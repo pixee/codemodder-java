@@ -4,7 +4,6 @@ import org.dom4j.Document
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.xmlunit.diff.ComparisonType
-import java.lang.IllegalStateException
 
 /**
  * Unit test for simple App.
@@ -12,7 +11,7 @@ import java.lang.IllegalStateException
 class POMOperatorTest : BaseTest() {
     @Test
     fun testSimplePOMUpgrade() {
-        val pomDocument = readPom("pom-1.xml")
+        val pomDocument = POMOperator.readResourcePom("pom-1.xml")
 
         val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.3")
 
@@ -21,7 +20,7 @@ class POMOperatorTest : BaseTest() {
 
     @Test
     fun testComplexPOMUpgrade() {
-        val pomDocument = readPom("pom-2.xml", effectivePom = true)
+        val pomDocument = POMOperator.readResourcePom("pom-2.xml", effectivePom = true)
 
         val dependencyToUpgrade = Dependency("junit", "junit", version = "4.13")
 
@@ -30,7 +29,7 @@ class POMOperatorTest : BaseTest() {
 
     @Test(expected = IllegalStateException::class)
     fun testMissingPomChange() {
-        val pomDocument = readPom("pom-2.xml")
+        val pomDocument = POMOperator.readResourcePom("pom-2.xml")
 
         val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.3")
 
@@ -42,6 +41,8 @@ class POMOperatorTest : BaseTest() {
         dependencyToUpgrade: Dependency
     ) {
         val changedPom = POMOperator.upgradePom(pomDocument, dependencyToUpgrade)
+
+        println(changedPom.asXML())
 
         val diff = getDifferences(pomDocument, changedPom)
 

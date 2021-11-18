@@ -2,6 +2,10 @@ package br.com.ingenieux.pom.operator
 
 import org.apache.commons.lang3.builder.EqualsBuilder
 import org.dom4j.Document
+import org.dom4j.io.SAXReader
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStreamReader
 import java.lang.IllegalStateException
 
 data class Dependency(
@@ -11,6 +15,17 @@ data class Dependency(
     val classifier: String? = null,
     val packaging: String? = "jar"
 ) {
+    companion object {
+        fun fromString(str: String): Dependency {
+            val elements = str.split(":")
+
+            if (elements.size < 3)
+                throw IllegalStateException("Give me 3 elements")
+
+            return Dependency(elements[0], elements[1], elements[2])
+        }
+    }
+
     fun matchesOther(dep: Dependency): Boolean {
         val equalsBuilder = EqualsBuilder().append(this.groupId, dep.groupId)
             .append(this.artifactId, dep.artifactId)
@@ -28,6 +43,53 @@ data class Dependency(
 }
 
 object POMOperator {
+    fun readPomFile(file: File): Document {
+        val pomDoc = readEffectivePom(file)
+
+        return SAXReader().read(pomDoc)!!
+    }
+
+    fun readResourcePom(path: String, effectivePom: Boolean = false): Document {
+        val pomDoc = if (effectivePom) {
+            val resourceURI = javaClass.getResource(path).toURI()
+
+            val resourceFile = File(resourceURI)
+
+            readEffectivePom(resourceFile)
+        } else {
+            InputStreamReader(javaClass.getResourceAsStream(path))
+        }
+
+        return SAXReader().read(pomDoc)!!
+    }
+
+    private fun readEffectivePom(resourceFile: File): InputStreamReader {
+        val absPath = resourceFile.absolutePath
+
+        val tmpOutputFile = File.createTempFile("tmp-pom", ".xml")
+
+        val psBuilder = ProcessBuilder(
+            "mvn",
+            "-N",
+            "-o",
+            "-f",
+            absPath,
+            "help:effective-pom",
+            "-Doutput=${tmpOutputFile.absolutePath}"
+        ).inheritIO()
+
+        psBuilder.environment().putAll(System.getenv())
+
+        val process = psBuilder.start()
+
+        val retCode = process.waitFor()
+
+        if (0 != retCode)
+            throw IllegalStateException("Unexpected return code from maven: $retCode")
+
+        return InputStreamReader(FileInputStream(tmpOutputFile))
+    }
+
     fun upgradePom(pom: Document, dependencyToUpgrade: Dependency): Document {
         val doc = pom.clone() as Document
 
