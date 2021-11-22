@@ -44,7 +44,7 @@ data class Context(
     }
 
     companion object {
-        fun load(`is`: InputStream, dependencyToInsert: Dependency): Context {
+        private fun load(`is`: InputStream, dependencyToInsert: Dependency): Context {
             val pomDocument = SAXReader().read(`is`)!!
 
             return Context(pomDocument, dependencyToInsert)

@@ -1,8 +1,5 @@
 package br.com.ingenieux.pom.operator
 
-import org.apache.commons.lang3.builder.EqualsBuilder
-import java.lang.IllegalStateException
-
 data class Dependency(
     val groupId: String,
     val artifactId: String,

@@ -24,10 +24,11 @@ object Util {
                 /*  */ "./m:artifactId[text()='${dependency.artifactId}']" +
                 "]"
 
+    @Suppress("UNCHECKED_CAST")
     fun Node.selectXPathNodes(expression: String) =
-        createXPathExpression(expression).selectNodes(this) as List<Node>
+        createXPathExpression(expression).selectNodes(this)!! as List<Node>
 
-    fun createXPathExpression(expression: String): XPath {
+    private fun createXPathExpression(expression: String): XPath {
         val xpath = Dom4jXPath(expression)
 
         xpath.namespaceContext = namespaceContext
@@ -35,7 +36,7 @@ object Util {
         return xpath
     }
 
-    internal val namespaceContext = SimpleNamespaceContext(
+    private val namespaceContext = SimpleNamespaceContext(
         mapOf(
             "m" to "http://maven.apache.org/POM/4.0.0"
         )

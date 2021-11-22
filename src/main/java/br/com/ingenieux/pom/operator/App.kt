@@ -2,6 +2,7 @@ package br.com.ingenieux.pom.operator
 
 import org.docopt.Docopt
 import java.io.File
+import java.lang.IllegalStateException
 
 
 /**
@@ -22,14 +23,17 @@ object App {
 
         val dep = Dependency.fromString(opts["DEPENDENCY"]!! as String)
 
-        val files = opts["POMFILES"]!! as List<String>
+        @Suppress("UNCHECKED_CAST") val files = opts["POMFILES"]!! as List<String>
 
         for (path in files) {
             val ctx = Context.load(File(path), dep)
 
             println("Upgrading dependency ($dep) in path $path")
 
-            val newPomFileContents = POMOperator.upgradePom(ctx)
+            val upgradeResult = POMOperator.upgradePom(ctx)
+
+            if (!upgradeResult)
+                throw IllegalStateException("Unexpected failure on upgradeResult")
 
             val xmlContent = ctx.resultPom.asXML()
 

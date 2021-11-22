@@ -20,7 +20,7 @@ class POMOperatorTest {
         val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.3")
 
         val context =
-            Context.load(POMOperator::class.java.getResource("pom-case-1.xml"), dependencyToUpgrade)
+            Context.load(POMOperator::class.java.getResource("pom-case-1.xml")!!, dependencyToUpgrade)
 
         POMOperator.upgradePom(context)
 
@@ -37,7 +37,7 @@ class POMOperatorTest {
         val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.3")
 
         val context =
-            Context.load(POMOperator::class.java.getResource("pom-case-3.xml"), dependencyToUpgrade)
+            Context.load(POMOperator::class.java.getResource("pom-case-3.xml")!!, dependencyToUpgrade)
 
         POMOperator.upgradePom(context)
 
@@ -57,7 +57,7 @@ class POMOperatorTest {
 
     @Test
     fun testCase4() {
-        val pomPath = File(POMOperator::class.java.getResource("webgoat-parent.xml").toURI())
+        val pomPath = File(POMOperator::class.java.getResource("webgoat-parent.xml")!!.toURI())
 
         val exitCode = ProcessBuilder(
             "mvn",
@@ -76,7 +76,7 @@ class POMOperatorTest {
             Dependency("org.apache.activemq", "activemq-amqp", version = "5.16.2")
 
         val context =
-            Context.load(POMOperator::class.java.getResource("pom-case-4.xml"), dependencyToUpgrade)
+            Context.load(POMOperator::class.java.getResource("pom-case-4.xml")!!, dependencyToUpgrade)
 
         POMOperator.upgradePom(context)
 
