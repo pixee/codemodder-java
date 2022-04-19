@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/pixeeworks/java-code-hardener/workflows/Java%20CI/badge.svg)](https://github.com/dayzerozero/java-fixit/actions)
+[![Actions Status](https://github.com/pixeeworks/java-code-hardener/workflows/Java%20CI/badge.svg)](https://github.com/pixeeworks/java-code-hardener/actions)
 ![Coverage](.github/badges/jacoco.svg)
 
 # java-fixit
