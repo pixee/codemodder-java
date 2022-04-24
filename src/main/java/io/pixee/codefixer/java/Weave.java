@@ -43,4 +43,12 @@ public final class Weave {
   public static Weave from(final int line, final String code) {
     return new Weave(line, code);
   }
+
+  @Override
+  public String toString() {
+    return "Weave{" +
+            "changeCode='" + changeCode + '\'' +
+            ", lineNumber=" + lineNumber +
+            '}';
+  }
 }

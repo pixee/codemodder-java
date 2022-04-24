@@ -149,15 +149,20 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
       } catch (IOException e) {
         throw new IllegalArgumentException(e);
       }
+
+      LOG.info("Found the following poms to update:");
+      pomsToUpdate.forEach(LOG::info);
     }
 
     if (pomsToUpdate.contains(file)) {
+      LOG.info("Injecting dependency into: {}", file);
       try {
         var changedFile = transformPomIfNeeded(file);
         if (changedFile != null) {
           return WeavingResult.createDefault(Set.of(changedFile), Collections.emptySet());
         }
       } catch (Exception e) {
+        LOG.error("Problem injecting pom", e);
         return WeavingResult.createDefault(Collections.emptySet(), Set.of(file.getAbsolutePath()));
       }
     }
@@ -165,17 +170,19 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
   }
 
   private Set<File> scan(final File repositoryRoot, final Set<ChangedFile> changedJavaFiles) {
-    LOG.info("Scanning repository root for all poms");
+    LOG.info("Scanning repository root for all poms representing {} changed Java files", changedJavaFiles.size());
     final Set<File> pomsToUpdate = new HashSet<>();
     changedJavaFiles.forEach(
         changedFile -> {
           final var path = changedFile.originalFilePath();
           final var file = new File(path);
+          final var aboveRepoDir = repositoryRoot.getParentFile().toPath();
           var parent = file.getParentFile();
           try {
-            while (parent != null && !Files.isSameFile(parent.toPath(), repositoryRoot.toPath())) {
+            while (parent != null && !Files.isSameFile(parent.toPath(), aboveRepoDir)) {
               var potentialPom = new File(parent, "pom.xml");
               if (potentialPom.exists()) {
+                LOG.info("Adding pom: {}", potentialPom);
                 pomsToUpdate.add(potentialPom);
                 parent = null;
               } else {
