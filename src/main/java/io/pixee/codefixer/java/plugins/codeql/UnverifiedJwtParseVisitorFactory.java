@@ -5,9 +5,14 @@ import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import com.google.common.annotations.VisibleForTesting;
 import io.pixee.codefixer.java.DoNothingVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.VisitorFactory;
@@ -105,7 +110,7 @@ final class UnverifiedJwtParseVisitorFactory implements VisitorFactory {
             int startLine = expRange.get().begin.line;
             Integer resultStartLine = findingRegion.getStartLine();
             if (startLine == resultStartLine) {
-              methodCallExpr.setName("parseClaimsJws");
+              methodCallExpr.setName("parseClaimsJwt");
               context.addWeave(Weave.from(startLine, missingJwtSignatureCheckRuleId));
               instrumentedThisMethodCall = true;
             }

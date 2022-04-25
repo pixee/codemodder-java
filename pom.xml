@@ -260,6 +260,13 @@
             <version>1.4.5</version>
             <scope>test</scope>
         </dependency>
+        <!-- for testing patching jwt -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.3</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
