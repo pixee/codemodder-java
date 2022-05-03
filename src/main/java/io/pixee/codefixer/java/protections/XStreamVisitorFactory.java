@@ -15,6 +15,7 @@ import com.github.javaparser.ast.visitor.Visitable;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
+import javassist.compiler.ast.MethodDecl;
 
 import java.io.File;
 import java.util.Objects;
@@ -74,15 +75,20 @@ public final class XStreamVisitorFactory implements VisitorFactory {
 
     private boolean neverCallRegisterConverter(
         final VariableDeclarator variableDeclaration, final String name) {
-      boolean calledRegisterConverter =
-          ASTs.findMethodBodyFrom(variableDeclaration).findAll(MethodCallExpr.class).stream()
-              .filter(
-                  methodCallExpr -> "registerConverter".equals(methodCallExpr.getNameAsString()))
-              .anyMatch(
-                  methodCallExpr ->
-                      methodCallExpr.getScope().isPresent()
-                          && name.equals(methodCallExpr.getScope().get().toString()));
-      return !calledRegisterConverter;
+      Optional<MethodDeclaration> methodRef = ASTs.findMethodBodyFrom(variableDeclaration);
+      if(methodRef.isPresent()) {
+        MethodDeclaration method = methodRef.get();
+        boolean calledRegisterConverter =
+                method.findAll(MethodCallExpr.class).stream()
+                        .filter(
+                                methodCallExpr -> "registerConverter".equals(methodCallExpr.getNameAsString()))
+                        .anyMatch(
+                                methodCallExpr ->
+                                        methodCallExpr.getScope().isPresent()
+                                                && name.equals(methodCallExpr.getScope().get().toString()));
+        return !calledRegisterConverter;
+      }
+      return false;
     }
 
     private boolean isXStreamCreation(final ObjectCreationExpr n) {

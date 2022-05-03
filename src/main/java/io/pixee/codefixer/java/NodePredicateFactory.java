@@ -32,11 +32,15 @@ public interface NodePredicateFactory {
         return new ArgumentTypePredicate(cu, argumentIndex, name);
     }
 
-    static Predicate<MethodCallExpr> withArgumentNodeType(int argumentIndex, Class<? extends Node> nodeType) {
+    static Predicate<MethodCallExpr> withArgumentNodeType(final int argumentIndex, final Class<? extends Node> nodeType) {
         return new ArgumentNodeTypePredicate(argumentIndex, nodeType);
     }
 
-    static Predicate<MethodCallExpr> withScreamingSnakeCaseVariableNameForArgument(int argumentIndex) {
+    static Predicate<MethodCallExpr> withScreamingSnakeCaseVariableNameForArgument(final int argumentIndex) {
         return new ArgumentIsScreamingSnakeCasePredicate(argumentIndex);
+    }
+
+    static Predicate<MethodCallExpr> withMethodPreviouslyCalledOnScope(final String methodName) {
+        return new MethodPreviouslyCalledOnScope(methodName);
     }
 }

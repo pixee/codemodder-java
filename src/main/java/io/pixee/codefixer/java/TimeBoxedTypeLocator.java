@@ -77,7 +77,11 @@ final class TimeBoxedTypeLocator implements TypeLocator {
     final ResolvedValueDeclaration valueDeclaration = nameExpr.resolve();
     locatedTypeName = locateTypeName(locatedTypeName, valueDeclaration);
     if (locatedTypeName == null) {
-      MethodDeclaration methodBody = ASTs.findMethodBodyFrom(nameExpr);
+      Optional<MethodDeclaration> methodBodyRef = ASTs.findMethodBodyFrom(nameExpr);
+      if(methodBodyRef.isEmpty()) {
+        return null;
+      }
+      MethodDeclaration methodBody = methodBodyRef.get();
       // search for variables declared within the method body
       Optional<VariableDeclarator> variableOfSameName =
           methodBody.findAll(VariableDeclarationExpr.class).stream()

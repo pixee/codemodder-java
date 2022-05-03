@@ -16,6 +16,7 @@ import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 
 import java.io.File;
+import java.util.Optional;
 
 /**
  * This visitor prevents XXE attacks by injecting the correct flags into XML parsers at creation or
@@ -67,7 +68,11 @@ public final class XXEVisitorFactory implements VisitorFactory {
       if (parentNode instanceof VariableDeclarator) {
         final VariableDeclarator variableDeclarator = (VariableDeclarator) parentNode;
         final NameExpr scope = variableDeclarator.getNameAsExpression();
-        final MethodDeclaration method = ASTs.findMethodBodyFrom(variableDeclarator);
+        final Optional<MethodDeclaration> methodRef = ASTs.findMethodBodyFrom(variableDeclarator);
+        if(methodRef.isEmpty()) {
+          return false;
+        }
+        final MethodDeclaration method = methodRef.get();
         final BlockStmt methodBody = method.getBody().get();
         return methodBody.findAll(MethodCallExpr.class).stream()
             .filter(

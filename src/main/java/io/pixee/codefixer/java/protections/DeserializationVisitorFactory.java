@@ -15,6 +15,7 @@ import io.pixee.security.*;
 import java.io.File;
 import java.io.ObjectInputStream;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.pixee.codefixer.java.FileWeavingContext;
@@ -28,7 +29,12 @@ import org.apache.logging.log4j.Logger;
  * This visitor prevents deserialization attacks by injecting an {@link java.io.ObjectInputFilter}
  * that blacklists known gadget types.
  */
+@Deprecated
 public final class DeserializationVisitorFactory implements VisitorFactory {
+
+  public DeserializationVisitorFactory() {
+    throw new UnsupportedOperationException("moved to ng");
+  }
 
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
@@ -70,13 +76,14 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
      */
     private void checkAndWeaveProtectionIfPossible(
         final FileWeavingContext context, final MethodCallExpr readObjectInvocation) {
-      final MethodDeclaration method = ASTs.findMethodBodyFrom(readObjectInvocation);
-      if (method == null) {
-        // if there's no method above this, it's not really a valid Java file -- just quit?
-        LOG.warn("Found method-less code in {}", ASTs.describeTypeAndMethod(readObjectInvocation));
+      final Optional<MethodDeclaration> methodRef = ASTs.findMethodBodyFrom(readObjectInvocation);
+      if (methodRef.isEmpty()) {
+        // if there's no method above this, it's probably a class member declaration
+        LOG.warn("Found method-less code in {}", ASTs.describeType(readObjectInvocation));
         return;
       }
 
+      final MethodDeclaration method = methodRef.get();
       final Expression originalScope = readObjectInvocation.getScope().get();
 
       // determine if they called setObjectFilter() on this already
@@ -105,7 +112,7 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
       if (setObjectInputFilterCallsOnScope.size() > 1) {
         LOG.warn(
             "Method had multiple calls to setObjectInputFilter on {} - noping out of here",
-            ASTs.describeTypeAndMethod(readObjectInvocation));
+            ASTs.describeType(readObjectInvocation));
       } else if (setObjectInputFilterCallsOnScope.size() == 1) {
         // let's harden if it's not our call that already exists there
         var setObjectInputFilterCall = setObjectInputFilterCallsOnScope.get(0);

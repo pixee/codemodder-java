@@ -1,4 +1,9 @@
 package io.pixee.codefixer.java;
 
-public class TransformationException extends Exception {
+public final class TransformationException extends Exception {
+
+    public TransformationException(final String s) {
+        super(s);
+    }
+
 }

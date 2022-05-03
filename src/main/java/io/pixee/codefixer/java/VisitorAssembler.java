@@ -4,6 +4,7 @@ import io.pixee.codefixer.java.plugins.codeql.CodeQlPlugin;
 import io.pixee.codefixer.java.plugins.contrast.ContrastScanPlugin;
 import io.pixee.codefixer.java.protections.DependencyInjectingVisitor;
 import io.pixee.codefixer.java.protections.DeserializationVisitorFactory;
+import io.pixee.codefixer.java.protections.DeserializationVisitorFactoryNg;
 import io.pixee.codefixer.java.protections.HeaderInjectionVisitorFactoryNg;
 import io.pixee.codefixer.java.protections.JakartaForwardVisitoryFactoryNg;
 import io.pixee.codefixer.java.protections.JspScriptletXSSVisitor;
@@ -60,7 +61,6 @@ public interface VisitorAssembler {
         public List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
             List<VisitorFactory> defaultVisitorFactories =
                     List.of(
-                            new DeserializationVisitorFactory(),
                             new MultipartVisitorFactory(),
                             new RuntimeExecVisitorFactory(),
                             new SSLProtocolVisitorFactory(),
@@ -92,7 +92,9 @@ public interface VisitorAssembler {
         @Override
         public List<VisitorFactoryNg> assembleJavaCodeScanningVisitorFactoriesNg(final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
             List<VisitorFactoryNg> defaultVisitorFactories =
-                    List.of(new HeaderInjectionVisitorFactoryNg(),
+                    List.of(
+                            new DeserializationVisitorFactoryNg(),
+                            new HeaderInjectionVisitorFactoryNg(),
                             new JakartaForwardVisitoryFactoryNg());
 
             final List<SarifProcessorPlugin> sarifProcessorPlugins =
