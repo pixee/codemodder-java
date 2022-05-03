@@ -44,7 +44,6 @@ public interface VisitorAssembler {
         public List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
             List<VisitorFactory> defaultVisitorFactories =
                     List.of(
-                            new RuntimeExecVisitorFactory(),
                             new SSLProtocolVisitorFactory(),
                             new SSRFVisitorFactory(),
                             new UnsafeReadlineVisitorFactory(),
@@ -79,6 +78,7 @@ public interface VisitorAssembler {
                             new DeserializationVisitorFactoryNg(),
                             new HeaderInjectionVisitorFactoryNg(),
                             new JakartaForwardVisitoryFactoryNg(),
+                            new RuntimeExecVisitorFactoryNg(),
                             new SpringMultipartVisitorFactoryNg());
 
             final List<SarifProcessorPlugin> sarifProcessorPlugins =

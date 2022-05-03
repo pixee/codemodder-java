@@ -1,6 +1,6 @@
 package io.pixee.codefixer.java.protections;
 
-import static io.pixee.codefixer.java.protections.WeavingTests.assertJavaWeaveWorkedAndWontReweave;
+import static io.pixee.codefixer.java.protections.WeavingNgTests.assertJavaWeaveWorkedAndWontReweave;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -11,6 +11,6 @@ final class CmdInjectionTest {
   void it_prevents_cmd_injection() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
         "src/test/java/com/acme/testcode/CmdInjectionVulnerability.java",
-        new RuntimeExecVisitorFactory());
+        new RuntimeExecVisitorFactoryNg());
   }
 }

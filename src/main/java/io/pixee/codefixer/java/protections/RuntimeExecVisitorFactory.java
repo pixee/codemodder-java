@@ -19,7 +19,12 @@ import java.util.Objects;
  * This visitor prevents {@link Runtime} OS / command injection by wrapping the execute calls with a
  * semantic analysis wrapper ensuring certain requirements.
  */
+@Deprecated
 public final class RuntimeExecVisitorFactory implements VisitorFactory {
+
+  public RuntimeExecVisitorFactory() {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
