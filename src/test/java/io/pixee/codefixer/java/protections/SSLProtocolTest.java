@@ -11,11 +11,33 @@ import org.junit.jupiter.api.Test;
 final class SSLProtocolTest {
 
   @Test
-  void it_prevents_bad_protocol() throws IOException {
+  void it_prevents_sslcontext_getinstance_protocol_weakness() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
-        "src/test/java/com/acme/testcode/SSLProtocolVulnerability.java",
-        new SSLProtocolVisitorFactory());
+        "src/test/java/com/acme/testcode/SSLContextGetInstanceVulnerability.java",
+        new SSLContextGetInstanceVisitorFactory());
   }
+
+  @Test
+  void it_prevents_sslengine_setenabledprotocols_weakness() throws IOException {
+    assertJavaWeaveWorkedAndWontReweave(
+            "src/test/java/com/acme/testcode/SSLEngineSetEnabledProtocolsVulnerability.java",
+            new SSLEngineSetEnabledProtocolsVisitorFactory());
+  }
+
+  @Test
+  void it_prevents_sslparameters_setprotocols_weakness() throws IOException {
+    assertJavaWeaveWorkedAndWontReweave(
+            "src/test/java/com/acme/testcode/SSLParametersSetProtocolsVulnerability.java",
+            new SSLParametersSetProtocolsVisitorFactory());
+  }
+
+  @Test
+  void it_prevents_sslsocket_setenabledprotocols_weakness() throws IOException {
+    assertJavaWeaveWorkedAndWontReweave(
+            "src/test/java/com/acme/testcode/SSLSocketSetEnabledProtocolsVulnerability.java",
+            new SSLSocketSetEnabledProtocolsVisitorFactory());
+  }
+
 
   @Test
   void checkstyle_config_only_ignores_weaved_files() {
