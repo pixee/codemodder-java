@@ -97,7 +97,7 @@ public abstract class WeavingTests {
           final List<VisitorFactory> visitorFactories,
           final IncludesExcludes includesExcludes)
       throws IOException {
-    var weave = analyzer.weave(List.of(directory), visitorFactories, Collections.emptyList(), includesExcludes);
+    var weave = analyzer.weave(List.of(directory), visitorFactories, includesExcludes);
     assertThat(weave, is(not(nullValue())));
     assertThat(weave.unscannableFiles(), is(empty()));
     var changedFiles = weave.changedFiles();
@@ -124,10 +124,10 @@ public abstract class WeavingTests {
   private static void scanAndAssertNoErrorsWithNoFilesChanged(
       final SourceWeaver analyzer,
       final SourceDirectory directory,
-      final List<VisitorFactory> visitorFactory,
+      final List<VisitorFactory> visitorFactories,
       final IncludesExcludes includesExcludes)
       throws IOException {
-    var weave = analyzer.weave(List.of(directory), visitorFactory, Collections.emptyList(), includesExcludes);
+    var weave = analyzer.weave(List.of(directory), visitorFactories, includesExcludes);
     assertThat(weave, is(not(nullValue())));
 
     assertThat(weave.unscannableFiles(), is(empty()));

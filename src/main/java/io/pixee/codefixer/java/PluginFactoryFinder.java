@@ -49,34 +49,5 @@ final class PluginFactoryFinder {
     return Collections.unmodifiableList(factories);
   }
 
-  List<VisitorFactoryNg> getPluginFactoriesNg(
-          final File repositoryRoot,
-          final RuleContext ruleContext,
-          final List<File> sarifs,
-          final List<SarifProcessorPlugin> sarifProcessorPlugins) {
-    List<VisitorFactoryNg> factories = new ArrayList<>();
-    for (File sarifFile : sarifs) {
-      try {
-        SarifSchema210 sarif =
-                new ObjectMapper().readValue(new FileReader(sarifFile), SarifSchema210.class);
-        for (Run run : sarif.getRuns()) {
-          ToolComponent tool = run.getTool().getDriver();
-          LOG.info(
-                  "Processing SARIF file (name={}, product={}, org={}, version={}",
-                  tool.getName(),
-                  tool.getProduct(),
-                  tool.getOrganization(),
-                  tool.getVersion());
-          for (SarifProcessorPlugin plugin : sarifProcessorPlugins) {
-            factories.addAll(plugin.getJavaVisitorFactoriesForNg(repositoryRoot, run, ruleContext));
-          }
-        }
-      } catch (IOException e) {
-        LOG.error("Problem deserializing SARIF file: {}", sarifFile, e);
-      }
-    }
-    return Collections.unmodifiableList(factories);
-  }
-
   private static final Logger LOG = LogManager.getLogger(PluginFactoryFinder.class);
 }

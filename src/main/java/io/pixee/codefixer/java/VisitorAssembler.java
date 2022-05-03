@@ -25,8 +25,6 @@ public interface VisitorAssembler {
      */
     List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(File repositoryRoot, RuleContext ruleContext, List<File> sarifs);
 
-    List<VisitorFactoryNg> assembleJavaCodeScanningVisitorFactoriesNg(File repositoryRoot, RuleContext ruleContext, List<File> sarifs);
-
     /**
      * Given the context, assemble of a list of {@link FileBasedVisitor} we'll use in our non-Java code weaving.
      * @param ruleContext the rules
@@ -44,10 +42,16 @@ public interface VisitorAssembler {
         public List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
             List<VisitorFactory> defaultVisitorFactories =
                     List.of(
+                            new ApacheMultipartVisitorFactoryNg(),
+                            new DeserializationVisitorFactoryNg(),
+                            new HeaderInjectionVisitorFactoryNg(),
+                            new JakartaForwardVisitoryFactoryNg(),
                             new SSLProtocolVisitorFactory(),
                             new SSRFVisitorFactory(),
-                            new UnsafeReadlineVisitorFactory(),
                             new PredictableSeedVisitorFactory(),
+                            new RuntimeExecVisitorFactoryNg(),
+                            new SpringMultipartVisitorFactoryNg(),
+                            new UnsafeReadlineVisitorFactory(),
                             new WeakPRNGVisitorFactory(),
                             new XMLDecoderVisitorFactory(),
                             new XStreamVisitorFactory(),
@@ -67,33 +71,6 @@ public interface VisitorAssembler {
             LOG.info("Factories available: {}", factories.size());
             factories.removeIf(factory -> !ruleContext.isRuleAllowed(factory.ruleId()));
             LOG.info("Factories after removing disallowed: {}", factories.size());
-            return Collections.unmodifiableList(factories);
-        }
-
-        @Override
-        public List<VisitorFactoryNg> assembleJavaCodeScanningVisitorFactoriesNg(final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
-            List<VisitorFactoryNg> defaultVisitorFactories =
-                    List.of(
-                            new ApacheMultipartVisitorFactoryNg(),
-                            new DeserializationVisitorFactoryNg(),
-                            new HeaderInjectionVisitorFactoryNg(),
-                            new JakartaForwardVisitoryFactoryNg(),
-                            new RuntimeExecVisitorFactoryNg(),
-                            new SpringMultipartVisitorFactoryNg());
-
-            final List<SarifProcessorPlugin> sarifProcessorPlugins =
-                    List.of(new CodeQlPlugin(), new ContrastScanPlugin());
-
-            List<VisitorFactoryNg> pluginFactories =
-                    new PluginFactoryFinder().getPluginFactoriesNg(repositoryRoot, ruleContext, sarifs, sarifProcessorPlugins);
-
-            final List<VisitorFactoryNg> factories = new ArrayList<>();
-            factories.addAll(defaultVisitorFactories);
-            factories.addAll(pluginFactories);
-
-            LOG.info("NgFactories available: {}", factories.size());
-            factories.removeIf(factory -> !ruleContext.isRuleAllowed(factory.ruleId()));
-            LOG.info("NgFactories after removing disallowed: {}", factories.size());
             return Collections.unmodifiableList(factories);
         }
 

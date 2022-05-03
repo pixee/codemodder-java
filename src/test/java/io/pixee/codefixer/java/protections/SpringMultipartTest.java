@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static io.pixee.codefixer.java.protections.WeavingNgTests.assertJavaWeaveWorkedAndWontReweave;
+import static io.pixee.codefixer.java.protections.WeavingTests.assertJavaWeaveWorkedAndWontReweave;
 
 final class SpringMultipartTest {
 

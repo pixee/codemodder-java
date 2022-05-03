@@ -16,7 +16,7 @@ import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
 import io.pixee.codefixer.java.NodePredicateFactory;
 import io.pixee.codefixer.java.TransformationException;
 import io.pixee.codefixer.java.Transformer;
-import io.pixee.codefixer.java.VisitorFactoryNg;
+import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 import io.pixee.security.Deserialization;
 import org.apache.logging.log4j.LogManager;
@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
  * This visitor prevents deserialization attacks by injecting an {@link java.io.ObjectInputFilter}
  * that blacklists known gadget types.
  */
-public final class DeserializationVisitorFactoryNg implements VisitorFactoryNg {
+public final class DeserializationVisitorFactoryNg implements VisitorFactory {
 
   @Override
-  public ModifierVisitor<FileWeavingContext> createVisitor(
+  public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
           final File file, CompilationUnit cu) {
     Set<Predicate<MethodCallExpr>> predicates = Set.of(
             NodePredicateFactory.withMethodName("readObject"),

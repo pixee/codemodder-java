@@ -10,7 +10,7 @@ import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
 import io.pixee.codefixer.java.NodePredicateFactory;
 import io.pixee.codefixer.java.Transformer;
-import io.pixee.codefixer.java.VisitorFactoryNg;
+import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 
 import java.io.File;
@@ -21,10 +21,10 @@ import java.util.function.Predicate;
 /**
  * Makes sure that internal Jakarta forwards don't go to places they shouldn't (e.g., /WEB-INF/web.xml.)
  */
-public final class JakartaForwardVisitoryFactoryNg implements VisitorFactoryNg {
+public final class JakartaForwardVisitoryFactoryNg implements VisitorFactory {
 
   @Override
-  public ModifierVisitor<FileWeavingContext> createVisitor(
+  public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, CompilationUnit cu) {
     Set<Predicate<MethodCallExpr>> predicates = Set.of(
             NodePredicateFactory.withMethodName("getRequestDispatcher"),

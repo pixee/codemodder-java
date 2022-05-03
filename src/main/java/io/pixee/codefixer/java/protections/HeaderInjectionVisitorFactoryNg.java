@@ -11,7 +11,7 @@ import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.NodePredicateFactory;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
-import io.pixee.codefixer.java.VisitorFactoryNg;
+import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 import io.pixee.security.HttpHeader;
 
@@ -20,10 +20,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public final class HeaderInjectionVisitorFactoryNg implements VisitorFactoryNg {
+public final class HeaderInjectionVisitorFactoryNg implements VisitorFactory {
 
     @Override
-    public ModifierVisitor<FileWeavingContext> createVisitor(final File javaFile, final CompilationUnit cu) {
+    public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(final File javaFile, final CompilationUnit cu) {
 
         Set<Predicate<MethodCallExpr>> predicates = Set.of(
                 NodePredicateFactory.withMethodName("setHeader"),

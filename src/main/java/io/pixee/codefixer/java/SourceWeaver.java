@@ -9,6 +9,13 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.mozilla.universalchardet.UniversalDetector;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,14 +26,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import io.pixee.codefixer.java.protections.HeaderInjectionVisitorFactoryNg;
-import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.mozilla.universalchardet.UniversalDetector;
-
 /** A visitor that finds opportunities for changes/protections/hardening. */
 public interface SourceWeaver {
 
@@ -34,7 +33,6 @@ public interface SourceWeaver {
   WeavingResult weave(
       List<SourceDirectory> javaSourceDirectories,
       List<VisitorFactory> visitorFactories,
-      List<VisitorFactoryNg> ngVisitorFactories,
       IncludesExcludes includesExcludes)
       throws IOException;
 
@@ -53,7 +51,7 @@ public interface SourceWeaver {
 
     @Override
     public @NotNull WeavingResult weave(
-        final List<SourceDirectory> javaSourceDirectories, final List<VisitorFactory> visitorFactories, final List<VisitorFactoryNg> ngVisitorFactories, final IncludesExcludes includesExcludes)
+        final List<SourceDirectory> javaSourceDirectories, final List<VisitorFactory> visitorFactories, final IncludesExcludes includesExcludes)
         throws IOException {
       /*
        * Create the parser which can resolve symbols across all the Java source directories.
@@ -82,7 +80,7 @@ public interface SourceWeaver {
             LOG.info("Scanned {} files", filesScanned);
           }
           try {
-            final ChangedFile changedFile = scanIndividualJavaFile(javaParser, javaFile, visitorFactories, ngVisitorFactories, includesExcludes);
+            final ChangedFile changedFile = scanIndividualJavaFile(javaParser, javaFile, visitorFactories, includesExcludes);
             if (changedFile != null) {
               changedFiles.add(changedFile);
             }
@@ -108,7 +106,6 @@ public interface SourceWeaver {
         final JavaParser javaParser,
         final String javaFile,
         final List<VisitorFactory> visitorFactories,
-        final List<VisitorFactoryNg> ngVisitorFactories,
         final IncludesExcludes includesExcludes)
         throws IOException, UnparseableFileException {
       final File file = new File(javaFile).getCanonicalFile();
@@ -120,12 +117,12 @@ public interface SourceWeaver {
 
       final CompilationUnit cu = result.getResult().orElseThrow();
       LexicalPreservingPrinter.setup(cu);
-      return scanType(file, cu, visitorFactories, ngVisitorFactories, includesExcludes);
+      return scanType(file, cu, visitorFactories, includesExcludes);
     }
 
     /** For each type in a Java source file, we scan through the code. */
     private ChangedFile scanType(
-            final File javaFile, final CompilationUnit cu, final List<VisitorFactory> visitorFactories, final List<VisitorFactoryNg> ngVisitorFactories, final IncludesExcludes includesExcludes)
+            final File javaFile, final CompilationUnit cu, final List<VisitorFactory> visitorFactories, final IncludesExcludes includesExcludes)
         throws IOException {
 
       final FileWeavingContext context =
@@ -138,12 +135,6 @@ public interface SourceWeaver {
                 vf.createJavaCodeVisitorFor(javaFile, cu);
             cu.accept(visitor, context);
           });
-
-      ngVisitorFactories.forEach(vf -> {
-        final ModifierVisitor<FileWeavingContext> visitor =
-                vf.createVisitor(javaFile, cu);
-        cu.accept(visitor, context);
-      });
 
       if (context.madeWeaves()) {
         final String encoding = detectEncoding(javaFile);

@@ -1,7 +1,7 @@
 package io.pixee.codefixer.java.protections;
 
-import static io.pixee.codefixer.java.protections.WeavingNgTests.assertJavaWeaveWorkedAndWontReweave;
-import static io.pixee.codefixer.java.protections.WeavingNgTests.scanAndAssertNoErrorsWithNoFilesChanged;
+import static io.pixee.codefixer.java.protections.WeavingTests.assertJavaWeaveWorkedAndWontReweave;
+import static io.pixee.codefixer.java.protections.WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.pixee.codefixer.java.IncludesExcludes;

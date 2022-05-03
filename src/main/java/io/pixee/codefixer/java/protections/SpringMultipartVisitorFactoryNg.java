@@ -10,7 +10,7 @@ import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
 import io.pixee.codefixer.java.NodePredicateFactory;
 import io.pixee.codefixer.java.Transformer;
-import io.pixee.codefixer.java.VisitorFactoryNg;
+import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 
 import java.io.File;
@@ -22,10 +22,10 @@ import java.util.function.Predicate;
  * This type weaves a protection against path traversal attacks on Spring multipart code by
  * normalizing the filename pulled from a multipart request.
  */
-public final class SpringMultipartVisitorFactoryNg implements VisitorFactoryNg {
+public final class SpringMultipartVisitorFactoryNg implements VisitorFactory {
 
   @Override
-  public ModifierVisitor<FileWeavingContext> createVisitor(
+  public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, final CompilationUnit cu) {
     Set<Predicate<MethodCallExpr>> predicates = Set.of(
             NodePredicateFactory.withMethodName("getOriginalFilename"),

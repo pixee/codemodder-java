@@ -12,7 +12,6 @@ import io.pixee.codefixer.java.DefaultSarifProcessorPlugin;
 import io.pixee.codefixer.java.FileBasedVisitor;
 import io.pixee.codefixer.java.RuleContext;
 import io.pixee.codefixer.java.VisitorFactory;
-import io.pixee.codefixer.java.VisitorFactoryNg;
 import io.pixee.codefixer.java.plugins.ReflectionInjectionVisitorFactory;
 import java.io.File;
 import java.util.ArrayList;
@@ -155,12 +154,6 @@ public final class ContrastScanPlugin extends DefaultSarifProcessorPlugin {
                                     .getUri()
                                     .endsWith(".jsp"))
             .collect(Collectors.toUnmodifiableList());
-  }
-
-  @Override
-  protected List<VisitorFactoryNg> getVendorToolSpecificFactoriesNg(
-          final File repositoryRoot, final Run run, final RuleContext ruleContext) {
-    return Collections.emptyList();
   }
 
   static final String ruleBase = "contrast-scan:java/";

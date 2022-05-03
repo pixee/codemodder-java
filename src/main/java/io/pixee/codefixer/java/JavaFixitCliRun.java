@@ -78,10 +78,8 @@ public final class JavaFixitCliRun {
     RuleContext ruleContext = RuleContext.of(defaultRuleSetting, ruleExceptions);
     final List<VisitorFactory> factories = visitorAssembler.assembleJavaCodeScanningVisitorFactories(repositoryRoot, ruleContext, sarifs);
 
-    final List<VisitorFactoryNg> ngVisitorFactories = visitorAssembler.assembleJavaCodeScanningVisitorFactoriesNg(repositoryRoot, ruleContext, sarifs);
-
     // run the Java code visitors
-    final var javaSourceWeaveResult = javaSourceWeaver.weave(sourceDirectories, factories, ngVisitorFactories, includesExcludes);
+    final var javaSourceWeaveResult = javaSourceWeaver.weave(sourceDirectories, factories, includesExcludes);
 
     // get the non-Java code visitors
     final List<FileBasedVisitor> fileBasedVisitors = visitorAssembler.assembleFileVisitors(ruleContext);

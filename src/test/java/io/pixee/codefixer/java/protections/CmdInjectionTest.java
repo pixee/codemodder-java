@@ -1,6 +1,6 @@
 package io.pixee.codefixer.java.protections;
 
-import static io.pixee.codefixer.java.protections.WeavingNgTests.assertJavaWeaveWorkedAndWontReweave;
+import static io.pixee.codefixer.java.protections.WeavingTests.assertJavaWeaveWorkedAndWontReweave;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;

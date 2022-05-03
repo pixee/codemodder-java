@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import io.pixee.codefixer.java.VisitorFactoryNg;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -53,12 +52,6 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
       }
     }
     return Collections.unmodifiableList(visitors);
-  }
-
-  @Override
-  protected List<VisitorFactoryNg> getVendorToolSpecificFactoriesNg(
-          final File repositoryRoot, final Run run, final RuleContext ruleContext) {
-    return Collections.emptyList();
   }
 
   /**
