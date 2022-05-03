@@ -4,8 +4,8 @@ import io.pixee.codefixer.java.plugins.codeql.CodeQlPlugin;
 import io.pixee.codefixer.java.plugins.contrast.ContrastScanPlugin;
 import io.pixee.codefixer.java.protections.DependencyInjectingVisitor;
 import io.pixee.codefixer.java.protections.DeserializationVisitorFactory;
-import io.pixee.codefixer.java.protections.HeaderInjectionVisitorFactory;
-import io.pixee.codefixer.java.protections.JakartaForwardVisitoryFactory;
+import io.pixee.codefixer.java.protections.HeaderInjectionVisitorFactoryNg;
+import io.pixee.codefixer.java.protections.JakartaForwardVisitoryFactoryNg;
 import io.pixee.codefixer.java.protections.JspScriptletXSSVisitor;
 import io.pixee.codefixer.java.protections.MultipartVisitorFactory;
 import io.pixee.codefixer.java.protections.PredictableSeedVisitorFactory;
@@ -41,6 +41,8 @@ public interface VisitorAssembler {
      */
     List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(File repositoryRoot, RuleContext ruleContext, List<File> sarifs);
 
+    List<VisitorFactoryNg> assembleJavaCodeScanningVisitorFactoriesNg(File repositoryRoot, RuleContext ruleContext, List<File> sarifs);
+
     /**
      * Given the context, assemble of a list of {@link FileBasedVisitor} we'll use in our non-Java code weaving.
      * @param ruleContext the rules
@@ -59,8 +61,6 @@ public interface VisitorAssembler {
             List<VisitorFactory> defaultVisitorFactories =
                     List.of(
                             new DeserializationVisitorFactory(),
-                            new HeaderInjectionVisitorFactory(),
-                            new JakartaForwardVisitoryFactory(),
                             new MultipartVisitorFactory(),
                             new RuntimeExecVisitorFactory(),
                             new SSLProtocolVisitorFactory(),
@@ -86,6 +86,28 @@ public interface VisitorAssembler {
             LOG.info("Factories available: {}", factories.size());
             factories.removeIf(factory -> !ruleContext.isRuleAllowed(factory.ruleId()));
             LOG.info("Factories after removing disallowed: {}", factories.size());
+            return Collections.unmodifiableList(factories);
+        }
+
+        @Override
+        public List<VisitorFactoryNg> assembleJavaCodeScanningVisitorFactoriesNg(final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
+            List<VisitorFactoryNg> defaultVisitorFactories =
+                    List.of(new HeaderInjectionVisitorFactoryNg(),
+                            new JakartaForwardVisitoryFactoryNg());
+
+            final List<SarifProcessorPlugin> sarifProcessorPlugins =
+                    List.of(new CodeQlPlugin(), new ContrastScanPlugin());
+
+            List<VisitorFactoryNg> pluginFactories =
+                    new PluginFactoryFinder().getPluginFactoriesNg(repositoryRoot, ruleContext, sarifs, sarifProcessorPlugins);
+
+            final List<VisitorFactoryNg> factories = new ArrayList<>();
+            factories.addAll(defaultVisitorFactories);
+            factories.addAll(pluginFactories);
+
+            LOG.info("NgFactories available: {}", factories.size());
+            factories.removeIf(factory -> !ruleContext.isRuleAllowed(factory.ruleId()));
+            LOG.info("NgFactories after removing disallowed: {}", factories.size());
             return Collections.unmodifiableList(factories);
         }
 

@@ -7,6 +7,7 @@ import io.pixee.codefixer.java.IncludesExcludes;
 import io.pixee.codefixer.java.SourceDirectory;
 import io.pixee.codefixer.java.SourceWeaver;
 import io.pixee.codefixer.java.VisitorFactory;
+import io.pixee.codefixer.java.VisitorFactoryNg;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,9 +27,9 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
 /** Holds testing utilities. */
-public abstract class WeavingTests {
+public abstract class WeavingNgTests {
 
-  private WeavingTests() {}
+  private WeavingNgTests() {}
 
   /**
    * This method takes the Java file given, asserts the presence of a "Weaved.java" file next to it,
@@ -41,7 +42,7 @@ public abstract class WeavingTests {
    */
   public static ChangedFile assertJavaWeaveWorkedAndWontReweave(
       final String pathToVulnerableFile,
-      final VisitorFactory factory,
+      final VisitorFactoryNg factory,
       final IncludesExcludes includesExcludes)
       throws IOException {
 
@@ -54,14 +55,14 @@ public abstract class WeavingTests {
     assertThat(fixedFile.exists(), is(true));
     assertThat(fixedFile.isFile(), is(true));
 
-    List<VisitorFactory> visitorFactories = List.of(factory);
+    List<VisitorFactoryNg> visitorFactories = List.of(factory);
     var analyzer = SourceWeaver.createDefault();
     var testCodeDir = new File(vulnerableFile.getParent());
     var directory =
         SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
 
     var changedFile =
-        scanAndAssertNoErrorsWithOneFileChanged(analyzer, directory, visitorFactories, includesExcludes);
+        scanAndAssertNoErrorsWithOneFileChanged(analyzer, directory, Collections.emptyList(), visitorFactories, includesExcludes);
     var actualContents =
         FileUtils.readFileToString(new File(changedFile.modifiedFile()), Charset.defaultCharset());
     var expectedContents = FileUtils.readFileToString(fixedFile, Charset.defaultCharset());
@@ -81,7 +82,7 @@ public abstract class WeavingTests {
   }
 
   public static ChangedFile assertJavaWeaveWorkedAndWontReweave(
-      final String pathToVulnerableFile, final VisitorFactory factory) throws IOException {
+      final String pathToVulnerableFile, final VisitorFactoryNg factory) throws IOException {
     return assertJavaWeaveWorkedAndWontReweave(
         pathToVulnerableFile,
         factory,
@@ -95,9 +96,10 @@ public abstract class WeavingTests {
           final SourceWeaver analyzer,
           final SourceDirectory directory,
           final List<VisitorFactory> visitorFactories,
+          final List<VisitorFactoryNg> ngVisitorFactories,
           final IncludesExcludes includesExcludes)
       throws IOException {
-    var weave = analyzer.weave(List.of(directory), visitorFactories, Collections.emptyList(), includesExcludes);
+    var weave = analyzer.weave(List.of(directory), visitorFactories, ngVisitorFactories, includesExcludes);
     assertThat(weave, is(not(nullValue())));
     assertThat(weave.unscannableFiles(), is(empty()));
     var changedFiles = weave.changedFiles();
@@ -107,13 +109,13 @@ public abstract class WeavingTests {
 
   public static void scanAndAssertNoErrorsWithNoFilesChanged(
       final String pathToVulnerableFile,
-      final VisitorFactory factory,
+      final VisitorFactoryNg factory,
       final IncludesExcludes includesExcludes)
       throws IOException {
     var vulnerableFile = new File(pathToVulnerableFile);
     assertThat(vulnerableFile.exists(), is(true));
     assertThat(vulnerableFile.isFile(), is(true));
-    List<VisitorFactory> visitorFactories = List.of(factory);
+    List<VisitorFactoryNg> visitorFactories = List.of(factory);
     var analyzer = SourceWeaver.createDefault();
     var testCodeDir = new File(vulnerableFile.getParent());
     var directory =
@@ -124,10 +126,10 @@ public abstract class WeavingTests {
   private static void scanAndAssertNoErrorsWithNoFilesChanged(
       final SourceWeaver analyzer,
       final SourceDirectory directory,
-      final List<VisitorFactory> visitorFactory,
+      final List<VisitorFactoryNg> visitorFactories,
       final IncludesExcludes includesExcludes)
       throws IOException {
-    var weave = analyzer.weave(List.of(directory), visitorFactory, Collections.emptyList(), includesExcludes);
+    var weave = analyzer.weave(List.of(directory), Collections.emptyList(), visitorFactories, includesExcludes);
     assertThat(weave, is(not(nullValue())));
 
     assertThat(weave.unscannableFiles(), is(empty()));

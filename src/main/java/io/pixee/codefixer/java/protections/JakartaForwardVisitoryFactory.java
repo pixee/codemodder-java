@@ -17,7 +17,12 @@ import java.util.Objects;
 /**
  * Makes sure that internal Jakarta forwards don't go to places they shouldn't (e.g., /WEB-INF/web.xml.)
  */
+@Deprecated
 public final class JakartaForwardVisitoryFactory implements VisitorFactory {
+
+  public JakartaForwardVisitoryFactory() {
+    throw new UnsupportedOperationException("moved to ng");
+  }
 
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(

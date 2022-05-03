@@ -28,7 +28,8 @@ public final class HeaderInjectionVisitorFactory implements VisitorFactory {
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, final CompilationUnit cu) {
-    return new HeaderInjectionVisitor(cu);
+    //return new HeaderInjectionVisitor(cu);
+    throw new UnsupportedOperationException("moved to ng");
   }
 
     @Override

@@ -10,6 +10,9 @@ public interface SarifProcessorPlugin {
   /** Create a set of Java factories associated with the given SARIF {@link Run}. */
   List<VisitorFactory> getJavaVisitorFactoriesFor(File repositoryRoot, Run run, RuleContext ruleContext);
 
+  /** Create a set of Java factories associated with the given SARIF {@link Run}. */
+  List<VisitorFactoryNg> getJavaVisitorFactoriesForNg(File repositoryRoot, Run run, RuleContext ruleContext);
+
   /**
    * Create a set of file based weavers intended to handle vulnerabilities found in the given SARIF
    * {@link Run}.

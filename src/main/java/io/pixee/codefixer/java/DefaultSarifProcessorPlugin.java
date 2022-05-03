@@ -23,6 +23,18 @@ public abstract class DefaultSarifProcessorPlugin implements SarifProcessorPlugi
     return Collections.emptyList();
   }
 
+  @Override
+  public final List<VisitorFactoryNg> getJavaVisitorFactoriesForNg(
+          final File repositoryRoot, final Run run, final RuleContext ruleContext) {
+    if (supports(run.getTool())) {
+      return getVendorToolSpecificFactoriesNg(repositoryRoot, run, ruleContext);
+    }
+    return Collections.emptyList();
+  }
+
   protected abstract List<VisitorFactory> getVendorToolSpecificFactories(
       File repositoryRoot, Run run, RuleContext ruleContext);
+
+  protected abstract List<VisitorFactoryNg> getVendorToolSpecificFactoriesNg(
+          File repositoryRoot, Run run, RuleContext ruleContext);
 }
