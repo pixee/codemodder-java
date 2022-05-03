@@ -12,7 +12,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
-import io.pixee.codefixer.java.NodePredicateFactory;
+import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
@@ -46,11 +46,11 @@ abstract class SSLProtocolsVisitorFactory implements VisitorFactory {
       final File file, final CompilationUnit cu) {
 
     Set<Predicate<MethodCallExpr>> predicates = Set.of(
-            NodePredicateFactory.withMethodName(methodName),
-            NodePredicateFactory.withArgumentCount(1),
-            NodePredicateFactory.withScopeType(cu, typeName).or(NodePredicateFactory.withScopeType(cu, fullyQualifiedTypeName)),
-            (NodePredicateFactory.withArgumentNodeType(0, ArrayCreationExpr.class).and(hasUnsafeArrayArgument)).or
-                    (NodePredicateFactory.withArgumentNodeType(0, NameExpr.class).and(hasUnsafeArrayArgumentVariable))
+            MethodCallPredicateFactory.withName(methodName),
+            MethodCallPredicateFactory.withArgumentCount(1),
+            MethodCallPredicateFactory.withScopeType(cu, typeName).or(MethodCallPredicateFactory.withScopeType(cu, fullyQualifiedTypeName)),
+            (MethodCallPredicateFactory.withArgumentNodeType(0, ArrayCreationExpr.class).and(hasUnsafeArrayArgument)).or
+                    (MethodCallPredicateFactory.withArgumentNodeType(0, NameExpr.class).and(hasUnsafeArrayArgumentVariable))
 
     );
 

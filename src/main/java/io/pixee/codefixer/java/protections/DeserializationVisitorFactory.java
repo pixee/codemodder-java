@@ -13,7 +13,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
-import io.pixee.codefixer.java.NodePredicateFactory;
+import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.TransformationException;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
@@ -40,11 +40,11 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
           final File file, CompilationUnit cu) {
     Set<Predicate<MethodCallExpr>> predicates = Set.of(
-            NodePredicateFactory.withMethodName("readObject"),
-            NodePredicateFactory.withArgumentCount(0),
-            NodePredicateFactory.withScopeType(cu, "java.io.ObjectInputStream"),
-            NodePredicateFactory.withMethodPreviouslyCalledOnScope("setObjectInputFilter").negate(),
-            NodePredicateFactory.withMethodPreviouslyCalledOnScope("enableObjectFilterIfUnprotected").negate(),
+            MethodCallPredicateFactory.withName("readObject"),
+            MethodCallPredicateFactory.withArgumentCount(0),
+            MethodCallPredicateFactory.withScopeType(cu, "java.io.ObjectInputStream"),
+            MethodCallPredicateFactory.withMethodPreviouslyCalledOnScope("setObjectInputFilter").negate(),
+            MethodCallPredicateFactory.withMethodPreviouslyCalledOnScope("enableObjectFilterIfUnprotected").negate(),
             new OriginalDeserializationLogicPredicate()
     );
 

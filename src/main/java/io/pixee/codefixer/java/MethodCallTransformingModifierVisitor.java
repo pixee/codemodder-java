@@ -13,6 +13,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
+/**
+ * This is the glue utility for giving users the ability to gives us a set of {@link Predicate} and a {@link Transformer}
+ * for transforming {@link MethodCallExpr}.
+ */
 public class MethodCallTransformingModifierVisitor extends ModifierVisitor<FileWeavingContext> {
 
     private final Set<Predicate<MethodCallExpr>> predicates;

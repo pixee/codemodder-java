@@ -8,7 +8,7 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
-import io.pixee.codefixer.java.NodePredicateFactory;
+import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
@@ -28,13 +28,13 @@ public final class ApacheMultipartVisitorFactory implements VisitorFactory {
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, final CompilationUnit cu) {
     Set<Predicate<MethodCallExpr>> predicates = Set.of(
-            NodePredicateFactory.withMethodName("getName"),
-            NodePredicateFactory.withArgumentCount(0),
-            NodePredicateFactory.withScopeType(cu, "org.apache.commons.fileupload.FileItem").or(NodePredicateFactory.withScopeType(cu, "org.apache.commons.fileupload.disk.DiskFileItem")),
-            NodePredicateFactory.withParentCodeContains("toSimpleFileName").negate(),
+            MethodCallPredicateFactory.withName("getName"),
+            MethodCallPredicateFactory.withArgumentCount(0),
+            MethodCallPredicateFactory.withScopeType(cu, "org.apache.commons.fileupload.FileItem").or(MethodCallPredicateFactory.withScopeType(cu, "org.apache.commons.fileupload.disk.DiskFileItem")),
+            MethodCallPredicateFactory.withParentCodeContains("toSimpleFileName").negate(),
 
-            NodePredicateFactory.withArgumentNodeType(0, StringLiteralExpr.class).negate(),
-            NodePredicateFactory.withScreamingSnakeCaseVariableNameForArgument(1).negate()
+            MethodCallPredicateFactory.withArgumentNodeType(0, StringLiteralExpr.class).negate(),
+            MethodCallPredicateFactory.withScreamingSnakeCaseVariableNameForArgument(1).negate()
     );
 
     Transformer<MethodCallExpr> transformer = new Transformer<>() {

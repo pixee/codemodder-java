@@ -2,19 +2,13 @@ package io.pixee.codefixer.java.protections;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
-import io.pixee.codefixer.java.NodePredicateFactory;
+import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
@@ -53,11 +47,11 @@ public final class SSLContextGetInstanceVisitorFactory implements VisitorFactory
     };
 
     Set<Predicate<MethodCallExpr>> predicates = Set.of(
-            NodePredicateFactory.withMethodName("getInstance"),
-            NodePredicateFactory.withArgumentCount(1),
-            NodePredicateFactory.withScopeType(cu, "javax.net.ssl.SSLContext").or(NodePredicateFactory.withScopeType(cu, "SSLContext")),
-            (NodePredicateFactory.withArgumentNodeType(0, StringLiteralExpr.class).and(isUnsafeArgument)).or
-                    (NodePredicateFactory.withArgumentNodeType(0, NameExpr.class).and(isUnsafeVariable))
+            MethodCallPredicateFactory.withName("getInstance"),
+            MethodCallPredicateFactory.withArgumentCount(1),
+            MethodCallPredicateFactory.withScopeType(cu, "javax.net.ssl.SSLContext").or(MethodCallPredicateFactory.withScopeType(cu, "SSLContext")),
+            (MethodCallPredicateFactory.withArgumentNodeType(0, StringLiteralExpr.class).and(isUnsafeArgument)).or
+                    (MethodCallPredicateFactory.withArgumentNodeType(0, NameExpr.class).and(isUnsafeVariable))
 
     );
 

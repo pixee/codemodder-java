@@ -8,7 +8,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
-import io.pixee.codefixer.java.NodePredicateFactory;
+import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
@@ -28,9 +28,9 @@ public final class RuntimeExecVisitorFactory implements VisitorFactory {
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, final CompilationUnit cu) {
     Set<Predicate<MethodCallExpr>> predicates = Set.of(
-            NodePredicateFactory.withMethodName("exec"),
-            NodePredicateFactory.withArgumentCount(0).negate(),
-            NodePredicateFactory.withScopeType(cu, "java.lang.Runtime").or(new Predicate<MethodCallExpr>() {
+            MethodCallPredicateFactory.withName("exec"),
+            MethodCallPredicateFactory.withArgumentCount(0).negate(),
+            MethodCallPredicateFactory.withScopeType(cu, "java.lang.Runtime").or(new Predicate<MethodCallExpr>() {
               @Override
               public boolean test(final MethodCallExpr execCall) {
                 Expression originalScope = execCall.getScope().get();
