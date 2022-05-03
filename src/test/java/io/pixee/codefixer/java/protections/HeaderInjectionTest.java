@@ -11,6 +11,6 @@ final class HeaderInjectionTest {
   void it_prevents_header_injection() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
         "src/test/java/com/acme/testcode/HeaderInjectionVulnerability.java",
-        new HeaderInjectionVisitorFactoryNg());
+        new HeaderInjectionVisitorFactory());
   }
 }

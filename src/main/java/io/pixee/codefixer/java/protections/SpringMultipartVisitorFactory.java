@@ -22,7 +22,7 @@ import java.util.function.Predicate;
  * This type weaves a protection against path traversal attacks on Spring multipart code by
  * normalizing the filename pulled from a multipart request.
  */
-public final class SpringMultipartVisitorFactoryNg implements VisitorFactory {
+public final class SpringMultipartVisitorFactory implements VisitorFactory {
 
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(

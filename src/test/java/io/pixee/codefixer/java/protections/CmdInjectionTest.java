@@ -11,6 +11,6 @@ final class CmdInjectionTest {
   void it_prevents_cmd_injection() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
         "src/test/java/com/acme/testcode/CmdInjectionVulnerability.java",
-        new RuntimeExecVisitorFactoryNg());
+        new RuntimeExecVisitorFactory());
   }
 }

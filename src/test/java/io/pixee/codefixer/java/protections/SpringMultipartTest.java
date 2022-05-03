@@ -12,6 +12,6 @@ final class SpringMultipartTest {
   void it_sanitizes_spring_multipart() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
             "src/test/java/com/acme/testcode/SpringMultipartVulnerability.java",
-            new SpringMultipartVisitorFactoryNg());
+            new SpringMultipartVisitorFactory());
   }
 }

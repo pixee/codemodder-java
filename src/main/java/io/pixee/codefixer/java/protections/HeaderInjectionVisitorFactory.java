@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public final class HeaderInjectionVisitorFactoryNg implements VisitorFactory {
+public final class HeaderInjectionVisitorFactory implements VisitorFactory {
 
     @Override
     public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(final File javaFile, final CompilationUnit cu) {

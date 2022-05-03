@@ -11,6 +11,6 @@ final class JakartaForwardTest {
   void it_prevents_unsafe_forward() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
         "src/test/java/com/acme/testcode/RequestForwardVulnerability.java",
-        new JakartaForwardVisitoryFactoryNg());
+        new JakartaForwardVisitoryFactory());
   }
 }

@@ -84,7 +84,7 @@ final class IncludesTest {
       final List<String> includes, final List<String> excludes) throws IOException {
     scanAndAssertNoErrorsWithNoFilesChanged(
         "src/test/java/com/acme/testcode/RequestForwardVulnerability.java",
-        new JakartaForwardVisitoryFactoryNg(),
+        new JakartaForwardVisitoryFactory(),
         IncludesExcludes.fromConfiguration(new File(""), includes, excludes));
   }
 
@@ -92,7 +92,7 @@ final class IncludesTest {
       throws IOException {
     scanAndAssertNoErrorsWithNoFilesChanged(
         "src/test/java/com/acme/testcode/RequestForwardVulnerability.java",
-        new JakartaForwardVisitoryFactoryNg(),
+        new JakartaForwardVisitoryFactory(),
         IncludesExcludes.fromConfiguration(
             new File(""), List.of(includePattern), Collections.emptyList()));
   }
@@ -101,14 +101,14 @@ final class IncludesTest {
       final List<String> includePatterns, final List<String> excludePatterns) throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
         "src/test/java/com/acme/testcode/RequestForwardVulnerability.java",
-        new JakartaForwardVisitoryFactoryNg(),
+        new JakartaForwardVisitoryFactory(),
         IncludesExcludes.fromConfiguration(new File(""), includePatterns, excludePatterns));
   }
 
   private void assertItWorksWithSingleInclude(final String includePattern) throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
         "src/test/java/com/acme/testcode/RequestForwardVulnerability.java",
-        new JakartaForwardVisitoryFactoryNg(),
+        new JakartaForwardVisitoryFactory(),
         IncludesExcludes.fromConfiguration(
             new File(""), List.of(includePattern), Collections.emptyList()));
   }

@@ -11,6 +11,6 @@ final class DeserializationTest {
   void it_prevents_deserialization() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
         "src/test/java/com/acme/testcode/DeserializationVulnerability.java",
-        new DeserializationVisitorFactoryNg());
+        new DeserializationVisitorFactory());
   }
 }

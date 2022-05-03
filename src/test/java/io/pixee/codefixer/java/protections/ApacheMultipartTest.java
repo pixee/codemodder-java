@@ -11,7 +11,7 @@ final class ApacheMultipartTest {
   void it_sanitizes_apache_multipart() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
         "src/test/java/com/acme/testcode/ApacheMultipartVulnerability.java",
-        new ApacheMultipartVisitorFactoryNg());
+        new ApacheMultipartVisitorFactory());
   }
 
 }

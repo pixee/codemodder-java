@@ -22,7 +22,7 @@ import java.util.function.Predicate;
  * This visitor prevents {@link Runtime} OS / command injection by wrapping the execute calls with a
  * semantic analysis wrapper ensuring certain requirements.
  */
-public final class RuntimeExecVisitorFactoryNg implements VisitorFactory {
+public final class RuntimeExecVisitorFactory implements VisitorFactory {
 
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(

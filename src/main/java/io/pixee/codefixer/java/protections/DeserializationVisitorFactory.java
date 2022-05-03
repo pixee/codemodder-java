@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * This visitor prevents deserialization attacks by injecting an {@link java.io.ObjectInputFilter}
  * that blacklists known gadget types.
  */
-public final class DeserializationVisitorFactoryNg implements VisitorFactory {
+public final class DeserializationVisitorFactory implements VisitorFactory {
 
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
@@ -204,6 +204,6 @@ public final class DeserializationVisitorFactoryNg implements VisitorFactory {
   }
 
   private static final String deserializationRuleId = "pixee:java/deserialization-java-readObject";
-  private static final Logger LOG = LogManager.getLogger(DeserializationVisitorFactoryNg.class);
+  private static final Logger LOG = LogManager.getLogger(DeserializationVisitorFactory.class);
 
 }
