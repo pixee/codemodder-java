@@ -20,7 +20,13 @@ import java.util.Objects;
  * This type weaves a protection against path traversal attacks on Apache Multipart library by
  * normalizing the filename pulled from a multipart request.
  */
+@Deprecated
 public final class MultipartVisitorFactory implements VisitorFactory {
+
+  @Deprecated
+  public MultipartVisitorFactory() {
+    throw new UnsupportedOperationException("moved to ng");
+  }
 
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(

@@ -21,7 +21,7 @@ final class VisitorAssemblerTest {
         List<VisitorFactory> allButOne = assembler.assembleJavaCodeScanningVisitorFactories(repositoryRoot, everythingButSecureRandom, List.of());
 
         // just make sure we're getting a reasonable number of factories
-        assertThat(allFactories.size() > 10, is(true));
+        assertThat(allFactories.isEmpty(), is(false));
 
         // make sure that only disabling one allows it to
         assertThat(allFactories.size() - allButOne.size(), equalTo(1));

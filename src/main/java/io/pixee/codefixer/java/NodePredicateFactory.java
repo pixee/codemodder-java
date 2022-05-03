@@ -20,6 +20,10 @@ public interface NodePredicateFactory {
         return new ArgumentCodeContainsPredicate(argumentIndex, searchStr);
     }
 
+    static Predicate<MethodCallExpr> withParentCodeContains(final String searchStr) {
+        return new ParentCodeContainsPredicate(searchStr);
+    }
+
     static Predicate<MethodCallExpr> withMethodName(final String name) {
         return new MethodNamePredicate(name);
     }

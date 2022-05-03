@@ -6,6 +6,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.visitor.ModifierVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.NodePredicateFactory;
 import io.pixee.codefixer.java.Transformer;
@@ -22,7 +23,7 @@ import java.util.function.Predicate;
 public final class HeaderInjectionVisitorFactoryNg implements VisitorFactoryNg {
 
     @Override
-    public MethodCallTransformingModifierVisitor createVisitor(final File javaFile, final CompilationUnit cu) {
+    public ModifierVisitor<FileWeavingContext> createVisitor(final File javaFile, final CompilationUnit cu) {
 
         Set<Predicate<MethodCallExpr>> predicates = Set.of(
                 NodePredicateFactory.withMethodName("setHeader"),

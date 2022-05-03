@@ -10,6 +10,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.visitor.ModifierVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
 import io.pixee.codefixer.java.NodePredicateFactory;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 public final class DeserializationVisitorFactoryNg implements VisitorFactoryNg {
 
   @Override
-  public MethodCallTransformingModifierVisitor createVisitor(
+  public ModifierVisitor<FileWeavingContext> createVisitor(
           final File file, CompilationUnit cu) {
     Set<Predicate<MethodCallExpr>> predicates = Set.of(
             NodePredicateFactory.withMethodName("readObject"),

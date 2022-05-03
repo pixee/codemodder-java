@@ -19,17 +19,20 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * Makes sure that internal Jakarta forwards don't go to places they shouldn't (e.g., /WEB-INF/web.xml.)
+ * This type weaves a protection against path traversal attacks on Spring multipart code by
+ * normalizing the filename pulled from a multipart request.
  */
-public final class JakartaForwardVisitoryFactoryNg implements VisitorFactoryNg {
+public final class SpringMultipartVisitorFactoryNg implements VisitorFactoryNg {
 
   @Override
   public ModifierVisitor<FileWeavingContext> createVisitor(
-      final File file, CompilationUnit cu) {
+      final File file, final CompilationUnit cu) {
     Set<Predicate<MethodCallExpr>> predicates = Set.of(
-            NodePredicateFactory.withMethodName("getRequestDispatcher"),
-            NodePredicateFactory.withArgumentCount(1),
-            NodePredicateFactory.withArgumentCodeContains(0, "validate").negate(),
+            NodePredicateFactory.withMethodName("getOriginalFilename"),
+            NodePredicateFactory.withArgumentCount(0),
+            NodePredicateFactory.withScopeType(cu, "org.springframework.web.multipart.MultipartFile"),
+            NodePredicateFactory.withParentCodeContains("toSimpleFileName").negate(),
+
             NodePredicateFactory.withArgumentNodeType(0, StringLiteralExpr.class).negate(),
             NodePredicateFactory.withScreamingSnakeCaseVariableNameForArgument(1).negate()
     );
@@ -37,22 +40,24 @@ public final class JakartaForwardVisitoryFactoryNg implements VisitorFactoryNg {
     Transformer<MethodCallExpr> transformer = new Transformer<>() {
       @Override
       public TransformationResult<MethodCallExpr> transform(final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
-        MethodCallExpr safeExpression =
-                new MethodCallExpr(new NameExpr(io.pixee.security.Jakarta.class.getName()), "validateForwardPath");
-        safeExpression.setArguments(NodeList.nodeList(methodCallExpr.getArgument(0)));
-        methodCallExpr.setArgument(0, safeExpression);
-        Weave weave = Weave.from(methodCallExpr.getRange().get().begin.line, pathCheckingRuleId);
-        return new TransformationResult<>(Optional.empty(), weave);
+        MethodCallExpr safeCall =
+                new MethodCallExpr(
+                        new NameExpr(io.pixee.security.SafeIO.class.getName()),
+                        "toSimpleFileName",
+                        NodeList.nodeList(methodCallExpr));
+        Weave weave =
+                Weave.from(methodCallExpr.getRange().get().begin.line, springMultipartFilenameSanitizerRuleId);
+        return new TransformationResult<>(Optional.of(safeCall), weave);
       }
     };
 
     return new MethodCallTransformingModifierVisitor(cu, predicates, transformer);
   }
 
-    @Override
-    public String ruleId() {
-        return pathCheckingRuleId;
-    }
+  @Override
+  public String ruleId() {
+      return springMultipartFilenameSanitizerRuleId;
+  }
 
-  private static final String pathCheckingRuleId = "pixee:java/validate-jakarta-forward-path";
+  private static final String springMultipartFilenameSanitizerRuleId = "pixee:java/spring-multipart-filename-sanitizer";
 }

@@ -2,24 +2,7 @@ package io.pixee.codefixer.java;
 
 import io.pixee.codefixer.java.plugins.codeql.CodeQlPlugin;
 import io.pixee.codefixer.java.plugins.contrast.ContrastScanPlugin;
-import io.pixee.codefixer.java.protections.DependencyInjectingVisitor;
-import io.pixee.codefixer.java.protections.DeserializationVisitorFactory;
-import io.pixee.codefixer.java.protections.DeserializationVisitorFactoryNg;
-import io.pixee.codefixer.java.protections.HeaderInjectionVisitorFactoryNg;
-import io.pixee.codefixer.java.protections.JakartaForwardVisitoryFactoryNg;
-import io.pixee.codefixer.java.protections.JspScriptletXSSVisitor;
-import io.pixee.codefixer.java.protections.MultipartVisitorFactory;
-import io.pixee.codefixer.java.protections.PredictableSeedVisitorFactory;
-import io.pixee.codefixer.java.protections.RuntimeExecVisitorFactory;
-import io.pixee.codefixer.java.protections.SSLProtocolVisitorFactory;
-import io.pixee.codefixer.java.protections.SSRFVisitorFactory;
-import io.pixee.codefixer.java.protections.UnsafeReadlineVisitorFactory;
-import io.pixee.codefixer.java.protections.VerbTamperingVisitor;
-import io.pixee.codefixer.java.protections.WeakPRNGVisitorFactory;
-import io.pixee.codefixer.java.protections.XMLDecoderVisitorFactory;
-import io.pixee.codefixer.java.protections.XStreamVisitorFactory;
-import io.pixee.codefixer.java.protections.XXEVisitorFactory;
-import io.pixee.codefixer.java.protections.ZipFileOverwriteVisitoryFactory;
+import io.pixee.codefixer.java.protections.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -61,7 +44,6 @@ public interface VisitorAssembler {
         public List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
             List<VisitorFactory> defaultVisitorFactories =
                     List.of(
-                            new MultipartVisitorFactory(),
                             new RuntimeExecVisitorFactory(),
                             new SSLProtocolVisitorFactory(),
                             new SSRFVisitorFactory(),
@@ -93,9 +75,11 @@ public interface VisitorAssembler {
         public List<VisitorFactoryNg> assembleJavaCodeScanningVisitorFactoriesNg(final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
             List<VisitorFactoryNg> defaultVisitorFactories =
                     List.of(
+                            new ApacheMultipartVisitorFactoryNg(),
                             new DeserializationVisitorFactoryNg(),
                             new HeaderInjectionVisitorFactoryNg(),
-                            new JakartaForwardVisitoryFactoryNg());
+                            new JakartaForwardVisitoryFactoryNg(),
+                            new SpringMultipartVisitorFactoryNg());
 
             final List<SarifProcessorPlugin> sarifProcessorPlugins =
                     List.of(new CodeQlPlugin(), new ContrastScanPlugin());
