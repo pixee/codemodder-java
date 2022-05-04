@@ -51,7 +51,7 @@ public final class RuntimeExecVisitorFactory implements VisitorFactory {
     // need to replace:
     //   Runtime.exec(cmd, ...)
     //   io.pixee.security.SystemCommand.runCommand(Runtime.getRuntime(), cmd, ...)
-    Transformer<MethodCallExpr> transformer = new Transformer<>() {
+    Transformer<MethodCallExpr,MethodCallExpr> transformer = new Transformer<>() {
       @Override
       public TransformationResult<MethodCallExpr> transform(final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
         Expression scope = methodCallExpr.getScope().get();

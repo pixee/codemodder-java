@@ -21,9 +21,9 @@ import java.util.function.Predicate;
 public class MethodCallTransformingModifierVisitor extends ModifierVisitor<FileWeavingContext> {
 
     private final List<Predicate<MethodCallExpr>> predicates;
-    private final Transformer<MethodCallExpr> transformer;
+    private final Transformer<MethodCallExpr,MethodCallExpr> transformer;
 
-    public MethodCallTransformingModifierVisitor(final CompilationUnit cu, final List<Predicate<MethodCallExpr>> predicates, final Transformer<MethodCallExpr> transformer) {
+    public MethodCallTransformingModifierVisitor(final CompilationUnit cu, final List<Predicate<MethodCallExpr>> predicates, final Transformer<MethodCallExpr,MethodCallExpr> transformer) {
         this.predicates = Objects.requireNonNull(predicates);
         this.transformer = Objects.requireNonNull(transformer);
     }

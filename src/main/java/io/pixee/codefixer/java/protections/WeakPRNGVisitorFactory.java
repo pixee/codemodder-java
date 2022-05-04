@@ -32,7 +32,7 @@ public final class WeakPRNGVisitorFactory implements VisitorFactory {
             ObjectCreationPredicateFactory.withType("Random").or(ObjectCreationPredicateFactory.withType("java.util.Random"))
     );
 
-    Transformer<ObjectCreationExpr> transformer = new Transformer<>() {
+    Transformer<ObjectCreationExpr,ObjectCreationExpr> transformer = new Transformer<>() {
       @Override
       public TransformationResult<ObjectCreationExpr> transform(final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
         objectCreationExpr.setType(new ClassOrInterfaceType(SecureRandom.class.getName()));

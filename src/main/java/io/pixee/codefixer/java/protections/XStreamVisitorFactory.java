@@ -67,7 +67,7 @@ public final class XStreamVisitorFactory implements VisitorFactory {
             }
     );
 
-    Transformer<ObjectCreationExpr> transformer = new Transformer<>() {
+    Transformer<ObjectCreationExpr,ObjectCreationExpr> transformer = new Transformer<>() {
       @Override
       public TransformationResult<ObjectCreationExpr> transform(final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
         VariableDeclarator variableDeclaration = (VariableDeclarator) objectCreationExpr.getParentNode().get();

@@ -38,7 +38,7 @@ public final class SpringMultipartVisitorFactory implements VisitorFactory {
             MethodCallPredicateFactory.withScreamingSnakeCaseVariableNameForArgument(1).negate()
     );
 
-    Transformer<MethodCallExpr> transformer = new Transformer<>() {
+    Transformer<MethodCallExpr, MethodCallExpr> transformer = new Transformer<>() {
       @Override
       public TransformationResult<MethodCallExpr> transform(final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
         MethodCallExpr safeCall =

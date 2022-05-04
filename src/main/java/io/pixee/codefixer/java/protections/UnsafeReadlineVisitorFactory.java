@@ -30,7 +30,7 @@ public final class UnsafeReadlineVisitorFactory implements VisitorFactory {
             MethodCallPredicateFactory.withScreamingSnakeCaseVariableNameForArgument(1).negate()
     );
 
-    Transformer<MethodCallExpr> transformer = new Transformer<>() {
+    Transformer<MethodCallExpr,MethodCallExpr> transformer = new Transformer<>() {
       @Override
       public TransformationResult<MethodCallExpr> transform(final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
         Expression readerScope = methodCallExpr.getScope().get();

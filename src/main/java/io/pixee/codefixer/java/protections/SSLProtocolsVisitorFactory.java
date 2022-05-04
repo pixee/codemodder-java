@@ -55,7 +55,7 @@ abstract class SSLProtocolsVisitorFactory implements VisitorFactory {
 
     );
 
-    Transformer<MethodCallExpr> transformer = new Transformer<>() {
+    Transformer<MethodCallExpr,MethodCallExpr> transformer = new Transformer<>() {
       @Override
       public TransformationResult<MethodCallExpr> transform(final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
         final ArrayCreationExpr safeArgument =

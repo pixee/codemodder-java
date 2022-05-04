@@ -50,7 +50,7 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
     );
 
 
-    Transformer<MethodCallExpr> transformer = new Transformer<>() {
+    Transformer<MethodCallExpr,MethodCallExpr> transformer = new Transformer<>() {
       @Override
       public TransformationResult<MethodCallExpr> transform(final MethodCallExpr methodCallExpr, final FileWeavingContext context) throws TransformationException {
         Optional<MethodDeclaration> methodRef = ASTs.findMethodBodyFrom(methodCallExpr);

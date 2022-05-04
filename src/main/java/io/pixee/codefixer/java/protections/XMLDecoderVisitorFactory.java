@@ -34,7 +34,7 @@ public final class XMLDecoderVisitorFactory implements VisitorFactory {
             ObjectCreationPredicateFactory.withType("XMLDecoder").or(ObjectCreationPredicateFactory.withType("java.beans.XMLDecoder"))
     );
 
-    Transformer<ObjectCreationExpr> transformer = new Transformer<>() {
+    Transformer<ObjectCreationExpr, ObjectCreationExpr> transformer = new Transformer<>() {
       @Override
       public TransformationResult<ObjectCreationExpr> transform(final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
         MethodCallExpr safeExpr =
