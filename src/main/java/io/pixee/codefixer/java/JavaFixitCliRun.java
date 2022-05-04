@@ -2,16 +2,15 @@ package io.pixee.codefixer.java;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.pixee.ccf.CCFReport;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** This is the connective tissue between the process startup and the weaving process. */
 public final class JavaFixitCliRun {
@@ -35,8 +34,10 @@ public final class JavaFixitCliRun {
    *
    * <p>Note that includes and excludes can both be specified, and "includes win" unless the exclude
    * has a longer matching path.
+   *
    * @param defaultRuleSetting the default setting for every rule
-   * @param ruleExceptions the rules that should be considered to have the opposite default rule setting
+   * @param ruleExceptions the rules that should be considered to have the opposite default rule
+   *     setting
    * @param sarifs the paths to SARIF files that tool
    * @param repositoryRoot the path to the repository root
    * @param includePatterns the patterns to include, null and empty list means all files are scanned
@@ -72,20 +73,26 @@ public final class JavaFixitCliRun {
 
     // parse the includes & exclude rules we'll need for all the scanning
     final IncludesExcludes includesExcludes =
-            IncludesExcludes.fromConfiguration(repositoryRoot, includePatterns, excludePatterns);
+        IncludesExcludes.fromConfiguration(repositoryRoot, includePatterns, excludePatterns);
 
     // get the Java code visitors
     RuleContext ruleContext = RuleContext.of(defaultRuleSetting, ruleExceptions);
-    final List<VisitorFactory> factories = visitorAssembler.assembleJavaCodeScanningVisitorFactories(repositoryRoot, ruleContext, sarifs);
+    final List<VisitorFactory> factories =
+        visitorAssembler.assembleJavaCodeScanningVisitorFactories(
+            repositoryRoot, ruleContext, sarifs);
 
     // run the Java code visitors
-    final var javaSourceWeaveResult = javaSourceWeaver.weave(sourceDirectories, factories, includesExcludes);
+    final var javaSourceWeaveResult =
+        javaSourceWeaver.weave(sourceDirectories, factories, includesExcludes);
 
     // get the non-Java code visitors
-    final List<FileBasedVisitor> fileBasedVisitors = visitorAssembler.assembleFileVisitors(ruleContext);
+    final List<FileBasedVisitor> fileBasedVisitors =
+        visitorAssembler.assembleFileVisitors(ruleContext);
 
     // run the non-Java code visitors
-    final var fileBasedWeaveResults = fileWeaver.weave(fileBasedVisitors, repositoryRoot, javaSourceWeaveResult, includesExcludes);
+    final var fileBasedWeaveResults =
+        fileWeaver.weave(
+            fileBasedVisitors, repositoryRoot, javaSourceWeaveResult, includesExcludes);
 
     // merge the results into one
     final var allWeaveResults = merge(javaSourceWeaveResult, fileBasedWeaveResults);
@@ -98,7 +105,9 @@ public final class JavaFixitCliRun {
     stopWatch.stop();
     final long elapsed = stopWatch.getTime();
 
-    CCFReport ccfReport = reportGenerator.createReport(repositoryRoot, includePatterns, excludePatterns, allWeaveResults, elapsed);
+    CCFReport ccfReport =
+        reportGenerator.createReport(
+            repositoryRoot, includePatterns, excludePatterns, allWeaveResults, elapsed);
 
     // write out the JSON
     ObjectMapper mapper = new ObjectMapper();
@@ -107,9 +116,10 @@ public final class JavaFixitCliRun {
   }
 
   /**
-   * When we need to combine the results of multiple analyses, we can combine them with a method like this one. There is
-   * notably some loss of fidelity here when the two sets are combined, but hopefully all the changers have different
-   * domains over different types of files, so there should be little chance of collision.
+   * When we need to combine the results of multiple analyses, we can combine them with a method
+   * like this one. There is notably some loss of fidelity here when the two sets are combined, but
+   * hopefully all the changers have different domains over different types of files, so there
+   * should be little chance of collision.
    */
   private WeavingResult merge(final WeavingResult result1, final WeavingResult result2) {
     var combinedChangedFiles = new HashSet<ChangedFile>();

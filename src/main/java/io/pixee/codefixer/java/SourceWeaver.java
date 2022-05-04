@@ -9,13 +9,6 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
-import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.mozilla.universalchardet.UniversalDetector;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,6 +18,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.mozilla.universalchardet.UniversalDetector;
 
 /** A visitor that finds opportunities for changes/protections/hardening. */
 public interface SourceWeaver {
@@ -51,7 +50,9 @@ public interface SourceWeaver {
 
     @Override
     public @NotNull WeavingResult weave(
-        final List<SourceDirectory> javaSourceDirectories, final List<VisitorFactory> visitorFactories, final IncludesExcludes includesExcludes)
+        final List<SourceDirectory> javaSourceDirectories,
+        final List<VisitorFactory> visitorFactories,
+        final IncludesExcludes includesExcludes)
         throws IOException {
       /*
        * Create the parser which can resolve symbols across all the Java source directories.
@@ -80,7 +81,8 @@ public interface SourceWeaver {
             LOG.info("Scanned {} files", filesScanned);
           }
           try {
-            final ChangedFile changedFile = scanIndividualJavaFile(javaParser, javaFile, visitorFactories, includesExcludes);
+            final ChangedFile changedFile =
+                scanIndividualJavaFile(javaParser, javaFile, visitorFactories, includesExcludes);
             if (changedFile != null) {
               changedFiles.add(changedFile);
             }
@@ -122,7 +124,10 @@ public interface SourceWeaver {
 
     /** For each type in a Java source file, we scan through the code. */
     private ChangedFile scanType(
-            final File javaFile, final CompilationUnit cu, final List<VisitorFactory> visitorFactories, final IncludesExcludes includesExcludes)
+        final File javaFile,
+        final CompilationUnit cu,
+        final List<VisitorFactory> visitorFactories,
+        final IncludesExcludes includesExcludes)
         throws IOException {
 
       final FileWeavingContext context =

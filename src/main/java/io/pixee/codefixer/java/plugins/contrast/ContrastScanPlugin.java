@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -50,27 +49,31 @@ public final class ContrastScanPlugin extends DefaultSarifProcessorPlugin {
     List<VisitorFactory> visitorFactories = new ArrayList<>();
 
     if (ruleContext.isRuleAllowed("contrast:java/reflected-xss")) {
-      Set<Map.Entry<String, Set<Result>>> xssEntries = getRuleEntries(results, List.of("reflected-xss"));
+      Set<Map.Entry<String, Set<Result>>> xssEntries =
+          getRuleEntries(results, List.of("reflected-xss"));
       for (final Map.Entry<String, Set<Result>> xssEntry : xssEntries) {
-        visitorFactories.add(new JavaXssVisitorFactory(repositoryRoot, xssEntry.getValue(), "reflected-xss"));
+        visitorFactories.add(
+            new JavaXssVisitorFactory(repositoryRoot, xssEntry.getValue(), "reflected-xss"));
       }
     }
 
     if (ruleContext.isRuleAllowed("contrast:java/stored-xss")) {
-      Set<Map.Entry<String, Set<Result>>> xssEntries = getRuleEntries(results, List.of("stored-xss"));
+      Set<Map.Entry<String, Set<Result>>> xssEntries =
+          getRuleEntries(results, List.of("stored-xss"));
       for (final Map.Entry<String, Set<Result>> xssEntry : xssEntries) {
-        visitorFactories.add(new JavaXssVisitorFactory(repositoryRoot, xssEntry.getValue(), "stored-xss"));
+        visitorFactories.add(
+            new JavaXssVisitorFactory(repositoryRoot, xssEntry.getValue(), "stored-xss"));
       }
     }
 
-    if(ruleContext.isRuleAllowed(ReflectionInjectionVisitorFactory.ID)) {
+    if (ruleContext.isRuleAllowed(ReflectionInjectionVisitorFactory.ID)) {
       Set<Map.Entry<String, Set<Result>>> reflectionInjectionEntries =
-              getRuleEntries(results, List.of("reflection-injection"));
+          getRuleEntries(results, List.of("reflection-injection"));
       for (final Map.Entry<String, Set<Result>> reflectionInjectionEntry :
-              reflectionInjectionEntries) {
+          reflectionInjectionEntries) {
         visitorFactories.add(
-                new ReflectionInjectionVisitorFactory(
-                        repositoryRoot, reflectionInjectionEntry.getValue()));
+            new ReflectionInjectionVisitorFactory(
+                repositoryRoot, reflectionInjectionEntry.getValue()));
       }
     }
     return Collections.unmodifiableList(visitorFactories);
@@ -131,10 +134,10 @@ public final class ContrastScanPlugin extends DefaultSarifProcessorPlugin {
     List<Result> storedJspXss = getXssJspResults(run, "stored-xss");
     List<Result> reflectedJspXss = getXssJspResults(run, "reflected-xss");
     List<FileBasedVisitor> weavers = new ArrayList<>();
-    if(!reflectedJspXss.isEmpty()) {
+    if (!reflectedJspXss.isEmpty()) {
       weavers.add(new SarifBasedJspScriptletXSSVisitor(reflectedJspXss, "reflected-xss"));
     }
-    if(!storedJspXss.isEmpty()) {
+    if (!storedJspXss.isEmpty()) {
       weavers.add(new SarifBasedJspScriptletXSSVisitor(storedJspXss, "stored-xss"));
     }
     return weavers;
@@ -143,17 +146,16 @@ public final class ContrastScanPlugin extends DefaultSarifProcessorPlugin {
   @NotNull
   private List<Result> getXssJspResults(final Run run, final String ruleId) {
     return run.getResults().stream()
-            .filter(
-                    r -> ruleId.equals(r.getRuleId()))
-            .filter(
-                    r ->
-                            r.getLocations()
-                                    .get(0)
-                                    .getPhysicalLocation()
-                                    .getArtifactLocation()
-                                    .getUri()
-                                    .endsWith(".jsp"))
-            .collect(Collectors.toUnmodifiableList());
+        .filter(r -> ruleId.equals(r.getRuleId()))
+        .filter(
+            r ->
+                r.getLocations()
+                    .get(0)
+                    .getPhysicalLocation()
+                    .getArtifactLocation()
+                    .getUri()
+                    .endsWith(".jsp"))
+        .collect(Collectors.toUnmodifiableList());
   }
 
   static final String ruleBase = "contrast-scan:java/";

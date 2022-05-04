@@ -2,7 +2,6 @@ package io.pixee.codefixer.java;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
-
 import java.io.File;
 
 /**
@@ -11,9 +10,7 @@ import java.io.File;
  */
 public interface VisitorFactory {
 
-  /**
-   * Given some context, create a visitor for the given {@link CompilationUnit}.
-   */
+  /** Given some context, create a visitor for the given {@link CompilationUnit}. */
   ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(File file, CompilationUnit cu);
 
   String ruleId();

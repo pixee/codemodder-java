@@ -6,11 +6,10 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
-import io.pixee.security.*;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
-
+import io.pixee.security.*;
 import java.io.File;
 import java.util.Objects;
 
@@ -26,12 +25,12 @@ public final class SSRFVisitorFactory implements VisitorFactory {
     return new SSRFVisitor(cu);
   }
 
-    @Override
-    public String ruleId() {
-        return ssrfRuleId;
-    }
+  @Override
+  public String ruleId() {
+    return ssrfRuleId;
+  }
 
-    private static class SSRFVisitor extends ModifierVisitor<FileWeavingContext> {
+  private static class SSRFVisitor extends ModifierVisitor<FileWeavingContext> {
     private final CompilationUnit cu;
 
     private SSRFVisitor(final CompilationUnit cu) {
@@ -69,7 +68,9 @@ public final class SSRFVisitorFactory implements VisitorFactory {
               newArguments.add(denyCommonTargetsExpr); // load the host validator
               MethodCallExpr safeCall =
                   new MethodCallExpr(
-                      new NameExpr(io.pixee.security.SSRF.class.getName()), "createSafeURL", newArguments);
+                      new NameExpr(io.pixee.security.SSRF.class.getName()),
+                      "createSafeURL",
+                      newArguments);
               context.addWeave(Weave.from(n.getRange().get().begin.line, ssrfRuleId));
               return super.visit(safeCall, context);
             }

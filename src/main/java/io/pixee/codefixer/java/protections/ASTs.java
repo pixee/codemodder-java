@@ -25,8 +25,8 @@ public final class ASTs {
       node = node.getParentNode().get();
     }
     var methodDeclarationOrNullRef = node.getParentNode();
-    if(methodDeclarationOrNullRef.isPresent()) {
-      return Optional.of((MethodDeclaration)methodDeclarationOrNullRef.get());
+    if (methodDeclarationOrNullRef.isPresent()) {
+      return Optional.of((MethodDeclaration) methodDeclarationOrNullRef.get());
     }
     return Optional.empty();
   }

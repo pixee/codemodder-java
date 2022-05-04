@@ -1,13 +1,9 @@
 package io.pixee.codefixer.java;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.List;
 
-/**
- * Describes the 'rules' section of the YAML configuration.
- */
+/** Describes the 'rules' section of the YAML configuration. */
 public class RuleConfiguration {
 
   @JsonProperty("default")

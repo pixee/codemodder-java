@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.is;
 import io.pixee.codefixer.java.JspLineWeave;
 import java.util.Collections;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 final class JspExpressionLanguageOutputMethodTest {

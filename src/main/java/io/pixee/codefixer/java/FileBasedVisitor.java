@@ -11,7 +11,8 @@ import java.util.Set;
 public interface FileBasedVisitor {
 
   /**
-   * Given a repository root and some context, weave the changes you'd like to the configuration or non-Java code.
+   * Given a repository root and some context, weave the changes you'd like to the configuration or
+   * non-Java code.
    */
   WeavingResult visitRepositoryFile(
       File repositoryRoot,

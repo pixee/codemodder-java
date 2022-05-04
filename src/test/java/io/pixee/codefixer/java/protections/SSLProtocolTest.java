@@ -20,24 +20,23 @@ final class SSLProtocolTest {
   @Test
   void it_prevents_sslengine_setenabledprotocols_weakness() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
-            "src/test/java/com/acme/testcode/SSLEngineSetEnabledProtocolsVulnerability.java",
-            new SSLEngineSetEnabledProtocolsVisitorFactory());
+        "src/test/java/com/acme/testcode/SSLEngineSetEnabledProtocolsVulnerability.java",
+        new SSLEngineSetEnabledProtocolsVisitorFactory());
   }
 
   @Test
   void it_prevents_sslparameters_setprotocols_weakness() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
-            "src/test/java/com/acme/testcode/SSLParametersSetProtocolsVulnerability.java",
-            new SSLParametersSetProtocolsVisitorFactory());
+        "src/test/java/com/acme/testcode/SSLParametersSetProtocolsVulnerability.java",
+        new SSLParametersSetProtocolsVisitorFactory());
   }
 
   @Test
   void it_prevents_sslsocket_setenabledprotocols_weakness() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
-            "src/test/java/com/acme/testcode/SSLSocketSetEnabledProtocolsVulnerability.java",
-            new SSLSocketSetEnabledProtocolsVisitorFactory());
+        "src/test/java/com/acme/testcode/SSLSocketSetEnabledProtocolsVulnerability.java",
+        new SSLSocketSetEnabledProtocolsVisitorFactory());
   }
-
 
   @Test
   void checkstyle_config_only_ignores_weaved_files() {

@@ -6,14 +6,13 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 
 import io.pixee.codefixer.java.ChangedFile;
+import io.pixee.codefixer.java.FileWeavingContext;
+import io.pixee.codefixer.java.Weave;
+import io.pixee.codefixer.java.WeavingResult;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Set;
-
-import io.pixee.codefixer.java.FileWeavingContext;
-import io.pixee.codefixer.java.Weave;
-import io.pixee.codefixer.java.WeavingResult;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -31,13 +30,19 @@ final class DependencyInjectingTest {
     File repositoryRoot = new File("src/test/resources/poms/fake_repo_root");
     File pom = new File(repositoryRoot, "pom.xml");
     FileWeavingContext ctx = mock(FileWeavingContext.class);
-    ChangedFile changedFile = ChangedFile.createDefault("src/test/resources/poms/fake_repo_root/code/Foo.java", "/tmp/fixed_path", Weave.from(5, "some-code"));
-    WeavingResult result = weaver.visitRepositoryFile(repositoryRoot, pom, ctx, Set.of(changedFile));
+    ChangedFile changedFile =
+        ChangedFile.createDefault(
+            "src/test/resources/poms/fake_repo_root/code/Foo.java",
+            "/tmp/fixed_path",
+            Weave.from(5, "some-code"));
+    WeavingResult result =
+        weaver.visitRepositoryFile(repositoryRoot, pom, ctx, Set.of(changedFile));
 
     Set<ChangedFile> changedFiles = result.changedFiles();
     assertThat(changedFiles.size(), equalTo(1));
     ChangedFile changedPom = changedFiles.iterator().next();
-    assertThat(changedPom.originalFilePath(), endsWith("src/test/resources/poms/fake_repo_root/pom.xml"));
+    assertThat(
+        changedPom.originalFilePath(), endsWith("src/test/resources/poms/fake_repo_root/pom.xml"));
     assertThat(changedPom.weaves(), hasItems(Weave.from(1, pomInjectionRuleId)));
   }
 

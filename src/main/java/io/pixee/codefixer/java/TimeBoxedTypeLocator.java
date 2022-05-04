@@ -28,7 +28,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -57,7 +56,7 @@ final class TimeBoxedTypeLocator implements TypeLocator {
 
     } catch (Exception ignored) {
     } // this could be stack overflow, timeout exception, runtime exceptions, and other stuff that
-      // we can't do anything about
+    // we can't do anything about
     return name;
   }
 
@@ -78,7 +77,7 @@ final class TimeBoxedTypeLocator implements TypeLocator {
     locatedTypeName = locateTypeName(locatedTypeName, valueDeclaration);
     if (locatedTypeName == null) {
       Optional<MethodDeclaration> methodBodyRef = ASTs.findMethodBodyFrom(nameExpr);
-      if(methodBodyRef.isEmpty()) {
+      if (methodBodyRef.isEmpty()) {
         return null;
       }
       MethodDeclaration methodBody = methodBodyRef.get();

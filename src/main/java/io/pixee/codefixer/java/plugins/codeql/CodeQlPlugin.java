@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -41,11 +40,13 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
     Set<Map.Entry<String, Set<Result>>> ruleFindings = ruleIdToResultsMap.entrySet();
     for (final Map.Entry<String, Set<Result>> ruleFinding : ruleFindings) {
       String ruleId = ruleFinding.getKey();
-      if(ruleContext.isRuleAllowed(ruleId)) {
+      if (ruleContext.isRuleAllowed(ruleId)) {
         if ("java/stack-trace-exposure".equals(ruleId)) {
-          visitors.add(new StackTraceExposureVisitorFactory(repositoryRoot, ruleFinding.getValue()));
+          visitors.add(
+              new StackTraceExposureVisitorFactory(repositoryRoot, ruleFinding.getValue()));
         } else if ("java/missing-jwt-signature-check".equals(ruleId)) {
-          visitors.add(new UnverifiedJwtParseVisitorFactory(repositoryRoot, ruleFinding.getValue()));
+          visitors.add(
+              new UnverifiedJwtParseVisitorFactory(repositoryRoot, ruleFinding.getValue()));
         } else if ("java/insecure-cookie".equals(ruleId)) {
           visitors.add(new InsecureCookieVisitorFactory(repositoryRoot, ruleFinding.getValue()));
         }

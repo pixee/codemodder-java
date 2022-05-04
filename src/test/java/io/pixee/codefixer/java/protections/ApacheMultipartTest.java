@@ -13,5 +13,4 @@ final class ApacheMultipartTest {
         "src/test/java/com/acme/testcode/ApacheMultipartVulnerability.java",
         new ApacheMultipartVisitorFactory());
   }
-
 }

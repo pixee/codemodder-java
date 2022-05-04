@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -61,9 +60,9 @@ final class CodeQlPluginTest {
   void it_gives_expected_results() {
     List<VisitorFactory> factories =
         plugin.getJavaVisitorFactoriesFor(
-                new File("src/test/resources"),
-                runs.get(0),
-                RuleContext.of(DefaultRuleSetting.ENABLED, Collections.emptyList()));
+            new File("src/test/resources"),
+            runs.get(0),
+            RuleContext.of(DefaultRuleSetting.ENABLED, Collections.emptyList()));
 
     assertThat(factories.size(), equalTo(3));
     assertThat(factories.get(0), instanceOf(InsecureCookieVisitorFactory.class));

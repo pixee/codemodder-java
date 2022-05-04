@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,12 +58,12 @@ final class StackTraceExposureVisitorFactory implements VisitorFactory {
     return new DoNothingVisitor();
   }
 
-    @Override
-    public String ruleId() {
-        return stackTraceExposureRuleId;
-    }
+  @Override
+  public String ruleId() {
+    return stackTraceExposureRuleId;
+  }
 
-    private boolean looksTheSame(final PhysicalLocation physicalLocation, final File file)
+  private boolean looksTheSame(final PhysicalLocation physicalLocation, final File file)
       throws IOException {
     String filePath = file.getCanonicalPath();
     String fileUri = physicalLocation.getArtifactLocation().getUri();
@@ -97,8 +96,6 @@ final class StackTraceExposureVisitorFactory implements VisitorFactory {
       }
       return methodCallExpr;
     }
-
-
   }
 
   private static final String stackTraceExposureRuleId = "codeql:java/stack-trace-exposure";

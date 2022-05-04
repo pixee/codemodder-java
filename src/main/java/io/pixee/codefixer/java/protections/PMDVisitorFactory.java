@@ -6,11 +6,10 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import com.google.gson.GsonBuilder;
+import io.codescan.sarif.model.*;
 import io.pixee.codefixer.java.DoNothingVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.VisitorFactory;
-import io.codescan.sarif.model.*;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -18,6 +17,7 @@ import java.util.*;
 
 /**
  * Fixes things discovered by PMD.
+ *
  * @deprecated this needs to be broken down into multiple visitors so they can be controlled
  */
 @Deprecated
@@ -33,7 +33,8 @@ public final class PMDVisitorFactory implements VisitorFactory {
       throw new IllegalArgumentException("pmd file must be non-null and readable file");
     }
     try {
-      SarifLog sarifLog = new GsonBuilder().create().fromJson(new FileReader(pmdResultsFile), SarifLog.class);
+      SarifLog sarifLog =
+          new GsonBuilder().create().fromJson(new FileReader(pmdResultsFile), SarifLog.class);
       this.resultsByFile = new HashMap<>();
       Run run = sarifLog.getRuns().get(0);
       List<Result> results = run.getResults();
@@ -61,12 +62,12 @@ public final class PMDVisitorFactory implements VisitorFactory {
     return new PMDVisitor(cu, pmdResults);
   }
 
-    @Override
-    public String ruleId() {
-        throw new UnsupportedOperationException("unsupported per rule id");
-    }
+  @Override
+  public String ruleId() {
+    throw new UnsupportedOperationException("unsupported per rule id");
+  }
 
-    private static final class PMDVisitor extends ModifierVisitor<FileWeavingContext> {
+  private static final class PMDVisitor extends ModifierVisitor<FileWeavingContext> {
     private final CompilationUnit cu;
     private final List<Result> pmdResults;
 

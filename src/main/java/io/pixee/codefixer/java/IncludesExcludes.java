@@ -85,8 +85,8 @@ public interface IncludesExcludes {
   }
 
   /**
-   * Create an {@link IncludesExcludes} based on the configuration we're using -- the include patterns and exclude
-   * patterns.
+   * Create an {@link IncludesExcludes} based on the configuration we're using -- the include
+   * patterns and exclude patterns.
    */
   static IncludesExcludes fromConfiguration(
       final File repositoryRoot,

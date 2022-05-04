@@ -16,7 +16,6 @@ import io.pixee.codefixer.java.ObjectCreationTransformingModifierVisitor;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
-
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -28,71 +27,81 @@ public final class XStreamVisitorFactory implements VisitorFactory {
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, CompilationUnit cu) {
-    List<Predicate<ObjectCreationExpr>> predicates = List.of(
+    List<Predicate<ObjectCreationExpr>> predicates =
+        List.of(
             ObjectCreationPredicateFactory.withArgumentCount(0),
-            ObjectCreationPredicateFactory.withType("XStream").or(ObjectCreationPredicateFactory.withType("com.thoughtworks.xstream.XStream")),
+            ObjectCreationPredicateFactory.withType("XStream")
+                .or(ObjectCreationPredicateFactory.withType("com.thoughtworks.xstream.XStream")),
             ObjectCreationPredicateFactory.withParentType(VariableDeclarator.class),
             new Predicate<>() {
               @Override
               public boolean test(final ObjectCreationExpr objectCreationExpr) {
-                final VariableDeclarator variableDeclaration = (VariableDeclarator) objectCreationExpr.getParentNode().get();
+                final VariableDeclarator variableDeclaration =
+                    (VariableDeclarator) objectCreationExpr.getParentNode().get();
                 final String name = variableDeclaration.getNameAsString();
                 return neverCallRegisterConverter(variableDeclaration, name);
               }
 
               private boolean neverCallRegisterConverter(
-                      final VariableDeclarator variableDeclaration, final String name) {
-                Optional<MethodDeclaration> methodRef = ASTs.findMethodBodyFrom(variableDeclaration);
+                  final VariableDeclarator variableDeclaration, final String name) {
+                Optional<MethodDeclaration> methodRef =
+                    ASTs.findMethodBodyFrom(variableDeclaration);
                 if (methodRef.isPresent()) {
                   MethodDeclaration method = methodRef.get();
                   boolean calledRegisterConverter =
-                          method.findAll(MethodCallExpr.class).stream()
-                                  .filter(
-                                          methodCallExpr -> "registerConverter".equals(methodCallExpr.getNameAsString()))
-                                  .anyMatch(
-                                          methodCallExpr ->
-                                                  methodCallExpr.getScope().isPresent()
-                                                          && name.equals(methodCallExpr.getScope().get().toString()));
+                      method.findAll(MethodCallExpr.class).stream()
+                          .filter(
+                              methodCallExpr ->
+                                  "registerConverter".equals(methodCallExpr.getNameAsString()))
+                          .anyMatch(
+                              methodCallExpr ->
+                                  methodCallExpr.getScope().isPresent()
+                                      && name.equals(methodCallExpr.getScope().get().toString()));
                   return !calledRegisterConverter;
                 }
                 return false;
               }
-            }
-    );
+            });
 
-    Transformer<ObjectCreationExpr,ObjectCreationExpr> transformer = new Transformer<>() {
-      @Override
-      public TransformationResult<ObjectCreationExpr> transform(final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
-        VariableDeclarator variableDeclaration = (VariableDeclarator) objectCreationExpr.getParentNode().get();
-        Optional<Statement> stmt = ASTs.findParentStatementFrom(variableDeclaration);
-        if (stmt.isPresent()) {
-          Optional<BlockStmt> blockStmt = ASTs.findBlockStatementFrom(variableDeclaration);
-          if (blockStmt.isPresent()) {
-            BlockStmt block = blockStmt.get();
-            NodeList<Statement> statements = block.getStatements();
-            int indexOfVulnStmt = statements.indexOf(stmt.get());
-            statements.add(indexOfVulnStmt + 1, buildFixStatement(variableDeclaration.getNameAsString()));
-            context.addWeave(Weave.from(objectCreationExpr.getRange().get().begin.line, xstreamConverterRuleId));
+    Transformer<ObjectCreationExpr, ObjectCreationExpr> transformer =
+        new Transformer<>() {
+          @Override
+          public TransformationResult<ObjectCreationExpr> transform(
+              final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
+            VariableDeclarator variableDeclaration =
+                (VariableDeclarator) objectCreationExpr.getParentNode().get();
+            Optional<Statement> stmt = ASTs.findParentStatementFrom(variableDeclaration);
+            if (stmt.isPresent()) {
+              Optional<BlockStmt> blockStmt = ASTs.findBlockStatementFrom(variableDeclaration);
+              if (blockStmt.isPresent()) {
+                BlockStmt block = blockStmt.get();
+                NodeList<Statement> statements = block.getStatements();
+                int indexOfVulnStmt = statements.indexOf(stmt.get());
+                statements.add(
+                    indexOfVulnStmt + 1, buildFixStatement(variableDeclaration.getNameAsString()));
+                context.addWeave(
+                    Weave.from(
+                        objectCreationExpr.getRange().get().begin.line, xstreamConverterRuleId));
+              }
+            }
+            Weave weave =
+                Weave.from(objectCreationExpr.getRange().get().begin.line, xstreamConverterRuleId);
+            return new TransformationResult<>(Optional.empty(), weave);
           }
-        }
-        Weave weave = Weave.from(objectCreationExpr.getRange().get().begin.line, xstreamConverterRuleId);
-        return new TransformationResult<>(Optional.empty(), weave);
-      }
-    };
+        };
 
     return new ObjectCreationTransformingModifierVisitor(cu, predicates, transformer);
   }
 
-    @Override
-    public String ruleId() {
-        return xstreamConverterRuleId;
-    }
+  @Override
+  public String ruleId() {
+    return xstreamConverterRuleId;
+  }
 
   private static Statement buildFixStatement(final String name) {
-    CompilationUnit parsedFixCode =
-            StaticJavaParser.parse(patchCode.replace("%SCOPE%", name));
+    CompilationUnit parsedFixCode = StaticJavaParser.parse(patchCode.replace("%SCOPE%", name));
     MethodDeclaration method =
-            (MethodDeclaration) parsedFixCode.getChildNodes().get(0).getChildNodes().get(2);
+        (MethodDeclaration) parsedFixCode.getChildNodes().get(0).getChildNodes().get(2);
     NodeList<Statement> fixStatements = method.getBody().get().getStatements();
     return fixStatements.get(0);
   }

@@ -32,17 +32,18 @@ public final class JavaFixitCli implements Callable<Integer> {
   private File output;
 
   @CommandLine.Option(
-          names = {"-d", "--rule-default"},
-          description = "Specify the default rule setting ('enabled' or 'disabled')",
-          defaultValue = "enabled",
-          converter = DefaultRuleSettingConverter.class,
-          required = false)
+      names = {"-d", "--rule-default"},
+      description = "Specify the default rule setting ('enabled' or 'disabled')",
+      defaultValue = "enabled",
+      converter = DefaultRuleSettingConverter.class,
+      required = false)
   private DefaultRuleSetting ruleDefault;
 
   @CommandLine.Option(
-          names = {"-x", "--rule-exception"},
-          description = "Specify the rules that should have have the opposite of the default rule setting",
-          required = false)
+      names = {"-x", "--rule-exception"},
+      description =
+          "Specify the rules that should have have the opposite of the default rule setting",
+      required = false)
   private List<String> ruleExceptions;
 
   @CommandLine.Option(
@@ -94,15 +95,17 @@ public final class JavaFixitCli implements Callable<Integer> {
     return rc;
   }
 
-  private static class DefaultRuleSettingConverter implements CommandLine.ITypeConverter<DefaultRuleSetting> {
+  private static class DefaultRuleSettingConverter
+      implements CommandLine.ITypeConverter<DefaultRuleSetting> {
     @Override
     public DefaultRuleSetting convert(final String s) {
-      if("enabled".equalsIgnoreCase(s)) {
+      if ("enabled".equalsIgnoreCase(s)) {
         return DefaultRuleSetting.ENABLED;
-      } else if("disabled".equalsIgnoreCase(s)) {
+      } else if ("disabled".equalsIgnoreCase(s)) {
         return DefaultRuleSetting.DISABLED;
       }
-      throw new IllegalArgumentException("invalid setting for default rule setting -- must be 'enabled' (default) or 'disabled'");
+      throw new IllegalArgumentException(
+          "invalid setting for default rule setting -- must be 'enabled' (default) or 'disabled'");
     }
   }
 

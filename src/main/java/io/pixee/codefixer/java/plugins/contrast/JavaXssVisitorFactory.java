@@ -16,6 +16,10 @@ import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import io.pixee.codefixer.java.DoNothingVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
+import io.pixee.codefixer.java.Sarif;
+import io.pixee.codefixer.java.TypeLocator;
+import io.pixee.codefixer.java.VisitorFactory;
+import io.pixee.codefixer.java.Weave;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -24,11 +28,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import io.pixee.codefixer.java.Sarif;
-import io.pixee.codefixer.java.TypeLocator;
-import io.pixee.codefixer.java.VisitorFactory;
-import io.pixee.codefixer.java.Weave;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,12 +68,12 @@ final class JavaXssVisitorFactory implements VisitorFactory {
     return new DoNothingVisitor();
   }
 
-    @Override
-    public String ruleId() {
-        return ruleId;
-    }
+  @Override
+  public String ruleId() {
+    return ruleId;
+  }
 
-    /**
+  /**
    * Limit the changes to the following conditions:
    *
    * <ul>
@@ -113,7 +112,8 @@ final class JavaXssVisitorFactory implements VisitorFactory {
               String type = locator.locateType(argument);
               if ("String".equals(type) || "java.lang.String".equals(type)) {
                 MethodCallExpr safeExpression =
-                    new MethodCallExpr(new NameExpr(io.pixee.security.XSS.class.getName()), "htmlEncode");
+                    new MethodCallExpr(
+                        new NameExpr(io.pixee.security.XSS.class.getName()), "htmlEncode");
                 safeExpression.setArguments(NodeList.nodeList(argument));
                 methodCallExpr.setArguments(NodeList.nodeList(safeExpression));
                 context.addWeave(Weave.from(startLine, toWeaveId(result)));

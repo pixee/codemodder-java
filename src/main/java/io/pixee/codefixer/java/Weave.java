@@ -46,9 +46,6 @@ public final class Weave {
 
   @Override
   public String toString() {
-    return "Weave{" +
-            "changeCode='" + changeCode + '\'' +
-            ", lineNumber=" + lineNumber +
-            '}';
+    return "Weave{" + "changeCode='" + changeCode + '\'' + ", lineNumber=" + lineNumber + '}';
   }
 }

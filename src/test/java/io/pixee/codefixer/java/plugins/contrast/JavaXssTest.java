@@ -22,6 +22,6 @@ final class JavaXssTest {
                 buildSimpleResult(insecureFilePath, 11, "println", "reflected-xxs"),
                 buildSimpleResult(insecureFilePath, 12, "printf", "reflected-xxs"),
                 buildSimpleResult(insecureFilePath, 13, "write", "reflected-xxs")),
-                "reflected-xss"));
+            "reflected-xss"));
   }
 }

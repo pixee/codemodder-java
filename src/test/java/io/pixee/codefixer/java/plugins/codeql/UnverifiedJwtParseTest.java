@@ -1,18 +1,17 @@
 package io.pixee.codefixer.java.plugins.codeql;
 
+import static io.pixee.codefixer.java.protections.WeavingTests.assertJavaWeaveWorkedAndWontReweave;
+
 import com.contrastsecurity.sarif.ArtifactLocation;
 import com.contrastsecurity.sarif.Location;
 import com.contrastsecurity.sarif.PhysicalLocation;
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-
-import static io.pixee.codefixer.java.protections.WeavingTests.assertJavaWeaveWorkedAndWontReweave;
+import org.junit.jupiter.api.Test;
 
 final class UnverifiedJwtParseTest {
 

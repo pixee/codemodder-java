@@ -10,7 +10,6 @@ import io.pixee.codefixer.java.ObjectCreationTransformingModifierVisitor;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
-
 import java.io.File;
 import java.security.SecureRandom;
 import java.util.List;
@@ -26,26 +25,30 @@ public final class WeakPRNGVisitorFactory implements VisitorFactory {
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, final CompilationUnit cu) {
-    List<Predicate<ObjectCreationExpr>> predicates = List.of(
+    List<Predicate<ObjectCreationExpr>> predicates =
+        List.of(
             ObjectCreationPredicateFactory.withArgumentCount(0),
-            ObjectCreationPredicateFactory.withType("Random").or(ObjectCreationPredicateFactory.withType("java.util.Random"))
-    );
+            ObjectCreationPredicateFactory.withType("Random")
+                .or(ObjectCreationPredicateFactory.withType("java.util.Random")));
 
-    Transformer<ObjectCreationExpr,ObjectCreationExpr> transformer = new Transformer<>() {
-      @Override
-      public TransformationResult<ObjectCreationExpr> transform(final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
-        objectCreationExpr.setType(new ClassOrInterfaceType(SecureRandom.class.getName()));
-        Weave weave = Weave.from(objectCreationExpr.getRange().get().begin.line, secureRandomRuleId);
-        return new TransformationResult<>(Optional.empty(), weave);
-      }
-    };
+    Transformer<ObjectCreationExpr, ObjectCreationExpr> transformer =
+        new Transformer<>() {
+          @Override
+          public TransformationResult<ObjectCreationExpr> transform(
+              final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
+            objectCreationExpr.setType(new ClassOrInterfaceType(SecureRandom.class.getName()));
+            Weave weave =
+                Weave.from(objectCreationExpr.getRange().get().begin.line, secureRandomRuleId);
+            return new TransformationResult<>(Optional.empty(), weave);
+          }
+        };
 
     return new ObjectCreationTransformingModifierVisitor(cu, predicates, transformer);
   }
 
   @Override
   public String ruleId() {
-      return secureRandomRuleId;
+    return secureRandomRuleId;
   }
 
   private static final String secureRandomRuleId = "pixee:java/secure-random";

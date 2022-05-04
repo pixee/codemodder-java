@@ -315,7 +315,7 @@
                                 <goal>${fmt.goal}</goal>
                             </goals>
                             <configuration>
-                                <filesNamePattern>^src/test/com/acme/testcode/.*\.java</filesNamePattern>
+                                <filesPathPattern>(${project.basedir}/src/main/java/.*|${project.basedir}/src/test/java/io/pixee/.*)</filesPathPattern>
                             </configuration>
                         </execution>
                     </executions>

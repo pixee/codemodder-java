@@ -1,5 +1,10 @@
 package io.pixee.codefixer.java.protections;
 
+import io.pixee.codefixer.java.ChangedFile;
+import io.pixee.codefixer.java.FileBasedVisitor;
+import io.pixee.codefixer.java.FileWeavingContext;
+import io.pixee.codefixer.java.Weave;
+import io.pixee.codefixer.java.WeavingResult;
 import io.pixee.security.*;
 import java.io.File;
 import java.io.IOException;
@@ -9,12 +14,6 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import io.pixee.codefixer.java.ChangedFile;
-import io.pixee.codefixer.java.FileBasedVisitor;
-import io.pixee.codefixer.java.FileWeavingContext;
-import io.pixee.codefixer.java.Weave;
-import io.pixee.codefixer.java.WeavingResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -97,7 +96,8 @@ public abstract class RegexTextVisitor implements FileBasedVisitor {
       lastEnd = end;
 
       if (removeEmptyLeftoverLines && replacement.isBlank()) {
-        int lineOfSnippetEnd = LineNumbers.getLineNumberAt(rebuiltContents, rebuiltContents.length() - 1);
+        int lineOfSnippetEnd =
+            LineNumbers.getLineNumberAt(rebuiltContents, rebuiltContents.length() - 1);
         possibleEmptylines.add(lineOfSnippetEnd);
       }
     }

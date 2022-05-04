@@ -11,14 +11,11 @@ import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import io.pixee.codefixer.java.DoNothingVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
-import io.pixee.security.Reflection;
 import io.pixee.codefixer.java.Sarif;
 import io.pixee.codefixer.java.TypeLocator;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import io.pixee.security.Reflection;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -26,6 +23,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Protects against "reflection injection" weaknesses -- where user input is used to build a class
@@ -64,12 +63,12 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
     return new DoNothingVisitor();
   }
 
-    @Override
-    public String ruleId() {
-      return ID;
-    }
+  @Override
+  public String ruleId() {
+    return ID;
+  }
 
-    private static class ReflectionInjectionVisitor extends ModifierVisitor<FileWeavingContext> {
+  private static class ReflectionInjectionVisitor extends ModifierVisitor<FileWeavingContext> {
 
     private final TypeLocator resolver;
     private final NameExpr callbackClass;
