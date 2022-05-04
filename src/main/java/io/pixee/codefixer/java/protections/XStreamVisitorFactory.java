@@ -2,7 +2,6 @@ package io.pixee.codefixer.java.protections;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -10,23 +9,17 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
-import com.github.javaparser.ast.visitor.Visitable;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.ObjectCreationPredicateFactory;
 import io.pixee.codefixer.java.ObjectCreationTransformingModifierVisitor;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
-import javassist.compiler.ast.MethodDecl;
 
 import java.io.File;
-import java.security.SecureRandom;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 /** Registers a converter for common exploit types. */
