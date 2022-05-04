@@ -12,14 +12,18 @@ import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
+/**
+ * Prevents attacks whereby attackers can provide infinite data to a {@link BufferedReader#readLine()} consumer until
+ * it runs out of memory.
+ */
 public final class UnsafeReadlineVisitorFactory implements VisitorFactory {
-
 
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(final File file, final CompilationUnit cu) {

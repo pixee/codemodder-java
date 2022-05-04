@@ -205,6 +205,4 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
   }
 
   private static final String deserializationRuleId = "pixee:java/deserialization-java-readObject";
-  private static final Logger LOG = LogManager.getLogger(DeserializationVisitorFactory.class);
-
 }
