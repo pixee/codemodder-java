@@ -4,6 +4,11 @@ import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
 import com.google.common.annotations.VisibleForTesting;
+import io.pixee.codefixer.java.ChangedFile;
+import io.pixee.codefixer.java.FileBasedVisitor;
+import io.pixee.codefixer.java.FileWeavingContext;
+import io.pixee.codefixer.java.Weave;
+import io.pixee.codefixer.java.WeavingResult;
 import io.pixee.security.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -12,12 +17,6 @@ import java.util.*;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-
-import io.pixee.codefixer.java.ChangedFile;
-import io.pixee.codefixer.java.FileBasedVisitor;
-import io.pixee.codefixer.java.FileWeavingContext;
-import io.pixee.codefixer.java.Weave;
-import io.pixee.codefixer.java.WeavingResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -170,7 +169,9 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
   }
 
   private Set<File> scan(final File repositoryRoot, final Set<ChangedFile> changedJavaFiles) {
-    LOG.info("Scanning repository root for all poms representing {} changed Java files", changedJavaFiles.size());
+    LOG.info(
+        "Scanning repository root for all poms representing {} changed Java files",
+        changedJavaFiles.size());
     final Set<File> pomsToUpdate = new HashSet<>();
     changedJavaFiles.forEach(
         changedFile -> {

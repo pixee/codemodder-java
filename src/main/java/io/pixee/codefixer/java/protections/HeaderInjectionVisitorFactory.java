@@ -7,97 +7,56 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
-import com.github.javaparser.ast.visitor.Visitable;
-import io.pixee.security.*;
 import io.pixee.codefixer.java.FileWeavingContext;
-import io.pixee.codefixer.java.TypeLocator;
+import io.pixee.codefixer.java.MethodCallPredicateFactory;
+import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
+import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
-
+import io.pixee.security.HttpHeader;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
+import java.util.function.Predicate;
 
-/**
- * This visitor prevents header injection by making sure any non-constant header values are stripped
- * of newlines.
- */
 public final class HeaderInjectionVisitorFactory implements VisitorFactory {
 
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
-      final File file, final CompilationUnit cu) {
-    return new HeaderInjectionVisitor(cu);
-  }
+      final File javaFile, final CompilationUnit cu) {
 
-    @Override
-    public String ruleId() {
-        return stripHeaderRuleId;
-    }
+    List<Predicate<MethodCallExpr>> predicates =
+        List.of(
+            MethodCallPredicateFactory.withName("setHeader"),
+            MethodCallPredicateFactory.withArgumentCount(2),
+            MethodCallPredicateFactory.withScopeType(cu, "javax.servlet.http.HttpServletResponse"),
+            MethodCallPredicateFactory.withArgumentType(cu, 1, "java.lang.String"),
+            MethodCallPredicateFactory.withArgumentNodeType(1, StringLiteralExpr.class).negate(),
+            MethodCallPredicateFactory.withScreamingSnakeCaseVariableNameForArgument(1).negate());
 
-    private static class HeaderInjectionVisitor extends ModifierVisitor<FileWeavingContext> {
-    private final TypeLocator resolver;
-    private final List<HeaderSettingDetector> headerProtectors;
-
-    private HeaderInjectionVisitor(final CompilationUnit cu) {
-      this.resolver = TypeLocator.createDefault(cu);
-      this.headerProtectors = List.of(new J2EEHeaderSettingDetector());
-    }
-
-    @Override
-    public Visitable visit(final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
-      if (context.isLineIncluded(methodCallExpr)) {
-        for (HeaderSettingDetector detector : headerProtectors) {
-          detector.findHeaderSettingCall(methodCallExpr, resolver, context);
-        }
-      }
-      return super.visit(methodCallExpr, context);
-    }
-  }
-
-  interface HeaderSettingDetector {
-    void findHeaderSettingCall(
-        MethodCallExpr expressionStmt, TypeLocator resolver, FileWeavingContext context);
-  }
-
-  private static class J2EEHeaderSettingDetector implements HeaderSettingDetector {
-
-    @Override
-    public void findHeaderSettingCall(
-        final MethodCallExpr methodCallExpr,
-        final TypeLocator resolver,
-        final FileWeavingContext context) {
-      if ("setHeader".equals(methodCallExpr.getNameAsString())
-          && methodCallExpr.getArguments().size() == 2) {
-        Optional<Expression> scope = methodCallExpr.getScope();
-        if (scope.isPresent()) {
-          final Expression expression = scope.get();
-          final String typeName = resolver.locateType(expression);
-          if ("javax.servlet.http.HttpServletResponse".equals(typeName)) {
-            final Expression argument = methodCallExpr.getArgument(1);
-            if (!(argument instanceof StringLiteralExpr)) {
-              if (argument.isNameExpr() && !looksLikeConstant(argument.toString())) {
-                final MethodCallExpr stripNewlinesCall =
-                    new MethodCallExpr(callbackClass, "stripNewlines");
-                stripNewlinesCall.setArguments(NodeList.nodeList(argument));
-                methodCallExpr.setArguments(
-                    NodeList.nodeList(methodCallExpr.getArgument(0), stripNewlinesCall));
-                context.addWeave(
-                    Weave.from(methodCallExpr.getRange().get().begin.line, stripHeaderRuleId));
-              }
-            }
+    Transformer<MethodCallExpr, MethodCallExpr> transformer =
+        new Transformer<>() {
+          @Override
+          public TransformationResult<MethodCallExpr> transform(
+              final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
+            MethodCallExpr stripNewlinesCall = new MethodCallExpr(callbackClass, "stripNewlines");
+            Expression argument = methodCallExpr.getArgument(1);
+            stripNewlinesCall.setArguments(NodeList.nodeList(argument));
+            methodCallExpr.setArguments(
+                NodeList.nodeList(methodCallExpr.getArgument(0), stripNewlinesCall));
+            Weave weave = Weave.from(methodCallExpr.getRange().get().begin.line, stripHeaderRuleId);
+            return new TransformationResult<>(Optional.empty(), weave);
           }
-        }
-      }
-    }
+        };
 
-    private boolean looksLikeConstant(final String variableName) {
-      return commonConstantPattern.matcher(variableName).matches();
-    }
+    return new MethodCallTransformingModifierVisitor(cu, predicates, transformer);
   }
 
-  private static final Pattern commonConstantPattern = Pattern.compile("[A-Z_]{2,}");
+  @Override
+  public String ruleId() {
+    return stripHeaderRuleId;
+  }
+
   private static final NameExpr callbackClass = new NameExpr(HttpHeader.class.getName());
   private static final String stripHeaderRuleId = "pixee:java/strip-http-header";
 }

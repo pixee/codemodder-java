@@ -4,7 +4,6 @@ import io.pixee.codefixer.java.JspLineWeave;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.codehaus.plexus.util.StringUtils;
 
 /**

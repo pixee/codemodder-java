@@ -3,14 +3,11 @@ package io.pixee.codefixer.java.protections;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-
-import io.pixee.security.*;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.List;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 
 import io.pixee.codefixer.java.ChangedFile;
 import io.pixee.codefixer.java.FileBasedVisitor;
@@ -19,6 +16,11 @@ import io.pixee.codefixer.java.IncludesExcludes;
 import io.pixee.codefixer.java.SourceDirectory;
 import io.pixee.codefixer.java.SourceWeaver;
 import io.pixee.codefixer.java.VisitorFactory;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,7 +60,8 @@ public abstract class WeavingTests {
         SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
 
     var changedFile =
-        scanAndAssertNoErrorsWithOneFileChanged(analyzer, directory, visitorFactories, includesExcludes);
+        scanAndAssertNoErrorsWithOneFileChanged(
+            analyzer, directory, visitorFactories, includesExcludes);
     var actualContents =
         FileUtils.readFileToString(new File(changedFile.modifiedFile()), Charset.defaultCharset());
     var expectedContents = FileUtils.readFileToString(fixedFile, Charset.defaultCharset());
@@ -72,7 +75,8 @@ public abstract class WeavingTests {
     assertThat(actualContents, equalToIgnoringWhiteSpace(expectedContents));
 
     directory = SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToFixedFile));
-    scanAndAssertNoErrorsWithNoFilesChanged(analyzer, directory, visitorFactories, includesExcludes);
+    scanAndAssertNoErrorsWithNoFilesChanged(
+        analyzer, directory, visitorFactories, includesExcludes);
 
     return changedFile;
   }
@@ -89,10 +93,10 @@ public abstract class WeavingTests {
   }
 
   private static ChangedFile scanAndAssertNoErrorsWithOneFileChanged(
-          final SourceWeaver analyzer,
-          final SourceDirectory directory,
-          final List<VisitorFactory> visitorFactories,
-          final IncludesExcludes includesExcludes)
+      final SourceWeaver analyzer,
+      final SourceDirectory directory,
+      final List<VisitorFactory> visitorFactories,
+      final IncludesExcludes includesExcludes)
       throws IOException {
     var weave = analyzer.weave(List.of(directory), visitorFactories, includesExcludes);
     assertThat(weave, is(not(nullValue())));
@@ -115,16 +119,17 @@ public abstract class WeavingTests {
     var testCodeDir = new File(vulnerableFile.getParent());
     var directory =
         SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
-    scanAndAssertNoErrorsWithNoFilesChanged(analyzer, directory, visitorFactories, includesExcludes);
+    scanAndAssertNoErrorsWithNoFilesChanged(
+        analyzer, directory, visitorFactories, includesExcludes);
   }
 
   private static void scanAndAssertNoErrorsWithNoFilesChanged(
       final SourceWeaver analyzer,
       final SourceDirectory directory,
-      final List<VisitorFactory> visitorFactory,
+      final List<VisitorFactory> visitorFactories,
       final IncludesExcludes includesExcludes)
       throws IOException {
-    var weave = analyzer.weave(List.of(directory), visitorFactory, includesExcludes);
+    var weave = analyzer.weave(List.of(directory), visitorFactories, includesExcludes);
     assertThat(weave, is(not(nullValue())));
 
     assertThat(weave.unscannableFiles(), is(empty()));

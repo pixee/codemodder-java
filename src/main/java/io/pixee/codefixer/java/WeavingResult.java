@@ -4,9 +4,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * Represents the technical results of a scan.
- */
+/** Represents the technical results of a scan. */
 public interface WeavingResult {
 
   /** A collection of the changes we want to make. */
@@ -38,9 +36,7 @@ public interface WeavingResult {
     }
   }
 
-  /**
-   * A convenience method to return a weave that represents no results.
-   */
+  /** A convenience method to return a weave that represents no results. */
   static WeavingResult empty() {
     return createDefault(Collections.emptySet(), Collections.emptySet());
   }

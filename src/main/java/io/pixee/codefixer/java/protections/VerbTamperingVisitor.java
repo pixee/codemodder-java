@@ -1,7 +1,6 @@
 package io.pixee.codefixer.java.protections;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 

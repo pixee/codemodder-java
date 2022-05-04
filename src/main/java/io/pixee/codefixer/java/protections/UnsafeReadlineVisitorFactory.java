@@ -4,58 +4,57 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
-import com.github.javaparser.ast.visitor.Visitable;
-import io.pixee.security.*;
 import io.pixee.codefixer.java.FileWeavingContext;
-import io.pixee.codefixer.java.TypeLocator;
+import io.pixee.codefixer.java.MethodCallPredicateFactory;
+import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
+import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
-
+import io.pixee.security.*;
+import java.io.BufferedReader;
 import java.io.File;
-import java.util.Objects;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
+/**
+ * Prevents attacks whereby attackers can provide infinite data to a {@link
+ * BufferedReader#readLine()} consumer until it runs out of memory.
+ */
 public final class UnsafeReadlineVisitorFactory implements VisitorFactory {
 
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
-      final File file, CompilationUnit cu) {
-    return new UnsafeReadlineVisitor(cu);
-  }
+      final File file, final CompilationUnit cu) {
+    List<Predicate<MethodCallExpr>> predicates =
+        List.of(
+            MethodCallPredicateFactory.withName("readLine"),
+            MethodCallPredicateFactory.withArgumentCount(0),
+            MethodCallPredicateFactory.withScopeType(cu, "java.io.BufferedReader"),
+            MethodCallPredicateFactory.withScreamingSnakeCaseVariableNameForArgument(1).negate());
 
-    @Override
-    public String ruleId() {
-        return readlineRuleId;
-    }
-
-    private static class UnsafeReadlineVisitor extends ModifierVisitor<FileWeavingContext> {
-    private final CompilationUnit cu;
-
-    private UnsafeReadlineVisitor(final CompilationUnit cu) {
-      this.cu = Objects.requireNonNull(cu);
-    }
-
-    @Override
-    public Visitable visit(MethodCallExpr n, final FileWeavingContext context) {
-      if ("readLine".equals(n.getNameAsString())
-          && n.getScope().isPresent()
-          && context.isLineIncluded(n)) {
-        NodeList<Expression> arguments = n.getArguments();
-        if (arguments.size() == 0) {
-          Expression readerScope = n.getScope().get();
-          TypeLocator resolver = TypeLocator.createDefault(cu);
-          if ("java.io.BufferedReader".equals(resolver.locateType(readerScope))) {
+    Transformer<MethodCallExpr, MethodCallExpr> transformer =
+        new Transformer<>() {
+          @Override
+          public TransformationResult<MethodCallExpr> transform(
+              final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
+            Expression readerScope = methodCallExpr.getScope().get();
             MethodCallExpr safeExpression =
                 new MethodCallExpr(new NameExpr(SafeIO.class.getName()), "boundedReadLine");
             safeExpression.setArguments(
                 NodeList.nodeList(readerScope, new IntegerLiteralExpr(defaultLineMaximum)));
-            context.addWeave(Weave.from(n.getRange().get().begin.line, readlineRuleId));
-            n.getParentNode().get().replace(n, safeExpression);
-            n = safeExpression;
+            Weave weave = Weave.from(methodCallExpr.getRange().get().begin.line, readlineRuleId);
+            methodCallExpr.getParentNode().get().replace(methodCallExpr, safeExpression);
+            return new TransformationResult<>(Optional.of(safeExpression), weave);
           }
-        }
-      }
-      return super.visit(n, context);
-    }
+        };
+
+    return new MethodCallTransformingModifierVisitor(cu, predicates, transformer);
+  }
+
+  @Override
+  public String ruleId() {
+    return readlineRuleId;
   }
 
   private static final int defaultLineMaximum = 1_000_000; // 1 MB

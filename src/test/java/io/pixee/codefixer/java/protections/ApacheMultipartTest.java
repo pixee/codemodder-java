@@ -5,11 +5,12 @@ import static io.pixee.codefixer.java.protections.WeavingTests.assertJavaWeaveWo
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
-final class MultipartTest {
+final class ApacheMultipartTest {
+
   @Test
-  void it_sanitizes_multipart() throws IOException {
+  void it_sanitizes_apache_multipart() throws IOException {
     assertJavaWeaveWorkedAndWontReweave(
-        "src/test/java/com/acme/testcode/MultipartVulnerability.java",
-        new MultipartVisitorFactory());
+        "src/test/java/com/acme/testcode/ApacheMultipartVulnerability.java",
+        new ApacheMultipartVisitorFactory());
   }
 }

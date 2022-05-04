@@ -50,7 +50,9 @@ public interface SourceWeaver {
 
     @Override
     public @NotNull WeavingResult weave(
-        final List<SourceDirectory> javaSourceDirectories, final List<VisitorFactory> visitorFactories, final IncludesExcludes includesExcludes)
+        final List<SourceDirectory> javaSourceDirectories,
+        final List<VisitorFactory> visitorFactories,
+        final IncludesExcludes includesExcludes)
         throws IOException {
       /*
        * Create the parser which can resolve symbols across all the Java source directories.
@@ -79,7 +81,8 @@ public interface SourceWeaver {
             LOG.info("Scanned {} files", filesScanned);
           }
           try {
-            final ChangedFile changedFile = scanIndividualJavaFile(javaParser, javaFile, visitorFactories, includesExcludes);
+            final ChangedFile changedFile =
+                scanIndividualJavaFile(javaParser, javaFile, visitorFactories, includesExcludes);
             if (changedFile != null) {
               changedFiles.add(changedFile);
             }
@@ -121,7 +124,10 @@ public interface SourceWeaver {
 
     /** For each type in a Java source file, we scan through the code. */
     private ChangedFile scanType(
-        final File javaFile, final CompilationUnit cu, final List<VisitorFactory> visitorFactories, final IncludesExcludes includesExcludes)
+        final File javaFile,
+        final CompilationUnit cu,
+        final List<VisitorFactory> visitorFactories,
+        final IncludesExcludes includesExcludes)
         throws IOException {
 
       final FileWeavingContext context =

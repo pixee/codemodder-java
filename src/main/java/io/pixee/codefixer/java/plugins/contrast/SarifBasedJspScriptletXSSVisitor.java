@@ -17,7 +17,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -109,7 +108,8 @@ public final class SarifBasedJspScriptletXSSVisitor implements FileBasedVisitor 
       }
       if (jspOutputMethod != null) {
         try {
-          JspLineWeave lineWeave = jspOutputMethod.weaveLine(line, ContrastScanPlugin.ruleBase + result.getRuleId());
+          JspLineWeave lineWeave =
+              jspOutputMethod.weaveLine(line, ContrastScanPlugin.ruleBase + result.getRuleId());
           LOG.info("Rebuilt JSP line for {}", correlationId);
           return Optional.of(lineWeave);
         } catch (UnsupportedOperationException e) {

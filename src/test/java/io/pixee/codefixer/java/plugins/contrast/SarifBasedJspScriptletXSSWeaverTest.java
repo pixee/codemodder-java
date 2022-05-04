@@ -9,7 +9,6 @@ import io.pixee.codefixer.java.Weave;
 import io.pixee.codefixer.java.protections.WeavingTests;
 import java.io.IOException;
 import java.util.List;
-
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +17,8 @@ final class SarifBasedJspScriptletXSSWeaverTest {
   @Test
   void it_weaves_supported_lines_and_avoids_unsupported_lines() throws IOException {
     List<Result> results = buildBigTestResults();
-    SarifBasedJspScriptletXSSVisitor weaver = new SarifBasedJspScriptletXSSVisitor(results, "reflected-xss");
+    SarifBasedJspScriptletXSSVisitor weaver =
+        new SarifBasedJspScriptletXSSVisitor(results, "reflected-xss");
     ChangedFile changedFile =
         WeavingTests.assertFileWeaveWorkedAndReweave("src/test/resources/jsps/sarif.jsp", weaver);
     List<Weave> weaves = changedFile.weaves();
@@ -65,7 +65,8 @@ final class SarifBasedJspScriptletXSSWeaverTest {
   void it_adds_header_for_el_when_no_functions_defined() throws IOException {
     List<Result> results =
         List.of(buildSimpleResult("/el_but_no_taglib.jsp", 3, "ignored", "stored-xss"));
-    SarifBasedJspScriptletXSSVisitor weaver = new SarifBasedJspScriptletXSSVisitor(results, "stored-xss");
+    SarifBasedJspScriptletXSSVisitor weaver =
+        new SarifBasedJspScriptletXSSVisitor(results, "stored-xss");
     ChangedFile changedFile =
         WeavingTests.assertFileWeaveWorkedAndReweave(
             "src/test/resources/jsps/el_but_no_taglib.jsp", weaver);

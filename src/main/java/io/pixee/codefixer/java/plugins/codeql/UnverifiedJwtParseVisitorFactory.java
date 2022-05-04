@@ -5,14 +5,9 @@ import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
-import com.google.common.annotations.VisibleForTesting;
 import io.pixee.codefixer.java.DoNothingVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.VisitorFactory;
@@ -24,7 +19,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,9 +28,7 @@ final class UnverifiedJwtParseVisitorFactory implements VisitorFactory {
   /** The locations of each result. */
   private final List<PhysicalLocation> locations;
 
-  /**
-   * The root of the repository.
-   */
+  /** The root of the repository. */
   private final String repositoryRootPath;
 
   UnverifiedJwtParseVisitorFactory(final File repositoryRoot, final Set<Result> results) {
@@ -68,12 +60,12 @@ final class UnverifiedJwtParseVisitorFactory implements VisitorFactory {
     return new DoNothingVisitor();
   }
 
-    @Override
-    public String ruleId() {
-        return missingJwtSignatureCheckRuleId;
-    }
+  @Override
+  public String ruleId() {
+    return missingJwtSignatureCheckRuleId;
+  }
 
-    private List<PhysicalLocation> getAllLocationsWithSameFile(final PhysicalLocation location) {
+  private List<PhysicalLocation> getAllLocationsWithSameFile(final PhysicalLocation location) {
     return locations.stream()
         .filter(
             loc ->
@@ -119,10 +111,9 @@ final class UnverifiedJwtParseVisitorFactory implements VisitorFactory {
       }
       return methodCallExpr;
     }
-
-
   }
 
-  private static final String missingJwtSignatureCheckRuleId = "codeql:java/missing-jwt-signature-check";
+  private static final String missingJwtSignatureCheckRuleId =
+      "codeql:java/missing-jwt-signature-check";
   private static final Logger LOG = LogManager.getLogger(UnverifiedJwtParseVisitorFactory.class);
 }

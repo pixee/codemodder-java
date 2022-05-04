@@ -15,7 +15,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.BeforeAll;
@@ -105,8 +104,7 @@ final class WebGoat820Test {
     // and inject the correct pom
     var pomPath = "webgoat-lessons$insecure-deserialization$pom.xml".replace("$", File.separator);
     assertThat(
-        report.getResults().stream()
-            .anyMatch(changedFile -> changedFile.getPath().equals(pomPath)),
+        report.getResults().stream().anyMatch(changedFile -> changedFile.getPath().equals(pomPath)),
         is(true));
   }
 }

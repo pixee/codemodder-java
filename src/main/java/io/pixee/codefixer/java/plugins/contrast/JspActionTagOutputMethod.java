@@ -1,7 +1,6 @@
 package io.pixee.codefixer.java.plugins.contrast;
 
 import io.pixee.codefixer.java.JspLineWeave;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -17,18 +17,18 @@ public final class ASTs {
 
   /**
    * Searches up the AST to find the method body from the given {@link Node}. There could be orphan
-   * statements I guess in stray Java files, so return null if we ever run into that? Not sure how
-   * expected that will be, so not sure if I should make it an exception-based pattern.
+   * statements like variable declarations outside a constructor.
    */
-  public static MethodDeclaration findMethodBodyFrom(Node node) {
+  public static Optional<MethodDeclaration> findMethodBodyFrom(Node node) {
     while (node.getParentNode().isPresent()
         && !(node.getParentNode().get() instanceof MethodDeclaration)) {
       node = node.getParentNode().get();
     }
-    var methodDeclarationOrNull = node.getParentNode();
-    return (MethodDeclaration)
-        methodDeclarationOrNull.orElseThrow(
-            () -> new IllegalArgumentException("no method body available"));
+    var methodDeclarationOrNullRef = node.getParentNode();
+    if (methodDeclarationOrNullRef.isPresent()) {
+      return Optional.of((MethodDeclaration) methodDeclarationOrNullRef.get());
+    }
+    return Optional.empty();
   }
 
   /**
@@ -118,9 +118,8 @@ public final class ASTs {
   }
 
   /** Return a string description of the type and method that contain this {@link Node}. */
-  public static String describeTypeAndMethod(final Node node) {
-    var method = findMethodBodyFrom(node);
-    var cu = findCompilationUnitFrom(method);
+  public static String describeType(final Node node) {
+    var cu = findCompilationUnitFrom(node);
     var filePackage = cu.getPackageDeclaration().orElse(new PackageDeclaration());
     var packageName = filePackage.getNameAsString();
     var type = cu.getPrimaryTypeName().orElse("unknown_type");

@@ -3,9 +3,7 @@ package io.pixee.codefixer.java;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-/**
- * Describes the 'paths' section of the YAML configuration.
- */
+/** Describes the 'paths' section of the YAML configuration. */
 public class PathConfiguration {
 
   @JsonProperty("includes")

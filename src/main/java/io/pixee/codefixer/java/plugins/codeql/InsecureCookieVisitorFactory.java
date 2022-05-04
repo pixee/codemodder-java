@@ -60,12 +60,12 @@ final class InsecureCookieVisitorFactory implements VisitorFactory {
     return new DoNothingVisitor();
   }
 
-    @Override
-    public String ruleId() {
-        return insecureCookieRuleId;
-    }
+  @Override
+  public String ruleId() {
+    return insecureCookieRuleId;
+  }
 
-    private List<PhysicalLocation> getAllLocationsWithSameFile(final PhysicalLocation location) {
+  private List<PhysicalLocation> getAllLocationsWithSameFile(final PhysicalLocation location) {
     return locations.stream()
         .filter(
             loc ->

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +45,8 @@ final class ContrastScanPluginTest {
 
   @Test
   void it_creates_correct_number_of_factories() {
-    List<VisitorFactory> factories = plugin.getJavaVisitorFactoriesFor(
+    List<VisitorFactory> factories =
+        plugin.getJavaVisitorFactoriesFor(
             new File("."),
             runs.get(0),
             RuleContext.of(DefaultRuleSetting.ENABLED, Collections.emptyList()));
@@ -67,11 +67,12 @@ final class ContrastScanPluginTest {
     Set<Map.Entry<String, Set<Result>>> reflectedResultsPerFile =
         plugin.getRuleEntries(results, List.of("reflected-xss"));
     Set<Map.Entry<String, Set<Result>>> storedResultsPerFile =
-            plugin.getRuleEntries(results, List.of("stored-xss"));
+        plugin.getRuleEntries(results, List.of("stored-xss"));
 
     assertThat(filesWithXss.size(), equalTo(23));
     assertThat(reflectedResultsPerFile.size(), equalTo(20));
     assertThat(storedResultsPerFile.size(), equalTo(10));
-    assertThat(factories.size(), equalTo(reflectedResultsPerFile.size() + storedResultsPerFile.size()));
+    assertThat(
+        factories.size(), equalTo(reflectedResultsPerFile.size() + storedResultsPerFile.size()));
   }
 }
