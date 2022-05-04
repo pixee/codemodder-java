@@ -3,13 +3,17 @@ package io.pixee.codefixer.java;
 import static java.util.Objects.requireNonNull;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
+
+import io.pixee.codefixer.java.protections.ASTs;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -89,14 +93,51 @@ public interface TypeLocator {
 
     private final TypeLocator locator;
     private final Map<Expression, String> expressionCache;
+    private MethodDeclaration lastMethod;
 
     CachingTypeLocator(final TypeLocator locator) {
       this.locator = requireNonNull(locator);
       this.expressionCache = new HashMap<>();
+      this.lastMethod = null;
     }
 
+    /**
+     * This does a little dark magic here that isn't obvious from the contract of the API. Right now our cache is scoped
+     * to the entire {@link CompilationUnit}, but unfortunately you can have two different methods that have a similar
+     * named variable that have different types. In fact our test case code for {@link io.pixee.codefixer.java.protections.XMLDecoderVisitorFactory}
+     * tests this scenario. Basically, this method resets its own cache every time it "senses" we have moved from one
+     * method to another.
+     *
+     * This is an incomplete approach because the problem isn't just similarly named variables in different methods. You
+     * can imagine two code scopes within a single method that does the same thing, e.g.:
+     *
+     * <code>
+     *     public void foo() {
+     *         {
+     *             InputStream is = ...;
+     *             doSomethingToInputStream(is);
+     *         }
+     *         {
+     *             InputSource is = ...;
+     *             doSomethingToInputSource(is);
+     *         }
+     *     }
+     *
+     * </code>
+     *
+     * However we are in enough of a rare situation here we can kick the can down the road. Eventually we probably need
+     * a listener in the visitor that can tell us when and what to evict from the cache.
+     */
     @Override
     public String locateType(final Expression expr) {
+      Optional<MethodDeclaration> containingMethodRef = ASTs.findMethodBodyFrom(expr);
+      if(lastMethod == null && containingMethodRef.isPresent()) {
+        lastMethod = containingMethodRef.get();
+      } else if(lastMethod != null && containingMethodRef.isPresent()) {
+        if(lastMethod != containingMethodRef.get()) {
+          resetCache();
+        }
+      }
       String type = expressionCache.get(expr);
       if (type == null) {
         type = locator.locateType(expr);
@@ -105,6 +146,10 @@ public interface TypeLocator {
         }
       }
       return type;
+    }
+
+    private void resetCache() {
+      expressionCache.clear();
     }
   }
 

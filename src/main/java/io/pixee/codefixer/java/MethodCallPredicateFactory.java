@@ -195,7 +195,7 @@ public interface MethodCallPredicateFactory {
 
     final class MethodPreviouslyCalledOnScope implements Predicate<MethodCallExpr> {
 
-        private String methodName;
+        private final String methodName;
 
         MethodPreviouslyCalledOnScope(final String methodName) {
             this.methodName = Objects.requireNonNull(methodName);

@@ -1,5 +1,9 @@
 package io.pixee.codefixer.java;
 
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
@@ -14,6 +18,10 @@ public interface ObjectCreationPredicateFactory {
 
     static Predicate<ObjectCreationExpr> withType(final String type) {
         return new FullyQualifiedNamePredicate(type);
+    }
+
+    static Predicate<ObjectCreationExpr> withArgumentType(final CompilationUnit cu, final int argumentIndex, final String name) {
+        return new ArgumentTypePredicate(cu, argumentIndex, name);
     }
 
     static Predicate<ObjectCreationExpr> withArgumentCount(final int argumentCount) {
@@ -49,6 +57,33 @@ public interface ObjectCreationPredicateFactory {
         @Override
         public boolean test(final ObjectCreationExpr objectCreationExpr) {
             return objectCreationExpr.getArguments().size() == argumentCount;
+        }
+    }
+
+    final class ArgumentTypePredicate implements Predicate<ObjectCreationExpr> {
+
+        private final String type;
+        private final int argumentIndex;
+        private final TypeLocator typeLocator;
+
+        ArgumentTypePredicate(final CompilationUnit cu, final int argumentIndex, final String type) {
+            if(argumentIndex < 0) {
+                throw new IllegalArgumentException("must be non-negative");
+            }
+            this.argumentIndex = argumentIndex;
+            this.type = Objects.requireNonNull(type);
+            this.typeLocator = TypeLocator.createDefault(cu);
+        }
+
+        @Override
+        public boolean test(final ObjectCreationExpr objectCreationExpr) {
+            NodeList<Expression> arguments = objectCreationExpr.getArguments();
+            if(argumentIndex < arguments.size()) {
+                Expression expression = arguments.get(argumentIndex);
+                String type = typeLocator.locateType(expression);
+                return this.type.equals(type);
+            }
+            return false;
         }
     }
 }
