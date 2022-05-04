@@ -1,9 +1,10 @@
 package io.pixee.codefixer.java;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
@@ -28,6 +29,10 @@ public interface ObjectCreationPredicateFactory {
         return new ArgumentCountPredicate(argumentCount);
     }
 
+    static Predicate<ObjectCreationExpr> withParentType(Class<? extends Node> type) {
+        return new ParentNodeTypePredicate(type);
+    }
+
     final class FullyQualifiedNamePredicate implements Predicate<ObjectCreationExpr> {
 
         private final String type;
@@ -40,6 +45,24 @@ public interface ObjectCreationPredicateFactory {
         public boolean test(final ObjectCreationExpr objectCreationExpr) {
             ClassOrInterfaceType type = objectCreationExpr.getType();
             return this.type.equals(type.getNameAsString());
+        }
+    }
+
+    final class ParentNodeTypePredicate implements Predicate<ObjectCreationExpr> {
+
+        private final Class<? extends Node> type;
+
+        ParentNodeTypePredicate(final Class<? extends Node> type) {
+            this.type = Objects.requireNonNull(type);
+        }
+
+        @Override
+        public boolean test(final ObjectCreationExpr objectCreationExpr) {
+            if(objectCreationExpr.getParentNode().isPresent()) {
+                Node parent = objectCreationExpr.getParentNode().get();
+                return this.type.isAssignableFrom(parent.getClass());
+            }
+            return false;
         }
     }
 

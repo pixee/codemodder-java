@@ -18,6 +18,7 @@ import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -45,7 +46,7 @@ abstract class SSLProtocolsVisitorFactory implements VisitorFactory {
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, final CompilationUnit cu) {
 
-    Set<Predicate<MethodCallExpr>> predicates = Set.of(
+    List<Predicate<MethodCallExpr>> predicates = List.of(
             MethodCallPredicateFactory.withName(methodName),
             MethodCallPredicateFactory.withArgumentCount(1),
             MethodCallPredicateFactory.withScopeType(cu, typeName).or(MethodCallPredicateFactory.withScopeType(cu, fullyQualifiedTypeName)),

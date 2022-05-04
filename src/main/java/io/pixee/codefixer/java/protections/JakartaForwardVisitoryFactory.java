@@ -14,6 +14,7 @@ import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -26,7 +27,7 @@ public final class JakartaForwardVisitoryFactory implements VisitorFactory {
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, CompilationUnit cu) {
-    Set<Predicate<MethodCallExpr>> predicates = Set.of(
+    List<Predicate<MethodCallExpr>> predicates = List.of(
             MethodCallPredicateFactory.withName("getRequestDispatcher"),
             MethodCallPredicateFactory.withArgumentCount(1),
             MethodCallPredicateFactory.withArgumentCodeContains(0, "validate").negate(),

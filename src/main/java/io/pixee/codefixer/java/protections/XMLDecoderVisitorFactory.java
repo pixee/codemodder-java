@@ -15,8 +15,8 @@ import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -28,7 +28,7 @@ public final class XMLDecoderVisitorFactory implements VisitorFactory {
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, final CompilationUnit cu) {
-    Set<Predicate<ObjectCreationExpr>> predicates = Set.of(
+    List<Predicate<ObjectCreationExpr>> predicates = List.of(
             ObjectCreationPredicateFactory.withArgumentCount(0).negate(),
             ObjectCreationPredicateFactory.withArgumentType(cu, 0, "java.io.InputStream"),
             ObjectCreationPredicateFactory.withType("XMLDecoder").or(ObjectCreationPredicateFactory.withType("java.beans.XMLDecoder"))

@@ -8,6 +8,7 @@ import io.pixee.codefixer.java.protections.TransformationResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -19,10 +20,10 @@ import java.util.function.Predicate;
  */
 public class MethodCallTransformingModifierVisitor extends ModifierVisitor<FileWeavingContext> {
 
-    private final Set<Predicate<MethodCallExpr>> predicates;
+    private final List<Predicate<MethodCallExpr>> predicates;
     private final Transformer<MethodCallExpr> transformer;
 
-    public MethodCallTransformingModifierVisitor(final CompilationUnit cu, final Set<Predicate<MethodCallExpr>> predicates, final Transformer<MethodCallExpr> transformer) {
+    public MethodCallTransformingModifierVisitor(final CompilationUnit cu, final List<Predicate<MethodCallExpr>> predicates, final Transformer<MethodCallExpr> transformer) {
         this.predicates = Objects.requireNonNull(predicates);
         this.transformer = Objects.requireNonNull(transformer);
     }

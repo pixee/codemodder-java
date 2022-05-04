@@ -14,6 +14,7 @@ import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -46,7 +47,7 @@ public final class SSLContextGetInstanceVisitorFactory implements VisitorFactory
       }
     };
 
-    Set<Predicate<MethodCallExpr>> predicates = Set.of(
+    List<Predicate<MethodCallExpr>> predicates = List.of(
             MethodCallPredicateFactory.withName("getInstance"),
             MethodCallPredicateFactory.withArgumentCount(1),
             MethodCallPredicateFactory.withScopeType(cu, "javax.net.ssl.SSLContext").or(MethodCallPredicateFactory.withScopeType(cu, "SSLContext")),

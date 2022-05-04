@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.ObjectInputStream;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -39,7 +40,7 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
   @Override
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
           final File file, CompilationUnit cu) {
-    Set<Predicate<MethodCallExpr>> predicates = Set.of(
+    List<Predicate<MethodCallExpr>> predicates = List.of(
             MethodCallPredicateFactory.withName("readObject"),
             MethodCallPredicateFactory.withArgumentCount(0),
             MethodCallPredicateFactory.withScopeType(cu, "java.io.ObjectInputStream"),

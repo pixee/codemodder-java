@@ -9,6 +9,7 @@ import io.pixee.codefixer.java.protections.TransformationResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -20,10 +21,10 @@ import java.util.function.Predicate;
  */
 public class ObjectCreationTransformingModifierVisitor extends ModifierVisitor<FileWeavingContext> {
 
-    private final Set<Predicate<ObjectCreationExpr>> predicates;
+    private final List<Predicate<ObjectCreationExpr>> predicates;
     private final Transformer<ObjectCreationExpr> transformer;
 
-    public ObjectCreationTransformingModifierVisitor(final CompilationUnit cu, final Set<Predicate<ObjectCreationExpr>> predicates, final Transformer<ObjectCreationExpr> transformer) {
+    public ObjectCreationTransformingModifierVisitor(final CompilationUnit cu, final List<Predicate<ObjectCreationExpr>> predicates, final Transformer<ObjectCreationExpr> transformer) {
         this.predicates = Objects.requireNonNull(predicates);
         this.transformer = Objects.requireNonNull(transformer);
     }
