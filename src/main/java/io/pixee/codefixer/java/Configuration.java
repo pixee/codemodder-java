@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 
 /** Describes the root of the YAML configuration. */
 public class Configuration {
@@ -17,11 +18,11 @@ public class Configuration {
   @JsonProperty("paths")
   private PathConfiguration paths;
 
-  public RuleConfiguration getRules() {
+  public @NotNull RuleConfiguration getRules() {
     return rules != null ? rules : defaultRuleConfiguration;
   }
 
-  public PathConfiguration getPaths() {
+  public @NotNull PathConfiguration getPaths() {
     return paths != null ? paths : defaultPathConfiguration;
   }
 
