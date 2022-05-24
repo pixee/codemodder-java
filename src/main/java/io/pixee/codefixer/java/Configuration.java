@@ -18,11 +18,11 @@ public class Configuration {
   private PathConfiguration paths;
 
   public RuleConfiguration getRules() {
-    return rules;
+    return rules != null ? rules : defaultRuleConfiguration;
   }
 
   public PathConfiguration getPaths() {
-    return paths;
+    return paths != null ? paths : defaultPathConfiguration;
   }
 
   public String getVersion() {
@@ -37,4 +37,7 @@ public class Configuration {
   public static Configuration fromString(final String yaml) throws IOException {
     return new ObjectMapper(new YAMLFactory()).readValue(yaml, Configuration.class);
   }
+
+  private static final RuleConfiguration defaultRuleConfiguration = new RuleConfiguration();
+  private static final PathConfiguration defaultPathConfiguration = new PathConfiguration();
 }
