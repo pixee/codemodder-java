@@ -37,5 +37,5 @@ public final class JspScriptletXSSVisitor extends RegexTextVisitor {
       Pattern.compile(
           "<%(\\s*)=(\\s*)request(\\s*).(\\s*)get((Header|Parameter)(\\s*)\\((\\s*)\".*\"(\\s*)\\)|QueryString\\((\\s*)\\))(\\s*)%>",
           Pattern.MULTILINE);
-  @VisibleForTesting static final String xssJspScriptletRuleId = "pixee:java/xss-jsp-scriptlet";
+  @VisibleForTesting static final String xssJspScriptletRuleId = "pixee:java/encode-jsp-scriptlet";
 }

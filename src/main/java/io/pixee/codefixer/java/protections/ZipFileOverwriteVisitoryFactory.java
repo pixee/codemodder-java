@@ -54,5 +54,5 @@ public final class ZipFileOverwriteVisitoryFactory implements VisitorFactory {
     return zipHardeningRuleId;
   }
 
-  private static final String zipHardeningRuleId = "pixee:java/zip-hardening";
+  private static final String zipHardeningRuleId = "pixee:java/harden-zip-entry-paths";
 }

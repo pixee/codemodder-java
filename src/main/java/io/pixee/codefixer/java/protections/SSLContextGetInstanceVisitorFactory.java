@@ -81,7 +81,6 @@ public final class SSLContextGetInstanceVisitorFactory implements VisitorFactory
     return tlsVersionUpgradeRuleId;
   }
 
-  private static final String tlsVersionUpgradeRuleId =
-      "pixee:java/tls-version-upgrade-sslcontext-getinstance";
+  private static final String tlsVersionUpgradeRuleId = "pixee:java/upgrade-sslcontext-tls";
   private static final String safeTlsVersion = "TLSv1.2";
 }

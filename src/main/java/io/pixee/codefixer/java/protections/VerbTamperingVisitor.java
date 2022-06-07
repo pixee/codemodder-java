@@ -28,5 +28,5 @@ public final class VerbTamperingVisitor extends RegexTextVisitor {
   private static final Pattern httpMethod =
       Pattern.compile(
           "<http-method(\\s*)>[a-zA-Z\\s*]+</http-method>", Pattern.MULTILINE | Pattern.DOTALL);
-  @VisibleForTesting static final String verbTamperingRuleId = "pixee:java/verb-tampering-jakarta";
+  @VisibleForTesting static final String verbTamperingRuleId = "pixee:java/fix-verb-tampering";
 }

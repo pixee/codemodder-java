@@ -58,5 +58,5 @@ public final class HeaderInjectionVisitorFactory implements VisitorFactory {
   }
 
   private static final NameExpr callbackClass = new NameExpr(HttpHeader.class.getName());
-  private static final String stripHeaderRuleId = "pixee:java/strip-http-header";
+  private static final String stripHeaderRuleId = "pixee:java/strip-http-header-newlines";
 }

@@ -60,5 +60,5 @@ public final class XMLDecoderVisitorFactory implements VisitorFactory {
     return hardenXmlDecoderRuleId;
   }
 
-  private static final String hardenXmlDecoderRuleId = "pixee:java/harden-xmldecoder";
+  private static final String hardenXmlDecoderRuleId = "pixee:java/harden-xmldecoder-stream";
 }

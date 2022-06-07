@@ -59,5 +59,5 @@ public final class PredictableSeedVisitorFactory implements VisitorFactory {
     return unpredictableSeedRuleId;
   }
 
-  private static final String unpredictableSeedRuleId = "pixee:java/unpredictable-seed";
+  private static final String unpredictableSeedRuleId = "pixee:java/make-prng-seed-unpredictable";
 }

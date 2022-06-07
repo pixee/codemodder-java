@@ -93,5 +93,5 @@ public final class SSRFVisitorFactory implements VisitorFactory {
     }
   }
 
-  private static final String ssrfRuleId = "pixee:java/ssrf-sandboxed-url-creation";
+  private static final String ssrfRuleId = "pixee:java/sandbox-url-creation";
 }

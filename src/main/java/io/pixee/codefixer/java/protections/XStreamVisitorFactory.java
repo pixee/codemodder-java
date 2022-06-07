@@ -126,5 +126,5 @@ public final class XStreamVisitorFactory implements VisitorFactory {
           + "}"
           + "}";
 
-  private static final String xstreamConverterRuleId = "pixee:java/xstream-harden-converter";
+  private static final String xstreamConverterRuleId = "pixee:java/harden-xstream";
 }

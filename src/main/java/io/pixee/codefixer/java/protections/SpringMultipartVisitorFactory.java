@@ -63,5 +63,5 @@ public final class SpringMultipartVisitorFactory implements VisitorFactory {
   }
 
   private static final String springMultipartFilenameSanitizerRuleId =
-      "pixee:java/spring-multipart-filename-sanitizer";
+      "pixee:java/sanitize-spring-multipart-filename";
 }

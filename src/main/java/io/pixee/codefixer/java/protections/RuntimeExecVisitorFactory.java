@@ -77,5 +77,5 @@ public final class RuntimeExecVisitorFactory implements VisitorFactory {
     return hardenRuntimeExecRuleId;
   }
 
-  private static final String hardenRuntimeExecRuleId = "pixee:java/harden-runtime-exec";
+  private static final String hardenRuntimeExecRuleId = "pixee:java/harden-process-creation";
 }

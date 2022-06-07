@@ -15,6 +15,5 @@ public final class SSLEngineSetEnabledProtocolsVisitorFactory extends SSLProtoco
     return tlsVersionUpgradeRuleId;
   }
 
-  private static final String tlsVersionUpgradeRuleId =
-      "pixee:java/tls-version-upgrade-sslengine-setenabledprotocols";
+  private static final String tlsVersionUpgradeRuleId = "pixee:java/upgrade-sslengine-tls";
 }

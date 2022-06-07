@@ -15,6 +15,5 @@ public final class SSLSocketSetEnabledProtocolsVisitorFactory extends SSLProtoco
     return tlsVersionUpgradeRuleId;
   }
 
-  private static final String tlsVersionUpgradeRuleId =
-      "pixee:java/tls-version-upgrade-sslsocket-setenabledprotocols";
+  private static final String tlsVersionUpgradeRuleId = "pixee:java/upgrade-sslsocket-tls";
 }

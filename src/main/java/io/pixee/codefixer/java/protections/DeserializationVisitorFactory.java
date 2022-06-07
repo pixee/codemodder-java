@@ -207,5 +207,5 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
     return deserializationRuleId;
   }
 
-  private static final String deserializationRuleId = "pixee:java/deserialization-java-readObject";
+  private static final String deserializationRuleId = "pixee:java/harden-java-deserialization";
 }

@@ -58,5 +58,5 @@ public final class UnsafeReadlineVisitorFactory implements VisitorFactory {
   }
 
   private static final int defaultLineMaximum = 1_000_000; // 1 MB
-  private static final String readlineRuleId = "pixee:java/readline";
+  private static final String readlineRuleId = "pixee:java/limit-readline";
 }

@@ -15,6 +15,5 @@ public final class SSLParametersSetProtocolsVisitorFactory extends SSLProtocolsV
     return tlsVersionUpgradeRuleId;
   }
 
-  private static final String tlsVersionUpgradeRuleId =
-      "pixee:java/tls-version-upgrade-sslparameters-setprotocols";
+  private static final String tlsVersionUpgradeRuleId = "pixee:java/upgrade-sslparameters-tls";
 }

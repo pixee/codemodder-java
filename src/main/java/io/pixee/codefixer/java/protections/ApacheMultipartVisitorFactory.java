@@ -65,5 +65,5 @@ public final class ApacheMultipartVisitorFactory implements VisitorFactory {
   }
 
   private static final String apacheMultipartFilenameSanitizerRuleId =
-      "pixee:java/apache-multipart-filename-sanitizer";
+      "pixee:java/sanitize-apache-multipart-filename";
 }
