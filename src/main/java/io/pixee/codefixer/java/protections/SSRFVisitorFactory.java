@@ -51,7 +51,7 @@ public final class SSRFVisitorFactory implements VisitorFactory {
                *
                * With:
                *
-               * URL u = io.pixee.security.Urls.create(foo, io.pixee.security.SSRF.HTTP_PROTOCOLS, io.pixee.security.HostValidator.ALLOW_ALL)
+               * URL u = io.pixee.security.Urls.create(foo, io.pixee.security.Urls.HTTP_PROTOCOLS, io.pixee.security.HostValidator.ALLOW_ALL)
                */
               FieldAccessExpr httpProtocolsExpr = new FieldAccessExpr();
               httpProtocolsExpr.setScope(new NameExpr(Urls.class.getCanonicalName()));

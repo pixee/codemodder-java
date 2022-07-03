@@ -6,7 +6,7 @@ GIVEN METHOD_CALL $createUrl WHERE
   }
 
 TRANSFORM
-  $createUrl.arguments.insert(SafeURL.DENY_COMMON_INFRASTRUCTURE_TARGETS)
-  $createUrl.arguments.insert(SafeURL.HTTP_PROTOCOLS)
-  METHOD_CALL safeCreateUrl := io.pixee.SSRF.createSafeUrl($createUrl.arguments)
+  $createUrl.arguments.insert(Urls.DENY_COMMON_INFRASTRUCTURE_TARGETS)
+  $createUrl.arguments.insert(Urls.HTTP_PROTOCOLS)
+  METHOD_CALL safeCreateUrl := io.pixee.security.Urls.create($createUrl.arguments)
   RETURN safeCreateUrl
