@@ -41,8 +41,8 @@ public final class XMLDecoderVisitorFactory implements VisitorFactory {
               final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
             MethodCallExpr safeExpr =
                 new MethodCallExpr(
-                    new NameExpr(io.pixee.security.SafeIO.class.getName()),
-                    "toSafeXmlDecoderInputStream");
+                    new NameExpr(io.pixee.security.XMLDecoderSecurity.class.getName()),
+                    "hardenStream");
             final Expression firstArgument = objectCreationExpr.getArgument(0);
             safeExpr.setArguments(NodeList.nodeList(firstArgument));
             objectCreationExpr.setArgument(0, safeExpr);

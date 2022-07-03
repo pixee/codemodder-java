@@ -13,7 +13,7 @@ import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
-import io.pixee.security.HttpHeader;
+import io.pixee.security.Newlines;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +39,7 @@ public final class HeaderInjectionVisitorFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
-            MethodCallExpr stripNewlinesCall = new MethodCallExpr(callbackClass, "stripNewlines");
+            MethodCallExpr stripNewlinesCall = new MethodCallExpr(callbackClass, "stripAll");
             Expression argument = methodCallExpr.getArgument(1);
             stripNewlinesCall.setArguments(NodeList.nodeList(argument));
             methodCallExpr.setArguments(
@@ -57,6 +57,6 @@ public final class HeaderInjectionVisitorFactory implements VisitorFactory {
     return stripHeaderRuleId;
   }
 
-  private static final NameExpr callbackClass = new NameExpr(HttpHeader.class.getName());
+  private static final NameExpr callbackClass = new NameExpr(Newlines.class.getName());
   private static final String stripHeaderRuleId = "pixee:java/strip-http-header-newlines";
 }

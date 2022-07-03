@@ -18,7 +18,7 @@ import io.pixee.codefixer.java.TransformationException;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
-import io.pixee.security.Deserialization;
+import io.pixee.security.ObjectInputFilters;
 import java.io.File;
 import java.io.ObjectInputStream;
 import java.util.List;
@@ -144,12 +144,12 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
 
           /**
            * Generates an expression to invoke {@link
-           * io.pixee.security.Deserialization#enableObjectFilterIfUnprotected(ObjectInputStream)}
+           * io.pixee.security.ObjectInputFilters#enableObjectFilterIfUnprotected(ObjectInputStream)}
            * on the original scope (the {@link ObjectInputStream}).
            */
           private Statement generateFilterHardeningStatement(final Expression originalScope) {
             // this statement is the callback to our hardening code
-            var callbackClass = new NameExpr(Deserialization.class.getName());
+            var callbackClass = new NameExpr(ObjectInputFilters.class.getName());
             var hardenStatement =
                 new MethodCallExpr(callbackClass, "enableObjectFilterIfUnprotected");
             hardenStatement.addArgument(originalScope);

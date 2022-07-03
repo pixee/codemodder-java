@@ -40,7 +40,7 @@ public final class UnsafeReadlineVisitorFactory implements VisitorFactory {
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
             Expression readerScope = methodCallExpr.getScope().get();
             MethodCallExpr safeExpression =
-                new MethodCallExpr(new NameExpr(SafeIO.class.getName()), "boundedReadLine");
+                new MethodCallExpr(new NameExpr(BoundedLineReader.class.getName()), "readLine");
             safeExpression.setArguments(
                 NodeList.nodeList(readerScope, new IntegerLiteralExpr(defaultLineMaximum)));
             Weave weave = Weave.from(methodCallExpr.getRange().get().begin.line, readlineRuleId);

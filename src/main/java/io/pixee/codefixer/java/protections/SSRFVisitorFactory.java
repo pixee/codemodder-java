@@ -51,10 +51,10 @@ public final class SSRFVisitorFactory implements VisitorFactory {
                *
                * With:
                *
-               * URL u = io.pixee.security.SSRF.createSafeURL(foo, io.pixee.security.SSRF.HTTP_PROTOCOLS, io.pixee.security.HostValidator.ALLOW_ALL)
+               * URL u = io.pixee.security.Urls.create(foo, io.pixee.security.SSRF.HTTP_PROTOCOLS, io.pixee.security.HostValidator.ALLOW_ALL)
                */
               FieldAccessExpr httpProtocolsExpr = new FieldAccessExpr();
-              httpProtocolsExpr.setScope(new NameExpr(SSRF.class.getCanonicalName()));
+              httpProtocolsExpr.setScope(new NameExpr(Urls.class.getCanonicalName()));
               httpProtocolsExpr.setName("HTTP_PROTOCOLS");
 
               FieldAccessExpr denyCommonTargetsExpr = new FieldAccessExpr();
@@ -68,9 +68,7 @@ public final class SSRFVisitorFactory implements VisitorFactory {
               newArguments.add(denyCommonTargetsExpr); // load the host validator
               MethodCallExpr safeCall =
                   new MethodCallExpr(
-                      new NameExpr(io.pixee.security.SSRF.class.getName()),
-                      "createSafeURL",
-                      newArguments);
+                      new NameExpr(io.pixee.security.Urls.class.getName()), "create", newArguments);
               context.addWeave(Weave.from(n.getRange().get().begin.line, ssrfRuleId));
               return super.visit(safeCall, context);
             }

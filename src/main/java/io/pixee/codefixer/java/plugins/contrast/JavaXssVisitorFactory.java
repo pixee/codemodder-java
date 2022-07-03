@@ -113,7 +113,7 @@ final class JavaXssVisitorFactory implements VisitorFactory {
               if ("String".equals(type) || "java.lang.String".equals(type)) {
                 MethodCallExpr safeExpression =
                     new MethodCallExpr(
-                        new NameExpr(io.pixee.security.XSS.class.getName()), "htmlEncode");
+                        new NameExpr(io.pixee.security.HtmlEncoder.class.getName()), "encode");
                 safeExpression.setArguments(NodeList.nodeList(argument));
                 methodCallExpr.setArguments(NodeList.nodeList(safeExpression));
                 context.addWeave(Weave.from(startLine, toWeaveId(result)));

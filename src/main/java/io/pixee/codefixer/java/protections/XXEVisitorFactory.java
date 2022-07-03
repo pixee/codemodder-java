@@ -12,7 +12,6 @@ import com.github.javaparser.ast.visitor.ModifierVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
-import io.pixee.codefixer.java.TransformationException;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
@@ -58,14 +57,14 @@ public final class XXEVisitorFactory implements VisitorFactory {
                   return methodBody.findAll(MethodCallExpr.class).stream()
                       .filter(
                           methodCallExpr ->
-                              "hardenXmlInputFactory".equals(methodCallExpr.getNameAsString()))
+                              "hardenFactory".equals(methodCallExpr.getNameAsString()))
                       .filter(methodCallExpr -> methodCallExpr.getArguments().size() == 1)
                       .filter(methodCallExpr -> methodCallExpr.getArgument(0).equals(scope))
                       .findAny()
                       .isEmpty();
                 } else if (parentNode instanceof MethodCallExpr) {
                   final MethodCallExpr wrappedCall = (MethodCallExpr) parentNode;
-                  return !wrappedCall.getNameAsString().equals("hardenXmlInputFactory");
+                  return !wrappedCall.getNameAsString().equals("hardenFactory");
                 }
                 return true;
               }
@@ -75,11 +74,10 @@ public final class XXEVisitorFactory implements VisitorFactory {
         new Transformer<>() {
           @Override
           public TransformationResult<MethodCallExpr> transform(
-              final MethodCallExpr methodCallExpr, final FileWeavingContext context)
-              throws TransformationException {
-            final NameExpr callbackClass = new NameExpr(io.pixee.security.XXE.class.getName());
-            final MethodCallExpr wrapperExpr =
-                new MethodCallExpr(callbackClass, "hardenXmlInputFactory");
+              final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
+            final NameExpr callbackClass =
+                new NameExpr(io.pixee.security.XMLInputFactorySecurity.class.getName());
+            final MethodCallExpr wrapperExpr = new MethodCallExpr(callbackClass, "hardenFactory");
             wrapperExpr.setArguments(NodeList.nodeList(methodCallExpr));
             Weave weave =
                 Weave.from(methodCallExpr.getRange().get().begin.line, hardenXmlInputFactoryCode);

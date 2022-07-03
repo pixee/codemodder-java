@@ -45,7 +45,7 @@ public final class ApacheMultipartVisitorFactory implements VisitorFactory {
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
             MethodCallExpr safeCall =
                 new MethodCallExpr(
-                    new NameExpr(io.pixee.security.SafeIO.class.getName()),
+                    new NameExpr(io.pixee.security.Filenames.class.getName()),
                     "toSimpleFileName",
                     NodeList.nodeList(methodCallExpr));
             Weave weave =

@@ -11,7 +11,7 @@ import io.pixee.codefixer.java.ObjectCreationToMethodCallTransformingModifierVis
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
-import io.pixee.security.Zip;
+import io.pixee.security.ZipSecurity;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +36,7 @@ public final class ZipFileOverwriteVisitoryFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
-            NameExpr callbackClass = new NameExpr(Zip.class.getName());
+            NameExpr callbackClass = new NameExpr(ZipSecurity.class.getName());
             final MethodCallExpr securedCall =
                 new MethodCallExpr(callbackClass, "createHardenedZipInputStream");
             securedCall.setArguments(objectCreationExpr.getArguments());
