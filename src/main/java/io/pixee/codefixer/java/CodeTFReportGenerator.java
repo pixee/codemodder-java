@@ -5,12 +5,12 @@ import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
 import com.github.difflib.patch.PatchFailedException;
 import com.google.common.annotations.VisibleForTesting;
-import io.github.pixee.ccf.CCFChange;
-import io.github.pixee.ccf.CCFConfiguration;
-import io.github.pixee.ccf.CCFFileExtensionScanned;
-import io.github.pixee.ccf.CCFReport;
-import io.github.pixee.ccf.CCFResult;
-import io.github.pixee.ccf.CCFRun;
+import io.github.pixee.codetf.CodeTFChange;
+import io.github.pixee.codetf.CodeTFConfiguration;
+import io.github.pixee.codetf.CodeTFFileExtensionScanned;
+import io.github.pixee.codetf.CodeTFReport;
+import io.github.pixee.codetf.CodeTFResult;
+import io.github.pixee.codetf.CodeTFRun;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,10 +27,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * This type is responsible for generating a {@link CCFReport} based on the domain objects
+ * This type is responsible for generating a {@link CodeTFReport} based on the domain objects
  * representing our inputs and outputs.
  */
-interface CcfReportGenerator {
+interface CodeTFReportGenerator {
 
   /**
    * Creates the report.
@@ -40,9 +40,9 @@ interface CcfReportGenerator {
    * @param excludePatterns the exclude patterns the user specified in configuration
    * @param weaveResults the combined results from all of our analysis
    * @param millisElapsed how long the scan/fix took
-   * @return the {@link CCFReport} representing all the stuff above
+   * @return the {@link CodeTFReport} representing all the stuff above
    */
-  CCFReport createReport(
+  CodeTFReport createReport(
       File repositoryRoot,
       List<String> includePatterns,
       List<String> excludePatterns,
@@ -50,13 +50,13 @@ interface CcfReportGenerator {
       long millisElapsed)
       throws IOException;
 
-  static CcfReportGenerator createDefault() {
+  static CodeTFReportGenerator createDefault() {
     return new Default();
   }
 
-  class Default implements CcfReportGenerator {
+  class Default implements CodeTFReportGenerator {
     @Override
-    public CCFReport createReport(
+    public CodeTFReport createReport(
         final File repositoryRoot,
         final List<String> includePatterns,
         final List<String> excludePatterns,
@@ -64,35 +64,35 @@ interface CcfReportGenerator {
         final long elapsed)
         throws IOException {
 
-      CCFConfiguration ccfConfiguration =
-          new CCFConfiguration(
+      CodeTFConfiguration configuration =
+          new CodeTFConfiguration(
               repositoryRoot.getAbsolutePath(),
               includePatterns,
               excludePatterns,
               Collections.emptyList(),
               Collections.emptyList());
 
-      CCFRun run =
-          new CCFRun(
+      CodeTFRun run =
+          new CodeTFRun(
               "pixee",
               "pixee-java",
               null,
               elapsed,
               getFilesScanned(repositoryRoot),
-              ccfConfiguration,
+              configuration,
               List.copyOf(allWeaveResults.unscannableFiles()));
 
-      List<CCFResult> results;
+      List<CodeTFResult> results;
       try {
-        results = toCcfResults(allWeaveResults, repositoryRoot.getCanonicalPath());
+        results = toCodeTFResults(allWeaveResults, repositoryRoot.getCanonicalPath());
       } catch (PatchFailedException e) {
         throw new IOException("failed to generate patch", e);
       }
-      return new CCFReport(run, results);
+      return new CodeTFReport(run, results);
     }
 
     @VisibleForTesting
-    List<CCFFileExtensionScanned> getFilesScanned(final File repositoryRoot) throws IOException {
+    List<CodeTFFileExtensionScanned> getFilesScanned(final File repositoryRoot) throws IOException {
       Map<String, Integer> extensionScannedMap = new HashMap<>();
 
       try (Stream<Path> walkStream = Files.walk(repositoryRoot.toPath())) {
@@ -111,15 +111,15 @@ interface CcfReportGenerator {
                 });
       }
       return extensionScannedMap.entrySet().stream()
-          .map(ext -> new CCFFileExtensionScanned(ext.getKey(), ext.getValue()))
+          .map(ext -> new CodeTFFileExtensionScanned(ext.getKey(), ext.getValue()))
           .collect(Collectors.toUnmodifiableList());
     }
 
-    /** Turn the results from our format into {@link CCFResult}. */
-    private List<CCFResult> toCcfResults(
+    /** Turn the results from our format into {@link CodeTFResult}. */
+    private List<CodeTFResult> toCodeTFResults(
         final WeavingResult results, final String repositoryRootPath)
         throws IOException, PatchFailedException {
-      List<CCFResult> ccfResults = new ArrayList<>();
+      List<CodeTFResult> codetfResults = new ArrayList<>();
       Set<ChangedFile> changedFiles = results.changedFiles();
       for (ChangedFile changedFile : changedFiles) {
         String originalFilePath = changedFile.originalFilePath();
@@ -136,20 +136,20 @@ interface CcfReportGenerator {
         String diff =
             String.join("\n", UnifiedDiffUtils.generateUnifiedDiff(path, path, original, patch, 0));
         List<Weave> weaves = changedFile.weaves();
-        List<CCFChange> changes =
+        List<CodeTFChange> changes =
             weaves.stream()
                 .map(
                     weave ->
-                        new CCFChange(
+                        new CodeTFChange(
                             weave.lineNumber(),
                             Collections.emptyMap(),
                             weave.changeCode(),
                             "fill description for " + weave.changeCode()))
                 .collect(Collectors.toList());
-        CCFResult ccfResult = new CCFResult(path, diff, changes);
-        ccfResults.add(ccfResult);
+        CodeTFResult result = new CodeTFResult(path, diff, changes);
+        codetfResults.add(result);
       }
-      return Collections.unmodifiableList(ccfResults);
+      return Collections.unmodifiableList(codetfResults);
     }
   }
 }

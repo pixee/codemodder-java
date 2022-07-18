@@ -1,7 +1,7 @@
 package io.pixee.codefixer.java;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.pixee.ccf.CCFReport;
+import io.github.pixee.codetf.CodeTFReport;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -19,14 +19,14 @@ public final class JavaFixitCliRun {
   private final SourceWeaver javaSourceWeaver;
   private final FileWeaver fileWeaver;
   private final VisitorAssembler visitorAssembler;
-  private final CcfReportGenerator reportGenerator;
+  private final CodeTFReportGenerator reportGenerator;
 
   public JavaFixitCliRun() {
     this.directorySearcher = SourceDirectoryLister.createDefault();
     this.javaSourceWeaver = SourceWeaver.createDefault();
     this.fileWeaver = FileWeaver.createDefault();
     this.visitorAssembler = VisitorAssembler.createDefault();
-    this.reportGenerator = CcfReportGenerator.createDefault();
+    this.reportGenerator = CodeTFReportGenerator.createDefault();
   }
 
   /**
@@ -45,7 +45,7 @@ public final class JavaFixitCliRun {
    * @param output the output file path
    * @return the CCF report describing the scan/patch process we undertook
    */
-  public CCFReport run(
+  public CodeTFReport run(
       final DefaultRuleSetting defaultRuleSetting,
       final List<String> ruleExceptions,
       final List<File> sarifs,
@@ -105,14 +105,14 @@ public final class JavaFixitCliRun {
     stopWatch.stop();
     final long elapsed = stopWatch.getTime();
 
-    CCFReport ccfReport =
+    CodeTFReport report =
         reportGenerator.createReport(
             repositoryRoot, includePatterns, excludePatterns, allWeaveResults, elapsed);
 
     // write out the JSON
     ObjectMapper mapper = new ObjectMapper();
-    FileUtils.write(output, mapper.writeValueAsString(ccfReport), StandardCharsets.UTF_8);
-    return ccfReport;
+    FileUtils.write(output, mapper.writeValueAsString(report), StandardCharsets.UTF_8);
+    return report;
   }
 
   /**

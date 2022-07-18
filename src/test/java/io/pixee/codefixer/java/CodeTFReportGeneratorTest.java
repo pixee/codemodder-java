@@ -4,19 +4,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import io.github.pixee.ccf.CCFFileExtensionScanned;
+import io.github.pixee.codetf.CodeTFFileExtensionScanned;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-final class CcfReportGeneratorTest {
+final class CodeTFReportGeneratorTest {
 
   @Test
   void it_counts_file_extensions_correctly() throws IOException {
-    CcfReportGenerator.Default ccfReportGenerator = new CcfReportGenerator.Default();
-    List<CCFFileExtensionScanned> filesScanned =
-        ccfReportGenerator.getFilesScanned(new File("src/test/resources/ext_count"));
+    CodeTFReportGenerator.Default reportGenerator = new CodeTFReportGenerator.Default();
+    List<CodeTFFileExtensionScanned> filesScanned =
+        reportGenerator.getFilesScanned(new File("src/test/resources/ext_count"));
     assertThat(filesScanned.size(), equalTo(5));
     assertThat(
         filesScanned.stream()
