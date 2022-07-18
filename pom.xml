@@ -40,7 +40,7 @@
         <!-- code dependencies -->
         <versions.annotations>23.0.0</versions.annotations>
         <versions.auto-value>1.9</versions.auto-value>
-        <versions.ccf-java>0.0.2</versions.ccf-java>
+        <versions.codetf-java>0.0.2</versions.codetf-java>
         <versions.commons-collections4>4.4</versions.commons-collections4>
         <versions.gson>2.9.0</versions.gson>
         <versions.hamcrest>2.2</versions.hamcrest>
@@ -84,8 +84,8 @@
         </dependency>
         <dependency>
             <groupId>io.github.pixee</groupId>
-            <artifactId>ccf-java</artifactId>
-            <version>${versions.ccf-java}</version>
+            <artifactId>codetf-java</artifactId>
+            <version>${versions.codetf-java}</version>
         </dependency>
         <dependency>
             <groupId>io.github.java-diff-utils</groupId>

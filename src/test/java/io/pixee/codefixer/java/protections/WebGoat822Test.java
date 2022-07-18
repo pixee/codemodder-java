@@ -6,9 +6,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
-import io.github.pixee.ccf.CCFChange;
-import io.github.pixee.ccf.CCFReport;
-import io.github.pixee.ccf.CCFResult;
+import io.github.pixee.codetf.CodeTFChange;
+import io.github.pixee.codetf.CodeTFReport;
+import io.github.pixee.codetf.CodeTFResult;
 import io.pixee.codefixer.java.JavaFixitCli;
 import java.io.File;
 import java.io.FileReader;
@@ -58,7 +58,7 @@ final class WebGoat822Test {
 
     assertThat(exitCode, is(0));
 
-    var report = new ObjectMapper().readValue(new FileReader(outputFile), CCFReport.class);
+    var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
     assertThat(report.getResults().size(), is(24));
@@ -102,7 +102,7 @@ final class WebGoat822Test {
 
     assertThat(exitCode, is(0));
 
-    var report = new ObjectMapper().readValue(new FileReader(outputFile), CCFReport.class);
+    var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
     assertThat(report.getResults().size(), is(28));
@@ -125,9 +125,9 @@ final class WebGoat822Test {
         is(true));
 
     // count the changes associated with missing-jwt-signature-check from codeql
-    List<CCFChange> changes =
+    List<CodeTFChange> changes =
         report.getResults().stream()
-            .map(CCFResult::getChanges)
+            .map(CodeTFResult::getChanges)
             .flatMap(List::stream)
             .filter(
                 change -> "codeql:java/missing-jwt-signature-check".equals(change.getCategory()))
