@@ -5,15 +5,16 @@ import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
 import com.google.common.annotations.VisibleForTesting;
 import io.pixee.codefixer.java.ChangedFile;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.FileBasedVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.Weave;
 import io.pixee.codefixer.java.WeavingResult;
-import io.pixee.security.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
@@ -27,13 +28,15 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
-/** This is an important default weaver that will inject our dependency. */
+/**
+ * This is an important default weaver that will inject the dependencies that the weaves require.
+ */
 public final class DependencyInjectingVisitor implements FileBasedVisitor {
 
   private final PomRewriterStrategy pomRewriterStrategy;
   private final WeavingResult emptyWeaveResult;
   private boolean scanned;
-  private Set<File> pomsToUpdate;
+  private Map<File, Set<DependencyGAV>> pomsToUpdate;
 
   public DependencyInjectingVisitor() {
     this(new MavenXpp3RewriterStrategy());
@@ -44,7 +47,7 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
     this.emptyWeaveResult =
         WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
     this.scanned = false;
-    this.pomsToUpdate = Collections.emptySet();
+    this.pomsToUpdate = Collections.emptyMap();
   }
 
   @Override
@@ -108,7 +111,8 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
         var text = new StreamSource(new StringReader(pomContentsAsString));
         var sw = new StringWriter();
         transformer.transform(text, new StreamResult(sw));
-        final String dependenciesBlock = createDependency();
+        final String dependenciesBlock =
+            createDependency(projectGroup, projectArtifactId, projectVersion);
         var transformedText = sw.toString();
         transformedText = transformedText.replace("%PIXEE_DEPENDENCY_INFO%", dependenciesBlock);
         return transformedText;
@@ -117,17 +121,15 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
       }
     }
 
-    private String createDependency() {
+    private String createDependency(
+        final String group, final String artifact, final String version) {
       StringBuilder sb = new StringBuilder();
       sb.append(nl);
       sb.append("    <dependencies>").append(nl);
       sb.append("      <dependency>").append(nl);
-      sb.append("        <groupId>").append(projectGroup).append("</groupId>").append(nl);
-      sb.append("        <artifactId>")
-          .append(projectArtifactId)
-          .append("</artifactId>")
-          .append(nl);
-      sb.append("        <version>").append(projectVersion).append("</version>").append(nl);
+      sb.append("        <groupId>").append(group).append("</groupId>").append(nl);
+      sb.append("        <artifactId>").append(artifact).append("</artifactId>").append(nl);
+      sb.append("        <version>").append(version).append("</version>").append(nl);
       sb.append("      </dependency>").append(nl);
       sb.append("    </dependencies>").append(nl);
       return sb.toString();
@@ -150,13 +152,16 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
       }
 
       LOG.info("Found the following poms to update:");
-      pomsToUpdate.forEach(LOG::info);
+      pomsToUpdate.forEach(
+          (pomFile, newDependencies) -> {
+            LOG.info("{} -> {}", pomFile, newDependencies);
+          });
     }
 
-    if (pomsToUpdate.contains(file)) {
+    if (pomsToUpdate.containsKey(file)) {
       LOG.info("Injecting dependency into: {}", file);
       try {
-        var changedFile = transformPomIfNeeded(file);
+        var changedFile = transformPomIfNeeded(file, pomsToUpdate.get(file));
         if (changedFile != null) {
           return WeavingResult.createDefault(Set.of(changedFile), Collections.emptySet());
         }
@@ -168,11 +173,12 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
     return emptyWeaveResult;
   }
 
-  private Set<File> scan(final File repositoryRoot, final Set<ChangedFile> changedJavaFiles) {
+  private Map<File, Set<DependencyGAV>> scan(
+      final File repositoryRoot, final Set<ChangedFile> changedJavaFiles) {
     LOG.info(
         "Scanning repository root for all poms representing {} changed Java files",
         changedJavaFiles.size());
-    final Set<File> pomsToUpdate = new HashSet<>();
+    final Map<File, Set<DependencyGAV>> pomDependencyUpdates = new HashMap<>();
     changedJavaFiles.forEach(
         changedFile -> {
           final var path = changedFile.originalFilePath();
@@ -184,7 +190,13 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
               var potentialPom = new File(parent, "pom.xml");
               if (potentialPom.exists()) {
                 LOG.info("Adding pom: {}", potentialPom);
-                pomsToUpdate.add(potentialPom);
+                Set<DependencyGAV> existingDependenciesForPom =
+                    pomDependencyUpdates.computeIfAbsent(potentialPom, k -> new HashSet<>());
+                Set<DependencyGAV> newDependenciesForPom =
+                    changedFile.weaves().stream()
+                        .flatMap(w -> w.getDependenciesNeeded().stream())
+                        .collect(Collectors.toUnmodifiableSet());
+                existingDependenciesForPom.addAll(newDependenciesForPom);
                 parent = null;
               } else {
                 parent = parent.getParentFile();
@@ -194,31 +206,45 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
             LOG.error("Couldn't scan for pom files of changed Java source files", e);
           }
         });
-    return pomsToUpdate;
+    return pomDependencyUpdates;
   }
 
   @VisibleForTesting
-  ChangedFile transformPomIfNeeded(final File file) throws IOException, XmlPullParserException {
+  ChangedFile transformPomIfNeeded(final File file, final Set<DependencyGAV> dependenciesToAdd)
+      throws IOException, XmlPullParserException {
     var pomContents = IOUtils.toString(new FileReader(file));
     var reader = new MavenXpp3Reader();
     var model = reader.read(new StringReader(pomContents));
-    var hasDependencyAlready =
-        model.getDependencies().stream()
-            .anyMatch(
-                dep ->
-                    projectGroup.equals(dep.getGroupId())
-                        && projectArtifactId.equals(dep.getArtifactId()));
 
-    if (hasDependencyAlready) {
-      LOG.info("Not weaving pom since it contained our dependency");
-      return null;
+    boolean addedDependencies = false;
+    for (final DependencyGAV dependencyToAdd : dependenciesToAdd) {
+      var hasDependencyAlready =
+          model.getDependencies().stream()
+              .anyMatch(
+                  dep ->
+                      dependencyToAdd.group().equals(dep.getGroupId())
+                          && dependencyToAdd.artifact().equals(dep.getArtifactId()));
+
+      if (!hasDependencyAlready) {
+        LOG.info("Adding dependency {}:{}", dependencyToAdd.group(), dependencyToAdd.artifact());
+        addedDependencies = true;
+        var dependency = new Dependency();
+        dependency.setArtifactId(dependencyToAdd.artifact());
+        dependency.setGroupId(dependencyToAdd.group());
+        dependency.setVersion(dependencyToAdd.version());
+        model.addDependency(dependency);
+      } else {
+        LOG.info(
+            "Not weaving pom since it contained dependency {}:{}",
+            dependencyToAdd.group(),
+            dependencyToAdd.artifact());
+      }
     }
 
-    var dependency = new Dependency();
-    dependency.setArtifactId(projectArtifactId);
-    dependency.setGroupId(projectGroup);
-    dependency.setVersion(projectVersion);
-    model.addDependency(dependency);
+    if (!addedDependencies) {
+      LOG.info("No new dependencies needed");
+      return null;
+    }
 
     var rewrittenPomContents = pomRewriterStrategy.rewritePom(pomContents, model);
 

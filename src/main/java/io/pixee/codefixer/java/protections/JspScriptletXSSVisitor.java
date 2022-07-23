@@ -3,6 +3,7 @@ package io.pixee.codefixer.java.protections;
 import static org.apache.commons.lang3.StringUtils.endsWithIgnoreCase;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.pixee.codefixer.java.DependencyGAV;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +19,11 @@ import org.jetbrains.annotations.NotNull;
 public final class JspScriptletXSSVisitor extends RegexTextVisitor {
 
   public JspScriptletXSSVisitor() {
-    super(file -> endsWithIgnoreCase(file.getName(), ".jsp"), scriptlet, xssJspScriptletRuleId);
+    super(
+        file -> endsWithIgnoreCase(file.getName(), ".jsp"),
+        scriptlet,
+        xssJspScriptletRuleId,
+        DependencyGAV.OWASP_XSS_JAVA_ENCODER);
   }
 
   @Override
@@ -30,7 +35,7 @@ public final class JspScriptletXSSVisitor extends RegexTextVisitor {
   public @NotNull String getReplacementFor(final String matchingSnippet) {
     var codeWithinScriptlet =
         matchingSnippet.substring(matchingSnippet.indexOf('=') + 1, matchingSnippet.length() - 2);
-    return "<%=io.pixee.security.XSS.htmlEncode(" + codeWithinScriptlet + ")%>";
+    return "<%=org.owasp.encoder.Encode.forHtml(" + codeWithinScriptlet + ")%>";
   }
 
   private static final Pattern scriptlet =

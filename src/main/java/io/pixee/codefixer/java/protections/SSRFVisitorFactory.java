@@ -6,6 +6,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
@@ -69,7 +70,11 @@ public final class SSRFVisitorFactory implements VisitorFactory {
               MethodCallExpr safeCall =
                   new MethodCallExpr(
                       new NameExpr(io.pixee.security.Urls.class.getName()), "create", newArguments);
-              context.addWeave(Weave.from(n.getRange().get().begin.line, ssrfRuleId));
+              context.addWeave(
+                  Weave.from(
+                      n.getRange().get().begin.line,
+                      ssrfRuleId,
+                      DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT));
               return super.visit(safeCall, context);
             }
           }

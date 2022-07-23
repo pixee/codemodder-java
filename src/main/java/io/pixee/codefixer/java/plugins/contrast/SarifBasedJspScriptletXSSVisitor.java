@@ -2,6 +2,7 @@ package io.pixee.codefixer.java.plugins.contrast;
 
 import com.contrastsecurity.sarif.Result;
 import io.pixee.codefixer.java.ChangedFile;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.FileBasedVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.JspLineWeave;
@@ -187,7 +188,14 @@ public final class SarifBasedJspScriptletXSSVisitor implements FileBasedVisitor 
             JspLineWeave lineWeave = lineWeaveRef.get();
             String rebuiltLine = lineWeave.getRebuiltLine();
             rebuiltLines.add(rebuiltLine);
-            weaves.add(Weave.from(lineNumber, lineWeave.getRuleId()));
+            DependencyGAV dependencyNeeded = lineWeave.getDependencyNeeded();
+            weaves.add(
+                Weave.from(
+                    lineNumber,
+                    lineWeave.getRuleId(),
+                    dependencyNeeded != null
+                        ? List.of(dependencyNeeded)
+                        : Collections.emptyList()));
             Optional<String> supportingTaglibRef = lineWeave.getSupportingTaglib();
             supportingTaglibRef.ifPresent(taglibsNeeded::add);
           } else {

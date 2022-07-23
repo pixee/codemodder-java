@@ -3,6 +3,7 @@ package io.pixee.codefixer.java.plugins.contrast;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import io.pixee.codefixer.java.JspLineWeave;
 import java.util.Collections;
@@ -30,6 +31,7 @@ final class JspExpressionLanguageOutputMethodTest {
     JspLineWeave weave = output.weaveLine("Some ${rewrite} here", "myRuleId");
     assertThat(weave.getRebuiltLine(), equalTo("Some ${functionz:escapeXml(rewrite)} here"));
     assertThat(weave.getRuleId(), equalTo("myRuleId"));
+    assertThat(weave.getDependencyNeeded(), is(nullValue()));
   }
 
   @Test

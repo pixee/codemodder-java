@@ -2,6 +2,7 @@ package io.pixee.codefixer.java;
 
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.Nullable;
 
 /** Represents a weave done to a JSP line. */
 public final class JspLineWeave {
@@ -10,11 +11,22 @@ public final class JspLineWeave {
   private final String rebuiltLine;
   private final String ruleId;
 
+  @Nullable private final DependencyGAV dependencyNeeded;
+
   public JspLineWeave(
-      final String rebuiltLine, final String supportingTaglib, final String ruleId) {
+      final String rebuiltLine,
+      final String supportingTaglib,
+      final String ruleId,
+      final @Nullable DependencyGAV dependencyNeeded) {
     this.rebuiltLine = Objects.requireNonNull(rebuiltLine);
     this.ruleId = Objects.requireNonNull(ruleId);
     this.supportingTaglib = supportingTaglib;
+    this.dependencyNeeded = dependencyNeeded;
+  }
+
+  public JspLineWeave(
+      final String rebuiltLine, final String supportingTaglib, final String ruleId) {
+    this(rebuiltLine, supportingTaglib, ruleId, null);
   }
 
   /** The replacement text for the line. */
@@ -22,9 +34,15 @@ public final class JspLineWeave {
     return rebuiltLine;
   }
 
-  /** The rule ID assocated with the weave. */
+  /** The rule ID associated with the weave. */
   public String getRuleId() {
     return ruleId;
+  }
+
+  /** The dependency needed for our new weave (if any.) */
+  @Nullable
+  public DependencyGAV getDependencyNeeded() {
+    return dependencyNeeded;
   }
 
   /**

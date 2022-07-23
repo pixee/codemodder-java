@@ -6,6 +6,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
@@ -49,7 +50,8 @@ public final class SpringMultipartVisitorFactory implements VisitorFactory {
             Weave weave =
                 Weave.from(
                     methodCallExpr.getRange().get().begin.line,
-                    springMultipartFilenameSanitizerRuleId);
+                    springMultipartFilenameSanitizerRuleId,
+                    DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
             return new TransformationResult<>(Optional.of(safeCall), weave);
           }
         };

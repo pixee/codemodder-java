@@ -1,6 +1,7 @@
 package io.pixee.codefixer.java.protections;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.pixee.codefixer.java.DependencyGAV;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +13,11 @@ public final class VerbTamperingVisitor extends RegexTextVisitor {
 
   public VerbTamperingVisitor() {
     super(
-        file -> "web.xml".equalsIgnoreCase(file.getName()), httpMethod, verbTamperingRuleId, true);
+        file -> "web.xml".equalsIgnoreCase(file.getName()),
+        httpMethod,
+        verbTamperingRuleId,
+        DependencyGAV.OWASP_XSS_JAVA_ENCODER,
+        true);
   }
 
   @Override

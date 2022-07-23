@@ -14,6 +14,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.DoNothingVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.Sarif;
@@ -112,19 +113,19 @@ final class JavaXssVisitorFactory implements VisitorFactory {
               String type = locator.locateType(argument);
               if ("String".equals(type) || "java.lang.String".equals(type)) {
                 MethodCallExpr safeExpression =
-                    new MethodCallExpr(
-                        new NameExpr(io.pixee.security.HtmlEncoder.class.getName()), "encode");
+                    new MethodCallExpr(new NameExpr("org.owasp.encoder.Encode"), "forHtml");
                 safeExpression.setArguments(NodeList.nodeList(argument));
                 methodCallExpr.setArguments(NodeList.nodeList(safeExpression));
-                context.addWeave(Weave.from(startLine, toWeaveId(result)));
+                context.addWeave(
+                    Weave.from(startLine, toWeaveId(result), DependencyGAV.OWASP_XSS_JAVA_ENCODER));
               } else {
                 LOG.debug(
-                    "Ignoring Contrast result due to parameter not being a String: {}",
+                    "Ignoring XSS result due to parameter not being a String: {}",
                     result.getCorrelationGuid());
               }
             } else {
               LOG.debug(
-                  "Ignoring Contrast result due to parameter not being a String: {}",
+                  "Ignoring XSS result due to parameter not being a String: {}",
                   result.getCorrelationGuid());
             }
           }

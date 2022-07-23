@@ -1,11 +1,11 @@
 package io.pixee.codefixer.java.protections;
 
 import io.pixee.codefixer.java.ChangedFile;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.FileBasedVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.Weave;
 import io.pixee.codefixer.java.WeavingResult;
-import io.pixee.security.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -31,20 +31,26 @@ public abstract class RegexTextVisitor implements FileBasedVisitor {
   private final String weaveCode;
   private final boolean removeEmptyLeftoverLines;
   private final WeavingResult emptyWeaveResult;
+  private final DependencyGAV dependencyNeeded;
 
   public RegexTextVisitor(
-      final Predicate<File> fileMatcher, final Pattern pattern, final String weaveCode) {
-    this(fileMatcher, pattern, weaveCode, false);
+      final Predicate<File> fileMatcher,
+      final Pattern pattern,
+      final String weaveCode,
+      final DependencyGAV dependencyNeeded) {
+    this(fileMatcher, pattern, weaveCode, dependencyNeeded, false);
   }
 
   public RegexTextVisitor(
       final Predicate<File> fileMatcher,
       final Pattern pattern,
       final String weaveCode,
+      final DependencyGAV dependencyNeeded,
       final boolean removeEmptyLeftoverLines) {
     this.fileMatcher = Objects.requireNonNull(fileMatcher, "fileMatcher");
     this.pattern = Objects.requireNonNull(pattern, "pattern");
     this.weaveCode = Objects.requireNonNull(weaveCode, "weaveCode");
+    this.dependencyNeeded = dependencyNeeded;
     this.removeEmptyLeftoverLines = removeEmptyLeftoverLines;
     this.emptyWeaveResult =
         WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
@@ -89,7 +95,9 @@ public abstract class RegexTextVisitor implements FileBasedVisitor {
       int end = matcher.end();
       String snippet = fileContents.substring(start, end);
       rebuiltContents.append(fileContents, lastEnd, start);
-      weaves.add(Weave.from(LineNumbers.getLineNumberAt(fileContents, start), weaveCode));
+      weaves.add(
+          Weave.from(
+              LineNumbers.getLineNumberAt(fileContents, start), weaveCode, dependencyNeeded));
 
       final String replacement = getReplacementFor(snippet);
       rebuiltContents.append(replacement);

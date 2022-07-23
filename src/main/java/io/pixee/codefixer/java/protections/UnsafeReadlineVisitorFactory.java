@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
@@ -43,7 +44,11 @@ public final class UnsafeReadlineVisitorFactory implements VisitorFactory {
                 new MethodCallExpr(new NameExpr(BoundedLineReader.class.getName()), "readLine");
             safeExpression.setArguments(
                 NodeList.nodeList(readerScope, new IntegerLiteralExpr(defaultLineMaximum)));
-            Weave weave = Weave.from(methodCallExpr.getRange().get().begin.line, readlineRuleId);
+            Weave weave =
+                Weave.from(
+                    methodCallExpr.getRange().get().begin.line,
+                    readlineRuleId,
+                    DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
             methodCallExpr.getParentNode().get().replace(methodCallExpr, safeExpression);
             return new TransformationResult<>(Optional.of(safeExpression), weave);
           }
