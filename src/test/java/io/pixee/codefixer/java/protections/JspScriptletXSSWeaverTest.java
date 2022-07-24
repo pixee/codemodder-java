@@ -2,6 +2,7 @@ package io.pixee.codefixer.java.protections;
 
 import static io.pixee.codefixer.java.protections.JspScriptletXSSVisitor.xssJspScriptletRuleId;
 
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.Weave;
 import java.io.IOException;
 import org.hamcrest.CoreMatchers;
@@ -19,6 +20,7 @@ final class JspScriptletXSSWeaverTest {
     MatcherAssert.assertThat(
         weaves,
         CoreMatchers.hasItems(
-            Weave.from(3, xssJspScriptletRuleId), Weave.from(5, xssJspScriptletRuleId)));
+            Weave.from(3, xssJspScriptletRuleId, DependencyGAV.OWASP_XSS_JAVA_ENCODER),
+            Weave.from(5, xssJspScriptletRuleId, DependencyGAV.OWASP_XSS_JAVA_ENCODER)));
   }
 }

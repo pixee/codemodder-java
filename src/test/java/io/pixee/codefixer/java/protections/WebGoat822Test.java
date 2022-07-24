@@ -61,7 +61,7 @@ final class WebGoat822Test {
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
-    assertThat(report.getResults().size(), is(24));
+    assertThat(report.getResults().size(), is(19));
 
     // we only inject into a couple files
     assertThat(
@@ -105,7 +105,7 @@ final class WebGoat822Test {
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
-    assertThat(report.getResults().size(), is(28));
+    assertThat(report.getResults().size(), is(22));
 
     // we only inject into a couple files
     assertThat(

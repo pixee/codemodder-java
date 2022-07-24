@@ -6,6 +6,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
@@ -45,7 +46,10 @@ public final class JakartaForwardVisitoryFactory implements VisitorFactory {
             safeExpression.setArguments(NodeList.nodeList(methodCallExpr.getArgument(0)));
             methodCallExpr.setArgument(0, safeExpression);
             Weave weave =
-                Weave.from(methodCallExpr.getRange().get().begin.line, pathCheckingRuleId);
+                Weave.from(
+                    methodCallExpr.getRange().get().begin.line,
+                    pathCheckingRuleId,
+                    DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
             return new TransformationResult<>(Optional.empty(), weave);
           }
         };

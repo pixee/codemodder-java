@@ -5,6 +5,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.ObjectCreationPredicateFactory;
 import io.pixee.codefixer.java.ObjectCreationToMethodCallTransformingModifierVisitor;
@@ -41,7 +42,10 @@ public final class ZipFileOverwriteVisitoryFactory implements VisitorFactory {
                 new MethodCallExpr(callbackClass, "createHardenedInputStream");
             securedCall.setArguments(objectCreationExpr.getArguments());
             Weave weave =
-                Weave.from(objectCreationExpr.getRange().get().begin.line, zipHardeningRuleId);
+                Weave.from(
+                    objectCreationExpr.getRange().get().begin.line,
+                    zipHardeningRuleId,
+                    DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
             return new TransformationResult<>(Optional.of(securedCall), weave);
           }
         };

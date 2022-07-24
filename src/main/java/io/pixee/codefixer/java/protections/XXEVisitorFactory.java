@@ -9,6 +9,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
@@ -80,7 +81,10 @@ public final class XXEVisitorFactory implements VisitorFactory {
             final MethodCallExpr wrapperExpr = new MethodCallExpr(callbackClass, "hardenFactory");
             wrapperExpr.setArguments(NodeList.nodeList(methodCallExpr));
             Weave weave =
-                Weave.from(methodCallExpr.getRange().get().begin.line, hardenXmlInputFactoryCode);
+                Weave.from(
+                    methodCallExpr.getRange().get().begin.line,
+                    hardenXmlInputFactoryCode,
+                    DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
             return new TransformationResult<>(Optional.of(wrapperExpr), weave);
           }
         };

@@ -9,6 +9,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.DoNothingVisitor;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.Sarif;
@@ -101,7 +102,11 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
                 safeCall.setName("loadAndVerify");
                 safeCall.setScope(callbackClass);
                 safeCall.setArguments(methodCallExpr.getArguments());
-                context.addWeave(Weave.from(scopeRange.get().begin.line, ID));
+                context.addWeave(
+                    Weave.from(
+                        scopeRange.get().begin.line,
+                        ID,
+                        List.of(DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT)));
                 return super.visit(safeCall, context);
               }
             }

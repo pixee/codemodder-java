@@ -1,5 +1,6 @@
 package io.pixee.codefixer.java.plugins.contrast;
 
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.JspLineWeave;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -25,10 +26,10 @@ final class JspExpressionOutputMethod implements JspOutputMethod {
     String thingToEncode = line.substring(startIndex + 3, endIndex);
     StringBuilder sb = new StringBuilder();
     sb.append(line, 0, startIndex);
-    sb.append("<%=io.pixee.security.XSS.htmlEncode(String.valueOf(");
+    sb.append("<%=org.owasp.encoder.Encode.forHtml(String.valueOf(");
     sb.append(thingToEncode.trim());
     sb.append("))%>");
     sb.append(line, endIndex + 2, line.length());
-    return new JspLineWeave(sb.toString(), null, ruleId);
+    return new JspLineWeave(sb.toString(), null, ruleId, DependencyGAV.OWASP_XSS_JAVA_ENCODER);
   }
 }

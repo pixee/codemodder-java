@@ -21,10 +21,10 @@ This line has two writes and only one vulnerable <%= vulnerableVariable %><%= sa
 This line has two vulnerable writes with text between <%= vulnerableVariable %> and <%= vulnerableVariable %>
 This line has JSP expression and JSP action <%= vulnerableVariable %> and <c:out name="vulnerableVariable"/>
 This line has JSP expression and EL <%= vulnerableVariable %> and ${vulnerableVariable}
-This line has JSP expression, JSP action, and EL <%= vulnerableVariable %> and <c:out vulnerableVariable/> and ${vulnerableVariable}
+This line has JSP expression, JSP action, and EL <%= vulnerableVariable %> and <c:out name="vulnerableVariable"/> and ${vulnerableVariable}
 This line has JSP expression language, but its empty ${} whoops
 
-# This section contains one test -- a line that we can fix, but since theres no corresponding vulnerability, we dont.
+# This section contains one test -- a line that we can fix, but since theres no corresponding vulnerability, we don't.
 <%= safeVariable %>
 
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/functions" prefix = "fn" %>

@@ -11,6 +11,7 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
@@ -95,7 +96,10 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
             }
 
             Weave weave =
-                Weave.from(methodCallExpr.getRange().get().begin.line, deserializationRuleId);
+                Weave.from(
+                    methodCallExpr.getRange().get().begin.line,
+                    deserializationRuleId,
+                    DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
             return new TransformationResult<>(Optional.empty(), weave);
           }
 

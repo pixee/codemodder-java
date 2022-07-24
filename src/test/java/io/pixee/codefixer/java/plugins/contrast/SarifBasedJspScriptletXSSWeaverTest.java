@@ -1,10 +1,12 @@
 package io.pixee.codefixer.java.plugins.contrast;
 
 import static io.pixee.codefixer.java.Results.buildSimpleResult;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.contrastsecurity.sarif.Result;
 import io.pixee.codefixer.java.ChangedFile;
+import io.pixee.codefixer.java.DependencyGAV;
 import io.pixee.codefixer.java.Weave;
 import io.pixee.codefixer.java.protections.WeavingTests;
 import java.io.IOException;
@@ -25,8 +27,16 @@ final class SarifBasedJspScriptletXSSWeaverTest {
     assertThat(
         weaves,
         CoreMatchers.hasItems(
-            Weave.from(4, "contrast-scan:java/reflected-xss"),
-            Weave.from(5, "contrast-scan:java/reflected-xss")));
+            Weave.from(4, "contrast-scan:java/reflected-xss", DependencyGAV.OWASP_XSS_JAVA_ENCODER),
+            Weave.from(
+                5, "contrast-scan:java/reflected-xss", DependencyGAV.OWASP_XSS_JAVA_ENCODER)));
+
+    // make sure we don't import the Java XSS dependency if it's an expression, because for those we
+    // use built-in JSP functions
+    Weave jspExpressionWeave =
+        weaves.stream().filter(weave -> weave.lineNumber() == 12).findFirst().get();
+    List<DependencyGAV> jspExpressionWeaveDependencies = jspExpressionWeave.getDependenciesNeeded();
+    assertThat(jspExpressionWeaveDependencies.isEmpty(), is(true));
   }
 
   private List<Result> buildBigTestResults() {
