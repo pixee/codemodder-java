@@ -62,7 +62,8 @@ public final class Weave {
    * A {@link Weave} convenience builder for weaves that only requires one new dependency.
    * Equivalent to calling: <code>Weave.from(line, code, List.of(dependencyNeeded))</code>
    */
-  public static Weave from(final int line, final String code, DependencyGAV dependencyNeeded) {
+  public static Weave from(
+      final int line, final String code, final DependencyGAV dependencyNeeded) {
     return new Weave(line, code, List.of(dependencyNeeded));
   }
 
