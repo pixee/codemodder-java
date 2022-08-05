@@ -13,6 +13,7 @@ import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
+import io.pixee.security.SystemCommand;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +59,9 @@ public final class RuntimeExecVisitorFactory implements VisitorFactory {
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
             Expression scope = methodCallExpr.getScope().get();
-            NameExpr callbackClass = new NameExpr(io.pixee.security.SystemCommand.class.getName());
+            ASTs.addImportIfMissing(cu, SystemCommand.class);
+            NameExpr callbackClass =
+                new NameExpr(io.pixee.security.SystemCommand.class.getSimpleName());
             MethodCallExpr safeExpression = new MethodCallExpr(callbackClass, "runCommand");
             NodeList<Expression> nodeList = new NodeList<>();
             nodeList.add(scope);

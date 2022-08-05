@@ -14,6 +14,7 @@ import io.pixee.codefixer.java.ObjectCreationTransformingModifierVisitor;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
+import io.pixee.security.XMLDecoderSecurity;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -42,9 +43,10 @@ public final class XMLDecoderVisitorFactory implements VisitorFactory {
               final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
             MethodCallExpr safeExpr =
                 new MethodCallExpr(
-                    new NameExpr(io.pixee.security.XMLDecoderSecurity.class.getName()),
-                    "hardenStream");
+                    new NameExpr(XMLDecoderSecurity.class.getSimpleName()), "hardenStream");
             final Expression firstArgument = objectCreationExpr.getArgument(0);
+            final CompilationUnit cu = ASTs.findCompilationUnitFrom(objectCreationExpr);
+            ASTs.addImportIfMissing(cu, XMLDecoderSecurity.class);
             safeExpr.setArguments(NodeList.nodeList(firstArgument));
             objectCreationExpr.setArgument(0, safeExpr);
             Weave weave =

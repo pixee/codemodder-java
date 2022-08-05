@@ -13,6 +13,7 @@ import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
+import io.pixee.security.Filenames;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -44,9 +45,11 @@ public final class SpringMultipartVisitorFactory implements VisitorFactory {
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
             MethodCallExpr safeCall =
                 new MethodCallExpr(
-                    new NameExpr(io.pixee.security.Filenames.class.getName()),
+                    new NameExpr(Filenames.class.getSimpleName()),
                     "toSimpleFileName",
                     NodeList.nodeList(methodCallExpr));
+            CompilationUnit cu = ASTs.findCompilationUnitFrom(methodCallExpr);
+            ASTs.addImportIfMissing(cu, Filenames.class);
             Weave weave =
                 Weave.from(
                     methodCallExpr.getRange().get().begin.line,

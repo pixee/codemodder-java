@@ -40,6 +40,7 @@ public final class HeaderInjectionVisitorFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
+            ASTs.addImportIfMissing(cu, Newlines.class);
             MethodCallExpr stripNewlinesCall = new MethodCallExpr(callbackClass, "stripAll");
             Expression argument = methodCallExpr.getArgument(1);
             stripNewlinesCall.setArguments(NodeList.nodeList(argument));
@@ -62,6 +63,6 @@ public final class HeaderInjectionVisitorFactory implements VisitorFactory {
     return stripHeaderRuleId;
   }
 
-  private static final NameExpr callbackClass = new NameExpr(Newlines.class.getName());
+  private static final NameExpr callbackClass = new NameExpr(Newlines.class.getSimpleName());
   private static final String stripHeaderRuleId = "pixee:java/strip-http-header-newlines";
 }

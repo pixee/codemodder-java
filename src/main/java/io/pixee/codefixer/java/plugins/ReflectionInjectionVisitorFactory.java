@@ -16,6 +16,7 @@ import io.pixee.codefixer.java.Sarif;
 import io.pixee.codefixer.java.TypeLocator;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
+import io.pixee.codefixer.java.protections.ASTs;
 import io.pixee.security.Reflection;
 import java.io.File;
 import java.io.IOException;
@@ -74,10 +75,12 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
     private final TypeLocator resolver;
     private final NameExpr callbackClass;
     private final Set<Result> results;
+    private final CompilationUnit cu;
 
     private ReflectionInjectionVisitor(final CompilationUnit cu, final Set<Result> results) {
+      this.cu = cu;
       this.resolver = TypeLocator.createDefault(cu);
-      this.callbackClass = new NameExpr(Reflection.class.getName());
+      this.callbackClass = new NameExpr(Reflection.class.getSimpleName());
       this.results = Objects.requireNonNull(results);
     }
 
@@ -98,6 +101,7 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
                   Sarif.getFirstMatchingResult(
                       results, startLine, methodCallExpr.getNameAsString());
               if (resultRef.isPresent() && context.isLineIncluded(methodCallExpr)) {
+                ASTs.addImportIfMissing(cu, Reflection.class);
                 MethodCallExpr safeCall = new MethodCallExpr();
                 safeCall.setName("loadAndVerify");
                 safeCall.setScope(callbackClass);

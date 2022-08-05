@@ -13,6 +13,7 @@ import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
+import io.pixee.security.Jakarta;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -40,9 +41,10 @@ public final class JakartaForwardVisitoryFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
+            ASTs.addImportIfMissing(cu, Jakarta.class);
             MethodCallExpr safeExpression =
                 new MethodCallExpr(
-                    new NameExpr(io.pixee.security.Jakarta.class.getName()), "validateForwardPath");
+                    new NameExpr(Jakarta.class.getSimpleName()), "validateForwardPath");
             safeExpression.setArguments(NodeList.nodeList(methodCallExpr.getArgument(0)));
             methodCallExpr.setArgument(0, safeExpression);
             Weave weave =

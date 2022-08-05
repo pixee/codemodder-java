@@ -16,6 +16,7 @@ import io.pixee.codefixer.java.MethodCallTransformingModifierVisitor;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
+import io.pixee.security.XMLInputFactorySecurity;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -76,8 +77,10 @@ public final class XXEVisitorFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
+            final CompilationUnit cu = ASTs.findCompilationUnitFrom(methodCallExpr);
+            ASTs.addImportIfMissing(cu, XMLInputFactorySecurity.class);
             final NameExpr callbackClass =
-                new NameExpr(io.pixee.security.XMLInputFactorySecurity.class.getName());
+                new NameExpr(XMLInputFactorySecurity.class.getSimpleName());
             final MethodCallExpr wrapperExpr = new MethodCallExpr(callbackClass, "hardenFactory");
             wrapperExpr.setArguments(NodeList.nodeList(methodCallExpr));
             Weave weave =

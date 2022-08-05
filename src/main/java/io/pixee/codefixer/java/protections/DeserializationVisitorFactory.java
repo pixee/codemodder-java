@@ -118,6 +118,7 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
               final Statement vulnerableStatement) {
             var hardeningStmt = generateFilterHardeningStatement(originalScope);
             ASTs.addStatementBeforeStatement(vulnerableStatement, hardeningStmt);
+            ASTs.addImportIfMissing(cu, ObjectInputFilters.class);
           }
 
           /**
@@ -153,7 +154,7 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
            */
           private Statement generateFilterHardeningStatement(final Expression originalScope) {
             // this statement is the callback to our hardening code
-            var callbackClass = new NameExpr(ObjectInputFilters.class.getName());
+            var callbackClass = new NameExpr(ObjectInputFilters.class.getSimpleName());
             var hardenStatement =
                 new MethodCallExpr(callbackClass, "enableObjectFilterIfUnprotected");
             hardenStatement.addArgument(originalScope);

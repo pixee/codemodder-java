@@ -37,10 +37,12 @@ public final class ZipFileOverwriteVisitoryFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
-            NameExpr callbackClass = new NameExpr(ZipSecurity.class.getName());
+            NameExpr callbackClass = new NameExpr(ZipSecurity.class.getSimpleName());
             final MethodCallExpr securedCall =
                 new MethodCallExpr(callbackClass, "createHardenedInputStream");
             securedCall.setArguments(objectCreationExpr.getArguments());
+            final CompilationUnit cu = ASTs.findCompilationUnitFrom(objectCreationExpr);
+            ASTs.addImportIfMissing(cu, ZipSecurity.class);
             Weave weave =
                 Weave.from(
                     objectCreationExpr.getRange().get().begin.line,

@@ -54,12 +54,15 @@ public final class SSRFVisitorFactory implements VisitorFactory {
                *
                * URL u = io.pixee.security.Urls.create(foo, io.pixee.security.Urls.HTTP_PROTOCOLS, io.pixee.security.HostValidator.ALLOW_ALL)
                */
+              ASTs.addImportIfMissing(cu, Urls.class);
+              ASTs.addImportIfMissing(cu, HostValidator.class);
               FieldAccessExpr httpProtocolsExpr = new FieldAccessExpr();
-              httpProtocolsExpr.setScope(new NameExpr(Urls.class.getCanonicalName()));
+              httpProtocolsExpr.setScope(new NameExpr(Urls.class.getSimpleName()));
               httpProtocolsExpr.setName("HTTP_PROTOCOLS");
 
               FieldAccessExpr denyCommonTargetsExpr = new FieldAccessExpr();
-              denyCommonTargetsExpr.setScope(new NameExpr(HostValidator.class.getName()));
+
+              denyCommonTargetsExpr.setScope(new NameExpr(HostValidator.class.getSimpleName()));
               denyCommonTargetsExpr.setName("DENY_COMMON_INFRASTRUCTURE_TARGETS");
 
               NodeList<Expression> newArguments = new NodeList<>();
@@ -69,7 +72,9 @@ public final class SSRFVisitorFactory implements VisitorFactory {
               newArguments.add(denyCommonTargetsExpr); // load the host validator
               MethodCallExpr safeCall =
                   new MethodCallExpr(
-                      new NameExpr(io.pixee.security.Urls.class.getName()), "create", newArguments);
+                      new NameExpr(io.pixee.security.Urls.class.getSimpleName()),
+                      "create",
+                      newArguments);
               context.addWeave(
                   Weave.from(
                       n.getRange().get().begin.line,

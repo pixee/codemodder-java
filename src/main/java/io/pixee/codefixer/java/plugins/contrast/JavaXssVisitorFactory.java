@@ -21,6 +21,7 @@ import io.pixee.codefixer.java.Sarif;
 import io.pixee.codefixer.java.TypeLocator;
 import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
+import io.pixee.codefixer.java.protections.ASTs;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -112,8 +113,9 @@ final class JavaXssVisitorFactory implements VisitorFactory {
               Expression argument = methodCallExpr.getArgument(0);
               String type = locator.locateType(argument);
               if ("String".equals(type) || "java.lang.String".equals(type)) {
+                ASTs.addImportIfMissing(cu, "org.owasp.encoder.Encode");
                 MethodCallExpr safeExpression =
-                    new MethodCallExpr(new NameExpr("org.owasp.encoder.Encode"), "forHtml");
+                    new MethodCallExpr(new NameExpr("Encode"), "forHtml");
                 safeExpression.setArguments(NodeList.nodeList(argument));
                 methodCallExpr.setArguments(NodeList.nodeList(safeExpression));
                 context.addWeave(

@@ -1,7 +1,9 @@
 package io.pixee.codefixer.java.protections;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -14,6 +16,30 @@ import java.util.Optional;
 
 /** Utility methods that may be useful for many visitors. */
 public final class ASTs {
+
+  /** Add an import in alphabetical order. */
+  public static void addImportIfMissing(final CompilationUnit cu, final String className) {
+    NodeList<ImportDeclaration> imports = cu.getImports();
+    ImportDeclaration newImport = new ImportDeclaration(className, false, false);
+    if (imports.contains(newImport)) {
+      return;
+    }
+    for (int i = 0; i < imports.size(); i++) {
+      ImportDeclaration existingImport = imports.get(i);
+
+      if (existingImport.getNameAsString().compareToIgnoreCase(className) > 0) {
+
+        imports.addBefore(newImport, existingImport);
+        return;
+      }
+    }
+    cu.addImport(className);
+  }
+
+  /** Add an import in alphabetical order. */
+  public static void addImportIfMissing(final CompilationUnit cu, final Class<?> clazz) {
+    addImportIfMissing(cu, clazz.getName());
+  }
 
   /**
    * Searches up the AST to find the method body from the given {@link Node}. There could be orphan
