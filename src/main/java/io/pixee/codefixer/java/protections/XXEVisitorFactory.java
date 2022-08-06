@@ -77,7 +77,6 @@ public final class XXEVisitorFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
-            final CompilationUnit cu = ASTs.findCompilationUnitFrom(methodCallExpr);
             ASTs.addImportIfMissing(cu, XMLInputFactorySecurity.class);
             final NameExpr callbackClass =
                 new NameExpr(XMLInputFactorySecurity.class.getSimpleName());

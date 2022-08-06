@@ -48,7 +48,6 @@ public final class SpringMultipartVisitorFactory implements VisitorFactory {
                     new NameExpr(Filenames.class.getSimpleName()),
                     "toSimpleFileName",
                     NodeList.nodeList(methodCallExpr));
-            CompilationUnit cu = ASTs.findCompilationUnitFrom(methodCallExpr);
             ASTs.addImportIfMissing(cu, Filenames.class);
             Weave weave =
                 Weave.from(

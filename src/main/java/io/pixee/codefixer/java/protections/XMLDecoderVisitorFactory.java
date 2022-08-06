@@ -45,7 +45,6 @@ public final class XMLDecoderVisitorFactory implements VisitorFactory {
                 new MethodCallExpr(
                     new NameExpr(XMLDecoderSecurity.class.getSimpleName()), "hardenStream");
             final Expression firstArgument = objectCreationExpr.getArgument(0);
-            final CompilationUnit cu = ASTs.findCompilationUnitFrom(objectCreationExpr);
             ASTs.addImportIfMissing(cu, XMLDecoderSecurity.class);
             safeExpr.setArguments(NodeList.nodeList(firstArgument));
             objectCreationExpr.setArgument(0, safeExpr);

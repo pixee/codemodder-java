@@ -50,7 +50,6 @@ public final class UnsafeReadlineVisitorFactory implements VisitorFactory {
                     methodCallExpr.getRange().get().begin.line,
                     readlineRuleId,
                     DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
-            CompilationUnit cu = ASTs.findCompilationUnitFrom(methodCallExpr);
             ASTs.addImportIfMissing(cu, BoundedLineReader.class);
             methodCallExpr.getParentNode().get().replace(methodCallExpr, safeExpression);
             return new TransformationResult<>(Optional.of(safeExpression), weave);
