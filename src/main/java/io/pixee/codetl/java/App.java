@@ -1,4 +1,4 @@
-package io.github.pixee;
+package io.pixee.codetl.java;
 
 /** Hello world! */
 public class App {
