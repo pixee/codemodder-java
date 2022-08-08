@@ -5,6 +5,8 @@ grammar DSL;
  */
 MATCH: 'MATCH';
 CONS_CALL: 'ConsCall';
+STATIC_CALL: 'StaticCall';
+METHOD_CALL: 'MethodCall';
 REPLACE: 'REPLACE';
 WITH: 'WITH';
 
@@ -55,6 +57,16 @@ constructorCall:
        'target' COLON target=StringLiteral
     ;
 
+methodCall:
+    MATCH
+       METHOD_CALL var=Variable
+        'target' COLON source=StringLiteral
+    REPLACE var=Variable WITH
+      STATIC_CALL
+       'target' COLON target=StringLiteral args=StringLiteral
+    ;
+
 start:
-    constructorCall
+    constructorCall |
+    methodCall
     ;
