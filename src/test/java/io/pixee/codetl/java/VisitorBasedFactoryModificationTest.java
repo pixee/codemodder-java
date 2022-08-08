@@ -28,13 +28,13 @@ class VisitorBasedFactoryModificationTest {
   void checkVisitorFactoryCreation() throws IOException {
     var dsl =
         """
-           given method_call getInsecure where
-           name = <init>
-           type = Random
-
-          transform
-           name = <init>
-           type = java.security.SecureRandom""";
+           MATCH
+             ConsCall $c
+               target: "Random"
+           REPLACE $c WITH
+             ConsCall 
+               target: "java.security.SecureRandom"
+        """;
 
     var vulnerableCode = """
             import java.util.Random;

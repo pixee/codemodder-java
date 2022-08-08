@@ -3,16 +3,12 @@ grammar DSL;
 /*
  * Tokens (terminal)
  */
-GIVEN: 'given';
-METHOD_CALL: 'method_call';
-WHERE: 'where';
-NAME: 'name';
-TYPE: 'type';
-RETURN: 'return';
-TRANSFORM: 'transform';
+MATCH: 'MATCH';
+CONS_CALL: 'ConsCall';
+REPLACE: 'REPLACE';
+WITH: 'WITH';
 
-EQ: '=';
-ASSIGN: ':=';
+COLON: ':';
 
 LPAREN : '(';
 RPAREN : ')';
@@ -30,15 +26,21 @@ fragment VALID_ID_CHAR
    ;
 
 variable:
-    Identifier
+    '$'Identifier
    ;
 
-typeName:
-    Identifier ( '.' Identifier)*
-   ;
+StringLiteral
+	:	'"' StringCharacters? '"'
+	;
 
-methodName
-	:	Identifier | '<init>'
+fragment
+StringCharacters
+	:	StringCharacter+
+	;
+
+fragment
+StringCharacter
+	:	~["\\\r\n]
 	;
 
 WHITESPACE: [ \r\n\t]+ -> skip;
@@ -49,13 +51,13 @@ start:
     ;
 
 condition:
-    GIVEN METHOD_CALL var=variable WHERE
-      'name' EQ mName=methodName
-      'type' EQ type=typeName
+    MATCH
+       CONS_CALL var=variable
+        'target' COLON target=StringLiteral
     ;
 
 transformation:
-    TRANSFORM
-      'name' EQ mName=methodName
-      'type' EQ type=typeName
+    REPLACE var=variable WITH
+      CONS_CALL
+       'target' COLON target=StringLiteral
    ;

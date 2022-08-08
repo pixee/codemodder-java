@@ -9,6 +9,7 @@ import io.pixee.codefixer.java.Weave;
 import io.pixee.codetl.dsl.DSLBaseVisitor;
 import io.pixee.codetl.dsl.DSLParser;
 import io.pixee.codetl.java.VisitorFactoryDataBased;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,29 +26,25 @@ public class MyDSLVisitor extends DSLBaseVisitor<VisitorFactory> {
 
   @Override
   public VisitorFactory visitCondition(DSLParser.ConditionContext ctx) {
-    String variable = ctx.var.getText();
-    String methodName = ctx.mName.getText();
-    String type = ctx.type.getText();
+    String target = unquote(ctx.target.getText());
 
     factory
         .getData()
         .add(
             List.of(
                 ObjectCreationPredicateFactory.withArgumentCount(0),
-                ObjectCreationPredicateFactory.withType(type)));
+                ObjectCreationPredicateFactory.withType(target)));
 
     return factory;
   }
 
   @Override
   public VisitorFactory visitTransformation(DSLParser.TransformationContext ctx) {
-    // String variable = ctx..getText();
-    String methodName = ctx.mName.getText();
-    String type = ctx.type.getText();
+    String target = unquote(ctx.target.getText());
 
     Transformer<ObjectCreationExpr, ObjectCreationExpr> transformer =
         (objectCreationExpr, context) -> {
-          objectCreationExpr.setType(new ClassOrInterfaceType(type));
+          objectCreationExpr.setType(new ClassOrInterfaceType(target));
           Weave weave =
               Weave.from(
                   objectCreationExpr.getRange().get().begin.line,
@@ -57,5 +54,10 @@ public class MyDSLVisitor extends DSLBaseVisitor<VisitorFactory> {
     factory.getData().setCreationExpr(transformer);
 
     return factory;
+  }
+
+  @NotNull
+  private String unquote(String target) {
+    return target.substring(1, target.length() - 1);
   }
 }
