@@ -165,7 +165,7 @@ public interface TypeLocator {
       final StopWatch watch = new StopWatch();
       watch.start();
       final String resolvedTypeName = wrappedResolver.locateType(expression);
-      LOG.debug(
+      LOG.trace(
           "Resolved {} to {} in {}ms",
           expression.toString(),
           resolvedTypeName,

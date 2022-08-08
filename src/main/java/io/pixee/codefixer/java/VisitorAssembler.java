@@ -75,9 +75,9 @@ public interface VisitorAssembler {
       factories.addAll(defaultVisitorFactories);
       factories.addAll(pluginFactories);
 
-      LOG.info("Factories available: {}", factories.size());
+      LOG.debug("Factories available: {}", factories.size());
       factories.removeIf(factory -> !ruleContext.isRuleAllowed(factory.ruleId()));
-      LOG.info("Factories after removing disallowed: {}", factories.size());
+      LOG.debug("Factories after removing disallowed: {}", factories.size());
       return Collections.unmodifiableList(factories);
     }
 

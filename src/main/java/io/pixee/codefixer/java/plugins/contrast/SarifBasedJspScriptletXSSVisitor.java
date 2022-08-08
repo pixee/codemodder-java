@@ -114,12 +114,12 @@ public final class SarifBasedJspScriptletXSSVisitor implements FileBasedVisitor 
           LOG.info("Rebuilt JSP line for {}", correlationId);
           return Optional.of(lineWeave);
         } catch (UnsupportedOperationException e) {
-          LOG.info("Couldn't weave line as that JSP output method is not supported yet");
+          LOG.error("Couldn't weave line as that JSP output method is not supported yet");
         } catch (IllegalArgumentException e) {
-          LOG.info("Couldn't weave line as that JSP code couldn't be changed");
+          LOG.error("Couldn't weave line as that JSP code couldn't be changed");
         }
       } else {
-        LOG.info("Couldn't find JSP output on that line");
+        LOG.debug("Couldn't find JSP output on that line");
       }
       return Optional.empty();
     }

@@ -58,6 +58,7 @@
         <versions.log4j>2.17.1</versions.log4j>
         <versions.mockito>4.3.1</versions.mockito>
         <versions.picocli>4.5.2</versions.picocli>
+        <versions.progressbar>0.9.3</versions.progressbar>
 
         <!-- build tools -->
         <versions.fmt-maven-plugin>2.18</versions.fmt-maven-plugin>
@@ -117,6 +118,11 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
+            <version>${versions.log4j}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
             <version>${versions.log4j}</version>
         </dependency>
         <dependency>
@@ -180,6 +186,19 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>${versions.annotations}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.tongfei</groupId>
+            <artifactId>progressbar</artifactId>
+            <version>${versions.progressbar}</version>
+        </dependency>
+
+        <!-- this prevents a silly warning message in our unit tests because log4j2 thinks we're in a web app -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-web</artifactId>
+            <version>${versions.log4j}</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- produces our fun CLI banner -->

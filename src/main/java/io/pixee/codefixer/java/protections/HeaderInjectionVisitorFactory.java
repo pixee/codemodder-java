@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+/** This visitor weaves a newline stripping API into header setting calls. */
 public final class HeaderInjectionVisitorFactory implements VisitorFactory {
 
   @Override

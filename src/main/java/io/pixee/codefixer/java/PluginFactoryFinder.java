@@ -32,7 +32,7 @@ final class PluginFactoryFinder {
             new ObjectMapper().readValue(new FileReader(sarifFile), SarifSchema210.class);
         for (Run run : sarif.getRuns()) {
           ToolComponent tool = run.getTool().getDriver();
-          LOG.info(
+          LOG.debug(
               "Processing SARIF file (name={}, product={}, org={}, version={}",
               tool.getName(),
               tool.getProduct(),

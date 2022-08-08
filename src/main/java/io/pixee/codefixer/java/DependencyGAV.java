@@ -37,6 +37,36 @@ public interface DependencyGAV {
     public String version() {
       return version;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      final Default aDefault = (Default) o;
+      return group.equals(aDefault.group)
+          && artifact.equals(aDefault.artifact)
+          && version.equals(aDefault.version);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(group, artifact, version);
+    }
+
+    @Override
+    public String toString() {
+      return "DependencyGAV{"
+          + "group='"
+          + group
+          + '\''
+          + ", artifact='"
+          + artifact
+          + '\''
+          + ", version='"
+          + version
+          + '\''
+          + '}';
+    }
   }
 
   static DependencyGAV createDefault(

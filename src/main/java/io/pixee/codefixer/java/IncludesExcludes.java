@@ -41,7 +41,7 @@ public interface IncludesExcludes {
       }
 
       for (PathMatcher pathExclude : pathExcludes) {
-        if (pathExclude.matches(file)) {
+        if (!pathExclude.targetsLine() && pathExclude.matches(file)) {
           return false;
         }
       }

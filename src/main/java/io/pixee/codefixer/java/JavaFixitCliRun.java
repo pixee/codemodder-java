@@ -5,12 +5,22 @@ import io.github.pixee.codetf.CodeTFReport;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
+import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 /** This is the connective tissue between the process startup and the weaving process. */
 public final class JavaFixitCliRun {
@@ -52,28 +62,33 @@ public final class JavaFixitCliRun {
       final File repositoryRoot,
       final List<String> includePatterns,
       final List<String> excludePatterns,
-      final File output)
+      final File output,
+      final boolean verbose)
       throws IOException {
 
-    LOG.info("Default rule setting: {}", defaultRuleSetting.getDescription());
-    LOG.info("Exceptions to the default rule setting: {}", ruleExceptions);
-    LOG.info("Repository path: {}", repositoryRoot);
-    LOG.info("Output: {}", output);
-    LOG.info("Includes: {}", includePatterns.size());
-    LOG.info("Excludes: {}", excludePatterns.size());
+    configureLogging(verbose);
+
+    LOG.debug("Default rule setting: {}", defaultRuleSetting.getDescription());
+    LOG.debug("Exceptions to the default rule setting: {}", ruleExceptions);
+    LOG.debug("Repository path: {}", repositoryRoot);
+    LOG.debug("Output: {}", output);
+    LOG.debug("Includes: {}", includePatterns.size());
+    LOG.debug("Excludes: {}", excludePatterns.size());
 
     final StopWatch stopWatch = new StopWatch();
     stopWatch.start();
 
     // find the java source directories -- avoid test directories or other incidental java code
-    LOG.info("Scanning for Java source directories");
-    final List<SourceDirectory> sourceDirectories =
-        directorySearcher.listJavaSourceDirectories(List.of(repositoryRoot));
-    LOG.info("Scanning {} Java source directories", sourceDirectories.size());
+    LOG.debug("Scanning for Java source directories");
 
     // parse the includes & exclude rules we'll need for all the scanning
     final IncludesExcludes includesExcludes =
         IncludesExcludes.fromConfiguration(repositoryRoot, includePatterns, excludePatterns);
+
+    final List<SourceDirectory> sourceDirectories =
+        directorySearcher.listJavaSourceDirectories(List.of(repositoryRoot));
+
+    LOG.debug("Scanning {} Java source directories", sourceDirectories.size());
 
     // get the Java code visitors
     RuleContext ruleContext = RuleContext.of(defaultRuleSetting, ruleExceptions);
@@ -81,9 +96,19 @@ public final class JavaFixitCliRun {
         visitorAssembler.assembleJavaCodeScanningVisitorFactories(
             repositoryRoot, ruleContext, sarifs);
 
+    List<String> allJavaFiles = new ArrayList<>();
+    sourceDirectories.forEach(
+        sourceDirectory ->
+            allJavaFiles.addAll(
+                sourceDirectory.files().stream()
+                    .filter(file -> includesExcludes.shouldInspect(new File(file)))
+                    .collect(Collectors.toList())));
+
+    LOG.debug("Scanning following files: {}", String.join(",", allJavaFiles));
+
     // run the Java code visitors
     final var javaSourceWeaveResult =
-        javaSourceWeaver.weave(sourceDirectories, factories, includesExcludes);
+        javaSourceWeaver.weave(sourceDirectories, allJavaFiles, factories, includesExcludes);
 
     // get the non-Java code visitors
     final List<FileBasedVisitor> fileBasedVisitors =
@@ -96,10 +121,9 @@ public final class JavaFixitCliRun {
 
     // merge the results into one
     final var allWeaveResults = merge(javaSourceWeaveResult, fileBasedWeaveResults);
-    LOG.info(
-        "Analysis complete ({} changes suggested, {} errors encountered)",
-        allWeaveResults.changedFiles().size(),
-        allWeaveResults.unscannableFiles().size());
+    LOG.info("Analysis complete!");
+    LOG.info("\t{} changes", allWeaveResults.changedFiles().size());
+    LOG.info("\t{} errors", allWeaveResults.unscannableFiles().size());
 
     // clean up
     stopWatch.stop();
@@ -113,6 +137,32 @@ public final class JavaFixitCliRun {
     ObjectMapper mapper = new ObjectMapper();
     FileUtils.write(output, mapper.writeValueAsString(report), StandardCharsets.UTF_8);
     return report;
+  }
+
+  private void configureLogging(final boolean verbose) {
+    ConfigurationBuilder<BuiltConfiguration> builder =
+        ConfigurationBuilderFactory.newConfigurationBuilder();
+
+    builder.setStatusLevel(verbose ? Level.DEBUG : Level.INFO);
+    builder.setConfigurationName("DefaultLogger");
+    AppenderComponentBuilder appenderBuilder =
+        builder
+            .newAppender("Console", "CONSOLE")
+            .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
+
+    if (verbose) {
+      appenderBuilder.add(
+          builder.newLayout("PatternLayout").addAttribute("pattern", "%d %p %c [%t] %m%n"));
+    } else {
+      appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern", "%m%n"));
+    }
+    RootLoggerComponentBuilder rootLogger =
+        builder.newRootLogger(verbose ? Level.DEBUG : Level.INFO);
+    rootLogger.add(builder.newAppenderRef("Console"));
+
+    builder.add(appenderBuilder);
+    builder.add(rootLogger);
+    Configurator.reconfigure(builder.build());
   }
 
   /**

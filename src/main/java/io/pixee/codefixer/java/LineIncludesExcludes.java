@@ -46,7 +46,7 @@ public interface LineIncludesExcludes {
 
     @Override
     public boolean matches(int line) {
-      return excludedLines.contains(line);
+      return !excludedLines.contains(line);
     }
   }
 

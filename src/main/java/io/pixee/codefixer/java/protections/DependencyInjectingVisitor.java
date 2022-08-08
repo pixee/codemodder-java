@@ -151,15 +151,15 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
         throw new IllegalArgumentException(e);
       }
 
-      LOG.info("Found the following poms to update:");
+      LOG.debug("Found the following poms to update:");
       pomsToUpdate.forEach(
           (pomFile, newDependencies) -> {
-            LOG.info("{} -> {}", pomFile, newDependencies);
+            LOG.debug("{} -> {}", pomFile, newDependencies);
           });
     }
 
     if (pomsToUpdate.containsKey(file)) {
-      LOG.info("Injecting dependency into: {}", file);
+      LOG.debug("Injecting dependency into: {}", file);
       try {
         var changedFile = transformPomIfNeeded(file, pomsToUpdate.get(file));
         if (changedFile != null) {
@@ -175,7 +175,7 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
 
   private Map<File, Set<DependencyGAV>> scan(
       final File repositoryRoot, final Set<ChangedFile> changedJavaFiles) {
-    LOG.info(
+    LOG.debug(
         "Scanning repository root for all poms representing {} changed Java files",
         changedJavaFiles.size());
     final Map<File, Set<DependencyGAV>> pomDependencyUpdates = new HashMap<>();
@@ -189,7 +189,7 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
             while (parent != null && !Files.isSameFile(parent.toPath(), aboveRepoDir)) {
               var potentialPom = new File(parent, "pom.xml");
               if (potentialPom.exists()) {
-                LOG.info("Adding pom: {}", potentialPom);
+                LOG.debug("Adding pom: {}", potentialPom);
                 Set<DependencyGAV> existingDependenciesForPom =
                     pomDependencyUpdates.computeIfAbsent(potentialPom, k -> new HashSet<>());
                 Set<DependencyGAV> newDependenciesForPom =
@@ -226,7 +226,7 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
                           && dependencyToAdd.artifact().equals(dep.getArtifactId()));
 
       if (!hasDependencyAlready) {
-        LOG.info("Adding dependency {}:{}", dependencyToAdd.group(), dependencyToAdd.artifact());
+        LOG.debug("Adding dependency {}:{}", dependencyToAdd.group(), dependencyToAdd.artifact());
         addedDependencies = true;
         var dependency = new Dependency();
         dependency.setArtifactId(dependencyToAdd.artifact());
@@ -234,7 +234,7 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
         dependency.setVersion(dependencyToAdd.version());
         model.addDependency(dependency);
       } else {
-        LOG.info(
+        LOG.debug(
             "Not weaving pom since it contained dependency {}:{}",
             dependencyToAdd.group(),
             dependencyToAdd.artifact());
@@ -242,7 +242,7 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
     }
 
     if (!addedDependencies) {
-      LOG.info("No new dependencies needed");
+      LOG.debug("No new dependencies needed");
       return null;
     }
 

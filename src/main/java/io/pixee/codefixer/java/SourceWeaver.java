@@ -13,11 +13,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import me.tongfei.progressbar.ProgressBar;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +30,7 @@ public interface SourceWeaver {
   /** Go through the given source directories and return a {@link WeavingResult}. */
   WeavingResult weave(
       List<SourceDirectory> javaSourceDirectories,
+      List<String> javaFiles,
       List<VisitorFactory> visitorFactories,
       IncludesExcludes includesExcludes)
       throws IOException;
@@ -51,6 +51,7 @@ public interface SourceWeaver {
     @Override
     public @NotNull WeavingResult weave(
         final List<SourceDirectory> javaSourceDirectories,
+        final List<String> javaSourceFiles,
         final List<VisitorFactory> visitorFactories,
         final IncludesExcludes includesExcludes)
         throws IOException {
@@ -60,34 +61,26 @@ public interface SourceWeaver {
       final JavaParser javaParser = createJavaParser(javaSourceDirectories);
       final Set<ChangedFile> changedFiles = new HashSet<>();
       final Set<String> unscannableFiles = new HashSet<>();
-      int filesScanned = 0;
 
-      final long totalFiles =
-          javaSourceDirectories.stream()
-              .map(SourceDirectory::files)
-              .flatMap(Collection::stream)
-              .count();
+      final long totalFiles = javaSourceFiles.size();
 
-      LOG.info("Files to scan: {}", totalFiles);
-      for (SourceDirectory sourceDirectory : javaSourceDirectories) {
-        List<String> javaFiles =
-            sourceDirectory.files().stream()
-                .filter(file -> includesExcludes.shouldInspect(new File(file)))
-                .collect(Collectors.toList());
+      LOG.debug("Files to scan: {}", totalFiles);
 
-        for (String javaFile : javaFiles) {
-          filesScanned++;
-          if ((filesScanned % 250) == 0) {
-            LOG.info("Scanned {} files", filesScanned);
-          }
+      try (ProgressBar pb =
+          CLI.createProgressBuilderBase()
+              .setTaskName("Scanning source files")
+              .setInitialMax(totalFiles)
+              .build()) {
+        for (String javaFile : javaSourceFiles) {
           try {
+            pb.step();
             final ChangedFile changedFile =
                 scanIndividualJavaFile(javaParser, javaFile, visitorFactories, includesExcludes);
             if (changedFile != null) {
               changedFiles.add(changedFile);
             }
           } catch (UnparseableFileException e) {
-            LOG.error("Problem parsing file {}", javaFile, e);
+            LOG.debug("Problem parsing file {}", javaFile, e);
             unscannableFiles.add(javaFile);
           }
         }

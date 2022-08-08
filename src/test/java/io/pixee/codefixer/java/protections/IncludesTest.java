@@ -2,15 +2,22 @@ package io.pixee.codefixer.java.protections;
 
 import static io.pixee.codefixer.java.protections.WeavingTests.assertJavaWeaveWorkedAndWontReweave;
 import static io.pixee.codefixer.java.protections.WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.pixee.codefixer.java.IncludesExcludes;
+import io.pixee.codefixer.java.LineIncludesExcludes;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
+/**
+ * This class is a mix of integration and unit tests, and should probably move completely to unit
+ * tests.
+ */
 final class IncludesTest {
 
   @Test
@@ -48,9 +55,31 @@ final class IncludesTest {
 
   @Test
   void it_honors_excludes_path_and_line() throws IOException {
-    assertNoFindingsFoundWithIncludeExcludes(
-        Collections.emptyList(),
-        List.of("src/test/java/com/acme/testcode/RequestForwardVulnerability.java:16"));
+    IncludesExcludes includesExcludes =
+        IncludesExcludes.fromConfiguration(
+            new File(""),
+            Collections.emptyList(),
+            List.of("src/test/java/com/acme/testcode/RequestForwardVulnerability.java:16"));
+    assertThat(
+        includesExcludes.shouldInspect(
+            new File("src/test/java/com/acme/testcode/RequestForwardVulnerability.java")),
+        is(true));
+    assertThat(includesExcludes.shouldInspect(new File("src/test/java/Anything.java")), is(true));
+
+    // all lines are allowed on random files that match the include
+    LineIncludesExcludes otherAllowedFile =
+        includesExcludes.getIncludesExcludesForFile(new File("src/test/java/Anything.java"));
+    assertThat(otherAllowedFile.matches(1), is(true));
+    assertThat(otherAllowedFile.matches(16), is(true));
+    assertThat(otherAllowedFile.matches(1000), is(true));
+
+    // only line 16 is excluded in the file in question
+    LineIncludesExcludes mostlyAllowedFile =
+        includesExcludes.getIncludesExcludesForFile(
+            new File("src/test/java/com/acme/testcode/RequestForwardVulnerability.java"));
+    assertThat(mostlyAllowedFile.matches(1), is(true));
+    assertThat(mostlyAllowedFile.matches(16), is(false));
+    assertThat(mostlyAllowedFile.matches(1000), is(true));
   }
 
   @Test
@@ -66,18 +95,32 @@ final class IncludesTest {
 
   @Test
   void it_honors_unmatching_path() throws IOException {
-    assertNoFindingsFoundWithSingleInclude("src/non_existent/");
+    IncludesExcludes includesExcludes =
+        IncludesExcludes.fromConfiguration(
+            new File("src/non_existent/"), List.of("src/test/"), Collections.emptyList());
+    assertThat(
+        includesExcludes.shouldInspect(new File("src/non_existent/Anything.java")), is(false));
   }
 
   @Test
   void it_rejects_matching_path_with_longer_exclude_path() throws IOException {
-    assertNoFindingsFoundWithIncludeExcludes(List.of("src/test/"), List.of("src/test/java"));
+    IncludesExcludes includesExcludes =
+        IncludesExcludes.fromConfiguration(
+            new File(""), List.of("src/test/"), List.of("src/test/java"));
+    assertThat(includesExcludes.shouldInspect(new File("src/test/java/Foo.java")), is(false));
   }
 
   @Test
   void it_honors_includes_matching_path_and_unmatching_line() throws IOException {
     assertNoFindingsFoundWithSingleInclude(
         "src/test/java/com/acme/testcode/RequestForwardVulnerability.java:99");
+
+    IncludesExcludes includesExcludes =
+        IncludesExcludes.fromConfiguration(
+            new File(""),
+            List.of("src/test/java/com/acme/testcode/RequestForwardVulnerability.java:99"),
+            Collections.emptyList());
+    assertThat(includesExcludes.shouldInspect(new File("src/test/java/Foo.java")), is(false));
   }
 
   private void assertNoFindingsFoundWithIncludeExcludes(

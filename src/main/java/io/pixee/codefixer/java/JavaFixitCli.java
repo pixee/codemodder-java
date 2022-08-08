@@ -64,6 +64,13 @@ public final class JavaFixitCli implements Callable<Integer> {
       required = false)
   private List<String> excludes;
 
+  @CommandLine.Option(
+      names = {"-v", "--verbose"},
+      description = "Specify whether debug logging should be enabled",
+      defaultValue = "false",
+      required = false)
+  private boolean verbose;
+
   public static void main(final String[] args) throws IOException {
     String banner = FigletFont.convertOneLine("java-fixit");
     System.out.println(banner);
@@ -84,8 +91,10 @@ public final class JavaFixitCli implements Callable<Integer> {
           repositoryRoot,
           includes != null ? includes : Collections.emptyList(),
           excludes != null ? excludes : Collections.emptyList(),
-          output);
+          output,
+          verbose);
       stopwatch.stop();
+
       LOG.info("Weaved repository in {}", formatDurationHMS(stopwatch.elapsed().toMillis()));
       rc = cliSuccessCode;
     } catch (Exception e) {
