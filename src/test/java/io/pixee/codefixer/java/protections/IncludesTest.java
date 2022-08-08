@@ -57,7 +57,7 @@ final class IncludesTest {
   void it_honors_excludes_path_and_line() throws IOException {
     IncludesExcludes includesExcludes =
         IncludesExcludes.fromConfiguration(
-            new File(""),
+            new File("."),
             Collections.emptyList(),
             List.of("src/test/java/com/acme/testcode/RequestForwardVulnerability.java:16"));
     assertThat(
@@ -106,7 +106,7 @@ final class IncludesTest {
   void it_rejects_matching_path_with_longer_exclude_path() throws IOException {
     IncludesExcludes includesExcludes =
         IncludesExcludes.fromConfiguration(
-            new File(""), List.of("src/test/"), List.of("src/test/java"));
+            new File("."), List.of("src/test/"), List.of("src/test/java"));
     assertThat(includesExcludes.shouldInspect(new File("src/test/java/Foo.java")), is(false));
   }
 
@@ -117,7 +117,7 @@ final class IncludesTest {
 
     IncludesExcludes includesExcludes =
         IncludesExcludes.fromConfiguration(
-            new File(""),
+            new File("."),
             List.of("src/test/java/com/acme/testcode/RequestForwardVulnerability.java:99"),
             Collections.emptyList());
     assertThat(includesExcludes.shouldInspect(new File("src/test/java/Foo.java")), is(false));
@@ -128,7 +128,7 @@ final class IncludesTest {
     scanAndAssertNoErrorsWithNoFilesChanged(
         "src/test/java/com/acme/testcode/RequestForwardVulnerability.java",
         new JakartaForwardVisitoryFactory(),
-        IncludesExcludes.fromConfiguration(new File(""), includes, excludes));
+        IncludesExcludes.fromConfiguration(new File("."), includes, excludes));
   }
 
   private void assertNoFindingsFoundWithSingleInclude(final String includePattern)
@@ -137,7 +137,7 @@ final class IncludesTest {
         "src/test/java/com/acme/testcode/RequestForwardVulnerability.java",
         new JakartaForwardVisitoryFactory(),
         IncludesExcludes.fromConfiguration(
-            new File(""), List.of(includePattern), Collections.emptyList()));
+            new File("."), List.of(includePattern), Collections.emptyList()));
   }
 
   private void assertItWorksWithWithIncludeExcludes(
@@ -145,7 +145,7 @@ final class IncludesTest {
     assertJavaWeaveWorkedAndWontReweave(
         "src/test/java/com/acme/testcode/RequestForwardVulnerability.java",
         new JakartaForwardVisitoryFactory(),
-        IncludesExcludes.fromConfiguration(new File(""), includePatterns, excludePatterns));
+        IncludesExcludes.fromConfiguration(new File("."), includePatterns, excludePatterns));
   }
 
   private void assertItWorksWithSingleInclude(final String includePattern) throws IOException {
@@ -153,6 +153,6 @@ final class IncludesTest {
         "src/test/java/com/acme/testcode/RequestForwardVulnerability.java",
         new JakartaForwardVisitoryFactory(),
         IncludesExcludes.fromConfiguration(
-            new File(""), List.of(includePattern), Collections.emptyList()));
+            new File("."), List.of(includePattern), Collections.emptyList()));
   }
 }

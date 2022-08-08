@@ -69,8 +69,8 @@ public final class JavaFixitCliRun {
     LOG.debug("Exceptions to the default rule setting: {}", ruleExceptions);
     LOG.debug("Repository path: {}", repositoryRoot);
     LOG.debug("Output: {}", output);
-    LOG.debug("Includes: {}", includePatterns.size());
-    LOG.debug("Excludes: {}", excludePatterns.size());
+    LOG.debug("Includes: {}", includePatterns);
+    LOG.debug("Excludes: {}", excludePatterns);
 
     final StopWatch stopWatch = new StopWatch();
     stopWatch.start();
@@ -85,7 +85,11 @@ public final class JavaFixitCliRun {
     final List<SourceDirectory> sourceDirectories =
         directorySearcher.listJavaSourceDirectories(List.of(repositoryRoot));
 
-    LOG.debug("Scanning {} Java source directories", sourceDirectories.size());
+    sourceDirectories.forEach(
+        sourceDirectory -> {
+          LOG.debug("Scanning Java source directory: {}", sourceDirectory.path());
+          LOG.debug("Scanning Java source files from that directory: {}", sourceDirectory.files());
+        });
 
     // get the Java code visitors
     RuleContext ruleContext = RuleContext.of(defaultRuleSetting, ruleExceptions);
@@ -101,7 +105,7 @@ public final class JavaFixitCliRun {
                     .filter(file -> includesExcludes.shouldInspect(new File(file)))
                     .collect(Collectors.toList())));
 
-    LOG.debug("Scanning following files: {}", String.join(",", allJavaFiles));
+    LOG.debug("Scanning following files: {}", allJavaFiles);
 
     // run the Java code visitors
     final var javaSourceWeaveResult =
@@ -121,6 +125,18 @@ public final class JavaFixitCliRun {
     LOG.info("Analysis complete!");
     LOG.info("\t{} changes", allWeaveResults.changedFiles().size());
     LOG.info("\t{} errors", allWeaveResults.unscannableFiles().size());
+
+    LOG.debug("\n");
+    for (ChangedFile changedFile : allWeaveResults.changedFiles()) {
+      LOG.debug("File: {}", changedFile.originalFilePath());
+      for (Weave weave : changedFile.weaves()) {
+        LOG.debug("\tLine: {}", weave.lineNumber());
+        LOG.debug("\tRule: {}", weave.changeCode());
+        LOG.debug("\tDependencies required: {}", weave.getDependenciesNeeded());
+        LOG.debug("\n");
+      }
+      LOG.debug("\n");
+    }
 
     // clean up
     stopWatch.stop();

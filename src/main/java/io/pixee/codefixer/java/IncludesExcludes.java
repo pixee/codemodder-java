@@ -1,7 +1,6 @@
 package io.pixee.codefixer.java;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /** This is the main interaction point with types for detecting if a path should be included. */
@@ -129,12 +128,8 @@ public interface IncludesExcludes {
       line = null;
     }
     try {
-      return new PathMatcher(
-          repositoryRoot,
-          new File(repositoryRoot.getAbsolutePath() + File.separatorChar + pathPrefix)
-              .getCanonicalPath(),
-          line);
-    } catch (IOException e) {
+      return new PathMatcher(repositoryRoot, pathPrefix, line);
+    } catch (Exception e) {
       throw new IllegalArgumentException("couldn't get canonical path", e);
     }
   }
