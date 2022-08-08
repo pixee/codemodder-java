@@ -12,6 +12,17 @@ WITH: 'WITH';
 
 COLON: ':';
 
+INSERT: 'INSERT';
+INTO: 'INTO';
+DATA: 'DATA';
+FLOW: 'FLOW';
+BEFORE: 'BEFORE';
+AFTER: 'AFTER';
+
+InsertIntoDataFlow:
+    INSERT INTO DATA FLOW ( BEFORE | AFTER )
+   ;
+
 Identifier
    : VALID_ID_START VALID_ID_CHAR*
    ;
@@ -57,13 +68,20 @@ constructorCall:
        'target' COLON target=StringLiteral
     ;
 
+replaceStaticCall:
+    (
+        ( REPLACE var=Variable WITH ) |
+        InsertIntoDataFlow
+    )
+      STATIC_CALL
+       'target' COLON target=StringLiteral args=StringLiteral
+    ;
+
 methodCall:
     MATCH
        METHOD_CALL var=Variable
         'target' COLON source=StringLiteral
-    REPLACE var=Variable WITH
-      STATIC_CALL
-       'target' COLON target=StringLiteral args=StringLiteral
+    ( replaceStaticCall )
     ;
 
 start:

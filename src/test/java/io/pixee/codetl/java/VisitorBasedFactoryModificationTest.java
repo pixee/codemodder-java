@@ -37,6 +37,8 @@ class VisitorBasedFactoryModificationTest {
         """;
 
     var vulnerableCode = """
+            package a.b.c;
+            
             import java.util.Random;
                         
             interface RandomVulnerability {
@@ -50,6 +52,8 @@ class VisitorBasedFactoryModificationTest {
               long getLong();
             }""";
     var expected = """
+            package a.b.c;
+            
             import java.util.Random;
                         
             interface RandomVulnerability {
