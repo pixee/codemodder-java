@@ -8,7 +8,6 @@ import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.Weave;
 import io.pixee.codetl.dsl.DSLBaseVisitor;
 import io.pixee.codetl.dsl.DSLParser;
-import io.pixee.codetl.java.VisitorFactoryData;
 import io.pixee.codetl.java.VisitorFactoryDataBased;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,17 +25,22 @@ public class MyDSLVisitor extends DSLBaseVisitor<VisitorFactory> {
   }
 
   @Override
-  public VisitorFactory visitConstructorCall(DSLParser.ConstructorCallContext ctx) {
+  public VisitorFactory visitConstructorMatch(DSLParser.ConstructorMatchContext ctx) {
     String source = unquote(ctx.source.getText());
-    String target = unquote(ctx.target.getText());
 
-    VisitorFactoryData<ObjectCreationExpr> data = factory
-            .getData();
-    data
+    factory
+            .getData()
             .add(
                     List.of(
                             ObjectCreationPredicateFactory.withArgumentCount(0),
                             ObjectCreationPredicateFactory.withType(source)));
+
+    return factory;
+  }
+
+  @Override
+  public VisitorFactory visitConstructorReplace(DSLParser.ConstructorReplaceContext ctx) {
+    String target = unquote(ctx.target.getText());
 
     Transformer<ObjectCreationExpr, ObjectCreationExpr> transformer =
             (objectCreationExpr, context) -> {
@@ -48,7 +52,8 @@ public class MyDSLVisitor extends DSLBaseVisitor<VisitorFactory> {
               return new TransformationResult<>(Optional.empty(), weave);
             };
 
-    data.setCreationExpr(transformer);
+    factory
+            .getData().setCreationExpr(transformer);
 
     return factory;
   }

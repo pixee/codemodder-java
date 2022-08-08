@@ -19,6 +19,10 @@ FLOW: 'FLOW';
 BEFORE: 'BEFORE';
 AFTER: 'AFTER';
 
+AND: 'AND';
+OR: 'OR';
+WHERE: 'WHERE';
+
 InsertIntoDataFlow:
     INSERT INTO DATA FLOW ( BEFORE | AFTER )
    ;
@@ -59,32 +63,48 @@ WHITESPACE: [ \r\n\t]+ -> skip;
  * Rules
  */
 
-constructorCall:
+match:
     MATCH
-       CONS_CALL var=Variable
-        'target' COLON source=StringLiteral
-    REPLACE var=Variable WITH
-      CONS_CALL
-       'target' COLON target=StringLiteral
+    constructorMatch
+    ;
+replace:
+    REPLACE
+    constructorReplace |
+    staticCallReplace
     ;
 
-replaceStaticCall:
-    (
-        ( REPLACE var=Variable WITH ) |
-        InsertIntoDataFlow
-    )
-      STATIC_CALL
+constructorMatch:
+    CONS_CALL var=Variable
+        'target' COLON source=StringLiteral
+    ;
+
+constructorReplace:
+    var=Variable WITH
+    CONS_CALL
+        'target' COLON target=StringLiteral
+    ;
+
+methodCallMatch:
+    METHOD_CALL var=Variable
+        'target' COLON source=StringLiteral
+    ;
+
+staticCallReplace:
+    STATIC_CALL
        'target' COLON target=StringLiteral args=StringLiteral
     ;
 
-methodCall:
-    MATCH
-       METHOD_CALL var=Variable
-        'target' COLON source=StringLiteral
-    ( replaceStaticCall )
+clause:
+    var=Identifier '.' method=Identifier '(' target = StringLiteral ')'
+    ;
+
+where:
+    WHERE
+    clause ( (AND | OR) clause )*
     ;
 
 start:
-    constructorCall |
-    methodCall
+    match
+    where
+    replace
     ;
