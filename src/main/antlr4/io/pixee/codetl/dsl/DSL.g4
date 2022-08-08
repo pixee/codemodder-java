@@ -65,7 +65,8 @@ WHITESPACE: [ \r\n\t]+ -> skip;
 
 match:
     MATCH
-    constructorMatch
+    constructorMatch |
+    methodCallMatch
     ;
 replace:
     REPLACE
