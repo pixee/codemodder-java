@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -122,14 +123,25 @@ public final class JavaFixitCliRun {
 
     // merge the results into one
     final var allWeaveResults = merge(javaSourceWeaveResult, fileBasedWeaveResults);
+    final var changesCount =
+        allWeaveResults.changedFiles().stream()
+            .map(changedFile -> changedFile.weaves().size())
+            .mapToInt(Integer::intValue)
+            .sum();
     LOG.info("Analysis complete!");
-    LOG.info("\t{} changes", allWeaveResults.changedFiles().size());
+    LOG.info("\t{} files changed", allWeaveResults.changedFiles().size());
+    LOG.info("\t{} changes suggested", changesCount);
     LOG.info("\t{} errors", allWeaveResults.unscannableFiles().size());
 
     LOG.debug("\n");
-    for (ChangedFile changedFile : allWeaveResults.changedFiles()) {
+    List<ChangedFile> sortedChangedFiles = new ArrayList<>(allWeaveResults.changedFiles());
+    sortedChangedFiles.sort(Comparator.comparing(ChangedFile::originalFilePath));
+
+    for (ChangedFile changedFile : sortedChangedFiles) {
       LOG.debug("File: {}", changedFile.originalFilePath());
-      for (Weave weave : changedFile.weaves()) {
+      List<Weave> sortedWeaves = new ArrayList<>(changedFile.weaves());
+      sortedWeaves.sort(Comparator.comparing(Weave::lineNumber));
+      for (Weave weave : sortedWeaves) {
         LOG.debug("\tLine: {}", weave.lineNumber());
         LOG.debug("\tRule: {}", weave.changeCode());
         LOG.debug("\tDependencies required: {}", weave.getDependenciesNeeded());
