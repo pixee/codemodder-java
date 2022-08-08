@@ -10,7 +10,7 @@ final class CLI {
 
   static ProgressBarBuilder createProgressBuilderBase() {
     return new ProgressBarBuilder()
-        .setStyle(ProgressBarStyle.COLORFUL_UNICODE_BLOCK)
+        .setStyle(ProgressBarStyle.ASCII)
         .setUnit("", 1)
         .setUpdateIntervalMillis(100)
         .setSpeedUnit(ChronoUnit.SECONDS)

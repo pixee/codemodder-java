@@ -95,10 +95,11 @@ public final class JavaFixitCli implements Callable<Integer> {
           verbose);
       stopwatch.stop();
 
-      LOG.info("Weaved repository in {}", formatDurationHMS(stopwatch.elapsed().toMillis()));
+      Logger log = LogManager.getLogger(JavaFixitCli.class);
+      log.info("Weaved repository in {}", formatDurationHMS(stopwatch.elapsed().toMillis()));
       rc = cliSuccessCode;
     } catch (Exception e) {
-      LOG.error("Problem weaving", e);
+      e.printStackTrace();
       rc = cliErrorCode;
     }
     return rc;
@@ -120,5 +121,4 @@ public final class JavaFixitCli implements Callable<Integer> {
 
   private static final int cliSuccessCode = 0;
   private static final int cliErrorCode = -1;
-  private static final Logger LOG = LogManager.getLogger(JavaFixitCli.class);
 }

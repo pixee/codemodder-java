@@ -33,7 +33,7 @@ public interface SourceDirectoryLister {
 
       ProgressBar pb =
           CLI.createProgressBuilderBase()
-              .setTaskName("Scanning source directories")
+              .setTaskName("Scanning for source directories")
               .setInitialMax(0)
               .setUnit("%", 1)
               .build();

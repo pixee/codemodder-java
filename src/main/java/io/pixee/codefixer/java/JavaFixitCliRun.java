@@ -14,13 +14,10 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
-import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
-import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
-import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
-import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
 /** This is the connective tissue between the process startup and the weaving process. */
 public final class JavaFixitCliRun {
@@ -140,29 +137,20 @@ public final class JavaFixitCliRun {
   }
 
   private void configureLogging(final boolean verbose) {
-    ConfigurationBuilder<BuiltConfiguration> builder =
-        ConfigurationBuilderFactory.newConfigurationBuilder();
+    LoggerContext ctx = (LoggerContext) LogManager.getContext(getClass().getClassLoader(), false);
+    org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
+    LoggerConfig rootLoggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+    rootLoggerConfig.setLevel(Level.ERROR);
 
-    builder.setStatusLevel(verbose ? Level.DEBUG : Level.INFO);
-    builder.setConfigurationName("DefaultLogger");
-    AppenderComponentBuilder appenderBuilder =
-        builder
-            .newAppender("Console", "CONSOLE")
-            .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
-
-    if (verbose) {
-      appenderBuilder.add(
-          builder.newLayout("PatternLayout").addAttribute("pattern", "%d %p %c [%t] %m%n"));
-    } else {
-      appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern", "%m%n"));
-    }
-    RootLoggerComponentBuilder rootLogger =
-        builder.newRootLogger(verbose ? Level.DEBUG : Level.INFO);
-    rootLogger.add(builder.newAppenderRef("Console"));
-
-    builder.add(appenderBuilder);
-    builder.add(rootLogger);
-    Configurator.reconfigure(builder.build());
+    String loggerName = getClass().getPackageName();
+    LoggerConfig pixeeConfig =
+        new LoggerConfig(loggerName, verbose ? Level.DEBUG : Level.INFO, false);
+    pixeeConfig.setParent(rootLoggerConfig);
+    ConsoleAppender appender =
+        ConsoleAppender.createDefaultAppenderForLayout(PatternLayout.createDefaultLayout());
+    pixeeConfig.addAppender(appender, Level.ALL, null);
+    config.addLogger(loggerName, pixeeConfig);
+    ctx.updateLoggers();
   }
 
   /**
@@ -183,5 +171,5 @@ public final class JavaFixitCliRun {
     return WeavingResult.createDefault(combinedChangedFiles, combinedUnscannableFiles);
   }
 
-  private static final Logger LOG = LogManager.getLogger(JavaFixitCliRun.class);
+  private static Logger LOG = LogManager.getLogger(JavaFixitCliRun.class);
 }
