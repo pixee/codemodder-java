@@ -10,9 +10,6 @@ WITH: 'WITH';
 
 COLON: ':';
 
-LPAREN : '(';
-RPAREN : ')';
-
 Identifier
    : VALID_ID_START VALID_ID_CHAR*
    ;
@@ -25,7 +22,7 @@ fragment VALID_ID_CHAR
    : VALID_ID_START | ('0' .. '9')
    ;
 
-variable:
+Variable:
     '$'Identifier
    ;
 
@@ -45,19 +42,19 @@ StringCharacter
 
 WHITESPACE: [ \r\n\t]+ -> skip;
 
-start:
-    condition
-    transformation
-    ;
+/*
+ * Rules
+ */
 
-condition:
+constructorCall:
     MATCH
-       CONS_CALL var=variable
-        'target' COLON target=StringLiteral
-    ;
-
-transformation:
-    REPLACE var=variable WITH
+       CONS_CALL var=Variable
+        'target' COLON source=StringLiteral
+    REPLACE var=Variable WITH
       CONS_CALL
        'target' COLON target=StringLiteral
-   ;
+    ;
+
+start:
+    constructorCall
+    ;
