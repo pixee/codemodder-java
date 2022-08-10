@@ -33,11 +33,11 @@ public final class LoggingConfigurator extends ContextAwareBase implements Confi
 
     ca.setEncoder(patternLayoutEncoder);
     ca.start();
-    Logger rootLogger = lc.getLogger(ROOT_LOGGER_NAME);
-    rootLogger.setLevel(Level.INFO);
-    rootLogger.addAppender(ca);
+    Logger ourLogger = lc.getLogger(OUR_ROOT_LOGGER_NAME);
+    ourLogger.setLevel(Level.INFO);
+    ourLogger.addAppender(ca);
   }
 
-  public static final String ROOT_LOGGER_NAME = "ROOT";
+  public static final String OUR_ROOT_LOGGER_NAME = JavaFixitCli.class.getPackageName();
   public static final String APPENDER_NAME = "pixeeConsoleAppender";
 }
