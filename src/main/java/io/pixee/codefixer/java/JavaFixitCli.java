@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -72,7 +72,7 @@ public final class JavaFixitCli implements Callable<Integer> {
   private boolean verbose;
 
   public static void main(final String[] args) throws IOException {
-    String banner = FigletFont.convertOneLine("java-fixit");
+    String banner = FigletFont.convertOneLine("open-pixee");
     System.out.println(banner);
     final int exitCode = new CommandLine(new JavaFixitCli()).execute(args);
     System.exit(exitCode);
@@ -95,7 +95,7 @@ public final class JavaFixitCli implements Callable<Integer> {
           verbose);
       stopwatch.stop();
 
-      Logger log = LogManager.getLogger(JavaFixitCli.class);
+      Logger log = LoggerFactory.getLogger(JavaFixitCli.class);
       log.info("Weaved repository in {}", formatDurationHMS(stopwatch.elapsed().toMillis()));
       rc = cliSuccessCode;
     } catch (Exception e) {

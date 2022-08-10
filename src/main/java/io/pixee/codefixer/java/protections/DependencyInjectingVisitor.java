@@ -20,13 +20,13 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is an important default weaver that will inject the dependencies that the weaves require.
@@ -278,5 +278,5 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
   @VisibleForTesting static final String projectGroup = "io.github.pixee";
   @VisibleForTesting static final String projectVersion = "0.0.2";
   private static final String nl = System.getProperty("line.separator");
-  private static final Logger LOG = LogManager.getLogger(DependencyInjectingVisitor.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DependencyInjectingVisitor.class);
 }

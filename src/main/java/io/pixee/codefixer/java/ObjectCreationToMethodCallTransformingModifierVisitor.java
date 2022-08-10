@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the glue utility for giving users the ability to gives us a set of {@link Predicate} and
@@ -58,5 +58,5 @@ public class ObjectCreationToMethodCallTransformingModifierVisitor
   }
 
   private static final Logger LOG =
-      LogManager.getLogger(ObjectCreationToMethodCallTransformingModifierVisitor.class);
+      LoggerFactory.getLogger(ObjectCreationToMethodCallTransformingModifierVisitor.class);
 }

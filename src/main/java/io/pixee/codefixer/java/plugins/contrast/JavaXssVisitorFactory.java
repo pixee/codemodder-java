@@ -30,8 +30,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Attempts to fix XSS vulnerabilities discovered by Contrast in Java code. Contrast discovers XSS
@@ -159,5 +159,5 @@ final class JavaXssVisitorFactory implements VisitorFactory {
     return lineNumbers;
   }
 
-  private static final Logger LOG = LogManager.getLogger(JavaXssVisitorFactory.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JavaXssVisitorFactory.class);
 }

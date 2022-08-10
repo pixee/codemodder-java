@@ -16,9 +16,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This type does the heavy lifting for many protections that can work in a simple
@@ -161,5 +161,5 @@ public abstract class RegexTextVisitor implements FileBasedVisitor {
   public abstract String getReplacementFor(String matchingSnippet);
 
   private static final String nl = System.getProperty("line.separator");
-  private static final Logger LOG = LogManager.getLogger(RegexTextVisitor.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RegexTextVisitor.class);
 }

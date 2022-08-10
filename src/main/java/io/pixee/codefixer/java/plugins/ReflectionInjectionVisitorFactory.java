@@ -25,8 +25,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Protects against "reflection injection" weaknesses -- where user input is used to build a class
@@ -122,5 +122,6 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
   }
 
   public static final String ID = "pixee:java/reflection-injection";
-  private static final Logger LOG = LogManager.getLogger(ReflectionInjectionVisitorFactory.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(ReflectionInjectionVisitorFactory.class);
 }

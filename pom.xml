@@ -55,7 +55,7 @@
         <versions.jproc>2.6.2</versions.jproc>
         <versions.junit-jupiter>5.8.2</versions.junit-jupiter>
         <versions.juniversalchardet>2.4.0</versions.juniversalchardet>
-        <versions.log4j>2.17.1</versions.log4j>
+        <versions.logback>1.2.11</versions.logback>
         <versions.mockito>4.3.1</versions.mockito>
         <versions.picocli>4.5.2</versions.picocli>
         <versions.progressbar>0.9.3</versions.progressbar>
@@ -114,16 +114,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>${versions.commons-collections4}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${versions.log4j}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${versions.log4j}</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
@@ -192,13 +182,10 @@
             <artifactId>progressbar</artifactId>
             <version>${versions.progressbar}</version>
         </dependency>
-
-        <!-- this prevents a silly warning message in our unit tests because log4j2 thinks we're in a web app -->
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-web</artifactId>
-            <version>${versions.log4j}</version>
-            <scope>test</scope>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${versions.logback}</version>
         </dependency>
 
         <!-- produces our fun CLI banner -->

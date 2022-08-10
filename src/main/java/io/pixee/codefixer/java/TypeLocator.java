@@ -14,8 +14,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Helps resolve the type name of a source code expression. */
 public interface TypeLocator {
@@ -174,7 +174,7 @@ public interface TypeLocator {
       return resolvedTypeName;
     }
 
-    private static final Logger LOG = LogManager.getLogger(TimedLocator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TimedLocator.class);
   }
 
   /**

@@ -7,8 +7,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Assembles a list of {@link VisitorFactory} we'll need to weave based on configuration. */
 public interface VisitorAssembler {
@@ -92,5 +92,5 @@ public interface VisitorAssembler {
     }
   }
 
-  Logger LOG = LogManager.getLogger(VisitorAssembler.class);
+  Logger LOG = LoggerFactory.getLogger(VisitorAssembler.class);
 }

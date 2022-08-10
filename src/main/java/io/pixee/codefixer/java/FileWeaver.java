@@ -9,8 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This type is responsible for performing all the weaves that are not run on traditional Java
@@ -65,6 +65,6 @@ interface FileWeaver {
       return WeavingResult.createDefault(changedFiles, unscannableFiles);
     }
 
-    private static final Logger LOG = LogManager.getLogger(Default.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Default.class);
   }
 }

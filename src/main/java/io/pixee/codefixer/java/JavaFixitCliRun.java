@@ -1,5 +1,6 @@
 package io.pixee.codefixer.java;
 
+import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.pixee.codetf.CodeTFReport;
 import java.io.File;
@@ -12,13 +13,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.ConsoleAppender;
-import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** This is the connective tissue between the process startup and the weaving process. */
 public final class JavaFixitCliRun {
@@ -64,7 +60,9 @@ public final class JavaFixitCliRun {
       final boolean verbose)
       throws IOException {
 
-    configureLogging(verbose);
+    if (verbose) {
+      enableDebugLogging();
+    }
 
     LOG.debug("Default rule setting: {}", defaultRuleSetting.getDescription());
     LOG.debug("Exceptions to the default rule setting: {}", ruleExceptions);
@@ -147,7 +145,6 @@ public final class JavaFixitCliRun {
         LOG.debug("\tDependencies required: {}", weave.getDependenciesNeeded());
         LOG.debug("\n");
       }
-      LOG.debug("\n");
     }
 
     // clean up
@@ -164,21 +161,11 @@ public final class JavaFixitCliRun {
     return report;
   }
 
-  private void configureLogging(final boolean verbose) {
-    LoggerContext ctx = (LoggerContext) LogManager.getContext(getClass().getClassLoader(), false);
-    org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
-    LoggerConfig rootLoggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
-    rootLoggerConfig.setLevel(Level.ERROR);
-
-    String loggerName = getClass().getPackageName();
-    LoggerConfig pixeeConfig =
-        new LoggerConfig(loggerName, verbose ? Level.DEBUG : Level.INFO, false);
-    pixeeConfig.setParent(rootLoggerConfig);
-    ConsoleAppender appender =
-        ConsoleAppender.createDefaultAppenderForLayout(PatternLayout.createDefaultLayout());
-    pixeeConfig.addAppender(appender, Level.ALL, null);
-    config.addLogger(loggerName, pixeeConfig);
-    ctx.updateLoggers();
+  /** Dynamically raises the log level to DEBUG for more output! */
+  private void enableDebugLogging() {
+    ch.qos.logback.classic.Logger rootLogger =
+        (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    rootLogger.setLevel(Level.toLevel("DEBUG"));
   }
 
   /**
@@ -199,5 +186,5 @@ public final class JavaFixitCliRun {
     return WeavingResult.createDefault(combinedChangedFiles, combinedUnscannableFiles);
   }
 
-  private static Logger LOG = LogManager.getLogger(JavaFixitCliRun.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JavaFixitCliRun.class);
 }

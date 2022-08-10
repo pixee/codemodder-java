@@ -19,8 +19,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Fixes issues reported under the id "java/missing-jwt-signature-check" */
 final class UnverifiedJwtParseVisitorFactory implements VisitorFactory {
@@ -115,5 +115,5 @@ final class UnverifiedJwtParseVisitorFactory implements VisitorFactory {
 
   private static final String missingJwtSignatureCheckRuleId =
       "codeql:java/missing-jwt-signature-check";
-  private static final Logger LOG = LogManager.getLogger(UnverifiedJwtParseVisitorFactory.class);
+  private static final Logger LOG = LoggerFactory.getLogger(UnverifiedJwtParseVisitorFactory.class);
 }

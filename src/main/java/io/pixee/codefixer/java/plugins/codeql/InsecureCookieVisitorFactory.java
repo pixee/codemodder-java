@@ -25,8 +25,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Fixes issues reported under the id "java/insecure-cookie" */
 final class InsecureCookieVisitorFactory implements VisitorFactory {
@@ -118,5 +118,5 @@ final class InsecureCookieVisitorFactory implements VisitorFactory {
   }
 
   private static final String insecureCookieRuleId = "codeql:java/insecure-cookie";
-  private static final Logger LOG = LogManager.getLogger(InsecureCookieVisitorFactory.class);
+  private static final Logger LOG = LoggerFactory.getLogger(InsecureCookieVisitorFactory.class);
 }

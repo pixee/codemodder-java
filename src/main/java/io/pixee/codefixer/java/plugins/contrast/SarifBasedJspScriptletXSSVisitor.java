@@ -19,8 +19,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The scope of this is to fix simple JSP expressions that our default protection wouldn't help
@@ -225,5 +225,5 @@ public final class SarifBasedJspScriptletXSSVisitor implements FileBasedVisitor 
     return WeavingResult.createDefault(Collections.emptySet(), unscannableFiles);
   }
 
-  private static final Logger LOG = LogManager.getLogger(SarifBasedJspScriptletXSSVisitor.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SarifBasedJspScriptletXSSVisitor.class);
 }
