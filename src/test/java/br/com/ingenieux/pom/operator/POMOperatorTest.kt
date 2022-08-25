@@ -1,8 +1,10 @@
 package br.com.ingenieux.pom.operator
 
+import br.com.ingenieux.pom.operator.diff.DiffMatchPatch
 import br.com.ingenieux.pom.operator.util.Util.buildLookupExpressionForDependency
 import br.com.ingenieux.pom.operator.util.Util.selectXPathNodes
 import org.dom4j.Document
+import org.dom4j.io.SAXWriter
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.xmlunit.builder.DiffBuilder
@@ -10,6 +12,8 @@ import org.xmlunit.builder.Input
 import org.xmlunit.diff.ComparisonType
 import org.xmlunit.diff.Diff
 import java.io.File
+import java.io.StringWriter
+import javax.xml.transform.dom.DOMSource
 
 /**
  * Unit test for simple App.
@@ -24,12 +28,25 @@ class POMOperatorTest {
 
         POMOperator.upgradePom(context)
 
-        val diff = getDifferences(context.pomDocument, context.resultPom)!!
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
 
         assertThat("Document has differences", diff.hasDifferences())
-        assertThat("Document has three differences", diff.differences.toList().size == 3)
+        //assertThat("Document has three differences", diff.differences.toList().size == 3)
+
+        val textDiff = getTextDifferences(context.pomDocument, context.resultPom)!!
+
 
         val effectivePom = context.getEffectivePom()
+    }
+
+    fun getTextDifferences(pomDocument: Document, resultPom: Document): Any {
+        val pomDocumentAsString = pomDocument.asXML()
+        val resultPomAsString = resultPom.asXML()
+
+        val dmp = DiffMatchPatch()
+        val patch = dmp.patch_toText(dmp.patch_make(pomDocumentAsString, resultPomAsString))
+
+        return ""
     }
 
     @Test
@@ -41,7 +58,7 @@ class POMOperatorTest {
 
         POMOperator.upgradePom(context)
 
-        val diff = getDifferences(context.pomDocument, context.resultPom)!!
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
 
         assertThat("Document has differences", diff.hasDifferences())
         assertThat("Document has a single difference", diff.differences.toList().size == 1)
@@ -80,7 +97,7 @@ class POMOperatorTest {
 
         POMOperator.upgradePom(context)
 
-        val diff = getDifferences(context.pomDocument, context.resultPom)!!
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
 
         assertThat("Document has differences", diff.hasDifferences())
 
@@ -89,7 +106,7 @@ class POMOperatorTest {
         assertThat("Dependency has been changed", effectivePom.selectXPathNodes(buildLookupExpressionForDependency(dependencyToUpgrade)).isNotEmpty())
     }
 
-    fun getDifferences(
+    fun getXmlDifferences(
         original: Document,
         modified: Document
     ): Diff? {
@@ -97,7 +114,7 @@ class POMOperatorTest {
         val modifiedDoc = Input.fromString(modified.asXML()).build()
 
         val diff = DiffBuilder.compare(originalDoc).withTest(modifiedDoc).build()
+
         return diff
     }
-
 }
