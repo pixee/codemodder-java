@@ -1,7 +1,8 @@
 package br.com.ingenieux.pom.operator.util
 
 import br.com.ingenieux.pom.operator.Dependency
-import org.dom4j.Node
+import org.dom4j.*
+import org.dom4j.tree.DefaultElement
 import org.jaxen.SimpleNamespaceContext
 import org.jaxen.XPath
 import org.jaxen.dom4j.Dom4jXPath
@@ -41,5 +42,31 @@ object Util {
             "m" to "http://maven.apache.org/POM/4.0.0"
         )
     )
+
+    public val NAMESPACE_CLEANER = object : VisitorSupport() {
+        override fun visit(document: Document) {
+            (document.getRootElement() as DefaultElement)
+                .setNamespace(Namespace.NO_NAMESPACE)
+            document.getRootElement().additionalNamespaces().clear()
+        }
+
+        override fun visit(namespace: Namespace) {
+            namespace.detach()
+        }
+
+        override fun visit(node: Attribute) {
+            if (node.toString().contains("xmlns")
+                || node.toString().contains("xsi:")
+            ) {
+                node.detach()
+            }
+        }
+
+        override fun visit(node: Element) {
+            if (node is DefaultElement) {
+                (node as DefaultElement).setNamespace(Namespace.NO_NAMESPACE)
+            }
+        }
+    }
 
 }

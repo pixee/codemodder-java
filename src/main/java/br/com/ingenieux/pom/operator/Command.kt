@@ -1,12 +1,18 @@
 package br.com.ingenieux.pom.operator
 
+import br.com.ingenieux.pom.operator.util.Util.NAMESPACE_CLEANER
 import br.com.ingenieux.pom.operator.util.Util.buildLookupExpressionForDependency
 import br.com.ingenieux.pom.operator.util.Util.buildLookupExpressionForDependencyManagement
 import br.com.ingenieux.pom.operator.util.Util.selectXPathNodes
+import org.apache.commons.lang3.StringUtils
 import org.dom4j.Element
+import org.dom4j.Text
+import org.dom4j.VisitorSupport
 import org.dom4j.io.OutputFormat
+import org.dom4j.io.SAXReader
 import org.dom4j.io.XMLWriter
-import java.io.IOException
+import org.dom4j.tree.DefaultText
+import java.io.StringReader
 import java.io.StringWriter
 
 
@@ -58,6 +64,7 @@ val SimpleInsert = object : Command {
     override fun execute(c: Context): Boolean {
         val dependencyManagementNode =
             c.resultPom.selectXPathNodes("/m:project/m:dependencyManagement")
+        val elementsToFormat : MutableList<Element> = arrayListOf()
 
         if (dependencyManagementNode.isEmpty()) {
             val newDependencyManagementNode =
@@ -71,7 +78,7 @@ val SimpleInsert = object : Command {
 
             versionNode.text = c.dependencyToInsert.version
 
-            formatNode(newDependencyManagementNode, true)
+            elementsToFormat.add(newDependencyManagementNode)
         }
 
         val dependenciesNodeList = c.resultPom.selectXPathNodes("//m:project/m:dependencies")
@@ -84,95 +91,62 @@ val SimpleInsert = object : Command {
             throw IllegalStateException("More than one dependencies node")
         }
 
+        elementsToFormat.add(rootDependencyNode)
+
         appendCoordinates(rootDependencyNode, c)
+
+        elementsToFormat.forEach { formatNode(it) }
 
         return true
     }
 
-    private fun formatNode(node: Element, parent: Boolean = false) {
-        // TODO: Guess Indent Level
-        // TODO: Guess DOS / Windows Line Terminations
-        // TODO: tweak it a bit further (am I the first sibling or not? if so, how to leverage that?)
+    private fun formatNode(node: Element) {
+        val parent = node.parent
+        val siblings = parent.content()
 
-        val myIndex = node.parent.indexOf(node)
+        val indentLevel = findIndentLevel(node)
 
-        val contentList = (node.parent as Element).content() as MutableList
+        val clonedNode = node.clone() as Element
 
-        val previousElement = contentList.filterIndexed { index, node ->
-            node is Element && index < myIndex
-        }.last()
+        val out = StringWriter()
 
-        val previousElementIndex = node.parent.indexOf(previousElement)
+        val outputFormat = OutputFormat.createPrettyPrint()
 
-        val lastElegibleWhitespace = contentList.filterIndexed { index, node ->
-            node is Text && index < myIndex && node.text.isBlank() && node.text.isNotEmpty() && node.text.length > 1
-        }.last()!!.text
+        val xmlWriter = XMLWriter(out, outputFormat)
 
-        var leadingWhitespace = lastElegibleWhitespace.replace(Regex("^[\\r\\n]{2,}"), "\n")
+        xmlWriter.setIndentLevel(Math.ceil(indentLevel.toDouble() / 2).toInt())
 
-        // Deletes any matching whitespaced text between the two elements
+        xmlWriter.write(clonedNode)
 
-        val elementsToDelete = contentList.filterIndexed { index, node ->
-            node is Text && index < myIndex && index > previousElementIndex && node.text.isBlank()
-        }.toList()
+        val content = out.toString()
 
-        contentList.removeAll(elementsToDelete)
+        val newElement = SAXReader().read(StringReader(content)).rootElement.clone() as Element
 
-        val newTextNode = DefaultText(leadingWhitespace)
+        parent.remove(node)
 
-        contentList.add(-1 + myIndex, newTextNode)
+        parent.add(DefaultText("\n" + StringUtils.repeat(" ", indentLevel)))
+        parent.add(newElement)
+        parent.add(DefaultText("\n" + StringUtils.repeat(" ", ((indentLevel-1) / 2))))
+    }
 
-        //
+    private fun findIndentLevel(node: Element): Int {
+        val siblings = node.parent.content()
+        val myIndex = siblings.indexOf(node)
 
-        if (!parent) {
-            val siblingNode = findSiblingNode(node)
-
-            val siblingParent = siblingNode.parent
-            val siblingIndex = siblingParent.content().indexOf(siblingNode)
-
-            siblingParent.content().add(1 + siblingIndex, DefaultText("\n  "))
-        }
-
-        // one more thing: do I have any child elements? lets apply padding to them
-
-        var itNode = node
-
-        while (itNode.hasContent() && itNode.content().any { it is Element }) {
-            leadingWhitespace += "  "
-
-            val childElements = itNode.content().filter { it is Element }.map { it as Element }
-            val firstChild = childElements.first()
-            itNode.content().add(0, DefaultText(leadingWhitespace))
-
-            // and tell'em to do the same
-
-            if (childElements.size > 1) {
-                childElements.subList(1, childElements.size).forEach { formatNode(it, false) }
-            } else if (1 == childElements.size) {
-                itNode = childElements.first()
-                continue
+        if (myIndex > 0) {
+            val lastElement = siblings.subList(0, myIndex).findLast {
+                (it is Text) && it.text.matches(Regex("\\n+\\s+"))
             }
 
-            break
+            val lastElementText = lastElement?.text ?: ""
+
+            val len = lastElementText.trimStart('\n')?.length ?: 0
+
+            return len
         }
 
-        // Find the elements after the ones we added with continuous other elements and indent as well
+        return 0
     }
-
-    private fun findSiblingNode(node: Element): Element {
-        val parentNode: Element = (node.parent as Element)
-
-        val siblings = parentNode.elements()
-
-        val siblingNode = siblings[-1 + siblings.indexOf(node)]
-
-        if (siblingNode.elements().isNotEmpty()) {
-            return siblingNode.elements().last()
-        }
-
-        return siblingNode
-    }
-    */
 
     private fun appendCoordinates(
         dependenciesNode: Element,
