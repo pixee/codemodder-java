@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>br.com.ingenieux</groupId>
+    <groupId>io.openpixee.maven</groupId>
     <artifactId>pom-operator</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
@@ -199,7 +199,7 @@
 
                                             <!-- note that the main class is set *here* -->
 
-                                            <mainClass>br.com.ingenieux.pom.operator.App</mainClass>
+                                            <mainClass>io.openpixee.maven.operator.App</mainClass>
                                         </transformer>
                                     </transformers>
                                     <createDependencyReducedPom>false</createDependencyReducedPom>

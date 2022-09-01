@@ -1,13 +1,11 @@
-package br.com.ingenieux.pom.operator
+package io.openpixee.maven.operator
 
-import br.com.ingenieux.pom.operator.util.Util.NAMESPACE_CLEANER
-import br.com.ingenieux.pom.operator.util.Util.buildLookupExpressionForDependency
-import br.com.ingenieux.pom.operator.util.Util.buildLookupExpressionForDependencyManagement
-import br.com.ingenieux.pom.operator.util.Util.selectXPathNodes
+import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependency
+import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependencyManagement
+import io.openpixee.maven.operator.util.Util.selectXPathNodes
 import org.apache.commons.lang3.StringUtils
 import org.dom4j.Element
 import org.dom4j.Text
-import org.dom4j.VisitorSupport
 import org.dom4j.io.OutputFormat
 import org.dom4j.io.SAXReader
 import org.dom4j.io.XMLWriter

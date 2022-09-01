@@ -1,10 +1,9 @@
-package br.com.ingenieux.pom.operator
+package io.openpixee.maven.operator
 
-import br.com.ingenieux.pom.operator.diff.DiffMatchPatch
-import br.com.ingenieux.pom.operator.util.Util.buildLookupExpressionForDependency
-import br.com.ingenieux.pom.operator.util.Util.selectXPathNodes
+import io.openpixee.maven.operator.diff.DiffMatchPatch
+import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependency
+import io.openpixee.maven.operator.util.Util.selectXPathNodes
 import org.dom4j.Document
-import org.dom4j.io.SAXWriter
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.xmlunit.builder.DiffBuilder
@@ -12,8 +11,6 @@ import org.xmlunit.builder.Input
 import org.xmlunit.diff.ComparisonType
 import org.xmlunit.diff.Diff
 import java.io.File
-import java.io.StringWriter
-import javax.xml.transform.dom.DOMSource
 
 /**
  * Unit test for simple App.

@@ -1,6 +1,6 @@
-package br.com.ingenieux.pom.operator.util
+package io.openpixee.maven.operator.util
 
-import br.com.ingenieux.pom.operator.Dependency
+import io.openpixee.maven.operator.Dependency
 import org.dom4j.*
 import org.dom4j.tree.DefaultElement
 import org.jaxen.SimpleNamespaceContext

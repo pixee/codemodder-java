@@ -1,4 +1,4 @@
-package br.com.ingenieux.pom.operator
+package io.openpixee.maven.operator
 
 
 object POMOperator {

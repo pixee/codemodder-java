@@ -1,4 +1,4 @@
-package br.com.ingenieux.pom.operator
+package io.openpixee.maven.operator
 
 import org.dom4j.Document
 import org.dom4j.io.SAXReader

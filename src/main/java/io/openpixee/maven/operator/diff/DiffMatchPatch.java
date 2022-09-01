@@ -1,4 +1,4 @@
-package br.com.ingenieux.pom.operator.diff;
+package io.openpixee.maven.operator.diff;
 
 /*
  * Diff Match and Patch
