@@ -25,12 +25,12 @@ jobs:
                 "name": "central",
                 "url": "https://pixee.jfrog.io/artifactory/mailman-libs-snapshot",
                 "releases": {
-                  "enabled": "true",
+                  "enabled": "false",
                   "updatePolicy": "always",
                   "checksumPolicy": "fail"
                 },
                 "snapshots": {
-                  "enabled": "false",
+                  "enabled": "true",
                   "updatePolicy": "always",
                   "checksumPolicy": "fail"
                 }
@@ -45,4 +45,5 @@ jobs:
               }
             ]
       - name: Build with Maven
-        run: mvn install deploy
+        run: mvn install deploy -DaltDeploymentRepository=central::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
+
