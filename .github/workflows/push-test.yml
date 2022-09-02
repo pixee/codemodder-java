@@ -17,6 +17,8 @@ jobs:
           cache: maven
       - name: Setup Maven settings.xml
         uses: whelk-io/maven-settings-xml-action@v11
+        environment:
+          name: default
         with:
           servers: |
             [
