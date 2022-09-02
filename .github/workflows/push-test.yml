@@ -18,32 +18,14 @@ jobs:
       - name: Setup Maven settings.xml
         uses: whelk-io/maven-settings-xml-action@v11
         with:
-          repositories: >
-            [
-              {
-                "id": "central",
-                "name": "central",
-                "url": "https://pixee.jfrog.io/artifactory/mailman-libs-snapshot",
-                "releases": {
-                  "enabled": "false",
-                  "updatePolicy": "always",
-                  "checksumPolicy": "fail"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always",
-                  "checksumPolicy": "fail"
-                }
-              }
-            ]
           servers: |
             [
               {
-                "id": "central",
+                "id": "pixee",
                 "username": "${env.ARTIFACTORY_USERNAME_REF}",
                 "password": "${env.ARTIFACTORY_TOKEN_REF}"
               }
             ]
       - name: Build with Maven
-        run: mvn install deploy -DaltDeploymentRepository=central::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
+        run: mvn install deploy -DaltDeploymentRepository=pixee::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
 
