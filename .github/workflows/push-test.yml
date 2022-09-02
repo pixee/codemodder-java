@@ -23,21 +23,6 @@ jobs:
           server-id: pixee
           server-username: ARTIFACTORY_USERNAME_REF
           server-password: ARTIFACTORY_TOKEN_REF
-      - name: Setup Maven settings.xml
-        uses: whelk-io/maven-settings-xml-action@v11
-        with:
-          servers: |
-            [
-              {
-                "id": "pixee",
-                "username": "${env.ARTIFACTORY_USERNAME_REF}",
-                "password": "${env.ARTIFACTORY_TOKEN_REF}"
-              }
-            ]
-      - name: Show Env
-        run: env
-      - name: Show Settings.xml
-        run: /bin/bash -c 'cat ~/.m2/settings.xml'
       - name: Build with Maven
         run: >
           mvn -B install deploy -DaltDeploymentRepository=pixee::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
