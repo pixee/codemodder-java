@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: default
+    env:
+      ARTIFACTORY_USERNAME_REF: "{{ secrets.ARTIFACTORY_USERNAME_REF }}"
+      ARTIFACTORY_TOKEN_REF: "{{ secrets.ARTIFACTORY_TOKEN_REF }}"
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 11
@@ -27,8 +30,8 @@ jobs:
             [
               {
                 "id": "pixee",
-                "username": "${secrets.ARTIFACTORY_USERNAME_REF}",
-                "password": "${secrets.ARTIFACTORY_TOKEN_REF}"
+                "username": "${env.ARTIFACTORY_USERNAME_REF}",
+                "password": "${env.ARTIFACTORY_TOKEN_REF}"
               }
             ]
       - name: Build with Maven
