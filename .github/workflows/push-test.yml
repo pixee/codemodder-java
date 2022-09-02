@@ -27,8 +27,8 @@ jobs:
             [
               {
                 "id": "pixee",
-                "username": "${env.ARTIFACTORY_USERNAME_REF}",
-                "password": "${env.ARTIFACTORY_TOKEN_REF}"
+                "username": "${secrets.ARTIFACTORY_USERNAME_REF}",
+                "password": "${secrets.ARTIFACTORY_TOKEN_REF}"
               }
             ]
       - name: Build with Maven
