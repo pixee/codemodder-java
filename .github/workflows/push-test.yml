@@ -10,8 +10,8 @@ jobs:
     environment:
       name: default
     env:
-      ARTIFACTORY_USERNAME_REF: "{{ secrets.ARTIFACTORY_USERNAME_REF }}"
-      ARTIFACTORY_TOKEN_REF: "{{ secrets.ARTIFACTORY_TOKEN_REF }}"
+      ARTIFACTORY_USERNAME_REF: "${{ secrets.ARTIFACTORY_USERNAME_REF }}"
+      ARTIFACTORY_TOKEN_REF: "${{ secrets.ARTIFACTORY_TOKEN_REF }}"
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 11
