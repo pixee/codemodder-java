@@ -35,5 +35,8 @@ jobs:
               }
             ]
       - name: Build with Maven
-        run: mvn install deploy -DaltDeploymentRepository=pixee::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
+        run: >
+          env
+          cat ~/.m2/settings.xml
+          mvn install deploy -DaltDeploymentRepository=pixee::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
 
