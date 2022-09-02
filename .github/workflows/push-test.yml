@@ -34,9 +34,11 @@ jobs:
                 "password": "${env.ARTIFACTORY_TOKEN_REF}"
               }
             ]
+      - name: Show Env
+        run: env
+      - name: Show Settings.xml
+        run: /bin/bash -c 'cat ~/.m2/settings.xml'
       - name: Build with Maven
         run: >
-          env && \
-          cat ~/.m2/settings.xml && \
-          mvn install deploy -DaltDeploymentRepository=pixee::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
+          mvn -B install deploy -DaltDeploymentRepository=pixee::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
 
