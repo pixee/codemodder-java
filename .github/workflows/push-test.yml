@@ -19,12 +19,12 @@ jobs:
       uses: whelk-io/maven-settings-xml-action@v11
       with:
         servers: |
-          '[
+          [
             {
               "id": "artifactory",
               "username": "${env.ARTIFACTORY_USERNAME_REF}",
               "password": "${env.ARTIFACTORY_TOKEN_REF}"
             }
-          ]'
+          ]
     - name: Build with Maven
       run: mvn install deploy
