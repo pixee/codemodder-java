@@ -138,9 +138,7 @@ val SimpleInsert = object : Command {
 
             val lastElementText = lastElement?.text ?: ""
 
-            val len = lastElementText.trimStart('\n')?.length ?: 0
-
-            return len
+            return lastElementText.trimStart('\n').length
         }
 
         return 0

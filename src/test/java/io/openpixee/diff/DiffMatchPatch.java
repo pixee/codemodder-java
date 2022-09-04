@@ -1,4 +1,4 @@
-package io.openpixee.maven.operator.diff;
+package io.openpixee.diff;
 
 /*
  * Diff Match and Patch

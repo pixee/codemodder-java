@@ -43,7 +43,7 @@ object Util {
         )
     )
 
-    public val NAMESPACE_CLEANER = object : VisitorSupport() {
+    val NAMESPACE_CLEANER = object : VisitorSupport() {
         override fun visit(document: Document) {
             (document.getRootElement() as DefaultElement)
                 .setNamespace(Namespace.NO_NAMESPACE)
@@ -64,7 +64,7 @@ object Util {
 
         override fun visit(node: Element) {
             if (node is DefaultElement) {
-                (node as DefaultElement).setNamespace(Namespace.NO_NAMESPACE)
+                node.setNamespace(Namespace.NO_NAMESPACE)
             }
         }
     }
