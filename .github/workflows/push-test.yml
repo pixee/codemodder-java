@@ -28,7 +28,7 @@ jobs:
         with:
           maven-version: 3.8.2
       - name: Build with Maven
-        run: >
+        run: |
           mvn -B install
           mvn -f it/pom.xml test
           mvn -B deploy -DaltDeploymentRepository=pixee::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
