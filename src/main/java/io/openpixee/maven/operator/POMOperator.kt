@@ -2,5 +2,6 @@ package io.openpixee.maven.operator
 
 
 object POMOperator {
-    fun upgradePom(context: Context) = Chain.create().execute(context)
+    @JvmStatic
+    fun upgradePom(projectModel: ProjectModel) = Chain.create().execute(projectModel)
 }

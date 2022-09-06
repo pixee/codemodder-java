@@ -8,7 +8,7 @@ import java.io.InputStream
 import java.lang.IllegalStateException
 import java.net.URL
 
-data class Context(
+data class ProjectModel(
     val pomDocument: Document,
     val dependencyToInsert: Dependency,
 ) {
@@ -42,18 +42,20 @@ data class Context(
 
         return SAXReader().read(FileInputStream(tmpOutputFile))
     }
+}
 
-    companion object {
-        private fun load(`is`: InputStream, dependencyToInsert: Dependency): Context {
-            val pomDocument = SAXReader().read(`is`)!!
+object ProjectModelFactory {
+    private fun load(`is`: InputStream, dependencyToInsert: Dependency): ProjectModel {
+        val pomDocument = SAXReader().read(`is`)!!
 
-            return Context(pomDocument, dependencyToInsert)
-        }
-
-        fun load(f: File, dependencyToInsert: Dependency) =
-            load(FileInputStream(f), dependencyToInsert)
-
-        fun load(url: URL, dependencyToInsert: Dependency) =
-            load(url.openStream(), dependencyToInsert)
+        return ProjectModel(pomDocument, dependencyToInsert)
     }
+
+    @JvmStatic
+    fun load(f: File, dependencyToInsert: Dependency) =
+        load(FileInputStream(f), dependencyToInsert)
+
+    @JvmStatic
+    fun load(url: URL, dependencyToInsert: Dependency) =
+        load(url.openStream(), dependencyToInsert)
 }

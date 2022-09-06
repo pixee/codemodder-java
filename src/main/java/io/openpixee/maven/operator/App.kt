@@ -26,7 +26,7 @@ object App {
         @Suppress("UNCHECKED_CAST") val files = opts["POMFILES"]!! as List<String>
 
         for (path in files) {
-            val ctx = Context.load(File(path), dep)
+            val ctx = ProjectModelFactory.load(File(path), dep)
 
             println("Upgrading dependency ($dep) in path $path")
 

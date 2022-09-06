@@ -28,7 +28,7 @@ class POMOperatorTest {
         val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.3")
 
         val context =
-            Context.load(
+            ProjectModelFactory.load(
                 POMOperator::class.java.getResource("pom-case-1.xml")!!,
                 dependencyToUpgrade
             )
@@ -71,7 +71,7 @@ class POMOperatorTest {
         val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.3")
 
         val context =
-            Context.load(
+            ProjectModelFactory.load(
                 POMOperator::class.java.getResource("pom-case-3.xml")!!,
                 dependencyToUpgrade
             )
@@ -113,7 +113,7 @@ class POMOperatorTest {
             Dependency("org.apache.activemq", "activemq-amqp", version = "5.16.2")
 
         val context =
-            Context.load(
+            ProjectModelFactory.load(
                 POMOperator::class.java.getResource("pom-case-4.xml")!!,
                 dependencyToUpgrade
             )

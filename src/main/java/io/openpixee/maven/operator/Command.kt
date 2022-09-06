@@ -16,11 +16,11 @@ import kotlin.math.ceil
 
 
 fun interface Command {
-    fun execute(c: Context): Boolean
+    fun execute(c: ProjectModel): Boolean
 }
 
 abstract class AbstractSimpleCommand : Command {
-    protected fun handleDependency(c: Context, lookupExpression: String): Boolean {
+    protected fun handleDependency(c: ProjectModel, lookupExpression: String): Boolean {
         val dependencyNodes = c.resultPom.selectXPathNodes(lookupExpression)
 
         if (1 == dependencyNodes.size) {
@@ -38,7 +38,7 @@ abstract class AbstractSimpleCommand : Command {
 }
 
 val SimpleUpgrade = object : AbstractSimpleCommand() {
-    override fun execute(c: Context): Boolean {
+    override fun execute(c: ProjectModel): Boolean {
         val lookupExpressionForDependency = buildLookupExpressionForDependency(c.dependencyToInsert)
 
         return handleDependency(c, lookupExpressionForDependency)
@@ -46,7 +46,7 @@ val SimpleUpgrade = object : AbstractSimpleCommand() {
 }
 
 val SimpleDependencyManagement = object : AbstractSimpleCommand() {
-    override fun execute(c: Context): Boolean {
+    override fun execute(c: ProjectModel): Boolean {
         val lookupExpression = buildLookupExpressionForDependencyManagement(c.dependencyToInsert)
 
         return handleDependency(c, lookupExpression)
@@ -54,7 +54,7 @@ val SimpleDependencyManagement = object : AbstractSimpleCommand() {
 }
 
 val SimpleInsert = object : Command {
-    override fun execute(c: Context): Boolean {
+    override fun execute(c: ProjectModel): Boolean {
         val dependencyManagementNode =
             c.resultPom.selectXPathNodes("/m:project/m:dependencyManagement")
         val elementsToFormat : MutableList<Element> = arrayListOf()
@@ -141,7 +141,7 @@ val SimpleInsert = object : Command {
 
     private fun appendCoordinates(
         dependenciesNode: Element,
-        c: Context
+        c: ProjectModel
     ): Element {
         val dependencyNode = dependenciesNode.addElement("dependency")
 
@@ -159,7 +159,7 @@ val SimpleInsert = object : Command {
 class Chain(vararg c: Command) {
     private val commandList = ArrayList(c.toList())
 
-    fun execute(c: Context): Boolean {
+    fun execute(c: ProjectModel): Boolean {
         var done = false
         val listIterator = commandList.listIterator()
 

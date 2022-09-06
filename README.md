@@ -21,3 +21,10 @@ I want a Java library that helps me inject this dependency into a repository alr
 4. The POM doesn't have a "dependencies" section or inheritance so we need to inject that section as well as the "dependency" section.
 
 5. The POM doesn't have the dependency or inherit it, so it needs to be inserted.
+
+- Make it cleaner
+- Folder structure (it)
+- better readme
+- context -> projectmodel
+- companion stuff / instance
+- .idea /
