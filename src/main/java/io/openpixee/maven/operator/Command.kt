@@ -12,17 +12,16 @@ import org.dom4j.io.XMLWriter
 import org.dom4j.tree.DefaultText
 import java.io.StringReader
 import java.io.StringWriter
+import kotlin.math.ceil
 
 
 fun interface Command {
     fun execute(c: Context): Boolean
 }
 
-val SimpleUpgrade = object : Command {
-    override fun execute(c: Context): Boolean {
-        val lookupExpressionForDependency = buildLookupExpressionForDependency(c.dependencyToInsert)
-
-        val dependencyNodes = c.resultPom.selectXPathNodes(lookupExpressionForDependency)
+abstract class AbstractSimpleCommand : Command {
+    protected fun handleDependency(c: Context, lookupExpression: String): Boolean {
+        val dependencyNodes = c.resultPom.selectXPathNodes(lookupExpression)
 
         if (1 == dependencyNodes.size) {
             val versionNodes = dependencyNodes[0].selectXPathNodes("./m:version")
@@ -38,23 +37,19 @@ val SimpleUpgrade = object : Command {
     }
 }
 
-val SimpleDependencyManagement = object : Command {
+val SimpleUpgrade = object : AbstractSimpleCommand() {
+    override fun execute(c: Context): Boolean {
+        val lookupExpressionForDependency = buildLookupExpressionForDependency(c.dependencyToInsert)
+
+        return handleDependency(c, lookupExpressionForDependency)
+    }
+}
+
+val SimpleDependencyManagement = object : AbstractSimpleCommand() {
     override fun execute(c: Context): Boolean {
         val lookupExpression = buildLookupExpressionForDependencyManagement(c.dependencyToInsert)
 
-        val dependencyNodes = c.resultPom.selectXPathNodes(lookupExpression)
-
-        if (1 == dependencyNodes.size) {
-            val versionNodes = dependencyNodes[0].selectXPathNodes("./m:version")
-
-            if (1 == versionNodes.size) {
-                versionNodes[0].text = c.dependencyToInsert.version
-
-                return true
-            }
-        }
-
-        return false
+        return handleDependency(c, lookupExpression)
     }
 }
 
@@ -112,7 +107,7 @@ val SimpleInsert = object : Command {
 
         val xmlWriter = XMLWriter(out, outputFormat)
 
-        xmlWriter.setIndentLevel(Math.ceil(indentLevel.toDouble() / 2).toInt())
+        xmlWriter.setIndentLevel(ceil(indentLevel.toDouble() / 2).toInt())
 
         xmlWriter.write(clonedNode)
 

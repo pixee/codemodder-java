@@ -42,31 +42,4 @@ object Util {
             "m" to "http://maven.apache.org/POM/4.0.0"
         )
     )
-
-    val NAMESPACE_CLEANER = object : VisitorSupport() {
-        override fun visit(document: Document) {
-            (document.getRootElement() as DefaultElement)
-                .setNamespace(Namespace.NO_NAMESPACE)
-            document.getRootElement().additionalNamespaces().clear()
-        }
-
-        override fun visit(namespace: Namespace) {
-            namespace.detach()
-        }
-
-        override fun visit(node: Attribute) {
-            if (node.toString().contains("xmlns")
-                || node.toString().contains("xsi:")
-            ) {
-                node.detach()
-            }
-        }
-
-        override fun visit(node: Element) {
-            if (node is DefaultElement) {
-                node.setNamespace(Namespace.NO_NAMESPACE)
-            }
-        }
-    }
-
 }

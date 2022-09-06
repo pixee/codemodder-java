@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
  * Class containing the diff, match and patch methods.
  * Also contains the behaviour settings.
  */
+@SuppressWarnings("ALL")
 public class DiffMatchPatch {
 
   // Defaults.
