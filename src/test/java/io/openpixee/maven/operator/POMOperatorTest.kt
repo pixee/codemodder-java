@@ -40,11 +40,13 @@ class POMOperatorTest {
         val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
 
         assertThat("Document has differences", diff.hasDifferences())
-        //assertThat("Document has three differences", diff.differences.toList().size == 3)
 
         val textDiff = getTextDifferences(context.pomDocument, context.resultPom)
 
         LOGGER.debug("textDiff: {}", textDiff)
+
+        assertThat("diff contains a <dependencyManagement> tag", textDiff.toString().contains("<dependencyManagement>"))
+        assertThat("diff contains a <dependency> tag", textDiff.toString().contains("<dependency>"))
 
         val effectivePom = context.getEffectivePom()
 
