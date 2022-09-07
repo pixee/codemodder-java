@@ -7,6 +7,23 @@
   <version>1.0-SNAPSHOT</version>
   <name>codetl</name>
   <url>http://maven.apache.org</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+
+    <versions.junit-jupiter>5.8.2</versions.junit-jupiter>
+    <versions.hamcrest>2.2</versions.hamcrest>
+    <versions.log4j>2.17.1</versions.log4j>
+    <versions.mockito>4.3.1</versions.mockito>
+
+    <antlr4.plugin.version>4.10.1</antlr4.plugin.version>
+    <antlr4.version>4.10.1</antlr4.version>
+
+    <versions.maven-compiler-plugin>3.8.1</versions.maven-compiler-plugin>
+    <versions.maven-shade-plugin>3.2.4</versions.maven-shade-plugin>
+    <versions.maven-surefire-plugin>3.0.0-M4</versions.maven-surefire-plugin>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -14,5 +31,91 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+      <version>${antlr4.version}</version>
+    </dependency>
+ 
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-maven-plugin</artifactId>
+      <version>${antlr4.plugin.version}</version>
+    </dependency>
+
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${versions.junit-jupiter}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${versions.junit-jupiter}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-library</artifactId>
+      <version>${versions.hamcrest}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${versions.mockito}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <build>
+  <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${versions.maven-compiler-plugin}</version>
+          <configuration>
+            <source>11</source>
+            <target>11</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${versions.maven-surefire-plugin}</version>
+        </plugin>
+        <!-- Create a runnable JAR -->
+        <plugin>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>2.22.0</version>
+          <configuration>
+            <includes>
+              <include>**/IT</include>
+            </includes>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-maven-plugin</artifactId>
+        <version>${antlr4.plugin.version}</version>
+        <configuration>
+          <arguments>
+            <argument>-visitor</argument>
+            <!-- <argument>-Dlanguage=JavaScript</argument> -->
+          </arguments>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>antlr4</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
