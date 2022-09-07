@@ -29,7 +29,7 @@ jobs:
           maven-version: 3.8.2
       - name: Build with Maven
         run: |
-          mvn -B install
-          mvn -f java-test-fixture/pom.xml test
-          mvn -B deploy -DaltDeploymentRepository=pixee::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
+          mvn -N -B install
+          mvn -N -B -P integration-testing verify
+          mvn -N -B deploy -DaltDeploymentRepository=pixee::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
 

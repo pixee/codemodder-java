@@ -5,8 +5,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.openpixee.it</groupId>
-    <artifactId>it</artifactId>
+    <groupId>io.openpixee.pom</groupId>
+    <artifactId>java-sample</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <name>it</name>
