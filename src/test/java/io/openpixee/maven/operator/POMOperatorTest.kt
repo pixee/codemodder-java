@@ -1,6 +1,6 @@
 package io.openpixee.maven.operator
 
-import io.openpixee.diff.DiffMatchPatch
+import `fun`.mike.dmp.DiffMatchPatch
 import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependency
 import io.openpixee.maven.operator.util.Util.selectXPathNodes
 import org.dom4j.Document
