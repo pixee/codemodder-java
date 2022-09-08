@@ -1,5 +1,6 @@
-// Generated from DSL.g4 by ANTLR 4.10.1
+package io.pixee.dsl.java;
 
+// Generated from DSL.g4 by ANTLR 4.10.1
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
