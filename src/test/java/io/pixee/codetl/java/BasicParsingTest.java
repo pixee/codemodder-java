@@ -11,10 +11,10 @@ import io.pixee.dsl.java.DSLLexer;
 import io.pixee.dsl.java.DSLParser;
 import io.pixee.codetl.java.JavaDSLListener;
 
+final class BasicParsingTest {
 
-public class TestDSL {
     @Test
-    void get_parser() throws Exception {
+    void get_parser() {
         var input = "rule pixee:java/secure-random\n" +
                 "match\n" +
                 "\tConstructorCall {\n" +
