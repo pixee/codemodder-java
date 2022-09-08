@@ -4,9 +4,10 @@ POM Operator is a Library responsible for maintaining POMS
 
 ## Building it
 
-Use Maven:
+Use [Maven](https://maven.apache.org):
 
 ```
+$ git clone git@github.com:openpixee/pom-operator.git && cd pom-operator
 $ mvn clean install
 ```
 
