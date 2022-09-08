@@ -1,8 +1,8 @@
 # pom-operator
 
-POM Operator is a Library responsible for maintaining POMS
+POM Operator is a library responsible for injecting dependencies into POM files programatically.
 
-## Building it
+## Building
 
 Use [Maven](https://maven.apache.org):
 
@@ -11,7 +11,7 @@ $ git clone git@github.com:openpixee/pom-operator.git && cd pom-operator
 $ mvn clean install
 ```
 
-## How to Use It?
+## Using
 
 There's a sample of usage from Java on the `java-sample` directory - of look under the `src/test` directory as well. TL;DR:
 
