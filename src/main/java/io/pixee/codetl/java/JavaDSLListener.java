@@ -2,6 +2,8 @@ package io.pixee.codetl.java;
 
 import io.pixee.dsl.java.DSLParser;
 import io.pixee.dsl.java.DSLBaseListener;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,8 @@ public class JavaDSLListener extends DSLBaseListener {
 	
 	@Override public void enterReplace(DSLParser.ReplaceContext ctx) {
 		var text = ctx.getText().split("with")[1].strip();
-		System.out.println("enterReplace::" + text);
+		LOG.info("enterReplace::{}", text);
 	}
+
+    private static final Logger LOG = LogManager.getLogger(JavaDSLListener.class);
 }
