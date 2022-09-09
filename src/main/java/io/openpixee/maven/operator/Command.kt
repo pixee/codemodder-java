@@ -1,5 +1,6 @@
 package io.openpixee.maven.operator
 
+import com.github.zafarkhaja.semver.Version
 import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependency
 import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependencyManagement
 import io.openpixee.maven.operator.util.Util.selectXPathNodes
@@ -27,7 +28,21 @@ abstract class AbstractSimpleCommand : Command {
             val versionNodes = dependencyNodes[0].selectXPathNodes("./m:version")
 
             if (1 == versionNodes.size) {
-                versionNodes[0].text = c.dependencyToInsert.version
+                var mustUpgrade = true
+
+                if (c.skipIfNewer) {
+                    // TODO: Handle Properties
+                    val currentVersion = Version.valueOf(versionNodes[0].text)
+                    val newVersion = Version.valueOf(c.dependencyToInsert.version)
+
+                    val versionsAreIncreasing = newVersion.greaterThan(currentVersion)
+
+                    mustUpgrade = versionsAreIncreasing
+                }
+
+                if (mustUpgrade) {
+                    versionNodes[0].text = c.dependencyToInsert.version
+                }
 
                 return true
             }

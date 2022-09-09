@@ -26,11 +26,11 @@ object App {
         @Suppress("UNCHECKED_CAST") val files = opts["POMFILES"]!! as List<String>
 
         for (path in files) {
-            val ctx = ProjectModelFactory.load(File(path), dep)
+            val ctx = ProjectModelFactory.load(File(path)).withDependency(dep).build()
 
             println("Upgrading dependency ($dep) in path $path")
 
-            val upgradeResult = POMOperator.upgradePom(ctx)
+            val upgradeResult = POMOperator.modify(ctx)
 
             if (!upgradeResult)
                 throw IllegalStateException("Unexpected failure on upgradeResult")

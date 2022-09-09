@@ -20,7 +20,7 @@ import java.net.URLDecoder
  */
 class POMOperatorTest {
     companion object {
-        private val LOGGER : Logger = LoggerFactory.getLogger(POMOperatorTest::class.java)
+        private val LOGGER: Logger = LoggerFactory.getLogger(POMOperatorTest::class.java)
     }
 
     @Test
@@ -30,12 +30,11 @@ class POMOperatorTest {
         val context =
             ProjectModelFactory.load(
                 POMOperator::class.java.getResource("pom-case-1.xml")!!,
-                dependencyToUpgrade
-            )
+            ).withDependency(dependencyToUpgrade).build()
 
         LOGGER.debug("context: {}", context)
 
-        POMOperator.upgradePom(context)
+        POMOperator.modify(context)
 
         val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
 
@@ -45,7 +44,10 @@ class POMOperatorTest {
 
         LOGGER.debug("textDiff: {}", textDiff)
 
-        assertThat("diff contains a <dependencyManagement> tag", textDiff.toString().contains("<dependencyManagement>"))
+        assertThat(
+            "diff contains a <dependencyManagement> tag",
+            textDiff.toString().contains("<dependencyManagement>")
+        )
         assertThat("diff contains a <dependency> tag", textDiff.toString().contains("<dependency>"))
 
         val effectivePom = context.getEffectivePom()
@@ -68,15 +70,15 @@ class POMOperatorTest {
 
     @Test
     fun testCaseThree() {
-        val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.3")
+        val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.2")
 
         val context =
             ProjectModelFactory.load(
                 POMOperator::class.java.getResource("pom-case-3.xml")!!,
-                dependencyToUpgrade
-            )
+            ).withDependency(dependencyToUpgrade).withSkipIfNewer(false).build()
 
-        POMOperator.upgradePom(context)
+
+        POMOperator.modify(context)
 
         val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
 
@@ -90,6 +92,23 @@ class POMOperatorTest {
             "Document has changed version set to ${dependencyToUpgrade.version}",
             diff.differences.toList()[0].comparison.testDetails.value == dependencyToUpgrade.version
         )
+    }
+
+    @Test
+    fun testCaseThreeButWithLowerVersion() {
+        val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.2")
+
+        val context =
+            ProjectModelFactory.load(
+                POMOperator::class.java.getResource("pom-case-3.xml")!!,
+            ).withDependency(dependencyToUpgrade).withSkipIfNewer(true).build()
+
+
+        POMOperator.modify(context)
+
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
+
+        assertThat("Document has no differences", !diff.hasDifferences())
     }
 
     @Test
@@ -115,10 +134,9 @@ class POMOperatorTest {
         val context =
             ProjectModelFactory.load(
                 POMOperator::class.java.getResource("pom-case-4.xml")!!,
-                dependencyToUpgrade
-            )
+            ).withDependency(dependencyToUpgrade).build()
 
-        POMOperator.upgradePom(context)
+        POMOperator.modify(context)
 
         val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
 

@@ -28,7 +28,7 @@ public class POMOperatorJavaTest {
   public void testInterop() {
     ProjectModel projectModel = ProjectModelFactory.load(POMOperatorJavaTest.class.getResource("pom.xml"), new Dependency("org.dom4j", "dom4j", "0.0.0", null, "jar"));
 
-    POMOperator.upgradePom(projectModel);
+    POMOperator.modify(projectModel);
   }
 }
 

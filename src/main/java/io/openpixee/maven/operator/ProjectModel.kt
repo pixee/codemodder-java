@@ -11,6 +11,7 @@ import java.net.URL
 data class ProjectModel(
     val pomDocument: Document,
     val dependencyToInsert: Dependency,
+    val skipIfNewer: Boolean,
 ) {
     val resultPom: Document = pomDocument.clone() as Document
 
@@ -45,17 +46,42 @@ data class ProjectModel(
 }
 
 object ProjectModelFactory {
-    private fun load(`is`: InputStream, dependencyToInsert: Dependency): ProjectModel {
+    var pomDocument: Document? = null
+
+    var dependency: Dependency? = null
+
+    var skipIfNewer: Boolean = false
+
+    private fun load(`is`: InputStream): ProjectModelFactory {
         val pomDocument = SAXReader().read(`is`)!!
 
-        return ProjectModel(pomDocument, dependencyToInsert)
+        return this.apply {
+            this.pomDocument = pomDocument
+        }
+    }
+
+    fun withDependency(dep: Dependency): ProjectModelFactory {
+        return this.apply {
+            this.dependency = dep
+        }
+    }
+
+    fun withSkipIfNewer(skipIfNewer: Boolean): ProjectModelFactory {
+        return this.apply {
+            this.skipIfNewer = skipIfNewer
+        }
+    }
+
+
+    public fun build(): ProjectModel {
+        return ProjectModel(pomDocument!!, dependency!!, skipIfNewer)
     }
 
     @JvmStatic
-    fun load(f: File, dependencyToInsert: Dependency) =
-        load(FileInputStream(f), dependencyToInsert)
+    fun load(f: File) =
+        load(FileInputStream(f))
 
     @JvmStatic
-    fun load(url: URL, dependencyToInsert: Dependency) =
-        load(url.openStream(), dependencyToInsert)
+    fun load(url: URL) =
+        load(url.openStream())
 }
