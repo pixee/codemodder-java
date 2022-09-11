@@ -1,7 +1,12 @@
-GIVEN METHOD_CALL $getInsecure WHERE
-  name = <init>
-  type = java.util.Random
-
-TRANSFORM
-  METHOD_CALL secureRandom := java.security.SecureRandom.<init>($getInsecure.arguments)
-  RETURN secureRandom
+rule pixee:java/secure-random
+match
+   ConstructorCall $c {
+       type = java.util.Random
+       args = []  
+   }
+replace $c with
+   ConstructorCall {
+       type = java.security.SecureRandom
+       args = []
+   }
+report "We changed $c.type $line $file"

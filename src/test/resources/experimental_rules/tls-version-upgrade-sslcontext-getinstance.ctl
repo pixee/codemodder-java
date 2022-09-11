@@ -1,8 +1,13 @@
-GIVEN METHOD_CALL $getInstance WHERE
-  name = getInstance
-  type = javax.net.ssl.SSLContext
-  arguments.size = 1
-  traceConstantValue(arguments[0]) != "TLSv1.2"
+match
+  StaticMethodCall $c {
+    type = javax.net.ssl.SSLContext
+    name = getInstance
+    args = [!StringLiteral]
+  }
 
-TRANSFORM
-  $getInstance.arguments[0] = "TLSv1.2"
+replace $c.args[0] with
+  StaticMethodCall {
+    type = Security
+    name = sanitize
+    args = ["TLSv1.2"]
+  }

@@ -1,12 +1,16 @@
-GIVEN METHOD_CALL $createUrl WHERE
-  name = <init>
-  type = java.net.URL
-  foreach argument in arguments {
-     isConstant(argument)
+rule pixee:java/sandbox-url-creation
+
+match
+  ConstructorCall $c {
+    type = java.net.URL
   }
 
-TRANSFORM
-  $createUrl.arguments.insert(Urls.DENY_COMMON_INFRASTRUCTURE_TARGETS)
-  $createUrl.arguments.insert(Urls.HTTP_PROTOCOLS)
-  METHOD_CALL safeCreateUrl := io.pixee.security.Urls.create($createUrl.arguments)
-  RETURN safeCreateUrl
+require dependency io.pixee:io.pixee.security:1.0
+require import io.pixee.security.Urls
+
+replace $c with
+  StaticMethodCall {
+    type = io.pixee.security.Urls
+    name = create
+    args =  [Urls.DENY_COMMON_INFRASTRUCTURE_TARGETS, Urls.HTTP_PROTOCOLS] + $c.args
+  }

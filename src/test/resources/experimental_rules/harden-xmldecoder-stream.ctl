@@ -1,9 +1,24 @@
-GIVEN METHOD_CALL $insecureXmlDecoder WHERE
-  name = <init>
-  type = java.beans.XMLDecoder
-  arguments.size != 0
-  arguments[0].type = java.io.InputStream
+rule pixee:java/harden-xmldecoder-stream
+match
+  ConstructorCall $c {
+    type = java.beans.XMLDecoder
+    args = [*:java.io.InputStream, *]
+  }
+where
+  !hasDownstream(
+    $c.args[0],
+    MethodCall {
+      name = harden,
+      context = $c.args[0]
+    }
+  )
 
-TRANSFORM
-  METHOD_CALL secureStreamCall := io.pixee.security.SafeIO.toSafeXmlDecoderInputStream($insecureXmlDecoder.arguments[0])
-  $insecureXmlDecoder.arguments[0] := secureStreamCall
+require dependency io.pixee:io.pixee.security:1.0
+require import io.pixee.security.XMLDecoderSecurity
+
+insert into dataflow downstream of $c
+  StaticMethodCall {
+    type = io.pixee.security.XMLDecoderSecurity
+    name = hardenStream
+    args = [$c]
+  }

@@ -1,12 +1,27 @@
-GIVEN METHOD_CALL $setHeaderCall WHERE
-  name = setHeader
-  arguments.size = 2
-  arguments[1].nodeType != StringLiteral
-  type = javax.servlet.http.HttpServletResponse
-  arguments[1].code !=~ validate
-  arguments[1].code !=~ sanitize
-  arguments[1].code !=~ strip
+rule pixee:java/strip-http-header-newlines
 
-TRANSFORM
-  METHOD_CALL sanitized := org.pixee.security.HttpHeader.stripNewLines($ARGUMENTS[1])
-  RETURN $setHeaderCall($ARGUMENTS[0], $sanitized)
+match
+  InstanceMethodCall $c {
+    type = javax.servlet.http.HttpServletResponse
+    name = setHeader
+    args = [*, *:StringLiteral]
+  }
+
+where
+  !hasUpstream($c.args[1],
+    StaticMethodCall {
+      type = io.pixee.security.Newlines
+      name = stripAll
+      args = [$c.args[1]]
+    })
+
+require dependency io.pixee:io.pixee.security:1.0
+require import org.pixee.security.Newlines
+
+insert into data flow after $c
+  StaticMethodCall {
+    type = io.pixee.security.Newlines
+    name = stripAll
+    args = [$c]
+  }
+

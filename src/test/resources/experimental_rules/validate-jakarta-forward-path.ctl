@@ -1,12 +1,27 @@
-GIVEN METHOD_CALL $unvalidatedForward WHERE
-  name = getRequestDispatcher
-  arguments.size = 1
-  arguments[0].nodeType != StringLiteral
-  arguments[0].code !=~ validate
-  arguments[0].code !=~ sanitize
-  arguments[0].code !=~ strip
+rule pixee:java/validate-jakarta-forward-path
 
-TRANSFORM
-  METHOD_CALL validatedForwardPath := io.pixee.security.Jakarta.validateForwardPath($unvalidatedForward.arguments[0])
-  $unvalidatedForward.arguments[0] = $validatedForwardPath
-  RETURN $unvalidatedForward
+match
+  InstanceMethodCall $c {
+    type in [javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest]
+    name = getRequestDispatcher
+    args = [!StringLiteral]
+  }
+
+where
+  !hasDownstream($c.args[0],
+    StaticMethodCall {
+      name =~ validate
+      args = [$c.args[0]]
+    }
+  )
+
+require dependency io.pixee:io.pixee.security:1.0
+require import org.pixee.security.Jakarta
+
+insert into data flow after $c.args[0]
+  StaticMethodCall {
+    type = io.pixee.security.Jakarta
+    name = validateForwardPath
+    args = [$c.args[0]]
+  }
+
