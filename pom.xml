@@ -52,6 +52,12 @@
       <artifactId>antlr4-maven-plugin</artifactId>
       <version>${antlr4.plugin.version}</version>
     </dependency>
+    
+    <dependency>
+	    <groupId>org.jetbrains</groupId>
+	    <artifactId>annotations</artifactId>
+	    <version>23.0.0</version>
+	</dependency>
 
     <!-- test dependencies -->
     <dependency>
