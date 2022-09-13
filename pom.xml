@@ -12,13 +12,16 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
 
+    <!-- code dependencies -->
+    <versions.java-code-hardener>0.0.1</versions.java-code-hardener>
+
     <versions.junit-jupiter>5.8.2</versions.junit-jupiter>
     <versions.hamcrest>2.2</versions.hamcrest>
     <versions.log4j>2.18.0</versions.log4j>
     <versions.mockito>4.3.1</versions.mockito>
 
-    <antlr4.plugin.version>4.10.1</antlr4.plugin.version>
-    <antlr4.version>4.10.1</antlr4.version>
+    <antlr4.plugin.version>4.7.2</antlr4.plugin.version>
+    <antlr4.version>4.7.2</antlr4.version>
 
     <versions.maven-compiler-plugin>3.8.1</versions.maven-compiler-plugin>
     <versions.maven-shade-plugin>3.2.4</versions.maven-shade-plugin>
@@ -40,6 +43,12 @@
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.github.pixee</groupId>
+      <artifactId>java-code-hardener</artifactId>
+      <version>${versions.java-code-hardener}</version>
     </dependency>
     <dependency>
       <groupId>org.antlr</groupId>
