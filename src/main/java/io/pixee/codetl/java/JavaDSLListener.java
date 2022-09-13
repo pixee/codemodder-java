@@ -4,8 +4,12 @@ import io.pixee.dsl.java.DSLParser;
 import io.pixee.dsl.java.DSLBaseListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.Token;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,59 +26,58 @@ public class JavaDSLListener extends DSLBaseListener {
     @Override
     public void exitRule_id(DSLParser.Rule_idContext ctx) {
         String rule = ctx.getText().split("/")[1].strip();
-   		LOG.info("Rule is extracted: {}", rule);
 
    		this.result.setRule(rule);
+   		
+   		LOG.info("Rule is extracted: {}", rule);
     }
 	
 	@Override
-	public void exitMatch(DSLParser.MatchContext ctx) {
-		String matchText = ctx.getText();
-		LOG.info("Match is extracted:{}", matchText);
-
-		String[] definitions = matchText.split("{")[0].strip().split(" ");
-		String[] contents = matchText.split("{")[1].split("}")[0].split("\n");
-		String nodeType;
-		String variableName = "";
-		HashMap<String, String> properties = new HashMap<String, String>();
-
-		if (definitions.length > 2) {
-			nodeType = definitions[0];
-			variableName = definitions[1];
-		} else {
-			nodeType = definitions[0];
-		}
+	public void enterMatch(DSLParser.MatchContext ctx) {
+		String matchText = ctx.getText().split("match")[1].strip();
 		
-		for (String temp: contents) {
-			properties.put(temp.split("=")[0].strip(), temp.split("=")[1].strip());
-		}
-
-		this.result.setMatch(nodeType, variableName, properties);
+		var matchReplaceCtx = ctx.match_replace();
+        String nodeType = matchReplaceCtx.id.getText();
+        String variableName = "";
+        Map<String, String> attributes = getAttributes(matchReplaceCtx);
+		
+		this.result.setMatch(nodeType, variableName, attributes);
+		
+		LOG.info("Match is extracted:{}", matchText);
 	}
 	
 	@Override public void enterReplace(DSLParser.ReplaceContext ctx) {
 		String matchText = ctx.getText().split("with")[1].strip();
-		LOG.info("Replace is extracted: {}", matchText);
 
-		String[] definitions = matchText.split("{")[0].strip().split(" ");
-		String[] contents = matchText.split("{")[1].split("}")[0].split("\n");
-		String nodeType;
-		String variableName = "";
-		HashMap<String, String> properties = new HashMap<String, String>();
+		var matchReplaceCtx = ctx.match_replace();
+        String nodeType = matchReplaceCtx.id.getText();
+        String variableName = "";
+        Map<String, String> attributes = getAttributes(matchReplaceCtx);
 
-		if (definitions.length > 2) {
-			nodeType = definitions[0];
-			variableName = definitions[1];
-		} else {
-			nodeType = definitions[0];
-		}
+		this.result.setReplace(nodeType, variableName, attributes);
 		
-		for (String temp: contents) {
-			properties.put(temp.split("=")[0].strip(), temp.split("=")[1].strip());
-		}
-
-		this.result.setReplace(nodeType, variableName, properties);
+		LOG.info("Replace is extracted: {}", matchText);
 	}
+	
+	@NotNull
+    private Map<String, String> getAttributes(DSLParser.Match_replaceContext matchReplaceCtx) {
+        List<String> names = matchReplaceCtx
+                .name
+                .stream()
+                .map(Token::getText)
+                .collect(Collectors.toList());
+
+        List<String> values = matchReplaceCtx
+                .value
+                .stream()
+                .map(RuleContext::getText)
+                .collect(Collectors.toList());
+
+        return IntStream
+                .range(0, names.size())
+                .boxed()
+                .collect(Collectors.toMap(names::get, values::get));
+    }
 	
 	private static final Logger LOG = LogManager.getLogger(JavaDSLListener.class);
 }

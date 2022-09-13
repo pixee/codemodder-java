@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import io.pixee.dsl.java.DSLLexer;
 import io.pixee.dsl.java.DSLParser;
-import io.pixee.codetl.java.JavaDSLListener;
+
 
 final class BasicParsingTest {
 
