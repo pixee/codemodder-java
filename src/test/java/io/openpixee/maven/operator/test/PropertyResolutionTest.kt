@@ -7,6 +7,8 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class PropertyResolutionTest {
     @Test
@@ -32,12 +34,22 @@ class PropertyResolutionTest {
     }
 
     private fun resolveWithProfiles(vararg profilesToUse: String): Map<String, String> {
+        LOGGER.debug("resolving with profiles: {}", profilesToUse)
+
         val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.2")
         val context =
             ProjectModelFactory.load(
                 POMOperator::class.java.getResource("pom-1.xml")!!,
-            ).withDependency(dependencyToUpgrade).withActiveProfiles(setOf(*profilesToUse)).build()
+            ).withDependency(dependencyToUpgrade).withActiveProfiles(*profilesToUse).build()
 
-        return context.getResolvedProperties()
+        val resolvedProperties = context.getResolvedProperties()
+
+        LOGGER.debug("Resolved Properties: {}", resolvedProperties)
+
+        return resolvedProperties
+    }
+
+    companion object {
+        private val LOGGER: Logger = LoggerFactory.getLogger(POMOperatorTest::class.java)
     }
 }

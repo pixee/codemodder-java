@@ -26,8 +26,8 @@ class ProjectModelFactory private constructor(
         this.useProperties = useProperties
     }
 
-    fun withActiveProfiles(activeProfiles: Set<String>): ProjectModelFactory = this.apply {
-        this.activeProfiles = activeProfiles.toCollection(LinkedHashSet())
+    fun withActiveProfiles(vararg activeProfiles: String): ProjectModelFactory = this.apply {
+        this.activeProfiles = setOf(*activeProfiles)
     }
 
     fun build(): ProjectModel {

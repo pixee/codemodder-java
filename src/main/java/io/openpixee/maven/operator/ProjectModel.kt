@@ -43,7 +43,9 @@ class ProjectModel internal constructor(
         )
 
         if (this.activeProfiles.isNotEmpty()) {
-            processArgs.addAll(listOf("-P", "'${this.activeProfiles.joinToString(",")}'"))
+            // TODO Aldrin: How safe is not to escape those things? My concern is that deactivating a profile uses '!',
+            //  and I'm not sure how shell escaping rules play a part on that
+            processArgs.addAll(listOf("-P", this.activeProfiles.joinToString(",")))
         }
 
         processArgs.addAll(
