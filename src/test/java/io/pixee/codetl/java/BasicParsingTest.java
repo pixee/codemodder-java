@@ -1,6 +1,8 @@
 package io.pixee.codetl.java;
 
 import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 
 final class BasicParsingTest {
@@ -19,6 +21,7 @@ final class BasicParsingTest {
 
         var parser = new JavaDSLParser();
         var factory = parser.parse(input);
-        System.out.println("factory: " + factory.rule);
+
+        assertThat(factory.ruleId().equals("pixee:java/secure-random"), is(true));
     }
 }

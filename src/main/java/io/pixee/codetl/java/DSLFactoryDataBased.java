@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DSLFactoryDataBased implements VisitorFactory {
+public final class DSLFactoryDataBased implements VisitorFactory {
     private final DSLFactoryData data;
 
     public DSLFactoryDataBased() {

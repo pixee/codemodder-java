@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class DSLFactoryData {
+public final class DSLFactoryData {
 
   private TransformationType transformationType;
   private String ruleId;

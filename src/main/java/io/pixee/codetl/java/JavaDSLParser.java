@@ -11,8 +11,17 @@ import io.pixee.codetl.DSL;
 
 import io.pixee.codefixer.java.VisitorFactory;
 
-
+/**
+ * Return {@link DSLFactoryDataBased} after parsing DSL
+ */
 public class JavaDSLParser implements DSL {
+
+    /**
+    * Parse the given DSL text and return {@link DSLFactoryDataBased}
+    *
+    * @param input DSL text
+    * @return the {@link DSLFactoryDataBased}
+    */
     @Override
     public VisitorFactory parse(String input) {
         var chars = CharStreams.fromString(input);

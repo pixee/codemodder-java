@@ -1,5 +1,6 @@
 package io.pixee.codetl.java;
 
+/** Describes AST node types */
 public final class ASTNodeTypes {
 
     private ASTNodeTypes() {
