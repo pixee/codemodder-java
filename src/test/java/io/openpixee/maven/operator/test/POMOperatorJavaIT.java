@@ -1,4 +1,4 @@
-package io.openpixee.maven.operator;
+package io.openpixee.maven.operator.test;
 
 import org.junit.Test;
 

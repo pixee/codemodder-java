@@ -1,19 +1,31 @@
 package io.openpixee.maven.operator
 
 import org.dom4j.Document
+import org.dom4j.Element
 import org.dom4j.io.SAXReader
 import java.io.File
 import java.io.FileInputStream
-import java.io.InputStream
 import java.lang.IllegalStateException
-import java.net.URL
 
-data class ProjectModel(
+/**
+ * ProjectModel represents the input parameters for the chain
+ *
+ * @todo Wrap it into a <pre>Context</pre> interface
+ */
+class ProjectModel internal constructor(
     val pomDocument: Document,
-    val dependencyToInsert: Dependency,
+    val dependency: Dependency,
     val skipIfNewer: Boolean,
+    val useProperties: Boolean,
+    val activeProfiles: Set<String>
 ) {
     val resultPom: Document = pomDocument.clone() as Document
+
+    internal fun getResolvedProperties(): Map<String, String> =
+        getEffectivePom().rootElement.elements("properties").flatMap { it.elements() }
+            .associate {
+                it.name to it.text
+            }
 
     fun getEffectivePom(): Document {
         val tmpInputFile = File.createTempFile("tmp-pom-orig", ".xml")
@@ -22,15 +34,26 @@ data class ProjectModel(
 
         val tmpOutputFile = File.createTempFile("tmp-pom", ".xml")
 
-        val psBuilder = ProcessBuilder(
+        val processArgs = mutableListOf<String>(
             "mvn",
+            "-B",
             "-N",
-            //"-o",
             "-f",
             tmpInputFile.absolutePath,
-            "help:effective-pom",
-            "-Doutput=${tmpOutputFile.absolutePath}"
-        ).inheritIO()
+        )
+
+        if (this.activeProfiles.isNotEmpty()) {
+            processArgs.addAll(listOf("-P", "'${this.activeProfiles.joinToString(",")}'"))
+        }
+
+        processArgs.addAll(
+            listOf(
+                "help:effective-pom",
+                "-Doutput=${tmpOutputFile.absolutePath}"
+            )
+        )
+
+        val psBuilder = ProcessBuilder(processArgs).inheritIO()
 
         psBuilder.environment().putAll(System.getenv())
 
@@ -45,43 +68,3 @@ data class ProjectModel(
     }
 }
 
-object ProjectModelFactory {
-    var pomDocument: Document? = null
-
-    var dependency: Dependency? = null
-
-    var skipIfNewer: Boolean = false
-
-    private fun load(`is`: InputStream): ProjectModelFactory {
-        val pomDocument = SAXReader().read(`is`)!!
-
-        return this.apply {
-            this.pomDocument = pomDocument
-        }
-    }
-
-    fun withDependency(dep: Dependency): ProjectModelFactory {
-        return this.apply {
-            this.dependency = dep
-        }
-    }
-
-    fun withSkipIfNewer(skipIfNewer: Boolean): ProjectModelFactory {
-        return this.apply {
-            this.skipIfNewer = skipIfNewer
-        }
-    }
-
-
-    public fun build(): ProjectModel {
-        return ProjectModel(pomDocument!!, dependency!!, skipIfNewer)
-    }
-
-    @JvmStatic
-    fun load(f: File) =
-        load(FileInputStream(f))
-
-    @JvmStatic
-    fun load(url: URL) =
-        load(url.openStream())
-}

@@ -1,8 +1,7 @@
 package io.openpixee.maven.operator.util
 
 import io.openpixee.maven.operator.Dependency
-import org.dom4j.*
-import org.dom4j.tree.DefaultElement
+import org.dom4j.Node
 import org.jaxen.SimpleNamespaceContext
 import org.jaxen.XPath
 import org.jaxen.dom4j.Dom4jXPath

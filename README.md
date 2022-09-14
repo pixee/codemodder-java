@@ -47,3 +47,4 @@ It implements a Chain of Responsibility strategy - each `Command` class attempts
 
 - ~~better readme~~
 - be able to guess existing indenting for existing documents
+- investigate leverage whats on [versions-maven-plugin](https://github.com/mojohaus/versions-maven-plugin)

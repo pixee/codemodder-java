@@ -1,6 +1,9 @@
-package io.openpixee.maven.operator
+package io.openpixee.maven.operator.test
 
 import `fun`.mike.dmp.DiffMatchPatch
+import io.openpixee.maven.operator.Dependency
+import io.openpixee.maven.operator.POMOperator
+import io.openpixee.maven.operator.ProjectModelFactory
 import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependency
 import io.openpixee.maven.operator.util.Util.selectXPathNodes
 import org.dom4j.Document
