@@ -15,7 +15,7 @@ public final class TransformationResult<T> {
    *     com.github.javaparser.ast.visitor.ModifierVisitor} event method
    * @param weave the change that was made
    */
-  TransformationResult(final Optional<T> replacementNode, final Weave weave) {
+  public TransformationResult(final Optional<T> replacementNode, final Weave weave) {
     this.replacementNode = Objects.requireNonNull(replacementNode);
     this.weave = Objects.requireNonNull(weave);
   }
