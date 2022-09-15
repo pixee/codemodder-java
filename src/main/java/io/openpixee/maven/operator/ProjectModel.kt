@@ -1,11 +1,9 @@
 package io.openpixee.maven.operator
 
 import org.dom4j.Document
-import org.dom4j.Element
 import org.dom4j.io.SAXReader
 import java.io.File
 import java.io.FileInputStream
-import java.lang.IllegalStateException
 
 /**
  * ProjectModel represents the input parameters for the chain
@@ -21,11 +19,12 @@ class ProjectModel internal constructor(
 ) {
     val resultPom: Document = pomDocument.clone() as Document
 
-    internal fun getResolvedProperties(): Map<String, String> =
+    internal val resolvedProperties: Map<String, String> by lazy {
         getEffectivePom().rootElement.elements("properties").flatMap { it.elements() }
             .associate {
                 it.name to it.text
             }
+    }
 
     fun getEffectivePom(): Document {
         val tmpInputFile = File.createTempFile("tmp-pom-orig", ".xml")

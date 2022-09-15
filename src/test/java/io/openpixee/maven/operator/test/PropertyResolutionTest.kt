@@ -42,11 +42,9 @@ class PropertyResolutionTest {
                 POMOperator::class.java.getResource("pom-1.xml")!!,
             ).withDependency(dependencyToUpgrade).withActiveProfiles(*profilesToUse).build()
 
-        val resolvedProperties = context.getResolvedProperties()
+        LOGGER.debug("Resolved Properties: {}", context.resolvedProperties)
 
-        LOGGER.debug("Resolved Properties: {}", resolvedProperties)
-
-        return resolvedProperties
+        return context.resolvedProperties
     }
 
     companion object {

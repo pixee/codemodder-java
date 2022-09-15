@@ -154,6 +154,28 @@ class POMOperatorTest {
         )
     }
 
+    @Test
+    fun testCaseWithProperty() {
+        val dependencyToUpgrade =
+            Dependency("org.dom4j", "dom4j", version = "1.0.0")
+
+        val context =
+            ProjectModelFactory.load(
+                POMOperator::class.java.getResource("pom-with-property-simple.xml")!!,
+            ).withDependency(dependencyToUpgrade).withUseProperties(true).withSkipIfNewer(true)
+                .build()
+
+        POMOperator.modify(context)
+
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
+
+        assertThat("Document has differences", diff.hasDifferences())
+
+        assertThat("Document has one difference",  1 == listOf(diff.differences).size)
+
+        assertThat("Document changes a single version", diff.differences.first().toString().startsWith("Expected text value '0.0.1-SNAPSHOT' but was '1.0.0'"))
+    }
+
     private fun getXmlDifferences(
         original: Document,
         modified: Document
