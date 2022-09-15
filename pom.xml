@@ -130,7 +130,6 @@
         <configuration>
           <arguments>
             <argument>-visitor</argument>
-            <!-- <argument>-Dlanguage=JavaScript</argument> -->
           </arguments>
         </configuration>
         <executions>

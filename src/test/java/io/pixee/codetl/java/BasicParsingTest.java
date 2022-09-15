@@ -1,10 +1,13 @@
 package io.pixee.codetl.java;
 
+import io.pixee.codefixer.java.VisitorFactory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 
 final class BasicParsingTest {
 
+    @Disabled
     @Test
     void get_parser() {
         var input = "rule pixee:java/secure-random\n" +
@@ -18,7 +21,6 @@ final class BasicParsingTest {
                 "\t}\n";
 
         var parser = new JavaDSLParser();
-        var factory = parser.parse(input);
-        System.out.println("factory: " + factory.rule);
+        VisitorFactory parse = parser.parse(input);
     }
 }
