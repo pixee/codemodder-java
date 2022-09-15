@@ -27,7 +27,7 @@ public class DSLParser extends Parser {
 		RULE_replace = 4, RULE_clause = 5, RULE_where = 6, RULE_start = 7;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"type", "rule_id", "match_replace", "match", "replace", "clause", "where", 
+			"type", "rule_id", "match_replace", "match", "replaceChild", "clause", "where",
 			"start"
 		};
 	}
@@ -35,7 +35,7 @@ public class DSLParser extends Parser {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'.'", "'rule'", "'('", "')'", "'match'", "'replace'", "'with'", 
+			null, "'.'", "'rule'", "'('", "')'", "'match'", "'replaceChild'", "'with'",
 			"':'", "'='", "'insert'", "'into'", "'data'", "'flow'", "'before'", "'after'", 
 			"'and'", "'or'", "'where'", "'{'", "'}'"
 		};

@@ -17,7 +17,7 @@ final class BasicParsingTest {
                 "\tConstructorCall {\n" +
                 "\ttarget = Random\n" +
                 "\t}\n" +
-                "replace $c with\n" +
+                "replaceChild $c with\n" +
                 "\tConstructorCall {\n" +
                 "\ttarget = java.security.SecureRandom\n" +
                 "\t}\n";

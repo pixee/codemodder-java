@@ -43,7 +43,7 @@ public class DSLLexer extends Lexer {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'.'", "'rule'", "'('", "')'", "'match'", "'replace'", "'with'", 
+			null, "'.'", "'rule'", "'('", "')'", "'match'", "'replaceChild'", "'with'",
 			"':'", "'='", "'insert'", "'into'", "'data'", "'flow'", "'before'", "'after'", 
 			"'and'", "'or'", "'where'", "'{'", "'}'"
 		};
