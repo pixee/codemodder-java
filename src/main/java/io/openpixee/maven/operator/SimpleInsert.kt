@@ -19,7 +19,7 @@ val SimpleInsert = object : Command {
 
             val versionNode = dependencyNode.addElement("version")
 
-            versionNode.text = c.dependency.version
+            upgradeVersionNode(c, versionNode)
 
             elementsToFormat.add(newDependencyManagementNode)
         }
@@ -57,6 +57,7 @@ val SimpleInsert = object : Command {
         val artifactIdNode = dependencyNode.addElement("artifactId")
 
         artifactIdNode.text = c.dependency.artifactId
+
         return dependencyNode
     }
 }
