@@ -7,7 +7,7 @@ public class Child {
 
     private PropertyDescriptor role;
     private String tempRoleName;
-    public final Data data;
+    private Data data;
 
     public Child(PropertyDescriptor role, Data data) {
         this.role = role;
@@ -27,4 +27,11 @@ public class Child {
         role = parent.concept.prop(tempRoleName);
     }
 
+    public Data data() {
+        return data;
+    }
+
+    public void setData(Data data) {
+        this.data = data;
+    }
 }

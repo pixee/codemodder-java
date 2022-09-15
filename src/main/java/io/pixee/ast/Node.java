@@ -10,7 +10,7 @@ import java.util.List;
 public class Node extends Data {
 
     public final ConceptDescriptor concept;
-    private List<Child> children = new ArrayList<Child>();
+    private final List<Child> children = new ArrayList<Child>();
     private Node parent;
 
 
@@ -29,7 +29,7 @@ public class Node extends Data {
     }
 
     public List<Node> childNodes() {
-        return children.stream().filter(c -> c.data instanceof Node).map(c -> ((Node) c.data)).toList();
+        return children.stream().filter(c -> c.data() instanceof Node).map(c -> ((Node) c.data())).toList();
     }
 
     public void resolve(LanguageDescriptor lang, Node parent) {
@@ -42,16 +42,29 @@ public class Node extends Data {
     public String dump(String indent) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.concept.name + " {\n");
-        for (Child c : children.stream().filter(c -> c.data instanceof Value).toList()) {
+        for (Child c : children.stream().filter(c -> c.data() instanceof Value).toList()) {
             sb.append(indent + "  " + c.role().name + ": ");
-            sb.append(((Value) c.data).data + "\n");
+            sb.append(((Value) c.data()).data + "\n");
         }
-        for (Child c : children.stream().filter(c -> c.data instanceof Node).toList()) {
+        for (Child c : children.stream().filter(c -> c.data() instanceof Node).toList()) {
             sb.append(indent + "  " + c.role().name + ": ");
-            sb.append(((Node) c.data).dump(indent+"  "));
+            sb.append(((Node) c.data()).dump(indent+"  "));
         }
         sb.append(indent + "}\n");
         return sb.toString();
+    }
+
+    public Node parent() {
+        return parent;
+    }
+
+    public void replaceChild(Node matched, Node replacement) {
+        for (Child c: children) {
+            if (c.data() instanceof Node && c.data() == matched) {
+                c.setData(replacement);
+            }
+        }
+        replacement.resolve(this.concept.language(),this);
     }
 }
 

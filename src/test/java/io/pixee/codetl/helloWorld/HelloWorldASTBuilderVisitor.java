@@ -17,7 +17,7 @@ public class HelloWorldASTBuilderVisitor extends helloWorldGrammarBaseVisitor<No
     }
 
     @Override public Node visitProgram(helloWorldGrammarParser.ProgramContext ctx) {
-        hw = new HelloWorldLanguage();
+        hw = HelloWorldLanguage.INSTANCE;
         Node program = new Node(hw.PROGRAM);
         unit = new CodeUnit(hw.LANG, program);
         for (helloWorldGrammarParser.VariableContext c: ctx.variable()) {

@@ -15,10 +15,12 @@ public class LanguageDescriptor {
 
     public void addConcept(ConceptDescriptor cd) {
         this.concepts.add(cd);
+        cd.setLanguage(this);
     }
 
     public ConceptDescriptor newConcept(String name) {
         ConceptDescriptor cd = new ConceptDescriptor(name);
+        cd.setLanguage(this);
         this.concepts.add(cd);
         return cd;
     }

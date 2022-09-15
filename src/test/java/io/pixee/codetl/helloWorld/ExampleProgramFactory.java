@@ -8,7 +8,7 @@ import io.pixee.meta.PrimitiveType;
 public class ExampleProgramFactory {
 
     static CodeUnit makeProgram() {
-        HelloWorldLanguage hw = new HelloWorldLanguage();
+        HelloWorldLanguage hw = HelloWorldLanguage.INSTANCE;
         CodeUnit code = new CodeUnit(hw.LANG, new Node(hw.PROGRAM));
         Node varX = new Node(hw.VAR)
                 .add("initial", new Node(hw.NUM_LIT)
