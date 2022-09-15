@@ -12,12 +12,14 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+
+import io.pixee.codefixer.java.FileWeavingContext;
 import io.pixee.codefixer.java.MethodCallPredicateFactory;
 import io.pixee.codefixer.java.ObjectCreationPredicateFactory;
 import io.pixee.codefixer.java.Transformer;
 import io.pixee.codefixer.java.Weave;
-import io.pixee.codefixer.java.VisitorFactory;
 import io.pixee.codefixer.java.protections.TransformationResult;
+import io.pixee.codefixer.java.VisitorFactory;
 
 import io.pixee.dsl.java.DSLParser;
 import io.pixee.dsl.java.DSLBaseListener;
@@ -25,6 +27,7 @@ import io.pixee.codetl.java.TransformationType;
 import io.pixee.codetl.java.DSLFactoryDataBased;
 
 import java.util.List;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -49,13 +52,12 @@ public class JavaDSLListener extends DSLBaseListener {
 		
 		var matchReplaceCtx = ctx.match_replace();
         String matchConstructType = matchReplaceCtx.id.getText();
-        String variableName = "";
         Map<String, String> attributes = getAttributes(matchReplaceCtx);
 
         var data = result.getData();
 
         switch (matchConstructType) {
-            case "ConstructorCall": {
+            case ASTNodeTypes.ConstructorCall: {
                 data.setTransformationType(TransformationType.OBJECT);
                 var target = attributes.get("target");
                 data.add(
@@ -64,7 +66,7 @@ public class JavaDSLListener extends DSLBaseListener {
                                 cu -> ObjectCreationPredicateFactory.withType(target)));
                 break;
             }
-            case "InstanceMethodCall": {
+            case ASTNodeTypes.InstanceMethodCall: {
                 data.setTransformationType(TransformationType.METHOD);
                 var type = attributes.get("type");
                 var name = attributes.get("name");
@@ -83,7 +85,8 @@ public class JavaDSLListener extends DSLBaseListener {
 		LOG.info("Match is extracted:{}", matchText);
 	}
 	
-	@Override public void enterReplace(DSLParser.ReplaceContext ctx) {
+	@Override
+	public void enterReplace(DSLParser.ReplaceContext ctx) {
 		String matchText = ctx.getText().split("with")[1].strip();
 
 		var matchReplaceCtx = ctx.match_replace();
@@ -94,7 +97,7 @@ public class JavaDSLListener extends DSLBaseListener {
         var ruleId = data.getRuleId();
 
         switch (matchConstructType) {
-            case "ConstructorCall": {
+            case ASTNodeTypes.ConstructorCall: {
                 var target = attributes.get("target");
 
                 Transformer<ObjectCreationExpr, ObjectCreationExpr> transformer =
@@ -109,7 +112,7 @@ public class JavaDSLListener extends DSLBaseListener {
                 data.setTransformer(transformer);
                 break;
             }
-            case "StaticMethodCall": {
+            case ASTNodeTypes.InstanceMethodCall: {
                 var type = attributes.get("type");
                 var name = attributes.get("name");
 

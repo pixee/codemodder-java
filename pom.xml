@@ -13,8 +13,10 @@
     <maven.compiler.target>17</maven.compiler.target>
 
     <!-- code dependencies -->
+    <versions.annotations>23.0.0</versions.annotations>
     <versions.java-code-hardener>0.0.1</versions.java-code-hardener>
 
+    <versions.junit>3.8.1</versions.junit>
     <versions.junit-jupiter>5.8.2</versions.junit-jupiter>
     <versions.hamcrest>2.2</versions.hamcrest>
     <versions.log4j>2.18.0</versions.log4j>
@@ -26,6 +28,7 @@
     <versions.maven-compiler-plugin>3.8.1</versions.maven-compiler-plugin>
     <versions.maven-shade-plugin>3.2.4</versions.maven-shade-plugin>
     <versions.maven-surefire-plugin>3.0.0-M4</versions.maven-surefire-plugin>
+    <versions.maven-failsafe-plugin>2.22.0</versions.maven-failsafe-plugin>
   </properties>
   <dependencies>
     <dependency>
@@ -37,12 +40,6 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <version>${versions.log4j}</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -65,10 +62,16 @@
     <dependency>
 	    <groupId>org.jetbrains</groupId>
 	    <artifactId>annotations</artifactId>
-	    <version>23.0.0</version>
+	    <version>${versions.annotations}</version>
 	</dependency>
 
     <!-- test dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${versions.junit}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -113,7 +116,7 @@
         <!-- Create a runnable JAR -->
         <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>2.22.0</version>
+          <version>${versions.maven-failsafe-plugin}</version>
           <configuration>
             <includes>
               <include>**/IT</include>

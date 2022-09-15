@@ -3,6 +3,8 @@ package io.pixee.codetl.java;
 import io.pixee.codefixer.java.VisitorFactory;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 
 final class BasicParsingTest {
@@ -22,5 +24,8 @@ final class BasicParsingTest {
 
         var parser = new JavaDSLParser();
         VisitorFactory parse = parser.parse(input);
+        var factory = parser.parse(input);
+
+        assertThat(factory.ruleId().equals("pixee:java/secure-random"), is(true));
     }
 }
