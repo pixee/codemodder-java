@@ -1,8 +1,8 @@
-package io.pixee.meta;
+package io.pixee.lang;
 
 public class ConceptType extends Type {
 
-    private ConceptDescriptor concept;
+    private final ConceptDescriptor concept;
 
     public ConceptType(ConceptDescriptor cd) {
         concept = cd;

@@ -4,7 +4,7 @@ import io.pixee.ast.Node;
 
 public class ReplacementTransformation extends Transformation {
 
-    private Node replacement;
+    private final Node replacement;
 
     public ReplacementTransformation(Node pattern, Node replacement) {
         super(pattern);

@@ -1,4 +1,4 @@
-package io.pixee.meta;
+package io.pixee.lang;
 
 
 import java.util.ArrayList;
@@ -6,8 +6,8 @@ import java.util.List;
 
 public class LanguageDescriptor {
 
-    private String name;
-    private List<ConceptDescriptor> concepts = new ArrayList<ConceptDescriptor>();
+    private final String name;
+    private final List<ConceptDescriptor> concepts = new ArrayList<ConceptDescriptor>();
 
     public LanguageDescriptor(String name) {
         this.name = name;

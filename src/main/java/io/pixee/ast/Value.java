@@ -1,6 +1,6 @@
 package io.pixee.ast;
 
-import io.pixee.meta.PrimitiveType;
+import io.pixee.lang.PrimitiveType;
 
 public class Value extends Data {
 

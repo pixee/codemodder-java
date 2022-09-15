@@ -1,6 +1,6 @@
 package io.pixee.ast;
 
-import io.pixee.meta.LanguageDescriptor;
+import io.pixee.lang.LanguageDescriptor;
 
 public class CodeUnit {
 

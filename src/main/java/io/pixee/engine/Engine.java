@@ -10,9 +10,6 @@ public class Engine {
 
     private final List<Transformation> transformations = new ArrayList<Transformation>();
 
-    public Engine() {
-    }
-
     public void registerTransformation(Transformation tx) {
         this.transformations.add(tx);
     }

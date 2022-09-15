@@ -7,15 +7,17 @@ import io.pixee.codetl.helloWorld.grammar.helloWorldGrammarLexer;
 import io.pixee.codetl.helloWorld.grammar.helloWorldGrammarParser;
 import io.pixee.engine.Engine;
 import io.pixee.engine.ReplacementTransformation;
-import io.pixee.meta.PrimitiveType;
+import io.pixee.lang.PrimitiveType;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 public class HelloWorldPlayground {
 
     public static void main(String[] args) {
-        var input = "var x = 10\n"+
-                    "var y = 20\n";
+        var input = """
+                var x = 10
+                var y = 20
+                """;
 
         var parser = new helloWorldGrammarParser(new CommonTokenStream(new helloWorldGrammarLexer(CharStreams.fromString(input))));
         HelloWorldASTBuilderVisitor visitor = new HelloWorldASTBuilderVisitor();

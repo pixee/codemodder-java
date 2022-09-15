@@ -1,8 +1,8 @@
 package io.pixee.ast;
 
-import io.pixee.meta.ConceptDescriptor;
-import io.pixee.meta.LanguageDescriptor;
-import io.pixee.meta.PropertyDescriptor;
+import io.pixee.lang.ConceptDescriptor;
+import io.pixee.lang.LanguageDescriptor;
+import io.pixee.lang.PropertyDescriptor;
 
 import java.util.ArrayList;
 import java.util.List;

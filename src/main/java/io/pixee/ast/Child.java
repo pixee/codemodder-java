@@ -1,7 +1,6 @@
 package io.pixee.ast;
 
-import io.pixee.meta.LanguageDescriptor;
-import io.pixee.meta.PropertyDescriptor;
+import io.pixee.lang.PropertyDescriptor;
 
 public class Child {
 

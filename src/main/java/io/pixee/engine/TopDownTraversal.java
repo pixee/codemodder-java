@@ -7,7 +7,7 @@ import java.util.List;
 
 public class TopDownTraversal {
 
-    private List<Node> nodes = new ArrayList<Node>();
+    private final List<Node> nodes = new ArrayList<Node>();
 
     public TopDownTraversal(Node node) {
         collect(node);
@@ -19,7 +19,7 @@ public class TopDownTraversal {
 
     private void collect(Node node) {
         nodes.add(node);
-        node.childNodes().stream().forEach(it -> collect(it));
+        node.childNodes().forEach(this::collect);
     }
 
 }

@@ -1,4 +1,4 @@
-package io.pixee.meta;
+package io.pixee.lang;
 
 public abstract class Type {
 }

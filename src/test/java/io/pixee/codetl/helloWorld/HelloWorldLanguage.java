@@ -1,6 +1,6 @@
 package io.pixee.codetl.helloWorld;
 
-import io.pixee.meta.*;
+import io.pixee.lang.*;
 
 public class HelloWorldLanguage {
 
