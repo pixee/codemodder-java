@@ -2,9 +2,9 @@ package io.pixee.meta;
 
 public class PropertyDescriptor {
 
-    private final String name;
-    private final boolean isList;
-    private Type type;
+    public final String name;
+    public final boolean isList;
+    public final Type type;
 
     public PropertyDescriptor(String name, Type type) {
         this.name = name;

@@ -5,7 +5,7 @@ import java.util.List;
 
 public class ConceptDescriptor {
 
-    private final String name;
+    public final String name;
     private List<PropertyDescriptor> properties = new ArrayList<PropertyDescriptor>();
 
     public ConceptDescriptor(String name ) {
@@ -19,5 +19,9 @@ public class ConceptDescriptor {
 
     public ConceptType getType() {
         return new ConceptType(this);
+    }
+
+    public PropertyDescriptor prop(String name) {
+        return properties.stream().filter(prop -> prop.name.equals(name)).findFirst().orElseThrow();
     }
 }
