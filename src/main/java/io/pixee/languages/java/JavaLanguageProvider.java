@@ -1,15 +1,19 @@
-package io.pixee.codetl;
+package io.pixee.languages.java;
 
 import io.pixee.ast.Node;
+import io.pixee.codetl.SubjectLanguageProvider;
 import io.pixee.lang.ConceptDescriptor;
+import io.pixee.tools.Checker;
 import org.antlr.v4.runtime.tree.ParseTree;
+
+import java.util.ArrayList;
 
 /**
  * {@inheritDoc}
  * <p>
  * Responsible for the Java language!
  */
-final class JavaLanguageProvider implements SubjectLanguageProvider {
+public final class JavaLanguageProvider implements SubjectLanguageProvider {
 
     @Override
     public Node parseMatchNode(final ParseTree node) {
@@ -34,6 +38,11 @@ final class JavaLanguageProvider implements SubjectLanguageProvider {
             return parseStaticMethodCall(node);
         }
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Iterable<Checker> checkers() {
+        return new ArrayList<>();
     }
 
     private static class StaticMethodCall extends Node {

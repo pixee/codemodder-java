@@ -1,14 +1,17 @@
 package io.pixee.codetl;
 
 import io.pixee.ast.Node;
+import io.pixee.tools.Checker;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 /**
  * This type is responsible for parsing the ANTLR model objects into CodeTL node objects.
  */
-interface SubjectLanguageProvider {
+public interface SubjectLanguageProvider {
 
-    Node parseMatchNode(ParseTree node);
+    Node parseMatchNode(ParseTree tree);
 
-    Node parseReplacementNode(ParseTree node);
+    Node parseReplacementNode(ParseTree tree);
+
+    Iterable<Checker> checkers();
 }

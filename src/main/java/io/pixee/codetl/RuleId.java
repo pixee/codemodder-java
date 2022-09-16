@@ -75,5 +75,5 @@ public final class RuleId {
         return Objects.hash(namespace, subjectLanguage, category);
     }
 
-    private static final Pattern rulePattern = Pattern.compile("([a-zA-Z0-9]+):(java|python)/([a-zA-Z0-9\\-_]+)");
+    private static final Pattern rulePattern = Pattern.compile("([a-zA-Z0-9]+):(java|python|helloworld)/([a-zA-Z0-9\\-_]+)");
 }
