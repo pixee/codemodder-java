@@ -25,6 +25,15 @@ public class ASTStructureChecker implements Checker {
         return messages;
     }
 
+    public Iterable<Message> executeAndPrint(Node n, boolean isUsedAsPattern) {
+        Iterable<Message> messages = execute(n, isUsedAsPattern);
+        System.err.println("Messages for "+n);
+        for (Message m:messages) {
+            System.err.println("- "+m);
+        }
+        return messages;
+    }
+
     private void checkNode(Node n, List<Message> messages, boolean isUsedAsPattern) {
         if (n instanceof ErrorNode) messages.add(new NodeRelatedMessage(n, ((ErrorNode) n).problem()));
         for (Child c: n.children()) {

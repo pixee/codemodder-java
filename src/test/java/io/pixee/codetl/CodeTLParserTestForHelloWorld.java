@@ -73,6 +73,34 @@ final class CodeTLParserTestForHelloWorld {
         assertThat(replacementErrors.iterator().next().toString(), is("child missing for property value"));
     }
 
+    @Test
+    void it_builds_the_correct_ast() {
+        var input = """
+                rule pixee:helloworld/stuff
+                match
+                    Variable {
+                    }
+                replace $n
+                    Variable {
+                        initial = NumLit {
+                            value = 10
+                        }
+                    }
+                """;
+        CodeTLRuleDefinition rule = parseRule(input);
+        System.err.println(rule.getReplacementNode().dump(""));
+        Iterable<Message> replacementErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).executeAndPrint(rule.getReplacementNode(), false);
+        assertThat(replacementErrors.iterator().hasNext(), is(false));
+        assertThat(rule.getReplacementNode().dump(""), is("""
+                Variable {
+                  name: x
+                  initial: NumLit {
+                    value: 10
+                  }
+                }
+                """));
+    }
+
     @NotNull
     private CodeTLRuleDefinition parseRule(final String input) {
         CodePointCharStream stream = CharStreams.fromString(input);

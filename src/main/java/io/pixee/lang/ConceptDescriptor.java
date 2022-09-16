@@ -31,7 +31,7 @@ public class ConceptDescriptor {
     }
 
     public PropertyDescriptor prop(String name) {
-        return properties.stream().filter(prop -> prop.name.equals(name)).findFirst().orElseThrow();
+        return properties.stream().filter(prop -> prop.name.equals(name)).findFirst().orElse(null);
     }
 
     public Iterable<PropertyDescriptor> properties() {

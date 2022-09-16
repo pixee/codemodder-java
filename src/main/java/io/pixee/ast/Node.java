@@ -24,6 +24,11 @@ public class Node extends Data {
         return this;
     }
 
+    public Node add(Child c) {
+        this.children.add(c);
+        return this;
+    }
+
     public Node add(String propName, Data data) {
         this.children.add(new Child(propName, data));
         return this;
