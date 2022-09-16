@@ -15,7 +15,7 @@ import kotlin.math.ceil
 
 internal fun formatNode(node: Element) {
     val parent = node.parent
-    val siblings = parent.content()
+    //val siblings = parent.content()
 
     val indentLevel = findIndentLevel(node)
 
@@ -63,15 +63,25 @@ internal val PROPERTY_REFERENCE_REGEX = Regex("^\\\$\\{(.*)}$")
 internal fun upgradeProperty(c: ProjectModel, propertyName: String) {
     // TODO: Handle Profiles
 
-    val propertyElement = c.resultPom.rootElement.element("properties")
+    if (null == c.resultPom.rootElement.element("properties")) {
+        val propertyElement = c.resultPom.rootElement.addElement("properties")
 
-    if (null == propertyElement.element(propertyName)) {
-        val newElement = propertyElement.addElement(propertyName)
+        formatNode(propertyElement)
+    }
+
+    val parentPropertyElement = c.resultPom.rootElement.element("properties")
+
+    if (null == parentPropertyElement.element(propertyName)) {
+        val newElement = parentPropertyElement.addElement(propertyName)
 
         formatNode(newElement)
     }
 
-    propertyElement.element(propertyName).text = c.dependency.version
+    val propertyElement = parentPropertyElement.element(propertyName)
+
+    propertyElement.text = c.dependency.version
+
+    formatNode(propertyElement)
 }
 
 internal fun propertyName(c: ProjectModel, versionNode: Element): String {

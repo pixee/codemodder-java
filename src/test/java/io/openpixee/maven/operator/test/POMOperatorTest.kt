@@ -8,6 +8,7 @@ import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependency
 import io.openpixee.maven.operator.util.Util.selectXPathNodes
 import org.dom4j.Document
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -167,13 +168,74 @@ class POMOperatorTest {
 
         POMOperator.modify(context)
 
+        LOGGER.debug("original pom: {}", context.pomDocument.asXML())
+        LOGGER.debug("resulting pom: {}", context.resultPom.asXML())
+
         val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
 
         assertThat("Document has differences", diff.hasDifferences())
 
-        assertThat("Document has one difference",  1 == listOf(diff.differences).size)
+        val differenceList = diff.differences.toList()
 
-        assertThat("Document changes a single version", diff.differences.first().toString().startsWith("Expected text value '0.0.1-SNAPSHOT' but was '1.0.0'"))
+        assertThat("Document has one difference", 1 == differenceList.size)
+
+        assertThat(
+            "Document changes a single version",
+            differenceList.first().toString()
+                .startsWith("Expected text value '0.0.1-SNAPSHOT' but was '1.0.0'")
+        )
+
+        assertEquals(
+            "Document changes a property called 'sample.version'",
+            differenceList.first().comparison.testDetails.xPath,
+            "/project[1]/properties[1]/sample.version[1]/text()[1]"
+        )
+    }
+
+    @Test
+    fun testCaseWithoutPropertyButDefiningOne() {
+        val dependencyToUpgrade =
+            Dependency("org.dom4j", "dom4j", version = "1.0.0")
+
+        val originalPom = """
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>br.com.ingenieux</groupId>
+    <artifactId>pom-operator</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+</project>
+                """.trim()
+        val context =
+            ProjectModelFactory.load(
+                originalPom.byteInputStream(),
+            ).withDependency(dependencyToUpgrade).withUseProperties(true).withSkipIfNewer(true)
+                .build()
+
+        POMOperator.modify(context)
+
+        LOGGER.debug("original pom: {}", context.pomDocument.asXML())
+        LOGGER.debug("resulting pom: {}", context.resultPom.asXML())
+
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
+
+        assertThat("Document has differences", diff.hasDifferences())
+
+        val differencesAsList = diff.differences.toList()
+
+        assertThat("Document has several differences", differencesAsList.size > 1)
     }
 
     private fun getXmlDifferences(
@@ -183,7 +245,8 @@ class POMOperatorTest {
         val originalDoc = Input.fromString(original.asXML()).build()
         val modifiedDoc = Input.fromString(modified.asXML()).build()
 
-        val diff = DiffBuilder.compare(originalDoc).withTest(modifiedDoc).build()
+        val diff = DiffBuilder.compare(originalDoc).withTest(modifiedDoc).ignoreWhitespace()
+            .checkForSimilar().build()
 
         LOGGER.debug("diff: {}", diff)
 

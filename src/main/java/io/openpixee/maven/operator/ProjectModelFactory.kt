@@ -41,7 +41,8 @@ class ProjectModelFactory private constructor(
     }
 
     companion object {
-        private fun load(`is`: InputStream): ProjectModelFactory {
+        @JvmStatic
+        fun load(`is`: InputStream): ProjectModelFactory {
             val pomDocument = SAXReader().read(`is`)!!
 
             return ProjectModelFactory(pomDocument)

@@ -56,7 +56,7 @@ jobs:
           name: jacoco-report
           path: target/site/jacoco/
 
-      - name: Deploy
+      - name: Deploy (only if on master)
         if: ${{ github.ref_name == 'master' }}
         run: |
           mvn -N -B deploy -DaltDeploymentRepository=pixee::default::https://pixee.jfrog.io/artifactory/mailman-libs-snapshot
