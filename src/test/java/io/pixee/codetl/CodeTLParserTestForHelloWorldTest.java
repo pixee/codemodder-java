@@ -2,8 +2,6 @@ package io.pixee.codetl;
 
 import io.pixee.ast.ErrorNode;
 import io.pixee.ast.Node;
-import io.pixee.codetl.ASTExtractingCodeTLListener;
-import io.pixee.codetl.CodeTLRuleDefinition;
 import io.pixee.codetl_antlr.CodeTLBaseListener;
 import io.pixee.codetl_antlr.CodeTLLexer;
 import io.pixee.codetl_antlr.CodeTLParser;
@@ -22,8 +20,7 @@ import java.util.Collection;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-final class CodeTLParserTestForHelloWorld {
-
+final class CodeTLParserTestForHelloWorldTest {
 
     @Test
     void it_parses_generic_node() {
