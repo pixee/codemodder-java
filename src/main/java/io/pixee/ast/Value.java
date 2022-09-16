@@ -2,6 +2,9 @@ package io.pixee.ast;
 
 import io.pixee.lang.PrimitiveType;
 
+/**
+ * represents primitive data in the tree (as opposed to nodes)
+ */
 public class Value extends Data {
 
     public final PrimitiveType type;

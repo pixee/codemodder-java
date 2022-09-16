@@ -2,6 +2,10 @@ package io.pixee.ast;
 
 import io.pixee.lang.PropertyDescriptor;
 
+/**
+ * A special kind of child we insert into the tree if we cannot construct
+ * it because of a misfit with the language definition
+ */
 public class ErrorChild extends Child {
 
     private String problem;

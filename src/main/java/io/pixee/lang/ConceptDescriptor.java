@@ -3,6 +3,10 @@ package io.pixee.lang;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * reprents a kind of AST node, a building block of a language. Has a name
+ * plus typed properties (plus additional info in the future).
+ */
 public class ConceptDescriptor {
 
     public final String name;

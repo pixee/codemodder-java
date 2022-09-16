@@ -90,8 +90,7 @@ final class CodeTLParserTestForHelloWorldTest {
                     }
                 """;
         CodeTLRuleDefinition rule = parseRule(input);
-        System.err.println(rule.getReplacementNode().dump(""));
-        Collection<Message> replacementErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).executeAndPrint(rule.getReplacementNode(), false);
+        Collection<Message> replacementErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).execute(rule.getReplacementNode(), false);
         assertThat(replacementErrors.isEmpty(), is(true));
         assertThat(rule.getReplacementNode().dump(""), is("""
                 Variable {

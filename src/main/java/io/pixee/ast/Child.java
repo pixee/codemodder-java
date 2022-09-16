@@ -2,6 +2,11 @@ package io.pixee.ast;
 
 import io.pixee.lang.PropertyDescriptor;
 
+/**
+ * Represents information about a child of a node, including the
+ * property/role and the child itself; points to a property from
+ * the language definition
+ */
 public class Child {
 
     private PropertyDescriptor role;

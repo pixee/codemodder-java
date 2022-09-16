@@ -32,8 +32,6 @@ final class HelloWorldTransformationTest {
         HelloWorldASTBuilderVisitor visitor = new HelloWorldASTBuilderVisitor();
         visitor.visitProgram(parser.program());
         CodeUnit program = visitor.getCode();
-        System.err.println(program);
-
         Engine e = new Engine();
         HelloWorldLanguage hw = HelloWorldLanguage.INSTANCE;
         e.registerTransformation(new ReplacementTransformation(
@@ -41,6 +39,22 @@ final class HelloWorldTransformationTest {
                 new Node(hw.NUM_LIT).add("value", new Value(PrimitiveType.STRING,"0"))
         ));
         e.transform(program);
+        assertThat(program.root.dump(""),is("""
+                Program {
+                  variables: Variable {
+                    name: x
+                    initial: NumLit {
+                      value: 0
+                    }
+                  }
+                  variables: Variable {
+                    name: y
+                    initial: NumLit {
+                      value: 0
+                    }
+                  }
+                }
+                """));
     }
 
     @Test

@@ -6,6 +6,9 @@ import io.pixee.ast.Node;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Runs a set of transformations against a code unit
+ */
 public class Engine {
 
     private final List<Transformation> transformations = new ArrayList<Transformation>();

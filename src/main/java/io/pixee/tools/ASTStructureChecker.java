@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Checks an AST against its language definition
+ */
 public class ASTStructureChecker implements Checker {
 
     private LanguageDescriptor language;

@@ -2,6 +2,9 @@ package io.pixee.ast;
 
 import io.pixee.lang.LanguageDescriptor;
 
+/**
+ * Represents a unit of code, typically a file. Owns one root node.
+ */
 public class CodeUnit {
 
     private LanguageDescriptor language;
