@@ -3,9 +3,11 @@ grammar CodeTL;
 codeTlRule:
   rule_statement
   match_statement
+  (require_import_statement)*
   (replace_statement)+
   ;
 
+require_import_statement :  REQUIRE_START IMPORT_START DOTTED_IDENTIFIER;
 rule_statement   : RULE_SECTION_START RULE_ID ;
 match_statement  : MATCH_SECTION_START ast_node;
 replace_statement: REPLACE_SECTION_START VARIABLE_IDENTIFIER ast_node;
@@ -22,7 +24,9 @@ number_literal  : NUMBER;
 string_literal  : STRING;
 type_identifier : DOTTED_IDENTIFIER;
 
-
+REQUIRE_START          : 'require' ;
+IMPORT_START           : 'import' ;
+DEPENDENCY_START       : 'dependency' ;
 RULE_SECTION_START     : 'rule';
 RULE_ID                : [a-z]+ ':' ('java' | 'python' | 'helloworld') '/' [a-z-]+; // should these be hardcoded? Doesn't this depend on the language config?
 MATCH_SECTION_START    : 'match' ;

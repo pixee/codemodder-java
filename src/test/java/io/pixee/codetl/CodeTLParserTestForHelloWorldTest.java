@@ -119,6 +119,4 @@ final class CodeTLParserTestForHelloWorldTest {
         return ruleBuilder.build();
     }
 
-
-
 }

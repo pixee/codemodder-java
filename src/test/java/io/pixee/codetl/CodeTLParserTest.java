@@ -1,10 +1,8 @@
 package io.pixee.codetl;
 
-import io.pixee.ast.Node;
 import io.pixee.codetl_antlr.CodeTLBaseListener;
 import io.pixee.codetl_antlr.CodeTLLexer;
 import io.pixee.codetl_antlr.CodeTLParser;
-import io.pixee.languages.helloworld.HelloWorldLanguage;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -16,6 +14,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 final class CodeTLParserTest {
@@ -41,6 +41,21 @@ final class CodeTLParserTest {
         assertThat(rule.getRuleId().toIdentifier(), equalTo(expectedRule));
     }
 
+    @Test
+    void it_handles_import() {
+        String codeTl = """
+                rule pixee:java/stuff
+                match
+                   StaticMethodCall $c { }
+                require import org.apache.Foo
+                require import org.apache.Bar
+                replace $c
+                   StaticMethodCall { }
+                """;
+        CodeTLParser parser = getParser(codeTl);
+        CodeTLParser.CodeTlRuleContext parsedRule = parser.codeTlRule();
+        assertThat(parsedRule, is(notNullValue()));
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {
