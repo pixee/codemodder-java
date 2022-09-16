@@ -8,51 +8,21 @@ import io.pixee.lang.PrimitiveType;
 import io.pixee.languages.helloworld.HelloWorldLanguage;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-final class HelloWorldTransformationTest extends HelloWordEnd2EndTrafoTest {
+final class ASTCopyTest extends HelloWordEnd2EndTrafoTest {
 
     @Test
-    void it_transforms_simple() {
+    void it_copies_the_AST_correctly() {
         String helloWorldCode = """
                 var x = 10
                 var y = 20
                 """;
+        CodeUnit original = parseHelloWorldProgram(helloWorldCode);
+        CodeUnit copy = original.copy();
 
-        String ruleCode = """
-                rule pixee:helloworld/stuff
-                match
-                    Variable {}
-                replace $n
-                    Variable {
-                        name = "a"
-                        initial = NumLit {
-                            value = 10
-                        }
-                    }
-                """;
-
-        String res = transformCodeWithRuleToString(helloWorldCode, ruleCode);
-
-        assertThat(res, is("""
-                Program {
-                  variables: Variable {
-                    name: a
-                    initial: NumLit {
-                      value: 10
-                    }
-                  }
-                  variables: Variable {
-                    name: a
-                    initial: NumLit {
-                      value: 10
-                    }
-                  }
-                }
-                """));
+        assertThat(original.root.dump(""), is(copy.root.dump("")));
     }
 
     @Test

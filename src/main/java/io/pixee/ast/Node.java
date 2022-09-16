@@ -24,6 +24,15 @@ public class Node extends Data {
         this.concept = concept;
     }
 
+    @Override
+    public Node copy() {
+        Node copy = new Node(this.concept);
+        for (Child c: children) {
+            copy.add(c.copy());
+        }
+        return copy;
+    }
+
     public Node add(PropertyDescriptor pd, Data data) {
         this.children.add(new Child(pd, data));
         return this;

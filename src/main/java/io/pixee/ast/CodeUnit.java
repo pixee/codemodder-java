@@ -15,6 +15,10 @@ public class CodeUnit {
         this.root = root;
     }
 
+    public CodeUnit copy() {
+        return new CodeUnit(language,root.copy());
+    }
+
     public CodeUnit resolve() {
         this.root.resolve(language, null);
         return this;

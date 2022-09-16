@@ -1,4 +1,4 @@
-package io.pixee.codetl.helloWorld;
+package io.pixee.codetl.base;
 
 import io.pixee.ast.CodeUnit;
 import io.pixee.codetl.CodeTLRuleDefinition;

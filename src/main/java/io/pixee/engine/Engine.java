@@ -32,7 +32,7 @@ public class Engine {
             for (CodeTLRuleDefinition r: rules) {
                 PatternMatch match = match(r.getNodeToMatch(), n);
                 if (match.hasMatched()) {
-                    performReplacement(match.matchedNode, r.getReplacementNode());
+                    performReplacement(match.matchedNode, r.getReplacementNode().copy());
                 }
             }
         }

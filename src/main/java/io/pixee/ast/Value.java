@@ -19,4 +19,9 @@ public class Value extends Data {
     public String toString() {
         return "value(" + type + "):" + data;
     }
+
+    @Override
+    public Data copy() {
+        return new Value(type, data);
+    }
 }

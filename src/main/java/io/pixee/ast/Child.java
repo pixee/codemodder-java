@@ -18,6 +18,10 @@ public class Child {
         this.data = data;
     }
 
+    public Child copy() {
+        return new Child(role, data.copy());
+    }
+
     public PropertyDescriptor role() {
         return this.role;
     }
