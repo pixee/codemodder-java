@@ -1,4 +1,4 @@
-package io.pixee.codetl.helloWorld;
+package io.pixee.languages.helloworld;
 
 import io.pixee.lang.*;
 

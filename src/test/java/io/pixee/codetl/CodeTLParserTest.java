@@ -1,4 +1,4 @@
-package io.pixee.codetl.java;
+package io.pixee.codetl;
 
 import io.pixee.codetl_antlr.CodeTLBaseListener;
 import io.pixee.codetl_antlr.CodeTLLexer;
@@ -6,8 +6,6 @@ import io.pixee.codetl_antlr.CodeTLParser;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,28 +25,16 @@ final class CodeTLParserTest {
             "\nrule\tpixee:python/stuff,pixee:python/stuff"
     })
     void it_compiles_correct(final String codetl, final String expectedRule) {
-        CodeTLParser parser = getParser(codetl + " match MethodCall $c {} replace $c MethodCall {}");
+        CodeTLParser parser = getParser(codetl + " match StaticMethodCall $c {} replace $c StaticMethodCall {}");
         CodeTLParser.CodeTlRuleContext parsedRule = parser.codeTlRule();
 
-        final CodeTLRuleDefinitionBuilder ruleBuilder = CodeTLRuleDefinitionBuilder.builder();
-        CodeTLBaseListener listener = new CodeTLBaseListener() {
-            @Override
-            public void exitRule_statement(final CodeTLParser.Rule_statementContext ctx) {
-                ruleBuilder.withRuleId(ctx.getChild(1).getText());
-                super.exitRule_statement(ctx);
-            }
-
-            @Override
-            public void exitCodeTlRule(final CodeTLParser.CodeTlRuleContext ctx) {
-                super.exitCodeTlRule(ctx);
-            }
-        };
+        final CodeTLRuleDefinition.CodeTLRuleDefinitionBuilder ruleBuilder = CodeTLRuleDefinition.builder();
+        CodeTLBaseListener listener = new ASTExtractingCodeTLListener(ruleBuilder);
 
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(listener, parsedRule);
 
         CodeTLRuleDefinition rule = ruleBuilder.build();
-        System.out.println("Rule: " + rule.getRuleId());
         assertThat(rule.getRuleId(), equalTo(expectedRule));
     }
 
@@ -69,4 +55,5 @@ final class CodeTLParserTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         return new CodeTLParser(tokens);
     }
+
 }

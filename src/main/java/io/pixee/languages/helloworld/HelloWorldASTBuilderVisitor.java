@@ -1,10 +1,10 @@
-package io.pixee.codetl.helloWorld;
+package io.pixee.languages.helloworld;
 
 import io.pixee.ast.CodeUnit;
 import io.pixee.ast.Node;
 import io.pixee.ast.Value;
-import io.pixee.codetl.helloWorld.grammar.helloWorldGrammarBaseVisitor;
-import io.pixee.codetl.helloWorld.grammar.helloWorldGrammarParser;
+import io.pixee.codetl_antlr.helloWorldGrammarBaseVisitor;
+import io.pixee.codetl_antlr.helloWorldGrammarParser;
 import io.pixee.lang.PrimitiveType;
 
 public class HelloWorldASTBuilderVisitor extends helloWorldGrammarBaseVisitor<Node> {

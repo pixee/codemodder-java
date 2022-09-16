@@ -30,4 +30,4 @@ VARIABLE_IDENTIFIER : '$' IDENTIFIER ;
 IDENTIFIER : [a-zA-Z]+ ;
 DOTTED_IDENTIFIER : [a-zA-Z\\.]+ ;
 
-WS  : [ \t\r\n]+ -> skip ;
+WS : [ \t\r\n]+ -> skip ;
