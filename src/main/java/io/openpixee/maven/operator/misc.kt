@@ -86,8 +86,9 @@ internal fun propertyName(c: ProjectModel, versionNode: Element): String {
     }
 
     // TODO: Escaping
+    // TODO: Template Format (suffix / preffix)?
 
-    return c.dependency.artifactId + ".version"
+    return "versions." + c.dependency.artifactId
 }
 
 internal fun findOutIfUpgradeIsNeeded(c: ProjectModel, versionNode: Element): Boolean {
