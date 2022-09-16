@@ -33,4 +33,9 @@ public class Child {
     public void setData(Data data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "child:" + role.name+"=" + this.data;
+    }
 }

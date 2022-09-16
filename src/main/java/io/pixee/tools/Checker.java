@@ -4,6 +4,6 @@ import io.pixee.ast.Node;
 
 public interface Checker {
 
-    Iterable<Message> run(Node n);
+    Iterable<Message> execute(Node n, boolean isUsedAsPattern);
 
 }

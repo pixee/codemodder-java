@@ -8,4 +8,8 @@ public class ConceptType extends Type {
         concept = cd;
     }
 
+    @Override
+    public String toString() {
+        return "concept:" + concept.name;
+    }
 }

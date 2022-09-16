@@ -2,7 +2,17 @@ package io.pixee.lang;
 
 public class PrimitiveType extends Type {
 
-    public static PrimitiveType INTEGER = new PrimitiveType();
-    public static PrimitiveType STRING = new PrimitiveType();
+    private String name;
 
+    public PrimitiveType(String name) {
+        this.name = name;
+    }
+
+    public static PrimitiveType INTEGER = new PrimitiveType("integer");
+    public static PrimitiveType STRING = new PrimitiveType("string");
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

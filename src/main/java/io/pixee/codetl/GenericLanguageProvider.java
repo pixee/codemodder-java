@@ -32,7 +32,8 @@ public class GenericLanguageProvider implements SubjectLanguageProvider{
         String conceptName = tree.getChild(0).getText();
         ConceptDescriptor concept = language.conceptByName(conceptName);
         if (concept == null) return new ErrorNode("concept named "+conceptName+" not found in language "+ language.name());
-        return new Node(concept);
+        Node theNode = new Node(concept);
+        return theNode;
     }
 
     @Override

@@ -14,9 +14,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,7 +38,7 @@ final class CodeTLParserTestForHelloWorld {
     }
 
     @Test
-    void it_produces_error_node() {
+    void it_produces_error_node_and_checker_finds_it() {
         var input = """
                 rule pixee:helloworld/stuff
                 match
@@ -54,9 +51,26 @@ final class CodeTLParserTestForHelloWorld {
         CodeTLRuleDefinition rule = parseRule(input);
         Node nodeToMatch = rule.getNodeToMatch();
         assertThat(nodeToMatch, instanceOf(ErrorNode.class));
-        Iterable<Message> errors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).run(nodeToMatch);
-        assertThat(errors.iterator().hasNext(), is(true));
-        assertThat(errors.iterator().next().toString(), is("concept named Junk not found in language HelloWorld"));
+        Iterable<Message> patternErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).execute(nodeToMatch, true);
+        assertThat(patternErrors.iterator().hasNext(), is(true));
+        assertThat(patternErrors.iterator().next().toString(), is("concept named Junk not found in language HelloWorld"));
+    }
+
+    @Test
+    void it_allows_missing_children_in_pattern() {
+        var input = """
+                rule pixee:helloworld/stuff
+                match
+                    NumLit $n {}
+                replace $n
+                    NumLit {}
+                """;
+        CodeTLRuleDefinition rule = parseRule(input);
+        Iterable<Message> patternErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).execute(rule.getNodeToMatch(), true);
+        assertThat(patternErrors.iterator().hasNext(), is(false));
+        Iterable<Message> replacementErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).execute(rule.getReplacementNode(), false);
+        assertThat(replacementErrors.iterator().hasNext(), is(true));
+        assertThat(replacementErrors.iterator().next().toString(), is("child missing for property value"));
     }
 
     @NotNull

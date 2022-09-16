@@ -12,4 +12,8 @@ public class Value extends Data {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return "value(" + type + "):" + data;
+    }
 }

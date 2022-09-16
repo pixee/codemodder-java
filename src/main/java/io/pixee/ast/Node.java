@@ -5,6 +5,7 @@ import io.pixee.lang.LanguageDescriptor;
 import io.pixee.lang.PropertyDescriptor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Node extends Data {
@@ -38,6 +39,17 @@ public class Node extends Data {
         this.childNodes().stream().forEach(c -> c.resolve(lang, this));
     }
 
+    public Collection<Child> children() {
+        return this.children;
+    }
+
+    public Collection<Child> childrenFor(PropertyDescriptor property) {
+        return this.children.stream().filter(it -> it.role() == property).toList();
+    }
+
+    public boolean hasChildrenFor(PropertyDescriptor property) {
+        return !childrenFor(property).isEmpty();
+    }
 
     public String dump(String indent) {
         StringBuilder sb = new StringBuilder();
@@ -65,6 +77,11 @@ public class Node extends Data {
             }
         }
         replacement.resolve(this.concept.language(),this);
+    }
+
+    @Override
+    public String toString() {
+        return "node:" + concept.name;
     }
 }
 

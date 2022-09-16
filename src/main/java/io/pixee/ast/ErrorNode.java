@@ -12,4 +12,9 @@ public class ErrorNode extends Node {
     public String problem() {
         return problem;
     }
+
+    @Override
+    public String toString() {
+        return "node/error:" + problem;
+    }
 }
