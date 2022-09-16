@@ -2,6 +2,8 @@ package io.pixee.codetl;
 
 import io.pixee.ast.ErrorNode;
 import io.pixee.ast.Node;
+import io.pixee.codetl.ASTExtractingCodeTLListener;
+import io.pixee.codetl.CodeTLRuleDefinition;
 import io.pixee.codetl_antlr.CodeTLBaseListener;
 import io.pixee.codetl_antlr.CodeTLLexer;
 import io.pixee.codetl_antlr.CodeTLParser;
@@ -14,6 +16,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collection;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -68,8 +72,8 @@ final class CodeTLParserTestForHelloWorld {
         CodeTLRuleDefinition rule = parseRule(input);
         Iterable<Message> patternErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).execute(rule.getNodeToMatch(), true);
         assertThat(patternErrors.iterator().hasNext(), is(false));
-        Iterable<Message> replacementErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).execute(rule.getReplacementNode(), false);
-        assertThat(replacementErrors.iterator().hasNext(), is(true));
+        Collection<Message> replacementErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).execute(rule.getReplacementNode(), false);
+        assertThat(replacementErrors.isEmpty(), is(false));
         assertThat(replacementErrors.iterator().next().toString(), is("child missing for property value"));
     }
 
@@ -82,6 +86,7 @@ final class CodeTLParserTestForHelloWorld {
                     }
                 replace $n
                     Variable {
+                        name = "x"
                         initial = NumLit {
                             value = 10
                         }
@@ -89,8 +94,8 @@ final class CodeTLParserTestForHelloWorld {
                 """;
         CodeTLRuleDefinition rule = parseRule(input);
         System.err.println(rule.getReplacementNode().dump(""));
-        Iterable<Message> replacementErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).executeAndPrint(rule.getReplacementNode(), false);
-        assertThat(replacementErrors.iterator().hasNext(), is(false));
+        Collection<Message> replacementErrors = new ASTStructureChecker(HelloWorldLanguage.INSTANCE.LANG).executeAndPrint(rule.getReplacementNode(), false);
+        assertThat(replacementErrors.isEmpty(), is(true));
         assertThat(rule.getReplacementNode().dump(""), is("""
                 Variable {
                   name: x
