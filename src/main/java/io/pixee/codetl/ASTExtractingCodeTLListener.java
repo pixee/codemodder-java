@@ -18,7 +18,6 @@ final class ASTExtractingCodeTLListener extends CodeTLBaseListener {
     private SubjectLanguageProvider subjectLanguageProvider;
     private Node nodeToMatch;
     private Node replacementNode;
-    private String subjectLanguage;
     private RuleId ruleId;
 
     public ASTExtractingCodeTLListener(final CodeTLRuleDefinition.CodeTLRuleDefinitionBuilder ruleBuilder) {
@@ -51,56 +50,20 @@ final class ASTExtractingCodeTLListener extends CodeTLBaseListener {
         super.exitMatch_statement(ctx);
         ParseTree node = ctx.getChild(1);
         this.nodeToMatch = subjectLanguageProvider.parseMatchNode(node);
+        ruleBuilder.setNodeToMatch(nodeToMatch);
     }
 
     @Override
     public void exitReplace_statement(final CodeTLParser.Replace_statementContext ctx) {
         super.exitReplace_statement(ctx);
-        ParseTree node = ctx.getChild(1);
+        ParseTree node = ctx.getChild(2);
         this.replacementNode = subjectLanguageProvider.parseReplacementNode(node);
+        ruleBuilder.setReplacementNode(replacementNode);
     }
 
     @Override
     public void exitCodeTlRule(final CodeTLParser.CodeTlRuleContext ctx) {
         super.exitCodeTlRule(ctx);
-    }
-
-    /**
-     * This type is responsible for parsing the ANTLR model objects into CodeTL node objects.
-     */
-    interface SubjectLanguageProvider {
-        Node parseMatchNode(ParseTree node);
-        Node parseReplacementNode(ParseTree node);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * Responsible for the Java language!
-     */
-    static class JavaLanguageProvider implements SubjectLanguageProvider {
-
-        @Override
-        public Node parseMatchNode(final ParseTree node) {
-            String languageNodeType = node.getChild(0).getText();
-            if("StaticMethodCall".equals(languageNodeType)) {
-                return parseStaticMethodCall(node);
-            }
-            throw new UnsupportedOperationException();
-        }
-
-        /**
-         * Turn a <code>StaticMethodCall</code> into a parsed node.
-         */
-        private Node parseStaticMethodCall(final ParseTree methodCall) {
-            Node node = null;
-            return node;
-        }
-
-        @Override
-        public Node parseReplacementNode(final ParseTree node) {
-            throw new UnsupportedOperationException();
-        }
     }
 
 }

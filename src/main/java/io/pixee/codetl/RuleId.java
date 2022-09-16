@@ -53,5 +53,27 @@ public final class RuleId {
         return namespace + ":" + subjectLanguage + "/" + category;
     }
 
+    @Override
+    public String toString() {
+        return "RuleId{" +
+                "namespace='" + namespace + '\'' +
+                ", subjectLanguage='" + subjectLanguage + '\'' +
+                ", category='" + category + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RuleId ruleId = (RuleId) o;
+        return namespace.equals(ruleId.namespace) && subjectLanguage.equals(ruleId.subjectLanguage) && category.equals(ruleId.category);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(namespace, subjectLanguage, category);
+    }
+
     private static final Pattern rulePattern = Pattern.compile("([a-zA-Z0-9]+):(java|python)/([a-zA-Z0-9\\-_]+)");
 }

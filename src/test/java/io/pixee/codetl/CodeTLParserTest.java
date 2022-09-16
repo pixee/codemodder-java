@@ -22,7 +22,7 @@ final class CodeTLParserTest {
             "rule pixee:java/stuff,pixee:java/stuff",
             "rule  pixee:java/stuff,pixee:java/stuff",
             "\nrule\tpixee:java/stuff,pixee:java/stuff",
-            "\nrule\tpixee:python/stuff,pixee:python/stuff"
+            "\nrule\tpixee:java/dashed-thing,pixee:java/dashed-thing"
     })
     void it_compiles_correct(final String codetl, final String expectedRule) {
         CodeTLParser parser = getParser(codetl + " match StaticMethodCall $c {} replace $c StaticMethodCall {}");
@@ -35,7 +35,7 @@ final class CodeTLParserTest {
         walker.walk(listener, parsedRule);
 
         CodeTLRuleDefinition rule = ruleBuilder.build();
-        assertThat(rule.getRuleId(), equalTo(expectedRule));
+        assertThat(rule.getRuleId().toIdentifier(), equalTo(expectedRule));
     }
 
     @ParameterizedTest
