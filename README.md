@@ -1,3 +1,6 @@
+[![Actions Status](https://github.com/openpixee/pom-operator/workflows/Java%20CI/badge.svg)](https://github.com/openpixee/pom-operator/actions)
+![Coverage](.github/badges/jacoco.svg)
+
 # pom-operator
 
 POM Operator is a library responsible for injecting dependencies into POM files programatically.

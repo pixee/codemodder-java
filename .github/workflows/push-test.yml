@@ -1,3 +1,5 @@
+name: Java CI
+
 on: [push]
 
 jobs:
