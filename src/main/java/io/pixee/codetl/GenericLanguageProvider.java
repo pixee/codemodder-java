@@ -13,6 +13,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.List;
 
+/**
+ * A language provider that works for any language because it uses
+ * reflective APIs to build the AST.
+ */
 public class GenericLanguageProvider implements SubjectLanguageProvider{
 
     private final LanguageDescriptor language;
@@ -55,11 +59,9 @@ public class GenericLanguageProvider implements SubjectLanguageProvider{
             ParseTree dataContext = tree.getChild(2);
             if (dataContext instanceof CodeTLParser.ExpressionContext) {
                 ParseTree expr = dataContext.getChild(0);
-                if (expr instanceof CodeTLParser.Number_literalContext) {
-                    CodeTLParser.Number_literalContext numberLit = (CodeTLParser.Number_literalContext) expr;
+                if (expr instanceof CodeTLParser.Number_literalContext numberLit) {
                     data = new Value(PrimitiveType.INTEGER, Integer.valueOf(numberLit.NUMBER().getText()));
-                } else if (expr instanceof CodeTLParser.String_literalContext) {
-                    CodeTLParser.String_literalContext stringLit = (CodeTLParser.String_literalContext) expr;
+                } else if (expr instanceof CodeTLParser.String_literalContext stringLit) {
                     data = new Value(PrimitiveType.STRING, stringLit.STRING().getText().replaceAll("\"",""));
                 } else {
                     throw new RuntimeException("Not yet implemented: " + dataContext.getClass().getName());

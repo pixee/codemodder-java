@@ -7,6 +7,9 @@ import io.pixee.codetl_antlr.helloWorldGrammarBaseVisitor;
 import io.pixee.codetl_antlr.helloWorldGrammarParser;
 import io.pixee.lang.PrimitiveType;
 
+/**
+ * Constructs the AST for Hello World programs from the parser result
+ */
 public class HelloWorldASTBuilderVisitor extends helloWorldGrammarBaseVisitor<Node> {
 
     private CodeUnit unit;

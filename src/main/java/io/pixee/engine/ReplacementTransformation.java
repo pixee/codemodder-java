@@ -2,6 +2,9 @@ package io.pixee.engine;
 
 import io.pixee.ast.Node;
 
+/**
+ * A transformation that replaces its matched node with another one
+ */
 public class ReplacementTransformation extends Transformation {
 
     private final Node replacement;

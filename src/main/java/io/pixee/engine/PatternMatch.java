@@ -2,6 +2,10 @@ package io.pixee.engine;
 
 import io.pixee.ast.Node;
 
+/**
+ * Represents a successful or non-succesful match of a pattern
+ * against a node in the AST
+ */
 public class PatternMatch {
 
     public final Node pattern;

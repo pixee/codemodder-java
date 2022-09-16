@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * represents a language by containing all the concepts in that language
+ */
 public class LanguageDescriptor {
 
     private final String name;

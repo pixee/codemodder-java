@@ -1,5 +1,8 @@
 package io.pixee.lang;
 
+/**
+ * Describes a property (child node, primitive value) of a node
+ */
 public class PropertyDescriptor {
 
     public final String name;

@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Represents a node in the AST. Can contain children and points
+ * to the concept from the language definition of which it represents
+ * an instance.
+ */
 public class Node extends Data {
 
     public final ConceptDescriptor concept;

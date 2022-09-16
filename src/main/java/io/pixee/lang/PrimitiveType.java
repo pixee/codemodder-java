@@ -1,8 +1,11 @@
 package io.pixee.lang;
 
+/**
+ * Collection of primitive types for properties
+ */
 public class PrimitiveType extends Type {
 
-    private String name;
+    private final String name;
 
     public PrimitiveType(String name) {
         this.name = name;
