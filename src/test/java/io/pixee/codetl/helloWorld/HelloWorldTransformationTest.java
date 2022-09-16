@@ -3,15 +3,9 @@ package io.pixee.codetl.helloWorld;
 import io.pixee.ast.CodeUnit;
 import io.pixee.ast.Node;
 import io.pixee.ast.Value;
-import io.pixee.codetl_antlr.helloWorldGrammarLexer;
-import io.pixee.codetl_antlr.helloWorldGrammarParser;
-import io.pixee.engine.Engine;
-import io.pixee.engine.ReplacementTransformation;
+import io.pixee.codetl.CodeTLRuleDefinition;
 import io.pixee.lang.PrimitiveType;
-import io.pixee.languages.helloworld.HelloWorldASTBuilderVisitor;
 import io.pixee.languages.helloworld.HelloWorldLanguage;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -19,38 +13,42 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-final class HelloWorldTransformationTest {
+final class HelloWorldTransformationTest extends HelloWordEnd2EndTrafoTest {
 
     @Test
     void it_transforms_simple() {
-        var input = """
+        String helloWorldCode = """
                 var x = 10
                 var y = 20
                 """;
 
-        var parser = new helloWorldGrammarParser(new CommonTokenStream(new helloWorldGrammarLexer(CharStreams.fromString(input))));
-        HelloWorldASTBuilderVisitor visitor = new HelloWorldASTBuilderVisitor();
-        visitor.visitProgram(parser.program());
-        CodeUnit program = visitor.getCode();
-        Engine e = new Engine();
-        HelloWorldLanguage hw = HelloWorldLanguage.INSTANCE;
-        e.registerTransformation(new ReplacementTransformation(
-                new Node(hw.NUM_LIT),
-                new Node(hw.NUM_LIT).add("value", new Value(PrimitiveType.STRING,"0"))
-        ));
-        e.transform(program);
-        assertThat(program.root.dump(""),is("""
+        String ruleCode = """
+                rule pixee:helloworld/stuff
+                match
+                    Variable {}
+                replace $n
+                    Variable {
+                        name = "a"
+                        initial = NumLit {
+                            value = 10
+                        }
+                    }
+                """;
+
+        String res = transformCodeWithRuleToString(helloWorldCode, ruleCode);
+
+        assertThat(res, is("""
                 Program {
                   variables: Variable {
-                    name: x
+                    name: a
                     initial: NumLit {
-                      value: 0
+                      value: 10
                     }
                   }
                   variables: Variable {
-                    name: y
+                    name: a
                     initial: NumLit {
-                      value: 0
+                      value: 10
                     }
                   }
                 }

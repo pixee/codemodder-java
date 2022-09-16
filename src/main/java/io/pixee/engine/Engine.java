@@ -2,6 +2,7 @@ package io.pixee.engine;
 
 import io.pixee.ast.CodeUnit;
 import io.pixee.ast.Node;
+import io.pixee.codetl.CodeTLRuleDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,18 +12,27 @@ import java.util.List;
  */
 public class Engine {
 
-    private final List<Transformation> transformations = new ArrayList<Transformation>();
+    private final List<CodeTLRuleDefinition> rules = new ArrayList<>();
 
-    public void registerTransformation(Transformation tx) {
-        this.transformations.add(tx);
+    public void registerRule(CodeTLRuleDefinition rule) {
+        this.rules.add(rule);
     }
 
-    public void transform(CodeUnit code) {
+    protected PatternMatch match(Node pattern, Node candidate) {
+        return new PatternMatch(pattern, candidate, pattern.concept == candidate.concept);
+    }
+
+    protected void performReplacement(Node matched, Node replacement) {
+        matched.parent().replaceChild(matched, replacement);
+    }
+
+
+    public void transformWithRules(CodeUnit code) {
         for (Node n: new TopDownTraversal(code.root).nodes()) {
-            for (Transformation tf: transformations) {
-                PatternMatch match = tf.match(n);
+            for (CodeTLRuleDefinition r: rules) {
+                PatternMatch match = match(r.getNodeToMatch(), n);
                 if (match.hasMatched()) {
-                    tf.perform(match);
+                    performReplacement(match.matchedNode, r.getReplacementNode());
                 }
             }
         }

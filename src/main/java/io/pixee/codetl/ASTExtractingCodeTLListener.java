@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * This type is responsible for building an AST for a CodeTL rule from a given ANTLR4 listening event.
  */
-final class ASTExtractingCodeTLListener extends CodeTLBaseListener {
+public final class ASTExtractingCodeTLListener extends CodeTLBaseListener {
 
     private final CodeTLRuleDefinition.CodeTLRuleDefinitionBuilder ruleBuilder;
     private final Map<String,SubjectLanguageProvider> subjectLanguageProviderMap;

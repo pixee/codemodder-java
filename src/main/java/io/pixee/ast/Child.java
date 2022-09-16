@@ -28,7 +28,9 @@ public class Child {
     }
 
     void resolve(Node parent) {
-        role = parent.concept.prop(tempRoleName);
+        if (role == null) {
+            role = parent.concept.prop(tempRoleName);
+        }
     }
 
     public Data data() {
