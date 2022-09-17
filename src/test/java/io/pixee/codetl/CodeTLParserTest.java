@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -42,29 +41,24 @@ final class CodeTLParserTest {
     }
 
     @Test
-    void it_handles_import() {
+    void it_handles_requires() {
         String codeTl = """
                 rule pixee:java/stuff
                 match
                    StaticMethodCall $c { }
+                
+                require dependency apache:foo:1.2
                 require import org.apache.Foo
+                
+                require dependency apache:bar:3.2-SNAPSHOT
                 require import org.apache.Bar
+               
                 replace $c
                    StaticMethodCall { }
                 """;
         CodeTLParser parser = getParser(codeTl);
         CodeTLParser.CodeTlRuleContext parsedRule = parser.codeTlRule();
         assertThat(parsedRule, is(notNullValue()));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "rule=pixee:java/stuff", // wrong separator
-            "rule pixeejava/stuff", // no namespace separator
-            "rule pixee:java_stuff", // no language separator
-    })
-    void it_doesnt_parse_invalid(final String badRuleId) {
-        CodeTLParser parser = getParser(badRuleId);
     }
 
     @NotNull
