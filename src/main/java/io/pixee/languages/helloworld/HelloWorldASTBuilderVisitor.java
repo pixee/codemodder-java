@@ -32,7 +32,7 @@ public class HelloWorldASTBuilderVisitor extends helloWorldGrammarBaseVisitor<No
     private Node createVariable(helloWorldGrammarParser.VariableContext ctx) {
         Node var = new Node(hw.VAR);
         var.add("name", new Value(PrimitiveType.STRING, ctx.ID().getText()));
-        var.add("initial", new Node(hw.NUM_LIT).add("value", new Value(PrimitiveType.STRING, ctx.numlit().NUMBER().getText())));
+        var.add("initial", new Node(hw.NUM_LIT).add("value", new Value(PrimitiveType.INTEGER, Integer.valueOf(ctx.numlit().NUMBER().getText()))));
         return var;
     }
 

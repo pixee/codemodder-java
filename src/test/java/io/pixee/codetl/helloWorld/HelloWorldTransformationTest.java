@@ -55,6 +55,55 @@ final class HelloWorldTransformationTest extends HelloWordEnd2EndTrafoTest {
                 """));
     }
 
+
+    @Test
+    void it_transforms_simple2() {
+        String helloWorldCode = """
+                var x = 10
+                var y = 20
+                """;
+
+        String ruleCode = """
+                rule pixee:helloworld/stuff
+                match
+                    Variable {
+                        name = "x"
+                        initial = NumLit {
+                            value = 10
+                        }
+                    }                
+                replace $n
+                    Variable {
+                        name = "a"
+                        initial = NumLit {
+                            value = 30
+                        }
+                    }
+                """;
+
+        String res = transformCodeWithRuleToString(helloWorldCode, ruleCode);
+
+        assertThat(res, is("""
+                Program {
+                  variables: Variable {
+                    name: a
+                    initial: NumLit {
+                      value: 30
+                    }
+                  }
+                  variables: Variable {
+                    name: y
+                    initial: NumLit {
+                      value: 20
+                    }
+                  }
+                }
+                """));
+    }
+
+
+
+
     @Test
     void it_makes_programs() {
         CodeUnit codeUnit = makeProgram();

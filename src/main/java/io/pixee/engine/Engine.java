@@ -1,10 +1,10 @@
 package io.pixee.engine;
 
-import io.pixee.ast.CodeUnit;
-import io.pixee.ast.Node;
+import io.pixee.ast.*;
 import io.pixee.codetl.CodeTLRuleDefinition;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -19,7 +19,34 @@ public class Engine {
     }
 
     protected PatternMatch match(Node pattern, Node candidate) {
-        return new PatternMatch(pattern, candidate, pattern.concept == candidate.concept);
+        return new PatternMatch(pattern, candidate, matchNode(pattern,candidate));
+    }
+
+    protected boolean matchNode(Node pattern, Node candidate) {
+        if (pattern.concept != candidate.concept) return false;
+        for (Child patternChild: pattern.children()) {
+            Collection<Child> candChildren = candidate.childrenFor(patternChild.role());
+            if (candChildren.isEmpty()) return false;
+            if (!candChildren.stream().anyMatch(it -> matchChild(patternChild, it))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected boolean matchChild(Child pattern, Child candidate) {
+        if (pattern.role() != candidate.role()) return false;
+        return matchData(pattern.data(), candidate.data());
+    }
+
+    private boolean matchData(Data pattern, Data candidate) {
+        if (pattern instanceof Node pattNode && candidate instanceof Node candNode) {
+            return matchNode(pattNode, candNode);
+        }
+        if (pattern instanceof Value pattVal && candidate instanceof Value candVal) {
+            return pattVal.equals(candVal);
+        }
+        return false;
     }
 
     protected void performReplacement(Node matched, Node replacement) {

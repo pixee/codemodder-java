@@ -24,4 +24,16 @@ public class Value extends Data {
     public Data copy() {
         return new Value(type, data);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof Value)) return false;
+        return this.type == ((Value) obj).type && this.data.equals(((Value) obj).data);
+    }
+
+    @Override
+    public int hashCode() {
+        return data.hashCode();
+    }
 }
