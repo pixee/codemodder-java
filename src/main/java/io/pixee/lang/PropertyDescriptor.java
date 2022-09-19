@@ -15,6 +15,12 @@ public class PropertyDescriptor {
         this.isList = false;
     }
 
+    public PropertyDescriptor(String name, ConceptDescriptor concept) {
+        this.name = name;
+        this.type = new ConceptType(concept);
+        this.isList = false;
+    }
+
     public PropertyDescriptor(String name, Type type, boolean isList) {
         this.name = name;
         this.type = type;

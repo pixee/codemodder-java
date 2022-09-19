@@ -21,4 +21,9 @@ public class ErrorNode extends Node {
     public String toString() {
         return "node/error:" + problem;
     }
+
+    public String dump(String indent) {
+        return this.toString();
+    }
+
 }

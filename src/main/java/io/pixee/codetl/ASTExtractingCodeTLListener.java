@@ -4,6 +4,7 @@ import io.pixee.ast.Node;
 import io.pixee.codetl_antlr.CodeTLBaseListener;
 import io.pixee.codetl_antlr.CodeTLParser;
 import io.pixee.languages.helloworld.HelloWorldLanguage;
+import io.pixee.languages.java.JavaLanguage;
 import io.pixee.languages.java.JavaLanguageProvider;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -24,8 +25,9 @@ public final class ASTExtractingCodeTLListener extends CodeTLBaseListener {
 
     public ASTExtractingCodeTLListener(final CodeTLRuleDefinition.CodeTLRuleDefinitionBuilder ruleBuilder) {
         this.ruleBuilder = Objects.requireNonNull(ruleBuilder);
-        this.subjectLanguageProviderMap = Map.of("java", new JavaLanguageProvider(),
-                                                 "helloworld", new GenericLanguageProvider(HelloWorldLanguage.INSTANCE.LANG));
+        this.subjectLanguageProviderMap = Map.of(//"java", new JavaLanguageProvider(),
+                "java", new GenericLanguageProvider(JavaLanguage.INSTANCE.LANG) ,
+                "helloworld", new GenericLanguageProvider(HelloWorldLanguage.INSTANCE.LANG));
     }
 
     @Override

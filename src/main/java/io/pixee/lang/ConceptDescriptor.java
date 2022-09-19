@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * reprents a kind of AST node, a building block of a language. Has a name
+ * reperents a kind of AST node, a building block of a language. Has a name
  * plus typed properties (plus additional info in the future).
  */
 public class ConceptDescriptor {
@@ -12,13 +12,41 @@ public class ConceptDescriptor {
     public final String name;
     private final List<PropertyDescriptor> properties = new ArrayList<PropertyDescriptor>();
     private LanguageDescriptor language;
+    private List<ConceptType> baseConcepts = new ArrayList<>();
+    private boolean isAbstract = false;
 
-    public ConceptDescriptor(String name ) {
+    public ConceptDescriptor(String name) {
         this.name = name;
     }
 
+    public ConceptDescriptor markAbstract() {
+        this.isAbstract = true;
+        return this;
+    }
+
+
     public ConceptDescriptor add(PropertyDescriptor pd) {
         properties.add(pd);
+        return this;
+    }
+
+    public ConceptDescriptor add(String name, ConceptDescriptor cd) {
+        properties.add(new PropertyDescriptor(name, cd));
+        return this;
+    }
+
+    public ConceptDescriptor add(String name, Type type) {
+        properties.add(new PropertyDescriptor(name, type));
+        return this;
+    }
+
+    public ConceptDescriptor add(String name, ConceptDescriptor cd, boolean isList) {
+        properties.add(new PropertyDescriptor(name, cd.getType(), isList));
+        return this;
+    }
+
+    public ConceptDescriptor base(ConceptDescriptor base) {
+        baseConcepts.add(new ConceptType(base));
         return this;
     }
 
