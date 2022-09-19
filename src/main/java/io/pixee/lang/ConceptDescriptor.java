@@ -1,6 +1,7 @@
 package io.pixee.lang;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -50,6 +51,10 @@ public class ConceptDescriptor {
         return this;
     }
 
+    public Collection<ConceptDescriptor> baseConcepts() {
+        return baseConcepts.stream().map(ConceptType::concept).toList();
+    }
+
     void setLanguage(LanguageDescriptor ld) {
         this.language = ld;
     }
@@ -66,7 +71,15 @@ public class ConceptDescriptor {
         return properties.stream().filter(prop -> prop.name.equals(name)).findFirst().orElse(null);
     }
 
-    public Iterable<PropertyDescriptor> properties() {
+    public Collection<PropertyDescriptor> properties() {
         return this.properties;
+    }
+
+    public Collection<PropertyDescriptor> primitiveProperties() {
+        return this.properties.stream().filter(it -> it.type instanceof PrimitiveType).toList();
+    }
+
+    public Collection<PropertyDescriptor> nodeProperties() {
+        return this.properties.stream().filter(it -> it.type instanceof ConceptType).toList();
     }
 }

@@ -12,6 +12,10 @@ public class ConceptType extends Type {
         concept = cd;
     }
 
+    public ConceptDescriptor concept() {
+        return this.concept;
+    }
+
     @Override
     public String toString() {
         return "concept:" + concept.name;

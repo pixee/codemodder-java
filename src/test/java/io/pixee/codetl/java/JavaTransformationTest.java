@@ -7,6 +7,7 @@ import io.pixee.codetl.CodeTLRuleDefinition;
 import io.pixee.codetl.base.HelloWordEnd2EndTrafoTest;
 import io.pixee.lang.PrimitiveType;
 import io.pixee.languages.helloworld.HelloWorldLanguage;
+import io.pixee.languages.java.JavaLanguage;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -16,6 +17,9 @@ final class JavaTransformationTest extends HelloWordEnd2EndTrafoTest {
 
     @Test
     void it_transforms_simple() {
+        System.err.println(JavaLanguage.INSTANCE.LANG.plantUMLString());
+
+
         String ruleCode = """
                 rule pixee:java/stuff
                 match

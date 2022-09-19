@@ -38,5 +38,27 @@ public class LanguageDescriptor {
         return this.name;
     }
 
+    public String plantUMLString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("@startuml\n");
+        for (ConceptDescriptor cd: concepts.values() ) {
+            sb.append("class "+cd.name+" {\n");
+            for (PropertyDescriptor attr: cd.primitiveProperties()) {
+                sb.append("  " + attr.name + " : " + attr.type.toString() + "\n");
+            }
+            sb.append("}\n");
+        }
+        for (ConceptDescriptor cd: concepts.values() ) {
+            for (ConceptDescriptor base: cd.baseConcepts()) {
+                sb.append(base.name + " <|-- " + cd.name + "\n");
+            }
+            for (PropertyDescriptor rel: cd.nodeProperties()) {
+                String card = rel.isList ? "\"*\"" : "";
+                sb.append(cd.name + " *-> " + card + " " + ((ConceptType) rel.type).concept().name+ " : " + rel.name + "\n");
+            }
+        }
+        sb.append("@enduml\n");
+        return sb.toString();
+    }
 
 }
