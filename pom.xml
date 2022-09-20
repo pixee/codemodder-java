@@ -20,6 +20,7 @@
     <versions.hamcrest>2.2</versions.hamcrest>
     <versions.log4j>2.18.0</versions.log4j>
     <versions.mockito>4.3.1</versions.mockito>
+    <versions.lsp4j>0.15.0</versions.lsp4j>
 
     <antlr4.plugin.version>4.7.2</antlr4.plugin.version>
     <antlr4.version>4.7.2</antlr4.version>
@@ -43,7 +44,7 @@
     <dependency>
       <groupId>org.eclipse.lsp4j</groupId>
       <artifactId>org.eclipse.lsp4j</artifactId>
-      <version>0.15.0</version>
+      <version>${versions.lsp4j}</version>
     </dependency>
 
 
