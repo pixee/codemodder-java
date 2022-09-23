@@ -1,0 +1,22 @@
+{
+  "name": "codetl",
+  "version": "0.0.1",
+  "description": "",
+  "main": "out/cli.js",
+  "dependencies": {
+    "jest": "^29.0.3",
+    "ts-jest": "^29.0.1",
+    "ts-node": "^10.9.1"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "ts-node src/codetl/cli.ts",
+    "test": "jest"
+  },
+  "exclude": [
+    "test/**/*.test.ts"
+  ],
+  "devDependencies": {
+    "@types/yargs": "^17.0.12"
+  }
+}
