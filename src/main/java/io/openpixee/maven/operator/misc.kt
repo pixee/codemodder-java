@@ -11,6 +11,7 @@ import org.dom4j.io.XMLWriter
 import org.dom4j.tree.DefaultText
 import java.io.StringReader
 import java.io.StringWriter
+import java.lang.IllegalStateException
 import kotlin.math.ceil
 
 internal fun formatNode(node: Element) {
@@ -75,6 +76,16 @@ internal fun upgradeProperty(c: ProjectModel, propertyName: String) {
         val newElement = parentPropertyElement.addElement(propertyName)
 
         formatNode(newElement)
+    } else {
+        if (!c.overrideIfAlreadyExists) {
+            val propertyReferenceRE = Regex.fromLiteral("\${$propertyName}")
+
+            val numberOfAllCurrentMatches = propertyReferenceRE.findAll(c.pomDocument.asXML()).toList().size
+
+            if (numberOfAllCurrentMatches > 1) {
+                throw IllegalStateException("Property ${propertyName} is already defined - and used more than once.")
+            }
+        }
     }
 
     val propertyElement = parentPropertyElement.element(propertyName)

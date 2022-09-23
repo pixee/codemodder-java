@@ -17,6 +17,7 @@ import org.xmlunit.builder.Input
 import org.xmlunit.diff.ComparisonType
 import org.xmlunit.diff.Diff
 import java.io.File
+import java.lang.IllegalStateException
 import java.net.URLDecoder
 
 /**
@@ -190,6 +191,50 @@ class POMOperatorTest {
             differenceList.first().comparison.testDetails.xPath,
             "/project[1]/properties[1]/sample.version[1]/text()[1]"
         )
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testCaseWithPropertyDefinedTwice() {
+        val dependencyToUpgrade =
+            Dependency("org.dom4j", "dom4j", version = "1.0.0")
+
+        val originalPom = """
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>br.com.ingenieux</groupId>
+    <artifactId>pom-operator</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    
+    <properties>
+      <dom4j.version>0.0.1</dom4j.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>${'$'}{dom4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j-other</artifactId>
+            <version>${'$'}{dom4j.version}</version>
+        </dependency>
+    </dependencies>
+</project>
+                """.trimIndent()
+        val context =
+            ProjectModelFactory.load(
+                originalPom.byteInputStream(),
+            ).withDependency(dependencyToUpgrade).withUseProperties(true).withOverrideIfAlreadyExists(false)
+                .build()
+
+        POMOperator.modify(context)
     }
 
     @Test

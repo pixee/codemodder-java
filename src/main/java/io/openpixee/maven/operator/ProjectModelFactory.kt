@@ -13,6 +13,7 @@ class ProjectModelFactory private constructor(
     private var skipIfNewer: Boolean = false,
     private var useProperties: Boolean = false,
     private var activeProfiles: Set<String> = emptySet(),
+    private var overrideIfAlreadyExists: Boolean = false,
 ) {
     fun withDependency(dep: Dependency): ProjectModelFactory = this.apply {
         this.dependency = dep
@@ -30,13 +31,18 @@ class ProjectModelFactory private constructor(
         this.activeProfiles = setOf(*activeProfiles)
     }
 
+    fun withOverrideIfAlreadyExists(overrideIfAlreadyExists: Boolean) = this.apply {
+        this.overrideIfAlreadyExists = overrideIfAlreadyExists
+    }
+
     fun build(): ProjectModel {
         return ProjectModel(
             pomDocument = pomDocument,
             dependency = dependency!!,
             skipIfNewer = skipIfNewer,
             useProperties = useProperties,
-            activeProfiles = activeProfiles
+            activeProfiles = activeProfiles,
+            overrideIfAlreadyExists = overrideIfAlreadyExists
         )
     }
 

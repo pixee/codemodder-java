@@ -15,7 +15,8 @@ class ProjectModel internal constructor(
     val dependency: Dependency,
     val skipIfNewer: Boolean,
     val useProperties: Boolean,
-    val activeProfiles: Set<String>
+    val activeProfiles: Set<String>,
+    val overrideIfAlreadyExists: Boolean,
 ) {
     val resultPom: Document = pomDocument.clone() as Document
 
