@@ -12,7 +12,8 @@ export class ArgumentParser {
         return yargs(argString).options({
             verbose: {
                 type: 'boolean',
-                default: false },
+                default: false
+            },
             repository: {
                 type: 'string',
                 describe: "repository path",
@@ -20,27 +21,29 @@ export class ArgumentParser {
             },
             sarifFilePaths : {
               type: 'array',
+              default: [],
               describe: 'path to a SARIF file to be incorporated as input (multiple)',
               demandOption: false
             },
-            ruleDefault : {
-                alias: 'rule-default',
+            'rule-default' : {
                 choices: ['enabled', 'disabled'],
                 describe: 'Specify the default rule setting',
                 default: 'enabled',
+                demandOption: false
+            },
+            'rule-exception' : {
+                default: [],
+                describe: 'the rules that should have have the opposite of the default rule setting',
                 demandOption: false
             },
             includes : {
                 type: 'array',
                 describe: 'the paths to include within the repository',
-                default: 'enabled',
                 demandOption: false
             },
-            ruleException : {
-                alias: 'rule-exception',
-                choices: ['enabled', 'disabled'],
-                describe: 'Specify the default rule setting',
-
+            excludes : {
+                type: 'array',
+                describe: 'the paths to exclude within the repository',
                 demandOption: false
             },
             output: {

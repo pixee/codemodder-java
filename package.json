@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc -p .",
-    "start": "ts-node src/codetl/cli.ts",
+    "start": "ts-node src/codetl/entry.ts",
     "test": "jest"
   },
   "exclude": [
