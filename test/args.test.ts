@@ -1,4 +1,4 @@
-import {expect, jest, test} from '@jest/globals';
+import {expect, test} from '@jest/globals';
 import {ArgumentParser} from '../src/codetl/args';
 
 const parser = new ArgumentParser();
