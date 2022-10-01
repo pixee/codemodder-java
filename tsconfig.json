@@ -2,8 +2,10 @@
     "compilerOptions": {
       "target": "ES6",
       "module": "commonjs",
+      "esModuleInterop" : true,
       "outDir": "out",
       "sourceMap": true,
+      "strictNullChecks": true
     },
     "include": ["src"]
   }
