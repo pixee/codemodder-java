@@ -9,6 +9,7 @@ import {JavaLanguageProvider} from "./langs/java";
 const args = new ArgumentParser().parse(process.argv);
 
 const codetlExecutionContext : CodeTLExecutionContext = {
+    repository : args.repository as string,
     ruleDefault : args.ruleDefault as RuleSetting,
     ruleExceptions : args.ruleException != undefined ? args.ruleException : [],
     sarifFilePaths : args.sarifFilePaths != undefined ? args.sarifFilePaths : [],

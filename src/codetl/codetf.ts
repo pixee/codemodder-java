@@ -2,50 +2,50 @@
  * Represents the CodeTF format
  * @see https://github.com/openpixee/codetf
  */
-export interface CodeTF {
-    run: CodeTFRun
-    results: CodeTFResult[]
+export class CodeTF {
+    readonly run: CodeTFRun
+    readonly results: CodeTFResult[]
 }
 
-export interface CodeTFRun {
-    vendor: string,
-    tool: string,
-    commandLine: string,
-    elapsed: number,
-    configuration: CodeTFConfiguration,
-    fileExtensionsScanned: CodeTFFileExtensionScanned[]
+export class CodeTFRun {
+    readonly vendor: string
+    readonly tool: string
+    readonly commandLine: string
+    readonly elapsed: number
+    readonly configuration: CodeTFConfiguration
+    readonly fileExtensionsScanned: CodeTFFileExtensionScanned[]
 }
 
-export interface CodeTFFileExtensionScanned {
-    extension: string,
-    count: number
+export class CodeTFFileExtensionScanned {
+    readonly extension: string
+    readonly count: number
 }
 
-export interface CodeTFResult {
-    path: string,
-    diff: string,
-    changes: CodeTFChange[]
+export class CodeTFResult {
+    readonly path: string
+    readonly diff: string
+    readonly changes: CodeTFChange[]
 }
 
-export interface CodeTFChange {
-    lineNumber: number,
-    category: string,
-    description: string,
-    properties: Map<any,any>
+export class CodeTFChange {
+    readonly lineNumber: number
+    readonly category: string
+    readonly description: string
+    readonly properties: Map<string,any>
 }
 
-export interface CodeTFConfiguration {
-    directory: string,
-    inputs: CodeTFInput,
-    modules: string[],
-    includes: string[],
-    excludes: string[]
+export class CodeTFConfiguration {
+    readonly directory: string
+    readonly inputs: CodeTFInput
+    readonly modules: string[]
+    readonly includes: string[]
+    readonly excludes: string[]
 }
 
-export interface CodeTFInput {
-    artifact: string,
-    sha1: string,
-    vendor: string
+export class CodeTFInput {
+    readonly artifact: string
+    readonly sha1: string
+    readonly vendor: string
 }
 
 /**

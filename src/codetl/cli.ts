@@ -1,11 +1,12 @@
 import {LanguageProvider} from "./providers";
-import {CodeTF, CodeTFAggregator, CodeTFReporter} from "./codetf";
+import {CodeTF, CodeTFAggregator, CodeTFReporter, CodeTFRun} from "./codetf";
 import * as fs from "fs";
 
 /**
  * This is the message we send to language providers in order to scan their given code.
  */
 export interface CodeTLExecutionContext {
+  repository: string,
   ruleDefault: string,
   ruleExceptions: string[],
   sarifFilePaths: string[],
@@ -33,9 +34,7 @@ export class DefaultCodeTLExecutor implements CodeTLExecutor {
   }
 
   run(executionContext: CodeTLExecutionContext, outputFile: string): void {
-    console.log("Rule setting: " + executionContext.ruleDefault);
-
-    let codetfFiles : string[] = []
+    const codetfFiles : string[] = []
     this.languageProviders.forEach(function(lp) {
       const codetfFile = lp.process(executionContext);
       codetfFiles.push(codetfFile);
@@ -48,7 +47,7 @@ export class DefaultCodeTLExecutor implements CodeTLExecutor {
 
 export class DefaultCodeTFAggregator implements CodeTFAggregator {
   aggregate(codetfs: string[]): CodeTF {
-    return undefined;
+    return new CodeTF();
   }
 }
 
