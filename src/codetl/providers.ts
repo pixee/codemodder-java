@@ -1,4 +1,4 @@
-import {CodeTLExecutionContext} from "./cli";
+import {IncludesExcludes} from "./includes";
 
 /**
  * This type is responsible for providing support for a new language. They usually hand off to a backend process of some
@@ -7,7 +7,7 @@ import {CodeTLExecutionContext} from "./cli";
 export interface LanguageProvider {
 
     /**
-     * Give the language provider backened all the execution context and return the CodeTF file path that it produces.
+     * Give the language provider backend all the execution context and return the CodeTF file path that it produces.
      */
-    process(codetlExecutionContext: CodeTLExecutionContext) : string;
+    process(includesExcludes : IncludesExcludes) : string;
 }
