@@ -4,6 +4,7 @@
   "description": "",
   "main": "out/entry.js",
   "dependencies": {
+    "codetl-parser": "file:../codetl-parser",
     "jest": "^29.0.3",
     "tempfile": "3.0.0",
     "ts-jest": "^29.0.1",
