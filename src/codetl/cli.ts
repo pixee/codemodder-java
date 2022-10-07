@@ -1,8 +1,22 @@
 import {LanguageProvider} from "./providers";
-import {CodeTF, CodeTFAggregator, CodeTFReporter} from "./codetf";
-import * as fs from "fs";
+import {Log} from "sarif";
+import {
+  CodeTF,
+  CodeTFRun,
+  CodeTFFileExtensionScanned,
+  CodeTFAggregator,
+  CodeTFInput,
+  CodeTFResult,
+  CodeTFReporter,
+  LanguageProviderResult,
+  CodeTFConfiguration
+} from "./codetf";
+import {readFileSync, writeFileSync} from "fs";
 import {CodeTLParser} from "../../../codetl-parser/src/codetl/parser";
 import {fromConfiguration, IncludesExcludes} from "./includes";
+import {createHash} from "crypto";
+import {extname} from "path";
+import {getAllFilesSync} from "get-all-files";
 
 /**
  * This is the message we send to language providers in order to scan their given code.
@@ -36,17 +50,16 @@ export class DefaultCodeTLExecutor implements CodeTLExecutor {
   }
 
   run(executionContext: CodeTLExecutionContext, outputFile: string): void {
-    const codetfFiles : string[] = []
 
     const rule : string = `
        rule pixee:java/secure-random
        match
           ConstructorCall $c {
-             type = java.util.Random
+             type = "java.util.Random"
           }
        replace $c 
           ConstructorCall {
-             type = java.security.SecureRandom
+             type = "java.security.SecureRandom"
           }
     `;
 
@@ -60,29 +73,85 @@ export class DefaultCodeTLExecutor implements CodeTLExecutor {
     }
 
     const ruleDefinition = parser.convertAstToRuleDefinition(parsedAst.ast);
-    const matchNode = ruleDefinition.matchNode;
-    const name = matchNode.concept!!.name;
-
     const includesExcludes : IncludesExcludes = fromConfiguration(executionContext.repository, executionContext.includes, executionContext.excludes)
 
+    let startTime = new Date().getTime()
+    const allLanguageProviderResults : LanguageProviderResult[] = []
     this.languageProviders.forEach(function(lp) {
-      const codetfFile = lp.process(includesExcludes);
-      codetfFiles.push(codetfFile);
+      const result = lp.process(executionContext.repository, includesExcludes, [ruleDefinition]);
+      allLanguageProviderResults.push(result)
     });
 
-    const aggregateCodetfFile : CodeTF = this.aggregator.aggregate(codetfFiles);
+    let elapsed = new Date().getTime() - startTime
+    const aggregateCodetfFile : CodeTF = this.aggregator.aggregate(executionContext, allLanguageProviderResults, elapsed);
     this.reporter.report(aggregateCodetfFile, outputFile);
   }
+
 }
 
 export class DefaultCodeTFAggregator implements CodeTFAggregator {
-  aggregate(codetfs: string[]): CodeTF {
-    return new CodeTF();
+
+  aggregate(executionContext : CodeTLExecutionContext, languageProviderResults: LanguageProviderResult[], elapsed : number): CodeTF {
+    const allChanges : CodeTFResult[] = []
+    languageProviderResults.forEach(lpResult => lpResult.changes().forEach(lpChange => allChanges.push(lpChange)))
+    const extensions : CodeTFFileExtensionScanned[] = this.countFileExtensions(executionContext.repository)
+    const allResults : CodeTFResult[] = []
+
+    const allModules : string[] = languageProviderResults.map(lpResult => lpResult.vendor() + "/" + lpResult.language())
+    const allInputs : CodeTFInput[] = executionContext.sarifFilePaths.map(
+        sarif => {
+          const sarifFileBuffer = readFileSync(sarif).toString();
+          const sarifSha = createHash('sha256');
+          sarifSha.update(sarifFileBuffer);
+          const sha256Hex = sarifSha.digest('hex');
+          const sarifLog : Log = JSON.parse(sarifFileBuffer)
+          const tools : Set<string> = new Set<string>()
+          sarifLog.runs.forEach(run => {
+            if(run.tool && run.tool.driver && run.tool.driver.name) {
+              const driver = run.tool.driver
+              let tool : string = driver.organization ? driver.organization : "unknown"
+              tool += "/"
+              tool += driver.name
+              tool += "/"
+              tool += driver.version ? driver.version : "unknown"
+              tools.add(tool)
+            }
+          })
+          return new CodeTFInput(sarif, sha256Hex, Array.from(tools.values()).join(","))
+        }
+    )
+
+    const config : CodeTFConfiguration = new CodeTFConfiguration(process.cwd(), allInputs, allModules, executionContext.includes, executionContext.excludes)
+
+    const run : CodeTFRun = new CodeTFRun("openpixee", "codetl", process.argv.splice(2).join(" "), elapsed, config, extensions)
+    return new CodeTF(run, allResults)
   }
+
+  private countFileExtensions(repository: string) : CodeTFFileExtensionScanned[] {
+    const extensionScannedMap : Map<string, number> = new Map<string,number>();
+    getAllFilesSync(repository, {resolve: true}).toArray().forEach(file => {
+      const extension : string = extname(file)
+      if(extension) {
+        if(extensionScannedMap.has(extension)) {
+          extensionScannedMap.set(extension, extensionScannedMap.get(extension)!! + 1)
+        } else {
+          extensionScannedMap.set(extension, 1)
+        }
+      }
+    });
+
+    const extensions : CodeTFFileExtensionScanned[] = []
+    for(let [extension,count] of extensionScannedMap.entries()) {
+      extensions.push(new CodeTFFileExtensionScanned(extension, count))
+    }
+
+    return extensions;
+  }
+
 }
 
 export class DefaultCodeTFReporter implements CodeTFReporter {
   report(codetf: CodeTF, outputFile: string): void {
-    fs.writeFileSync(outputFile, JSON.stringify(codetf));
+    writeFileSync(outputFile, JSON.stringify(codetf));
   }
 }

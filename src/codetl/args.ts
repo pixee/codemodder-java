@@ -19,7 +19,7 @@ export class ArgumentParser {
                 describe: "repository path",
                 demandOption: true
             },
-            sarifFilePaths : {
+            'sarif-file-paths' : {
               type: 'array',
               default: [],
               describe: 'path to a SARIF file to be incorporated as input (multiple)',
@@ -31,9 +31,9 @@ export class ArgumentParser {
                 default: 'enabled',
                 demandOption: false
             },
-            'rule-exception' : {
+            'rule-exceptions' : {
                 default: [],
-                describe: 'the rules that should have have the opposite of the default rule setting',
+                describe: 'the rules that should have the opposite of the default rule setting',
                 demandOption: false
             },
             includes : {

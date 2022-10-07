@@ -27,6 +27,9 @@ export interface IncludesExcludes {
 
 }
 
+/**
+ * A promiscuous matcher that we use if the user chooses not to have any configuration for line-specific includes/excludes.
+ */
 class MatchesAllLines implements LineIncludesExcludes {
     matches(line: number): boolean {
         return true;
@@ -129,6 +132,9 @@ class DefaultIncludesExcludes implements IncludesExcludes {
     }
 }
 
+/**
+ * A promiscuous matcher that we use if the user chooses not to have any configuration for includes/excludes.
+ */
 class MatchesEverything implements IncludesExcludes {
     shouldInspect(file : string) : boolean {
         return true;
