@@ -7,15 +7,20 @@ Although it is a language, it is also the name of a CLI program which implements
 # Installing
 
 ```bash 
-$ npm install codetl # TODO
+# Grab the package
+$ npm install @openpixee/codetl # not actually done yet
+
+# Scan and suggest changes to harden my code!
+$ codetl --repository=/path/to/my_repo --output=/tmp/my_repo.codetf
 ```
 
-# Building & Testing
-As a developer, you need to install GraalVM in order to build, test and run locally.
+# Developing
+As a developer, you need to install GraalVM (Community Edition 20.3.4) in order to build, test and run locally.
 ```bash
+export JAVA_HARDENER_LIB=../java-code-hardener/target/hardener.jar 
 $GRAALVM/bin/npm run build
 $GRAALVM/bin/npm run test
-$GRAALVM/bin/node --jvm --vm.cp=/path/to/java-code-hardener-<VERSION>.jar --polyglot out/entry.js --repository=/tmp/foo --output=/tmp/bar
+$GRAALVM/bin/npm start -- --repository=/tmp/foo --output=/tmp/bar
 ```
 
 # Supported Languages
