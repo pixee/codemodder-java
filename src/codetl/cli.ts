@@ -61,6 +61,7 @@ export class DefaultCodeTLExecutor implements CodeTLExecutor {
           ConstructorCall {
              type = "java.security.SecureRandom"
           }
+       report "Replaced a weak PRNG with a strong one" 
     `;
 
     const parser = new CodeTLParser();
@@ -92,12 +93,11 @@ export class DefaultCodeTLExecutor implements CodeTLExecutor {
 export class DefaultCodeTFAggregator implements CodeTFAggregator {
 
   aggregate(executionContext : CodeTLExecutionContext, languageProviderResults: LanguageProviderResult[], elapsed : number): CodeTF {
-    const allChanges : CodeTFResult[] = []
-    languageProviderResults.forEach(lpResult => lpResult.changes().forEach(lpChange => allChanges.push(lpChange)))
-    const extensions : CodeTFFileExtensionScanned[] = this.countFileExtensions(executionContext.repository)
     const allResults : CodeTFResult[] = []
+    languageProviderResults.forEach(lpResult => lpResult.results.forEach(lpChange => allResults.push(lpChange)))
+    const extensions : CodeTFFileExtensionScanned[] = this.countFileExtensions(executionContext.repository)
 
-    const allModules : string[] = languageProviderResults.map(lpResult => lpResult.vendor() + "/" + lpResult.language())
+    const allModules : string[] = languageProviderResults.map(lpResult => lpResult.vendor + "/" + lpResult.language)
     const allInputs : CodeTFInput[] = executionContext.sarifFilePaths.map(
         sarif => {
           const sarifFileBuffer = readFileSync(sarif).toString();
@@ -153,5 +153,6 @@ export class DefaultCodeTFAggregator implements CodeTFAggregator {
 export class DefaultCodeTFReporter implements CodeTFReporter {
   report(codetf: CodeTF, outputFile: string): void {
     writeFileSync(outputFile, JSON.stringify(codetf));
+    console.log("Wrote CodeTF file to: " + outputFile)
   }
 }

@@ -2,6 +2,7 @@ import {ArgumentParser} from "./args";
 import {RuleSetting} from "./rules";
 import {CodeTLExecutionContext, DefaultCodeTFAggregator, DefaultCodeTFReporter, DefaultCodeTLExecutor} from "./cli";
 import {DefaultJavaCodeTLInterpreter, JavaLanguageProvider} from "./langs/java";
+import {resolve} from "path";
 
 /**
  * Entry point for CLI!
@@ -9,7 +10,7 @@ import {DefaultJavaCodeTLInterpreter, JavaLanguageProvider} from "./langs/java";
 const args = new ArgumentParser().parse(process.argv);
 
 const codetlExecutionContext : CodeTLExecutionContext = {
-    repository : args.repository as string,
+    repository : resolve(args.repository) as string,
     ruleDefault : args['rule-default'] as RuleSetting,
     ruleExceptions : args['rule-exceptions'] != undefined ? args['rule-exceptions'] as string[] : [],
     sarifFilePaths : args['sarif-file-paths'] != undefined ? args['sarif-file-paths'] as string[] : [],

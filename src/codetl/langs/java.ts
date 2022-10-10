@@ -4,9 +4,9 @@ import tempfile from 'tempfile';
 import {Node} from "../../../../codetl-parser/src/langdef/ast";
 import {IncludesExcludes} from "../includes";
 import { getAllFilesSync } from 'get-all-files'
-import {CodeTLRuleDefinition, RequiredDependency} from "../../../../codetl-parser/src/codetl/parser";
+import {CodeTLRuleDefinition, ReplaceCommand, RequiredDependency} from "../../../../codetl-parser/src/codetl/parser";
 import {readFileSync, readdirSync, writeFileSync, statSync} from "fs";
-import path from "path";
+import path, {resolve} from "path";
 import {createTwoFilesPatch} from 'diff'
 import {
     CodeTFResult,
@@ -27,7 +27,6 @@ export class JavaLanguageProvider implements LanguageProvider {
 
     process(repositoryPath: string, includesExcludes: IncludesExcludes, rules: CodeTLRuleDefinition[]): LanguageProviderResult {
         // get all java files in the repository and add them to a JavaParser context
-
         // @ts-ignore
         const javaParser = new (Java.type("com.github.javaparser.JavaParser"))
         // @ts-ignore
@@ -49,7 +48,6 @@ export class JavaLanguageProvider implements LanguageProvider {
             .setSymbolResolver(new (Java.type("com.github.javaparser.symbolsolver.JavaSymbolSolver"))(combinedTypeSolver));
 
         const javaSourceFiles = findJavaSourceFiles(javaSourceDirectories)
-        console.log("Processing " + javaSourceFiles.length + " files in repository")
 
         // @ts-ignore
         let lexicalPreservingPrinterType = Java.type("com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter");
@@ -59,7 +57,6 @@ export class JavaLanguageProvider implements LanguageProvider {
         const erroredFiles : Array<string> = []
         const allResults : CodeTFResult[] = []
         for (const javaSourceFile of javaSourceFiles) {
-            console.log("Processing " + javaSourceFile)
             // @ts-ignore
             const file = new (Java.type("java.io.File"))(javaSourceFile)
 
@@ -92,7 +89,7 @@ export class JavaLanguageProvider implements LanguageProvider {
                 const modifiedFilePath = tempfile(".java")
                 writeFileSync(modifiedFilePath, modifiedFileContents)
                 const originalFileContents = readFileSync(javaSourceFile).toString()
-                const relativePath : string = javaSourceFile.substring(repositoryPath.length)
+                const relativePath : string = resolve(javaSourceFile).substring(resolve(repositoryPath).length)
                 const diff : string = createTwoFilesPatch(relativePath, relativePath, originalFileContents, modifiedFileContents, null, null , {});
                 allResults.push(new CodeTFResult(relativePath, diff, allRuleChanges))
             }
@@ -148,6 +145,20 @@ export interface JavaCodeTLInterpreter {
     run(compilationUnit: any, rule: CodeTLRuleDefinition) : CodeTFChange[]
 }
 
+/**
+ * Describes a place in the AST that matched our "match" CodeTL section.
+ */
+class MatchContext {
+
+    readonly rootMatchNode : JavaPaserASTNode
+    readonly variables: Map<string, JavaPaserASTNode>
+
+    constructor(rootMatchNode: JavaPaserASTNode, variables: Map<string, JavaPaserASTNode>) {
+        this.rootMatchNode = rootMatchNode
+        this.variables = variables
+    }
+}
+
 export class DefaultJavaCodeTLInterpreter implements JavaCodeTLInterpreter {
 
     run(compilationUnit: any, rule: CodeTLRuleDefinition): CodeTFChange[] {
@@ -155,13 +166,15 @@ export class DefaultJavaCodeTLInterpreter implements JavaCodeTLInterpreter {
         const typeLocatorClass = Java.type("io.pixee.codefixer.java.TypeLocator")
         // @ts-ignore
         const typeLocator = typeLocatorClass.createDefault(compilationUnit);
-        const matchNode = rule.matchNode;
-        const matchAstNodeTypeName = matchNode.concept.name;
-        const matchingAstNodes : JavaParserConstructor[] = []
-        const changes : CodeTFChange[] = []
-        const detectedImpliedImportsNeeded : string[] = []
+        const rootMatchNode = rule.matchNode;
+        const rootMatchAstNodeTypeName = rootMatchNode.concept.name;
 
-        if(matchAstNodeTypeName === "ConstructorCall") {
+        const changes : CodeTFChange[] = []
+        const detectedImpliedImportsNeeded : Set<string> = new Set<string>()
+
+        const matchContexts : MatchContext[] = []
+
+        if(rootMatchAstNodeTypeName === "ConstructorCall") {
             // @ts-ignore
             const constructors : JavaParserConstructor[] =
                 // @ts-ignore
@@ -171,44 +184,44 @@ export class DefaultJavaCodeTLInterpreter implements JavaCodeTLInterpreter {
                 ).map(con => new JavaParserConstructor(con, typeLocator))
 
             constructors.forEach(con => {
-                if(this.constructorPropertiesMatch(matchNode, con)) {
-                    matchingAstNodes.push(con);
+                if(this.constructorPropertiesMatch(rootMatchNode, con)) {
+                    const variableMap : Map<string,JavaPaserASTNode> = new Map<string,JavaPaserASTNode>()
+                    if(rootMatchNode.nodeVariableName()) {
+                        variableMap.set(rootMatchNode.nodeVariableName()!, con)
+                    }
+                    const matchContext : MatchContext = new MatchContext(con, variableMap)
+                    matchContexts.push(matchContext)
                 }
             });
 
-            const replaceNode = rule.replaceNode
-            if(replaceNode) {
-                const replaceAstNodeTypeName = replaceNode.concept.name;
-                const matchVariableName = replaceNode.nodeVariableName()
-                const replaceVariableName = replaceNode.nodeVariableName()
+            for(let replaceCommand of rule.replaceCommands) {
+                const replaceNode : Node = replaceCommand.node
+                const nodeTypeNameToReplaceWith = replaceNode.concept.name;
 
-                for(const matchingAstNode of matchingAstNodes) {
-                    if(matchVariableName == replaceVariableName) {
-                        // if the match and replace are both constructor calls, just overwrite the replaced elements
-                        if(replaceAstNodeTypeName == "ConstructorCall") {
-                            let typeFromReplace = replaceNode.valueFor("type") as string;
-                            if(typeFromReplace != undefined) {
-                                // save the FQCN for the import
-                                detectedImpliedImportsNeeded.push(typeFromReplace)
-                                // but for the code we're replacing, use the simple name
-                                const simpleClassName = toSimpleClassName(typeFromReplace)
-                                console.log("Replacing constructor type with: " + simpleClassName)
-                                matchingAstNode.setType(typeFromReplace)
-                                changes.push(new CodeTFChange(matchingAstNode.getRange().startLine, rule.ruleId.toIdentifier(),"", new Map<string,any>()))
-                            }
+                for(const matchContext of matchContexts) {
+                    if(!matchContext.variables.has(replaceCommand.variable)) {
+                        throw new Error("no variable by that name to replace: " + replaceCommand)
+                    }
+                    const actualNodeToReplace : JavaPaserASTNode = matchContext.variables.get(replaceCommand.variable)!;
+                    // if the match and replace are both constructor calls, just overwrite the replaced elements
+                    if(nodeTypeNameToReplaceWith == "ConstructorCall" && actualNodeToReplace instanceof JavaParserConstructor) {
+                        let typeFromReplace = replaceNode.valueFor("type") as string;
+                        if(typeFromReplace != undefined) {
+                            // save the FQCN for the import
+                            detectedImpliedImportsNeeded.add(typeFromReplace)
+                            // but for the code we're replacing, use the simple name
+                            const simpleClassName = toSimpleClassName(typeFromReplace)
+                            actualNodeToReplace.setType(typeFromReplace)
+                            changes.push(new CodeTFChange(actualNodeToReplace.getRange().startLine, rule.ruleId.toIdentifier(), rule.reportMessage ? rule.reportMessage : "", new Map<string,any>()))
                         }
                     }
                 }
             }
+
         }
 
         if(changes.length > 0) {
-            console.log("Since we changed code, we add the " + (rule.requiredImports.length + detectedImpliedImportsNeeded.length) + " imports needed")
-            for(const impt of rule.requiredImports) {
-                // @ts-ignore
-                Java.type("io.pixee.codefixer.java.protections.ASTs").addImportIfMissing(compilationUnit, impt)
-            }
-            for(const impt of detectedImpliedImportsNeeded) {
+            for(const impt of [...rule.requiredImports, ...detectedImpliedImportsNeeded]) {
                 // @ts-ignore
                 Java.type("io.pixee.codefixer.java.protections.ASTs").addImportIfMissing(compilationUnit, impt)
             }
@@ -225,13 +238,10 @@ export class DefaultJavaCodeTLInterpreter implements JavaCodeTLInterpreter {
         if(typeFromMatch != undefined) {
             // we have to match on this
             const typeInCode : string = con.getResolvedType()
-            console.log("Comparing " + typeFromMatch + " to " + typeInCode)
             if(typeInCode != typeFromMatch) {
                 return false;
             }
         }
-        let range = con.getRange()
-        console.log("Matched at " + JSON.stringify(range))
         return true;
     }
 
@@ -250,10 +260,14 @@ interface JavaConstructor {
     setType(newType : string)
 }
 
+interface JavaPaserASTNode {
+
+}
+
 /**
  * A proxy for JavaParser's ObjectCreationExpr object.
  */
-class JavaParserConstructor implements JavaConstructor, RangedNode {
+class JavaParserConstructor implements JavaConstructor, RangedNode, JavaPaserASTNode {
     private readonly range: Range;
     private readonly objectCreationExpr: any;
     private readonly typeLocator: any;
