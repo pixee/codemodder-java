@@ -19,7 +19,8 @@
   "scripts": {
     "build": "tsc -p .",
     "start": "ts-node src/codetl/entry.ts",
-    "test": "node --jvm --polyglot --vm.cp=${JAVA_CODE_HARDENER_PATH:../java-code-hardener/target/java-code-hardener-0.0.1.jar} ./node_modules/.bin/jest",
+    "cli": "node --jvm --polyglot --vm.cp=../java-code-hardener/target/java-code-hardener-0.0.1.jar out/codetl/src/codetl/entry.js",
+    "test": "node --jvm --polyglot --vm.cp=../java-code-hardener/target/java-code-hardener-0.0.1.jar ./node_modules/.bin/jest --runInBand",
     "test-only-java": "node --jvm --polyglot --vm.cp=${JAVA_CODE_HARDENER_PATH:../java-code-hardener/target/java-code-hardener-0.0.1.jar} ./node_modules/.bin/jest -i test/java.test.ts",
     "test-except-java": "node --jvm --polyglot ./node_modules/.bin/jest -e test/java.test.ts",
     "debug-test": "node --inspect=4117 --jvm --polyglot --vm.cp=${JAVA_CODE_HARDENER_PATH:../java-code-hardener/target/java-code-hardener-0.0.1.jar} ./node_modules/.bin/jest"
