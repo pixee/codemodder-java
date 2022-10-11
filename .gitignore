@@ -1,1 +1,4 @@
-.idea
+out/
+node_modules/
+.idea/
+.vscode/
