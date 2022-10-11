@@ -211,7 +211,7 @@ export class DefaultJavaCodeTLInterpreter implements JavaCodeTLInterpreter {
                             detectedImpliedImportsNeeded.add(typeFromReplace)
                             // but for the code we're replacing, use the simple name
                             const simpleClassName = toSimpleClassName(typeFromReplace)
-                            actualNodeToReplace.setType(typeFromReplace)
+                            actualNodeToReplace.setType(simpleClassName)
                             changes.push(new CodeTFChange(actualNodeToReplace.getRange().startLine, rule.ruleId.toIdentifier(), rule.reportMessage ? rule.reportMessage : "", new Map<string,any>()))
                         }
                     }
