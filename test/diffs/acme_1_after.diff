@@ -10,20 +10,20 @@ Index: /src/main/java/acme_1.java
  
      static {
 -        new Random();
-+        new java.security.SecureRandom();
++        new SecureRandom();
      }
  
 -    private Object fieldMember = new Random();
-+    private Object fieldMember = new java.security.SecureRandom();
++    private Object fieldMember = new SecureRandom();
  
      public void foo() {
 -        Random r = new Random();
-+        Random r = new java.security.SecureRandom();
++        Random r = new SecureRandom();
      }
  
      public void foo2() {
 -        Random r = new java.util.Random();
-+        Random r = new java.security.SecureRandom();
++        Random r = new SecureRandom();
      }
  }
 \ No newline at end of file

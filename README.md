@@ -15,12 +15,12 @@ $ codetl --repository=/path/to/my_repo --output=/tmp/my_repo.codetf
 ```
 
 # Developing
-As a developer, you need to install GraalVM (Community Edition 20.3.4) in order to build, test and run locally.
+As a developer, you need to install GraalVM (Community Edition 22.2.0) in order to build, test and run locally.
 ```bash
 export JAVA_HARDENER_LIB=../java-code-hardener/target/hardener.jar 
 $GRAALVM/bin/npm run build
 $GRAALVM/bin/npm run test
-$GRAALVM/bin/npm start -- --repository=/tmp/foo --output=/tmp/bar
+$GRAALVM/bin/npm run start -- --repository=/tmp/foo --output=/tmp/bar
 ```
 
 # Supported Languages

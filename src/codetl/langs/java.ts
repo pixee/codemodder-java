@@ -4,7 +4,7 @@ import tempfile from 'tempfile';
 import {Node} from "../../../../codetl-parser/src/langdef/ast";
 import {IncludesExcludes} from "../includes";
 import { getAllFilesSync } from 'get-all-files'
-import {CodeTLRuleDefinition, ReplaceCommand, RequiredDependency} from "../../../../codetl-parser/src/codetl/parser";
+import {CodeTLRuleDefinition, RequiredDependency} from "../../../../codetl-parser/src/codetl/parser";
 import {readFileSync, readdirSync, writeFileSync, statSync} from "fs";
 import path, {resolve} from "path";
 import {createTwoFilesPatch} from 'diff'
@@ -211,7 +211,7 @@ export class DefaultJavaCodeTLInterpreter implements JavaCodeTLInterpreter {
                             detectedImpliedImportsNeeded.add(typeFromReplace)
                             // but for the code we're replacing, use the simple name
                             const simpleClassName = toSimpleClassName(typeFromReplace)
-                            actualNodeToReplace.setType(typeFromReplace)
+                            actualNodeToReplace.setType(simpleClassName)
                             changes.push(new CodeTFChange(actualNodeToReplace.getRange().startLine, rule.ruleId.toIdentifier(), rule.reportMessage ? rule.reportMessage : "", new Map<string,any>()))
                         }
                     }
