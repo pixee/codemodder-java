@@ -4,7 +4,7 @@ import tempfile from 'tempfile';
 import {Node} from "../../../../codetl-parser/src/langdef/ast";
 import {IncludesExcludes} from "../includes";
 import { getAllFilesSync } from 'get-all-files'
-import {CodeTLRuleDefinition, ReplaceCommand, RequiredDependency} from "../../../../codetl-parser/src/codetl/parser";
+import {CodeTLRuleDefinition, RequiredDependency} from "../../../../codetl-parser/src/codetl/parser";
 import {readFileSync, readdirSync, writeFileSync, statSync} from "fs";
 import path, {resolve} from "path";
 import {createTwoFilesPatch} from 'diff'
