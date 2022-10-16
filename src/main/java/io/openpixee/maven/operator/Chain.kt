@@ -1,8 +1,22 @@
 package io.openpixee.maven.operator
 
-class Chain(vararg c: Command) {
-    private val commandList = ArrayList(c.toList())
+/**
+ * Implements a Chain of Responsibility Pattern
+ *
+ * @constructor commands: Commands to Use
+ */
+class Chain(vararg commands: Command) {
+    /**
+     * Internal ArrayList of the Commands
+     */
+    private val commandList = ArrayList(commands.toList())
 
+    /**
+     * Executes the Commands in the Chain of Responsibility
+     *
+     * @param c ProjectModel (context)
+     * @return Boolean if successful
+     */
     fun execute(c: ProjectModel): Boolean {
         var done = false
         val listIterator = commandList.listIterator()
@@ -17,6 +31,9 @@ class Chain(vararg c: Command) {
     }
 
     companion object {
+        /**
+         * Returns a Pre-Configured Chain with the Defaults
+         */
         fun create() = Chain(SimpleUpgrade, SimpleDependencyManagement, SimpleInsert)
     }
 }

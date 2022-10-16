@@ -6,8 +6,7 @@ import java.lang.IllegalStateException
 
 
 /**
- * Hello world!
- *
+ * Sample CLI Modification App
  */
 object App {
     @JvmStatic

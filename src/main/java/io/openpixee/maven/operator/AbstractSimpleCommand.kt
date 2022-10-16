@@ -5,6 +5,9 @@ import io.openpixee.maven.operator.util.Util.selectXPathNodes
 import org.apache.commons.lang3.text.StrSubstitutor
 import org.dom4j.Element
 
+/**
+ * Base implementation of Command - used by SimpleDependency and SimpleInsert
+ */
 abstract class AbstractSimpleCommand : Command {
     protected fun handleDependency(c: ProjectModel, lookupExpression: String): Boolean {
         val dependencyNodes = c.resultPom.selectXPathNodes(lookupExpression)

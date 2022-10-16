@@ -1,5 +1,8 @@
 package io.openpixee.maven.operator
 
+/**
+ * Represents a Dependency
+ */
 data class Dependency(
     val groupId: String,
     val artifactId: String,
@@ -7,6 +10,9 @@ data class Dependency(
     val classifier: String? = null,
     val packaging: String? = "jar"
 ) {
+    /**
+     * Given a string, parses - and creates - a new dependency Object
+     */
     companion object {
         fun fromString(str: String): Dependency {
             val elements = str.split(":")

@@ -3,11 +3,14 @@ package io.openpixee.maven.operator
 import io.openpixee.maven.operator.util.Util.selectXPathNodes
 import org.dom4j.Element
 
+/**
+ * Represents a POM Upgrade Strategy implicying simply adding a dependency/ section (and optionally a dependencyManagement/ section as well)
+ */
 val SimpleInsert = object : Command {
     override fun execute(c: ProjectModel): Boolean {
         val dependencyManagementNode =
             c.resultPom.selectXPathNodes("/m:project/m:dependencyManagement")
-        val elementsToFormat : MutableList<Element> = arrayListOf()
+        val elementsToFormat: MutableList<Element> = arrayListOf()
 
         if (dependencyManagementNode.isEmpty()) {
             val newDependencyManagementNode =
@@ -44,6 +47,9 @@ val SimpleInsert = object : Command {
     }
 
 
+    /**
+     * Creates the XML Elements for a given dependency
+     */
     private fun appendCoordinates(
         dependenciesNode: Element,
         c: ProjectModel

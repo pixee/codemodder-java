@@ -14,6 +14,9 @@ import java.io.StringWriter
 import java.lang.IllegalStateException
 import kotlin.math.ceil
 
+/**
+ * Formats a XML Element Node
+ */
 internal fun formatNode(node: Element) {
     val parent = node.parent
     //val siblings = parent.content()
@@ -43,6 +46,9 @@ internal fun formatNode(node: Element) {
     parent.add(DefaultText("\n" + StringUtils.repeat(" ", ((indentLevel - 1) / 2))))
 }
 
+/**
+ * Guesses the current indent level of the nearest nodes
+ */
 internal fun findIndentLevel(node: Element): Int {
     val siblings = node.parent.content()
     val myIndex = siblings.indexOf(node)
@@ -60,7 +66,14 @@ internal fun findIndentLevel(node: Element): Int {
     return 0
 }
 
+/**
+ * Represents a Property Reference - as a regex
+ */
 internal val PROPERTY_REFERENCE_REGEX = Regex("^\\\$\\{(.*)}$")
+
+/**
+ * Upserts a given property
+ */
 internal fun upgradeProperty(c: ProjectModel, propertyName: String) {
     // TODO: Handle Profiles
 
@@ -95,6 +108,9 @@ internal fun upgradeProperty(c: ProjectModel, propertyName: String) {
     formatNode(propertyElement)
 }
 
+/**
+ * Creates a property Name
+ */
 internal fun propertyName(c: ProjectModel, versionNode: Element): String {
     val version = versionNode.textTrim
 
@@ -106,12 +122,12 @@ internal fun propertyName(c: ProjectModel, versionNode: Element): String {
         return firstMatch.value
     }
 
-    // TODO: Escaping
-    // TODO: Template Format (suffix / preffix)?
-
     return "versions." + c.dependency.artifactId
 }
 
+/**
+ * Identifies if an upgrade is needed
+ */
 internal fun findOutIfUpgradeIsNeeded(c: ProjectModel, versionNode: Element): Boolean {
     val currentVersionNodeText = resolveVersion(c, versionNode.text!!)
 
@@ -131,9 +147,15 @@ internal fun resolveVersion(c: ProjectModel, versionText: String): String =
         versionText
     }
 
+/**
+ * Escapes a Property Name
+ */
 internal fun escapedPropertyName(propertyName: String): String =
     "\${$propertyName}"
 
+/**
+ * Given a Version Node, upgrades a resulting POM
+ */
 internal fun upgradeVersionNode(c: ProjectModel, versionNode: Element) {
     if (c.useProperties) {
         val propertyName = propertyName(c, versionNode)

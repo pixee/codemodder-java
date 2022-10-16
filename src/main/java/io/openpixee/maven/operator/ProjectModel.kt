@@ -1,9 +1,8 @@
 package io.openpixee.maven.operator
 
+import io.openpixee.maven.operator.util.Util.selectXPathNodes
 import org.dom4j.Document
-import org.dom4j.io.SAXReader
-import java.io.File
-import java.io.FileInputStream
+import org.dom4j.Element
 
 /**
  * ProjectModel represents the input parameters for the chain
@@ -20,53 +19,32 @@ class ProjectModel internal constructor(
 ) {
     val resultPom: Document = pomDocument.clone() as Document
 
-    internal val resolvedProperties: Map<String, String> by lazy {
-        getEffectivePom().rootElement.elements("properties").flatMap { it.elements() }
-            .associate {
-                it.name to it.text
+    val resolvedProperties: Map<String, String> =
+        run {
+            val rootProperties =
+                pomDocument.rootElement.elements("properties").flatMap { it.elements() }
+                    .associate {
+                        it.name to it.text
+                    }
+            val result: MutableMap<String, String> = LinkedHashMap()
+            result.putAll(rootProperties)
+            val activatedProfiles = activeProfiles.filterNot { it.startsWith("!") }
+            activatedProfiles.forEach { profileName ->
+                val expression =
+                    "/m:project/m:profiles/m:profile[./m:id[text()='${profileName}']]/m:properties"
+                val propertiesElements =
+                    pomDocument.selectXPathNodes(expression)
+
+                val newPropertiesToAppend =
+                    propertiesElements.filter { it is Element }.map { it as Element }
+                        .flatMap { it.elements() }
+                        .associate {
+                            it.name to it.text
+                        }
+
+                result.putAll(newPropertiesToAppend)
             }
-    }
-
-    fun getEffectivePom(): Document {
-        val tmpInputFile = File.createTempFile("tmp-pom-orig", ".xml")
-
-        tmpInputFile.writeText(resultPom.asXML())
-
-        val tmpOutputFile = File.createTempFile("tmp-pom", ".xml")
-
-        val processArgs = mutableListOf<String>(
-            "mvn",
-            "-B",
-            "-N",
-            "-f",
-            tmpInputFile.absolutePath,
-        )
-
-        if (this.activeProfiles.isNotEmpty()) {
-            // TODO Aldrin: How safe is not to escape those things? My concern is that deactivating a profile uses '!',
-            //  and I'm not sure how shell escaping rules play a part on that
-            processArgs.addAll(listOf("-P", this.activeProfiles.joinToString(",")))
+            result.toMap()
         }
-
-        processArgs.addAll(
-            listOf(
-                "help:effective-pom",
-                "-Doutput=${tmpOutputFile.absolutePath}"
-            )
-        )
-
-        val psBuilder = ProcessBuilder(processArgs).inheritIO()
-
-        psBuilder.environment().putAll(System.getenv())
-
-        val process = psBuilder.start()
-
-        val retCode = process.waitFor()
-
-        if (0 != retCode)
-            throw IllegalStateException("Unexpected return code from maven: $retCode")
-
-        return SAXReader().read(FileInputStream(tmpOutputFile))
-    }
 }
 
