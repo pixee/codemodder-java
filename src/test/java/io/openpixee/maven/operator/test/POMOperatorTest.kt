@@ -1,47 +1,31 @@
 package io.openpixee.maven.operator.test
 
-import `fun`.mike.dmp.DiffMatchPatch
 import io.openpixee.maven.operator.Dependency
 import io.openpixee.maven.operator.POMOperator
 import io.openpixee.maven.operator.ProjectModelFactory
 import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependency
 import io.openpixee.maven.operator.util.Util.selectXPathNodes
-import org.dom4j.Document
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.xmlunit.builder.DiffBuilder
-import org.xmlunit.builder.Input
 import org.xmlunit.diff.ComparisonType
-import org.xmlunit.diff.Diff
 import java.io.File
-import java.lang.IllegalStateException
-import java.net.URLDecoder
 
 /**
  * Unit test for simple App.
  */
-class POMOperatorTest {
-    companion object {
-        private val LOGGER: Logger = LoggerFactory.getLogger(POMOperatorTest::class.java)
-    }
+class POMOperatorTest : AbstractTestBase() {
 
     @Test
     fun testCaseOne() {
-        val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.3")
-
-        val context =
+        val context = gwt(
+            "case-1",
             ProjectModelFactory.load(
-                POMOperator::class.java.getResource("pom-case-1.xml")!!,
-            ).withDependency(dependencyToUpgrade).build()
+                POMOperatorTest::class.java.getResource("pom-case-1.xml")!!,
+            ).withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"))
+        )
 
-        LOGGER.debug("context: {}", context)
-
-        POMOperator.modify(context)
-
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
 
         assertThat("Document has differences", diff.hasDifferences())
 
@@ -60,32 +44,18 @@ class POMOperatorTest {
         LOGGER.debug("effectivePom: {}", effectivePom.asXML())
     }
 
-    private fun getTextDifferences(pomDocument: Document, resultPom: Document): Any {
-        val pomDocumentAsString = pomDocument.asXML()
-        val resultPomAsString = resultPom.asXML()
-
-        val dmp = DiffMatchPatch()
-
-        val diffs = dmp.patch_make(pomDocumentAsString, resultPomAsString)
-
-        val patch = dmp.patch_toText(diffs)
-
-        return URLDecoder.decode(patch, "utf-8")
-    }
-
     @Test
     fun testCaseThree() {
-        val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.2")
+        val dependencyToUpgradeOnCaseThree = Dependency("org.dom4j", "dom4j", version = "2.0.2")
 
-        val context =
+        val context = gwt(
+            "case-3",
             ProjectModelFactory.load(
-                POMOperator::class.java.getResource("pom-case-3.xml")!!,
-            ).withDependency(dependencyToUpgrade).withSkipIfNewer(false).build()
+                POMOperatorTest::class.java.getResource("pom-case-3.xml")!!,
+            ).withDependency(dependencyToUpgradeOnCaseThree).withSkipIfNewer(false)
+        )
 
-
-        POMOperator.modify(context)
-
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
 
         assertThat("Document has differences", diff.hasDifferences())
         assertThat("Document has a single difference", diff.differences.toList().size == 1)
@@ -94,8 +64,8 @@ class POMOperatorTest {
             diff.differences.toList()[0].comparison.type == ComparisonType.TEXT_VALUE
         )
         assertThat(
-            "Document has changed version set to ${dependencyToUpgrade.version}",
-            diff.differences.toList()[0].comparison.testDetails.value == dependencyToUpgrade.version
+            "Document has changed version set to ${dependencyToUpgradeOnCaseThree.version}",
+            diff.differences.toList()[0].comparison.testDetails.value == dependencyToUpgradeOnCaseThree.version
         )
     }
 
@@ -103,22 +73,21 @@ class POMOperatorTest {
     fun testCaseThreeButWithLowerVersion() {
         val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.2")
 
-        val context =
+        val context = gwt(
+            "pom-case-three-with-lower-version",
             ProjectModelFactory.load(
-                POMOperator::class.java.getResource("pom-case-3.xml")!!,
-            ).withDependency(dependencyToUpgrade).withSkipIfNewer(true).build()
+                POMOperatorTest::class.java.getResource("pom-case-3.xml")!!,
+            ).withDependency(dependencyToUpgrade).withSkipIfNewer(true)
+        )
 
-
-        POMOperator.modify(context)
-
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
 
         assertThat("Document has no differences", !diff.hasDifferences())
     }
 
     @Test
     fun testCase4() {
-        val pomPath = File(POMOperator::class.java.getResource("webgoat-parent.xml")!!.toURI())
+        val pomPath = File(POMOperatorTest::class.java.getResource("webgoat-parent.xml")!!.toURI())
 
         val exitCode = ProcessBuilder(
             "mvn",
@@ -136,14 +105,14 @@ class POMOperatorTest {
         val dependencyToUpgrade =
             Dependency("org.apache.activemq", "activemq-amqp", version = "5.16.2")
 
-        val context =
+        val context = gwt(
+            "case-4",
             ProjectModelFactory.load(
-                POMOperator::class.java.getResource("pom-case-4.xml")!!,
-            ).withDependency(dependencyToUpgrade).build()
+                POMOperatorTest::class.java.getResource("pom-case-4.xml")!!,
+            ).withDependency(dependencyToUpgrade)
+        )
 
-        POMOperator.modify(context)
-
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
 
         assertThat("Document has differences", diff.hasDifferences())
 
@@ -161,18 +130,17 @@ class POMOperatorTest {
         val dependencyToUpgrade =
             Dependency("org.dom4j", "dom4j", version = "1.0.0")
 
-        val context =
+        val context = gwt(
+            "case-with-property",
             ProjectModelFactory.load(
-                POMOperator::class.java.getResource("pom-with-property-simple.xml")!!,
+                POMOperatorTest::class.java.getResource("pom-with-property-simple.xml")!!,
             ).withDependency(dependencyToUpgrade).withUseProperties(true).withSkipIfNewer(true)
-                .build()
-
-        POMOperator.modify(context)
+        )
 
         LOGGER.debug("original pom: {}", context.pomDocument.asXML())
         LOGGER.debug("resulting pom: {}", context.resultPom.asXML())
 
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
 
         assertThat("Document has differences", diff.hasDifferences())
 
@@ -231,7 +199,8 @@ class POMOperatorTest {
         val context =
             ProjectModelFactory.load(
                 originalPom.byteInputStream(),
-            ).withDependency(dependencyToUpgrade).withUseProperties(true).withOverrideIfAlreadyExists(false)
+            ).withDependency(dependencyToUpgrade).withUseProperties(true)
+                .withOverrideIfAlreadyExists(false)
                 .build()
 
         POMOperator.modify(context)
@@ -274,7 +243,7 @@ class POMOperatorTest {
         LOGGER.debug("original pom: {}", context.pomDocument.asXML())
         LOGGER.debug("resulting pom: {}", context.resultPom.asXML())
 
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)!!
+        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
 
         assertThat("Document has differences", diff.hasDifferences())
 
@@ -283,18 +252,4 @@ class POMOperatorTest {
         assertThat("Document has several differences", differencesAsList.size > 1)
     }
 
-    private fun getXmlDifferences(
-        original: Document,
-        modified: Document
-    ): Diff? {
-        val originalDoc = Input.fromString(original.asXML()).build()
-        val modifiedDoc = Input.fromString(modified.asXML()).build()
-
-        val diff = DiffBuilder.compare(originalDoc).withTest(modifiedDoc).ignoreWhitespace()
-            .checkForSimilar().build()
-
-        LOGGER.debug("diff: {}", diff)
-
-        return diff
-    }
 }

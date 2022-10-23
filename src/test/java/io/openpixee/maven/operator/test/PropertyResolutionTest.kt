@@ -1,7 +1,6 @@
 package io.openpixee.maven.operator.test
 
 import io.openpixee.maven.operator.Dependency
-import io.openpixee.maven.operator.POMOperator
 import io.openpixee.maven.operator.ProjectModelFactory
 import junit.framework.TestCase.assertEquals
 import org.junit.Assert.assertFalse
@@ -39,7 +38,7 @@ class PropertyResolutionTest {
         val dependencyToUpgrade = Dependency("org.dom4j", "dom4j", version = "2.0.2")
         val context =
             ProjectModelFactory.load(
-                POMOperator::class.java.getResource("pom-1.xml")!!,
+                POMOperatorTest::class.java.getResource("pom-1.xml")!!,
             ).withDependency(dependencyToUpgrade).withActiveProfiles(*profilesToUse).build()
 
         LOGGER.debug("Resolved Properties: {}", context.resolvedProperties)

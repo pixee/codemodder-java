@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -14,7 +16,8 @@
     <name>Versions Maven Plugin</name>
     <url>http://www.mojohaus.org/versions-maven-plugin/</url>
     <description>
-        Versions Plugin for Maven. The Versions Plugin updates the versions of components in the POM.
+        Versions Plugin for Maven. The Versions Plugin updates the versions of components in the
+        POM.
     </description>
     <inceptionYear>2008</inceptionYear>
     <licenses>
@@ -86,7 +89,8 @@
 
     <scm>
         <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git
+        </developerConnection>
         <url>https://github.com/mojohaus/versions-maven-plugin/tree/${project.scm.tag}</url>
         <tag>versions-maven-plugin-2.8.1</tag>
     </scm>
@@ -350,7 +354,9 @@
                             <goal>xsd</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/generated-site/resources/xsd</outputDirectory>
+                            <outputDirectory>
+                                ${project.build.directory}/generated-site/resources/xsd
+                            </outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

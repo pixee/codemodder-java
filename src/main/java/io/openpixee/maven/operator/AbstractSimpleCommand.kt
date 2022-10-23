@@ -1,8 +1,6 @@
 package io.openpixee.maven.operator
 
-import com.github.zafarkhaja.semver.Version
 import io.openpixee.maven.operator.util.Util.selectXPathNodes
-import org.apache.commons.lang3.text.StrSubstitutor
 import org.dom4j.Element
 
 /**
