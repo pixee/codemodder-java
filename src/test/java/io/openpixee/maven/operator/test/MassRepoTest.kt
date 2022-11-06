@@ -62,10 +62,12 @@ class MassRepoIT {
         TestRepo(
             "casbin/jcasbin",
         ) to "com.google.code.gson:gson:2.8.0",
+        /*
         TestRepo(
             "trinodb/trino",
             pomPath = "core/trino-main/pom.xml"
         ) to "org.apache.commons:commons-math3:3.6.0",
+         */
         TestRepo(
             "bytedeco/javacv"
         ) to "org.jogamp.jocl:jocl-main:2.3.1",
