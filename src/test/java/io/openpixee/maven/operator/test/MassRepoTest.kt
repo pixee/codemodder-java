@@ -146,7 +146,7 @@ class MassRepoIT {
 
         checkoutOrResetCachedRepo(sampleRepo)
 
-        val originalDependencies = getDepedenciesFrom(sampleRepo)
+        val originalDependencies = getDependenciesFrom(sampleRepo)
 
         LOGGER.info("dependencies: {}", originalDependencies)
 
@@ -164,7 +164,7 @@ class MassRepoIT {
         alternatePomFile.writeText(context.resultPom.asXML())
 
         val finalDependencies =
-            getDepedenciesFrom(alternatePomFile.canonicalPath, sampleRepo.cacheDir())
+            getDependenciesFrom(alternatePomFile.canonicalPath, sampleRepo.cacheDir())
 
         LOGGER.info("dependencies: {}", finalDependencies)
 
@@ -182,10 +182,10 @@ class MassRepoIT {
         )
     }
 
-    private fun getDepedenciesFrom(repo: TestRepo): String =
-        getDepedenciesFrom(repo.pomPath, repo.cacheDir())
+    private fun getDependenciesFrom(repo: TestRepo): String =
+        getDependenciesFrom(repo.pomPath, repo.cacheDir())
 
-    private fun getDepedenciesFrom(pomPath: String, dir: File): String {
+    private fun getDependenciesFrom(pomPath: String, dir: File): String {
         val outputFile = File.createTempFile("tmp-pom", ".txt")
 
         if (outputFile.exists()) {
