@@ -1,4 +1,6 @@
 ### Maven template
+.cache/
+
 target/
 pom.xml.tag
 pom.xml.releaseBackup

@@ -10,6 +10,9 @@ data class Dependency(
     val classifier: String? = null,
     val packaging: String? = "jar"
 ) {
+    override fun toString(): String {
+        return listOf(groupId, artifactId, packaging, version).joinToString(":")
+    }
     /**
      * Given a string, parses - and creates - a new dependency Object
      */
