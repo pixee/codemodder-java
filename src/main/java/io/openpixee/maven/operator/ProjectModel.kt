@@ -1,87 +1,50 @@
 package io.openpixee.maven.operator
 
+import io.openpixee.maven.operator.util.Util.selectXPathNodes
 import org.dom4j.Document
-import org.dom4j.io.SAXReader
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.lang.IllegalStateException
-import java.net.URL
+import org.dom4j.Element
 
-data class ProjectModel(
+/**
+ * ProjectModel represents the input parameters for the chain
+ *
+ * @todo Wrap it into a <pre>Context</pre> interface
+ */
+class ProjectModel internal constructor(
     val pomDocument: Document,
-    val dependencyToInsert: Dependency,
+    val dependency: Dependency,
     val skipIfNewer: Boolean,
+    val useProperties: Boolean,
+    val activeProfiles: Set<String>,
+    val overrideIfAlreadyExists: Boolean,
 ) {
     val resultPom: Document = pomDocument.clone() as Document
 
-    fun getEffectivePom(): Document {
-        val tmpInputFile = File.createTempFile("tmp-pom-orig", ".xml")
+    val resolvedProperties: Map<String, String> =
+        run {
+            val rootProperties =
+                pomDocument.rootElement.elements("properties").flatMap { it.elements() }
+                    .associate {
+                        it.name to it.text
+                    }
+            val result: MutableMap<String, String> = LinkedHashMap()
+            result.putAll(rootProperties)
+            val activatedProfiles = activeProfiles.filterNot { it.startsWith("!") }
+            activatedProfiles.forEach { profileName ->
+                val expression =
+                    "/m:project/m:profiles/m:profile[./m:id[text()='${profileName}']]/m:properties"
+                val propertiesElements =
+                    pomDocument.selectXPathNodes(expression)
 
-        tmpInputFile.writeText(resultPom.asXML())
+                val newPropertiesToAppend =
+                    propertiesElements.filter { it is Element }.map { it as Element }
+                        .flatMap { it.elements() }
+                        .associate {
+                            it.name to it.text
+                        }
 
-        val tmpOutputFile = File.createTempFile("tmp-pom", ".xml")
-
-        val psBuilder = ProcessBuilder(
-            "mvn",
-            "-N",
-            //"-o",
-            "-f",
-            tmpInputFile.absolutePath,
-            "help:effective-pom",
-            "-Doutput=${tmpOutputFile.absolutePath}"
-        ).inheritIO()
-
-        psBuilder.environment().putAll(System.getenv())
-
-        val process = psBuilder.start()
-
-        val retCode = process.waitFor()
-
-        if (0 != retCode)
-            throw IllegalStateException("Unexpected return code from maven: $retCode")
-
-        return SAXReader().read(FileInputStream(tmpOutputFile))
-    }
+                result.putAll(newPropertiesToAppend)
+            }
+            result.toMap()
+        }
 }
 
-object ProjectModelFactory {
-    var pomDocument: Document? = null
-
-    var dependency: Dependency? = null
-
-    var skipIfNewer: Boolean = false
-
-    private fun load(`is`: InputStream): ProjectModelFactory {
-        val pomDocument = SAXReader().read(`is`)!!
-
-        return this.apply {
-            this.pomDocument = pomDocument
-        }
-    }
-
-    fun withDependency(dep: Dependency): ProjectModelFactory {
-        return this.apply {
-            this.dependency = dep
-        }
-    }
-
-    fun withSkipIfNewer(skipIfNewer: Boolean): ProjectModelFactory {
-        return this.apply {
-            this.skipIfNewer = skipIfNewer
-        }
-    }
-
-
-    public fun build(): ProjectModel {
-        return ProjectModel(pomDocument!!, dependency!!, skipIfNewer)
-    }
-
-    @JvmStatic
-    fun load(f: File) =
-        load(FileInputStream(f))
-
-    @JvmStatic
-    fun load(url: URL) =
-        load(url.openStream())
-}

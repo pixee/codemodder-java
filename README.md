@@ -1,3 +1,6 @@
+[![Actions Status](https://github.com/openpixee/pom-operator/workflows/Java%20CI/badge.svg)](https://github.com/openpixee/pom-operator/actions)
+![Coverage](.github/badges/jacoco.svg)
+
 # pom-operator
 
 POM Operator is a library responsible for injecting dependencies into POM files programatically.
@@ -47,3 +50,5 @@ It implements a Chain of Responsibility strategy - each `Command` class attempts
 
 - ~~better readme~~
 - be able to guess existing indenting for existing documents
+- investigate leverage whats on [versions-maven-plugin](https://github.com/mojohaus/versions-maven-plugin)
+- consider fuzzying when testing
