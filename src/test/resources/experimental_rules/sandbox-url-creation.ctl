@@ -5,12 +5,12 @@ match
     type = java.net.URL
   }
 
-require dependency io.pixee:io.pixee.security:1.0
-require import io.pixee.security.Urls
+require dependency io.openpixee:java-security-toolkit:1.0.0
+require import io.openpixee.security.Urls
 
 replace $c with
   StaticMethodCall {
-    type = io.pixee.security.Urls
+    type = io.openpixee.security.Urls
     name = create
     args =  [Urls.DENY_COMMON_INFRASTRUCTURE_TARGETS, Urls.HTTP_PROTOCOLS] + $c.args
   }

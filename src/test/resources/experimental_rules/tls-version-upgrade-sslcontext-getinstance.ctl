@@ -5,9 +5,10 @@ match
     args = [!StringLiteral]
   }
 
+
 replace $c.args[0] with
-  StaticMethodCall {
-    type = Security
-    name = sanitize
-    args = ["TLSv1.2"]
+  # how do we express this? bad strawman here
+  LiteralExpression {
+    type = java.lang.String[]
+    value = ["TLSv1.2"]
   }

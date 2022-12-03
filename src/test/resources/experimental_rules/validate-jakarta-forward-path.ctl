@@ -15,12 +15,12 @@ where
     }
   )
 
-require dependency io.pixee:io.pixee.security:1.0
-require import org.pixee.security.Jakarta
+require dependency io.openpixee:java-security-toolkit:1.0.0
+require import org.openpixee.security.Jakarta
 
 insert into data flow after $c.args[0]
   StaticMethodCall {
-    type = io.pixee.security.Jakarta
+    type = io.openpixee.security.Jakarta
     name = validateForwardPath
     args = [$c.args[0]]
   }

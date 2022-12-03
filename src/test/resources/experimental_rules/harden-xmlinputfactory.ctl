@@ -14,12 +14,12 @@ where
     }
   )
 
-require dependency io.pixee:io.pixee.security:1.0
-require import io.pixee.security.XMLInputFactorySecurity
+require dependency io.openpixee:java-security-toolkit:1.0.0
+require import io.openpixee.security.XMLInputFactorySecurity
 
 insert into dataflow downstream of $c
   StaticMethodCall {
-    type = io.pixee.security.XMLInputFactorySecurity
+    type = io.openpixee.security.XMLInputFactorySecurity
     name = hardenFactory
     args = [$c]
   }

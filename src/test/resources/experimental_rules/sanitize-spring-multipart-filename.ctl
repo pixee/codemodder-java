@@ -17,12 +17,12 @@ where
     }
   )
 
-require dependency io.pixee:io.pixee.security:1.0
-require import org.pixee.security.SafeIO
+require dependency io.openpixee:java-security-toolkit:1.0.0
+require import org.openpixee.security.Filenames
 
 insert into data flow after $c
   StaticMethodCall {
-    type = io.pixee.security.SafeIO
+    type = io.openpixee.security.Filenames
     name = toSimpleFileName
     args = [$c]
   }

@@ -12,11 +12,11 @@ where
       context = $c
     }
   )
-require dependency io.pixee:io.pixee.security.xstream:1.1
-require import io.pixee.security.SafeXStream
+require dependency io.openpixee:java-security-toolkit-xstream:1.0.0
+require import io.openpixee.security.HardeningConverter
 insert into dataflow downstream of $c
   StaticMethodCall {
-    type = io.pixee.security.SafeXStream
+    type = io.openpixee.security.SafeXStream
     name = preventDangerousTypes
     args = [$c]
   }

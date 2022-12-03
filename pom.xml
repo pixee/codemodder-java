@@ -49,7 +49,8 @@
         <versions.javaparser>3.23.0</versions.javaparser>
         <versions.java-diff-utils>4.9</versions.java-diff-utils>
         <versions.java-sarif>2.0</versions.java-sarif>
-        <versions.jcst>0.0.2</versions.jcst>
+        <versions.jst>1.0.0</versions.jst>
+        <versions.jst-xstream>1.0.0</versions.jst-xstream>
         <versions.jfiglet>0.0.8</versions.jfiglet>
         <versions.jgit>3.5.0.201409260305-r</versions.jgit>
         <versions.jproc>2.6.2</versions.jproc>
@@ -79,9 +80,14 @@
             <version>${versions.jackson}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.pixee</groupId>
-            <artifactId>java-code-security-toolkit</artifactId>
-            <version>${versions.jcst}</version>
+            <groupId>io.openpixee</groupId>
+            <artifactId>java-security-toolkit</artifactId>
+            <version>${versions.jst}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.openpixee</groupId>
+            <artifactId>java-security-toolkit-xstream</artifactId>
+            <version>${versions.jst-xstream}</version>
         </dependency>
         <dependency>
             <groupId>io.github.pixee</groupId>
@@ -263,7 +269,7 @@
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
-            <version>1.4.5</version>
+            <version>1.4.7</version>
             <scope>test</scope>
         </dependency>
         <!-- for testing patching jwt -->
@@ -358,7 +364,7 @@
                                 </filters>
                                 <transformers>
                                     <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                        <mainClass>io.pixee.codefixer.java.JavaFixitCli</mainClass>
+                                        <mainClass>io.openpixee.java.JavaFixitCli</mainClass>
                                     </transformer>
                                 </transformers>
                             </configuration>

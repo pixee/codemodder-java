@@ -6,12 +6,12 @@ match
     args = []
   }
 
-require dependency io.pixee:io.pixee.security:1.0
-require import io.pixee.security.BoundedLineReader
+require dependency io.openpixee:java-security-toolkit:1.0.0
+require import io.openpixee.security.BoundedLineReader
 
 replace $c with
   StaticMethodCall {
-    type = io.pixee.security.BoundedLineReader
+    type = io.openpixee.security.BoundedLineReader
     name = readLine
     args = [$c, 1_000_000]
   }

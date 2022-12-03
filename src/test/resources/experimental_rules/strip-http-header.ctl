@@ -10,17 +10,17 @@ match
 where
   !hasUpstream($c.args[1],
     StaticMethodCall {
-      type = io.pixee.security.Newlines
+      type = io.openpixee.security.Newlines
       name = stripAll
       args = [$c.args[1]]
     })
 
-require dependency io.pixee:io.pixee.security:1.0
-require import org.pixee.security.Newlines
+require dependency io.openpixee:java-security-toolkit:1.0.0
+require import org.openpixee.security.Newlines
 
 insert into data flow after $c
   StaticMethodCall {
-    type = io.pixee.security.Newlines
+    type = io.openpixee.security.Newlines
     name = stripAll
     args = [$c]
   }

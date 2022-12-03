@@ -13,12 +13,12 @@ where
     }
   )
 
-require dependency io.pixee:io.pixee.security:1.0
-require import io.pixee.security.XMLDecoderSecurity
+require dependency io.openpixee:java-security-toolkit:1.0.0
+require import io.openpixee.security.XMLDecoderSecurity
 
 insert into dataflow downstream of $c
   StaticMethodCall {
-    type = io.pixee.security.XMLDecoderSecurity
+    type = io.openpixee.security.XMLDecoderSecurity
     name = hardenStream
     args = [$c]
   }
