@@ -60,7 +60,7 @@ public final class Weave {
 
   /**
    * A {@link Weave} convenience builder for weaves that only requires one new dependency.
-   * Equivalent to calling: <code>Weave.from(line, code, List.of(dependencyNeeded))</code>
+   * Equivalent to calling: {@code Weave.from(line, code, List.of(dependencyNeeded))}
    */
   public static Weave from(
       final int line, final String code, final DependencyGAV dependencyNeeded) {
@@ -69,7 +69,7 @@ public final class Weave {
 
   /**
    * A {@link Weave} convenience builder for weaves that don't require a new dependency. Equivalent
-   * to calling: <code>Weave.from(line, code, List.of())</code>
+   * to calling: {@code Weave.from(line, code, List.of())}
    */
   public static Weave from(final int line, final String code) {
     return new Weave(line, code, List.of());
