@@ -9,8 +9,11 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import java.util.Optional;
 
@@ -58,21 +61,6 @@ public final class ASTs {
   }
 
   /**
-   * Searches up the AST to find the {@link com.github.javaparser.ast.CompilationUnit} given {@link
-   * Node}. There could be orphan statements I guess in stray Java files, so return null if we ever
-   * run into that? Not sure how expected that will be, so not sure if I should make it an
-   * exception-based pattern.
-   */
-  public static CompilationUnit findCompilationUnitFrom(Node node) {
-    while (node.getParentNode().isPresent()
-        && !(node.getParentNode().get() instanceof CompilationUnit)) {
-      node = node.getParentNode().get();
-    }
-    var compilationUnit = node.getParentNode();
-    return (CompilationUnit) compilationUnit.orElse(null);
-  }
-
-  /**
    * Searches up the AST to find the {@link BlockStmt} given the {@link Node}. Eventually these
    * other methods should be refactored to use {@link Optional} patterns.
    */
@@ -112,40 +100,68 @@ public final class ASTs {
     return (ClassOrInterfaceDeclaration) type.orElse(null);
   }
 
+  // Possible parents of a Statement that is not a BlockStmt:
+  // NodeWithBody: ForStmt, ForEachStmt, DoStmt, WhileStmt
+  // IfStmt, LabeledStmt
   /**
-   * This is working around a bug in the lexical parsing:
-   * https://github.com/javaparser/javaparser/issues/2264
-   *
-   * <p>We should just be able to call:
-   *
-   * <p>vulnerableBlock.getStatements().addBefore(hardeningStmt, readObjectInvocation);
-   *
-   * <p>Unfortunately that breaks stuff because of the listeners in NodeList related to lexical
-   * preservation. So we have to insert a nonsense statement in there first that looks different
-   * from the method we want to add, then replace it, and that works somehow.
+   * Adds an {@code Statement} before another {@code Statement}. Single {@code Statements} in the
+   * body of For/Do/While/If/Labeled Statements are replaced with a {@code BlockStmt} containing
+   * both statements.
    */
   public static void addStatementBeforeStatement(
-      final Statement existingStatement, final Statement newStatementToPrecede) {
-    var vulnerableBlock = (BlockStmt) existingStatement.getParentNode().get();
-    var indexOfStatementToPrecede = findIndexOf(vulnerableBlock, existingStatement);
-    var ignoredExpression = new MethodCallExpr(new NameExpr("ignored"), "thisIsIgnored");
-    var ignoredStatement = new ExpressionStmt(ignoredExpression);
-    vulnerableBlock.getStatements().addBefore(ignoredStatement, existingStatement);
-    vulnerableBlock.setStatement(indexOfStatementToPrecede, newStatementToPrecede);
-  }
-
-  private static int findIndexOf(final BlockStmt block, final Statement stmt) {
-    for (int i = 0; i < block.getStatements().size(); i++) {
-      if (block.getStatement(i) == stmt) {
-        return i;
+      final Statement existingStatement, final Statement newStatement) {
+    var parent = existingStatement.getParentNode().get();
+    // Short If/For/... with a single statement and LabeledStmt
+    if (parent instanceof NodeWithBody
+        || parent instanceof IfStmt
+        || parent instanceof LabeledStmt) {
+      var newBody = new BlockStmt();
+      existingStatement.replace(newBody);
+      newBody.addStatement(newStatement);
+      newBody.addStatement(existingStatement);
+    } else {
+      // It's a block
+      var block = (BlockStmt) parent;
+      // Workaround for a bug on LexicalPreservingPrinter (see #2)
+      if (existingStatement.equals(block.getStatement(0))) {
+        existingStatement.replace(newStatement);
+        block.addStatement(1, existingStatement);
+      } else {
+        block.getStatements().addBefore(newStatement, existingStatement);
       }
     }
-    throw new IllegalArgumentException("couldn't find node in block");
+  }
+
+  /**
+   * Adds an {@code Statement} after another {@code Statement}. Single Statements in the body of
+   * For/Do/While/If/Labeled Statements are replaced with a {@code BlockStmt} containing both
+   * statements.
+   */
+  public static void addStatementAfterStatement(
+      final Statement existingStatement, final Statement newStatement) {
+    var parent = existingStatement.getParentNode().get();
+    // Short If/For/... with a single statement
+    if (parent instanceof NodeWithBody
+        || parent instanceof IfStmt
+        || parent instanceof LabeledStmt) {
+      var newBody = new BlockStmt();
+      existingStatement.replace(newBody);
+      newBody.addStatement(existingStatement);
+      newBody.addStatement(newStatement);
+    } else {
+      // It's a block
+      var block = (BlockStmt) parent;
+      var ignoredExpression = new MethodCallExpr(new NameExpr("ignored"), "thisIsIgnored");
+      var ignoredStatement = new ExpressionStmt(ignoredExpression);
+      block.getStatements().addAfter(ignoredStatement, existingStatement);
+      ignoredStatement.replace(newStatement);
+    }
   }
 
   /** Return a string description of the type and method that contain this {@link Node}. */
   public static String describeType(final Node node) {
-    var cu = findCompilationUnitFrom(node);
+    // TODO unchecked get from Optional
+    var cu = node.findCompilationUnit().get();
     var filePackage = cu.getPackageDeclaration().orElse(new PackageDeclaration());
     var packageName = filePackage.getNameAsString();
     var type = cu.getPrimaryTypeName().orElse("unknown_type");
