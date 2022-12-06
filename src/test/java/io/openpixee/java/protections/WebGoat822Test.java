@@ -19,7 +19,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
@@ -51,7 +50,6 @@ final class WebGoat822Test {
     outputFile.deleteOnExit();
   }
 
-  @Disabled
   @Test
   void it_transforms_webgoat_normally() throws Exception {
     int exitCode =
@@ -63,7 +61,7 @@ final class WebGoat822Test {
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
-    assertThat(report.getResults().size(), is(19));
+    assertThat(report.getResults().size(), is(21));
 
     // we only inject into a couple files
     assertThat(
@@ -90,7 +88,6 @@ final class WebGoat822Test {
         is(true));
   }
 
-  @Disabled
   @Test
   void it_transforms_webgoat_with_codeql() throws Exception {
     int exitCode =
@@ -108,7 +105,7 @@ final class WebGoat822Test {
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
-    assertThat(report.getResults().size(), is(22));
+    assertThat(report.getResults().size(), is(24));
 
     // we only inject into a couple files
     assertThat(
