@@ -19,6 +19,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
@@ -50,6 +51,7 @@ final class WebGoat820Test {
     outputFile.deleteOnExit();
   }
 
+  @Disabled
   @Test
   void it_transforms_webgoat_with_codeql() throws Exception {
     int exitCode =

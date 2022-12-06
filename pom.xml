@@ -69,6 +69,11 @@
     </properties>
 
     <dependencies>
+	<dependency>
+	    <groupId>io.openpixee</groupId>
+	    <artifactId>java-jdbc-parameterizer</artifactId>
+	    <version>0.0.1</version>
+	</dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
