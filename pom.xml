@@ -60,6 +60,8 @@
         <versions.mockito>4.3.1</versions.mockito>
         <versions.picocli>4.5.2</versions.picocli>
         <versions.progressbar>0.9.3</versions.progressbar>
+        <versions.jdbc-parameterizer>0.0.4</versions.jdbc-parameterizer>
+
 
         <!-- build tools -->
         <versions.fmt-maven-plugin>2.18</versions.fmt-maven-plugin>
@@ -72,7 +74,7 @@
 	<dependency>
 	    <groupId>io.openpixee</groupId>
 	    <artifactId>java-jdbc-parameterizer</artifactId>
-	    <version>0.0.4</version>
+	    <version>${versions.jdbc-parameterizer}</version>
 	</dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
