@@ -100,18 +100,20 @@ public final class ASTs {
     return (ClassOrInterfaceDeclaration) type.orElse(null);
   }
 
-  // Possible parents of a Statement that is not a BlockStmt:
-  // NodeWithBody: ForStmt, ForEachStmt, DoStmt, WhileStmt
-  // IfStmt, LabeledStmt
   /**
-   * Adds an {@code Statement} before another {@code Statement}. Single {@code Statements} in the
-   * body of For/Do/While/If/Labeled Statements are replaced with a {@code BlockStmt} containing
+   * Adds an {@link Statement} before another {@link Statement}. Single {@link Statements} in the
+   * body of For/Do/While/If/Labeled Statements are replaced with a {@link BlockStmt} containing
    * both statements.
    */
   public static void addStatementBeforeStatement(
       final Statement existingStatement, final Statement newStatement) {
+    // See https://docs.oracle.com/javase/specs/jls/se19/html/jls-14.html#jls-14.5
+    // Possible parents of a Statement that is not a BlockStmt:
+    // NodeWithBody: ForStmt, ForEachStmt, DoStmt, WhileStmt
+    // IfStmt, LabeledStmt
     var parent = existingStatement.getParentNode().get();
-    // Short If/For/... with a single statement and LabeledStmt
+    // In those cases we need to create a BlockStmt for
+    // the existing and newly added Statement
     if (parent instanceof NodeWithBody
         || parent instanceof IfStmt
         || parent instanceof LabeledStmt) {
@@ -120,9 +122,13 @@ public final class ASTs {
       newBody.addStatement(newStatement);
       newBody.addStatement(existingStatement);
     } else {
-      // It's a block
+      // The only option left is BlockStmt. Otherwise existingStatement is a BlockStmt contained
+      // in a:
+      // NodeWithBody, MethodDeclaration, NodeWithBlockStmt, SwitchStmt(?)
+      // No way (or reason) to add a Statement before those, maybe throw an Error?
       var block = (BlockStmt) parent;
-      // Workaround for a bug on LexicalPreservingPrinter (see #2)
+      // Workaround for a bug on LexicalPreservingPrinter (see
+      // https://github.com/javaparser/javaparser/issues/3746)
       if (existingStatement.equals(block.getStatement(0))) {
         existingStatement.replace(newStatement);
         block.addStatement(1, existingStatement);
