@@ -29,7 +29,7 @@ public final class SQLParameterizerVisitorFactory implements VisitorFactory {
         if (maybeChanges.isLeft()) {
           for (var c : maybeChanges.getLeft()) {
             // Create Weave based on Change
-            context.addWeave(Weave.from(c.getLine(), sqlinjectionRuleId));
+            context.addWeave(Weave.from(c.getLine(), sqlParameterizerRuleId));
           }
           return methodCallExpr;
         }
@@ -47,9 +47,9 @@ public final class SQLParameterizerVisitorFactory implements VisitorFactory {
 
   @Override
   public String ruleId() {
-    return sqlinjectionRuleId;
+    return sqlParameterizerRuleId;
   }
 
   private static final int defaultLineMaximum = 1_000_000; // 1 MB
-  private static final String sqlinjectionRuleId = "pixee:java/sql-parameterizer";
+  private static final String sqlParameterizerRuleId = "pixee:java/sql-parameterizer";
 }
