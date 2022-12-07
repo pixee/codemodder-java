@@ -101,7 +101,7 @@ public final class ASTs {
   }
 
   /**
-   * Adds an {@link Statement} before another {@link Statement}. Single {@link Statements} in the
+   * Adds an {@link Statement} before another {@link Statement}. Single {@link Statement}s in the
    * body of For/Do/While/If/Labeled Statements are replaced with a {@link BlockStmt} containing
    * both statements.
    */
@@ -139,14 +139,14 @@ public final class ASTs {
   }
 
   /**
-   * Adds an {@code Statement} after another {@code Statement}. Single Statements in the body of
-   * For/Do/While/If/Labeled Statements are replaced with a {@code BlockStmt} containing both
-   * statements.
+   * Adds an {@link Statement} after another {@link Statement}. Single {@link Statement}s in the
+   * body of For/Do/While/If/Labeled Statements are replaced with a {@link BlockStmt} containing
+   * both statements.
    */
   public static void addStatementAfterStatement(
       final Statement existingStatement, final Statement newStatement) {
     var parent = existingStatement.getParentNode().get();
-    // Short If/For/... with a single statement
+    // See comments in addStatementBeforeStatement
     if (parent instanceof NodeWithBody
         || parent instanceof IfStmt
         || parent instanceof LabeledStmt) {
@@ -155,7 +155,6 @@ public final class ASTs {
       newBody.addStatement(existingStatement);
       newBody.addStatement(newStatement);
     } else {
-      // It's a block
       var block = (BlockStmt) parent;
       var ignoredExpression = new MethodCallExpr(new NameExpr("ignored"), "thisIsIgnored");
       var ignoredStatement = new ExpressionStmt(ignoredExpression);
