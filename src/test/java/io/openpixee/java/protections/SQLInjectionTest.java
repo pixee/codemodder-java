@@ -13,6 +13,6 @@ final class SQLInjectionTest {
   void it_rewrites_parameterized() throws IOException {
     WeavingTests.assertJavaWeaveWorkedAndWontReweave(
         "src/test/java/com/acme/testcode/SQLSimpleSelectVulnerability.java",
-        new SQLInjectionVisitorFactory());
+        new SQLParameterizerVisitorFactory());
   }
 }

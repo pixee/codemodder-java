@@ -11,13 +11,13 @@ import io.openpixee.jdbcparameterizer.SQLParameterizer;
 import java.io.File;
 
 /** */
-public final class SQLInjectionVisitorFactory implements VisitorFactory {
+public final class SQLParameterizerVisitorFactory implements VisitorFactory {
 
-  private class SQLInjectionVisitor extends ModifierVisitor<FileWeavingContext> {
+  private class SQLParameterizerVisitor extends ModifierVisitor<FileWeavingContext> {
 
     CompilationUnit cu;
 
-    SQLInjectionVisitor(CompilationUnit cu) {
+    SQLParameterizerVisitor(CompilationUnit cu) {
       this.cu = cu;
     }
 
@@ -28,8 +28,8 @@ public final class SQLInjectionVisitorFactory implements VisitorFactory {
         var maybeChanges = fixer.fixVulnerability(methodCallExpr, methodCallExpr.getArgument(0));
         if (maybeChanges.isLeft()) {
           for (var c : maybeChanges.getLeft()) {
-            // prepends the ruleId
-            context.addWeave(Weave.from(c.getLine(), sqlinjectionRuleId + "\n" + c.getMessage()));
+            // Create Weave based on Change
+            context.addWeave(Weave.from(c.getLine(), sqlinjectionRuleId));
           }
           return methodCallExpr;
         }
@@ -42,7 +42,7 @@ public final class SQLInjectionVisitorFactory implements VisitorFactory {
   public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
       final File file, final CompilationUnit cu) {
 
-    return new SQLInjectionVisitor(cu);
+    return new SQLParameterizerVisitor(cu);
   }
 
   @Override
@@ -51,5 +51,5 @@ public final class SQLInjectionVisitorFactory implements VisitorFactory {
   }
 
   private static final int defaultLineMaximum = 1_000_000; // 1 MB
-  private static final String sqlinjectionRuleId = "pixee:java/sql-injection";
+  private static final String sqlinjectionRuleId = "pixee:java/sql-parameterizer";
 }
