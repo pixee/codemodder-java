@@ -10,7 +10,7 @@ import io.openpixee.java.Weave;
 import io.openpixee.jdbcparameterizer.SQLParameterizer;
 import java.io.File;
 
-/** Protects against user data SQL injections by parameterizing the query call.*/
+/** Protects against user data SQL injections by parameterizing the query call. */
 public final class SQLParameterizerVisitorFactory implements VisitorFactory {
 
   private class SQLParameterizerVisitor extends ModifierVisitor<FileWeavingContext> {
