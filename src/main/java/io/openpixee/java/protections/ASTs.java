@@ -7,11 +7,8 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -156,10 +153,7 @@ public final class ASTs {
       newBody.addStatement(newStatement);
     } else {
       var block = (BlockStmt) parent;
-      var ignoredExpression = new MethodCallExpr(new NameExpr("ignored"), "thisIsIgnored");
-      var ignoredStatement = new ExpressionStmt(ignoredExpression);
-      block.getStatements().addAfter(ignoredStatement, existingStatement);
-      ignoredStatement.replace(newStatement);
+      block.getStatements().addAfter(newStatement, existingStatement);
     }
   }
 
