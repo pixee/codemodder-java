@@ -41,7 +41,6 @@ public final class ZipFileOverwriteVisitoryFactory implements VisitorFactory {
             final MethodCallExpr securedCall =
                 new MethodCallExpr(callbackClass, "createHardenedInputStream");
             securedCall.setArguments(objectCreationExpr.getArguments());
-            // TODO treat this optional here
             final CompilationUnit cu = objectCreationExpr.findCompilationUnit().get();
             ASTs.addImportIfMissing(cu, ZipSecurity.class);
             Weave weave =

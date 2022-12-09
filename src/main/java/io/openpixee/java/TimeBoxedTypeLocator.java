@@ -98,7 +98,6 @@ final class TimeBoxedTypeLocator implements TypeLocator {
           Type type = parameter.getType();
           if (type.isClassOrInterfaceType()) {
             ClassOrInterfaceType variableType = type.asClassOrInterfaceType();
-            // TODO treat this here...
             CompilationUnit cu = nameExpr.findCompilationUnit().get();
             for (ImportDeclaration i : cu.getImports()) {
               final Name name = i.getName();
@@ -112,7 +111,6 @@ final class TimeBoxedTypeLocator implements TypeLocator {
         Type type = variableOfSameName.get().getType();
         if (type.isClassOrInterfaceType()) {
           ClassOrInterfaceType variableType = type.asClassOrInterfaceType();
-          // TODO treat this here...
           CompilationUnit cu = nameExpr.findCompilationUnit().get();
           for (ImportDeclaration i : cu.getImports()) {
             final Name name = i.getName();

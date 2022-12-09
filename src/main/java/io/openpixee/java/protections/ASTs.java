@@ -159,7 +159,6 @@ public final class ASTs {
 
   /** Return a string description of the type and method that contain this {@link Node}. */
   public static String describeType(final Node node) {
-    // TODO unchecked get from Optional
     var cu = node.findCompilationUnit().get();
     var filePackage = cu.getPackageDeclaration().orElse(new PackageDeclaration());
     var packageName = filePackage.getNameAsString();
