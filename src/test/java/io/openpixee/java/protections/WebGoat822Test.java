@@ -5,7 +5,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Files;
 import io.github.pixee.codetf.CodeTFChange;
 import io.github.pixee.codetf.CodeTFReport;
 import io.github.pixee.codetf.CodeTFResult;
@@ -17,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,22 +26,38 @@ final class WebGoat822Test {
 
   /** Shared repo dir for all tests. */
   private static File repoDir;
+  private static final String tempDirName = "WebGoat822";
 
   /** The output file for each test. */
   private File outputFile;
 
+  private static boolean isCached(File dir) throws IOException {
+    var rb = new FileRepositoryBuilder();
+    rb.findGitDir(dir);
+    if (rb.getGitDir() == null) return false;
+    var rep = rb.build();
+    for (var ref : rep.getAllRefs().values()) {
+      if (ref.getObjectId() == null) continue;
+      return true;
+    }
+    return false;
+  }
+
   @BeforeAll
-  static void setup() throws GitAPIException {
-    repoDir = Files.createTempDir();
-    var git =
-        Git.cloneRepository()
-            .setURI("https://github.com/WebGoat/WebGoat")
-            .setDirectory(repoDir)
-            .setBranch("release/v8.2.2")
-            .call();
-    git.close();
-    System.out.println("Writing to " + repoDir.getAbsolutePath());
-    repoDir.deleteOnExit();
+  static void setup() throws GitAPIException, IOException {
+    String tmpDir = System.getProperty("java.io.tmpdir");
+    repoDir = new File(tmpDir, tempDirName);
+    if (!isCached(repoDir)) {
+      var git =
+          Git.cloneRepository()
+              .setURI("https://github.com/WebGoat/WebGoat")
+              .setDirectory(repoDir)
+              .setBranch("release/v8.2.2")
+              .call();
+      git.close();
+      System.out.println("Writing to " + repoDir.getAbsolutePath());
+      // repoDir.deleteOnExit();
+    }
   }
 
   @BeforeEach
