@@ -56,7 +56,6 @@ final class WebGoat822Test {
               .call();
       git.close();
       System.out.println("Writing to " + repoDir.getAbsolutePath());
-      // repoDir.deleteOnExit();
     }
   }
 

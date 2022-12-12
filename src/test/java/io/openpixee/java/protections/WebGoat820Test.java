@@ -49,7 +49,6 @@ final class WebGoat820Test {
     String tmpDir = System.getProperty("java.io.tmpdir");
     repoDir = new File(tmpDir, tempDirName);
     if (!isCached(repoDir)) {
-      System.out.println("Not Cached");
       var git =
           Git.cloneRepository()
               .setURI("https://github.com/WebGoat/WebGoat")
@@ -58,7 +57,6 @@ final class WebGoat820Test {
               .call();
       git.close();
       System.out.println("Writing to " + repoDir.getAbsolutePath());
-      // repoDir.deleteOnExit();
     }
   }
 
