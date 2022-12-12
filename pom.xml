@@ -60,7 +60,7 @@
         <versions.mockito>4.3.1</versions.mockito>
         <versions.picocli>4.5.2</versions.picocli>
         <versions.progressbar>0.9.3</versions.progressbar>
-        <versions.jdbc-parameterizer>0.0.4</versions.jdbc-parameterizer>
+        <versions.jdbc-parameterizer>0.0.5</versions.jdbc-parameterizer>
 
 
         <!-- build tools -->

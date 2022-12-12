@@ -23,9 +23,10 @@ public final class SQLParameterizerVisitorFactory implements VisitorFactory {
 
     @Override
     public Visitable visit(final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
-      if (SQLParameterizer.isInjectableCall(methodCallExpr)) {
+      if (SQLParameterizer.isParameterizationCandidate(methodCallExpr)) {
         var fixer = new SQLParameterizer(this.cu);
-        var maybeChanges = fixer.fixVulnerability(methodCallExpr, methodCallExpr.getArgument(0));
+        var maybeChanges =
+            fixer.parameterizeStatement(methodCallExpr, methodCallExpr.getArgument(0));
         if (maybeChanges.isLeft()) {
           for (var c : maybeChanges.getLeft()) {
             // Create Weave based on Change
