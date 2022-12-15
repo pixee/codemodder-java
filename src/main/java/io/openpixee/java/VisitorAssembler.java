@@ -49,6 +49,7 @@ public interface VisitorAssembler {
               new DeserializationVisitorFactory(),
               new HeaderInjectionVisitorFactory(),
               new JakartaForwardVisitoryFactory(),
+              new SQLParameterizerVisitorFactory(),
               new SSLContextGetInstanceVisitorFactory(),
               new SSLEngineSetEnabledProtocolsVisitorFactory(),
               new SSLParametersSetProtocolsVisitorFactory(),

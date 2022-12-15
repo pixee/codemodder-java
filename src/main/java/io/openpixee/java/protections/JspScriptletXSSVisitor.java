@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * This type corrects simple and obvious XSS vulnerabilities in JSPs. It looks for patterns like:
  *
- * <p><%= request.getParameter("anything") %>
+ * <p>&lt;%= request.getParameter("anything") %&gt;
  *
  * <p>Literally almost any modification to the above snippets could provide protection -- we only
  * want to find 100% certain cases when its uncontrolled user input which can escape any context and

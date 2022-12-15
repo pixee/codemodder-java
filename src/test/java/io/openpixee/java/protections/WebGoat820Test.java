@@ -5,49 +5,23 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Files;
 import io.github.pixee.codetf.CodeTFChange;
 import io.github.pixee.codetf.CodeTFReport;
 import io.github.pixee.codetf.CodeTFResult;
 import io.openpixee.java.JavaFixitCli;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
-final class WebGoat820Test {
+final class WebGoat820Test extends GitRepositoryTest {
 
-  /** Shared repo dir for all tests. */
-  private static File repoDir;
-
-  /** The output file for each test. */
-  private File outputFile;
-
-  @BeforeAll
-  static void setup() throws GitAPIException {
-    repoDir = Files.createTempDir();
-    var git =
-        Git.cloneRepository()
-            .setURI("https://github.com/WebGoat/WebGoat")
-            .setDirectory(repoDir)
-            .setBranch("release/v8.2.0")
-            .call();
-    git.close();
-    System.out.println("Writing to " + repoDir.getAbsolutePath());
-    repoDir.deleteOnExit();
-  }
-
-  @BeforeEach
-  void createOutputFile() throws IOException {
-    outputFile = File.createTempFile("report", ".log");
-    outputFile.deleteOnExit();
+  void setParameters() {
+    this.repoURI = "https://github.com/WebGoat/WebGoat";
+    this.repoBranch = "release/v8.2.0";
+    this.tempDirName = "WebGoat820";
   }
 
   @Test
@@ -67,7 +41,7 @@ final class WebGoat820Test {
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
-    assertThat(report.getResults().size(), is(22));
+    assertThat(report.getResults().size(), is(24));
 
     // count the changes associated with missing-jwt-signature-check from codeql
     List<CodeTFChange> changes =
