@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/info.picocli/picocli-codegen/4.7.0/465dee9139421849ba0139882c67379c341a2f20/picocli-codegen-4.7.0.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/info.picocli/picocli/4.7.0/dcdde55edcb523af7814ba47e57a8a097daa208d/picocli-4.7.0.jar" />
+        </processorPath>
+        <module name="codetl.cli.main" />
+      </profile>
+    </annotationProcessing>
     <bytecodeTargetLevel target="1.6" />
   </component>
 </project>

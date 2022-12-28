@@ -1,2 +1,6 @@
+[versions]
+picocli = "4.7.0"
+
 [libraries]
-picocli = "info.picocli:picocli:4.7.0"
+picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
