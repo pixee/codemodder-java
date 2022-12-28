@@ -1,0 +1,6 @@
+[submodule "languages/java"]
+	path = languages/java
+	url = git@github.com:openpixee/java-code-hardener.git
+[submodule "languages/javascript"]
+	path = languages/javascript
+	url = git@github.com:openpixee/javascript-language-provider.git

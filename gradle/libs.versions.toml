@@ -1,0 +1,2 @@
+[libraries]
+picocli = "info.picocli:picocli:4.7.0"
