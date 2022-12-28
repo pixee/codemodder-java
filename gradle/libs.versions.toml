@@ -1,6 +1,8 @@
 [versions]
 picocli = "4.7.0"
+graalvm = "22.3.0"
 
 [libraries]
 picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
 picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
+graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }

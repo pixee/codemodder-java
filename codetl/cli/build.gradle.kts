@@ -7,9 +7,17 @@ application {
     mainClass.set("io.openpixee.codetl.cli.Application")
 }
 
-dependencies {
-    implementation(libs.picocli)
-
-    annotationProcessor(libs.picocli.codegen)
+graalvmNative {
+    binaries {
+        named("main") {
+            imageName.set("codetl")
+            buildArgs("--language:js")
+        }
+    }
 }
 
+dependencies {
+    compileOnly(libs.graal.sdk)
+    implementation(libs.picocli)
+    annotationProcessor(libs.picocli.codegen)
+}

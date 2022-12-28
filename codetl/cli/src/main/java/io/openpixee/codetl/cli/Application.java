@@ -3,6 +3,8 @@ package io.openpixee.codetl.cli;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Value;
 import picocli.CommandLine;
 
 /** Main entrypoint for the CodeTL CLI application. */
@@ -11,6 +13,17 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true,
     description = "Automatically transform source code at scale to improve code bases.")
 public final class Application implements Callable<Integer> {
+
+  public static void main(final String[] args) {
+    final String message;
+    try (var context = Context.create()) {
+      final Value value = context.eval("js", "'hello, world'");
+      message = value.asString();
+    }
+    System.out.println(message);
+    final int exitCode = new CommandLine(new Application()).execute(args);
+    System.exit(exitCode);
+  }
 
   @CommandLine.Option(
       names = {"-r", "--repository"},
@@ -55,11 +68,6 @@ public final class Application implements Callable<Integer> {
       defaultValue = "false",
       required = false)
   private boolean verbose;
-
-  public static void main(final String[] args) {
-    final int exitCode = new CommandLine(new Application()).execute(args);
-    System.exit(exitCode);
-  }
 
   @Override
   public Integer call() {
