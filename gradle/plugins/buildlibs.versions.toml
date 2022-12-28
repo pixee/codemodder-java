@@ -1,0 +1,5 @@
+[versions]
+ktlint = "0.48.0"
+
+[libraries]
+spotless = "com.diffplug.spotless:spotless-plugin-gradle:6.12.0"
