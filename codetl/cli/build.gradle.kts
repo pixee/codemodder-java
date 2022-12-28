@@ -1,5 +1,5 @@
 plugins {
-    `java-library`
+    id("io.openpixee.codetl.java")
 }
 
 dependencies {
