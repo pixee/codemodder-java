@@ -81,6 +81,11 @@ public interface IncludesExcludes {
       }
       return LineIncludesExcludes.fromExcludedLines(disallowedLines);
     }
+
+    @Override
+    public String toString() {
+      return "Includes: " + pathIncludes + "\nExcludes: " + pathExcludes;
+    }
   }
 
   /**
