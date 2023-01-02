@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.openpixee.java.IncludesExcludes;
 import io.openpixee.java.LineIncludesExcludes;
+import io.openpixee.java.PathMatcher;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,18 @@ import org.junit.jupiter.api.Test;
  * tests.
  */
 final class IncludesTest {
+
+  @Test
+  void it_wont_match_partial_names()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    var iexParsePattern =
+        IncludesExcludes.class.getDeclaredMethod("parsePattern", File.class, String.class);
+    iexParsePattern.setAccessible(true);
+    var pm = (PathMatcher) iexParsePattern.invoke(null, new File("."), "src/test/java");
+    var pmMatches = PathMatcher.class.getDeclaredMethod("matches", File.class);
+    pmMatches.setAccessible(true);
+    assertThat((Boolean) pmMatches.invoke(pm, new File("src/test/javascript")), is(false));
+  }
 
   @Test
   void scans_all_by_default() throws IOException {
