@@ -1,5 +1,6 @@
 package io.openpixee.java;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
 import java.util.*;
 
@@ -113,6 +114,7 @@ public interface IncludesExcludes {
     return new Default(pathIncludes, pathExcludes);
   }
 
+  @VisibleForTesting
   static PathMatcher parsePattern(final File repositoryRoot, String pattern) {
     // validate and sanitize
     Objects.requireNonNull(pattern);

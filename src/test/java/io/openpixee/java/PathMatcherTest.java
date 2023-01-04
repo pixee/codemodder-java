@@ -6,7 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.File;
 import org.junit.jupiter.api.Test;
 
-class PathMatcherTest {
+final class PathMatcherTest {
 
   @Test
   public void it_wont_match_partial_names() {
