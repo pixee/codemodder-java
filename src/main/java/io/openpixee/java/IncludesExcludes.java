@@ -113,7 +113,7 @@ public interface IncludesExcludes {
     return new Default(pathIncludes, pathExcludes);
   }
 
-  private static PathMatcher parsePattern(final File repositoryRoot, String pattern) {
+  static PathMatcher parsePattern(final File repositoryRoot, String pattern) {
     // validate and sanitize
     Objects.requireNonNull(pattern);
     pattern = pattern.trim();

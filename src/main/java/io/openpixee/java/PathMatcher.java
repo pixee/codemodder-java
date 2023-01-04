@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 /** This type is used in include/exclude logic for matching paths. */
-public final class PathMatcher {
+final class PathMatcher {
 
   private final Path pathPrefix;
   private final Integer line;
