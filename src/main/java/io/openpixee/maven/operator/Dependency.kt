@@ -8,7 +8,8 @@ data class Dependency(
     val artifactId: String,
     val version: String? = null,
     val classifier: String? = null,
-    val packaging: String? = "jar"
+    val packaging: String? = "jar",
+    val scope: String? = "compile",
 ) {
     override fun toString(): String {
         return listOf(groupId, artifactId, packaging, version).joinToString(":")
@@ -21,7 +22,7 @@ data class Dependency(
             val elements = str.split(":")
 
             if (elements.size < 3)
-                throw IllegalStateException("Give me 3 elements")
+                throw IllegalStateException("Give me at least 3 elements")
 
             return Dependency(elements[0], elements[1], elements[2])
         }

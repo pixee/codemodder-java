@@ -1,21 +1,24 @@
 package io.openpixee.maven.operator
 
-import io.openpixee.maven.operator.util.Util.selectXPathNodes
+import io.openpixee.maven.operator.Util.selectXPathNodes
 import org.dom4j.Document
 import org.dom4j.Element
+import java.net.URL
 
 /**
  * ProjectModel represents the input parameters for the chain
  *
- * @todo Wrap it into a <pre>Context</pre> interface
+ * @todo consider resolution and also Topological Sort of Properties for cross-property reference
  */
 class ProjectModel internal constructor(
+    val pomPath: URL?,
     val pomDocument: Document,
-    val dependency: Dependency,
+    var dependency: Dependency?,
     val skipIfNewer: Boolean,
     val useProperties: Boolean,
     val activeProfiles: Set<String>,
     val overrideIfAlreadyExists: Boolean,
+    val queryType: QueryType = QueryType.SAFE,
 ) {
     val resultPom: Document = pomDocument.clone() as Document
 
@@ -36,7 +39,7 @@ class ProjectModel internal constructor(
                     pomDocument.selectXPathNodes(expression)
 
                 val newPropertiesToAppend =
-                    propertiesElements.filter { it is Element }.map { it as Element }
+                    propertiesElements.filterIsInstance<Element>()
                         .flatMap { it.elements() }
                         .associate {
                             it.name to it.text

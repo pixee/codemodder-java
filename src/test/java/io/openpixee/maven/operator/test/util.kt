@@ -1,6 +1,8 @@
 package io.openpixee.maven.operator.test
 
 import io.openpixee.maven.operator.ProjectModel
+import io.openpixee.maven.operator.Util.which
+import org.apache.commons.lang3.SystemUtils
 import org.dom4j.Document
 import org.dom4j.io.SAXReader
 import java.io.File
@@ -20,13 +22,18 @@ internal fun ProjectModel.getEffectivePom(): Document {
 
     val tmpOutputFile = File.createTempFile("tmp-pom", ".xml")
 
-    val processArgs = mutableListOf<String>(
-        "mvn",
-        "-B",
-        "-N",
-        "-f",
-        tmpInputFile.absolutePath,
-    )
+    val processArgs: MutableList<String> =
+            mutableListOf<String>(
+                which("mvn")!!.absolutePath,
+                "-B",
+                "-N",
+                "-f",
+                tmpInputFile.absolutePath,
+            )
+
+    if (SystemUtils.IS_OS_WINDOWS) {
+        processArgs.addAll(0, listOf("cmd.exe", "/c"))
+    }
 
     if (this.activeProfiles.isNotEmpty()) {
         // TODO Aldrin: How safe is not to escape those things? My concern is that deactivating a profile uses '!',

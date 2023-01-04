@@ -1,10 +1,13 @@
 package io.openpixee.maven.operator.test
 
 import io.openpixee.maven.operator.Dependency
+import io.openpixee.maven.operator.MissingDependencyException
 import io.openpixee.maven.operator.POMOperator
 import io.openpixee.maven.operator.ProjectModelFactory
-import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependency
-import io.openpixee.maven.operator.util.Util.selectXPathNodes
+import io.openpixee.maven.operator.Util.buildLookupExpressionForDependency
+import io.openpixee.maven.operator.Util.selectXPathNodes
+import io.openpixee.maven.operator.Util.which
+import org.apache.commons.lang3.SystemUtils
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -15,6 +18,15 @@ import java.io.File
  * Unit test for simple App.
  */
 class POMOperatorTest : AbstractTestBase() {
+    @Test(expected = MissingDependencyException::class)
+    fun testWithDependencyMissing() {
+        gwt(
+            "case-dependency-missing",
+            ProjectModelFactory.load(
+                POMOperatorTest::class.java.getResource("pom-case-1.xml")!!,
+            )
+        )
+    }
 
     @Test
     fun testCaseOne() {
@@ -89,15 +101,25 @@ class POMOperatorTest : AbstractTestBase() {
     fun testCase4() {
         val pomPath = File(POMOperatorTest::class.java.getResource("webgoat-parent.xml")!!.toURI())
 
+        val args =
+            if (SystemUtils.IS_OS_WINDOWS) {
+                listOf("cmd.exe", "/c")
+            } else {
+                listOf()
+            } +
+                    listOf(
+                        which("mvn")!!.absolutePath,
+                        "-N",
+                        "install:install-file",
+                        "-DgroupId=org.owasp.webgoat",
+                        "-DartifactId=webgoat-parent",
+                        "-Dversion=8.2.3-SNAPSHOT",
+                        "-Dpackaging=pom",
+                        "-Dfile=${pomPath.absolutePath}"
+                    )
+
         val exitCode = ProcessBuilder(
-            "mvn",
-            "-N",
-            "install:install-file",
-            "-DgroupId=org.owasp.webgoat",
-            "-DartifactId=webgoat-parent",
-            "-Dversion=8.2.3-SNAPSHOT",
-            "-Dpackaging=pom",
-            "-Dfile=${pomPath.absolutePath}"
+            *args.toTypedArray()
         ).start().waitFor()
 
         assertThat("POM install was successful", 0 == exitCode)

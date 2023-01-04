@@ -3,7 +3,6 @@ package io.openpixee.maven.operator
 import org.dom4j.Document
 import org.dom4j.io.SAXReader
 import java.io.File
-import java.io.FileInputStream
 import java.io.InputStream
 import java.net.URL
 
@@ -11,13 +10,23 @@ import java.net.URL
  * Builder Object for ProjectModel instances
  */
 class ProjectModelFactory private constructor(
+    private var pomPath: URL?,
     private var pomDocument: Document,
     private var dependency: Dependency? = null,
     private var skipIfNewer: Boolean = false,
     private var useProperties: Boolean = false,
     private var activeProfiles: Set<String> = emptySet(),
     private var overrideIfAlreadyExists: Boolean = false,
+    private var queryType: QueryType = QueryType.SAFE,
 ) {
+    /**
+     * Fluent Setter
+     * @param pomPath pomPath
+     */
+    fun withPomPath(pomPath: URL): ProjectModelFactory = this.apply {
+        this.pomPath = pomPath
+    }
+
     /**
      * Fluent Setter
      *
@@ -57,15 +66,26 @@ class ProjectModelFactory private constructor(
 
     /**
      * Fluent Setter
+     *
+     * @param queryType query type
+     */
+    fun withQueryType(queryType: QueryType) = this.apply {
+        this.queryType = queryType
+    }
+
+    /**
+     * Fluent Setter
      */
     fun build(): ProjectModel {
         return ProjectModel(
+            pomPath = pomPath,
             pomDocument = pomDocument,
-            dependency = dependency!!,
+            dependency = dependency,
             skipIfNewer = skipIfNewer,
             useProperties = useProperties,
             activeProfiles = activeProfiles,
-            overrideIfAlreadyExists = overrideIfAlreadyExists
+            overrideIfAlreadyExists = overrideIfAlreadyExists,
+            queryType = queryType,
         )
     }
 
@@ -74,15 +94,18 @@ class ProjectModelFactory private constructor(
         fun load(`is`: InputStream): ProjectModelFactory {
             val pomDocument = SAXReader().read(`is`)!!
 
-            return ProjectModelFactory(pomDocument)
+            return ProjectModelFactory(pomPath = null, pomDocument = pomDocument)
         }
 
         @JvmStatic
         fun load(f: File) =
-            load(FileInputStream(f))
+            load(f.toURI().toURL())
 
         @JvmStatic
-        fun load(url: URL) =
-            load(url.openStream())
+        fun load(url: URL): ProjectModelFactory {
+            val pomDocument = SAXReader().read(url.openStream())
+
+            return ProjectModelFactory(pomPath = url, pomDocument = pomDocument)
+        }
     }
 }

@@ -1,15 +1,18 @@
 package io.openpixee.maven.operator
 
-import io.openpixee.maven.operator.util.Util.selectXPathNodes
+import io.openpixee.maven.operator.Util.formatNode
+import io.openpixee.maven.operator.Util.selectXPathNodes
+import io.openpixee.maven.operator.Util.upgradeVersionNode
 import org.dom4j.Element
 
 /**
- * Represents a POM Upgrade Strategy implicying simply adding a dependency/ section (and optionally a dependencyManagement/ section as well)
+ * Represents a POM Upgrade Strategy by simply adding a dependency/ section (and optionally a dependencyManagement/ section as well)
  */
 val SimpleInsert = object : Command {
     override fun execute(c: ProjectModel): Boolean {
         val dependencyManagementNode =
             c.resultPom.selectXPathNodes("/m:project/m:dependencyManagement")
+
         val elementsToFormat: MutableList<Element> = arrayListOf()
 
         if (dependencyManagementNode.isEmpty()) {
@@ -46,7 +49,6 @@ val SimpleInsert = object : Command {
         return true
     }
 
-
     /**
      * Creates the XML Elements for a given dependency
      */
@@ -58,11 +60,13 @@ val SimpleInsert = object : Command {
 
         val groupIdNode = dependencyNode.addElement("groupId")
 
-        groupIdNode.text = c.dependency.groupId
+        val dep = c.dependency!!
+
+        groupIdNode.text = dep.groupId
 
         val artifactIdNode = dependencyNode.addElement("artifactId")
 
-        artifactIdNode.text = c.dependency.artifactId
+        artifactIdNode.text = dep.artifactId
 
         return dependencyNode
     }

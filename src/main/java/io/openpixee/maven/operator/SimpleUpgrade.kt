@@ -1,6 +1,6 @@
 package io.openpixee.maven.operator
 
-import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependency
+import io.openpixee.maven.operator.Util.buildLookupExpressionForDependency
 
 
 /**
@@ -9,7 +9,7 @@ import io.openpixee.maven.operator.util.Util.buildLookupExpressionForDependency
 val SimpleUpgrade = object : AbstractSimpleCommand() {
     override fun execute(c: ProjectModel): Boolean {
         val lookupExpressionForDependency =
-            buildLookupExpressionForDependency(c.dependency)
+            buildLookupExpressionForDependency(c.dependency!!)
 
         return handleDependency(c, lookupExpressionForDependency)
     }
