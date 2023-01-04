@@ -1,5 +1,6 @@
 package io.openpixee.java;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
 import java.util.*;
 
@@ -81,6 +82,11 @@ public interface IncludesExcludes {
       }
       return LineIncludesExcludes.fromExcludedLines(disallowedLines);
     }
+
+    @Override
+    public String toString() {
+      return "Includes: " + pathIncludes + "\nExcludes: " + pathExcludes;
+    }
   }
 
   /**
@@ -108,7 +114,8 @@ public interface IncludesExcludes {
     return new Default(pathIncludes, pathExcludes);
   }
 
-  private static PathMatcher parsePattern(final File repositoryRoot, String pattern) {
+  @VisibleForTesting
+  static PathMatcher parsePattern(final File repositoryRoot, String pattern) {
     // validate and sanitize
     Objects.requireNonNull(pattern);
     pattern = pattern.trim();
