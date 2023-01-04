@@ -1,9 +1,15 @@
 package io.openpixee.codetl.cli;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import picocli.CommandLine;
 
@@ -15,12 +21,6 @@ import picocli.CommandLine;
 public final class Application implements Callable<Integer> {
 
   public static void main(final String[] args) {
-    final String message;
-    try (var context = Context.create()) {
-      final Value value = context.eval("js", "'hello, world'");
-      message = value.asString();
-    }
-    System.out.println(message);
     final int exitCode = new CommandLine(new Application()).execute(args);
     System.exit(exitCode);
   }
@@ -71,6 +71,43 @@ public final class Application implements Callable<Integer> {
 
   @Override
   public Integer call() {
+    final URL jsLanguageProviderBundleURL =
+        ClassLoader.getSystemResource("javascript-language-provider.js");
+    if (jsLanguageProviderBundleURL == null) {
+      throw new NullPointerException(
+          "Cannot find js language provider bundle. Check classpath or GraalVM native image resource inclusion configuration");
+    }
+    final Source jsLanguageProviderBundleSource;
+    try {
+      jsLanguageProviderBundleSource = Source.newBuilder("js", jsLanguageProviderBundleURL).build();
+    } catch (IOException e) {
+      throw new UncheckedIOException(
+          "Failed to read JS language provider bundle. This should never happen", e);
+    }
+    try (var context = Context.newBuilder("js").build()) {
+      context.eval(jsLanguageProviderBundleSource);
+      final var provider = context.eval("js", "codetlProvider.weave");
+      try (var paths = Files.walk(repositoryRoot)) {
+        // TODO ignore node_modules
+        paths
+            .filter(Files::isRegularFile)
+            .map(
+                path -> {
+                  final String contents;
+                  try {
+                    contents = Files.readString(path, StandardCharsets.UTF_8);
+                  } catch (IOException e) {
+                    throw new UncheckedIOException("Failed to read file " + path, e);
+                  }
+                  final Value result = provider.execute(path.toString(), contents, "auto");
+                  // TODO create CodeTF result object
+                  return result.asString();
+                })
+            .forEach(System.out::println);
+      } catch (IOException e) {
+        throw new UncheckedIOException("Failed to walk repository " + repositoryRoot, e);
+      }
+    }
     return 0;
   }
 }

@@ -12,6 +12,9 @@ graalvmNative {
         named("main") {
             imageName.set("codetl")
             buildArgs("--language:js")
+            resources {
+                includedPatterns.add(".*/javascript-language-provider.js$")
+            }
         }
     }
 }
