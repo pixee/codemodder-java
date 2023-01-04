@@ -19,8 +19,24 @@ graalvmNative {
     }
 }
 
+val bundle by configurations.registering {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
+
 dependencies {
     compileOnly(libs.graal.sdk)
-    implementation(libs.picocli)
     annotationProcessor(libs.picocli.codegen)
+    implementation(libs.picocli)
+
+    add(bundle.name, project(":languages:javascript", "bundle"))
+}
+
+val copyBundle by tasks.registering(Copy::class) {
+    from(bundle)
+    into(layout.buildDirectory.dir("generated/sources/$name/main/resources"))
+}
+
+sourceSets.main {
+    resources.srcDir(copyBundle)
 }

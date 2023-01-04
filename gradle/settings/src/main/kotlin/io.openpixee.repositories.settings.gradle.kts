@@ -1,11 +1,14 @@
 pluginManagement {
-    includeBuild("../gradle/plugins")
+    // Get our own convention plugins from 'gradle/plugins'
+    if (File(rootDir, "gradle/plugins").exists()) {
+        includeBuild("gradle/plugins")
+    }
+    // If not the main build, 'plugins' is located next to the build (e.g. gradle/settings)
+    if (File(rootDir, "../plugins").exists()) {
+        includeBuild("../plugins")
+    }
 }
 
 dependencyResolutionManagement {
     repositories.mavenCentral()
-    // For the version catalog 'libs.versions.toml' shared by all builds/components in the repository
-    versionCatalogs.create("libs") {
-        from(files("../gradle/libs.versions.toml"))
-    }
 }

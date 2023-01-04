@@ -6,4 +6,4 @@ plugins {
     id("io.openpixee.repositories")
 }
 
-include("cli")
+include("javascript")
