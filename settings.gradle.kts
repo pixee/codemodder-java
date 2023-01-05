@@ -8,4 +8,14 @@ plugins {
     id("io.openpixee.repositories")
 }
 
-include("cli", "languages:javascript")
+dependencyResolutionManagement {
+    versionCatalogs.create("testfixturelibs") {
+        from(files("./gradle/testfixturelibs.versions.toml"))
+    }
+
+    versionCatalogs.create("testlibs") {
+        from(files("./gradle/testlibs.versions.toml"))
+    }
+}
+
+include("cli", "languages:java", "languages:javascript")

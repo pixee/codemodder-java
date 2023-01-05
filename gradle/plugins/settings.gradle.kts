@@ -1,12 +1,14 @@
+pluginManagement {
+    includeBuild("../settings")
+}
+
+plugins {
+    id("io.openpixee.repositories")
+}
+
 dependencyResolutionManagement {
-    repositories.mavenCentral()
-
-    versionCatalogs.create("libs") {
-        from(files("../libs.versions.toml"))
-    }
-
     versionCatalogs.create("buildlibs") {
-        from(files("./buildlibs.versions.toml"))
+        from(files("../buildlibs.versions.toml"))
     }
 }
 

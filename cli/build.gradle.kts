@@ -3,6 +3,12 @@ plugins {
     id("io.openpixee.codetl.native-image")
 }
 
+java {
+    toolchain {
+        vendor.set(JvmVendorSpec.GRAAL_VM)
+    }
+}
+
 application {
     mainClass.set("io.openpixee.codetl.cli.Application")
 }
