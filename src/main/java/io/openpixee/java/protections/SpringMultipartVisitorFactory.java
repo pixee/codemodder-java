@@ -13,7 +13,7 @@ import io.openpixee.java.MethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
-import io.openpixee.java.ast.ASTs;
+import io.openpixee.java.ast.ASTTransform;
 import io.openpixee.security.Filenames;
 import java.io.File;
 import java.util.List;
@@ -49,7 +49,7 @@ public final class SpringMultipartVisitorFactory implements VisitorFactory {
                     new NameExpr(Filenames.class.getSimpleName()),
                     "toSimpleFileName",
                     NodeList.nodeList(methodCallExpr));
-            ASTs.addImportIfMissing(cu, Filenames.class);
+            ASTTransform.addImportIfMissing(cu, Filenames.class);
             Weave weave =
                 Weave.from(
                     methodCallExpr.getRange().get().begin.line,

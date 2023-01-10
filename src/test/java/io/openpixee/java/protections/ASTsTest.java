@@ -13,7 +13,7 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import java.util.List;
 import java.util.stream.Stream;
 
-import io.openpixee.java.ast.ASTs;
+import io.openpixee.java.ast.ASTTransform;
 import org.junit.jupiter.api.Test;
 
 final class ASTsTest {
@@ -22,7 +22,7 @@ final class ASTsTest {
   void it_works_when_no_imports() {
     String code = "package foo;\nclass Bar {}";
     CompilationUnit cu = new JavaParser().parse(code).getResult().get();
-    ASTs.addImportIfMissing(cu, "org.acme.Widget");
+    ASTTransform.addImportIfMissing(cu, "org.acme.Widget");
     assertThat(cu.getImports().equals(List.of(toSimpleImport("org.acme.Widget"))), is(true));
   }
 
@@ -30,7 +30,7 @@ final class ASTsTest {
   void it_works_when_new_import_should_be_first() {
     String code = "package foo;\nimport zzz;\nclass Bar {}";
     CompilationUnit cu = new JavaParser().parse(code).getResult().get();
-    ASTs.addImportIfMissing(cu, "org.acme.Widget");
+    ASTTransform.addImportIfMissing(cu, "org.acme.Widget");
     assertThat(
         cu.getImports(),
         equalTo(List.of(toSimpleImport("org.acme.Widget"), toSimpleImport("zzz"))));
@@ -40,7 +40,7 @@ final class ASTsTest {
   void it_works_when_new_import_should_be_last() {
     String code = "package foo;\nimport aaa;\nclass Bar {}";
     CompilationUnit cu = new JavaParser().parse(code).getResult().get();
-    ASTs.addImportIfMissing(cu, "org.acme.Widget");
+    ASTTransform.addImportIfMissing(cu, "org.acme.Widget");
     assertThat(
         cu.getImports(),
         equalTo(List.of(toSimpleImport("aaa"), toSimpleImport("org.acme.Widget"))));
@@ -50,7 +50,7 @@ final class ASTsTest {
   void it_works_when_new_import_should_be_in_the_middle() {
     String code = "package foo;\nimport aaa;\nimport zzz;\nclass Bar {}";
     CompilationUnit cu = new JavaParser().parse(code).getResult().get();
-    ASTs.addImportIfMissing(cu, "org.acme.Widget");
+    ASTTransform.addImportIfMissing(cu, "org.acme.Widget");
     assertThat(
         cu.getImports(),
         equalTo(
@@ -76,7 +76,7 @@ final class ASTsTest {
     var bstmt = new BreakStmt();
     var estmt = cu.findAll(EmptyStmt.class).get(0);
     LexicalPreservingPrinter.setup(cu);
-    ASTs.addStatementBeforeStatement(estmt, bstmt);
+    ASTTransform.addStatementBeforeStatement(estmt, bstmt);
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
   }
 
@@ -98,7 +98,7 @@ final class ASTsTest {
     var bstmt = new BreakStmt();
     var estmt = cu.findAll(EmptyStmt.class).get(0);
     LexicalPreservingPrinter.setup(cu);
-    ASTs.addStatementAfterStatement(estmt, bstmt);
+    ASTTransform.addStatementAfterStatement(estmt, bstmt);
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
   }
 
@@ -110,7 +110,7 @@ final class ASTsTest {
     var bstmt = new BreakStmt();
     var estmt = cu.findAll(EmptyStmt.class).get(0);
     LexicalPreservingPrinter.setup(cu);
-    ASTs.addStatementAfterStatement(estmt, bstmt);
+    ASTTransform.addStatementAfterStatement(estmt, bstmt);
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
   }
 

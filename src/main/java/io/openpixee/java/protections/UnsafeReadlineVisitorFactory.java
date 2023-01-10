@@ -11,7 +11,7 @@ import io.openpixee.java.MethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
-import io.openpixee.java.ast.ASTs;
+import io.openpixee.java.ast.ASTTransform;
 import io.openpixee.security.*;
 import java.io.BufferedReader;
 import java.io.File;
@@ -51,7 +51,7 @@ public final class UnsafeReadlineVisitorFactory implements VisitorFactory {
                     methodCallExpr.getRange().get().begin.line,
                     readlineRuleId,
                     DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
-            ASTs.addImportIfMissing(cu, BoundedLineReader.class);
+            ASTTransform.addImportIfMissing(cu, BoundedLineReader.class);
             methodCallExpr.getParentNode().get().replace(methodCallExpr, safeExpression);
             return new TransformationResult<>(Optional.of(safeExpression), weave);
           }

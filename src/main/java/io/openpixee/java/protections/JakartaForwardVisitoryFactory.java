@@ -13,7 +13,7 @@ import io.openpixee.java.MethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
-import io.openpixee.java.ast.ASTs;
+import io.openpixee.java.ast.ASTTransform;
 import io.openpixee.security.Jakarta;
 import java.io.File;
 import java.util.List;
@@ -42,7 +42,7 @@ public final class JakartaForwardVisitoryFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
-            ASTs.addImportIfMissing(cu, Jakarta.class);
+            ASTTransform.addImportIfMissing(cu, Jakarta.class);
             MethodCallExpr safeExpression =
                 new MethodCallExpr(
                     new NameExpr(Jakarta.class.getSimpleName()), "validateForwardPath");

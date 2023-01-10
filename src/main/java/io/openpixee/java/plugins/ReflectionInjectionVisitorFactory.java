@@ -16,7 +16,7 @@ import io.openpixee.java.Sarif;
 import io.openpixee.java.TypeLocator;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
-import io.openpixee.java.ast.ASTs;
+import io.openpixee.java.ast.ASTTransform;
 import io.openpixee.security.Reflection;
 import java.io.File;
 import java.io.IOException;
@@ -101,7 +101,7 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
                   Sarif.getFirstMatchingResult(
                       results, startLine, methodCallExpr.getNameAsString());
               if (resultRef.isPresent() && context.isLineIncluded(methodCallExpr)) {
-                ASTs.addImportIfMissing(cu, Reflection.class);
+                ASTTransform.addImportIfMissing(cu, Reflection.class);
                 MethodCallExpr safeCall = new MethodCallExpr();
                 safeCall.setName("loadAndVerify");
                 safeCall.setScope(callbackClass);

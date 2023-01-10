@@ -8,7 +8,7 @@ import com.github.javaparser.ast.stmt.BreakStmt;
 import com.github.javaparser.ast.stmt.EmptyStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 
-import io.openpixee.java.ast.ASTs;
+import io.openpixee.java.ast.ASTTransform;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,7 @@ final class LexicalTest {
     var bstmt = new BreakStmt();
     var estmt = cu.findAll(EmptyStmt.class).get(0);
     LexicalPreservingPrinter.setup(cu);
-    ASTs.addStatementBeforeStatement(estmt, bstmt);
+    ASTTransform.addStatementBeforeStatement(estmt, bstmt);
     assertThat(LexicalPreservingPrinter.print(cu),equalTo(expected));
   }
 
@@ -60,7 +60,7 @@ final class LexicalTest {
     var bstmt = new BreakStmt();
     var estmt = cu.findAll(EmptyStmt.class).get(0);
     LexicalPreservingPrinter.setup(cu);
-    ASTs.addStatementBeforeStatement(estmt, bstmt);
+    ASTTransform.addStatementBeforeStatement(estmt, bstmt);
     assertThat(LexicalPreservingPrinter.print(cu),equalTo(expected));
   }
 }

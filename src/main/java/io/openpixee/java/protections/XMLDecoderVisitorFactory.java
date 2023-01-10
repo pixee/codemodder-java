@@ -14,7 +14,7 @@ import io.openpixee.java.ObjectCreationTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
-import io.openpixee.java.ast.ASTs;
+import io.openpixee.java.ast.ASTTransform;
 import io.openpixee.security.XMLDecoderSecurity;
 import java.io.File;
 import java.util.List;
@@ -46,7 +46,7 @@ public final class XMLDecoderVisitorFactory implements VisitorFactory {
                 new MethodCallExpr(
                     new NameExpr(XMLDecoderSecurity.class.getSimpleName()), "hardenStream");
             final Expression firstArgument = objectCreationExpr.getArgument(0);
-            ASTs.addImportIfMissing(cu, XMLDecoderSecurity.class);
+            ASTTransform.addImportIfMissing(cu, XMLDecoderSecurity.class);
             safeExpr.setArguments(NodeList.nodeList(firstArgument));
             objectCreationExpr.setArgument(0, safeExpr);
             Weave weave =
