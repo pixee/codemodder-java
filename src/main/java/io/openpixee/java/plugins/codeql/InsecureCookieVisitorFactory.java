@@ -17,7 +17,7 @@ import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.Sarif;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
-import io.openpixee.java.ast.ASTTransform;
+import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.java.ast.ASTs;
 import java.io.File;
 import java.io.IOException;
@@ -105,7 +105,7 @@ final class InsecureCookieVisitorFactory implements VisitorFactory {
                       new MethodCallExpr("setSecure", new BooleanLiteralExpr(true));
                   secureCookieExpr.setScope(cookieExpression);
                   newStatement.setExpression(secureCookieExpr);
-                  ASTTransform.addStatementBeforeStatement(parentStatement, newStatement);
+                  ASTTransforms.addStatementBeforeStatement(parentStatement, newStatement);
                   context.addWeave(Weave.from(startLine, insecureCookieRuleId));
                   instrumentedThisMethodCall = true;
                 }

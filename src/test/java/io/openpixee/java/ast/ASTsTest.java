@@ -22,7 +22,7 @@ final class ASTsTest {
   void it_works_when_no_imports() {
     String code = "package foo;\nclass Bar {}";
     CompilationUnit cu = new JavaParser().parse(code).getResult().get();
-    ASTTransform.addImportIfMissing(cu, "org.acme.Widget");
+    ASTTransforms.addImportIfMissing(cu, "org.acme.Widget");
     assertThat(cu.getImports().equals(List.of(toSimpleImport("org.acme.Widget"))), is(true));
   }
 
@@ -30,7 +30,7 @@ final class ASTsTest {
   void it_works_when_new_import_should_be_first() {
     String code = "package foo;\nimport zzz;\nclass Bar {}";
     CompilationUnit cu = new JavaParser().parse(code).getResult().get();
-    ASTTransform.addImportIfMissing(cu, "org.acme.Widget");
+    ASTTransforms.addImportIfMissing(cu, "org.acme.Widget");
     assertThat(
         cu.getImports(),
         equalTo(List.of(toSimpleImport("org.acme.Widget"), toSimpleImport("zzz"))));
@@ -40,7 +40,7 @@ final class ASTsTest {
   void it_works_when_new_import_should_be_last() {
     String code = "package foo;\nimport aaa;\nclass Bar {}";
     CompilationUnit cu = new JavaParser().parse(code).getResult().get();
-    ASTTransform.addImportIfMissing(cu, "org.acme.Widget");
+    ASTTransforms.addImportIfMissing(cu, "org.acme.Widget");
     assertThat(
         cu.getImports(),
         equalTo(List.of(toSimpleImport("aaa"), toSimpleImport("org.acme.Widget"))));
@@ -50,7 +50,7 @@ final class ASTsTest {
   void it_works_when_new_import_should_be_in_the_middle() {
     String code = "package foo;\nimport aaa;\nimport zzz;\nclass Bar {}";
     CompilationUnit cu = new JavaParser().parse(code).getResult().get();
-    ASTTransform.addImportIfMissing(cu, "org.acme.Widget");
+    ASTTransforms.addImportIfMissing(cu, "org.acme.Widget");
     assertThat(
         cu.getImports(),
         equalTo(
@@ -76,7 +76,7 @@ final class ASTsTest {
     var bstmt = new BreakStmt();
     var estmt = cu.findAll(EmptyStmt.class).get(0);
     LexicalPreservingPrinter.setup(cu);
-    ASTTransform.addStatementBeforeStatement(estmt, bstmt);
+    ASTTransforms.addStatementBeforeStatement(estmt, bstmt);
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
   }
 
@@ -98,7 +98,7 @@ final class ASTsTest {
     var bstmt = new BreakStmt();
     var estmt = cu.findAll(EmptyStmt.class).get(0);
     LexicalPreservingPrinter.setup(cu);
-    ASTTransform.addStatementAfterStatement(estmt, bstmt);
+    ASTTransforms.addStatementAfterStatement(estmt, bstmt);
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
   }
 
@@ -110,7 +110,7 @@ final class ASTsTest {
     var bstmt = new BreakStmt();
     var estmt = cu.findAll(EmptyStmt.class).get(0);
     LexicalPreservingPrinter.setup(cu);
-    ASTTransform.addStatementAfterStatement(estmt, bstmt);
+    ASTTransforms.addStatementAfterStatement(estmt, bstmt);
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
   }
 

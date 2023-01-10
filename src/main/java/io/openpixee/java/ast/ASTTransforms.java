@@ -9,7 +9,7 @@ import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.ast.stmt.Statement;
 
-public class ASTTransform {
+public final class ASTTransforms {
   /** Add an import in alphabetical order. */
   public static void addImportIfMissing(final CompilationUnit cu, final String className) {
     NodeList<ImportDeclaration> imports = cu.getImports();

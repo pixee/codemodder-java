@@ -14,7 +14,7 @@ import io.openpixee.java.MethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
-import io.openpixee.java.ast.ASTTransform;
+import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.security.Newlines;
 import java.io.File;
 import java.util.List;
@@ -42,7 +42,7 @@ public final class HeaderInjectionVisitorFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
-            ASTTransform.addImportIfMissing(cu, Newlines.class);
+            ASTTransforms.addImportIfMissing(cu, Newlines.class);
             MethodCallExpr stripNewlinesCall = new MethodCallExpr(callbackClass, "stripAll");
             Expression argument = methodCallExpr.getArgument(1);
             stripNewlinesCall.setArguments(NodeList.nodeList(argument));

@@ -19,7 +19,7 @@ import io.openpixee.java.TransformationException;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
-import io.openpixee.java.ast.ASTTransform;
+import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.java.ast.ASTs;
 import io.openpixee.security.ObjectInputFilters;
 import java.io.File;
@@ -119,8 +119,8 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
               final Expression originalScope,
               final Statement vulnerableStatement) {
             var hardeningStmt = generateFilterHardeningStatement(originalScope);
-            ASTTransform.addStatementBeforeStatement(vulnerableStatement, hardeningStmt);
-            ASTTransform.addImportIfMissing(cu, ObjectInputFilters.class);
+            ASTTransforms.addStatementBeforeStatement(vulnerableStatement, hardeningStmt);
+            ASTTransforms.addImportIfMissing(cu, ObjectInputFilters.class);
           }
 
           /**
@@ -137,7 +137,7 @@ public final class DeserializationVisitorFactory implements VisitorFactory {
             var expressionStmt =
                 (ExpressionStmt) variableDeclarationExpression.getParentNode().get();
             var hardeningStmt = generateFilterHardeningStatement(originalScope);
-            ASTTransform.addStatementBeforeStatement(expressionStmt, hardeningStmt);
+            ASTTransforms.addStatementBeforeStatement(expressionStmt, hardeningStmt);
           }
 
           private boolean isNormalObjectInputStreamConstructor(
