@@ -38,4 +38,4 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
-            target/fixit*.jar
+            target/java-code-*.jar
