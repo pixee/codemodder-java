@@ -1,7 +1,7 @@
 [![Actions Status](https://github.com/pixeeworks/java-code-hardener/workflows/Java%20CI/badge.svg)](https://github.com/pixeeworks/java-code-hardener/actions)
 ![Coverage](.github/badges/jacoco.svg)
 
-# java-fixit
+# OpenPixee: Java Language Provider
 
 A utility for generating a list of suggested weaves.
 
