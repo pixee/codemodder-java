@@ -1,4 +1,4 @@
-package io.openpixee.java.protections;
+package io.openpixee.java.ast;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -7,13 +7,13 @@ import static org.hamcrest.Matchers.is;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.expr.BooleanLiteralExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BreakStmt;
 import com.github.javaparser.ast.stmt.EmptyStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import java.util.List;
 import java.util.stream.Stream;
-
-import io.openpixee.java.ast.ASTTransform;
 import org.junit.jupiter.api.Test;
 
 final class ASTsTest {
@@ -112,6 +112,31 @@ final class ASTsTest {
     LexicalPreservingPrinter.setup(cu);
     ASTTransform.addStatementAfterStatement(estmt, bstmt);
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
+  }
+
+  @Test
+  void it_detects_it_is_rhs_of_assignment() {
+    var code =
+        "class A {\n" + "  void foo() {\n" + "    var a = null;\n" + "    a = true;" + "  }\n" + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var exp = cu.findAll(BooleanLiteralExpr.class).get(0);
+    assertThat(ASTPatterns.isAssigned(exp).isPresent(), is(true));
+  }
+
+  @Test
+  void it_detects_it_initializes() {
+    var code = "class A {\n" + "  void foo() {\n" + "    var a = true;\n" + "  }\n" + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var exp = cu.findAll(BooleanLiteralExpr.class).get(0);
+    assertThat(ASTPatterns.isInitExpr(exp).isPresent(), is(true));
+  }
+
+  @Test
+  void it_detects_it_is_a_resource() {
+    var code = "class A {\n" + "  void foo() {\n" + "    try(var fr = new FileReader(new File(\"./test\"))){}\n" + "  }\n" + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var exp = cu.findAll(VariableDeclarationExpr.class).get(0);
+    assertThat(ASTPatterns.isResource(exp).isPresent(), is(true));
   }
 
   void assertEquals(Stream<String> stream, Stream<String> expected) {
