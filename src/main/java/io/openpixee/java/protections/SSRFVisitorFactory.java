@@ -10,6 +10,7 @@ import io.openpixee.java.DependencyGAV;
 import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
+import io.openpixee.java.ast.ASTs;
 import io.openpixee.security.*;
 import java.io.File;
 import java.util.Objects;

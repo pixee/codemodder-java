@@ -1,4 +1,4 @@
-package io.openpixee.java.protections;
+package io.openpixee.java.ast;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;

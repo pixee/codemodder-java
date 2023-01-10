@@ -16,7 +16,7 @@ import io.openpixee.java.Sarif;
 import io.openpixee.java.TypeLocator;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
-import io.openpixee.java.protections.ASTs;
+import io.openpixee.java.ast.ASTs;
 import io.openpixee.security.Reflection;
 import java.io.File;
 import java.io.IOException;

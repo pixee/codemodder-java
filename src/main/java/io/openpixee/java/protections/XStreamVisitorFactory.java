@@ -18,6 +18,7 @@ import io.openpixee.java.ObjectCreationTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
+import io.openpixee.java.ast.ASTs;
 import io.openpixee.security.HardeningConverter;
 import java.io.File;
 import java.util.List;

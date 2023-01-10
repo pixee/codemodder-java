@@ -12,6 +12,7 @@ import io.openpixee.java.ObjectCreationToMethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
+import io.openpixee.java.ast.ASTs;
 import io.openpixee.security.ZipSecurity;
 import java.io.File;
 import java.util.List;
