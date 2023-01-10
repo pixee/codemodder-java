@@ -36,7 +36,10 @@ public final class WeakPRNGVisitorFactory implements VisitorFactory {
           @Override
           public TransformationResult<ObjectCreationExpr> transform(
               final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
-            objectCreationExpr.setType(new ClassOrInterfaceType(SecureRandom.class.getName()));
+            objectCreationExpr.setType(
+                new ClassOrInterfaceType(SecureRandom.class.getSimpleName()));
+            ASTs.addImportIfMissing(
+                objectCreationExpr.findCompilationUnit().get(), SecureRandom.class.getName());
             Weave weave =
                 Weave.from(objectCreationExpr.getRange().get().begin.line, secureRandomRuleId);
             return new TransformationResult<>(Optional.empty(), weave);
