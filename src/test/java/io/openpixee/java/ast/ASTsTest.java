@@ -11,6 +11,7 @@ import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BreakStmt;
 import com.github.javaparser.ast.stmt.EmptyStmt;
+import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import java.util.List;
 import java.util.stream.Stream;
@@ -117,7 +118,12 @@ final class ASTsTest {
   @Test
   void it_detects_it_is_rhs_of_assignment() {
     var code =
-        "class A {\n" + "  void foo() {\n" + "    var a = null;\n" + "    a = true;" + "  }\n" + "}";
+        "class A {\n"
+            + "  void foo() {\n"
+            + "    var a = null;\n"
+            + "    a = true;"
+            + "  }\n"
+            + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var exp = cu.findAll(BooleanLiteralExpr.class).get(0);
     assertThat(ASTPatterns.isAssigned(exp).isPresent(), is(true));
@@ -133,10 +139,86 @@ final class ASTsTest {
 
   @Test
   void it_detects_it_is_a_resource() {
-    var code = "class A {\n" + "  void foo() {\n" + "    try(var fr = new FileReader(new File(\"./test\"))){}\n" + "  }\n" + "}";
+    var code =
+        "class A {\n"
+            + "  void foo() {\n"
+            + "    try(var fr = new FileReader(new File(\"./test\"))){}\n"
+            + "  }\n"
+            + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var exp = cu.findAll(VariableDeclarationExpr.class).get(0);
     assertThat(ASTPatterns.isResource(exp).isPresent(), is(true));
+  }
+
+  @Test
+  void it_calculates_scope_of_resource() {
+    var code =
+        "class A {\n"
+            + "  void foo() {\n"
+            + "    try(var fr = new FileReader(new File(\"./test\")); var fr2 = new FileReader(new File(\"./test2\"))){\n"
+            + "      ;\n"
+            + "      ;\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
+    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    assertThat(scope.getExpressions().size(), is(1));
+    assertThat(scope.getStatements().size(), is(2));
+  }
+
+  @Test
+  void it_calculates_scope_of_declaration() {
+    var code =
+        "class A {\n"
+            + "  void foo() {\n"
+            + "    int i = 0;\n"
+            + "    ;\n"
+            + "    ;\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
+    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    assertThat(scope.getExpressions().size(), is(0));
+    assertThat(scope.getStatements().size(), is(2));
+  }
+
+  @Test
+  void it_calculates_scope_of_foreach_declaration() {
+    var code =
+        "class A {\n"
+            + "  void foo() {\n"
+            + "    for(int i : List.of(1,2,3)){\n"
+            + "        ;\n"
+            + "        ;\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
+    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    assertThat(scope.getExpressions().size(), is(0));
+    assertThat(scope.getStatements().size(), is(2));
+  }
+
+  @Test
+  void it_calculates_scope_of_for_declaration() {
+    var code =
+        "class A {\n"
+            + "  void foo() {\n"
+            + "    for(int i=0, j=1;true;i++){\n"
+            + "        ;\n"
+            + "        ;\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
+    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    assertThat(scope.getExpressions().size(), is(3));
+    assertThat(scope.getStatements().size(), is(2));
   }
 
   void assertEquals(Stream<String> stream, Stream<String> expected) {
