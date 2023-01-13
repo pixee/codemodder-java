@@ -3,11 +3,14 @@ package io.openpixee.java.ast;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.stmt.TryStmt;
 
 public final class ASTTransforms {
   /** Add an import in alphabetical order. */
@@ -92,5 +95,29 @@ public final class ASTTransforms {
       var block = (BlockStmt) parent;
       block.getStatements().addAfter(newStatement, existingStatement);
     }
+  }
+
+  /**
+   * Given an a local variable declaration {@code stmt}, where {@code vdecl} is a single initialized
+   * declaration of a variable {@code v} with scope {@code scope}, {@code v} is never assigned in
+   * its scope, then wrap the declaration into as a resource of a try stmt.
+   */
+  public static TryStmt wrapIntoResource(
+      ExpressionStmt stmt, VariableDeclarationExpr vdecl, LocalVariableScope scope) {
+    var wrapper = new TryStmt();
+    wrapper.getResources().add(vdecl);
+
+    var block = new BlockStmt();
+    scope.getStatements().stream()
+        .forEach(
+            s -> {
+              s.remove();
+              block.addStatement(s);
+            });
+    wrapper.setTryBlock(block);
+
+    stmt.replace(wrapper);
+
+    return wrapper;
   }
 }

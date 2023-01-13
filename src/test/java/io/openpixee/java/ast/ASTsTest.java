@@ -11,7 +11,7 @@ import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BreakStmt;
 import com.github.javaparser.ast.stmt.EmptyStmt;
-import com.github.javaparser.ast.stmt.TryStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import java.util.List;
 import java.util.stream.Stream;
@@ -155,7 +155,8 @@ final class ASTsTest {
     var code =
         "class A {\n"
             + "  void foo() {\n"
-            + "    try(var fr = new FileReader(new File(\"./test\")); var fr2 = new FileReader(new File(\"./test2\"))){\n"
+            + "    try(var fr = new FileReader(new File(\"./test\")); var fr2 = new FileReader(new"
+            + " File(\"./test2\"))){\n"
             + "      ;\n"
             + "      ;\n"
             + "    }\n"
@@ -219,6 +220,39 @@ final class ASTsTest {
     var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
     assertThat(scope.getExpressions().size(), is(3));
     assertThat(scope.getStatements().size(), is(2));
+  }
+
+  @Test
+  void it_wraps_declaration_into_try_resource() {
+    var code =
+        "class A {\n"
+            + "  void foo() {\n"
+            + "    ;\n"
+            + "    FileReader fr = new FileReader(new File(\"./test\"));\n"
+            + "    ;\n"
+            + "    ;\n"
+            + "  }\n"
+            + "}";
+    var expected =
+        "class A {\n"
+            + "  void foo() {\n"
+            + "    ;\n"
+            + "    try (FileReader fr = new FileReader(new File(\"./test\"))) {\n"
+            + "      ;\n"
+            + "      ;\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    LexicalPreservingPrinter.setup(cu);
+    var stmt = cu.findAll(ExpressionStmt.class).get(0);
+    var vde = stmt.getExpression().asVariableDeclarationExpr();
+    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    assertThat(scope.getExpressions().size(), is(0));
+    assertThat(scope.getStatements().size(), is(2));
+    ASTTransforms.wrapIntoResource(stmt, vde, scope);
+    System.out.println(cu.toString());
+    assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
   }
 
   void assertEquals(Stream<String> stream, Stream<String> expected) {
