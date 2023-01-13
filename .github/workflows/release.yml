@@ -37,14 +37,16 @@ jobs:
         env:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
           ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
-        run: mvn deploy
+        run: |
+          mvn deploy
+          find /opt/hostedtoolcache/Java_Adopt_jdk -type d
 
       - name: Release
         uses: qcastel/github-actions-maven-release@master
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
         env:
-          JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
+          JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/11.0.17-8/x64
 #
 #      - name: "Create release"
 #        uses: "marvinpinto/action-automatic-releases@latest"
