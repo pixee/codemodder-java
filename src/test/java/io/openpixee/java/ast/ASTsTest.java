@@ -8,14 +8,11 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BreakStmt;
 import com.github.javaparser.ast.stmt.EmptyStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import java.util.List;
 import java.util.stream.Stream;
@@ -260,7 +257,7 @@ final class ASTsTest {
   }
 
   @Test
-  void it_detects_expr_is_scope_in_method_call(){
+  void it_detects_expr_is_scope_in_method_call() {
     var code =
         "class A {\n"
             + "  static void bar() {}\n"

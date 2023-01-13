@@ -28,11 +28,9 @@ public final class ASTPatterns {
    * Test for this pattern: {@link VariableDeclarationExpr} -&gt; {@link VariableDeclarator} -&gt;
    * {@link Expression} ({@code expr})
    */
-  public static Optional<VariableDeclarationExpr> isInitExpr(Expression expr) {
+  public static Optional<VariableDeclarator> isInitExpr(Expression expr) {
     return expr.getParentNode()
-        .map(p -> p instanceof VariableDeclarator ? (VariableDeclarator) p : null)
-        .flatMap(p -> p.getParentNode())
-        .map(gp -> gp instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) gp : null);
+        .map(p -> p instanceof VariableDeclarator ? (VariableDeclarator) p : null);
   }
 
   /** Test for this pattern: {@link TryStmt} -&gt; {@link VariableDeclarationExpr} ({@code vde}) */
