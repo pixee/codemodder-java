@@ -38,26 +38,9 @@ jobs:
         run: |
           mvn -N -B -P integration-testing verify install 
 
-      - name: "Publish to Artifactory"
-        env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
-        run: |
-          mvn deploy
-
       - name: Release
         uses: qcastel/github-actions-maven-release@master
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
         env:
           JAVA_HOME: "${{ steps.setup-java.outputs.path }}"
-#
-#      - name: "Create release"
-#        uses: "marvinpinto/action-automatic-releases@latest"
-#        with:
-#          java-version: '11'
-#          distribution: 'adopt'
-#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-#          prerelease: false
-#          files: |
-#            target/pom-operator-*.jar
