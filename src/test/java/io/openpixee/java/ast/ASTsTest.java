@@ -252,7 +252,6 @@ final class ASTsTest {
     assertThat(scope.getExpressions().size(), is(0));
     assertThat(scope.getStatements().size(), is(2));
     ASTTransforms.wrapIntoResource(stmt, vde, scope);
-    System.out.println(cu.toString());
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
   }
 
