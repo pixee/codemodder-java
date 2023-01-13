@@ -3,6 +3,7 @@ package io.openpixee.java.ast;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.TryStmt;
 import java.util.Optional;
@@ -40,5 +41,18 @@ public final class ASTPatterns {
         .map(p -> p instanceof TryStmt ? (TryStmt) p : null)
         .filter(
             ts -> ts.getResources().stream().filter(rs -> rs.equals(vde)).findFirst().isPresent());
+  }
+
+  /**
+   * Given an {@link Expression} {@code expr}, check if {@code expr} is the scope of a {@link
+   * MethodCallExpr}.
+   *
+   * @return A {@link MethodCallExpr} with {@code expr} as its scope.
+   */
+  public static Optional<MethodCallExpr> isScopeInMethodCall(final Expression expr) {
+    final var maybe = expr.getParentNode();
+    return maybe
+        .map(p -> p instanceof MethodCallExpr ? (MethodCallExpr) p : null)
+        .filter(p -> (p.getScope().isPresent() && p.getScope().get().equals(expr)));
   }
 }
