@@ -5,7 +5,7 @@
 
   <groupId>io.github.pixee</groupId>
   <artifactId>java-code-hardener</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 
   <distributionManagement>
     <repository>
@@ -67,7 +67,7 @@
     <versions.fmt-maven-plugin>2.18</versions.fmt-maven-plugin>
     <versions.maven-compiler-plugin>3.8.1</versions.maven-compiler-plugin>
     <versions.maven-shade-plugin>3.2.4</versions.maven-shade-plugin>
-    <versions.maven-surefire-plugin>3.0.0-M4</versions.maven-surefire-plugin>
+    <versions.maven-surefire-plugin>3.0.0-M8</versions.maven-surefire-plugin>
   </properties>
 
   <dependencies>
@@ -90,11 +90,6 @@
       <groupId>io.openpixee</groupId>
       <artifactId>java-security-toolkit</artifactId>
       <version>${versions.jst}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.openpixee</groupId>
-      <artifactId>java-security-toolkit-xstream</artifactId>
-      <version>${versions.jst-xstream}</version>
     </dependency>
     <dependency>
       <groupId>io.github.pixee</groupId>
@@ -274,6 +269,12 @@
     </dependency>
     <!-- for testing xstream patch -->
     <dependency>
+      <groupId>io.openpixee</groupId>
+      <artifactId>java-security-toolkit-xstream</artifactId>
+      <version>${versions.jst-xstream}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
       <version>1.4.7</version>
@@ -383,11 +384,16 @@
         </plugin>
         <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>2.22.0</version>
+          <version>${versions.maven-surefire-plugin}</version>
           <configuration>
-            <includesExcludes>
-              <include>**/IT</include>
-            </includesExcludes>
+            <systemPropertyVariables>
+              <io.openpixee.test.test-code-dir>
+                ${project.build.testSourceDirectory}/com
+              </io.openpixee.test.test-code-dir>
+              <io.openpixee.test.language-provider-jar>
+                ${project.build.directory}/${project.build.finalName}.jar
+              </io.openpixee.test.language-provider-jar>
+            </systemPropertyVariables>
           </configuration>
         </plugin>
       </plugins>
@@ -407,6 +413,17 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>

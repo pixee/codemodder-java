@@ -18,7 +18,6 @@ import io.openpixee.java.ObjectCreationTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
-import io.openpixee.security.HardeningConverter;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -82,8 +81,7 @@ public final class XStreamVisitorFactory implements VisitorFactory {
                 int indexOfVulnStmt = statements.indexOf(stmt.get());
                 statements.add(
                     indexOfVulnStmt + 1, buildFixStatement(variableDeclaration.getNameAsString()));
-                ASTs.addImportIfMissing(cu, HardeningConverter.class);
-
+                ASTs.addImportIfMissing(cu, "io.openpixee.security.HardeningConverter");
                 context.addWeave(
                     Weave.from(
                         objectCreationExpr.getRange().get().begin.line, xstreamConverterRuleId));
@@ -106,7 +104,7 @@ public final class XStreamVisitorFactory implements VisitorFactory {
   private static Statement buildFixStatement(final String variableName) {
     ExpressionStmt newStatement = new ExpressionStmt();
     ObjectCreationExpr hardeningConverter = new ObjectCreationExpr();
-    hardeningConverter.setType(new ClassOrInterfaceType(HardeningConverter.class.getSimpleName()));
+    hardeningConverter.setType(new ClassOrInterfaceType("HardeningConverter"));
     MethodCallExpr registerConverterCall =
         new MethodCallExpr("registerConverter", hardeningConverter);
     newStatement.setExpression(registerConverterCall);
