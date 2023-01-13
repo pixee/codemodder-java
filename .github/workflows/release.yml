@@ -2,15 +2,15 @@ name: Create Release on Semantic Version Tag
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - master
 
 jobs:
   pre-release:
     runs-on: "ubuntu-latest"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: "Build, test and deploy"
         uses: actions/setup-java@v2
@@ -27,6 +27,11 @@ jobs:
               {"id": "pixee-libs-snapshot", "username": "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"}
             ]
           githubServer: false
+
+      - name: Build and Test
+        uses: qcastel/github-actions-maven-cmd@master
+        with:
+          maven-args: "clean install -Ddockerfile.skip -DdockerCompose.skip -Djib.skip"
 
       - name: "Publish to Artifactory"
         env:
