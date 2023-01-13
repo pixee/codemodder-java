@@ -57,12 +57,12 @@ dependencies {
     testRuntimeOnly(testlibs.junit.jupiter.engine)
 
     // TODO move test fixtures to a different source set
-    testImplementation(testfixturelibs.commons.fileupload)
-    testImplementation(testfixturelibs.jwt)
-    testImplementation(testfixturelibs.owasp)
-    testImplementation(testfixturelibs.servlet)
-    testImplementation(testfixturelibs.spring.web)
-    testImplementation(testfixturelibs.xstream)
+    testImplementation(testcodelibs.commons.fileupload)
+    testImplementation(testcodelibs.jwt)
+    testImplementation(testcodelibs.owasp)
+    testImplementation(testcodelibs.servlet)
+    testImplementation(testcodelibs.spring.web)
+    testImplementation(testcodelibs.xstream)
 }
 
 tasks.test {
