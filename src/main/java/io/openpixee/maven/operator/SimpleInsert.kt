@@ -10,25 +10,29 @@ import org.dom4j.Element
  */
 val SimpleInsert = object : Command {
     override fun execute(c: ProjectModel): Boolean {
-        val dependencyManagementNode =
+        val dependencyManagementNodeList =
             c.resultPom.selectXPathNodes("/m:project/m:dependencyManagement")
 
         val elementsToFormat: MutableList<Element> = arrayListOf()
 
-        if (dependencyManagementNode.isEmpty()) {
+        val dependenciesNode = if (dependencyManagementNodeList.isEmpty()) {
             val newDependencyManagementNode =
                 c.resultPom.rootElement.addElement("dependencyManagement")
 
-            val dependenciesNode = newDependencyManagementNode.addElement("dependencies")
-
-            val dependencyNode = appendCoordinates(dependenciesNode, c)
-
-            val versionNode = dependencyNode.addElement("version")
-
-            upgradeVersionNode(c, versionNode)
-
             elementsToFormat.add(newDependencyManagementNode)
+
+            newDependencyManagementNode.addElement("dependencies")
+        } else {
+            (dependencyManagementNodeList.first() as Element).element("dependencies").apply {
+                elementsToFormat.add(this)
+            }
         }
+
+        val dependencyNode = appendCoordinates(dependenciesNode, c)
+
+        val versionNode = dependencyNode.addElement("version")
+
+        upgradeVersionNode(c, versionNode)
 
         val dependenciesNodeList = c.resultPom.selectXPathNodes("//m:project/m:dependencies")
 

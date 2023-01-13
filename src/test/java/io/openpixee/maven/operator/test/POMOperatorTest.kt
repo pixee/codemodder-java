@@ -1,9 +1,6 @@
 package io.openpixee.maven.operator.test
 
-import io.openpixee.maven.operator.Dependency
-import io.openpixee.maven.operator.MissingDependencyException
-import io.openpixee.maven.operator.POMOperator
-import io.openpixee.maven.operator.ProjectModelFactory
+import io.openpixee.maven.operator.*
 import io.openpixee.maven.operator.Util.buildLookupExpressionForDependency
 import io.openpixee.maven.operator.Util.selectXPathNodes
 import io.openpixee.maven.operator.Util.which
@@ -13,11 +10,44 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.xmlunit.diff.ComparisonType
 import java.io.File
+import kotlin.test.assertTrue
 
 /**
  * Unit test for simple App.
  */
 class POMOperatorTest : AbstractTestBase() {
+    @Test
+    fun testWithMultipleDependencies() {
+        val deps = listOf(
+            "org.slf4j:slf4j-api:1.7.25",
+            "io.github.pixee:java-code-security-toolkit:0.0.2",
+            "org.owasp.encoder:encoder:1.2.3",
+        ).map { Dependency.fromString(it) }.toList()
+
+        val testPom = File.createTempFile("pom", ".xml")
+
+        POMOperatorTest::class.java.getResourceAsStream("sample-bad-pom.xml")!!.copyTo(testPom.outputStream())
+
+        deps.forEach { d ->
+            val projectModel = ProjectModelFactory.load(testPom)
+                .withDependency(d)
+                .withUseProperties(true)
+                .build()
+
+            if (POMOperator.modify(projectModel)) {
+                val resultPomAsXml = projectModel.resultPom.asXML()
+
+                LOGGER.debug("resultPomAsXml: {}", resultPomAsXml)
+
+                testPom.writeText(resultPomAsXml)
+            }
+        }
+
+        val resolvedDeps = POMOperator.queryDependency(ProjectModelFactory.load(testPom).withQueryType(QueryType.SAFE).build())
+
+        assertTrue(3 == resolvedDeps.size, "Must have three dependencies")
+    }
+
     @Test(expected = MissingDependencyException::class)
     fun testWithDependencyMissing() {
         gwt(

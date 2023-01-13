@@ -1,0 +1,52 @@
+name: Create Release on Semantic Version Tag
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  pre-release:
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: "Build, test and deploy"
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: "Setting up Artifactory authentication"
+        uses: s4u/maven-settings-action@v2
+        with:
+          servers: |
+            [
+              {"id": "pixee-libs-release", "username": "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"},
+              {"id": "pixee-libs-snapshot", "username": "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"}
+            ]
+          githubServer: false
+
+      - name: "Publish to Artifactory"
+        env:
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
+        run: mvn deploy
+
+      - name: Release
+        uses: qcastel/github-actions-maven-release@master
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        env:
+          JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
+#
+#      - name: "Create release"
+#        uses: "marvinpinto/action-automatic-releases@latest"
+#        with:
+#          java-version: '11'
+#          distribution: 'adopt'
+#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+#          prerelease: false
+#          files: |
+#            target/pom-operator-*.jar
