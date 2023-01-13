@@ -29,10 +29,14 @@ jobs:
             ]
           githubServer: false
 
-      - name: Build and Test
-        uses: qcastel/github-actions-maven-cmd@master
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.4
         with:
-          maven-args: "clean install -Ddockerfile.skip -DdockerCompose.skip -Djib.skip"
+          maven-version: 3.8.2
+
+      - name: Build with Maven
+        run: |
+          mvn -N -B -P integration-testing verify install 
 
       - name: "Publish to Artifactory"
         env:
