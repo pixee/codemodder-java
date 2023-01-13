@@ -12,7 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: "Build, test and deploy"
+      - id: setup-java
+        name: "Build, test and deploy"
         uses: actions/setup-java@v2
         with:
           java-version: '11'
@@ -44,6 +45,8 @@ jobs:
         uses: qcastel/github-actions-maven-release@master
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        env:
+          JAVA_HOME: "${{ steps.setup-java.outputs.path }}"
 #
 #      - name: "Create release"
 #        uses: "marvinpinto/action-automatic-releases@latest"
