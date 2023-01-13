@@ -2,7 +2,7 @@ package io.openpixee.java.plugins.contrast;
 
 import io.openpixee.java.DependencyGAV;
 import io.openpixee.java.JspLineWeave;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * For JSP expressions like:

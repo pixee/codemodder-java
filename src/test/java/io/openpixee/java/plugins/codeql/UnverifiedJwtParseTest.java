@@ -1,6 +1,5 @@
 package io.openpixee.java.plugins.codeql;
 
-
 import com.contrastsecurity.sarif.ArtifactLocation;
 import com.contrastsecurity.sarif.Location;
 import com.contrastsecurity.sarif.PhysicalLocation;

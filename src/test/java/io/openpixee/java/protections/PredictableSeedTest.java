@@ -1,7 +1,5 @@
 package io.openpixee.java.protections;
 
-import static io.openpixee.java.protections.WeavingTests.assertJavaWeaveWorkedAndWontReweave;
-
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 

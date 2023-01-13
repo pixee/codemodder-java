@@ -1,13 +1,6 @@
 package io.openpixee.java.protections;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.openpixee.java.ChangedFile;
 import io.openpixee.java.FileBasedVisitor;
@@ -45,13 +38,12 @@ public abstract class WeavingTests {
       throws IOException {
 
     var vulnerableFile = new File(pathToVulnerableFile);
-    assertThat(vulnerableFile.exists(), is(true));
-    assertThat(vulnerableFile.isFile(), is(true));
+    assertThat(vulnerableFile.exists()).isTrue();
+    assertThat(vulnerableFile.isFile()).isTrue();
 
     final String pathToFixedFile = pathToVulnerableFile.replace(".java", "Weaved.java");
     var fixedFile = new File(pathToFixedFile);
-    assertThat(fixedFile.exists(), is(true));
-    assertThat(fixedFile.isFile(), is(true));
+    assertThat(fixedFile).isFile();
 
     List<VisitorFactory> visitorFactories = List.of(factory);
     var analyzer = SourceWeaver.createDefault();
@@ -62,8 +54,6 @@ public abstract class WeavingTests {
     var changedFile =
         scanAndAssertNoErrorsWithOneFileChanged(
             analyzer, directory, visitorFactories, includesExcludes);
-    var actualContents =
-        FileUtils.readFileToString(new File(changedFile.modifiedFile()), Charset.defaultCharset());
     var expectedContents = FileUtils.readFileToString(fixedFile, Charset.defaultCharset());
 
     var typeName = vulnerableFile.getName().replace(".java", "");
@@ -72,7 +62,9 @@ public abstract class WeavingTests {
     expectedContents =
         expectedContents.replace("interface " + typeName + "Weaved", "interface " + typeName);
 
-    assertThat(actualContents, equalToIgnoringWhiteSpace(expectedContents));
+    assertThat(new File(changedFile.modifiedFile()))
+        .content()
+        .isEqualToIgnoringWhitespace(expectedContents);
 
     directory = SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToFixedFile));
     scanAndAssertNoErrorsWithNoFilesChanged(
@@ -100,10 +92,10 @@ public abstract class WeavingTests {
       throws IOException {
     var weave =
         analyzer.weave(List.of(directory), directory.files(), visitorFactories, includesExcludes);
-    assertThat(weave, is(not(nullValue())));
-    assertThat(weave.unscannableFiles(), is(empty()));
+    assertThat(weave).isNotNull();
+    assertThat(weave.unscannableFiles()).isEmpty();
     var changedFiles = weave.changedFiles();
-    assertThat(changedFiles, hasSize(1));
+    assertThat(changedFiles).hasSize(1);
     return changedFiles.iterator().next();
   }
 
@@ -113,8 +105,8 @@ public abstract class WeavingTests {
       final IncludesExcludes includesExcludes)
       throws IOException {
     var vulnerableFile = new File(pathToVulnerableFile);
-    assertThat(vulnerableFile.exists(), is(true));
-    assertThat(vulnerableFile.isFile(), is(true));
+    assertThat(vulnerableFile.exists()).isTrue();
+    assertThat(vulnerableFile.isFile()).isTrue();
     List<VisitorFactory> visitorFactories = List.of(factory);
     var analyzer = SourceWeaver.createDefault();
     var testCodeDir = new File(vulnerableFile.getParent());
@@ -132,12 +124,12 @@ public abstract class WeavingTests {
       throws IOException {
     var weave =
         analyzer.weave(List.of(directory), directory.files(), visitorFactories, includesExcludes);
-    assertThat(weave, is(not(nullValue())));
+    assertThat(weave).isNotNull();
 
-    assertThat(weave.unscannableFiles(), is(empty()));
+    assertThat(weave.unscannableFiles()).isEmpty();
 
     var changedFiles = weave.changedFiles();
-    assertThat(changedFiles, hasSize(0));
+    assertThat(changedFiles).hasSize(0);
   }
 
   /**
@@ -153,13 +145,12 @@ public abstract class WeavingTests {
   public static ChangedFile assertFileWeaveWorkedAndReweave(
       final String pathToVulnerableFile, final FileBasedVisitor weaver) throws IOException {
     var vulnerableFile = new File(pathToVulnerableFile);
-    assertThat(vulnerableFile.exists(), is(true));
-    assertThat(vulnerableFile.isFile(), is(true));
+    assertThat(vulnerableFile.exists()).isTrue();
+    assertThat(vulnerableFile.isFile()).isTrue();
 
     final String pathToFixedFile = pathToVulnerableFile.replace(".", "_weaved.");
     var fixedFile = new File(pathToFixedFile);
-    assertThat(fixedFile.exists(), is(true));
-    assertThat(fixedFile.isFile(), is(true));
+    assertThat(fixedFile).isFile();
 
     var result =
         weaver.visitRepositoryFile(
@@ -168,25 +159,22 @@ public abstract class WeavingTests {
             FileWeavingContext.createDefault(
                 vulnerableFile, new IncludesExcludes.MatchesEverything()),
             Collections.emptySet());
-    assertThat(result.unscannableFiles().isEmpty(), is(true));
+    assertThat(result.unscannableFiles()).isEmpty();
     var changedFiles = result.changedFiles();
-    assertThat(changedFiles.size(), is(1));
+    assertThat(changedFiles).hasSize(1);
     var changedFile = changedFiles.iterator().next();
-    assertThat(
-        new File(changedFile.originalFilePath()).getAbsolutePath(),
-        equalTo(vulnerableFile.getAbsolutePath()));
-    assertThat(
-        FileUtils.readFileToString(new File(changedFile.modifiedFile())),
-        equalTo(FileUtils.readFileToString(fixedFile)));
+    assertThat(new File(changedFile.originalFilePath()).getAbsolutePath())
+        .isEqualTo(vulnerableFile.getAbsolutePath());
+    assertThat(new File(changedFile.modifiedFile())).hasSameTextualContentAs(fixedFile);
     return changedFile;
   }
 
   @NotNull
   public static void assertFileWeaveWorkedAndNoChangesNeeded(
-      final String pathToVulnerableFile, final FileBasedVisitor weaver) throws IOException {
+      final String pathToVulnerableFile, final FileBasedVisitor weaver) {
     var vulnerableFile = new File(pathToVulnerableFile);
-    assertThat(vulnerableFile.exists(), is(true));
-    assertThat(vulnerableFile.isFile(), is(true));
+    assertThat(vulnerableFile.exists()).isTrue();
+    assertThat(vulnerableFile.isFile()).isTrue();
 
     var result =
         weaver.visitRepositoryFile(
@@ -195,8 +183,8 @@ public abstract class WeavingTests {
             FileWeavingContext.createDefault(
                 vulnerableFile, new IncludesExcludes.MatchesEverything()),
             Collections.emptySet());
-    assertThat(result.unscannableFiles().isEmpty(), is(true));
+    assertThat(result.unscannableFiles()).isEmpty();
     var changedFiles = result.changedFiles();
-    assertThat(changedFiles.size(), is(0));
+    assertThat(changedFiles).isEmpty();
   }
 }

@@ -1,6 +1,5 @@
 package io.openpixee.java.protections;
 
-import static io.openpixee.java.protections.WeavingTests.assertJavaWeaveWorkedAndWontReweave;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
