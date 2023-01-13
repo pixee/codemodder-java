@@ -9,8 +9,8 @@ plugins {
 }
 
 dependencyResolutionManagement {
-    versionCatalogs.create("testfixturelibs") {
-        from(files("./gradle/testfixturelibs.versions.toml"))
+    versionCatalogs.create("testcodelibs") {
+        from(files("./gradle/testcodelibs.versions.toml"))
     }
 
     versionCatalogs.create("testlibs") {
