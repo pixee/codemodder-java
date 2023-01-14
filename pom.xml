@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.pixee</groupId>
@@ -9,25 +9,31 @@
 
   <distributionManagement>
     <repository>
-      <id>central</id>
+      <id>pixee-libs-release</id>
       <name>pixee-libs-release</name>
-      <url>https://pixee.jfrog.io/artifactory/mailman</url>
+      <url>https://pixee.jfrog.io/artifactory/default-maven-local</url>
     </repository>
   </distributionManagement>
 
   <repositories>
     <repository>
-      <id>central</id>
+      <id>pixee-libs-release</id>
       <name>pixee-libs-release</name>
-      <url>https://pixee.jfrog.io/artifactory/mailman</url>
+      <url>https://pixee.jfrog.io/artifactory/default-maven-local</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
     </repository>
     <repository>
-      <id>snapshots</id>
+      <id>pixee-libs-snapshot</id>
       <name>pixee-libs-snapshot</name>
-      <url>https://pixee.jfrog.io/artifactory/mailman</url>
+      <url>https://pixee.jfrog.io/artifactory/mailman-libs-snapshot</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -68,9 +74,15 @@
     <versions.maven-compiler-plugin>3.8.1</versions.maven-compiler-plugin>
     <versions.maven-shade-plugin>3.2.4</versions.maven-shade-plugin>
     <versions.maven-surefire-plugin>3.0.0-M8</versions.maven-surefire-plugin>
+    <versions.pom-operator>0.0.1</versions.pom-operator>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>io.openpixee.maven</groupId>
+      <artifactId>pom-operator</artifactId>
+      <version>${versions.pom-operator}</version>
+    </dependency>
     <dependency>
       <groupId>io.openpixee</groupId>
       <artifactId>java-jdbc-parameterizer</artifactId>
@@ -90,11 +102,6 @@
       <groupId>io.openpixee</groupId>
       <artifactId>java-security-toolkit</artifactId>
       <version>${versions.jst}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.openpixee</groupId>
-      <artifactId>java-security-toolkit-xstream</artifactId>
-      <version>${versions.jst-xstream}</version>
     </dependency>
     <dependency>
       <groupId>io.github.pixee</groupId>
