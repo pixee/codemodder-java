@@ -7,6 +7,7 @@ on:
 
 env:
   M2_HOME: /opt/hostedtoolcache/maven/3.8.2
+  JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/11.0.17-8
 
 jobs:
   pre-release:
@@ -47,5 +48,5 @@ jobs:
         uses: qcastel/github-actions-maven-release@master
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        env:
-          JAVA_HOME: "${{ steps.setup-java.outputs.path }}"
+#        env:
+#          JAVA_HOME: "${{ steps.setup-java.outputs.path }}"
