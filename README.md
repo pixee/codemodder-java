@@ -45,6 +45,19 @@ public class POMOperatorJavaTest {
 
 It implements a Chain of Responsibility strategy - each `Command` class attempts a different way of fixing a POM, based around a Context (in this case, a `ProjectModel`)
 
+## Releasing
+
+e.g. to generate version `0.0.2`:
+
+```
+mvn versions:set -DnewVersion=0.0.2
+mvn clean package source:jar javadoc:jar deploy
+git commit -am "Generating Tag"
+git tag 0.0.2
+git push && git push --tags
+mvn versions:set -DnewVersion=0.0.3-SNAPSHOT
+git commit -am "Generating Development Version"
+```
 
 # TODO:
 
