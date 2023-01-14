@@ -92,6 +92,11 @@
       <version>${versions.jst}</version>
     </dependency>
     <dependency>
+      <groupId>io.openpixee</groupId>
+      <artifactId>java-security-toolkit-xstream</artifactId>
+      <version>${versions.jst-xstream}</version>
+    </dependency>
+    <dependency>
       <groupId>io.github.pixee</groupId>
       <artifactId>codetf-java</artifactId>
       <version>${versions.codetf-java}</version>

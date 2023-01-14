@@ -3,6 +3,7 @@ package io.openpixee.java.protections;
 import java.io.File;
 import java.io.IOException;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,6 +52,8 @@ abstract class GitRepositoryTest {
           Git.cloneRepository().setURI(repoURI).setDirectory(repoDir).setBranch(repoBranch).call();
       git.close();
       System.out.println("Writing to " + repoDir.getAbsolutePath());
+    } else { // Repo has been cloned locally - do a hard reset instead
+      Git.open(repoDir).reset().setMode(ResetCommand.ResetType.HARD).call();
     }
   }
 

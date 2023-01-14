@@ -2,29 +2,40 @@ name: Java CI
 
 on: [push]
 
+env:
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2"
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
+
       - name: "Set up JDK 11"
         uses: actions/setup-java@v2
         with:
           java-version: '11'
           distribution: 'adopt'
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.4
+        with:
+          maven-version: 3.8.2
+
       - name: "Setting up Artifactory authentication"
         uses: s4u/maven-settings-action@v2
         with:
-          servers: '[{"id": "central", "username": "${env.ARTIFACTORY_USER}", "password": "${env.ARTIFACTORY_TOKEN}"}]'
+          servers: |
+            [
+              {"id": "pixee-libs-release", "username": "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"},
+              {"id": "pixee-libs-snapshot", "username": "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"}
+            ]
           githubServer: false
 
       - name: "Build with Maven"
-        env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
-        run: mvn --batch-mode --update-snapshots -Pci verify
+        run: |
+          mvn --batch-mode --update-snapshots -Pci verify
 
       - name: "Generate Coverage Badge"
         id: jacoco
