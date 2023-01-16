@@ -3,6 +3,7 @@ package io.openpixee.java.ast;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -119,5 +120,37 @@ public final class ASTTransforms {
     stmt.replace(wrapper);
 
     return wrapper;
+  }
+
+  /** Given a {@link TryStmt} split its resources into two nested {@link TryStmt}s. */
+  public static TryStmt splitResources(TryStmt stmt, int index) {
+    var resources = stmt.getResources();
+    var head = new NodeList<Expression>();
+    var tail = new NodeList<Expression>();
+    for (int i = 0; i <= index; i++) head.add(resources.get(i));
+    for (int i = index + 1; i < resources.size(); i++) tail.add(resources.get(i));
+
+    stmt.setResources(head);
+
+    var innerTry = new TryStmt();
+    innerTry.setResources(tail);
+    innerTry.setTryBlock(stmt.getTryBlock());
+    stmt.setTryBlock(new BlockStmt(new NodeList<Statement>(innerTry)));
+
+    return stmt;
+  }
+
+  /**
+   * Given a {@link TryStmt} without any finally and catch clauses, and that is the first statement
+   * of a try with resources block, merge the two try statements into one.
+   */
+  public static TryStmt combineResources(TryStmt innerTry) {
+    var outerTry = (TryStmt) innerTry.getParentNode().flatMap(p -> p.getParentNode()).get();
+    innerTry.getResources().stream().forEach(outerTry.getResources()::add);
+    outerTry.getTryBlock().getStatements().stream()
+        .skip(1)
+        .forEach(innerTry.getTryBlock()::addStatement);
+    outerTry.setTryBlock(innerTry.getTryBlock());
+    return outerTry;
   }
 }

@@ -13,6 +13,7 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BreakStmt;
 import com.github.javaparser.ast.stmt.EmptyStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import java.util.List;
 import java.util.stream.Stream;
@@ -267,6 +268,28 @@ final class ASTsTest {
     var cu = new JavaParser().parse(code).getResult().get();
     var ne = cu.findAll(NameExpr.class).get(0);
     assertThat(ASTPatterns.isScopeInMethodCall(ne).isPresent(), is(true));
+  }
+  
+  @Test 
+  void merging_and_combining_trystmts_is_the_identity(){
+    var code =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    try (var fr = new FileReader(new File(\"./test\"))) {\n"
+            + "      try (var fr2 = new FileReader(new File(\"./test\"))) {\n"
+            + "        ;\n"
+            + "        ;\n"
+            + "      }\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var ts = cu.findAll(TryStmt.class).get(1);
+    ASTTransforms.combineResources(ts);
+    var tsm = cu.findAll(TryStmt.class).get(0);
+    ASTTransforms.splitResources(tsm, 0);
+    assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), code);
   }
 
   void assertEquals(Stream<String> stream, Stream<String> expected) {
