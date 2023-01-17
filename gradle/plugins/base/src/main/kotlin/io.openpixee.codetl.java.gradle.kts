@@ -14,3 +14,7 @@ spotless {
         googleJavaFormat()
     }
 }
+
+tasks.withType(Test::class) {
+    useJUnitPlatform()
+}
