@@ -65,16 +65,15 @@
     <versions.logback>1.2.11</versions.logback>
     <versions.mockito>4.3.1</versions.mockito>
     <versions.picocli>4.5.2</versions.picocli>
+    <versions.pom-operator>0.0.1</versions.pom-operator>
     <versions.progressbar>0.9.3</versions.progressbar>
     <versions.jdbc-parameterizer>0.0.7</versions.jdbc-parameterizer>
-
 
     <!-- build tools -->
     <versions.fmt-maven-plugin>2.18</versions.fmt-maven-plugin>
     <versions.maven-compiler-plugin>3.8.1</versions.maven-compiler-plugin>
     <versions.maven-shade-plugin>3.2.4</versions.maven-shade-plugin>
     <versions.maven-surefire-plugin>3.0.0-M8</versions.maven-surefire-plugin>
-    <versions.pom-operator>0.0.1</versions.pom-operator>
   </properties>
 
   <dependencies>

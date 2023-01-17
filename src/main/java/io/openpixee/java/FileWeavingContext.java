@@ -16,16 +16,18 @@ public interface FileWeavingContext {
 
   boolean madeWeaves();
 
+  /** Intended to be used when dealing with AST objects. */
   boolean isLineIncluded(Node n);
+
+  /** Intended to be used in non-JavaParser situations. */
+  boolean isLineIncluded(int line);
 
   class Default implements FileWeavingContext {
 
     private final List<Weave> weaves;
     private final LineIncludesExcludes includesExcludes;
-    private final File file;
 
-    Default(final File file, final LineIncludesExcludes includesExcludes) {
-      this.file = file;
+    Default(final LineIncludesExcludes includesExcludes) {
       this.includesExcludes = includesExcludes;
       this.weaves = new ArrayList<>();
     }
@@ -52,10 +54,15 @@ public interface FileWeavingContext {
       }
       return includesExcludes.matches(n.getRange().get().begin.line);
     }
+
+    @Override
+    public boolean isLineIncluded(final int line) {
+      return includesExcludes.matches(line);
+    }
   }
 
   static FileWeavingContext createDefault(
       final File file, final IncludesExcludes includesExcludes) {
-    return new Default(file, includesExcludes.getIncludesExcludesForFile(file));
+    return new Default(includesExcludes.getIncludesExcludesForFile(file));
   }
 }

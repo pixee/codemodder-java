@@ -88,16 +88,18 @@ public abstract class RegexTextVisitor implements FileBasedVisitor {
     int lastEnd = 0;
     final List<Integer> possibleEmptylines = new ArrayList<>();
     while (matcher.find()) {
+      int start = matcher.start();
+      int startLine = LineNumbers.getLineNumberAt(fileContents, start);
+      if (!context.isLineIncluded(startLine)) {
+        continue;
+      }
       if (rebuiltContents == null) {
         rebuiltContents = new StringBuilder(fileContents.length() + 128);
       }
-      int start = matcher.start();
       int end = matcher.end();
       String snippet = fileContents.substring(start, end);
       rebuiltContents.append(fileContents, lastEnd, start);
-      weaves.add(
-          Weave.from(
-              LineNumbers.getLineNumberAt(fileContents, start), weaveCode, dependencyNeeded));
+      weaves.add(Weave.from(startLine, weaveCode, dependencyNeeded));
 
       final String replacement = getReplacementFor(snippet);
       rebuiltContents.append(replacement);

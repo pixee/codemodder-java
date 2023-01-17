@@ -1,48 +1,37 @@
 package io.openpixee.java;
 
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
 
 /** This type is used in include/exclude logic for matching paths. */
 final class PathMatcher {
 
-  private final Path pathPrefix;
   private final Integer line;
+  private final String repositoryRootPath;
+  private final java.nio.file.PathMatcher matcher;
 
-  PathMatcher(final File repositoryRoot, final String path, final Integer line) {
-    try {
-      this.pathPrefix =
-          new File(repositoryRoot, path).getCanonicalFile().getAbsoluteFile().toPath();
-    } catch (IOException e) {
-      throw new IllegalArgumentException("couldn't get canonical path", e);
-    }
+  PathMatcher(
+      final FileSystem fs,
+      final File repositoryRoot,
+      final String pathPattern,
+      final Integer line) {
+    this.repositoryRootPath = Path.of(repositoryRoot.getAbsolutePath()).normalize().toString();
+    Objects.requireNonNull(pathPattern);
+    this.matcher = fs.getPathMatcher("glob:" + pathPattern);
     this.line = line;
   }
 
   /** Return if this path matcher matches the given file. */
   boolean matches(final File file) {
-    try {
-      return file.getCanonicalFile().getAbsoluteFile().toPath().startsWith(pathPrefix);
-    } catch (IOException e) {
-      throw new IllegalArgumentException("couldn't get canonical path", e);
+    String candidateFilePath = Path.of(file.getAbsolutePath()).normalize().toString();
+    String relativeCandidateFilePath = candidateFilePath.substring(repositoryRootPath.length());
+    if (!relativeCandidateFilePath.startsWith("/")) {
+      relativeCandidateFilePath = "/" + relativeCandidateFilePath;
     }
-  }
-
-  /**
-   * Return true if this instance has a longer include/exclude than another, and thus overrules the
-   * previous.
-   */
-  boolean hasLongerPathThan(final PathMatcher matcher) {
-    return !pathPrefix.equals(matcher.pathPrefix) && pathPrefix.startsWith(matcher.pathPrefix);
-  }
-
-  boolean targetsFileExactly(final File file) {
-    try {
-      return file.getCanonicalFile().getAbsoluteFile().toPath().equals(this.pathPrefix);
-    } catch (IOException e) {
-      throw new IllegalArgumentException("couldn't get canonical path", e);
-    }
+    return matcher.matches(Paths.get(relativeCandidateFilePath));
   }
 
   Integer line() {
@@ -55,6 +44,6 @@ final class PathMatcher {
 
   @Override
   public String toString() {
-    return this.pathPrefix + ":" + this.line;
+    return this.matcher.toString() + ":" + this.line;
   }
 }
