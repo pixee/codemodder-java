@@ -177,7 +177,6 @@ public final class ASTs {
     if (parent instanceof BlockStmt) {
       var block = (BlockStmt) parent;
       for (var stmt : block.getStatements()) {
-        System.out.println(stmt);
         if (stmt.equals(start)) break;
         var maybeExprStmtTriplet = ASTPatterns.isExpressionStmtDeclarationOf(stmt, name);
         if (maybeExprStmtTriplet.isPresent())
@@ -188,10 +187,31 @@ public final class ASTs {
                   maybeExprStmtTriplet.get().getValue2()));
       }
       return findEarliestLocalDeclarationOf(parent, name);
-
     } else if (parent instanceof TryStmt) {
+      var maybeResource = ASTPatterns.isResourceOf(parent, name);
+      if (maybeResource.isPresent()) {
+        return Optional.of(
+            new Triplet<Statement, VariableDeclarationExpr, VariableDeclarator>(
+                maybeResource.get().getValue0(),
+                maybeResource.get().getValue1(),
+                maybeResource.get().getValue2()));
+      }
     } else if (parent instanceof ForEachStmt) {
+      var maybeForDeclaration = ASTPatterns.isForEachVariableDeclarationOf(parent, name);
+      if (maybeForDeclaration.isPresent())
+        return Optional.of(
+            new Triplet<Statement, VariableDeclarationExpr, VariableDeclarator>(
+                maybeForDeclaration.get().getValue0(),
+                maybeForDeclaration.get().getValue1(),
+                maybeForDeclaration.get().getValue2()));
     } else if (parent instanceof ForStmt) {
+      var maybeForDeclaration = ASTPatterns.isForVariableDeclarationOf(parent, name);
+      if (maybeForDeclaration.isPresent())
+        return Optional.of(
+            new Triplet<Statement, VariableDeclarationExpr, VariableDeclarator>(
+                maybeForDeclaration.get().getValue0(),
+                maybeForDeclaration.get().getValue1(),
+                maybeForDeclaration.get().getValue2()));
     }
     return findEarliestLocalDeclarationOf(parent, name);
   }

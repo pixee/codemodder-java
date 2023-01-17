@@ -8,7 +8,10 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.ForEachStmt;
+import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
+import com.google.common.base.Predicate;
 import java.util.Optional;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
@@ -92,6 +95,71 @@ public final class ASTPatterns {
         return Optional.of(
             new Triplet<>(
                 (ExpressionStmt) node, maybePair.get().getValue0(), maybePair.get().getValue1()));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link ForEachStmt} ({@code node}) -&gt; {@link VariableDeclarationExpr}
+   * -&gt; {@link VariableDeclarator} -&gt; {@link SimpleName} ({@code name})
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Triplet<ForEachStmt, VariableDeclarationExpr, VariableDeclarator>>
+      isForEachVariableDeclarationOf(final Node node, final String name) {
+    final Predicate<VariableDeclarator> isVDOf = vd -> vd.getName().asString().equals(name);
+    if (node instanceof ForEachStmt) {
+      final ForEachStmt fstmt = (ForEachStmt) node;
+      final var vde = fstmt.getVariable();
+      final var maybeVD = vde.getVariables().stream().filter(isVDOf).findFirst();
+      if (maybeVD.isPresent()) {
+        return Optional.of(new Triplet<>(fstmt, vde, maybeVD.get()));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link ForStmt} ({@code node}) -&gt; {@link VariableDeclarationExpr}
+   * -&gt; {@link VariableDeclarator} -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Triplet<ForStmt, VariableDeclarationExpr, VariableDeclarator>>
+      isForVariableDeclarationOf(final Node node, final String name) {
+    final Predicate<VariableDeclarator> isVDOf = vd -> vd.getName().asString().equals(name);
+    if (node instanceof ForStmt) {
+      final ForStmt fstmt = (ForStmt) node;
+      for (final var e : fstmt.getInitialization())
+        if (e instanceof VariableDeclarationExpr) {
+          final var maybeVD =
+              e.asVariableDeclarationExpr().getVariables().stream().filter(isVDOf).findFirst();
+          if (maybeVD.isPresent()) {
+            return Optional.of(new Triplet<>(fstmt, e.asVariableDeclarationExpr(), maybeVD.get()));
+          }
+        }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link TryStmt} ({@code node}) -&gt; {@link VariableDeclarationExpr}
+   * -&gt; {@link VariableDeclarator} -&gt; {@link SimpleName} ({@code name})
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Triplet<TryStmt, VariableDeclarationExpr, VariableDeclarator>>
+      isResourceOf(final Node node, final String name) {
+    if (node instanceof TryStmt) {
+      final var resources = ((TryStmt) node).getResources();
+      for (final var e : resources) {
+        final var maybePair = isVariableDeclarationExprOf(e, name);
+        if (maybePair.isPresent()) {
+          return Optional.of(
+              new Triplet<>(
+                  (TryStmt) node, maybePair.get().getValue0(), maybePair.get().getValue1()));
+        }
       }
     }
     return Optional.empty();

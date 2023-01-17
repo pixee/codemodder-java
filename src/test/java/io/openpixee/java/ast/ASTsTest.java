@@ -389,6 +389,76 @@ final class ASTsTest {
         ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString()).isEmpty(), is(true));
   }
 
+  @Test
+  void it_finds_resource_declaration() {
+	  var code = 
+        "class A {\n"
+            + "\n"
+            + "FileReader fr;\n"
+            + "  void foo() {\n"
+            + "    try (FileReader fr = new FileReader(new File(\"./test\"))) {\n"
+            + "      fr.read();\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var ne = cu.findAll(NameExpr.class).get(0);
+    var local_vd = cu.findAll(VariableDeclarator.class).get(1);
+    assertThat(
+        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+            .get()
+            .getValue2()
+            .equals(local_vd),
+        is(true));
+  }
+
+  @Test
+  void it_finds_for_declaration() {
+	  var code = 
+        "class A {\n"
+            + "\n"
+            + "int variable =10;\n"
+            + "  void foo() {\n"
+            + "    for (int variable = 12;true;) {\n"
+            + "      variable++;\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var ne = cu.findAll(NameExpr.class).get(0);
+    var local_vd = cu.findAll(VariableDeclarator.class).get(1);
+    assertThat(
+        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+            .get()
+            .getValue2()
+            .equals(local_vd),
+        is(true));
+  }
+
+  @Test
+  void it_finds_for_each_declaration() {
+	  var code = 
+        "class A {\n"
+            + "\n"
+            + "int variable =10;\n"
+            + "  void foo() {\n"
+            + "    int[] variables = new int[]{1,2,3,4};\n"
+            + "    for (int variable : variables) {\n"
+            + "      variable++;\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var ne = cu.findAll(NameExpr.class).get(1);
+    var local_vd = cu.findAll(VariableDeclarator.class).get(2);
+    assertThat(
+        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+            .get()
+            .getValue2()
+            .equals(local_vd),
+        is(true));
+  }
+
   void assertEquals(Stream<String> stream, Stream<String> expected) {
     var itc = stream.iterator();
     var ite = expected.iterator();
