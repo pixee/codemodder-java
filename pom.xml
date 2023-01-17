@@ -72,6 +72,11 @@
 
     <dependencies>
 	<dependency>
+	    <groupId>org.javatuples</groupId>
+	    <artifactId>javatuples</artifactId>
+	    <version>1.2</version>
+	</dependency>
+	<dependency>
 	    <groupId>io.openpixee</groupId>
 	    <artifactId>java-jdbc-parameterizer</artifactId>
 	    <version>${versions.jdbc-parameterizer}</version>

@@ -18,6 +18,7 @@ import com.github.javaparser.ast.stmt.TryStmt;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import org.javatuples.Triplet;
 
 /** Utility methods that may be useful for many visitors. */
 public final class ASTs {
@@ -166,5 +167,32 @@ public final class ASTs {
     if (p instanceof ForStmt) return LocalVariableScope.fromForDeclaration((ForStmt) p, vd);
     // Should not happen
     return null;
+  }
+
+  public static Optional<Triplet<Statement, VariableDeclarationExpr, VariableDeclarator>>
+      findEarliestLocalDeclarationOf(Node start, String name) {
+    var maybeParent = start.getParentNode();
+    if (maybeParent.isEmpty()) return Optional.empty();
+    var parent = maybeParent.get();
+    if (parent instanceof BlockStmt) {
+      var block = (BlockStmt) parent;
+      for (var stmt : block.getStatements()) {
+        System.out.println(stmt);
+        if (stmt.equals(start)) break;
+        var maybeExprStmtTriplet = ASTPatterns.isExpressionStmtDeclarationOf(stmt, name);
+        if (maybeExprStmtTriplet.isPresent())
+          return Optional.of(
+              new Triplet<Statement, VariableDeclarationExpr, VariableDeclarator>(
+                  maybeExprStmtTriplet.get().getValue0(),
+                  maybeExprStmtTriplet.get().getValue1(),
+                  maybeExprStmtTriplet.get().getValue2()));
+      }
+      return findEarliestLocalDeclarationOf(parent, name);
+
+    } else if (parent instanceof TryStmt) {
+    } else if (parent instanceof ForEachStmt) {
+    } else if (parent instanceof ForStmt) {
+    }
+    return findEarliestLocalDeclarationOf(parent, name);
   }
 }
