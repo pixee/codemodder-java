@@ -269,9 +269,9 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(0);
     assertThat(ASTPatterns.isScopeInMethodCall(ne).isPresent(), is(true));
   }
-  
-  @Test 
-  void merging_and_combining_trystmts_is_the_identity(){
+
+  @Test
+  void merging_and_combining_trystmts_is_the_identity() {
     var code =
         "class A {\n"
             + "\n"
@@ -290,6 +290,59 @@ final class ASTsTest {
     var tsm = cu.findAll(TryStmt.class).get(0);
     ASTTransforms.splitResources(tsm, 0);
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), code);
+  }
+
+  @Test
+  void it_detects_varible_is_final() {
+    var code =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    final int variable = 12;\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
+    assertThat(ASTs.isFinalOrNeverAssigned(vd,ASTs.findLocalVariableScope(vd)), is(true));
+  }
+
+  @Test
+  void it_detects_variable_is_not_initialized_and_effectively_final() {
+    var code =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    int variable;\n"
+            + "    variable = 12;\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
+    assertThat(ASTs.isNotInitializedAndAssignedAtMostOnce(vd,ASTs.findLocalVariableScope(vd)), is(true));
+  }
+
+  @Test
+  void it_detects_variable_is_initialized_and_effectively_final() {
+    var code =
+        "class A {\n" + "\n" + "  void foo() {\n" + "    int variable = 12;\n" + "  }\n" + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
+    assertThat(ASTs.isFinalOrNeverAssigned(vd,ASTs.findLocalVariableScope(vd)), is(true));
+  }
+
+  @Test
+  void it_detects_that_variable_is_not_effectively_final() {
+    var code =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    int variable = 12;\n"
+            + "    variable++;\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
+    assertThat(ASTs.isFinalOrNeverAssigned(vd,ASTs.findLocalVariableScope(vd)), is(false));
   }
 
   void assertEquals(Stream<String> stream, Stream<String> expected) {

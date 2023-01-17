@@ -5,7 +5,9 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.UnaryExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -14,6 +16,8 @@ import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /** Utility methods that may be useful for many visitors. */
 public final class ASTs {
@@ -85,33 +89,63 @@ public final class ASTs {
 
   /**
    * Given a {@link SimpleName} {@code name} and a {@link VariableDeclarationExpr} with a declarator
-   * of {@code name}, verifies if {@code name} is final or effectively final. See <a
+   * of {@code name}, verifies if {@code name} is final or never assigned. See <a
    * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-4.html">Java Language
-   * Specification - Section 4.12.14</a> for the definitions of final and effectively final
-   * variables.
+   * Specification - Section 4.12.14</a> for the definitions of final variables.
    */
-  public static boolean isFinalOrEffectivelyFinal(VariableDeclarationExpr vde, SimpleName name) {
+  public static boolean isFinalOrNeverAssigned(VariableDeclarator vd, LocalVariableScope scope) {
     // Assumes vde contains a declarator with name
-    var nameVariableDeclarator =
-        vde.getVariables().stream()
-            .filter(vd -> vd.getName().asString().equals(name.asString()))
-            .findFirst()
-            .get();
+    var vde = (VariableDeclarationExpr) vd.getParentNode().get();
+    // has final modifier
     if (vde.isFinal()) return true;
-    if (nameVariableDeclarator.getInitializer().isEmpty()
-        && isDefinitivelyAssigned(vde, nameVariableDeclarator)) return true;
+
+    // Effectivelly Final: never operand of unary operator
+    Predicate<UnaryExpr> isOperand =
+        ue ->
+            ue.getExpression().isNameExpr()
+                && ue.getExpression()
+                    .asNameExpr()
+                    .getName()
+                    .asString()
+                    .equals(vd.getName().asString());
+    for (var expr : scope.getExpressions()) {
+      if (expr.findFirst(UnaryExpr.class, isOperand).isPresent()) return false;
+    }
+    for (var stmt : scope.getStatements()) {
+      if (stmt.findFirst(UnaryExpr.class, isOperand).isPresent()) return false;
+    }
+
+    Predicate<AssignExpr> isLHS =
+        ae ->
+            ae.getTarget().isNameExpr()
+                && ae.getTarget().asNameExpr().getName().asString().equals(vd.getName().asString());
+    // TODO If not initialized, always definitively unassigned whenever lhs of assignment
+    if (!vd.getInitializer().isEmpty()) {
+      for (var stmt : scope.getStatements())
+        if (stmt.findFirst(AssignExpr.class, isLHS).isPresent()) return false;
+      for (var expr : scope.getExpressions())
+        if (expr.findFirst(AssignExpr.class, isLHS).isPresent()) return false;
+      return true;
+    }
     return false;
   }
 
-  /**
-   * Given a {@link VariableDeclarator} {@code vd} within the {@link VariableDeclarationExpr} {@code
-   * vde} of a local declaration, verifies if it is definitively assigned. See <a
-   * href="https://docs.oracle.com/javase/specs/jls/se19/ht://docs.oracle.com/javase/specs/jls/se19/html/jls-16.html">
-   * Java Language Specification - Chapter 16. Definite Assignment</a> for details about when a
-   * variable is definitively assigned.
-   */
-  public static boolean isDefinitivelyAssigned(VariableDeclarationExpr vde, VariableDeclarator vd) {
-    // TODO check --v or v++ operators
+  public static boolean isNotInitializedAndAssignedAtMostOnce(
+      VariableDeclarator vd, LocalVariableScope scope) {
+    Predicate<AssignExpr> isLHS =
+        ae ->
+            ae.getTarget().isNameExpr()
+                && ae.getTarget().asNameExpr().getName().asString().equals(vd.getName().asString());
+    if (vd.getInitializer().isEmpty()) {
+      var allAssignments =
+          Stream.concat(
+              scope.getExpressions().stream()
+                  .flatMap(e -> e.findAll(AssignExpr.class, isLHS).stream()),
+              scope.getStatements().stream()
+                  .flatMap(s -> s.findAll(AssignExpr.class, isLHS).stream()));
+      if (allAssignments.count() == 1) return true;
+      else return false;
+    }
     return false;
   }
 
