@@ -1,5 +1,7 @@
 plugins {
-    id("io.openpixee.codetl.java")
+    id("io.openpixee.codetl.base")
+    id("io.openpixee.codetl.java-library")
+    id("io.openpixee.codetl.maven-publish")
 }
 
 java {
@@ -15,14 +17,26 @@ spotless {
     }
 }
 
+publishing {
+    publications {
+        register<MavenPublication>("maven") {
+            from(components["java"])
+            artifactId = "codetl-java-language-provider"
+            version = "0.0.1"
+        }
+    }
+}
+
 dependencies {
     annotationProcessor(libs.autovalue.annotations)
     annotationProcessor(libs.picocli.codegen)
 
     compileOnly(libs.jetbrains.annotations)
 
+    api(libs.javadiff) // TODO we leak this dependency through exceptions - let's encapsulate those
+    api("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo
+
     implementation(libs.codescan.sarif)
-    implementation("io.github.pixee:codetf-java:0.0.2") // TODO inline
     implementation(libs.commons.collections4)
     implementation(libs.commons.lang3)
     implementation(libs.contrast.sarif)
@@ -30,7 +44,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.jackson.core)
     implementation(libs.jackson.yaml)
-    implementation(libs.javadiff)
     implementation(libs.javaparser.core)
     implementation(libs.javaparser.symbolsolver.core)
     implementation(libs.javaparser.symbolsolver.logic)
@@ -39,7 +52,7 @@ dependencies {
     implementation(libs.juniversalchardet)
     implementation(libs.logback.classic)
     implementation(libs.maven.model)
-    implementation("io.openpixee:java-jdbc-parameterizer:0.0.7") // TODO inline
+    implementation("io.openpixee:java-jdbc-parameterizer:0.0.7") // TODO bring into monorepo
     implementation(libs.openpixee.toolkit)
     implementation(libs.openpixee.toolkit.xstream)
     implementation(libs.picocli)
@@ -63,8 +76,4 @@ dependencies {
     testImplementation(testcodelibs.servlet)
     testImplementation(testcodelibs.spring.web)
     testImplementation(testcodelibs.xstream)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
