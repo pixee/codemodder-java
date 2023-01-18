@@ -1,4 +1,5 @@
 plugins {
+    id("io.openpixee.codetl.base")
     id("io.openpixee.codetl.java")
     id("io.openpixee.codetl.native-image")
 }
