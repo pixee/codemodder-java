@@ -1,13 +1,7 @@
 package io.openpixee.java.protections;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import io.openpixee.java.ChangedFile;
 import io.openpixee.java.DependencyGAV;
@@ -18,9 +12,13 @@ import io.openpixee.maven.operator.POMOperator;
 import io.openpixee.maven.operator.ProjectModel;
 import io.openpixee.maven.operator.ProjectModelFactory;
 import io.openpixee.maven.operator.QueryType;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 final class DependencyGAVInjectingTest {
   private DependencyInjectingVisitor weaver;

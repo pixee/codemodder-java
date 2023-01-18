@@ -37,7 +37,8 @@ final class CLISmokeIT {
    *     and io.openpixee.test.test-code-dir system properties
    */
   @Test
-  void process_java_sources_without_failing(@TempDir final Path tmp, final TestReporter reporter) {
+  void process_java_sources_without_failing(@TempDir final Path tmp, final TestReporter reporter)
+      throws IOException {
     copyTestCodeSourcesToDirectory(tmp);
 
     final String javaHome = System.getenv().get("JAVA_HOME");
@@ -59,16 +60,23 @@ final class CLISmokeIT {
     if (!Files.isRegularFile(jar)) {
       throw new IllegalStateException("Expected " + jar + " to be a regular file");
     }
+    final String classpath = System.getProperty("io.openpixee.test.language-provider-classpath");
+    if (classpath == null) {
+       throw new IllegalStateException("Expected io.openpixee.test.language-provider-classpath to be a path to the CodeTL Java language provider JAR");
+    }
     final ProcessBuilder builder =
         new ProcessBuilder()
             .command(
                 java.toString(),
+                "-classpath",
+                classpath,
                 "-jar",
                 jar.toString(),
                 "--repository=" + tmp,
                 "--output=" + tmp.resolve("output.codetf.json"))
             .directory(tmp.toFile())
             .inheritIO();
+    System.out.println("Executing language provider: " + builder.command());
     reporter.publishEntry("Executing language provider: " + builder.command());
 
     final Process process;
@@ -82,6 +90,7 @@ final class CLISmokeIT {
     } catch (InterruptedException e) {
       throw (AssertionError) fail("Timeout waiting for CodeTL to execute", e);
     }
+    System.err.println(new String(process.getErrorStream().readAllBytes()));
 
     assertThat(process.exitValue(), equalTo(0));
   }
