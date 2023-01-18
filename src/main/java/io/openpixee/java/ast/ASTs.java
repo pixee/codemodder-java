@@ -193,6 +193,15 @@ public final class ASTs {
                 maybeResource.get().getValue1(),
                 maybeResource.get().getValue2()));
       }
+    } else if (parent instanceof ExpressionStmt) {
+      var maybeExpressionDeclaration = ASTPatterns.isExpressionStmtDeclarationOf(parent, name);
+      if (maybeExpressionDeclaration.isPresent()) {
+        return Optional.of(
+            new Triplet<>(
+                maybeExpressionDeclaration.get().getValue0(),
+                maybeExpressionDeclaration.get().getValue1(),
+                maybeExpressionDeclaration.get().getValue2()));
+      }
     } else if (parent instanceof ForEachStmt) {
       var maybeForDeclaration = ASTPatterns.isForEachVariableDeclarationOf(parent, name);
       if (maybeForDeclaration.isPresent())

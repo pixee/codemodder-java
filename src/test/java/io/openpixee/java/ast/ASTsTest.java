@@ -8,7 +8,6 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -372,6 +371,29 @@ final class ASTsTest {
   }
 
   @Test
+  void it_finds_local_variable_declaration_from_initializer() {
+    var code =
+        "class A {\n"
+            + "\n"
+            + "int variable = 10;\n"
+            + "  void foo() {\n"
+            + "    variable = 20;\n"
+            + "    int variable = 12, variable2 = variable + 1;\n"
+            + "    variable = 24;\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var ne = cu.findAll(NameExpr.class).get(1);
+    var local_vd = cu.findAll(VariableDeclarator.class).get(1);
+    assertThat(
+        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+            .get()
+            .getValue2()
+            .equals(local_vd),
+        is(true));
+  }
+
+  @Test
   void it_finds_no_local_variable() {
     var code =
         "class A {\n"
@@ -391,7 +413,7 @@ final class ASTsTest {
 
   @Test
   void it_finds_resource_declaration() {
-	  var code = 
+    var code =
         "class A {\n"
             + "\n"
             + "FileReader fr;\n"
@@ -414,7 +436,7 @@ final class ASTsTest {
 
   @Test
   void it_finds_for_declaration() {
-	  var code = 
+    var code =
         "class A {\n"
             + "\n"
             + "int variable =10;\n"
@@ -437,7 +459,7 @@ final class ASTsTest {
 
   @Test
   void it_finds_for_each_declaration() {
-	  var code = 
+    var code =
         "class A {\n"
             + "\n"
             + "int variable =10;\n"
