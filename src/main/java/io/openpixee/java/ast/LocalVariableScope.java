@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 
 /**
  * Contains the expressions and statements that span the scope of a local variable declaration. See
- * <a href="htts://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.3">Java Language
+ * <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.3">Java Language
  * Specification - Section 6.3 </a> for how the scope of local declarations is defined. The
  * nodelists are ordered and the nodes in {@code expressions} happens before the ones in {@code
  * statements}.
@@ -60,7 +60,7 @@ public final class LocalVariableScope {
     if (body instanceof BlockStmt) {
       statements = ((BlockStmt) body).getStatements();
     } else {
-      statements = new NodeList<Statement>();
+      statements = new NodeList<>();
       statements.setParentNode(stmt);
     }
     return new LocalVariableScope(expressions, statements);
@@ -86,7 +86,7 @@ public final class LocalVariableScope {
     if (body instanceof BlockStmt) {
       statements = ((BlockStmt) body).getStatements();
     } else {
-      statements = new NodeList<Statement>();
+      statements = new NodeList<>();
       statements.setParentNode(stmt);
     }
     return new LocalVariableScope(expressions, statements);

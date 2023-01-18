@@ -2,6 +2,7 @@ package io.openpixee.java.ast;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -60,7 +61,7 @@ public final class ASTTransforms {
       newBody.addStatement(newStatement);
       newBody.addStatement(existingStatement);
     } else {
-      // The only option left is BlockStmt. Otherwise existingStatement is a BlockStmt contained
+      // The only option left is BlockStmt. Otherwise, existingStatement is a BlockStmt contained
       // in a:
       // NodeWithBody, MethodDeclaration, NodeWithBlockStmt, SwitchStmt(?)
       // No way (or reason) to add a Statement before those, maybe throw an Error?
@@ -109,7 +110,7 @@ public final class ASTTransforms {
     wrapper.getResources().add(vdecl);
 
     var block = new BlockStmt();
-    scope.getStatements().stream()
+    scope.getStatements()
         .forEach(
             s -> {
               s.remove();
@@ -135,7 +136,7 @@ public final class ASTTransforms {
     var innerTry = new TryStmt();
     innerTry.setResources(tail);
     innerTry.setTryBlock(stmt.getTryBlock());
-    stmt.setTryBlock(new BlockStmt(new NodeList<Statement>(innerTry)));
+    stmt.setTryBlock(new BlockStmt(new NodeList<>(innerTry)));
 
     return stmt;
   }
@@ -145,8 +146,8 @@ public final class ASTTransforms {
    * of a try with resources block, merge the two try statements into one.
    */
   public static TryStmt combineResources(TryStmt innerTry) {
-    var outerTry = (TryStmt) innerTry.getParentNode().flatMap(p -> p.getParentNode()).get();
-    innerTry.getResources().stream().forEach(outerTry.getResources()::add);
+    var outerTry = (TryStmt) innerTry.getParentNode().flatMap(Node::getParentNode).get();
+    innerTry.getResources().forEach(outerTry.getResources()::add);
     outerTry.getTryBlock().getStatements().stream()
         .skip(1)
         .forEach(innerTry.getTryBlock()::addStatement);

@@ -2,19 +2,16 @@ package io.openpixee.java.ast;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.SimpleName;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
-import com.google.common.base.Predicate;
-import java.util.Optional;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
+
+import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * A static library for querying and returning patterns over AST nodes. Patterns are returned as
@@ -46,7 +43,7 @@ public final class ASTPatterns {
     return vde.getParentNode()
         .map(p -> p instanceof TryStmt ? (TryStmt) p : null)
         .filter(
-            ts -> ts.getResources().stream().filter(rs -> rs.equals(vde)).findFirst().isPresent());
+            ts -> ts.getResources().stream().anyMatch(rs -> rs.equals(vde)));
   }
 
   /**

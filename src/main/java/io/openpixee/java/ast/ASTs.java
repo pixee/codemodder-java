@@ -33,10 +33,7 @@ public final class ASTs {
       node = node.getParentNode().get();
     }
     var methodDeclarationOrNullRef = node.getParentNode();
-    if (methodDeclarationOrNullRef.isPresent()) {
-      return Optional.of((MethodDeclaration) methodDeclarationOrNullRef.get());
-    }
-    return Optional.empty();
+    return methodDeclarationOrNullRef.map(value -> (MethodDeclaration) value);
   }
 
   /**
@@ -100,7 +97,7 @@ public final class ASTs {
     // has final modifier
     if (vde.isFinal()) return true;
 
-    // Effectivelly Final: never operand of unary operator
+    // Effectively Final: never operand of unary operator
     Predicate<UnaryExpr> isOperand =
         ue ->
             ue.getExpression().isNameExpr()
@@ -121,7 +118,7 @@ public final class ASTs {
             ae.getTarget().isNameExpr()
                 && ae.getTarget().asNameExpr().getName().asString().equals(vd.getName().asString());
     // TODO If not initialized, always definitively unassigned whenever lhs of assignment
-    if (!vd.getInitializer().isEmpty()) {
+    if (vd.getInitializer().isEmpty()) {
       for (var stmt : scope.getStatements())
         if (stmt.findFirst(AssignExpr.class, isLHS).isPresent()) return false;
       for (var expr : scope.getExpressions())
@@ -144,15 +141,14 @@ public final class ASTs {
                   .flatMap(e -> e.findAll(AssignExpr.class, isLHS).stream()),
               scope.getStatements().stream()
                   .flatMap(s -> s.findAll(AssignExpr.class, isLHS).stream()));
-      if (allAssignments.count() == 1) return true;
-      else return false;
+      return allAssignments.count() == 1;
     }
     return false;
   }
 
   /**
    * Given a {@link VariableDeclarationExpr} {@code vde} returns the scope of the variables declared
-   * within. See <a href="htts://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.3">Java
+   * within. See <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.3">Java
    * Language Specification - Section 6.3 </a>} for how the scope of local declarations are defined.
    */
   public static LocalVariableScope findLocalVariableScope(VariableDeclarator vd) {
@@ -181,37 +177,37 @@ public final class ASTs {
         var maybeExprStmtTriplet = ASTPatterns.isExpressionStmtDeclarationOf(stmt, name);
         if (maybeExprStmtTriplet.isPresent())
           return Optional.of(
-              new Triplet<Statement, VariableDeclarationExpr, VariableDeclarator>(
-                  maybeExprStmtTriplet.get().getValue0(),
-                  maybeExprStmtTriplet.get().getValue1(),
-                  maybeExprStmtTriplet.get().getValue2()));
+                  new Triplet<>(
+                          maybeExprStmtTriplet.get().getValue0(),
+                          maybeExprStmtTriplet.get().getValue1(),
+                          maybeExprStmtTriplet.get().getValue2()));
       }
       return findEarliestLocalDeclarationOf(parent, name);
     } else if (parent instanceof TryStmt) {
       var maybeResource = ASTPatterns.isResourceOf(parent, name);
       if (maybeResource.isPresent()) {
         return Optional.of(
-            new Triplet<Statement, VariableDeclarationExpr, VariableDeclarator>(
-                maybeResource.get().getValue0(),
-                maybeResource.get().getValue1(),
-                maybeResource.get().getValue2()));
+                new Triplet<>(
+                        maybeResource.get().getValue0(),
+                        maybeResource.get().getValue1(),
+                        maybeResource.get().getValue2()));
       }
     } else if (parent instanceof ForEachStmt) {
       var maybeForDeclaration = ASTPatterns.isForEachVariableDeclarationOf(parent, name);
       if (maybeForDeclaration.isPresent())
         return Optional.of(
-            new Triplet<Statement, VariableDeclarationExpr, VariableDeclarator>(
-                maybeForDeclaration.get().getValue0(),
-                maybeForDeclaration.get().getValue1(),
-                maybeForDeclaration.get().getValue2()));
+                new Triplet<>(
+                        maybeForDeclaration.get().getValue0(),
+                        maybeForDeclaration.get().getValue1(),
+                        maybeForDeclaration.get().getValue2()));
     } else if (parent instanceof ForStmt) {
       var maybeForDeclaration = ASTPatterns.isForVariableDeclarationOf(parent, name);
       if (maybeForDeclaration.isPresent())
         return Optional.of(
-            new Triplet<Statement, VariableDeclarationExpr, VariableDeclarator>(
-                maybeForDeclaration.get().getValue0(),
-                maybeForDeclaration.get().getValue1(),
-                maybeForDeclaration.get().getValue2()));
+                new Triplet<>(
+                        maybeForDeclaration.get().getValue0(),
+                        maybeForDeclaration.get().getValue1(),
+                        maybeForDeclaration.get().getValue2()));
     }
     return findEarliestLocalDeclarationOf(parent, name);
   }
