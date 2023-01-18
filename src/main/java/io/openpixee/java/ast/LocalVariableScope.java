@@ -10,7 +10,6 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
-import java.util.Collections;
 import java.util.stream.IntStream;
 
 /**
@@ -41,7 +40,17 @@ public final class LocalVariableScope {
 
   public static LocalVariableScope fromLocalDeclaration(
       ExpressionStmt stmt, VariableDeclarator vd) {
-    var expressions = new NodeList<Expression>(Collections.emptyList());
+    var expressions = new NodeList<Expression>();
+    // We expect a VariableDeclarationExpr in the stmt, it may contain multiple declarations
+    var vde = (VariableDeclarationExpr) vd.getParentNode().get();
+    var vdIndex = vde.getVariables().indexOf(vd);
+    vde.getVariables().stream()
+        .skip(vdIndex + 1)
+        .map(vdInVDE -> vdInVDE.getInitializer())
+        .filter(init -> init.isPresent())
+        .map(init -> init.get())
+        .forEach(expressions::add);
+
     // Local variable declarations are always contained in a block statement.
     var block = (BlockStmt) stmt.getParentNode().get();
     var statements = new NodeList<Statement>();

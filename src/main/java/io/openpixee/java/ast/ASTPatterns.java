@@ -7,11 +7,10 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
-import org.javatuples.Pair;
-import org.javatuples.Triplet;
-
 import java.util.Optional;
 import java.util.function.Predicate;
+import org.javatuples.Pair;
+import org.javatuples.Triplet;
 
 /**
  * A static library for querying and returning patterns over AST nodes. Patterns are returned as
@@ -42,8 +41,7 @@ public final class ASTPatterns {
   public static Optional<TryStmt> isResource(final VariableDeclarationExpr vde) {
     return vde.getParentNode()
         .map(p -> p instanceof TryStmt ? (TryStmt) p : null)
-        .filter(
-            ts -> ts.getResources().stream().anyMatch(rs -> rs.equals(vde)));
+        .filter(ts -> ts.getResources().stream().anyMatch(rs -> rs.equals(vde)));
   }
 
   /**

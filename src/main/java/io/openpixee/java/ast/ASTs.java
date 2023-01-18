@@ -117,14 +117,14 @@ public final class ASTs {
         ae ->
             ae.getTarget().isNameExpr()
                 && ae.getTarget().asNameExpr().getName().asString().equals(vd.getName().asString());
-    // TODO If not initialized, always definitively unassigned whenever lhs of assignment
-    if (vd.getInitializer().isEmpty()) {
+    if (vd.getInitializer().isPresent()) {
       for (var stmt : scope.getStatements())
         if (stmt.findFirst(AssignExpr.class, isLHS).isPresent()) return false;
       for (var expr : scope.getExpressions())
         if (expr.findFirst(AssignExpr.class, isLHS).isPresent()) return false;
       return true;
     }
+    // TODO If not initialized, always definitively unassigned whenever lhs of assignment
     return false;
   }
 
@@ -148,8 +148,9 @@ public final class ASTs {
 
   /**
    * Given a {@link VariableDeclarationExpr} {@code vde} returns the scope of the variables declared
-   * within. See <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.3">Java
-   * Language Specification - Section 6.3 </a>} for how the scope of local declarations are defined.
+   * within. See <a
+   * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.3">Java Language
+   * Specification - Section 6.3 </a>} for how the scope of local declarations are defined.
    */
   public static LocalVariableScope findLocalVariableScope(VariableDeclarator vd) {
     var p = vd.getParentNode().get().getParentNode().get();
@@ -177,37 +178,37 @@ public final class ASTs {
         var maybeExprStmtTriplet = ASTPatterns.isExpressionStmtDeclarationOf(stmt, name);
         if (maybeExprStmtTriplet.isPresent())
           return Optional.of(
-                  new Triplet<>(
-                          maybeExprStmtTriplet.get().getValue0(),
-                          maybeExprStmtTriplet.get().getValue1(),
-                          maybeExprStmtTriplet.get().getValue2()));
+              new Triplet<>(
+                  maybeExprStmtTriplet.get().getValue0(),
+                  maybeExprStmtTriplet.get().getValue1(),
+                  maybeExprStmtTriplet.get().getValue2()));
       }
       return findEarliestLocalDeclarationOf(parent, name);
     } else if (parent instanceof TryStmt) {
       var maybeResource = ASTPatterns.isResourceOf(parent, name);
       if (maybeResource.isPresent()) {
         return Optional.of(
-                new Triplet<>(
-                        maybeResource.get().getValue0(),
-                        maybeResource.get().getValue1(),
-                        maybeResource.get().getValue2()));
+            new Triplet<>(
+                maybeResource.get().getValue0(),
+                maybeResource.get().getValue1(),
+                maybeResource.get().getValue2()));
       }
     } else if (parent instanceof ForEachStmt) {
       var maybeForDeclaration = ASTPatterns.isForEachVariableDeclarationOf(parent, name);
       if (maybeForDeclaration.isPresent())
         return Optional.of(
-                new Triplet<>(
-                        maybeForDeclaration.get().getValue0(),
-                        maybeForDeclaration.get().getValue1(),
-                        maybeForDeclaration.get().getValue2()));
+            new Triplet<>(
+                maybeForDeclaration.get().getValue0(),
+                maybeForDeclaration.get().getValue1(),
+                maybeForDeclaration.get().getValue2()));
     } else if (parent instanceof ForStmt) {
       var maybeForDeclaration = ASTPatterns.isForVariableDeclarationOf(parent, name);
       if (maybeForDeclaration.isPresent())
         return Optional.of(
-                new Triplet<>(
-                        maybeForDeclaration.get().getValue0(),
-                        maybeForDeclaration.get().getValue1(),
-                        maybeForDeclaration.get().getValue2()));
+            new Triplet<>(
+                maybeForDeclaration.get().getValue0(),
+                maybeForDeclaration.get().getValue1(),
+                maybeForDeclaration.get().getValue2()));
     }
     return findEarliestLocalDeclarationOf(parent, name);
   }

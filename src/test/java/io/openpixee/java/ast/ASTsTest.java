@@ -178,7 +178,7 @@ final class ASTsTest {
     var code =
         "class A {\n"
             + "  void foo() {\n"
-            + "    int i = 0;\n"
+            + "    int i=0,j=i;\n"
             + "    ;\n"
             + "    ;\n"
             + "  }\n"
@@ -186,7 +186,7 @@ final class ASTsTest {
     var cu = new JavaParser().parse(code).getResult().get();
     var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
     var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
-    assertThat(scope.getExpressions().size(), is(0));
+    assertThat(scope.getExpressions().size(), is(1));
     assertThat(scope.getStatements().size(), is(2));
   }
 

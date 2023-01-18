@@ -110,7 +110,8 @@ public final class ASTTransforms {
     wrapper.getResources().add(vdecl);
 
     var block = new BlockStmt();
-    scope.getStatements()
+    scope
+        .getStatements()
         .forEach(
             s -> {
               s.remove();
