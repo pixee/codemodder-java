@@ -2,25 +2,11 @@ plugins {
     id("io.openpixee.codetl.base")
     id("io.openpixee.codetl.java-library")
     id("io.openpixee.codetl.maven-publish")
-    `idea`
 }
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
-    }
-}
-
-sourceSets {
-    register("intTest") {
-        compileClasspath += sourceSets.main.get().output
-        runtimeClasspath += sourceSets.main.get().output
-    }
-}
-
-idea {
-    module {
-        testSources.from(sourceSets["intTest"].allJava.srcDirs)
     }
 }
 
@@ -40,11 +26,6 @@ publishing {
         }
     }
 }
-
-val intTestImplementation: Configuration by configurations.getting {
-    extendsFrom(configurations.implementation.get())
-}
-val intTestRuntimeOnly : Configuration by configurations.getting
 
 dependencies {
     annotationProcessor(libs.autovalue.annotations)
@@ -96,40 +77,4 @@ dependencies {
     testImplementation(testcodelibs.servlet)
     testImplementation(testcodelibs.spring.web)
     testImplementation(testcodelibs.xstream)
-
-    intTestImplementation(testlibs.bundles.junit.jupiter)
-    intTestImplementation(testlibs.bundles.hamcrest)
-    intTestImplementation(testlibs.assertj)
-    intTestRuntimeOnly(testlibs.junit.jupiter.engine)
-}
-
-tasks.jar {
-    manifest {
-        attributes["Main-Class"] = "io.openpixee.java.JavaFixitCli"
-    }
-}
-
-val integrationTest by tasks.registering(Test::class) {
-    dependsOn(tasks.jar)
-
-    description = "Runs integration tests"
-    group = LifecycleBasePlugin.VERIFICATION_GROUP
-
-    testClassesDirs = sourceSets["intTest"].output.classesDirs
-    classpath = sourceSets["intTest"].runtimeClasspath
-    shouldRunAfter(tasks.test)
-
-    useJUnitPlatform()
-
-    javaLauncher.set(javaToolchains.launcherFor {
-        version = JavaLanguageVersion.of(11)
-    })
-
-    systemProperty("io.openpixee.test.language-provider-classpath", sourceSets["main"].runtimeClasspath.asPath)
-    systemProperty("io.openpixee.test.language-provider-jar", tasks.jar.get().archiveFile.get().asFile.path)
-    systemProperty("io.openpixee.test.test-code-dir", sourceSets["test"].java.sourceDirectories.singleFile.resolve("com").path)
-}
-
-tasks.check {
-    dependsOn(integrationTest)
 }
