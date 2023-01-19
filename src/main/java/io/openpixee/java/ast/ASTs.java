@@ -15,6 +15,8 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -220,5 +222,69 @@ public final class ASTs {
                 maybeForDeclaration.get().getValue2()));
     }
     return findEarliestLocalDeclarationOf(parent, name);
+  }
+
+  /**
+   * Returns the unique path from {@code n} to the root of the tree. The path includes {@code n}
+   * itself.
+   */
+  public static ArrayList<Node> pathToRoot(Node n) {
+    ArrayList<Node> path = new ArrayList<>(List.of(n));
+    var currentNode = n;
+    while (currentNode.getParentNode().isPresent()) {
+      path.add(currentNode.getParentNode().get());
+      currentNode = currentNode.getParentNode().get();
+    }
+    return path;
+  }
+
+  /** Returns the lowest common ancestor of a pair of nodes. */
+  public static Node lowestCommonAncestor(Node n1, Node n2) {
+    var n1Path = pathToRoot(n1);
+    var n2Path = pathToRoot(n1);
+    var i1 = n1Path.size() - 1;
+    var i2 = n2Path.size() - 1;
+    while (n1Path.get(i1).equals(n2Path.get(i2)) && i1 >= 0 && i2 >= 0) {
+      i1 -= 1;
+      i2 -= 1;
+    }
+    return n1Path.get(i1);
+  }
+
+  /** Returns true if and only if {@code n1} &lt;= {@code n2} in post-order. */
+  public static boolean postOrderLessThanOrEqual(Node n1, Node n2) {
+    if (n1.equals(n2)) return true;
+    var n1Path = pathToRoot(n1);
+    var n2Path = pathToRoot(n2);
+    var i1 = n1Path.size() - 1;
+    var i2 = n2Path.size() - 1;
+    while (i1 >= 0 && i2 >= 0 && n1Path.get(i1).equals(n2Path.get(i2))) {
+      i1 -= 1;
+      i2 -= 1;
+    }
+    // lowestCommonAncestor
+    var lca = n1Path.get(i1 + 1);
+    System.out.println(lca);
+    if (lca.equals(n2)) return true;
+    if (lca.equals(n1)) return false;
+
+    var lcaDirectChild1 = n1Path.get(i1);
+    var lcaDirectChild2 = n2Path.get(i2);
+
+    for (Node n : lca.getChildNodes()) {
+      if (n.equals(lcaDirectChild1)) return true;
+      if (n.equals(lcaDirectChild2)) return false;
+    }
+    // should not happen
+    return false;
+  }
+
+  /** Returns true if and only if {@code n} is contained in {@code scope} */
+  public static boolean inScope(Node n, LocalVariableScope scope) {
+    // Always true for LocalVariableScope
+    var scopeStatementsRoot = scope.getStatements().getParentNode().get();
+    if (n.equals(scopeStatementsRoot) || scopeStatementsRoot.isAncestorOf(n)) return true;
+    for (var e : scope.getExpressions()) if (n.equals(e) || e.isAncestorOf(n)) return true;
+    return false;
   }
 }
