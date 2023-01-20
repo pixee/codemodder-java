@@ -1,0 +1,30 @@
+name: Run Checks and Tests
+
+on:
+  push:
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+          token: ${{ secrets.TEMP_GITHUB_PAT }}
+      - uses: actions/setup-node@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          version: 'latest'
+          java-version: '17'
+          components: 'native-image'
+      - uses: gradle/gradle-build-action@v2
+        env:
+          ORG_GRADLE_PROJECT_pixeeArtifactoryUsername: ${{ secrets.PIXEE_ARTIFACTORY_USERNAME }}
+          ORG_GRADLE_PROJECT_pixeeArtifactoryPassword: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
+        with:
+          arguments: check

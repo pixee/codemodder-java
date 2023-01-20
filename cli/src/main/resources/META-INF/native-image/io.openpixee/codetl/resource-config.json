@@ -1,0 +1,9 @@
+{
+  "bundles": [
+  ],
+  "resources": [
+    {
+      "pattern": ".*javascript-language-provider.js$"
+    }
+  ]
+}

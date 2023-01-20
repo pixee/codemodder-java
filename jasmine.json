@@ -1,9 +1,0 @@
-{
-  "spec_dir": "out/codetl/test",
-  "spec_files": [
-    "**/*.spec.js"
-  ],
-  "helpers": [
-    "jasmine-typescript-helper.js"
-  ]
-}
