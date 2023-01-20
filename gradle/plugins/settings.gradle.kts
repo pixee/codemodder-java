@@ -12,4 +12,4 @@ dependencyResolutionManagement {
     }
 }
 
-include("base")
+include("convention")
