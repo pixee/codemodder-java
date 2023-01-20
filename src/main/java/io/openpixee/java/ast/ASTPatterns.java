@@ -6,6 +6,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
+import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -28,10 +29,7 @@ public final class ASTPatterns {
         .filter(ae -> ae.getValue().equals(expr));
   }
 
-  /**
-   * Test for this pattern: {@link VariableDeclarationExpr} -&gt; {@link VariableDeclarator} -&gt;
-   * {@link Expression} ({@code expr})
-   */
+  /** Test for this pattern: {@link VariableDeclarator} -&gt; {@link Expression} ({@code expr}) */
   public static Optional<VariableDeclarator> isInitExpr(final Expression expr) {
     return expr.getParentNode()
         .map(p -> p instanceof VariableDeclarator ? (VariableDeclarator) p : null);
@@ -158,5 +156,13 @@ public final class ASTPatterns {
       }
     }
     return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link ReturnStmt} -&gt; {@link VariableDeclarator} -&gt; {@link
+   * Expression} ({@code expr})
+   */
+  public static Optional<ReturnStmt> isReturnExpr(final Expression expr) {
+    return expr.getParentNode().map(p -> p instanceof ReturnStmt ? (ReturnStmt) p : null);
   }
 }
