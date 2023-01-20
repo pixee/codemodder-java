@@ -3,10 +3,33 @@
 CLI tool for leveraging the Code Transformation Language (CodeTL) to apply complex source code
 transformations to projects.
 
-## ⚗️ Language Provider Proof of Concept
+## Building
+
+1. Install GraalVM 22.3.0
+2. Install native-image component
+   ```shell
+    gu install native-image
+   ```
+3. Build CLI tool
+   ```shell
+   ./gradlew assemble
+   ```
+4. The built binary is at path `./cli/build/native/nativeCompile/codetl`
+
+### Running Tests
+
+```shell
+./gradlew check
+```
+
+## Language Providers
 
 CodeTL is a language agnostic tool and code transformation domain specific language (DSL). Support
-for a language is added by an extension called a "language provider".
+for a language is added by an extension called a "language provider". These language providers may be found in the `./languages` directory.
+
+
+
+### ⚗️ JavaScript Language Provider Proof of Concept
 
 In the working architecture, language providers are written in the language they support. For
 example, the JavaScript language provider is largely written in TypeScript. This proof of concept
@@ -31,16 +54,3 @@ Gradle build ties all the projects together and produces a binary using GraalVM'
 - The Java code in the `cli` subproject reads the JavaScript bundle from the classpath and evaluates
   it in using the GraalVM polyglot SDK. It then reads each JavaScript source file in the given
   repository and transforms it using the transformation function exposed by the bundle.
-
-## Building
-
-1. Install GraalVM 22.3.0
-2. Install native-image component
-   ```shell
-    gu install native-image
-   ```
-3. Build CLI tool
-   ```shell
-   ./gradlew assemble
-   ```
-4. The built binary is at path `./cli/build/native/nativeCompile/codetl`

@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: a stable version to set in version.txt before publishing
+
+jobs:
+  release:
+    name: Build & Release
+    permissions:
+      contents: write
+    environment: Public Release
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+          token: ${{ secrets.TEMP_GITHUB_PAT }}
+      - uses: actions/setup-node@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          version: 'latest'
+          java-version: '17'
+          components: 'native-image'
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: -q setVersion -PnewVersion=${{ inputs.version }}
+      - uses: gradle/gradle-build-action@v2
+        env:
+          ORG_GRADLE_PROJECT_pixeeArtifactoryUsername: ${{ secrets.PIXEE_ARTIFACTORY_USERNAME }}
+          ORG_GRADLE_PROJECT_pixeeArtifactoryPassword: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
+        with:
+          arguments: build publish
+
+      # share version bump
+      - run: |
+          git add version.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m '🚀 release v${{ inputs.version }}'
+          git push
+
+      # set version for next release
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: -q bumpPatch applySnapshot
+      - run: |
+          git add version.txt
+          git commit -m '🚧 prepare for next development iteration'
+          git push
