@@ -1,7 +1,9 @@
+@Suppress("DSL_SCOPE_VIOLATION") // https://github.com/gradle/gradle/issues/22797
 plugins {
     id("io.openpixee.codetl.base")
     id("io.openpixee.codetl.java-library")
     id("io.openpixee.codetl.maven-publish")
+    alias(libs.plugins.fileversioning)
 }
 
 java {
@@ -22,7 +24,7 @@ publishing {
         register<MavenPublication>("maven") {
             from(components["java"])
             artifactId = "codetl-java-language-provider"
-            version = "0.0.1"
+            version = "1.0.3"
         }
     }
 }
