@@ -1,0 +1,39 @@
+[versions]
+auto-value = "1.9"
+graalvm = "22.3.0"
+jackson = "2.13.1"
+javaparser-core = "3.23.0"
+javaparser-symbolsovler = "3.15.15"
+logback = "1.2.11"
+maven = "3.8.7"
+openpixee-toolkit = "1.0.0"
+picocli = "4.7.0"
+slf4j = "2.0.6"
+
+[libraries]
+autovalue-annotations = { module = "com.google.auto.value:auto-value-annotations", version.ref = "auto-value" }
+codescan-sarif = "io.codescan:sarif-java:1.0"
+commons-lang3 = "org.apache.commons:commons-lang3:3.12.0"
+commons-collections4 = "org.apache.commons:commons-collections4:4.4"
+contrast-sarif = "com.contrastsecurity:java-sarif:2.0"
+graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
+gson = "com.google.code.gson:gson:2.9.0"
+immutables = "org.immutables:value:2.9.0"
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+javadiff = "io.github.java-diff-utils:java-diff-utils:4.9"
+javaparser-core = { module = "com.github.javaparser:javaparser-core", version.ref = "javaparser-core" }
+javaparser-symbolsolver-core = { module = "com.github.javaparser:javaparser-symbol-solver-core", version.ref = "javaparser-core" }
+javaparser-symbolsolver-model = { module = "com.github.javaparser:javaparser-symbol-solver-model", version.ref = "javaparser-symbolsovler" }
+javaparser-symbolsolver-logic = { module = "com.github.javaparser:javaparser-symbol-solver-logic", version.ref = "javaparser-symbolsovler" }
+jetbrains-annotations = "org.jetbrains:annotations:23.0.0"
+jfiglet = "com.github.lalyos:jfiglet:0.0.8"
+juniversalchardet = "com.github.albfernandez:juniversalchardet:2.4.0"
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
+openpixee-toolkit = { module = "io.openpixee:java-security-toolkit", version.ref = "openpixee-toolkit" }
+openpixee-toolkit-xstream = { module = "io.openpixee:java-security-toolkit-xstream", version.ref = "openpixee-toolkit" }
+picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
+progressbar = "me.tongfei:progressbar:0.9.3"
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
