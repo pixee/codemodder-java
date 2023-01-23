@@ -1,4 +1,6 @@
-include("plugin-analysis-plugins", "settings")
+pluginManagement {
+    repositories.gradlePluginPortal()
+}
 
 dependencyResolutionManagement {
     versionCatalogs.create("buildlibs") {

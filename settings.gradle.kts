@@ -1,21 +1,11 @@
 rootProject.name = "codetl"
 
 pluginManagement {
-    includeBuild("gradle/meta-plugins")
+    includeBuild("gradle/settings")
 }
 
 plugins {
-    id("io.openpixee.codetl.repositories")
-}
-
-dependencyResolutionManagement {
-    versionCatalogs.create("testcodelibs") {
-        from(files("./gradle/testcodelibs.versions.toml"))
-    }
-
-    versionCatalogs.create("testlibs") {
-        from(files("./gradle/testlibs.versions.toml"))
-    }
+    id("io.openpixee.codetl.settings")
 }
 
 include("cli", "languages:java", "languages:javascript")

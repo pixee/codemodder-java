@@ -1,9 +1,18 @@
 plugins {
     `kotlin-dsl`
-    id("io.openpixee.codetl.script-formatting")
+    id("com.diffplug.spotless")
 }
 
-group = "io.openpixee.codetl.buildlogic"
+spotless {
+    kotlinGradle {
+        target("*.gradle.kts", "src/main/kotlin/*.gradle.kts")
+        ktlint()
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.spotlessCheck)
+}
 
 dependencies {
     implementation(buildlibs.spotless)
