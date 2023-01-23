@@ -1,8 +1,8 @@
 package io.openpixee.java;
 
-import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.pixee.codetf.CodeTFReport;
+import io.openpixee.codetl.config.DefaultRuleSetting;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -56,13 +56,8 @@ public final class JavaFixitCliRun {
       final File repositoryRoot,
       final List<String> includePatterns,
       final List<String> excludePatterns,
-      final File output,
-      final boolean verbose)
+      final File output)
       throws IOException {
-
-    if (verbose) {
-      enableDebugLogging();
-    }
 
     LOG.debug("Default rule setting: {}", defaultRuleSetting.getDescription());
     LOG.debug("Exceptions to the default rule setting: {}", ruleExceptions);
@@ -159,14 +154,6 @@ public final class JavaFixitCliRun {
     ObjectMapper mapper = new ObjectMapper();
     FileUtils.write(output, mapper.writeValueAsString(report), StandardCharsets.UTF_8);
     return report;
-  }
-
-  /** Dynamically raises the log level to DEBUG for more output! */
-  private void enableDebugLogging() {
-    ch.qos.logback.classic.Logger rootLogger =
-        (ch.qos.logback.classic.Logger)
-            LoggerFactory.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME);
-    rootLogger.setLevel(Level.toLevel("DEBUG"));
   }
 
   /**

@@ -34,9 +34,26 @@ val bundle by configurations.registering {
 dependencies {
     compileOnly(libs.graal.sdk)
     annotationProcessor(libs.picocli.codegen)
+
+    implementation(libs.commons.lang3)
+    implementation(libs.jfiglet)
+    implementation(libs.logback.classic)
     implementation(libs.picocli)
+    implementation(libs.slf4j.api)
+    implementation(project(":config"))
+    implementation(project(":languages:java"))
 
     add(bundle.name, project(":languages:javascript", "bundle"))
+
+    testImplementation(testlibs.bundles.junit.jupiter)
+    testImplementation(testlibs.bundles.hamcrest)
+    testRuntimeOnly(testlibs.junit.jupiter.engine)
+
+    integrationTestImplementation(libs.picocli)
+    integrationTestImplementation("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo)
+    integrationTestImplementation(testlibs.bundles.junit.jupiter)
+    integrationTestImplementation(testlibs.jgit)
+    integrationTestImplementation(testlibs.bundles.hamcrest)
 }
 
 val copyBundle by tasks.registering(Copy::class) {

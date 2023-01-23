@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import io.openpixee.codetl.config.DefaultRuleSetting;
 import java.io.File;
 import java.util.List;
 import org.junit.jupiter.api.Test;

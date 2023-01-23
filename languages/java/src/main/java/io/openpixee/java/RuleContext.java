@@ -1,5 +1,6 @@
 package io.openpixee.java;
 
+import io.openpixee.codetl.config.DefaultRuleSetting;
 import java.util.List;
 import java.util.Objects;
 

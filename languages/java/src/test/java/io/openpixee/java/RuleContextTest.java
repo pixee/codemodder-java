@@ -3,6 +3,7 @@ package io.openpixee.java;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import io.openpixee.codetl.config.DefaultRuleSetting;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

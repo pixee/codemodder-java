@@ -1,16 +1,20 @@
 package io.openpixee.codetl.cli;
 
+import static org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS;
+
+import ch.qos.logback.classic.Level;
+import com.github.lalyos.jfiglet.FigletFont;
+import io.openpixee.codetl.cli.logging.LoggingConfigurator;
+import io.openpixee.codetl.config.DefaultRuleSetting;
+import io.openpixee.java.JavaFixitCliRun;
+import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Source;
-import org.graalvm.polyglot.Value;
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 /** Main entrypoint for the CodeTL CLI application. */
@@ -20,7 +24,9 @@ import picocli.CommandLine;
     description = "Automatically transform source code at scale to improve code bases.")
 public final class Application implements Callable<Integer> {
 
-  public static void main(final String[] args) {
+  public static void main(final String[] args) throws IOException {
+    String banner = FigletFont.convertOneLine("open-pixee");
+    System.out.println(banner);
     final int exitCode = new CommandLine(new Application()).execute(args);
     System.exit(exitCode);
   }
@@ -29,13 +35,21 @@ public final class Application implements Callable<Integer> {
       names = {"-r", "--repository"},
       description = "Source code repository path",
       required = true)
-  private Path repositoryRoot;
+  private File repositoryRoot;
 
   @CommandLine.Option(
       names = {"-o", "--output"},
       description = "Specify the file to write the output results to",
       required = true)
-  private Path output;
+  private File output;
+
+  @CommandLine.Option(
+      names = {"-d", "--rule-default"},
+      description = "Specify the default rule setting ('enabled' or 'disabled')",
+      defaultValue = "enabled",
+      converter = DefaultRuleSettingConverter.class,
+      required = false)
+  private DefaultRuleSetting ruleDefault;
 
   @CommandLine.Option(
       names = {"-x", "--rule-exception"},
@@ -48,7 +62,7 @@ public final class Application implements Callable<Integer> {
       names = {"-s", "--sarif"},
       description = "Specify the paths to SARIFs that the hardener should act on",
       required = false)
-  private List<Path> sarifs;
+  private List<File> sarifs;
 
   @CommandLine.Option(
       names = {"-i", "--include"},
@@ -71,43 +85,67 @@ public final class Application implements Callable<Integer> {
 
   @Override
   public Integer call() {
-    final URL jsLanguageProviderBundleURL =
-        ClassLoader.getSystemResource("javascript-language-provider.js");
-    if (jsLanguageProviderBundleURL == null) {
-      throw new NullPointerException(
-          "Cannot find js language provider bundle. Check classpath or GraalVM native image resource inclusion configuration");
+    final StopWatch stopwatch = StopWatch.createStarted();
+    if (verbose) {
+      enableDebugLogging();
     }
-    final Source jsLanguageProviderBundleSource;
     try {
-      jsLanguageProviderBundleSource = Source.newBuilder("js", jsLanguageProviderBundleURL).build();
-    } catch (IOException e) {
-      throw new UncheckedIOException(
-          "Failed to read JS language provider bundle. This should never happen", e);
+      JavaFixitCliRun cliRun = new JavaFixitCliRun();
+      cliRun.run(
+          ruleDefault != null ? ruleDefault : DefaultRuleSetting.ENABLED,
+          ruleExceptions != null ? ruleExceptions : Collections.emptyList(),
+          sarifs != null ? sarifs : Collections.emptyList(),
+          repositoryRoot,
+          includes != null ? includes : defaultIncludes,
+          excludes != null ? excludes : defaultExcludes,
+          output);
+      stopwatch.stop();
+
+      Logger log = LoggerFactory.getLogger(Application.class);
+      log.info("Weaved repository in {}", formatDurationHMS(stopwatch.getTime()));
+      return cliSuccessCode;
+    } catch (Exception e) {
+      e.printStackTrace(System.err);
+      return cliErrorCode;
     }
-    try (var context = Context.newBuilder("js").build()) {
-      context.eval(jsLanguageProviderBundleSource);
-      final var provider = context.eval("js", "codetlProvider.weave");
-      try (var paths = Files.walk(repositoryRoot)) {
-        // TODO ignore node_modules
-        paths
-            .filter(Files::isRegularFile)
-            .map(
-                path -> {
-                  final String contents;
-                  try {
-                    contents = Files.readString(path, StandardCharsets.UTF_8);
-                  } catch (IOException e) {
-                    throw new UncheckedIOException("Failed to read file " + path, e);
-                  }
-                  final Value result = provider.execute(path.toString(), contents, "auto");
-                  // TODO create CodeTF result object
-                  return result.asString();
-                })
-            .forEach(System.out::println);
-      } catch (IOException e) {
-        throw new UncheckedIOException("Failed to walk repository " + repositoryRoot, e);
-      }
-    }
-    return 0;
   }
+
+  /** Dynamically raises the log level to DEBUG for more output! */
+  private void enableDebugLogging() {
+    ch.qos.logback.classic.Logger rootLogger =
+        (ch.qos.logback.classic.Logger)
+            LoggerFactory.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME);
+    rootLogger.setLevel(Level.toLevel("DEBUG"));
+  }
+
+  private static final class DefaultRuleSettingConverter
+      implements CommandLine.ITypeConverter<DefaultRuleSetting> {
+    @Override
+    public DefaultRuleSetting convert(final String s) {
+      if ("enabled".equalsIgnoreCase(s)) {
+        return DefaultRuleSetting.ENABLED;
+      } else if ("disabled".equalsIgnoreCase(s)) {
+        return DefaultRuleSetting.DISABLED;
+      }
+      throw new IllegalArgumentException(
+          "invalid setting for default rule setting -- must be 'enabled' (default) or 'disabled'");
+    }
+  }
+
+  @VisibleForTesting
+  static final List<String> defaultIncludes =
+      List.of(
+          "**.java",
+          "**/*.java",
+          "pom.xml",
+          "**/pom.xml",
+          "**.jsp",
+          "**/*.jsp",
+          "web.xml",
+          "**/web.xml");
+
+  @VisibleForTesting static final List<String> defaultExcludes = List.of("**/test/**");
+
+  private static final int cliSuccessCode = 0;
+  private static final int cliErrorCode = -1;
 }

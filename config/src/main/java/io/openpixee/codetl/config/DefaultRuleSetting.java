@@ -1,4 +1,4 @@
-package io.openpixee.java;
+package io.openpixee.codetl.config;
 
 import java.util.Objects;
 

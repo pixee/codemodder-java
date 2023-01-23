@@ -1,18 +1,19 @@
-package io.openpixee.java;
+package io.openpixee.codetl.cli;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
+import io.openpixee.java.IncludesExcludes;
 import java.io.File;
 import org.junit.jupiter.api.Test;
 
-final class JavaFixitCliTest {
-
+/** Unit tests for {@link Application}. */
+final class ApplicationTest {
   @Test
-  void defaults_includes_excludes_are_good() {
+  void default_includes_excludes_match_expected_files() {
     IncludesExcludes includesExcludes =
         IncludesExcludes.fromConfiguration(
-            new File("."), JavaFixitCli.defaultIncludes, JavaFixitCli.defaultExcludes);
+            new File("."), Application.defaultIncludes, Application.defaultExcludes);
     assertThat(includesExcludes.shouldInspect(file("src/main/java/Foo.java")), is(true));
     assertThat(
         includesExcludes.shouldInspect(file("src/main/resources/WEB-INF/web.xml")), is(true));

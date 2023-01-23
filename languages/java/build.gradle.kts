@@ -36,6 +36,7 @@ dependencies {
 
     api(libs.javadiff) // TODO we leak this dependency through exceptions - let's encapsulate those
     api("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo
+    api(project(":config"))
 
     implementation(libs.codescan.sarif)
     implementation(libs.commons.collections4)

@@ -9,11 +9,10 @@ import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.openpixee.java.DefaultRuleSetting;
+import io.openpixee.codetl.config.DefaultRuleSetting;
 import io.openpixee.java.RuleContext;
 import io.openpixee.java.VisitorFactory;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -30,9 +29,10 @@ final class CodeQlPluginTest {
   @BeforeEach
   void setup() throws IOException {
     this.plugin = new CodeQlPlugin();
-    String sarifFile = "src/test/resources/webgoat_v8.2.0_codeql.sarif";
-    SarifSchema210 sarifSchema210 =
-        new ObjectMapper().readValue(new FileReader(sarifFile), SarifSchema210.class);
+    final SarifSchema210 sarifSchema210;
+    try (var is = CodeQlPluginTest.class.getResourceAsStream("/webgoat_v8.2.0_codeql.sarif")) {
+      sarifSchema210 = new ObjectMapper().readValue(is, SarifSchema210.class);
+    }
     this.runs = sarifSchema210.getRuns();
     assertThat(runs.size(), equalTo(1));
   }

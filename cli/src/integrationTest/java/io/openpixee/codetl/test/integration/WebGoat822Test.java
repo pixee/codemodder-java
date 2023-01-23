@@ -1,4 +1,4 @@
-package io.openpixee.java.protections;
+package io.openpixee.codetl.test.integration;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -8,12 +8,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.pixee.codetf.CodeTFChange;
 import io.github.pixee.codetf.CodeTFReport;
 import io.github.pixee.codetf.CodeTFResult;
-import io.openpixee.java.JavaFixitCli;
+import io.openpixee.codetl.cli.Application;
 import java.io.File;
 import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import picocli.CommandLine;
 
 final class WebGoat822Test extends GitRepositoryTest {
@@ -27,7 +30,7 @@ final class WebGoat822Test extends GitRepositoryTest {
   @Test
   void it_transforms_webgoat_normally() throws Exception {
     int exitCode =
-        new CommandLine(new JavaFixitCli())
+        new CommandLine(new Application())
             .execute("-o", outputFile.getPath(), "-r", repoDir.getPath());
 
     assertThat(exitCode, is(0));
@@ -63,16 +66,20 @@ final class WebGoat822Test extends GitRepositoryTest {
   }
 
   @Test
-  void it_transforms_webgoat_with_codeql() throws Exception {
+  void it_transforms_webgoat_with_codeql(@TempDir final Path tmp) throws Exception {
+    final var filename =
+        "webgoat_v8.2.0_codeql.sarif"; // TODO is this supposed to be webgoat_v8.2.2_contrast.sarif?
+    final var sarif = tmp.resolve(filename);
+    try (var is = WebGoat820Test.class.getResourceAsStream("/" + filename)) {
+      if (is == null) {
+        throw new IllegalStateException("Expected to find test SARIF file " + filename);
+      }
+      Files.copy(is, sarif);
+    }
+
     int exitCode =
-        new CommandLine(new JavaFixitCli())
-            .execute(
-                "-o",
-                outputFile.getPath(),
-                "-r",
-                repoDir.getPath(),
-                "-s",
-                "src/test/resources/webgoat_v8.2.0_codeql.sarif");
+        new CommandLine(new Application())
+            .execute("-o", outputFile.getPath(), "-r", repoDir.getPath(), "-s", sarif.toString());
 
     assertThat(exitCode, is(0));
 

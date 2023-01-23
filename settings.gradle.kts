@@ -8,4 +8,4 @@ plugins {
     id("io.openpixee.codetl.settings")
 }
 
-include("cli", "languages:java", "languages:javascript")
+include("cli", "config", "languages:java", "languages:javascript")
