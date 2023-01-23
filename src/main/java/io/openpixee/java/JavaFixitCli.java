@@ -3,6 +3,7 @@ package io.openpixee.java;
 import static org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS;
 
 import com.github.lalyos.jfiglet.FigletFont;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import java.io.File;
 import java.io.IOException;
@@ -89,8 +90,8 @@ public final class JavaFixitCli implements Callable<Integer> {
           ruleExceptions != null ? ruleExceptions : Collections.emptyList(),
           sarifs != null ? sarifs : Collections.emptyList(),
           repositoryRoot,
-          includes != null ? includes : Collections.emptyList(),
-          excludes != null ? excludes : Collections.emptyList(),
+          includes != null ? includes : defaultIncludes,
+          excludes != null ? excludes : defaultExcludes,
           output,
           verbose);
       stopwatch.stop();
@@ -118,6 +119,20 @@ public final class JavaFixitCli implements Callable<Integer> {
           "invalid setting for default rule setting -- must be 'enabled' (default) or 'disabled'");
     }
   }
+
+  @VisibleForTesting
+  static final List<String> defaultIncludes =
+      List.of(
+          "**.java",
+          "**/*.java",
+          "pom.xml",
+          "**/pom.xml",
+          "**.jsp",
+          "**/*.jsp",
+          "web.xml",
+          "**/web.xml");
+
+  @VisibleForTesting static final List<String> defaultExcludes = List.of("**/test/**");
 
   private static final int cliSuccessCode = 0;
   private static final int cliErrorCode = -1;

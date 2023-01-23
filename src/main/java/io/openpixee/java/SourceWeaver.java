@@ -124,8 +124,7 @@ public interface SourceWeaver {
         throws IOException {
 
       final FileWeavingContext context =
-          new FileWeavingContext.Default(
-              javaFile, includesExcludes.getIncludesExcludesForFile(javaFile));
+          new FileWeavingContext.Default(includesExcludes.getIncludesExcludesForFile(javaFile));
 
       visitorFactories.forEach(
           vf -> {

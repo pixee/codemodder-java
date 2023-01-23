@@ -43,12 +43,17 @@ interface FileWeaver {
           fileBasedWeaver -> {
             Path repositoryRootPath = repositoryRoot.toPath();
             try (Stream<Path> stream = walk(repositoryRootPath, Integer.MAX_VALUE)) {
-              List<File> files = stream.map(Path::toFile).sorted().collect(Collectors.toList());
+              List<File> files =
+                  stream
+                      .map(Path::toFile)
+                      .filter(includesExcludes::shouldInspect)
+                      .sorted()
+                      .collect(Collectors.toList());
               for (File filePath : files) {
                 var canonicalFile = filePath.getCanonicalFile();
                 var context =
                     new FileWeavingContext.Default(
-                        canonicalFile, includesExcludes.getIncludesExcludesForFile(filePath));
+                        includesExcludes.getIncludesExcludesForFile(filePath));
                 WeavingResult result =
                     fileBasedWeaver.visitRepositoryFile(
                         repositoryRoot,

@@ -146,8 +146,11 @@ interface CodeTFReportGenerator {
                             weave.changeCode(),
                             "fill description for " + weave.changeCode()))
                 .collect(Collectors.toList());
-        CodeTFResult result = new CodeTFResult(path, diff, changes);
-        codetfResults.add(result);
+
+        if (StringUtils.isNotBlank(diff)) {
+          CodeTFResult result = new CodeTFResult(path, diff, changes);
+          codetfResults.add(result);
+        }
       }
       return Collections.unmodifiableList(codetfResults);
     }

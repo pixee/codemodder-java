@@ -1,7 +1,7 @@
 [![Actions Status](https://github.com/pixeeworks/java-code-hardener/workflows/Java%20CI/badge.svg)](https://github.com/pixeeworks/java-code-hardener/actions)
 ![Coverage](.github/badges/jacoco.svg)
 
-# java-fixit
+# OpenPixee: Java Language Provider
 
 A utility for generating a list of suggested weaves.
 
@@ -15,14 +15,35 @@ TODO: We don't have configuration yet. There are lots of possible configurations
 * Should we inject comments that explain the security implications of this change?
 
 ### Running the tool
+You should hopefully be running this as part of a polyglot CLI TBD but if you need to run the JAR directly, you can do as follows:
 
+```shell
+$ java -jar target/java-code-hardener-X.jar <args>
 ```
-Usage: pixee-java-hardener [-hV] -c=<configuration> -o=<output> -r=<repositoryRoot>
+
+Argument information here:
+```
+Usage: java-code-hardener [-hvV] [-d=<ruleDefault>] -o=<output> -r=<repositoryRoot>
+                 [-e=<excludes>]... [-i=<includes>]... [-s=<sarifs>]...
+                 [-x=<ruleExceptions>]...
 scans a repository with suggested weaves for Java
--c, --config=<configuration>  Specify the configuration file
--h, --help              Show this help message and exit.
--o, --output=<output>   Specify the file to write the output results to
--r, --repository=<repositoryRoot> Source code repository path
+  -d, --rule-default=<ruleDefault>
+                             Specify the default rule setting ('enabled' or
+                               'disabled')
+  -e, --exclude=<excludes>   Specify the paths to exclude within the repository
+  -h, --help                 Show this help message and exit.
+  -i, --include=<includes>   Specify the paths to include within the repository
+  -o, --output=<output>      Specify the file to write the output results to
+  -r, --repository=<repositoryRoot>
+                             Source code repository path
+  -s, --sarif=<sarifs>       Specify the paths to SARIFs that the hardener
+                               should act on
+  -v, --verbose              Specify whether debug logging should be enabled
+  -V, --version              Print version information and exit.
+  -x, --rule-exception=<ruleExceptions>
+                             Specify the rules that should have have the
+                               opposite of the default rule setting
+
 ```
 
 ### Consuming the output

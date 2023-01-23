@@ -5,11 +5,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.contrastsecurity.sarif.Result;
-import io.openpixee.java.protections.WeavingTests;
 import io.openpixee.java.ChangedFile;
 import io.openpixee.java.DependencyGAV;
 import io.openpixee.java.Weave;
-
+import io.openpixee.java.protections.WeavingTests;
 import java.io.IOException;
 import java.util.List;
 import org.hamcrest.CoreMatchers;

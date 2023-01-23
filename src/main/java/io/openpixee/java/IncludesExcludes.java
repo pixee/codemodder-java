@@ -2,6 +2,7 @@ package io.openpixee.java;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
+import java.nio.file.FileSystems;
 import java.util.*;
 
 /** This is the main interaction point with types for detecting if a path should be included. */
@@ -28,10 +29,12 @@ public interface IncludesExcludes {
       if (!pathIncludes.isEmpty()) {
         for (PathMatcher pathInclude : pathIncludes) {
           if (pathInclude.matches(file)) {
-            // unless there is a deeper exclude, we match
+            // if there is an exclude, we honor that
             for (PathMatcher pathExclude : pathExcludes) {
-              if (pathExclude.matches(file) && pathExclude.hasLongerPathThan(pathInclude)) {
-                return false;
+              if (pathExclude.matches(file)) {
+                if (!pathExclude.targetsLine()) {
+                  return false;
+                }
               }
             }
             return true;
@@ -53,7 +56,7 @@ public interface IncludesExcludes {
       final Set<Integer> allowedLines = new HashSet<>();
       for (PathMatcher pathInclude : pathIncludes) {
         if (pathInclude.targetsLine()) {
-          if (pathInclude.targetsFileExactly(file)) {
+          if (pathInclude.matches(file)) {
             allowedLines.add(Objects.requireNonNull(pathInclude.line()));
           }
         }
@@ -62,7 +65,7 @@ public interface IncludesExcludes {
       final Set<Integer> disallowedLines = new HashSet<>();
       for (PathMatcher pathExclude : pathExcludes) {
         if (pathExclude.targetsLine()) {
-          if (pathExclude.targetsFileExactly(file)) {
+          if (pathExclude.matches(file)) {
             disallowedLines.add(Objects.requireNonNull(pathExclude.line()));
           }
         }
@@ -120,22 +123,27 @@ public interface IncludesExcludes {
     Objects.requireNonNull(pattern);
     pattern = pattern.trim();
 
+    // trim leading slash if user provided one
+    if (!pattern.startsWith("/")) {
+      pattern = "/" + pattern;
+    }
+
     // determine if this targets a line
     int lineSeparatorIndex = pattern.indexOf(':');
 
     final Integer line;
-    final String pathPrefix;
+    final String pathPatternPart;
 
     // if it targets a line, get the path and line separately
     if (lineSeparatorIndex != -1) {
-      pathPrefix = pattern.substring(0, lineSeparatorIndex);
+      pathPatternPart = pattern.substring(0, lineSeparatorIndex);
       line = Integer.parseInt(pattern.substring(lineSeparatorIndex + 1));
     } else {
-      pathPrefix = pattern;
+      pathPatternPart = pattern;
       line = null;
     }
     try {
-      return new PathMatcher(repositoryRoot, pathPrefix, line);
+      return new PathMatcher(FileSystems.getDefault(), repositoryRoot, pathPatternPart, line);
     } catch (Exception e) {
       throw new IllegalArgumentException("couldn't get canonical path", e);
     }
