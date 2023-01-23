@@ -1,11 +1,11 @@
 rootProject.name = "codetl"
 
 pluginManagement {
-    includeBuild("gradle/settings")
+    includeBuild("gradle/meta-plugins")
 }
 
 plugins {
-    id("io.openpixee.repositories")
+    id("io.openpixee.codetl.repositories")
 }
 
 dependencyResolutionManagement {

@@ -1,13 +1,8 @@
-pluginManagement {
-    includeBuild("../meta-plugins")
-}
-
-plugins {
-    id("io.openpixee.codetl.repositories")
-}
+include("plugin-analysis-plugins", "settings")
 
 dependencyResolutionManagement {
     versionCatalogs.create("buildlibs") {
         from(files("../buildlibs.versions.toml"))
     }
+    repositories.mavenCentral()
 }

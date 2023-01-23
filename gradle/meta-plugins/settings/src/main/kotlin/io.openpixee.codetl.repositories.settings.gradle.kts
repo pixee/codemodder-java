@@ -1,8 +1,11 @@
-plugins {
-    `maven-publish`
+pluginManagement {
+    // Get our own convention plugins from 'gradle/plugins'
+    if (File(rootDir, "gradle/plugins").exists()) {
+        includeBuild("gradle/plugins")
+    }
 }
 
-publishing {
+dependencyResolutionManagement {
     repositories {
         maven {
             name = "pixeeArtifactory"

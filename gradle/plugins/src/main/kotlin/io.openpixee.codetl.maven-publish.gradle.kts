@@ -1,4 +1,5 @@
 plugins {
+    id("io.openpixee.codetl.base")
     `maven-publish`
 }
 
