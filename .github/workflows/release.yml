@@ -31,6 +31,9 @@ jobs:
           components: 'native-image'
           github-token: ${{ secrets.github_token }}
       - uses: gradle/gradle-build-action@v2
+        env:
+          ORG_GRADLE_PROJECT_pixeeArtifactoryUsername: ${{ secrets.PIXEE_ARTIFACTORY_USERNAME }}
+          ORG_GRADLE_PROJECT_pixeeArtifactoryPassword: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
         with:
           arguments: -q setVersion -PnewVersion=${{ inputs.version }}
       - uses: gradle/gradle-build-action@v2
