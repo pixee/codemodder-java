@@ -28,7 +28,7 @@ jobs:
         with:
           version: 'latest'
           java-version: '17'
-          components: 'native-image'
+          components: 'js,native-image'
           github-token: ${{ secrets.github_token }}
       - uses: gradle/gradle-build-action@v2
         env:
