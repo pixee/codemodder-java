@@ -13,6 +13,9 @@ jobs:
       contents: write
     environment: Public Release
     runs-on: "ubuntu-latest"
+    env:
+      ORG_GRADLE_PROJECT_pixeeArtifactoryUsername: ${{ secrets.PIXEE_ARTIFACTORY_USERNAME }}
+      ORG_GRADLE_PROJECT_pixeeArtifactoryPassword: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v3
@@ -31,15 +34,9 @@ jobs:
           components: 'js,native-image'
           github-token: ${{ secrets.github_token }}
       - uses: gradle/gradle-build-action@v2
-        env:
-          ORG_GRADLE_PROJECT_pixeeArtifactoryUsername: ${{ secrets.PIXEE_ARTIFACTORY_USERNAME }}
-          ORG_GRADLE_PROJECT_pixeeArtifactoryPassword: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
         with:
           arguments: -q setVersion -PnewVersion=${{ inputs.version }}
       - uses: gradle/gradle-build-action@v2
-        env:
-          ORG_GRADLE_PROJECT_pixeeArtifactoryUsername: ${{ secrets.PIXEE_ARTIFACTORY_USERNAME }}
-          ORG_GRADLE_PROJECT_pixeeArtifactoryPassword: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
         with:
           arguments: build publish
 
