@@ -79,7 +79,7 @@ public interface DependencyGAV {
    * here.
    */
   DependencyGAV OPENPIXEE_JAVA_SECURITY_TOOLKIT =
-      createDefault("io.github.pixee", "java-code-security-toolkit", "0.0.2");
+      createDefault("io.openpixee", "java-security-toolkit", "1.0.0");
 
   /** There are multiple XSS rules require an XSS encoder. */
   DependencyGAV OWASP_XSS_JAVA_ENCODER =
