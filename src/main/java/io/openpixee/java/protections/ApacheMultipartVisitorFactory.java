@@ -13,6 +13,7 @@ import io.openpixee.java.MethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
+import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.security.Filenames;
 import java.io.File;
 import java.util.List;
@@ -45,7 +46,7 @@ public final class ApacheMultipartVisitorFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
-            ASTs.addImportIfMissing(cu, Filenames.class);
+            ASTTransforms.addImportIfMissing(cu, Filenames.class);
             MethodCallExpr safeCall =
                 new MethodCallExpr(
                     new NameExpr(Filenames.class.getSimpleName()),

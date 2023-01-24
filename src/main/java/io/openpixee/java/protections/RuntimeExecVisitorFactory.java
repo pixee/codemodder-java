@@ -13,6 +13,7 @@ import io.openpixee.java.MethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
+import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.security.SystemCommand;
 import java.io.File;
 import java.util.List;
@@ -59,7 +60,7 @@ public final class RuntimeExecVisitorFactory implements VisitorFactory {
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
             Expression scope = methodCallExpr.getScope().get();
-            ASTs.addImportIfMissing(cu, SystemCommand.class);
+            ASTTransforms.addImportIfMissing(cu, SystemCommand.class);
             NameExpr callbackClass =
                 new NameExpr(io.openpixee.security.SystemCommand.class.getSimpleName());
             MethodCallExpr safeExpression = new MethodCallExpr(callbackClass, "runCommand");

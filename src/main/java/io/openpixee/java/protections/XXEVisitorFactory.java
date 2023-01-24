@@ -16,6 +16,8 @@ import io.openpixee.java.MethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
+import io.openpixee.java.ast.ASTTransforms;
+import io.openpixee.java.ast.ASTs;
 import io.openpixee.security.XMLInputFactorySecurity;
 import java.io.File;
 import java.util.List;
@@ -77,7 +79,7 @@ public final class XXEVisitorFactory implements VisitorFactory {
           @Override
           public TransformationResult<MethodCallExpr> transform(
               final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
-            ASTs.addImportIfMissing(cu, XMLInputFactorySecurity.class);
+            ASTTransforms.addImportIfMissing(cu, XMLInputFactorySecurity.class);
             final NameExpr callbackClass =
                 new NameExpr(XMLInputFactorySecurity.class.getSimpleName());
             final MethodCallExpr wrapperExpr = new MethodCallExpr(callbackClass, "hardenFactory");

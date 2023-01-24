@@ -18,6 +18,8 @@ import io.openpixee.java.ObjectCreationTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
+import io.openpixee.java.ast.ASTTransforms;
+import io.openpixee.java.ast.ASTs;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +83,7 @@ public final class XStreamVisitorFactory implements VisitorFactory {
                 int indexOfVulnStmt = statements.indexOf(stmt.get());
                 statements.add(
                     indexOfVulnStmt + 1, buildFixStatement(variableDeclaration.getNameAsString()));
-                ASTs.addImportIfMissing(cu, "io.openpixee.security.HardeningConverter");
+                ASTTransforms.addImportIfMissing(cu, "io.openpixee.security.HardeningConverter");
                 context.addWeave(
                     Weave.from(
                         objectCreationExpr.getRange().get().begin.line, xstreamConverterRuleId));

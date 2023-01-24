@@ -10,6 +10,7 @@ import io.openpixee.java.DependencyGAV;
 import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
+import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.security.*;
 import java.io.File;
 import java.util.Objects;
@@ -54,8 +55,8 @@ public final class SSRFVisitorFactory implements VisitorFactory {
                *
                * URL u = io.openpixee.security.Urls.create(foo, io.openpixee.security.Urls.HTTP_PROTOCOLS, io.openpixee.security.HostValidator.ALLOW_ALL)
                */
-              ASTs.addImportIfMissing(cu, Urls.class);
-              ASTs.addImportIfMissing(cu, HostValidator.class);
+              ASTTransforms.addImportIfMissing(cu, Urls.class);
+              ASTTransforms.addImportIfMissing(cu, HostValidator.class);
               FieldAccessExpr httpProtocolsExpr = new FieldAccessExpr();
               httpProtocolsExpr.setScope(new NameExpr(Urls.class.getSimpleName()));
               httpProtocolsExpr.setName("HTTP_PROTOCOLS");

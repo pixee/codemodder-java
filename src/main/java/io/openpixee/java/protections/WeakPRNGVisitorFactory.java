@@ -10,6 +10,7 @@ import io.openpixee.java.ObjectCreationTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
+import io.openpixee.java.ast.ASTTransforms;
 import java.io.File;
 import java.security.SecureRandom;
 import java.util.List;
@@ -38,7 +39,7 @@ public final class WeakPRNGVisitorFactory implements VisitorFactory {
               final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
             objectCreationExpr.setType(
                 new ClassOrInterfaceType(SecureRandom.class.getSimpleName()));
-            ASTs.addImportIfMissing(
+            ASTTransforms.addImportIfMissing(
                 objectCreationExpr.findCompilationUnit().get(), SecureRandom.class.getName());
             Weave weave =
                 Weave.from(objectCreationExpr.getRange().get().begin.line, secureRandomRuleId);

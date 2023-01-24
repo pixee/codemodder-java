@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.Expression;
-import io.openpixee.java.protections.ASTs;
+import io.openpixee.java.ast.ASTs;
 import io.openpixee.java.protections.XMLDecoderVisitorFactory;
 import java.util.HashMap;
 import java.util.List;

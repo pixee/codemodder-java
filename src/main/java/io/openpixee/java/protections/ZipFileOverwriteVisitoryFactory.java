@@ -12,6 +12,7 @@ import io.openpixee.java.ObjectCreationToMethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
 import io.openpixee.java.Weave;
+import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.security.ZipSecurity;
 import java.io.File;
 import java.util.List;
@@ -42,7 +43,7 @@ public final class ZipFileOverwriteVisitoryFactory implements VisitorFactory {
                 new MethodCallExpr(callbackClass, "createHardenedInputStream");
             securedCall.setArguments(objectCreationExpr.getArguments());
             final CompilationUnit cu = objectCreationExpr.findCompilationUnit().get();
-            ASTs.addImportIfMissing(cu, ZipSecurity.class);
+            ASTTransforms.addImportIfMissing(cu, ZipSecurity.class);
             Weave weave =
                 Weave.from(
                     objectCreationExpr.getRange().get().begin.line,
