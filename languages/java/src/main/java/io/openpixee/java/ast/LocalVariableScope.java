@@ -1,5 +1,6 @@
 package io.openpixee.java.ast;
 
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
@@ -11,6 +12,7 @@ import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Contains the expressions and statements that span the scope of a local variable declaration. See
@@ -107,5 +109,9 @@ public final class LocalVariableScope {
 
   public NodeList<Statement> getStatements() {
     return statements;
+  }
+
+  public Stream<Node> stream() {
+    return Stream.concat(expressions.stream(), statements.stream());
   }
 }
