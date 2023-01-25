@@ -165,4 +165,16 @@ public final class ASTPatterns {
   public static Optional<ReturnStmt> isReturnExpr(final Expression expr) {
     return expr.getParentNode().map(p -> p instanceof ReturnStmt ? (ReturnStmt) p : null);
   }
+
+  /**
+   * Test for this pattern: {@link MethodCallExpr} -&gt; {@link Expression} ({@code expr}), where
+   * {@code expr} is an argument.
+   */
+  public static Optional<MethodCallExpr> isArgumentOfMethodCall(final Expression expr) {
+    return expr.getParentNode()
+        .map(p -> p instanceof MethodCallExpr ? (MethodCallExpr) p : null)
+        .filter(
+            mce ->
+                mce.getArguments().stream().filter(arg -> arg.equals(expr)).findAny().isPresent());
+  }
 }
