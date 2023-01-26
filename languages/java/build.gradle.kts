@@ -24,7 +24,6 @@ publishing {
         register<MavenPublication>("maven") {
             from(components["java"])
             artifactId = "codetl-java-language-provider"
-            version = "1.0.3"
         }
     }
 }
