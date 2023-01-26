@@ -1,6 +1,7 @@
 plugins {
-    java
+    id("io.openpixee.codetl.base")
     id("com.diffplug.spotless")
+    java
 }
 
 java {

@@ -1,7 +1,6 @@
-@Suppress("DSL_SCOPE_VIOLATION") // https://github.com/gradle/gradle/issues/22797
 plugins {
     `kotlin-dsl`
-    alias(buildlibs.plugins.spotless)
+    id("com.diffplug.spotless")
 }
 
 spotless {
@@ -11,10 +10,11 @@ spotless {
     }
 }
 
-dependencies {
-    implementation(buildlibs.spotless)
-}
-
 tasks.check {
     dependsOn(tasks.spotlessCheck)
+}
+
+dependencies {
+    implementation(buildlibs.spotless)
+    implementation(buildlibs.graalvm.nativeImage)
 }

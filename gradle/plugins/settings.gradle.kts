@@ -3,7 +3,8 @@ pluginManagement {
 }
 
 plugins {
-    id("io.openpixee.repositories")
+    // only take repositories, because the other settings plugins are intended for the root build
+    id("io.openpixee.codetl.repositories")
 }
 
 dependencyResolutionManagement {
@@ -11,5 +12,3 @@ dependencyResolutionManagement {
         from(files("../buildlibs.versions.toml"))
     }
 }
-
-include("base")
