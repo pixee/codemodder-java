@@ -3,18 +3,38 @@
 CLI tool for leveraging the Code Transformation Language (CodeTL) to apply complex source code
 transformations to projects.
 
-## Building
+## Developing
+
+Follow these instructions if you intend to modify and build this project from
+source.
+
+### First Time Set Up
 
 1. Install GraalVM 22.3.0
 2. Install native-image component
    ```shell
     gu install native-image
    ```
-3. Build CLI tool
-   ```shell
-   ./gradlew assemble
+3. Initialize Submodules
+
+```shell
+git submodule init
+git submodule update
+```
+
+4. Configure JFrog Artifactory Authentication by adding the following properties to your Gradle home gradle.properties (typically `$HOME/.gradle/gradle.properties`):
    ```
-4. The built binary is at path `./cli/build/native/nativeCompile/codetl`
+   pixeeArtifactoryUsername=<your-username>
+   pixeeArtifactoryPassword=<your-token>
+   ```
+
+### Building
+
+```shell
+./gradlew assemble
+```
+
+The built binary is at path `./cli/build/native/nativeCompile/codetl`
 
 ### Running Tests
 
@@ -26,8 +46,6 @@ transformations to projects.
 
 CodeTL is a language agnostic tool and code transformation domain specific language (DSL). Support
 for a language is added by an extension called a "language provider". These language providers may be found in the `./languages` directory.
-
-
 
 ### ⚗️ JavaScript Language Provider Proof of Concept
 
