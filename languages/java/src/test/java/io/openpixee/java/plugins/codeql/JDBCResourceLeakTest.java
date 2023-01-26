@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- Tests relating to JDBC database resource leaks detected by CodeQl. See @see <a href="https://codeql.github.com/codeql-query-help/java/java-database-resource-leak/"> CodeQL - Potential database resource leak </a>.
+ * Tests relating to JDBC database resource leaks detected by CodeQl. See @see <a
+ * href="https://codeql.github.com/codeql-query-help/java/java-database-resource-leak/">CodeQL -
+ * Potential database resource leak </a>.
  */
 final class JDBCResourceLeakTest {
 
