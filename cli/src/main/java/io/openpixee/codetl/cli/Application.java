@@ -89,8 +89,8 @@ public final class Application implements Callable<Integer> {
     if (verbose) {
       enableDebugLogging();
     }
+    final JavaFixitCliRun cliRun = new JavaFixitCliRun();
     try {
-      JavaFixitCliRun cliRun = new JavaFixitCliRun();
       cliRun.run(
           ruleDefault != null ? ruleDefault : DefaultRuleSetting.ENABLED,
           ruleExceptions != null ? ruleExceptions : Collections.emptyList(),

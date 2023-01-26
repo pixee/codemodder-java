@@ -12,11 +12,10 @@ import io.openpixee.codetl.cli.Application;
 import java.nio.charset.StandardCharsets;
 
 /**
- * A configurator for the log levels that defaults to "quiet" mode. This can be updated by using the
- * "-v" (verbose) command line setting. It is activated with the {@link java.util.ServiceLoader}
- * API.
+ * A configurator for the log levels that defaults to "quiet" mode. It is activated with the {@link
+ * java.util.ServiceLoader} API.
  */
-@SuppressWarnings("unused") // this is instantiated
+@SuppressWarnings("unused") // instantiated via serviceloader
 public final class LoggingConfigurator extends ContextAwareBase implements Configurator {
 
   @Override

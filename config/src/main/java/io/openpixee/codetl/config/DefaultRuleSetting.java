@@ -3,7 +3,7 @@ package io.openpixee.codetl.config;
 import java.util.Objects;
 
 /**
- * During analysis, this will be the default setting for every rule. All of the rules listed in the
+ * During analysis, this will be the default setting for every rule. All the rules listed in the
  * 'exceptions' section of the configuration will be considered the other, opposite value.
  */
 public enum DefaultRuleSetting {
@@ -26,6 +26,6 @@ public enum DefaultRuleSetting {
         return value;
       }
     }
-    throw new IllegalArgumentException("unknown default rule setting");
+    throw new IllegalArgumentException("unknown default rule setting " + s);
   }
 }

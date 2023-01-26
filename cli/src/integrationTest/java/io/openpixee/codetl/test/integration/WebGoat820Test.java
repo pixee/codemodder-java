@@ -14,7 +14,6 @@ import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import picocli.CommandLine;
@@ -56,7 +55,7 @@ final class WebGoat820Test extends GitRepositoryTest {
             .flatMap(List::stream)
             .filter(
                 change -> "codeql:java/missing-jwt-signature-check".equals(change.getCategory()))
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
     assertThat(changes.size(), equalTo(6));
 
     // this file is also only changed by including the codeql results
