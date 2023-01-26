@@ -2,10 +2,12 @@ package io.openpixee.java.plugins.codeql;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
@@ -46,6 +48,7 @@ public final class JDBCResourceLeakFixer {
         .filter(mce -> mce.getNameAsString().equals("close"));
   }
 
+  /** Checks if a variable has {@code close()} called at some point, explicitly or implicitly. */
   public static boolean isClosed(VariableDeclarator vd) {
     // For now we don't have dataflow analysis to verify if close is called at every brach.
     // We instead check if close is called at any point. It matches CodeQL's behaviour
@@ -63,15 +66,12 @@ public final class JDBCResourceLeakFixer {
     // explicit close() call at some point
     var closeCalled =
         scope.stream()
-            .flatMap(
+            .anyMatch(
                 n ->
-                    n
-                        .findFirst(
+                    n.findFirst(
                             MethodCallExpr.class,
                             mce -> isNameInMCEScope.and(isCloseCall).test(mce))
-                        .stream())
-            .findAny()
-            .isPresent();
+                        .isPresent());
     if (closeCalled) return true;
 
     // implicit close() at some point
@@ -85,19 +85,20 @@ public final class JDBCResourceLeakFixer {
     Predicate<TryStmt> isNameExprResource =
         stmt ->
             stmt.getResources().stream()
-                .filter(
+                .anyMatch(
                     expr ->
                         expr.isNameExpr()
-                            && expr.asNameExpr().getNameAsString().equals(vd.getNameAsString()))
-                .findFirst()
-                .isPresent();
+                            && expr.asNameExpr().getNameAsString().equals(vd.getNameAsString()));
+
     if (scope.getStatements().stream()
-        .flatMap(n -> n.findFirst(TryStmt.class, isNameExprResource).stream())
-        .findFirst()
-        .isPresent()) return true;
+        .anyMatch(n -> n.findFirst(TryStmt.class, isNameExprResource).isPresent())) return true;
     return false;
   }
 
+  /**
+   * Checks if an object created/acessed by {@code expr} has {@code close()} called at some point,
+   * explicitly or implicitly.
+   */
   public static boolean isClosed(Expression expr) {
     if (isImmediatelyClosed(expr).isPresent()) return true;
 
@@ -114,6 +115,104 @@ public final class JDBCResourceLeakFixer {
     return false;
   }
 
+  /**
+   * Checks if an object created/acessed by {@code expr} escapes the scope of its encompassing
+   * method immediately, that is, without begin assigned.
+   */
+  public static boolean immediatelyEscapesMethodScope(Expression expr) {
+    // Returned or argument of a MethodCallExpr
+    if (ASTPatterns.isReturnExpr(expr).isPresent()
+        || ASTPatterns.isArgumentOfMethodCall(expr).isPresent()) return true;
+
+    // Is assigned to a field?
+    var maybeAE = ASTPatterns.isAssigned(expr);
+    if (maybeAE.isPresent()) {
+      var ae = maybeAE.get();
+      // TODO Currently we have no precise way of knowing if the target is a field, thus
+      // if the target is not a ExpressionName of a local variable, we consider it escaping
+      Optional<NameExpr> maybeNameTarget =
+          ae.getTarget().isNameExpr() ? Optional.of(ae.getTarget().asNameExpr()) : Optional.empty();
+      var maybeLD =
+          maybeNameTarget.flatMap(
+              nameExpr ->
+                  ASTs.findEarliestLocalDeclarationOf(nameExpr, nameExpr.getNameAsString()));
+      if (maybeLD.isPresent()) return false;
+      else return true;
+    }
+    return false;
+  }
+
+  /** Checks if a variable escapes the scope of its encompassing method. */
+  public static boolean escapesMethodScope(VariableDeclarator vd) {
+    var scope = ASTs.findLocalVariableScope(vd);
+
+    // Returned
+    Predicate<ReturnStmt> isReturned =
+        rs ->
+            rs.getExpression()
+                .filter(
+                    e ->
+                        e.isNameExpr()
+                            && e.asNameExpr().getNameAsString().equals(vd.getNameAsString()))
+                .isPresent();
+    if (scope.stream().anyMatch(n -> n.findFirst(ReturnStmt.class, isReturned).isPresent()))
+      return true;
+
+    // As an argument of a method call
+    Predicate<MethodCallExpr> isCallArgument =
+        mce ->
+            mce.getArguments().stream()
+                .anyMatch(
+                    arg ->
+                        arg.isNameExpr()
+                            && arg.asNameExpr().getNameAsString().equals(vd.getNameAsString()));
+
+    if (scope.stream().anyMatch(n -> n.findFirst(MethodCallExpr.class, isCallArgument).isPresent()))
+      return true;
+
+    // Assigned to a field
+    // As before, we have no tools to precisely identify a field, so we detect any assignments whose
+    // target is not a local variable
+    Predicate<AssignExpr> isAssigned =
+        ae ->
+            ae.getValue().isNameExpr()
+                && ae.getValue().asNameExpr().getNameAsString().equals(vd.getNameAsString());
+    Predicate<AssignExpr> assignedToLocalVariable =
+        ae ->
+            ae.getTarget().isNameExpr()
+                && ASTs.findEarliestLocalDeclarationOf(
+                        ae.getTarget(), ae.getTarget().asNameExpr().getNameAsString())
+                    .isPresent();
+
+    if (scope.stream()
+        .anyMatch(
+            n ->
+                n.findFirst(AssignExpr.class, isAssigned.and(assignedToLocalVariable.negate()))
+                    .isPresent())) return true;
+    return false;
+  }
+
+  /**
+   * Checks if an object created/acessed by {@code expr} escapes the scope of its encompassing
+   * method immediately.
+   */
+  public static boolean escapesMethodScope(Expression expr) {
+    // immediately escapes or
+    if (immediatelyEscapesMethodScope(expr)) return true;
+    // is assigned/initialized to a variable and it escapes
+    // initialized
+    if (ASTPatterns.isInitExpr(expr).filter(vd -> escapesMethodScope(vd)).isPresent()) return true;
+
+    // assigned
+    var maybeLocalVD =
+        ASTPatterns.isAssigned(expr)
+            .map(ae -> ae.getTarget() instanceof NameExpr ? (NameExpr) ae.getTarget() : null)
+            .flatMap(ne -> ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()));
+    if (maybeLocalVD.filter(triplet -> escapesMethodScope(triplet.getValue2())).isPresent())
+      return true;
+    return false;
+  }
+
   public static Optional<Integer> checkAndFix(MethodCallExpr mce) {
     if (isFixable(mce)) return Optional.of(fix(mce));
     return Optional.empty();
@@ -123,18 +222,22 @@ public final class JDBCResourceLeakFixer {
     String code =
         "class A {\n"
             + "private Connection conn;\n"
+            + "private Statement stmt;\n"
             + "\n"
+            + "  void outside(Statement stmt) {}\n"
             + "  void foo(String query) {\n"
-            + "    conn.createStatement().close();\n"
+            + "    Statement stmt;\n"
+            + "    stmt = conn.createStatement();\n"
+            + "    outside(stmt);\n"
             + "  }\n"
             + "}";
     final var combinedTypeSolver = new CombinedTypeSolver();
     StaticJavaParser.getParserConfiguration()
         .setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
     var cu = StaticJavaParser.parse(code);
-    var mce = cu.findAll(MethodCallExpr.class).get(1);
+    var mce = cu.findAll(MethodCallExpr.class).get(0);
     System.out.println(mce);
-    System.out.println(isClosed(mce));
+    System.out.println(escapesMethodScope(mce));
     LexicalPreservingPrinter.setup(cu);
     System.out.println(LexicalPreservingPrinter.print(cu));
   }
