@@ -1,4 +1,5 @@
 plugins {
+    id("io.openpixee.codetl.base")
     application
     id("org.graalvm.buildtools.native")
 }
