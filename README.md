@@ -17,11 +17,10 @@ source.
    ```
 3. Initialize Submodules
 
-```shell
-git submodule init
-git submodule update
-```
-
+   ```shell
+   git submodule init
+   git submodule update
+   ```
 4. Configure JFrog Artifactory Authentication by adding the following properties to your Gradle home gradle.properties (typically `$HOME/.gradle/gradle.properties`):
    ```
    pixeeArtifactoryUsername=<your-username>
