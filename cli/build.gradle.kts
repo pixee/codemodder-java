@@ -26,6 +26,27 @@ graalvmNative {
     }
 }
 
+testing {
+    suites {
+        getByName("test", JvmTestSuite::class) {
+            dependencies {
+                implementation.bundle(testlibs.bundles.junit.jupiter)
+                implementation.bundle(testlibs.bundles.hamcrest)
+                runtimeOnly(testlibs.junit.jupiter.engine)
+            }
+        }
+        getByName("integrationTest", JvmTestSuite::class) {
+            dependencies {
+                implementation.bundle(testlibs.bundles.hamcrest)
+                implementation.bundle(testlibs.bundles.junit.jupiter)
+                implementation("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo)
+                implementation(libs.picocli)
+                implementation(testlibs.jgit)
+            }
+        }
+    }
+}
+
 val bundle by configurations.registering {
     isCanBeConsumed = false
     isCanBeResolved = true
@@ -44,16 +65,14 @@ dependencies {
     implementation(project(":languages:java"))
 
     add(bundle.name, project(":languages:javascript", "bundle"))
+}
 
-    testImplementation(testlibs.bundles.junit.jupiter)
-    testImplementation(testlibs.bundles.hamcrest)
-    testRuntimeOnly(testlibs.junit.jupiter.engine)
-
-    integrationTestImplementation(libs.picocli)
-    integrationTestImplementation("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo)
-    integrationTestImplementation(testlibs.bundles.junit.jupiter)
-    integrationTestImplementation(testlibs.jgit)
-    integrationTestImplementation(testlibs.bundles.hamcrest)
+tasks.integrationTest {
+    dependsOn(tasks.nativeCompile)
+    val executable = tasks.nativeCompile.flatMap { it.outputFile }.map { it.asFile.path }
+    doFirst {
+        systemProperty("io.openpixee.codetl.test.executable", executable.get())
+    }
 }
 
 val copyBundle by tasks.registering(Copy::class) {

@@ -7,7 +7,7 @@ testing {
     suites {
         val test by getting(JvmTestSuite::class)
 
-        val integrationTest by registering(JvmTestSuite::class) {
+        register("integrationTest", JvmTestSuite::class) {
             dependencies {
                 implementation(project())
             }

@@ -12,3 +12,7 @@ graalvmNative {
     // nativeIntegrationTest task to succeed.
     testSupport.set(false)
 }
+
+tasks.assemble {
+    dependsOn(tasks.nativeCompile)
+}

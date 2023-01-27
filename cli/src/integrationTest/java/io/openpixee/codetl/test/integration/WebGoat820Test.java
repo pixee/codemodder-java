@@ -8,15 +8,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.pixee.codetf.CodeTFChange;
 import io.github.pixee.codetf.CodeTFReport;
 import io.github.pixee.codetf.CodeTFResult;
-import io.openpixee.codetl.cli.Application;
+import io.openpixee.codetl.test.integration.junit.CodeTLExecutable;
+import io.openpixee.codetl.test.integration.junit.CodeTLExecutableUnderTest;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import picocli.CommandLine;
+import org.opentest4j.TestAbortedException;
 
 final class WebGoat820Test extends GitRepositoryTest {
 
@@ -27,7 +29,9 @@ final class WebGoat820Test extends GitRepositoryTest {
   }
 
   @Test
-  void it_transforms_webgoat_with_codeql(@TempDir final Path tmp) throws Exception {
+  void it_transforms_webgoat_with_codeql(
+      @TempDir final Path tmp, @CodeTLExecutableUnderTest final CodeTLExecutable codetl)
+      throws IOException {
     final var filename = "webgoat_v8.2.0_codeql.sarif";
     final var sarif = tmp.resolve(filename);
     try (var is = WebGoat820Test.class.getResourceAsStream("/" + filename)) {
@@ -37,11 +41,12 @@ final class WebGoat820Test extends GitRepositoryTest {
       Files.copy(is, sarif);
     }
 
-    int exitCode =
-        new CommandLine(new Application())
-            .execute("-o", outputFile.getPath(), "-r", repoDir.getPath(), "-s", sarif.toString());
-
-    assertThat(exitCode, is(0));
+    try {
+      codetl.execute("-o", outputFile.getPath(), "-r", repoDir.getPath(), "-s", sarif.toString());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new TestAbortedException("interrupted while waiting for codetl process", e);
+    }
 
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 

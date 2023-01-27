@@ -3,7 +3,6 @@ package io.openpixee.codetl.cli;
 import static org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS;
 
 import ch.qos.logback.classic.Level;
-import com.github.lalyos.jfiglet.FigletFont;
 import io.openpixee.codetl.cli.logging.LoggingConfigurator;
 import io.openpixee.codetl.config.DefaultRuleSetting;
 import io.openpixee.java.JavaFixitCliRun;
@@ -25,8 +24,8 @@ import picocli.CommandLine;
 public final class Application implements Callable<Integer> {
 
   public static void main(final String[] args) throws IOException {
-    String banner = FigletFont.convertOneLine("open-pixee");
-    System.out.println(banner);
+    //    String banner = FigletFont.convertOneLine("open-pixee");
+    //    System.out.println(banner);
     final int exitCode = new CommandLine(new Application()).execute(args);
     System.exit(exitCode);
   }

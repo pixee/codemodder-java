@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link Application}. */
 final class ApplicationTest {
+
   @Test
   void default_includes_excludes_match_expected_files() {
     IncludesExcludes includesExcludes =
