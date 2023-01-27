@@ -3,11 +3,13 @@ package io.openpixee.codetl.cli;
 import static org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS;
 
 import ch.qos.logback.classic.Level;
+import com.github.lalyos.jfiglet.FigletFont;
 import io.openpixee.codetl.cli.logging.LoggingConfigurator;
 import io.openpixee.codetl.config.DefaultRuleSetting;
 import io.openpixee.java.JavaFixitCliRun;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -24,8 +26,8 @@ import picocli.CommandLine;
 public final class Application implements Callable<Integer> {
 
   public static void main(final String[] args) throws IOException {
-    //    String banner = FigletFont.convertOneLine("open-pixee");
-    //    System.out.println(banner);
+    String banner = FigletFont.convertOneLine("open-pixee");
+    System.out.println(banner);
     final int exitCode = new CommandLine(new Application()).execute(args);
     System.exit(exitCode);
   }
@@ -34,13 +36,13 @@ public final class Application implements Callable<Integer> {
       names = {"-r", "--repository"},
       description = "Source code repository path",
       required = true)
-  private File repositoryRoot;
+  private Path repositoryRoot;
 
   @CommandLine.Option(
       names = {"-o", "--output"},
       description = "Specify the file to write the output results to",
       required = true)
-  private File output;
+  private Path output;
 
   @CommandLine.Option(
       names = {"-d", "--rule-default"},
@@ -94,7 +96,7 @@ public final class Application implements Callable<Integer> {
           ruleDefault != null ? ruleDefault : DefaultRuleSetting.ENABLED,
           ruleExceptions != null ? ruleExceptions : Collections.emptyList(),
           sarifs != null ? sarifs : Collections.emptyList(),
-          repositoryRoot,
+          repositoryRoot.toFile(),
           includes != null ? includes : defaultIncludes,
           excludes != null ? excludes : defaultExcludes,
           output);
@@ -119,6 +121,7 @@ public final class Application implements Callable<Integer> {
 
   private static final class DefaultRuleSettingConverter
       implements CommandLine.ITypeConverter<DefaultRuleSetting> {
+
     @Override
     public DefaultRuleSetting convert(final String s) {
       if ("enabled".equalsIgnoreCase(s)) {

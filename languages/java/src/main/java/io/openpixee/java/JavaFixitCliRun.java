@@ -6,12 +6,13 @@ import io.openpixee.codetl.config.DefaultRuleSetting;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public final class JavaFixitCliRun {
       final File repositoryRoot,
       final List<String> includePatterns,
       final List<String> excludePatterns,
-      final File output)
+      final Path output)
       throws IOException {
 
     LOG.debug("Default rule setting: {}", defaultRuleSetting.getDescription());
@@ -152,7 +153,9 @@ public final class JavaFixitCliRun {
 
     // write out the JSON
     ObjectMapper mapper = new ObjectMapper();
-    FileUtils.write(output, mapper.writeValueAsString(report), StandardCharsets.UTF_8);
+    try (var writer = Files.newBufferedWriter(output, StandardCharsets.UTF_8)) {
+      mapper.writeValue(writer, report);
+    }
     return report;
   }
 
