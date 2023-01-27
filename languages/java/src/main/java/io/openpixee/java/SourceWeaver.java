@@ -8,7 +8,6 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,10 +23,14 @@ import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** A visitor that finds opportunities for changes/protections/hardening. */
+/**
+ * A visitor that finds opportunities for changes/protections/hardening.
+ */
 public interface SourceWeaver {
 
-  /** Go through the given source directories and return a {@link WeavingResult}. */
+  /**
+   * Go through the given source directories and return a {@link WeavingResult}.
+   */
   WeavingResult weave(
       List<SourceDirectory> javaSourceDirectories,
       List<String> javaFiles,
@@ -90,12 +93,15 @@ public interface SourceWeaver {
     }
 
     private static class UnparseableFileException extends Exception {
+
       private UnparseableFileException(final String javaFile) {
         super(javaFile);
       }
     }
 
-    /** Scan the file. */
+    /**
+     * Scan the file.
+     */
     @Nullable
     private ChangedFile scanIndividualJavaFile(
         final JavaParser javaParser,
@@ -115,7 +121,9 @@ public interface SourceWeaver {
       return scanType(file, cu, visitorFactories, includesExcludes);
     }
 
-    /** For each type in a Java source file, we scan through the code. */
+    /**
+     * For each type in a Java source file, we scan through the code.
+     */
     private ChangedFile scanType(
         final File javaFile,
         final CompilationUnit cu,
@@ -163,7 +171,8 @@ public interface SourceWeaver {
     private JavaParser createJavaParser(final List<SourceDirectory> javaSourceDirectories) {
       final JavaParser javaParser = new JavaParser();
       final CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-      combinedTypeSolver.add(new ReflectionTypeSolver());
+      // TODO[JG] I don't think this will work with GraalVM; see
+      // combinedTypeSolver.add(new ReflectionTypeSolver());
 
       javaSourceDirectories.forEach(
           javaDirectory -> combinedTypeSolver.add(new JavaParserTypeSolver(javaDirectory.path())));

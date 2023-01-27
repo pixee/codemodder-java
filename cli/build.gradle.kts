@@ -1,6 +1,5 @@
 plugins {
-    id("io.openpixee.codetl.base")
-    id("io.openpixee.codetl.java")
+    id("io.openpixee.codetl.application")
     id("io.openpixee.codetl.native-image")
 }
 
@@ -11,6 +10,7 @@ java {
 }
 
 application {
+    applicationName = "codetl"
     mainClass.set("io.openpixee.codetl.cli.Application")
 }
 
@@ -58,7 +58,7 @@ dependencies {
 
     implementation(libs.commons.lang3)
     implementation(libs.jfiglet)
-    implementation(libs.logback.classic)
+
     implementation(libs.picocli)
     implementation(libs.slf4j.api)
     implementation(project(":config"))
@@ -71,7 +71,8 @@ tasks.integrationTest {
     dependsOn(tasks.nativeCompile)
     val executable = tasks.nativeCompile.flatMap { it.outputFile }.map { it.asFile.path }
     doFirst {
-        systemProperty("io.openpixee.codetl.test.executable", executable.get())
+//        systemProperty("io.openpixee.codetl.test.executable", executable.get())
+        systemProperty("io.openpixee.codetl.test.executable", layout.buildDirectory.file("distributions/codetl/bin/codetl").get())
     }
 }
 

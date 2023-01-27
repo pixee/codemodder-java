@@ -2,8 +2,6 @@ package io.openpixee.codetl.cli;
 
 import static org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS;
 
-import ch.qos.logback.classic.Level;
-import io.openpixee.codetl.cli.logging.LoggingConfigurator;
 import io.openpixee.codetl.config.DefaultRuleSetting;
 import io.openpixee.java.JavaFixitCliRun;
 import java.io.File;
@@ -16,7 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
-/** Main entrypoint for the CodeTL CLI application. */
+/**
+ * Main entrypoint for the CodeTL CLI application.
+ */
 @CommandLine.Command(
     name = "codetl",
     mixinStandardHelpOptions = true,
@@ -86,7 +86,7 @@ public final class Application implements Callable<Integer> {
   public Integer call() {
     final StopWatch stopwatch = StopWatch.createStarted();
     if (verbose) {
-      enableDebugLogging();
+      // TODO enable verbose
     }
     final JavaFixitCliRun cliRun = new JavaFixitCliRun();
     try {
@@ -109,16 +109,9 @@ public final class Application implements Callable<Integer> {
     }
   }
 
-  /** Dynamically raises the log level to DEBUG for more output! */
-  private void enableDebugLogging() {
-    ch.qos.logback.classic.Logger rootLogger =
-        (ch.qos.logback.classic.Logger)
-            LoggerFactory.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME);
-    rootLogger.setLevel(Level.toLevel("DEBUG"));
-  }
-
   private static final class DefaultRuleSettingConverter
       implements CommandLine.ITypeConverter<DefaultRuleSetting> {
+
     @Override
     public DefaultRuleSetting convert(final String s) {
       if ("enabled".equalsIgnoreCase(s)) {
@@ -143,7 +136,8 @@ public final class Application implements Callable<Integer> {
           "web.xml",
           "**/web.xml");
 
-  @VisibleForTesting static final List<String> defaultExcludes = List.of("**/test/**");
+  @VisibleForTesting
+  static final List<String> defaultExcludes = List.of("**/test/**");
 
   private static final int cliSuccessCode = 0;
   private static final int cliErrorCode = -1;

@@ -3,6 +3,7 @@ plugins {
     id("io.openpixee.codetl.base")
     id("io.openpixee.codetl.java-library")
     id("io.openpixee.codetl.maven-publish")
+    id("org.graalvm.buildtools.native")
     alias(libs.plugins.fileversioning)
 }
 
@@ -29,6 +30,7 @@ publishing {
 }
 
 dependencies {
+    compileOnly(libs.graal.sdk)
     annotationProcessor(libs.autovalue.annotations)
     annotationProcessor(libs.picocli.codegen)
 
@@ -50,6 +52,7 @@ dependencies {
     implementation(libs.javaparser.symbolsolver.core)
     implementation(libs.javaparser.symbolsolver.logic)
     implementation(libs.javaparser.symbolsolver.model)
+    implementation("org.javatuples:javatuples:1.2")
     implementation(libs.jfiglet)
     implementation(libs.juniversalchardet)
     implementation(libs.logback.classic)

@@ -42,7 +42,7 @@ final class WebGoat820Test extends GitRepositoryTest {
     }
 
     try {
-      codetl.execute("-o", outputFile.getPath(), "-r", repoDir.getPath(), "-s", sarif.toString());
+      codetl.execute("-v", "-o", outputFile.getPath(), "-r", repoDir.getPath(), "-s", sarif.toString());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new TestAbortedException("interrupted while waiting for codetl process", e);

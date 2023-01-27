@@ -17,8 +17,10 @@ public final class CodeTLExecutable {
 
   public void execute(final String... args) throws IOException, InterruptedException {
     final var process = newProcessBuilder(args);
+    final var out = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
     final var err = new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
     final int code = process.waitFor();
+    System.out.println(out);
     if (code != 0) {
       throw new CodeTLExecutionException(code, err);
     }
