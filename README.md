@@ -11,9 +11,9 @@ source.
 ### First Time Set Up
 
 1. Install GraalVM 22.3.0
-2. Install native-image component
+2. Install native-image and JavaScript components
    ```shell
-    gu install native-image
+    gu install native-image js
    ```
 3. Initialize Submodules
 
