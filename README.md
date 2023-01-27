@@ -11,22 +11,18 @@ source.
 ### First Time Set Up
 
 1. Install GraalVM 22.3.0
-2. Install native-image component
+2. Install native-image and JavaScript components
    ```shell
-    gu install native-image
+    gu install native-image js
    ```
-3. Install JavaScript component
-   ```shell
-    gu install js
-   ```
-4. Initialize Submodules
+3. Initialize Submodules
 
    ```shell
    git submodule init
    git submodule update
    ```
 
-5. Configure JFrog Artifactory Authentication by adding the following properties to your Gradle home gradle.properties (typically `$HOME/.gradle/gradle.properties`):
+4. Configure JFrog Artifactory Authentication by adding the following properties to your Gradle home gradle.properties (typically `$HOME/.gradle/gradle.properties`):
    ```
    pixeeArtifactoryUsername=<your-username>
    pixeeArtifactoryPassword=<your-token>
