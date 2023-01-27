@@ -8,6 +8,7 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -171,8 +172,8 @@ public interface SourceWeaver {
     private JavaParser createJavaParser(final List<SourceDirectory> javaSourceDirectories) {
       final JavaParser javaParser = new JavaParser();
       final CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-      // TODO[JG] I don't think this will work with GraalVM; see
-      // combinedTypeSolver.add(new ReflectionTypeSolver());
+      // TODO[JG] this does not work with GraalVM
+      combinedTypeSolver.add(new ReflectionTypeSolver());
 
       javaSourceDirectories.forEach(
           javaDirectory -> combinedTypeSolver.add(new JavaParserTypeSolver(javaDirectory.path())));

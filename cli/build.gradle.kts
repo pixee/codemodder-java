@@ -1,6 +1,7 @@
 plugins {
     id("io.openpixee.codetl.application")
     id("io.openpixee.codetl.native-image")
+    alias(libs.plugins.jib)
 }
 
 java {
@@ -13,6 +14,8 @@ application {
     applicationName = "codetl"
     mainClass.set("io.openpixee.codetl.cli.Application")
 }
+
+jib.to.image = "codetl"
 
 graalvmNative {
     binaries {
@@ -67,12 +70,23 @@ dependencies {
     add(bundle.name, project(":languages:javascript", "bundle"))
 }
 
+val extractApplicationDistribution by tasks.registering(Copy::class) {
+    from(zipTree(tasks.distZip.flatMap { it.archiveFile }))
+    into(layout.buildDirectory.dir("application"))
+}
+
 tasks.integrationTest {
-    dependsOn(tasks.nativeCompile)
-    val executable = tasks.nativeCompile.flatMap { it.outputFile }.map { it.asFile.path }
+    // TODO not yet using native image, because we still use too many incompatible dependencies
+//    dependsOn(tasks.nativeCompile)
+//    val executable = tasks.nativeCompile.flatMap { it.outputFile }.map { it.asFile.path }
+    // TODO use application plugin distribution in integration tests, until native image challenges resolved
+    dependsOn(extractApplicationDistribution)
+    val executable = layout.buildDirectory.file("application/codetl/bin/codetl")
     doFirst {
-//        systemProperty("io.openpixee.codetl.test.executable", executable.get())
-        systemProperty("io.openpixee.codetl.test.executable", layout.buildDirectory.file("distributions/codetl/bin/codetl").get())
+        systemProperty(
+            "io.openpixee.codetl.test.executable",
+            executable.get()
+        )
     }
 }
 
