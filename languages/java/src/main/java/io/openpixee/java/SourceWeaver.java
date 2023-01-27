@@ -163,6 +163,7 @@ public interface SourceWeaver {
     private JavaParser createJavaParser(final List<SourceDirectory> javaSourceDirectories) {
       final JavaParser javaParser = new JavaParser();
       final CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+      // TODO[JG] this does not work with GraalVM
       combinedTypeSolver.add(new ReflectionTypeSolver());
 
       javaSourceDirectories.forEach(
