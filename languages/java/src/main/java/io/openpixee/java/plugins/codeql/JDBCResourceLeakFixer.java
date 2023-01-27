@@ -232,8 +232,7 @@ public final class JDBCResourceLeakFixer {
             + "  }\n"
             + "}";
     final var combinedTypeSolver = new CombinedTypeSolver();
-    StaticJavaParser.getParserConfiguration()
-        .setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
+    StaticJavaParser.getConfiguration().setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
     var cu = StaticJavaParser.parse(code);
     var mce = cu.findAll(MethodCallExpr.class).get(0);
     System.out.println(mce);
