@@ -30,10 +30,12 @@ jobs:
         with:
           arguments: check
       - uses: actions/upload-artifact@v3
+        if: failure()
         with:
           name: test-results
           path: '**/build/test-results/*/*.xml'
       - uses: dorny/test-reporter@v1 # TODO move this to accommodate OSS contributors
+        if: failure()
         with:
           artifact: test-results
           name: JUnit Tests
