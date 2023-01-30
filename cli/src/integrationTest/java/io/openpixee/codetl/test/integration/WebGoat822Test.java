@@ -9,14 +9,17 @@ import io.github.pixee.codetf.CodeTFChange;
 import io.github.pixee.codetf.CodeTFReport;
 import io.github.pixee.codetf.CodeTFResult;
 import io.openpixee.codetl.cli.Application;
+import io.openpixee.codetl.test.integration.junit.CodeTLExecutable;
+import io.openpixee.codetl.test.integration.junit.CodeTLExecutableUnderTest;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.opentest4j.TestAbortedException;
 import picocli.CommandLine;
 
 final class WebGoat822Test extends GitRepositoryTest {
@@ -28,7 +31,15 @@ final class WebGoat822Test extends GitRepositoryTest {
   }
 
   @Test
-  void it_transforms_webgoat_normally() throws Exception {
+  void it_transforms_webgoat_normally(@CodeTLExecutableUnderTest final CodeTLExecutable codetl)
+      throws Exception {
+    // TODO integrate me with CodeTLExecutableExtension
+    try {
+      codetl.execute("-o", outputFile.getPath(), "-r", repoDir.getPath());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new TestAbortedException("interrupted while waiting for codetl process", e);
+    }
     int exitCode =
         new CommandLine(new Application())
             .execute("-o", outputFile.getPath(), "-r", repoDir.getPath());
@@ -66,22 +77,26 @@ final class WebGoat822Test extends GitRepositoryTest {
   }
 
   @Test
-  void it_transforms_webgoat_with_codeql(@TempDir final Path tmp) throws Exception {
+  void it_transforms_webgoat_with_codeql(
+      @TempDir final Path tmp, @CodeTLExecutableUnderTest final CodeTLExecutable codetl)
+      throws Exception {
     final var filename =
         "webgoat_v8.2.0_codeql.sarif"; // TODO is this supposed to be webgoat_v8.2.2_contrast.sarif?
     final var sarif = tmp.resolve(filename);
-    try (var is = WebGoat820Test.class.getResourceAsStream("/" + filename)) {
-      if (is == null) {
-        throw new IllegalStateException("Expected to find test SARIF file " + filename);
-      }
+    try (var is =
+        Objects.requireNonNull(
+            WebGoat820Test.class.getResourceAsStream("/" + filename),
+            "Expected to find test SARIF file " + filename)) {
       Files.copy(is, sarif);
     }
 
-    int exitCode =
-        new CommandLine(new Application())
-            .execute("-o", outputFile.getPath(), "-r", repoDir.getPath(), "-s", sarif.toString());
-
-    assertThat(exitCode, is(0));
+    final int exitCode;
+    try {
+      codetl.execute("-o", outputFile.getPath(), "-r", repoDir.getPath(), "-s", sarif.toString());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new TestAbortedException("interrupted while waiting for codetl process", e);
+    }
 
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
@@ -112,7 +127,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             .flatMap(List::stream)
             .filter(
                 change -> "codeql:java/missing-jwt-signature-check".equals(change.getCategory()))
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
     assertThat(changes.size(), equalTo(6));
 
     // this file is also only changed by including the codeql results
