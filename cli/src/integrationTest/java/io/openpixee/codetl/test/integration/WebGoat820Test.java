@@ -60,28 +60,24 @@ final class WebGoat820Test extends GitRepositoryTest {
     assertThat(changes).hasSize(6);
 
     // this file is also only changed by including the codeql results
-    assertThat(
-        report.getResults().stream())
+    assertThat(report.getResults().stream())
         .anyMatch(
             changedFile ->
                 changedFile.getPath().endsWith("AjaxAuthenticationEntryPoint.java")
                     && changedFile.getChanges().get(0).getLineNumber() == 53
                     && "codeql:java/stack-trace-exposure"
-                    .equals(changedFile.getChanges().get(0).getCategory()));
+                        .equals(changedFile.getChanges().get(0).getCategory()));
 
     // we only check our pom injection for a couple files
-    assertThat(
-        report.getResults().stream())
+    assertThat(report.getResults().stream())
         .anyMatch(changedFile -> changedFile.getPath().endsWith("SerializationHelper.java"));
-    assertThat(
-        report.getResults().stream())
+    assertThat(report.getResults().stream())
         .anyMatch(
             changedFile -> changedFile.getPath().endsWith("InsecureDeserializationTask.java"));
 
     // and inject the correct pom
     var pomPath = "webgoat-lessons$insecure-deserialization$pom.xml".replace("$", File.separator);
-    assertThat(
-        report.getResults().stream()).anyMatch(
-        changedFile -> changedFile.getPath().equals(pomPath));
+    assertThat(report.getResults().stream())
+        .anyMatch(changedFile -> changedFile.getPath().equals(pomPath));
   }
 }

@@ -42,18 +42,16 @@ final class WebGoat822Test extends GitRepositoryTest {
     assertThat(report.getResults()).hasSize(21);
 
     // we only inject into a couple files
-    assertThat(report.getResults().stream()).anyMatch(
-        changedFile -> changedFile.getPath().endsWith("SerializationHelper.java"));
+    assertThat(report.getResults().stream())
+        .anyMatch(changedFile -> changedFile.getPath().endsWith("SerializationHelper.java"));
     assertThat(report.getResults().stream())
         .anyMatch(
-            changedFile -> changedFile.getPath()
-                .endsWith("InsecureDeserializationTask.java"));
+            changedFile -> changedFile.getPath().endsWith("InsecureDeserializationTask.java"));
 
     // this file is only changed by including the codeql results, which we didn't do in this test
     assertThat(report.getResults().stream())
         .noneMatch(
-            changedFile -> changedFile.getPath()
-                .endsWith("AjaxAuthenticationEntrypoint.java"));
+            changedFile -> changedFile.getPath().endsWith("AjaxAuthenticationEntrypoint.java"));
 
     // and inject the correct pom
     var pomPath = "webgoat-lessons$insecure-deserialization$pom.xml".replace("$", File.separator);
@@ -89,12 +87,10 @@ final class WebGoat822Test extends GitRepositoryTest {
 
     // we only inject into a couple files
     assertThat(report.getResults().stream())
-        .anyMatch(
-            changedFile -> changedFile.getPath().endsWith("SerializationHelper.java"));
+        .anyMatch(changedFile -> changedFile.getPath().endsWith("SerializationHelper.java"));
     assertThat(report.getResults().stream())
         .anyMatch(
-            changedFile -> changedFile.getPath()
-                .endsWith("InsecureDeserializationTask.java"));
+            changedFile -> changedFile.getPath().endsWith("InsecureDeserializationTask.java"));
 
     // and inject the correct pom
     var pomPath = "webgoat-lessons$insecure-deserialization$pom.xml".replace("$", File.separator);
@@ -117,6 +113,6 @@ final class WebGoat822Test extends GitRepositoryTest {
                 changedFile.getPath().endsWith("AjaxAuthenticationEntryPoint.java")
                     && changedFile.getChanges().get(0).getLineNumber() == 53
                     && "codeql:java/stack-trace-exposure"
-                    .equals(changedFile.getChanges().get(0).getCategory()));
+                        .equals(changedFile.getChanges().get(0).getCategory()));
   }
 }
