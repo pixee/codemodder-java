@@ -1,14 +1,10 @@
 package io.openpixee.codetl.test.integration;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.pixee.codetf.CodeTFChange;
 import io.github.pixee.codetf.CodeTFReport;
 import io.github.pixee.codetf.CodeTFResult;
-import io.openpixee.codetl.cli.Application;
 import io.openpixee.codetl.test.integration.junit.CodeTLExecutable;
 import io.openpixee.codetl.test.integration.junit.CodeTLExecutableUnderTest;
 import java.io.File;
@@ -20,7 +16,6 @@ import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opentest4j.TestAbortedException;
-import picocli.CommandLine;
 
 final class WebGoat822Test extends GitRepositoryTest {
 
@@ -40,40 +35,30 @@ final class WebGoat822Test extends GitRepositoryTest {
       Thread.currentThread().interrupt();
       throw new TestAbortedException("interrupted while waiting for codetl process", e);
     }
-    int exitCode =
-        new CommandLine(new Application())
-            .execute("-o", outputFile.getPath(), "-r", repoDir.getPath());
-
-    assertThat(exitCode, is(0));
 
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
-    assertThat(report.getRun().getFailedFiles().size(), is(0));
-    assertThat(report.getResults().size(), is(21));
+    assertThat(report.getRun().getFailedFiles()).isEmpty();
+    assertThat(report.getResults()).hasSize(21);
 
     // we only inject into a couple files
-    assertThat(
-        report.getResults().stream()
-            .anyMatch(changedFile -> changedFile.getPath().endsWith("SerializationHelper.java")),
-        is(true));
-    assertThat(
-        report.getResults().stream()
-            .anyMatch(
-                changedFile -> changedFile.getPath().endsWith("InsecureDeserializationTask.java")),
-        is(true));
+    assertThat(report.getResults().stream()).anyMatch(
+        changedFile -> changedFile.getPath().endsWith("SerializationHelper.java"));
+    assertThat(report.getResults().stream())
+        .anyMatch(
+            changedFile -> changedFile.getPath()
+                .endsWith("InsecureDeserializationTask.java"));
 
     // this file is only changed by including the codeql results, which we didn't do in this test
-    assertThat(
-        report.getResults().stream()
-            .anyMatch(
-                changedFile -> changedFile.getPath().endsWith("AjaxAuthenticationEntrypoint.java")),
-        is(false));
+    assertThat(report.getResults().stream())
+        .noneMatch(
+            changedFile -> changedFile.getPath()
+                .endsWith("AjaxAuthenticationEntrypoint.java"));
 
     // and inject the correct pom
     var pomPath = "webgoat-lessons$insecure-deserialization$pom.xml".replace("$", File.separator);
-    assertThat(
-        report.getResults().stream().anyMatch(changedFile -> changedFile.getPath().equals(pomPath)),
-        is(true));
+    assertThat(report.getResults().stream())
+        .anyMatch(changedFile -> changedFile.getPath().equals(pomPath));
   }
 
   @Test
@@ -90,7 +75,6 @@ final class WebGoat822Test extends GitRepositoryTest {
       Files.copy(is, sarif);
     }
 
-    final int exitCode;
     try {
       codetl.execute("-o", outputFile.getPath(), "-r", repoDir.getPath(), "-s", sarif.toString());
     } catch (InterruptedException e) {
@@ -100,45 +84,39 @@ final class WebGoat822Test extends GitRepositoryTest {
 
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
-    assertThat(report.getRun().getFailedFiles().size(), is(0));
-    assertThat(report.getResults().size(), is(24));
+    assertThat(report.getRun().getFailedFiles()).hasSize(0);
+    assertThat(report.getResults()).hasSize(24);
 
     // we only inject into a couple files
-    assertThat(
-        report.getResults().stream()
-            .anyMatch(changedFile -> changedFile.getPath().endsWith("SerializationHelper.java")),
-        is(true));
-    assertThat(
-        report.getResults().stream()
-            .anyMatch(
-                changedFile -> changedFile.getPath().endsWith("InsecureDeserializationTask.java")),
-        is(true));
+    assertThat(report.getResults().stream())
+        .anyMatch(
+            changedFile -> changedFile.getPath().endsWith("SerializationHelper.java"));
+    assertThat(report.getResults().stream())
+        .anyMatch(
+            changedFile -> changedFile.getPath()
+                .endsWith("InsecureDeserializationTask.java"));
 
     // and inject the correct pom
     var pomPath = "webgoat-lessons$insecure-deserialization$pom.xml".replace("$", File.separator);
-    assertThat(
-        report.getResults().stream().anyMatch(changedFile -> changedFile.getPath().equals(pomPath)),
-        is(true));
+    assertThat(report.getResults().stream())
+        .anyMatch(changedFile -> changedFile.getPath().equals(pomPath));
 
     // count the changes associated with missing-jwt-signature-check from codeql
-    List<CodeTFChange> changes =
+    final var changes =
         report.getResults().stream()
             .map(CodeTFResult::getChanges)
             .flatMap(List::stream)
             .filter(
-                change -> "codeql:java/missing-jwt-signature-check".equals(change.getCategory()))
-            .toList();
-    assertThat(changes.size(), equalTo(6));
+                change -> "codeql:java/missing-jwt-signature-check".equals(change.getCategory()));
+    assertThat(changes).hasSize(6);
 
     // this file is also only changed by including the codeql results
-    assertThat(
-        report.getResults().stream()
-            .anyMatch(
-                changedFile ->
-                    changedFile.getPath().endsWith("AjaxAuthenticationEntryPoint.java")
-                        && changedFile.getChanges().get(0).getLineNumber() == 53
-                        && "codeql:java/stack-trace-exposure"
-                            .equals(changedFile.getChanges().get(0).getCategory())),
-        is(true));
+    assertThat(report.getResults().stream())
+        .anyMatch(
+            changedFile ->
+                changedFile.getPath().endsWith("AjaxAuthenticationEntryPoint.java")
+                    && changedFile.getChanges().get(0).getLineNumber() == 53
+                    && "codeql:java/stack-trace-exposure"
+                    .equals(changedFile.getChanges().get(0).getCategory()));
   }
 }

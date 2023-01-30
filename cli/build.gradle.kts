@@ -40,11 +40,11 @@ testing {
         }
         getByName("integrationTest", JvmTestSuite::class) {
             dependencies {
-                implementation.bundle(testlibs.bundles.hamcrest)
                 implementation.bundle(testlibs.bundles.junit.jupiter)
                 implementation("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo)
                 implementation(libs.picocli)
                 implementation(testlibs.jgit)
+                implementation(testlibs.assertj)
             }
         }
     }
