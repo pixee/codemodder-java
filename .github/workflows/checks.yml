@@ -33,3 +33,9 @@ jobs:
         with:
           name: test-results
           path: '**/build/test-results/*/*.xml'
+      - uses: dorny/test-reporter@v1 # TODO move this to accommodate OSS contributors
+        with:
+          artifact: test-results
+          name: JUnit Tests
+          path: '*.xml'
+          reporter: java-junit
