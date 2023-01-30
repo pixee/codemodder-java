@@ -6,6 +6,12 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
+/**
+ * JUnit extension that injects a {@link CodeTLExecutable} into tests.
+ *
+ * <p>This extension is part of the seam between the test and the CodeTL program under test. This
+ * seam allows for more flexibility in how we run CodeTL in the test suite.
+ */
 public final class CodeTLExecutableExtension implements ParameterResolver {
 
   @Override

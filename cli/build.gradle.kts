@@ -79,8 +79,9 @@ val extractApplicationDistribution by tasks.registering(Copy::class) {
 
 tasks.integrationTest {
     // TODO not yet using native image, because we still use too many incompatible dependencies
-//    dependsOn(tasks.nativeCompile)
-//    val executable = tasks.nativeCompile.flatMap { it.outputFile }.map { it.asFile.path }
+    //    dependsOn(tasks.nativeCompile)
+    //    val executable = tasks.nativeCompile.flatMap { it.outputFile }.map { it.asFile.path }
+
     // TODO use application plugin distribution in integration tests, until native image challenges resolved
     dependsOn(extractApplicationDistribution)
     val executable = layout.buildDirectory.file("application/codetl/bin/codetl")

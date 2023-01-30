@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opentest4j.TestAbortedException;
 
+/** Integration tests that run CodeTL with WebGoat 8.2.0. */
 final class WebGoat820Test extends GitRepositoryTest {
 
   void setParameters() {
