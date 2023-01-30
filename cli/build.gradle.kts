@@ -12,6 +12,7 @@ java {
 }
 
 application {
+    applicationName = "codetl"
     mainClass.set("io.openpixee.codetl.cli.Application")
 }
 
@@ -71,6 +72,7 @@ dependencies {
 }
 
 val extractApplicationDistribution by tasks.registering(Copy::class) {
+    dependsOn(tasks.distZip)
     from(zipTree(tasks.distZip.flatMap { it.archiveFile }))
     into(layout.buildDirectory.dir("application"))
 }
