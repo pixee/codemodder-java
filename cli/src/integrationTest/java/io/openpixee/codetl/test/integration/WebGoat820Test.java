@@ -21,7 +21,7 @@ import org.opentest4j.TestAbortedException;
 final class WebGoat820Test {
 
   @Test
-  void it_transforms_webgoat_with_codeql(
+  void transform_webgoat_with_codeql(
       @CloneRepository(repo = "https://github.com/WebGoat/WebGoat", branch = "release/v8.2.0")
           final Path webgoat,
       @TempDir final Path tmp,

@@ -29,7 +29,7 @@ final class WebGoat822Test {
   }
 
   @Test
-  void it_transforms_webgoat_normally(
+  void transform_webgoat(
       @CloneRepository(repo = "https://github.com/WebGoat/WebGoat", branch = "release/v8.2.2")
           final Path webgoat,
       @CodeTLExecutableUnderTest final CodeTLExecutable codetl)
@@ -68,7 +68,7 @@ final class WebGoat822Test {
   }
 
   @Test
-  void it_transforms_webgoat_with_codeql(
+  void transform_webgoat_with_codeql(
       @TempDir final Path tmp,
       @CloneRepository(repo = "https://github.com/WebGoat/WebGoat", branch = "release/v8.2.2")
           final Path webgoat,
