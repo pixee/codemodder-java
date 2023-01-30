@@ -5,39 +5,46 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.pixee.codetf.CodeTFReport;
 import io.github.pixee.codetf.CodeTFResult;
+import io.openpixee.codetl.test.integration.junit.CloneRepository;
 import io.openpixee.codetl.test.integration.junit.CodeTLExecutable;
 import io.openpixee.codetl.test.integration.junit.CodeTLExecutableUnderTest;
 import java.io.File;
-import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opentest4j.TestAbortedException;
 
 /** Integration tests that run CodeTL with WebGoat 8.2.2. */
-final class WebGoat822Test extends GitRepositoryTest {
+final class WebGoat822Test {
 
-  void setParameters() {
-    this.repoURI = "https://github.com/WebGoat/WebGoat";
-    this.repoBranch = "release/v8.2.2";
-    this.tempDirName = "WebGoat822";
+  private Path output;
+
+  @BeforeEach
+  void before(@TempDir final Path tmp) {
+    output = tmp.resolve("output.codetf.json");
   }
 
   @Test
-  void it_transforms_webgoat_normally(@CodeTLExecutableUnderTest final CodeTLExecutable codetl)
+  void it_transforms_webgoat_normally(
+      @CloneRepository(repo = "https://github.com/WebGoat/WebGoat", branch = "release/v8.2.2")
+          final Path webgoat,
+      @CodeTLExecutableUnderTest final CodeTLExecutable codetl)
       throws Exception {
-    // TODO integrate me with CodeTLExecutableExtension
     try {
-      codetl.execute("-o", outputFile.getPath(), "-r", repoDir.getPath());
+      codetl.execute("-o", output.toString(), "-r", webgoat.toString());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new TestAbortedException("interrupted while waiting for codetl process", e);
     }
 
-    var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
+    final CodeTFReport report;
+    try (var reader = Files.newBufferedReader(output)) {
+      report = new ObjectMapper().readValue(reader, CodeTFReport.class);
+    }
 
     assertThat(report.getRun().getFailedFiles()).isEmpty();
     assertThat(report.getResults()).hasSize(21);
@@ -62,7 +69,10 @@ final class WebGoat822Test extends GitRepositoryTest {
 
   @Test
   void it_transforms_webgoat_with_codeql(
-      @TempDir final Path tmp, @CodeTLExecutableUnderTest final CodeTLExecutable codetl)
+      @TempDir final Path tmp,
+      @CloneRepository(repo = "https://github.com/WebGoat/WebGoat", branch = "release/v8.2.2")
+          final Path webgoat,
+      @CodeTLExecutableUnderTest final CodeTLExecutable codetl)
       throws Exception {
     final var filename =
         "webgoat_v8.2.0_codeql.sarif"; // TODO is this supposed to be webgoat_v8.2.2_contrast.sarif?
@@ -75,13 +85,16 @@ final class WebGoat822Test extends GitRepositoryTest {
     }
 
     try {
-      codetl.execute("-o", outputFile.getPath(), "-r", repoDir.getPath(), "-s", sarif.toString());
+      codetl.execute("-o", output.toString(), "-r", webgoat.toString(), "-s", sarif.toString());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new TestAbortedException("interrupted while waiting for codetl process", e);
     }
 
-    var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
+    final CodeTFReport report;
+    try (var reader = Files.newBufferedReader(output)) {
+      report = new ObjectMapper().readValue(reader, CodeTFReport.class);
+    }
 
     assertThat(report.getRun().getFailedFiles()).hasSize(0);
     assertThat(report.getResults()).hasSize(24);
