@@ -6,8 +6,14 @@ import spoon.reflect.code.CtInvocation;
 
 final class UntrustedServletForwardProcessor extends AbstractProcessor<CtInvocation<Void>> {
 
-  public UntrustedServletForwardProcessor(final SarifSchema210 sarif) {}
+  private final SarifSchema210 sarif;
+
+  public UntrustedServletForwardProcessor(final SarifSchema210 sarif) {
+    this.sarif = sarif;
+  }
 
   @Override
-  public void process(final CtInvocation<Void> element) {}
+  public void process(final CtInvocation<Void> element) {
+
+  }
 }

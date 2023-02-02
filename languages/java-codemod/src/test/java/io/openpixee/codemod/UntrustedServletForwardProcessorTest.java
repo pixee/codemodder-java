@@ -21,12 +21,16 @@ final class UntrustedServletForwardProcessorTest {
     // create source file
     final var source =
         """
-          class Foo {
-            void a(final HttpServletRequest request) throws ServletException, IOException {
-              var foo = request.getParameter("foo");
-              request.getRequestDispatcher(foo).forward(null, null);
-            }
+        import java.io.IOException;
+        import jakarta.servlet.HttpServletRequest;
+        import jakarta.servlet.ServletException;
+
+        class Foo {
+          void a(final HttpServletRequest request) throws ServletException, IOException {
+            var foo = request.getParameter("foo");
+            request.getRequestDispatcher(foo).forward(null, null);
           }
+        }
         """
             .stripIndent();
     final var input = tmp.resolve("input");
@@ -85,5 +89,25 @@ final class UntrustedServletForwardProcessorTest {
     spoon.addProcessor(new UntrustedServletForwardProcessor(sarif));
     spoon.setSourceOutputDirectory(output.toFile());
     spoon.addInputResource(fooSource.toString());
+    spoon.run();
+    final Path transformed = output.resolve("Foo.java");
+
+    // FIXME https://github.com/INRIA/spoon/issues/4070
+    final var expected =
+        """
+        import java.io.IOException;
+        import jakarta.servlet.HttpServletRequest;
+        import jakarta.servlet.ServletException;
+
+        class Foo {
+          void a(final HttpServletRequest request) throws ServletException, IOException {
+            var foo = request.getParameter("foo");
+
+            request.getRequestDispatcher(io.openpixee.security.Jakarta.validateForwardPath(foo)).forward(null, null);
+          }
+        }
+        """
+            .stripIndent();
+    assertThat(transformed).hasContent(expected);
   }
 }
