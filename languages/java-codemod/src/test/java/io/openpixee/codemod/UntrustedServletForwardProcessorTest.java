@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -30,7 +31,8 @@ final class UntrustedServletForwardProcessorTest {
             .stripIndent();
     final var input = tmp.resolve("input");
     Files.createDirectory(input);
-    Files.writeString(input.resolve("Foo.java"), source);
+    final Path fooSource = input.resolve("Foo.java");
+    Files.writeString(fooSource, source);
 
     // create rules
     final var rules = tmp.resolve("rules");
@@ -51,11 +53,15 @@ final class UntrustedServletForwardProcessorTest {
     final var semgrep =
         new ProcessBuilder(
                 "semgrep",
+                "scan",
                 "--sarif",
-                "--config=" + rules,
-                "--output " + outputFile,
+                "--config",
+                rules.toString(),
+                "--output",
+                outputFile.toString(),
                 input.toString())
             .start();
+    final var err = new String(semgrep.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
     final boolean exited;
     try {
       exited = semgrep.waitFor(2, TimeUnit.SECONDS);
@@ -64,6 +70,9 @@ final class UntrustedServletForwardProcessorTest {
       throw new TestAbortedException("interrupted while awaiting semgrep", e);
     }
     assertThat(exited).withFailMessage("timeout waiting for semgrep to complete analysis").isTrue();
+    assertThat(semgrep.exitValue())
+        .withFailMessage("semgrep execution failed:\n" + err)
+        .isEqualTo(0);
 
     // read SARIF
     final SarifSchema210 sarif;
@@ -71,6 +80,10 @@ final class UntrustedServletForwardProcessorTest {
       sarif = new ObjectMapper().readerFor(SarifSchema210.class).readValue(reader);
     }
 
-    // TODO give sarif to the codemod
+    // set-up spoon, passing the SARIF to the codemod
+    final var spoon = SpoonAPIFactory.create();
+    spoon.addProcessor(new UntrustedServletForwardProcessor(sarif));
+    spoon.setSourceOutputDirectory(output.toFile());
+    spoon.addInputResource(fooSource.toString());
   }
 }
