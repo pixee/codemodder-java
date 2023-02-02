@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    implementation(libs.contrast.sarif)
     implementation(libs.spoon.core)
 }
 

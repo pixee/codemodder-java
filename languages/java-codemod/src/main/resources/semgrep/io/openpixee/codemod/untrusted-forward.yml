@@ -1,0 +1,17 @@
+rules:
+  - id: untrusted-redirect
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING
+    mode: taint
+    pattern-sources:
+      - patterns:
+        - pattern-inside: $M (..., String $STR, ...) {...}
+        - focus-metavariable: $STR
+      - pattern: $REQ.getParameter(...)
+    pattern-sinks:
+      - patterns:
+        - pattern-inside: $M (..., HttpServletRequest $REQ, ...) {...}
+        - pattern: $REQ.getRequestDispatcher($SINK)
+        - focus-metavariable: $SINK
