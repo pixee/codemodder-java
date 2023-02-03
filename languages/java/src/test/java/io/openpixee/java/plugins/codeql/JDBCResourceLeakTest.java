@@ -5,6 +5,7 @@ import com.contrastsecurity.sarif.Location;
 import com.contrastsecurity.sarif.PhysicalLocation;
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
+import io.openpixee.java.IncludesExcludes;
 import io.openpixee.java.protections.WeavingTests;
 import java.io.File;
 import java.io.IOException;
@@ -20,48 +21,52 @@ import org.junit.jupiter.api.Test;
  */
 final class JDBCResourceLeakTest {
 
-  @Disabled
   @Test
+  @Disabled
   void it_does_nothing_to_stmt_because_rs_returns() throws IOException {
     String insecureFilePath =
         "src/test/java/com/acme/testcode/resourceleak/JDBCNoFixReturningResultSet.java";
-    WeavingTests.assertJavaWeaveWorkedAndWontReweave(
+    WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 13))));
+            new File("."), Set.of(buildResult(insecureFilePath, 13))),
+        new IncludesExcludes.MatchesEverything());
   }
 
-  @Disabled
   @Test
+  @Disabled
   void it_does_nothing_to_stmt_because_rs_is_assigned_out_of_scope() throws IOException {
     String insecureFilePath =
         "src/test/java/com/acme/testcode/resourceleak/JDBCNoFixRSAssignedOutOfScope.java";
-    WeavingTests.assertJavaWeaveWorkedAndWontReweave(
+    WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 14))));
+            new File("."), Set.of(buildResult(insecureFilePath, 13))),
+        new IncludesExcludes.MatchesEverything());
   }
 
-  @Disabled
   @Test
+  @Disabled
   void it_does_nothing_to_stmt_because_rs_is_assigned_to_a_field() throws IOException {
     String insecureFilePath =
         "src/test/java/com/acme/testcode/resourceleak/JDBCNoFixRSAssignedToAField.java";
-    WeavingTests.assertJavaWeaveWorkedAndWontReweave(
+    WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 14))));
+            new File("."), Set.of(buildResult(insecureFilePath, 13))),
+        new IncludesExcludes.MatchesEverything());
   }
 
-  @Disabled
   @Test
+  @Disabled
   void it_does_nothing_to_stmt_because_rs_is_a_argument() throws IOException {
     String insecureFilePath =
         "src/test/java/com/acme/testcode/resourceleak/JDBCNoFixRSParameter.java";
-    WeavingTests.assertJavaWeaveWorkedAndWontReweave(
+    WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 11))));
+            new File("."), Set.of(buildResult(insecureFilePath, 13))),
+        new IncludesExcludes.MatchesEverything());
   }
 
   private Result buildResult(final String insecureFilePath, final int i) {
