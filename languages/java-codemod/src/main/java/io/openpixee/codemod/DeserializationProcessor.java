@@ -29,7 +29,8 @@ final class DeserializationProcessor extends AbstractProcessor<CtLocalVariable<O
     @Override
     public void process(final CtLocalVariable<ObjectInputStream> localVariable) {
         int line = localVariable.getPosition().getLine();
-        if(locations.stream().noneMatch(loc -> loc.getStartLine() == line)) {
+        int column = localVariable.getType().getPosition().getColumn();
+        if(locations.stream().noneMatch(loc -> loc.getStartLine() == line && loc.getStartColumn() == column)) {
             return;
         }
         Factory factory = localVariable.getFactory();
