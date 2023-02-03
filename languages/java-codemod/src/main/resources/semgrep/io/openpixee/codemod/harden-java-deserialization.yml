@@ -1,0 +1,25 @@
+rules:
+  - id: pixee:java/harden-java-deserialization
+    patterns:
+      - pattern: ObjectInputStream $OIS = new ObjectInputStream(...);
+      - pattern-not-inside: |
+          $RETURNTYPE $METHOD(...) {
+            ...
+            $OIS.setObjectInputFilter(...);
+            ...
+          }
+      - pattern-not-inside: |
+          $RETURNTYPE $METHOD(...) {
+            ...
+            ObjectInputFilters.enableObjectFilterIfUnprotected($OIS);
+            ...
+          }
+      - pattern-not-inside: |
+          $RETURNTYPE $METHOD(...) {
+            ...
+            io.openpixee.security.ObjectInputFilters.enableObjectFilterIfUnprotected($OIS);
+            ...
+          }
+    message: Semgrep found a match
+    languages: [java]
+    severity: WARNING
