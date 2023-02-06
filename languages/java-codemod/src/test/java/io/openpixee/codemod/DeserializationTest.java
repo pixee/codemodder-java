@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** Unit tests for {@link DeserializationProcessor}. */
+/** Unit tests for {@link HardenJavaDeserializationProcessor}. */
 final class DeserializationTest {
 
   private SpoonAPI spoon;
@@ -60,7 +60,7 @@ final class DeserializationTest {
     SarifSchema210 sarif = Semgrep.run(tmp, "/semgrep/io/openpixee/codemod/harden-java-deserialization.yml", file);
 
     spoon = SpoonAPIFactory.create();
-    spoon.addProcessor(new DeserializationProcessor(sarif));
+    spoon.addProcessor(new HardenJavaDeserializationProcessor(sarif));
     output = tmp.resolve("output");
     spoon.setSourceOutputDirectory(output.toFile());
     spoon.addInputResource(file.toString());

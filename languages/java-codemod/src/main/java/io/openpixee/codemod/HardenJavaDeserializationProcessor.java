@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 /**
  * Responsible for transform pixee:java/harden-java-deserialization
  */
-final class DeserializationProcessor extends AbstractProcessor<CtLocalVariable<ObjectInputStream>> {
+final class HardenJavaDeserializationProcessor extends AbstractProcessor<CtLocalVariable<ObjectInputStream>> {
 
     private final Set<Region> locations;
 
-    DeserializationProcessor(final SarifSchema210 sarif) {
+    HardenJavaDeserializationProcessor(final SarifSchema210 sarif) {
         this.locations = sarif.getRuns().get(0).getResults().stream().filter(result -> result.getRuleId().endsWith(".pixee:java/harden-java-deserialization")).map(result -> result.getLocations().get(0).getPhysicalLocation().getRegion()).collect(Collectors.toUnmodifiableSet());
     }
 

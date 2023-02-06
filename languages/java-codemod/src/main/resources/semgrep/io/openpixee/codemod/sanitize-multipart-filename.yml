@@ -1,0 +1,26 @@
+rules:
+  - id: sanitize-multipart-filename
+    mode: taint
+
+    metadata:
+      options:
+        symbolic_propagation: true
+    pattern-sources:
+      - pattern: (FileItem $X).getName()
+      - pattern: (MultipartFile $X).getOriginalFilename()
+    pattern-sanitizers:
+      - pattern-either:
+          - pattern: Filenames.toSimpleFileName(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: |
+                  new $F(...,<... $SINK ...>)
+              - pattern: |
+                  $F(<... $SINK ...>)
+              - pattern: |
+                  return $SINK;
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING
