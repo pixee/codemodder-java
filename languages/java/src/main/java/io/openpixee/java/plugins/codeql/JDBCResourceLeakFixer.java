@@ -16,11 +16,14 @@ import io.openpixee.java.ast.ASTPatterns;
 import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.java.ast.ASTs;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 public final class JDBCResourceLeakFixer {
@@ -107,6 +110,93 @@ public final class JDBCResourceLeakFixer {
     return originalLine;
   }
 
+  private static Pair<List<VariableDeclarator>, List<Node>> separateAE(
+      List<AssignExpr> allAE, HashSet<VariableDeclarator> memory) {
+    var allLVD = new ArrayList<VariableDeclarator>();
+    var notLVD = new ArrayList<Node>();
+    for (var ae : allAE) {
+      if (ae.getTarget().isNameExpr()) {
+        var ne = ae.getTarget().asNameExpr();
+        var maybeLVD =
+            ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()).map(t -> t.getValue2());
+        maybeLVD.ifPresentOrElse(
+            vd -> {
+              if (!memory.contains(vd)) allLVD.add(vd);
+            },
+            () -> notLVD.add(ne));
+      } else notLVD.add(ae.getTarget());
+    }
+    return new Pair<>(allLVD, notLVD);
+  }
+
+  private static Pair<List<VariableDeclarator>, List<Node>> combine(
+      Pair<List<VariableDeclarator>, List<Node>> left,
+      Pair<List<VariableDeclarator>, List<Node>> right) {
+    left.getValue0().addAll(right.getValue0());
+    left.getValue1().addAll(right.getValue1());
+    return left;
+  }
+
+  public static Pair<List<VariableDeclarator>, List<Node>> flowsInto(VariableDeclarator vd) {
+    return flowsIntoImpl(vd, new HashSet<>());
+  }
+
+  private static Pair<List<VariableDeclarator>, List<Node>> flowsIntoImpl(
+      VariableDeclarator vd, HashSet<VariableDeclarator> memory) {
+    if (memory.contains(vd)) return new Pair<>(Collections.emptyList(), Collections.emptyList());
+    else memory.add(vd);
+
+    var scope = ASTs.findLocalVariableScope(vd);
+    Predicate<AssignExpr> isRHSOfAE =
+        ae ->
+            ae.getValue().isNameExpr()
+                && ae.getValue().asNameExpr().getNameAsString().equals(vd.getNameAsString());
+
+    // assignments i.e. a = b;
+    var allAE =
+        scope.stream()
+            .flatMap(n -> n.findAll(AssignExpr.class, isRHSOfAE).stream())
+            .filter(
+                ae ->
+                    !(ae.getTarget().isNameExpr()
+                        && ae.getTarget()
+                            .asNameExpr()
+                            .getNameAsString()
+                            .equals(vd.getNameAsString())))
+            .collect(Collectors.toList());
+    // separate the assignments to loval variables from the others
+    var separated = separateAE(allAE, memory);
+
+    // init expressions var a = b;
+    Predicate<VariableDeclarator> isRHSOfVD =
+        varDecl ->
+            varDecl
+                .getInitializer()
+                .filter(
+                    init ->
+                        init.isNameExpr()
+                            && init.asNameExpr().getNameAsString().equals(vd.getNameAsString()))
+                .isPresent();
+
+    scope.stream()
+        .flatMap(n -> n.findAll(VariableDeclarator.class, isRHSOfVD).stream())
+        .forEach(separated.getValue0()::add);
+
+    var pair =
+        new Pair<List<VariableDeclarator>, List<Node>>(
+            new ArrayList<VariableDeclarator>(), new ArrayList<Node>());
+    for (var lvd : separated.getValue0()) {
+      pair = combine(pair, flowsIntoImpl(lvd, memory));
+    }
+    return combine(separated, pair);
+  }
+
+  /**
+   * Test for this pattern: {@link ExpressionStmt} -&gt; {@link VariableDeclarationExpr} -&gt;
+   * {@link VariableDeclarator} ({@code vd}).
+   *
+   * @return A tuple with the above pattern.
+   */
   public static Optional<Triplet<ExpressionStmt, VariableDeclarationExpr, VariableDeclarator>>
       isVariableOfLocalDeclarationStmt(VariableDeclarator vd) {
     return vd.getParentNode()
@@ -119,23 +209,27 @@ public final class JDBCResourceLeakFixer {
                     : null);
   }
 
+  /** Checks if {@code name} is contained in a {@link NameExpr} that is the scope of {@code mce}. */
   public static boolean isScopeInMethodCall(MethodCallExpr mce, String name) {
     return mce.getScope()
         .filter(m -> m.isNameExpr() && m.asNameExpr().getNameAsString().equals(name))
         .isPresent();
   }
 
+  /** Checks if {@code vd} is a local declaration. */
   public static boolean isLocalVD(VariableDeclarator vd) {
     var maybeParent = vd.getParentNode();
     return maybeParent.filter(p -> p instanceof FieldDeclaration ? false : true).isPresent();
   }
 
+  /** Checks if the created object implements the {@link Closeable} interface. */
   public static boolean isCloseableType(ObjectCreationExpr oce) {
     return oce.calculateResolvedType().isReferenceType()
         && oce.calculateResolvedType().asReferenceType().getAllAncestors().stream()
             .anyMatch(t -> t.describe().equals("java.io.Closeable"));
   }
 
+  /** Checks if {@code expr} is the initialization or the rhs of an assignment of a variable. */
   public static Optional<SimpleName> immediatelyFlowsIntoVariable(Expression expr) {
     var maybeInit = ASTPatterns.isInitExpr(expr);
     if (maybeInit.isPresent()) {
@@ -163,6 +257,7 @@ public final class JDBCResourceLeakFixer {
     return maybeLVD;
   }
 
+  /** Checks if {@code expr} creates a JDBC Resource. */
   public static boolean isJDBCResourceInit(MethodCallExpr expr) {
     Predicate<MethodCallExpr> isResultSetGen =
         mce -> {
@@ -200,6 +295,10 @@ public final class JDBCResourceLeakFixer {
     return isDependent.test(expr);
   }
 
+  /**
+   * Find all the dependent resources of {@code expr}. A resource R is dependent if closing {@code
+   * expr} will also close R.
+   */
   public static List<Expression> findDependentResources(Expression expr) {
     List<Expression> allDependent = new ArrayList<>();
 
