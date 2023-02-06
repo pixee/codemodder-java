@@ -67,6 +67,7 @@ public final class JDBCResourceLeakFixer {
     //   var stmt = foo(query);
     //   var rs = stmt.getResultSet();
     // }
+
     var maybeVD = immediatelyFlowsIntoLocalVariable(mce);
     var allDependent = findDependentResources(mce);
     if (maybeVD.isPresent()) {
@@ -85,7 +86,6 @@ public final class JDBCResourceLeakFixer {
   public static int fix(MethodCallExpr mce) {
     int originalLine = mce.getRange().get().begin.line;
 
-    // Actual fix here
     // Is LocalDeclarationStmt and Never Assigned -> Wrap as a try resource
     var maybeInit = ASTPatterns.isInitExpr(mce);
     if (maybeInit.isPresent()) {
