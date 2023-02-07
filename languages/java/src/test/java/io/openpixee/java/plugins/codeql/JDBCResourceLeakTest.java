@@ -11,8 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -67,14 +65,13 @@ final class JDBCResourceLeakTest {
   }
 
   @Test
-  @Disabled
   void it_does_nothing_to_rs_because_stmt_leaks() throws IOException {
     String insecureFilePath =
         "src/test/java/com/acme/testcode/resourceleak/JDBCNoFixRSLeakByStmt.java";
     WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 13))),
+            new File("."), Set.of(buildResult(insecureFilePath, 14))),
         new IncludesExcludes.MatchesEverything());
   }
 

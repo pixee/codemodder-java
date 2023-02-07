@@ -11,6 +11,7 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.resolution.UnsolvedSymbolException;
 import io.openpixee.java.ast.ASTPatterns;
 import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.java.ast.ASTs;
@@ -46,19 +47,28 @@ public final class JDBCResourceLeakFixer {
     // (1) S is not closed within R's scope, and
     // (2) S escapes R's scope
     // Currently, we cannot test (*), as it requires some dataflow analysis, instead we test for
-    // (2): S is assigned to a variable that escapes.
+    // (+): S is assigned to a variable that escapes.
 
-    // TODO For ResultSet objects, still need need to check if the generating *Statement object does
-    // not escape/is a field/parameter, consider:
-    // Statement foo(String query){
-    //   var stmt = conn.createStatement();
-    //   var rs = stmt.executeQuery(query);
-    //   return stmt;
-    // }
-    // void bar(String query){
-    //   var stmt = foo(query);
-    //   var rs = stmt.getResultSet();
-    // }
+    // For ResultSet objects, still need need to check if the generating *Statement object does
+    // not escape due to the getResultSet() method.
+    try {
+      if (mce.calculateResolvedType().describe().equals("java.sql.ResultSet")) {
+        // should always exist and is a *Statement object
+        var mScope = mce.getScope().get();
+        if (mScope.isFieldAccessExpr()) return false;
+        if (mScope.isNameExpr()) {
+          var maybeLVD =
+              ASTs.findEarliestLocalDeclarationOf(mScope, mScope.asNameExpr().getNameAsString());
+
+          if (maybeLVD.filter(trip -> escapesRootScope(trip.getValue2(), n -> true)).isPresent())
+            return false;
+        }
+      }
+    }
+    // There's a possible bug on solving types of var declarations
+    catch (UnsolvedSymbolException e) {
+      return false;
+    }
 
     var maybeVD = immediatelyFlowsIntoLocalVariable(mce);
     var allDependent = findDependentResources(mce);
@@ -377,7 +387,8 @@ public final class JDBCResourceLeakFixer {
 
   /**
    * Checks if an object created/acessed by {@code expr} escapes the scope of its encompassing
-   * method immediately, that is, without begin assigned.
+   * method immediately, that is, without begin assigned. It escapes if it is assigned to a field,
+   * returned, or is the argument of a method call.
    */
   public static boolean immediatelyEscapesMethodScope(Expression expr) {
     // Returned or argument of a MethodCallExpr
@@ -406,6 +417,7 @@ public final class JDBCResourceLeakFixer {
     return false;
   }
 
+  /** Returns true if {@code vd} is returned or is a argument of a method call. */
   public static boolean escapesRootScope(VariableDeclarator vd, Predicate<Node> isInScope) {
     if (!isInScope.test(vd)) return true;
     var scope = ASTs.findLocalVariableScope(vd);
@@ -436,10 +448,17 @@ public final class JDBCResourceLeakFixer {
     return false;
   }
 
+  /**
+   * Returns true if {@code expr} itself escapes or flows into a variable {@code v} such that {@code
+   * v} escapes.
+   */
   public static boolean escapesRootScope(Expression expr, Predicate<Node> isInScope) {
     if (immediatelyEscapesMethodScope(expr)) return true;
+    // find all the variables it flows into
     var pair = flowsInto(expr);
+    // flows into anything that is not a local variable
     if (!pair.getValue1().isEmpty()) return true;
+
     var allVD = pair.getValue0();
     if (allVD.stream().anyMatch(vd -> escapesRootScope(vd, isInScope))) return true;
     return false;
