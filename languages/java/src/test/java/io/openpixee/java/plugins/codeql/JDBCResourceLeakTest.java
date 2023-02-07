@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 final class JDBCResourceLeakTest {
 
   @Test
-  @Disabled
   void it_does_nothing_to_stmt_because_rs_returns() throws IOException {
     String insecureFilePath =
         "src/test/java/com/acme/testcode/resourceleak/JDBCNoFixReturningResultSet.java";
@@ -34,7 +33,6 @@ final class JDBCResourceLeakTest {
   }
 
   @Test
-  @Disabled
   void it_does_nothing_to_stmt_because_rs_is_assigned_out_of_scope() throws IOException {
     String insecureFilePath =
         "src/test/java/com/acme/testcode/resourceleak/JDBCNoFixRSAssignedOutOfScope.java";
@@ -46,7 +44,6 @@ final class JDBCResourceLeakTest {
   }
 
   @Test
-  @Disabled
   void it_does_nothing_to_stmt_because_rs_is_assigned_to_a_field() throws IOException {
     String insecureFilePath =
         "src/test/java/com/acme/testcode/resourceleak/JDBCNoFixRSAssignedToAField.java";
@@ -58,7 +55,6 @@ final class JDBCResourceLeakTest {
   }
 
   @Test
-  @Disabled
   void it_does_nothing_to_stmt_because_rs_is_a_argument() throws IOException {
     String insecureFilePath =
         "src/test/java/com/acme/testcode/resourceleak/JDBCNoFixRSParameter.java";
