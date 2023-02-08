@@ -5,7 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class JDBCSimpleLeakWeaved {
+public final class JDBCSimpleLeakWeaved {
 
   private Connection conn;
 
