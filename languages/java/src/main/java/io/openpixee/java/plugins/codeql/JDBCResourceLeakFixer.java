@@ -99,8 +99,10 @@ public final class JDBCResourceLeakFixer {
         var stmt = trip.get().getValue0();
         var vde = trip.get().getValue1();
         var vd = trip.get().getValue2();
-        ASTTransforms.wrapIntoResource(stmt, vde, ASTs.findLocalVariableScope(vd));
-        return Optional.of(originalLine);
+        if (vde.getVariables().size() == 1) {
+          ASTTransforms.wrapIntoResource(stmt, vde, ASTs.findLocalVariableScope(vd));
+          return Optional.of(originalLine);
+        }
       }
     }
     // other cases here...
