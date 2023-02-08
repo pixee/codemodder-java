@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -77,7 +76,6 @@ final class JDBCResourceLeakTest {
   }
 
   @Test
-  @Disabled
   void it_wraps_stmt_as_a_try_resource() throws IOException {
     String insecureFilePath = "src/test/java/com/acme/testcode/resourceleak/JDBCSimpleLeak.java";
     WeavingTests.assertJavaWeaveWorkedAndWontReweave(
