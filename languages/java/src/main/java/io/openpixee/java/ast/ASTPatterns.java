@@ -1,6 +1,7 @@
 package io.openpixee.java.ast;
 
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -176,5 +177,39 @@ public final class ASTPatterns {
         .filter(
             mce ->
                 mce.getArguments().stream().filter(arg -> arg.equals(expr)).findAny().isPresent());
+  }
+
+  /** Checks if {@code vd} is a local declaration. */
+  public static boolean isLocalVD(VariableDeclarator vd) {
+    var maybeParent = vd.getParentNode();
+    return maybeParent.filter(p -> p instanceof FieldDeclaration ? false : true).isPresent();
+  }
+
+  /**
+   * Test for this pattern: {@link ObjectCreationExpr} -&gt; {@link Expression} ({@code expr}),
+   * where ({@code expr}) is one of the constructor arguments.
+   */
+  public static Optional<ObjectCreationExpr> isConstructorArgument(Expression expr) {
+    return expr.getParentNode()
+        .map(p -> p instanceof ObjectCreationExpr ? (ObjectCreationExpr) p : null)
+        .filter(oce -> oce.getArguments().stream().anyMatch(e -> e.equals(expr)));
+  }
+
+  /**
+   * Test for this pattern: {@link ExpressionStmt} -&gt; {@link VariableDeclarationExpr} -&gt;
+   * {@link VariableDeclarator} ({@code vd}).
+   *
+   * @return A tuple with the above pattern.
+   */
+  public static Optional<Triplet<ExpressionStmt, VariableDeclarationExpr, VariableDeclarator>>
+      isVariableOfLocalDeclarationStmt(VariableDeclarator vd) {
+    return vd.getParentNode()
+        .map(p -> p instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) p : null)
+        .map(
+            vde ->
+                (vde.getParentNode().isPresent()
+                        && vde.getParentNode().get() instanceof ExpressionStmt)
+                    ? new Triplet<>((ExpressionStmt) vde.getParentNode().get(), vde, vd)
+                    : null);
   }
 }
