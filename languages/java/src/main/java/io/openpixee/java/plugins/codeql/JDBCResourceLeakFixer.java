@@ -1,15 +1,12 @@
 package io.openpixee.java.plugins.codeql;
 
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import io.openpixee.java.ast.ASTPatterns;
@@ -24,12 +21,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.javatuples.Pair;
-import org.javatuples.Triplet;
 
 public final class JDBCResourceLeakFixer {
 
   public static Optional<Integer> checkAndFix(MethodCallExpr mce) {
-    if (isFixable(mce)) return Optional.of(fix(mce));
+    if (isFixable(mce)) return tryToFix(mce);
     return Optional.empty();
   }
 
@@ -84,8 +80,8 @@ public final class JDBCResourceLeakFixer {
     }
   }
 
-  /** Fixes the leak of {@code mce} and returns its line. */
-  public static int fix(MethodCallExpr mce) {
+  /** Tries to fix the leak of {@code mce} and returns its line. */
+  public static Optional<Integer> tryToFix(MethodCallExpr mce) {
     int originalLine = mce.getRange().get().begin.line;
 
     // Is LocalDeclarationStmt and Never Assigned -> Wrap as a try resource
@@ -93,7 +89,7 @@ public final class JDBCResourceLeakFixer {
     if (maybeInit.isPresent()) {
       var trip =
           maybeInit
-              .flatMap(JDBCResourceLeakFixer::isVariableOfLocalDeclarationStmt)
+              .flatMap(ASTPatterns::isVariableOfLocalDeclarationStmt)
               .filter(
                   t ->
                       ASTs.isFinalOrNeverAssigned(
@@ -104,9 +100,11 @@ public final class JDBCResourceLeakFixer {
         var vde = trip.get().getValue1();
         var vd = trip.get().getValue2();
         ASTTransforms.wrapIntoResource(stmt, vde, ASTs.findLocalVariableScope(vd));
+        return Optional.of(originalLine);
       }
     }
-    return originalLine;
+    // other cases here...
+    return Optional.empty();
   }
 
   /**
@@ -154,7 +152,7 @@ public final class JDBCResourceLeakFixer {
     var maybeInit = ASTPatterns.isInitExpr(expr);
     if (maybeInit.isPresent()) {
       var vd = maybeInit.get();
-      if (isLocalVD(vd)) return flowsInto(vd);
+      if (ASTPatterns.isLocalVD(vd)) return flowsInto(vd);
       else return new Pair<>(Collections.emptyList(), List.of(vd));
     }
 
@@ -227,56 +225,22 @@ public final class JDBCResourceLeakFixer {
     return combine(separated, pair);
   }
 
-  /**
-   * Test for this pattern: {@link ExpressionStmt} -&gt; {@link VariableDeclarationExpr} -&gt;
-   * {@link VariableDeclarator} ({@code vd}).
-   *
-   * @return A tuple with the above pattern.
-   */
-  public static Optional<Triplet<ExpressionStmt, VariableDeclarationExpr, VariableDeclarator>>
-      isVariableOfLocalDeclarationStmt(VariableDeclarator vd) {
-    return vd.getParentNode()
-        .map(p -> p instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) p : null)
-        .map(
-            vde ->
-                (vde.getParentNode().isPresent()
-                        && vde.getParentNode().get() instanceof ExpressionStmt)
-                    ? new Triplet<>((ExpressionStmt) vde.getParentNode().get(), vde, vd)
-                    : null);
-  }
-
-  /**
-   * Test for this pattern: {@link ObjectCreationExpr} -&gt; {@link Expression} ({@code expr}),
-   * where ({@code expr}) is one of the constructor arguments.
-   */
-  public static Optional<ObjectCreationExpr> isConstructorArgument(Expression expr) {
-    return expr.getParentNode()
-        .map(p -> p instanceof ObjectCreationExpr ? (ObjectCreationExpr) p : null)
-        .filter(oce -> oce.getArguments().stream().anyMatch(e -> e.equals(expr)));
-  }
-
   /** Checks if {@code name} is contained in a {@link NameExpr} that is the scope of {@code mce}. */
-  public static boolean isScopeInMethodCall(MethodCallExpr mce, String name) {
+  private static boolean isScopeInMethodCall(MethodCallExpr mce, String name) {
     return mce.getScope()
         .filter(m -> m.isNameExpr() && m.asNameExpr().getNameAsString().equals(name))
         .isPresent();
   }
 
-  /** Checks if {@code vd} is a local declaration. */
-  public static boolean isLocalVD(VariableDeclarator vd) {
-    var maybeParent = vd.getParentNode();
-    return maybeParent.filter(p -> p instanceof FieldDeclaration ? false : true).isPresent();
-  }
-
   /** Checks if the created object implements the {@link Closeable} interface. */
-  public static boolean isCloseableType(ObjectCreationExpr oce) {
+  private static boolean isCloseableType(ObjectCreationExpr oce) {
     return oce.calculateResolvedType().isReferenceType()
         && oce.calculateResolvedType().asReferenceType().getAllAncestors().stream()
             .anyMatch(t -> t.describe().equals("java.io.Closeable"));
   }
 
   /** Checks if {@code expr} creates a JDBC Resource. */
-  public static boolean isJDBCResourceInit(MethodCallExpr expr) {
+  private static boolean isJDBCResourceInit(MethodCallExpr expr) {
     Predicate<MethodCallExpr> isResultSetGen =
         mce -> {
           switch (mce.getNameAsString()) {
@@ -317,8 +281,8 @@ public final class JDBCResourceLeakFixer {
    * Checks if {@code expr} is immediately assigned to a local variable {@code v} through an
    * assignment or initializer.
    */
-  public static Optional<VariableDeclarator> immediatelyFlowsIntoLocalVariable(Expression expr) {
-    var maybeInit = ASTPatterns.isInitExpr(expr).filter(JDBCResourceLeakFixer::isLocalVD);
+  private static Optional<VariableDeclarator> immediatelyFlowsIntoLocalVariable(Expression expr) {
+    var maybeInit = ASTPatterns.isInitExpr(expr).filter(ASTPatterns::isLocalVD);
     if (maybeInit.isPresent()) {
       return maybeInit;
     }
@@ -334,7 +298,7 @@ public final class JDBCResourceLeakFixer {
    * Find all the dependent resources of {@code expr}. A resource R is dependent if closing {@code
    * expr} will also close R.
    */
-  public static List<Expression> findDependentResources(Expression expr) {
+  private static List<Expression> findDependentResources(Expression expr) {
     List<Expression> allDependent = new ArrayList<>();
 
     // immediately generates a JDBC resource e.g. <expr>.prepareStatement()
@@ -348,7 +312,8 @@ public final class JDBCResourceLeakFixer {
 
     // immediately passed as a constructor argument for a closeable resource
     // the wrapping closeable resource is considered dependent
-    var maybeOCE = isConstructorArgument(expr).filter(JDBCResourceLeakFixer::isCloseableType);
+    var maybeOCE =
+        ASTPatterns.isConstructorArgument(expr).filter(JDBCResourceLeakFixer::isCloseableType);
     if (maybeOCE.isPresent()) {
       allDependent.add(maybeOCE.get());
       allDependent.addAll(findDependentResources(maybeOCE.get()));
@@ -390,14 +355,13 @@ public final class JDBCResourceLeakFixer {
    * method immediately, that is, without begin assigned. It escapes if it is assigned to a field,
    * returned, or is the argument of a method call.
    */
-  public static boolean immediatelyEscapesMethodScope(Expression expr) {
+  private static boolean immediatelyEscapesMethodScope(Expression expr) {
     // Returned or argument of a MethodCallExpr
     if (ASTPatterns.isReturnExpr(expr).isPresent()
         || ASTPatterns.isArgumentOfMethodCall(expr).isPresent()) return true;
 
     // is the init expression of a field
-    if (ASTPatterns.isInitExpr(expr).filter(vd -> JDBCResourceLeakFixer.isLocalVD(vd)).isEmpty())
-      return true;
+    if (ASTPatterns.isInitExpr(expr).filter(vd -> ASTPatterns.isLocalVD(vd)).isEmpty()) return true;
 
     // Is assigned to a field?
     var maybeAE = ASTPatterns.isAssigned(expr);
@@ -418,7 +382,7 @@ public final class JDBCResourceLeakFixer {
   }
 
   /** Returns true if {@code vd} is returned or is a argument of a method call. */
-  public static boolean escapesRootScope(VariableDeclarator vd, Predicate<Node> isInScope) {
+  private static boolean escapesRootScope(VariableDeclarator vd, Predicate<Node> isInScope) {
     if (!isInScope.test(vd)) return true;
     var scope = ASTs.findLocalVariableScope(vd);
 
@@ -448,11 +412,8 @@ public final class JDBCResourceLeakFixer {
     return false;
   }
 
-  /**
-   * Returns true if {@code expr} itself escapes or flows into a variable {@code v} such that {@code
-   * v} escapes.
-   */
-  public static boolean escapesRootScope(Expression expr, Predicate<Node> isInScope) {
+  /** Returns true if {@code expr} itself escapes or flows into a variable that escapes. */
+  private static boolean escapesRootScope(Expression expr, Predicate<Node> isInScope) {
     if (immediatelyEscapesMethodScope(expr)) return true;
     // find all the variables it flows into
     var pair = flowsInto(expr);
