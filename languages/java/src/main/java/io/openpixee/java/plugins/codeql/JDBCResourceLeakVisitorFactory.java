@@ -96,10 +96,10 @@ final class JDBCResourceLeakVisitorFactory implements VisitorFactory {
                   .orElse(false);
 
       // Checks if a PhysicalLocation matches methodCallExpr location
-      if (locations.stream().filter(matchLocation).findFirst().isPresent()) {
+      if (locations.stream().anyMatch(matchLocation)) {
         JDBCResourceLeakFixer.checkAndFix(methodCallExpr)
             .map(i -> Weave.from(i, JDBCResourceLeakRuleId))
-            .ifPresent(weave -> context.addWeave(weave));
+            .ifPresent(context::addWeave);
       }
 
       return methodCallExpr;

@@ -176,13 +176,13 @@ public final class ASTPatterns {
         .map(p -> p instanceof MethodCallExpr ? (MethodCallExpr) p : null)
         .filter(
             mce ->
-                mce.getArguments().stream().filter(arg -> arg.equals(expr)).findAny().isPresent());
+                    mce.getArguments().stream().anyMatch(arg -> arg.equals(expr)));
   }
 
   /** Checks if {@code vd} is a local declaration. */
   public static boolean isLocalVD(VariableDeclarator vd) {
     var maybeParent = vd.getParentNode();
-    return maybeParent.filter(p -> p instanceof FieldDeclaration ? false : true).isPresent();
+    return maybeParent.filter(p -> !(p instanceof FieldDeclaration)).isPresent();
   }
 
   /**
