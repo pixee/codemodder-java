@@ -24,10 +24,10 @@ public final class ASTPatterns {
    * Test for this pattern: {@link AssignExpr} -&gt; {@link Expression} ({@code expr}), where
    * ({@code expr}) is the right hand side expression of the assignment.
    */
-  public static Optional<AssignExpr> isAssigned(Expression expr) {
+  public static Optional<AssignExpr> isAssigned(final Expression expr) {
     return expr.getParentNode()
         .map(p -> p instanceof AssignExpr ? (AssignExpr) p : null)
-        .filter(ae -> ae.getValue().equals(expr));
+        .filter(ae -> ae.getValue() == expr);
   }
 
   /** Test for this pattern: {@link VariableDeclarator} -&gt; {@link Expression} ({@code expr}) */
@@ -40,7 +40,7 @@ public final class ASTPatterns {
   public static Optional<TryStmt> isResource(final VariableDeclarationExpr vde) {
     return vde.getParentNode()
         .map(p -> p instanceof TryStmt ? (TryStmt) p : null)
-        .filter(ts -> ts.getResources().stream().anyMatch(rs -> rs.equals(vde)));
+        .filter(ts -> ts.getResources().stream().anyMatch(rs -> rs == vde ));
   }
 
   /**
@@ -53,7 +53,7 @@ public final class ASTPatterns {
     final var maybe = expr.getParentNode();
     return maybe
         .map(p -> p instanceof MethodCallExpr ? (MethodCallExpr) p : null)
-        .filter(p -> (p.getScope().isPresent() && p.getScope().get().equals(expr)));
+        .filter(p -> (p.getScope().isPresent() && p.getScope().get() == expr));
   }
 
   /**
@@ -176,12 +176,12 @@ public final class ASTPatterns {
         .map(p -> p instanceof MethodCallExpr ? (MethodCallExpr) p : null)
         .filter(
             mce ->
-                    mce.getArguments().stream().anyMatch(arg -> arg.equals(expr)));
+                    mce.getArguments().stream().anyMatch(arg -> arg == expr));
   }
 
   /** Checks if {@code vd} is a local declaration. */
-  public static boolean isLocalVD(VariableDeclarator vd) {
-    var maybeParent = vd.getParentNode();
+  public static boolean isLocalVariableDeclarator(final VariableDeclarator vd) {
+    final var maybeParent = vd.getParentNode();
     return maybeParent.filter(p -> !(p instanceof FieldDeclaration)).isPresent();
   }
 
@@ -189,10 +189,10 @@ public final class ASTPatterns {
    * Test for this pattern: {@link ObjectCreationExpr} -&gt; {@link Expression} ({@code expr}),
    * where ({@code expr}) is one of the constructor arguments.
    */
-  public static Optional<ObjectCreationExpr> isConstructorArgument(Expression expr) {
+  public static Optional<ObjectCreationExpr> isConstructorArgument(final Expression expr) {
     return expr.getParentNode()
         .map(p -> p instanceof ObjectCreationExpr ? (ObjectCreationExpr) p : null)
-        .filter(oce -> oce.getArguments().stream().anyMatch(e -> e.equals(expr)));
+        .filter(oce -> oce.getArguments().stream().anyMatch(e -> e == expr));
   }
 
   /**
@@ -202,7 +202,7 @@ public final class ASTPatterns {
    * @return A tuple with the above pattern.
    */
   public static Optional<Triplet<ExpressionStmt, VariableDeclarationExpr, VariableDeclarator>>
-      isVariableOfLocalDeclarationStmt(VariableDeclarator vd) {
+      isVariableOfLocalDeclarationStmt(final VariableDeclarator vd) {
     return vd.getParentNode()
         .map(p -> p instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) p : null)
         .map(
