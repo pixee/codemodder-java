@@ -40,7 +40,7 @@ public final class ASTPatterns {
   public static Optional<TryStmt> isResource(final VariableDeclarationExpr vde) {
     return vde.getParentNode()
         .map(p -> p instanceof TryStmt ? (TryStmt) p : null)
-        .filter(ts -> ts.getResources().stream().anyMatch(rs -> rs == vde ));
+        .filter(ts -> ts.getResources().stream().anyMatch(rs -> rs == vde));
   }
 
   /**
@@ -174,9 +174,7 @@ public final class ASTPatterns {
   public static Optional<MethodCallExpr> isArgumentOfMethodCall(final Expression expr) {
     return expr.getParentNode()
         .map(p -> p instanceof MethodCallExpr ? (MethodCallExpr) p : null)
-        .filter(
-            mce ->
-                    mce.getArguments().stream().anyMatch(arg -> arg == expr));
+        .filter(mce -> mce.getArguments().stream().anyMatch(arg -> arg == expr));
   }
 
   /** Checks if {@code vd} is a local declaration. */

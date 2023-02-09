@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Fixes issues reported under the id "java/database-resource-leak" */
+/** Fixes issues reported under CodeQL's id "java/database-resource-leak" */
 final class JDBCResourceLeakVisitorFactory implements VisitorFactory {
 
   /** The locations of each result. */
@@ -78,7 +78,6 @@ final class JDBCResourceLeakVisitorFactory implements VisitorFactory {
     return filePath.startsWith(repositoryRootPath) && filePath.endsWith(fileUri);
   }
 
-  /** Replaces calls to Jwt.parser().parse() with .parseClaimsJws() */
   private static class JDBCResourceLeakVisitor extends ModifierVisitor<FileWeavingContext> {
     private final List<PhysicalLocation> locations;
 
