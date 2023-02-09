@@ -153,7 +153,7 @@ public final class JDBCResourceLeakFixer {
     final var maybeInit = ASTPatterns.isInitExpr(expr);
     if (maybeInit.isPresent()) {
       final var vd = maybeInit.get();
-      if (ASTPatterns.isLocalVD(vd)) return flowsInto(vd);
+      if (ASTPatterns.isLocalVariableDeclarator(vd)) return flowsInto(vd);
       else return new Pair<>(Collections.emptyList(), List.of(vd));
     }
 
@@ -283,7 +283,7 @@ public final class JDBCResourceLeakFixer {
    * assignment or initializer.
    */
   private static Optional<VariableDeclarator> immediatelyFlowsIntoLocalVariable(final Expression expr) {
-    final var maybeInit = ASTPatterns.isInitExpr(expr).filter(ASTPatterns::isLocalVD);
+    final var maybeInit = ASTPatterns.isInitExpr(expr).filter(ASTPatterns::isLocalVariableDeclarator);
     if (maybeInit.isPresent()) {
       return maybeInit;
     }
@@ -360,7 +360,7 @@ public final class JDBCResourceLeakFixer {
         || ASTPatterns.isArgumentOfMethodCall(expr).isPresent()) return true;
 
     // is the init expression of a field
-    if (ASTPatterns.isInitExpr(expr).filter(ASTPatterns::isLocalVD).isEmpty()) return true;
+    if (ASTPatterns.isInitExpr(expr).filter(ASTPatterns::isLocalVariableDeclarator).isEmpty()) return true;
 
     // Is assigned to a field?
     final var maybeAE = ASTPatterns.isAssigned(expr);
