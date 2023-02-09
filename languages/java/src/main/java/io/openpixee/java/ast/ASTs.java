@@ -241,7 +241,7 @@ public final class ASTs {
   /** Returns the lowest common ancestor of a pair of nodes. */
   public static Node lowestCommonAncestor(Node n1, Node n2) {
     var n1Path = pathToRoot(n1);
-    var n2Path = pathToRoot(n1);
+    var n2Path = pathToRoot(n2);
     var i1 = n1Path.size() - 1;
     var i2 = n2Path.size() - 1;
     while (n1Path.get(i1).equals(n2Path.get(i2)) && i1 >= 0 && i2 >= 0) {
