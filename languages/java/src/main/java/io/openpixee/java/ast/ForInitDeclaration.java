@@ -6,7 +6,7 @@ import com.github.javaparser.ast.stmt.ForStmt;
 
 public final class ForInitDeclaration extends LocalVariableDeclaration {
 
-  private ForStmt stmt;
+  private final ForStmt stmt;
 
   public ForInitDeclaration(ForStmt stmt, VariableDeclarationExpr vde, VariableDeclarator vd) {
     this.stmt = stmt;

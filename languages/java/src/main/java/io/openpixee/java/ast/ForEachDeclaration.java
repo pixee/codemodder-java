@@ -6,7 +6,7 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 
 public final class ForEachDeclaration extends LocalVariableDeclaration {
 
-  private ForEachStmt stmt;
+  private final ForEachStmt stmt;
 
   public ForEachDeclaration(ForEachStmt stmt, VariableDeclarationExpr vde, VariableDeclarator vd) {
     this.stmt = stmt;

@@ -6,7 +6,7 @@ import com.github.javaparser.ast.stmt.TryStmt;
 
 public final class TryResourceDeclaration extends LocalVariableDeclaration {
 
-  private TryStmt stmt;
+  private final TryStmt stmt;
 
   public TryResourceDeclaration(TryStmt stmt, VariableDeclarationExpr vde, VariableDeclarator vd) {
     this.stmt = stmt;
