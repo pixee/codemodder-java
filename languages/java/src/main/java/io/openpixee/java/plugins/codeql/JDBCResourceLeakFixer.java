@@ -7,11 +7,22 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.ForEachStmt;
+import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import io.openpixee.java.ast.ASTPatterns;
 import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.java.ast.ASTs;
+import io.openpixee.java.ast.ExpressionStmtVariableDeclaration;
+import io.openpixee.java.ast.ForEachDeclaration;
+import io.openpixee.java.ast.ForInitDeclaration;
+import io.openpixee.java.ast.LocalVariableDeclaration;
+import io.openpixee.java.ast.TryResourceDeclaration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,7 +32,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.javatuples.Pair;
-import org.javatuples.Triplet;
 
 /**
  * A library that contains methods for automatically fixing resource leaks detected by CodeQL's rule
@@ -70,8 +80,7 @@ public final class JDBCResourceLeakFixer {
               ASTs.findEarliestLocalDeclarationOf(
                   mceScope, mceScope.asNameExpr().getNameAsString());
 
-          if (maybeLVD.filter(trip -> escapesRootScope(trip.getValue2(), n -> true)).isPresent())
-            return false;
+          if (maybeLVD.filter(lvd -> escapesRootScope(lvd, n -> true)).isPresent()) return false;
         }
       }
     }
@@ -80,11 +89,11 @@ public final class JDBCResourceLeakFixer {
       return false;
     }
 
-    final var maybeVD = immediatelyFlowsIntoLocalVariable(mce);
+    final var maybeLVD = immediatelyFlowsIntoLocalVariable(mce);
     final var allDependent = findDependentResources(mce);
-    if (maybeVD.isPresent()) {
-      final var scope = ASTs.findLocalVariableScope(maybeVD.get());
-      final Predicate<Node> isInScope = n -> ASTs.inScope(n, scope);
+    if (maybeLVD.isPresent()) {
+      final var scope = maybeLVD.get().getScope();
+      final Predicate<Node> isInScope = n -> scope.inScope(n);
       return allDependent.stream().noneMatch(e -> escapesRootScope(e, isInScope));
     } else {
       final Predicate<Node> isInScope = n -> true;
@@ -122,22 +131,32 @@ public final class JDBCResourceLeakFixer {
     return Optional.empty();
   }
 
+  private static LocalVariableDeclaration fromVariableDeclarator(VariableDeclarator vd) {
+    var vde = (VariableDeclarationExpr) vd.getParentNode().get();
+    var stmt = (Statement) vde.getParentNode().get();
+    if (stmt instanceof TryStmt) return new TryResourceDeclaration(stmt.asTryStmt(), vde, vd);
+    if (stmt instanceof ExpressionStmt)
+      return new ExpressionStmtVariableDeclaration(stmt.asExpressionStmt(), vde, vd);
+    if (stmt instanceof ForEachStmt) return new ForEachDeclaration(stmt.asForEachStmt(), vde, vd);
+    if (stmt instanceof ForStmt) return new ForInitDeclaration(stmt.asForStmt(), vde, vd);
+    return null;
+  }
+
   /**
    * Given a list of {@link AssignExpr} separate it into assignments to local variables and
    * everything else.
    */
-  private static Pair<List<VariableDeclarator>, List<Node>> separateAE(
+  private static Pair<List<LocalVariableDeclaration>, List<Node>> separateAssignExpressions(
       final List<AssignExpr> allAE, final HashSet<VariableDeclarator> memory) {
-    final var allLVD = new ArrayList<VariableDeclarator>();
+    final var allLVD = new ArrayList<LocalVariableDeclaration>();
     final var notLVD = new ArrayList<Node>();
     for (final var ae : allAE) {
       if (ae.getTarget().isNameExpr()) {
         final var ne = ae.getTarget().asNameExpr();
-        final var maybeLVD =
-            ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()).map(Triplet::getValue2);
+        final var maybeLVD = ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString());
         maybeLVD.ifPresentOrElse(
-            vd -> {
-              if (!memory.contains(vd)) allLVD.add(vd);
+            lvd -> {
+              if (!memory.contains(lvd.getVariableDeclarator())) allLVD.add(lvd);
             },
             () -> notLVD.add(ne));
       } else notLVD.add(ae.getTarget());
@@ -145,9 +164,9 @@ public final class JDBCResourceLeakFixer {
     return new Pair<>(allLVD, notLVD);
   }
 
-  private static Pair<List<VariableDeclarator>, List<Node>> combine(
-      final Pair<List<VariableDeclarator>, List<Node>> left,
-      final Pair<List<VariableDeclarator>, List<Node>> right) {
+  private static Pair<List<LocalVariableDeclaration>, List<Node>> combine(
+      final Pair<List<LocalVariableDeclaration>, List<Node>> left,
+      final Pair<List<LocalVariableDeclaration>, List<Node>> right) {
     left.getValue0().addAll(right.getValue0());
     left.getValue1().addAll(right.getValue1());
     return left;
@@ -158,16 +177,16 @@ public final class JDBCResourceLeakFixer {
    * works recursively, meaning if, for example, {@code b = expr; a = b;}, {@code a} will be on the
    * list.
    *
-   * @return A pair {@code (lvd,lnv)} where {@code lvd} are all the {@link VariableDeclarator}s of
-   *     local variables that {@code expr} is assigned to, and {@code lnv} contains all the other
-   *     assignments.
+   * @return A pair {@code (lvd,lnv)} where {@code lvd} are all the {@link
+   *     LocalVariableDeclaration}s that {@code expr} is assigned to, and {@code lnv} contains all
+   *     the other assignments.
    */
-  public static Pair<List<VariableDeclarator>, List<Node>> flowsInto(final Expression expr) {
+  public static Pair<List<LocalVariableDeclaration>, List<Node>> flowsInto(final Expression expr) {
     // is immediately assigned as an init expr
     final var maybeInit = ASTPatterns.isInitExpr(expr);
     if (maybeInit.isPresent()) {
       final var vd = maybeInit.get();
-      if (ASTPatterns.isLocalVariableDeclarator(vd)) return flowsInto(vd);
+      if (ASTPatterns.isLocalVariableDeclarator(vd)) return flowsInto(fromVariableDeclarator(vd));
       else return new Pair<>(Collections.emptyList(), List.of(vd));
     }
 
@@ -179,27 +198,29 @@ public final class JDBCResourceLeakFixer {
         final var maybeLVD =
             ASTs.findEarliestLocalDeclarationOf(
                 ae.getTarget(), ae.getTarget().asNameExpr().getNameAsString());
-        if (maybeLVD.isPresent()) return flowsInto(maybeLVD.get().getValue2());
+        if (maybeLVD.isPresent()) return flowsInto(maybeLVD.get());
       }
       return new Pair<>(Collections.emptyList(), List.of(ae.getTarget()));
     }
     return new Pair<>(Collections.emptyList(), Collections.emptyList());
   }
 
-  public static Pair<List<VariableDeclarator>, List<Node>> flowsInto(final VariableDeclarator vd) {
-    return flowsIntoImpl(vd, new HashSet<>());
+  public static Pair<List<LocalVariableDeclaration>, List<Node>> flowsInto(
+      final LocalVariableDeclaration lvd) {
+    return flowsIntoImpl(lvd, new HashSet<>());
   }
 
-  private static Pair<List<VariableDeclarator>, List<Node>> flowsIntoImpl(
-      final VariableDeclarator vd, final HashSet<VariableDeclarator> memory) {
-    if (memory.contains(vd)) return new Pair<>(Collections.emptyList(), Collections.emptyList());
-    else memory.add(vd);
+  private static Pair<List<LocalVariableDeclaration>, List<Node>> flowsIntoImpl(
+      final LocalVariableDeclaration lvd, final HashSet<VariableDeclarator> memory) {
+    if (memory.contains(lvd.getVariableDeclarator()))
+      return new Pair<>(Collections.emptyList(), Collections.emptyList());
+    else memory.add(lvd.getVariableDeclarator());
 
-    final var scope = ASTs.findLocalVariableScope(vd);
+    final var scope = lvd.getScope();
     final Predicate<AssignExpr> isRHSOfAE =
         ae ->
             ae.getValue().isNameExpr()
-                && ae.getValue().asNameExpr().getNameAsString().equals(vd.getNameAsString());
+                && ae.getValue().asNameExpr().getNameAsString().equals(lvd.getName());
 
     // assignments i.e. a = b; but not a = a
     final var allAE =
@@ -208,13 +229,10 @@ public final class JDBCResourceLeakFixer {
             .filter(
                 ae ->
                     !(ae.getTarget().isNameExpr()
-                        && ae.getTarget()
-                            .asNameExpr()
-                            .getNameAsString()
-                            .equals(vd.getNameAsString())))
+                        && ae.getTarget().asNameExpr().getNameAsString().equals(lvd.getName())))
             .collect(Collectors.toList());
     // separate the assignments to local variables from the others
-    final var separated = separateAE(allAE, memory);
+    final var separated = separateAssignExpressions(allAE, memory);
 
     // init expressions var a = b;
     final Predicate<VariableDeclarator> isRHSOfVD =
@@ -224,16 +242,17 @@ public final class JDBCResourceLeakFixer {
                 .filter(
                     init ->
                         init.isNameExpr()
-                            && init.asNameExpr().getNameAsString().equals(vd.getNameAsString()))
+                            && init.asNameExpr().getNameAsString().equals(lvd.getName()))
                 .isPresent();
 
     scope.stream()
         .flatMap(n -> n.findAll(VariableDeclarator.class, isRHSOfVD).stream())
-        .forEach(separated.getValue0()::add);
+        .forEach(vd -> separated.getValue0().add(fromVariableDeclarator(vd)));
 
-    var pair = new Pair<List<VariableDeclarator>, List<Node>>(new ArrayList<>(), new ArrayList<>());
-    for (final var lvd : separated.getValue0()) {
-      pair = combine(pair, flowsIntoImpl(lvd, memory));
+    var pair =
+        new Pair<List<LocalVariableDeclaration>, List<Node>>(new ArrayList<>(), new ArrayList<>());
+    for (final var lvdInSep : separated.getValue0()) {
+      pair = combine(pair, flowsIntoImpl(lvdInSep, memory));
     }
     return combine(separated, pair);
   }
@@ -294,17 +313,16 @@ public final class JDBCResourceLeakFixer {
    * Checks if {@code expr} is immediately assigned to a local variable {@code v} through an
    * assignment or initializer.
    */
-  private static Optional<VariableDeclarator> immediatelyFlowsIntoLocalVariable(
+  private static Optional<LocalVariableDeclaration> immediatelyFlowsIntoLocalVariable(
       final Expression expr) {
     final var maybeInit =
         ASTPatterns.isInitExpr(expr).filter(ASTPatterns::isLocalVariableDeclarator);
     if (maybeInit.isPresent()) {
-      return maybeInit;
+      return maybeInit.map(JDBCResourceLeakFixer::fromVariableDeclarator);
     }
     return ASTPatterns.isAssigned(expr)
         .map(ae -> ae.getTarget().isNameExpr() ? ae.getTarget().asNameExpr() : null)
-        .flatMap(ne -> ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()))
-        .map(Triplet::getValue2);
+        .flatMap(ne -> ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()));
   }
 
   /**
@@ -334,13 +352,13 @@ public final class JDBCResourceLeakFixer {
     }
 
     // is assigned to a local variable and ...
-    final var maybeVD = immediatelyFlowsIntoLocalVariable(expr);
-    if (maybeVD.isPresent()) {
-      final var vd = maybeVD.get();
-      final var scope = ASTs.findLocalVariableScope(vd);
+    final var maybeLVD = immediatelyFlowsIntoLocalVariable(expr);
+    if (maybeLVD.isPresent()) {
+      final var lvd = maybeLVD.get();
+      final var scope = lvd.getScope();
       // ... generates JDBC resource or ...
       final Predicate<MethodCallExpr> vdGenerates =
-          mce -> isScopeInMethodCall(mce, vd.getNameAsString()) && isJDBCResourceInit(mce);
+          mce -> isScopeInMethodCall(mce, lvd.getName()) && isJDBCResourceInit(mce);
 
       scope.stream()
           .flatMap(n -> n.findAll(MethodCallExpr.class, vdGenerates).stream())
@@ -353,8 +371,7 @@ public final class JDBCResourceLeakFixer {
               oce.getArguments().stream()
                   .anyMatch(
                       e ->
-                          e.isNameExpr()
-                              && e.asNameExpr().getNameAsString().equals(vd.getNameAsString()));
+                          e.isNameExpr() && e.asNameExpr().getNameAsString().equals(lvd.getName()));
       scope.stream()
           .flatMap(n -> n.findAll(ObjectCreationExpr.class, wrapsVD).stream())
           .forEach(allDependent::add);
@@ -396,21 +413,18 @@ public final class JDBCResourceLeakFixer {
 
   /** Returns true if {@code vd} is returned or is an argument of a method call. */
   private static boolean escapesRootScope(
-      final VariableDeclarator vd, final Predicate<Node> isInScope) {
-    if (!isInScope.test(vd)) return true;
-    final var scope = ASTs.findLocalVariableScope(vd);
+      final LocalVariableDeclaration lvd, final Predicate<Node> isInScope) {
+    if (!isInScope.test(lvd.getVariableDeclarator())) return true;
 
     // Returned
     final Predicate<ReturnStmt> isReturned =
         rs ->
             rs.getExpression()
                 .filter(
-                    e ->
-                        e.isNameExpr()
-                            && e.asNameExpr().getNameAsString().equals(vd.getNameAsString()))
+                    e -> e.isNameExpr() && e.asNameExpr().getNameAsString().equals(lvd.getName()))
                 .isPresent();
-    if (scope.stream().anyMatch(n -> n.findFirst(ReturnStmt.class, isReturned).isPresent()))
-      return true;
+    if (lvd.getScope().stream()
+        .anyMatch(n -> n.findFirst(ReturnStmt.class, isReturned).isPresent())) return true;
 
     // As an argument of a method call
     final Predicate<MethodCallExpr> isCallArgument =
@@ -419,9 +433,9 @@ public final class JDBCResourceLeakFixer {
                 .anyMatch(
                     arg ->
                         arg.isNameExpr()
-                            && arg.asNameExpr().getNameAsString().equals(vd.getNameAsString()));
+                            && arg.asNameExpr().getNameAsString().equals(lvd.getName()));
 
-    return scope.stream()
+    return lvd.getScope().stream()
         .anyMatch(n -> n.findFirst(MethodCallExpr.class, isCallArgument).isPresent());
   }
 

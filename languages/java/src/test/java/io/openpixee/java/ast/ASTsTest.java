@@ -365,7 +365,7 @@ final class ASTsTest {
     assertThat(
         ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
             .get()
-            .getValue2()
+            .getVariableDeclarator()
             .equals(local_vd),
         is(true));
   }
@@ -388,7 +388,7 @@ final class ASTsTest {
     assertThat(
         ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
             .get()
-            .getValue2()
+            .getVariableDeclarator()
             .equals(local_vd),
         is(true));
   }
@@ -429,7 +429,7 @@ final class ASTsTest {
     assertThat(
         ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
             .get()
-            .getValue2()
+            .getVariableDeclarator()
             .equals(local_vd),
         is(true));
   }
@@ -452,7 +452,7 @@ final class ASTsTest {
     assertThat(
         ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
             .get()
-            .getValue2()
+            .getVariableDeclarator()
             .equals(local_vd),
         is(true));
   }
@@ -476,7 +476,7 @@ final class ASTsTest {
     assertThat(
         ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
             .get()
-            .getValue2()
+            .getVariableDeclarator()
             .equals(local_vd),
         is(true));
   }

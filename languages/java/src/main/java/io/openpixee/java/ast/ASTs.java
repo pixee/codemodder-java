@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import org.javatuples.Triplet;
 
 /** Utility methods that may be useful for many visitors. */
 public final class ASTs {
@@ -168,8 +167,8 @@ public final class ASTs {
     return null;
   }
 
-  public static Optional<Triplet<Statement, VariableDeclarationExpr, VariableDeclarator>>
-      findEarliestLocalDeclarationOf(Node start, String name) {
+  public static Optional<LocalVariableDeclaration> findEarliestLocalDeclarationOf(
+      Node start, String name) {
     var maybeParent = start.getParentNode();
     if (maybeParent.isEmpty()) return Optional.empty();
     var parent = maybeParent.get();
@@ -180,7 +179,7 @@ public final class ASTs {
         var maybeExprStmtTriplet = ASTPatterns.isExpressionStmtDeclarationOf(stmt, name);
         if (maybeExprStmtTriplet.isPresent())
           return Optional.of(
-              new Triplet<>(
+              new ExpressionStmtVariableDeclaration(
                   maybeExprStmtTriplet.get().getValue0(),
                   maybeExprStmtTriplet.get().getValue1(),
                   maybeExprStmtTriplet.get().getValue2()));
@@ -190,7 +189,7 @@ public final class ASTs {
       var maybeResource = ASTPatterns.isResourceOf(parent, name);
       if (maybeResource.isPresent()) {
         return Optional.of(
-            new Triplet<>(
+            new TryResourceDeclaration(
                 maybeResource.get().getValue0(),
                 maybeResource.get().getValue1(),
                 maybeResource.get().getValue2()));
@@ -199,7 +198,7 @@ public final class ASTs {
       var maybeExpressionDeclaration = ASTPatterns.isExpressionStmtDeclarationOf(parent, name);
       if (maybeExpressionDeclaration.isPresent()) {
         return Optional.of(
-            new Triplet<>(
+            new ExpressionStmtVariableDeclaration(
                 maybeExpressionDeclaration.get().getValue0(),
                 maybeExpressionDeclaration.get().getValue1(),
                 maybeExpressionDeclaration.get().getValue2()));
@@ -208,7 +207,7 @@ public final class ASTs {
       var maybeForDeclaration = ASTPatterns.isForEachVariableDeclarationOf(parent, name);
       if (maybeForDeclaration.isPresent())
         return Optional.of(
-            new Triplet<>(
+            new ForEachDeclaration(
                 maybeForDeclaration.get().getValue0(),
                 maybeForDeclaration.get().getValue1(),
                 maybeForDeclaration.get().getValue2()));
@@ -216,7 +215,7 @@ public final class ASTs {
       var maybeForDeclaration = ASTPatterns.isForVariableDeclarationOf(parent, name);
       if (maybeForDeclaration.isPresent())
         return Optional.of(
-            new Triplet<>(
+            new ForInitDeclaration(
                 maybeForDeclaration.get().getValue0(),
                 maybeForDeclaration.get().getValue1(),
                 maybeForDeclaration.get().getValue2()));
@@ -276,15 +275,6 @@ public final class ASTs {
       if (n.equals(lcaDirectChild2)) return false;
     }
     // should not happen
-    return false;
-  }
-
-  /** Returns true if and only if {@code n} is contained in {@code scope} */
-  public static boolean inScope(Node n, LocalVariableScope scope) {
-    // Always true for LocalVariableScope
-    var scopeStatementsRoot = scope.getStatements().getParentNode().get();
-    if (n.equals(scopeStatementsRoot) || scopeStatementsRoot.isAncestorOf(n)) return true;
-    for (var e : scope.getExpressions()) if (n.equals(e) || e.isAncestorOf(n)) return true;
     return false;
   }
 }
