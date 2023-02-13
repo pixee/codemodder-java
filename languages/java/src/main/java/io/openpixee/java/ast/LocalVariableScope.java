@@ -114,4 +114,13 @@ public final class LocalVariableScope {
   public Stream<Node> stream() {
     return Stream.concat(expressions.stream(), statements.stream());
   }
+
+  /** Returns true if and only if {@code n} is contained in {@code scope} */
+  public boolean inScope(Node n) {
+    // Always true for LocalVariableScope
+    var scopeStatementsRoot = statements.getParentNode().get();
+    if (n.equals(scopeStatementsRoot) || scopeStatementsRoot.isAncestorOf(n)) return true;
+    for (var e : expressions) if (n.equals(e) || e.isAncestorOf(n)) return true;
+    return false;
+  }
 }
