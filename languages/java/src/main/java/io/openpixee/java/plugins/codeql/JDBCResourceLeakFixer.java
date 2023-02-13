@@ -93,7 +93,7 @@ public final class JDBCResourceLeakFixer {
     final var allDependent = findDependentResources(mce);
     if (maybeLVD.isPresent()) {
       final var scope = maybeLVD.get().getScope();
-      final Predicate<Node> isInScope = n -> scope.inScope(n);
+      final Predicate<Node> isInScope = scope::inScope;
       return allDependent.stream().noneMatch(e -> escapesRootScope(e, isInScope));
     } else {
       final Predicate<Node> isInScope = n -> true;

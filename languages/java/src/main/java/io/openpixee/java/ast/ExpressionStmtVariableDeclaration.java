@@ -6,7 +6,7 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 
 public final class ExpressionStmtVariableDeclaration extends LocalVariableDeclaration {
 
-  private ExpressionStmt stmt;
+  private final ExpressionStmt stmt;
 
   public ExpressionStmtVariableDeclaration(
       ExpressionStmt stmt, VariableDeclarationExpr vde, VariableDeclarator vd) {

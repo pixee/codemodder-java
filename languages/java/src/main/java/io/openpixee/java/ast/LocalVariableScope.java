@@ -11,6 +11,8 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
+
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -48,9 +50,9 @@ public final class LocalVariableScope {
     var vdIndex = vde.getVariables().indexOf(vd);
     vde.getVariables().stream()
         .skip(vdIndex + 1)
-        .map(vdInVDE -> vdInVDE.getInitializer())
-        .filter(init -> init.isPresent())
-        .map(init -> init.get())
+        .map(VariableDeclarator::getInitializer)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .forEach(expressions::add);
 
     // Local variable declarations are always contained in a block statement.

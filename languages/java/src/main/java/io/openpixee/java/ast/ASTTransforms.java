@@ -100,7 +100,7 @@ public final class ASTTransforms {
   }
 
   /**
-   * Given an a local variable declaration {@code stmt}, where {@code vdecl} is a single initialized
+   * Given a local variable declaration {@code stmt}, where {@code vdecl} is a single initialized
    * declaration of a variable {@code v} with scope {@code scope}, {@code v} is never assigned in
    * its scope, then wrap the declaration into as a resource of a try stmt.
    */
