@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,6 +19,9 @@ abstract class GitRepositoryTest {
   protected String repoBranch;
 
   protected String tempDirName;
+
+  /** Hash string of the commit the repo should be at. */
+  protected String refHash;
 
   /** Shared repo dir for all tests. */
   protected File repoDir;
@@ -37,7 +41,7 @@ abstract class GitRepositoryTest {
     return false;
   }
 
-  /** Must set repoURI, repoBranch, tempDirName */
+  /** Must set repoURI, repoBranch, tempDirName at least */
   abstract void setParameters();
 
   @BeforeAll
@@ -52,6 +56,7 @@ abstract class GitRepositoryTest {
           Git.cloneRepository().setURI(repoURI).setDirectory(repoDir).setBranch(repoBranch).call();
       git.close();
       System.out.println("Writing to " + repoDir.getAbsolutePath());
+      if (refHash != null) Git.open(repoDir).reset().setRef(refHash).setMode(ResetType.HARD).call();
     } else { // Repo has been cloned locally - do a hard reset instead
       Git.open(repoDir).reset().setMode(ResetCommand.ResetType.HARD).call();
     }
