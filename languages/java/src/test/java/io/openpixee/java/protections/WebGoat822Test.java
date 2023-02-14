@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
@@ -21,12 +20,13 @@ final class WebGoat822Test extends GitRepositoryTest {
 
   void setParameters() {
     this.repoURI = "https://github.com/WebGoat/WebGoat";
-    this.repoBranch = "release/v8.2.2";
+    this.repoBranch = "main";
     this.tempDirName = "WebGoat822";
+    // Coincides with 8.2.2 release
+    this.refHash = "e75cfbeb110e3d3a2ca3c8fee2754992d89c419d";
   }
 
   @Test
-  @Disabled
   void it_transforms_webgoat_normally() throws Exception {
     int exitCode =
         new CommandLine(new JavaFixitCli())
@@ -65,7 +65,6 @@ final class WebGoat822Test extends GitRepositoryTest {
   }
 
   @Test
-  @Disabled
   void it_transforms_webgoat_with_codeql() throws Exception {
     int exitCode =
         new CommandLine(new JavaFixitCli())
