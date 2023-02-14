@@ -1,11 +1,12 @@
 package io.openpixee.java.ast;
 
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.Statement;
 
 /**
- * Holds the nodes in the AST that represents a local declaration of a variable. See <a
+ * Holds the nodes in the AST that represents several types of local declaration of a variable. See <a
  * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.1">Java Language
  * Specification - Section 6.1</a> for all the possible ways a local variable can be declarared.
  */
