@@ -11,6 +11,7 @@ import java.net.URL
  * @todo consider resolution and also Topological Sort of Properties for cross-property reference
  */
 class ProjectModel internal constructor(
+    val originalPom : ByteArray,
     val pomPath: URL?,
     val pomDocument: Document,
     var dependency: Dependency?,
@@ -18,9 +19,13 @@ class ProjectModel internal constructor(
     val useProperties: Boolean,
     val activeProfiles: Set<String>,
     val overrideIfAlreadyExists: Boolean,
-    val queryType: QueryType = QueryType.SAFE,
+    val queryType: QueryType = QueryType.NONE,
 ) {
-    val resultPom: Document = pomDocument.clone() as Document
+    internal var modifiedByCommand = false
+
+    var resultPomBytes: ByteArray = byteArrayOf()
+
+    internal val resultPom: Document = pomDocument.clone() as Document
 
     val resolvedProperties: Map<String, String> =
         run {

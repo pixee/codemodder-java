@@ -196,4 +196,5 @@ abstract class AbstractSimpleQueryCommand : AbstractSimpleCommand() {
         val LOGGER: Logger = LoggerFactory.getLogger(AbstractSimpleQueryCommand::class.java)
     }
 
+    override fun postProcess(c: ProjectModel): Boolean = false
 }

@@ -74,4 +74,6 @@ val SimpleInsert = object : Command {
 
         return dependencyNode
     }
+
+    override fun postProcess(c: ProjectModel): Boolean = false
 }

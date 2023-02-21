@@ -5,17 +5,30 @@ import io.openpixee.maven.operator.Util.buildLookupExpressionForDependency
 import io.openpixee.maven.operator.Util.selectXPathNodes
 import io.openpixee.maven.operator.Util.which
 import org.apache.commons.lang3.SystemUtils
+import org.dom4j.DocumentException
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.xmlunit.diff.ComparisonType
 import java.io.File
+import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /**
  * Unit test for simple App.
  */
 class POMOperatorTest : AbstractTestBase() {
+    @Test(expected = DocumentException::class)
+    fun testWithBrokenPom() {
+        val context = gwt(
+            "broken-pom",
+            ProjectModelFactory.load(
+                POMOperatorTest::class.java.getResource("broken-pom.xml")!!,
+            ).withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"))
+        )
+    }
+
     @Test
     fun testWithMultipleDependencies() {
         val deps = listOf(
@@ -26,26 +39,39 @@ class POMOperatorTest : AbstractTestBase() {
 
         val testPom = File.createTempFile("pom", ".xml")
 
-        POMOperatorTest::class.java.getResourceAsStream("sample-bad-pom.xml")!!.copyTo(testPom.outputStream())
+        POMOperatorTest::class.java.getResourceAsStream("sample-bad-pom.xml")!!
+            .copyTo(testPom.outputStream())
 
         deps.forEach { d ->
             val projectModel = ProjectModelFactory.load(testPom)
                 .withDependency(d)
                 .withUseProperties(true)
+                .withOverrideIfAlreadyExists(true)
                 .build()
 
             if (POMOperator.modify(projectModel)) {
-                val resultPomAsXml = projectModel.resultPom.asXML()
+                val resultPomAsXml = String(projectModel.resultPomBytes)
 
                 LOGGER.debug("resultPomAsXml: {}", resultPomAsXml)
 
-                testPom.writeText(resultPomAsXml)
+                testPom.writeBytes(projectModel.resultPomBytes)
+            } else {
+                throw IllegalStateException("Code that shouldn't be reached out at all")
             }
         }
 
-        val resolvedDeps = POMOperator.queryDependency(ProjectModelFactory.load(testPom).withQueryType(QueryType.SAFE).build())
+        val resolvedDeps = POMOperator.queryDependency(
+            ProjectModelFactory.load(testPom).withQueryType(QueryType.SAFE).build()
+        )
+
+        val testPomContents = testPom.readText()
 
         assertTrue(3 == resolvedDeps.size, "Must have three dependencies")
+        assertTrue(testPomContents.contains("<!--"), "Must have a comment inside")
+        assertTrue(
+            testPomContents.contains("         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"),
+            "Must have a formatted attribute spanning a whole line inside"
+        )
     }
 
     @Test(expected = MissingDependencyException::class)
@@ -171,7 +197,7 @@ class POMOperatorTest : AbstractTestBase() {
         val effectivePom = context.getEffectivePom()
 
         assertThat(
-            "Dependency has been changed",
+            "Dependencies Section did change",
             effectivePom.selectXPathNodes(buildLookupExpressionForDependency(dependencyToUpgrade))
                 .isNotEmpty()
         )

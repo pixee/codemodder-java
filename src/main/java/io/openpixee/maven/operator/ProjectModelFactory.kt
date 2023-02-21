@@ -1,7 +1,9 @@
 package io.openpixee.maven.operator
 
+import org.apache.commons.io.IOUtils
 import org.dom4j.Document
 import org.dom4j.io.SAXReader
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 import java.net.URL
@@ -10,6 +12,7 @@ import java.net.URL
  * Builder Object for ProjectModel instances
  */
 class ProjectModelFactory private constructor(
+    private val originalPom: ByteArray,
     private var pomPath: URL?,
     private var pomDocument: Document,
     private var dependency: Dependency? = null,
@@ -78,6 +81,7 @@ class ProjectModelFactory private constructor(
      */
     fun build(): ProjectModel {
         return ProjectModel(
+            originalPom = originalPom,
             pomPath = pomPath,
             pomDocument = pomDocument,
             dependency = dependency,
@@ -92,9 +96,11 @@ class ProjectModelFactory private constructor(
     companion object {
         @JvmStatic
         fun load(`is`: InputStream): ProjectModelFactory {
-            val pomDocument = SAXReader().read(`is`)!!
+            val originalPom: ByteArray = IOUtils.toByteArray(`is`)
 
-            return ProjectModelFactory(pomPath = null, pomDocument = pomDocument)
+            val pomDocument = SAXReader().read(originalPom.inputStream())!!
+
+            return ProjectModelFactory(pomPath = null, pomDocument = pomDocument, originalPom = originalPom)
         }
 
         @JvmStatic
@@ -103,9 +109,11 @@ class ProjectModelFactory private constructor(
 
         @JvmStatic
         fun load(url: URL): ProjectModelFactory {
-            val pomDocument = SAXReader().read(url.openStream())
+            val originalPom: ByteArray = IOUtils.toByteArray(url.openStream())
 
-            return ProjectModelFactory(pomPath = url, pomDocument = pomDocument)
+            val pomDocument = SAXReader().read(originalPom.inputStream())
+
+            return ProjectModelFactory(pomPath = url, pomDocument = pomDocument, originalPom = originalPom)
         }
     }
 }

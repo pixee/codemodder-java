@@ -38,4 +38,7 @@ abstract class AbstractSimpleCommand : Command {
         return false
     }
 
+    override fun execute(c: ProjectModel): Boolean = false
+
+    override fun postProcess(c: ProjectModel): Boolean = false
 }

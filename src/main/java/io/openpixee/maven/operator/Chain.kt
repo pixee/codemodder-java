@@ -12,7 +12,7 @@ class Chain(vararg commands: Command) {
     /**
      * Internal ArrayList of the Commands
      */
-    internal val commandList : MutableList<Command> = ArrayList(commands.toList())
+    internal val commandList: MutableList<Command> = ArrayList(commands.toList())
 
     /**
      * Executes the Commands in the Chain of Responsibility
@@ -28,9 +28,32 @@ class Chain(vararg commands: Command) {
             val nextCommand = listIterator.next()
 
             done = nextCommand.execute(c)
+
+            if (done) {
+                if (c.queryType == QueryType.NONE && (!(nextCommand is SupportCommand))) {
+                    c.modifiedByCommand = true
+                }
+
+                break
+            }
         }
 
-        return done
+        val result = done
+
+        /**
+         * Goes Reverse Order applying the filter pattern
+         */
+
+        while (listIterator.previousIndex() > 0) {
+            val nextCommand = listIterator.previous()
+
+            done = nextCommand.postProcess(c)
+
+            if (done)
+                break
+        }
+
+        return result
     }
 
     companion object {
@@ -50,7 +73,7 @@ class Chain(vararg commands: Command) {
          * Returns a Pre-Configured Chain with the Defaults for Modifying a POM
          */
         fun createForModify() =
-            Chain(CheckDependencyPresent, SimpleUpgrade, SimpleDependencyManagement, SimpleInsert)
+            Chain(CheckDependencyPresent, FormatCommand(),  DiscardFormatCommand(), SimpleUpgrade, SimpleDependencyManagement, SimpleInsert)
 
         /**
          * returns a pre-configured chain with the defaults for Querying

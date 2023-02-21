@@ -3,7 +3,7 @@ package io.openpixee.maven.operator
 /**
  * Represents a Command in a Chain of Responsibility Pattern
  */
-fun interface Command {
+interface Command {
     /**
      * Given a context, performs an operation
      *
@@ -11,4 +11,9 @@ fun interface Command {
      * @return true if the execution was successful *AND* the chain must end
      */
     fun execute(c: ProjectModel): Boolean
+
+    /**
+     * Post Processing, implementing a Filter Pattern
+     */
+    fun postProcess(c: ProjectModel): Boolean
 }

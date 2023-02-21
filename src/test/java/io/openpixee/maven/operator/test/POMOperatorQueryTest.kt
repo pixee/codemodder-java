@@ -11,7 +11,7 @@ class POMOperatorQueryTest {
 
     @Test
     fun testBasicQuery() {
-        QueryType.values().forEach { queryType ->
+        QueryType.values().filterNot { it == QueryType.NONE } .forEach { queryType ->
             val context =
                 ProjectModelFactory
                     .load(this.javaClass.getResource("pom-1.xml")!!)
