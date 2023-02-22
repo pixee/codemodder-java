@@ -69,8 +69,8 @@ public interface VisitorAssembler {
           List.of(new CodeQlPlugin(), new ContrastScanPlugin());
 
       List<VisitorFactory> pluginFactories =
-          new PluginFactoryFinder()
-              .getPluginFactories(repositoryRoot, ruleContext, sarifs, sarifProcessorPlugins);
+          new PluginVisitorFinder(sarifs)
+              .getPluginFactories(repositoryRoot, ruleContext, sarifProcessorPlugins);
 
       final List<VisitorFactory> factories = new ArrayList<>();
       factories.addAll(defaultVisitorFactories);
