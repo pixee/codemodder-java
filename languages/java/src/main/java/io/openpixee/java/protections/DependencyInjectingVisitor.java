@@ -159,7 +159,7 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
 
           if (result) {
             try {
-              IOUtils.write(projectModel.getResultPom().asXML(), new FileOutputStream(lastPomFile));
+              IOUtils.write(projectModel.getResultPomBytes(), new FileOutputStream(lastPomFile));
             } catch (IOException e) {
               throw new RuntimeException(e);
             }
