@@ -130,7 +130,8 @@ public final class ContrastScanPlugin extends DefaultSarifProcessorPlugin {
   }
 
   @Override
-  public List<FileBasedVisitor> getFileWeaversFor(final File repositoryRoot, final Run run) {
+  public List<FileBasedVisitor> getFileWeaversFor(
+      final File repositoryRoot, final Run run, RuleContext context) {
     List<Result> storedJspXss = getXssJspResults(run, "stored-xss");
     List<Result> reflectedJspXss = getXssJspResults(run, "reflected-xss");
     List<FileBasedVisitor> weavers = new ArrayList<>();

@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Set;
 
 /**
- * Given a repository foot, give an extension the chance to make any arbitrary change to any
+ * Given a repository root, give an extension the chance to make any arbitrary change to any
  * arbitrary file. This type should be extended if you don't want to change Java code like you can
  * in {@link VisitorFactory}.
  */

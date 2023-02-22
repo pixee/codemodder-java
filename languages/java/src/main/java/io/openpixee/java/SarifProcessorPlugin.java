@@ -15,5 +15,5 @@ public interface SarifProcessorPlugin {
    * Create a set of file based weavers intended to handle vulnerabilities found in the given SARIF
    * {@link Run}.
    */
-  List<FileBasedVisitor> getFileWeaversFor(File repositoryRoot, Run run);
+  List<FileBasedVisitor> getFileWeaversFor(File repositoryRoot, Run run, RuleContext ruleContext);
 }

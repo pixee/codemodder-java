@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -89,7 +90,28 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
   }
 
   @Override
-  public List<FileBasedVisitor> getFileWeaversFor(final File repositoryRoot, final Run run) {
-    return Collections.emptyList();
+  public List<FileBasedVisitor> getFileWeaversFor(
+      final File repositoryRoot, final Run run, RuleContext context) {
+    Set<Result> pomResults = getPOMResults(run, "java/maven-non-https-url");
+    var weavers = new ArrayList<FileBasedVisitor>();
+    if (!pomResults.isEmpty()) {
+      weavers.add(new MavenSecureURLVisitor(repositoryRoot, pomResults));
+    }
+    return weavers;
+  }
+
+  @NotNull
+  private Set<Result> getPOMResults(final Run run, final String ruleId) {
+    return run.getResults().stream()
+        .filter(r -> ruleId.equals(r.getRuleId()))
+        .filter(
+            r ->
+                r.getLocations()
+                    .get(0)
+                    .getPhysicalLocation()
+                    .getArtifactLocation()
+                    .getUri()
+                    .endsWith(".pom"))
+        .collect(Collectors.toUnmodifiableSet());
   }
 }
