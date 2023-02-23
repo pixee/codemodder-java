@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
@@ -66,33 +67,36 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
   @VisibleForTesting
   @NotNull
   Map<String, Set<Result>> getRuleIdToResultsMap(final Run run) {
-    ReportingDescriptor[] rules =
+
+    Optional<ReportingDescriptor[]> maybeRules =
         run.getTool().getExtensions().stream()
             .filter(ext -> "codeql/java-queries".equals(ext.getName()))
             .findFirst()
-            .orElseThrow()
-            .getRules()
-            .toArray(new ReportingDescriptor[0]);
+            .map(t -> t.getRules())
+            .map(s -> s.toArray(new ReportingDescriptor[0]));
 
-    // map the findings to their given rule
-    Map<String, Set<Result>> ruleIdToResultsMap = new HashMap<>();
-    run.getResults()
-        .forEach(
-            (entry) -> {
-              ReportingDescriptorReference ruleReference = entry.getRule();
-              Integer ruleIndex = ruleReference.getIndex();
-              ReportingDescriptor rule = rules[ruleIndex];
-              Set<Result> results =
-                  ruleIdToResultsMap.computeIfAbsent(rule.getName(), (k) -> new HashSet<>());
-              results.add(entry);
-            });
-    return Collections.unmodifiableMap(ruleIdToResultsMap);
+    if (maybeRules.isPresent()) {
+      var rules = maybeRules.get();
+      // map the findings to their given rule
+      Map<String, Set<Result>> ruleIdToResultsMap = new HashMap<>();
+      run.getResults()
+          .forEach(
+              (entry) -> {
+                ReportingDescriptorReference ruleReference = entry.getRule();
+                Integer ruleIndex = ruleReference.getIndex();
+                ReportingDescriptor rule = rules[ruleIndex];
+                Set<Result> results =
+                    ruleIdToResultsMap.computeIfAbsent(rule.getName(), (k) -> new HashSet<>());
+                results.add(entry);
+              });
+      return Collections.unmodifiableMap(ruleIdToResultsMap);
+    } else return Collections.emptyMap();
   }
 
   @Override
   public List<FileBasedVisitor> getFileWeaversFor(
       final File repositoryRoot, final Run run, RuleContext context) {
-    Set<Result> pomResults = getPOMResults(run, "java/maven-non-https-url");
+    Set<Result> pomResults = getPOMResults(run, "java/maven/non-https-url");
     var weavers = new ArrayList<FileBasedVisitor>();
     if (!pomResults.isEmpty()) {
       weavers.add(new MavenSecureURLVisitor(repositoryRoot, pomResults));
@@ -111,7 +115,7 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
                     .getPhysicalLocation()
                     .getArtifactLocation()
                     .getUri()
-                    .endsWith(".pom"))
+                    .endsWith("pom.xml"))
         .collect(Collectors.toUnmodifiableSet());
   }
 }

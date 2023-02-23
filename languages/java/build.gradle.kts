@@ -3,6 +3,7 @@ plugins {
     id("io.openpixee.codetl.base")
     id("io.openpixee.codetl.java-library")
     id("io.openpixee.codetl.maven-publish")
+    id("application")
     alias(libs.plugins.fileversioning)
 }
 
@@ -10,6 +11,10 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
     }
+}
+
+application {
+    mainClass.set("io.openpixee.java.JavaFixitCli")
 }
 
 spotless {

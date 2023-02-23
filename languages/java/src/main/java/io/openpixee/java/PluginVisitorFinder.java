@@ -62,7 +62,7 @@ final class PluginVisitorFinder {
     return sarifs.stream()
         .flatMap(sarif -> sarif.getRuns().stream())
         .flatMap(runToFactories)
-        .collect(Collectors.toUnmodifiableList());
+        .collect(Collectors.toList());
   }
 
   List<FileBasedVisitor> getPluginFileBasedVisitors(
@@ -86,7 +86,7 @@ final class PluginVisitorFinder {
     return sarifs.stream()
         .flatMap(sarif -> sarif.getRuns().stream())
         .flatMap(runToVisitors)
-        .collect(Collectors.toUnmodifiableList());
+        .collect(Collectors.toList());
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(PluginVisitorFinder.class);
