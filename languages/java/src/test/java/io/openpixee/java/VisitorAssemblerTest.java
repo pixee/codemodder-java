@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -36,10 +37,13 @@ final class VisitorAssemblerTest {
     VisitorAssembler assembler = VisitorAssembler.createDefault();
     RuleContext everythingButDependencyInjection =
         RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/mvn-dependency-injection"));
+    File repositoryRoot = new File(".");
     RuleContext everything = RuleContext.of(DefaultRuleSetting.ENABLED, List.of());
-    List<FileBasedVisitor> allVisitors = assembler.assembleFileVisitors(everything);
+    List<FileBasedVisitor> allVisitors =
+        assembler.assembleFileVisitors(repositoryRoot, everything, Collections.emptyList());
     List<FileBasedVisitor> allButOne =
-        assembler.assembleFileVisitors(everythingButDependencyInjection);
+        assembler.assembleFileVisitors(
+            repositoryRoot, everythingButDependencyInjection, Collections.emptyList());
 
     assertThat(allVisitors.size(), equalTo(3));
     assertThat(allButOne.size(), equalTo(2));

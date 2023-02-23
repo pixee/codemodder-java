@@ -112,7 +112,7 @@ public final class JavaFixitCliRun {
 
     // get the non-Java code visitors
     final List<FileBasedVisitor> fileBasedVisitors =
-        visitorAssembler.assembleFileVisitors(ruleContext);
+        visitorAssembler.assembleFileVisitors(repositoryRoot, ruleContext, sarifs);
 
     // run the non-Java code visitors
     final var fileBasedWeaveResults =
