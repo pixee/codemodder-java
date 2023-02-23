@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 public final class LoggingConfigurator extends ContextAwareBase implements Configurator {
 
   @Override
-  public void configure(final LoggerContext lc) {
+  public ExecutionStatus configure(final LoggerContext lc) {
     ConsoleAppender<ILoggingEvent> ca = new ConsoleAppender<>();
     ca.setContext(lc);
     ca.setName(APPENDER_NAME);
@@ -36,6 +36,7 @@ public final class LoggingConfigurator extends ContextAwareBase implements Confi
     Logger ourLogger = lc.getLogger(OUR_ROOT_LOGGER_NAME);
     ourLogger.setLevel(Level.INFO);
     ourLogger.addAppender(ca);
+    return Configurator.ExecutionStatus.NEUTRAL;
   }
 
   public static final String OUR_ROOT_LOGGER_NAME = JavaFixitCli.class.getPackageName();
