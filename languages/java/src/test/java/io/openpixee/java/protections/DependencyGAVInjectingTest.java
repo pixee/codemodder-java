@@ -14,7 +14,6 @@ import io.openpixee.maven.operator.ProjectModelFactory;
 import io.openpixee.maven.operator.QueryType;
 import java.io.File;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +76,7 @@ final class DependencyGAVInjectingTest {
     ProjectModel projectModel =
         ProjectModelFactory.load(pom).withQueryType(QueryType.UNSAFE).build();
 
-    Collection<Dependency> foundDependencies = POMOperator.queryDependency(projectModel, List.of());
+    Collection<Dependency> foundDependencies = POMOperator.queryDependency(projectModel);
 
     for (DependencyGAV dependency : dependencies) {
       Optional<Dependency> foundDependency =
