@@ -1,10 +1,6 @@
 package io.openpixee.java.plugins.codeql;
 
-import com.contrastsecurity.sarif.ReportingDescriptor;
-import com.contrastsecurity.sarif.ReportingDescriptorReference;
-import com.contrastsecurity.sarif.Result;
-import com.contrastsecurity.sarif.Run;
-import com.contrastsecurity.sarif.Tool;
+import com.contrastsecurity.sarif.*;
 import com.google.common.annotations.VisibleForTesting;
 import io.openpixee.java.DefaultSarifProcessorPlugin;
 import io.openpixee.java.FileBasedVisitor;
@@ -72,7 +68,7 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
         run.getTool().getExtensions().stream()
             .filter(ext -> "codeql/java-queries".equals(ext.getName()))
             .findFirst()
-            .map(t -> t.getRules())
+            .map(ToolComponent::getRules)
             .map(s -> s.toArray(new ReportingDescriptor[0]));
 
     if (maybeRules.isPresent()) {
@@ -115,7 +111,7 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
                     .getPhysicalLocation()
                     .getArtifactLocation()
                     .getUri()
-                    .endsWith("pom.xml"))
+                    .endsWith("xml"))
         .collect(Collectors.toUnmodifiableSet());
   }
 }
