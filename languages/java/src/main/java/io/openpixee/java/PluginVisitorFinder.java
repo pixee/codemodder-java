@@ -18,23 +18,23 @@ import org.slf4j.LoggerFactory;
 /** This type is responsible for gathering the factories from all the plugins. */
 final class PluginVisitorFinder {
 
-  List<SarifSchema210> sarifs;
+  private final List<SarifSchema210> sarifs;
 
-  PluginVisitorFinder(List<File> sarifFiles) {
+  PluginVisitorFinder(final List<File> sarifFiles) {
     this.sarifs = processSARIFFiles(sarifFiles);
   }
 
-  private Optional<SarifSchema210> readSarifFile(File sarifFile) {
+  private Optional<SarifSchema210> readSarifFile(final File sarifFile) {
     try {
       return Optional.of(
           new ObjectMapper().readValue(new FileReader(sarifFile), SarifSchema210.class));
-    } catch (IOException e) {
+    } catch (final IOException e) {
       LOG.error("Problem deserializing SARIF file: {}", sarifFile, e);
       return Optional.empty();
     }
   }
 
-  private List<SarifSchema210> processSARIFFiles(List<File> sarifFiles) {
+  private List<SarifSchema210> processSARIFFiles(final List<File> sarifFiles) {
     return sarifFiles.stream()
         .flatMap(f -> readSarifFile(f).stream())
         .collect(Collectors.toUnmodifiableList());
@@ -44,9 +44,9 @@ final class PluginVisitorFinder {
       final File repositoryRoot,
       final RuleContext ruleContext,
       final List<SarifProcessorPlugin> sarifProcessorPlugins) {
-    Function<Run, Stream<VisitorFactory>> runToFactories =
+    final Function<Run, Stream<VisitorFactory>> runToFactories =
         run -> {
-          ToolComponent tool = run.getTool().getDriver();
+          final ToolComponent tool = run.getTool().getDriver();
           LOG.debug(
               "Processing SARIF file (name={}, product={}, org={}, version={}",
               tool.getName(),
@@ -69,9 +69,9 @@ final class PluginVisitorFinder {
       final File repositoryRoot,
       final RuleContext ruleContext,
       final List<SarifProcessorPlugin> sarifProcessorPlugins) {
-    Function<Run, Stream<FileBasedVisitor>> runToVisitors =
+    final Function<Run, Stream<FileBasedVisitor>> runToVisitors =
         run -> {
-          ToolComponent tool = run.getTool().getDriver();
+          final ToolComponent tool = run.getTool().getDriver();
           LOG.debug(
               "Processing SARIF file (name={}, product={}, org={}, version={}",
               tool.getName(),
