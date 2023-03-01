@@ -7,8 +7,11 @@ import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.Weave;
 import io.openpixee.java.WeavingResult;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -32,10 +35,10 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
   /** Set of results for the rule "java/maven-non-https-url" */
   private final Set<Result> results;
 
-  public MavenSecureURLVisitor(File repositoryRootPath, Set<Result> results) {
+  public MavenSecureURLVisitor(final File repositoryRootPath, final Set<Result> results) {
     this.repositoryRootPath =
         Objects.requireNonNull(repositoryRootPath.toPath().toString(), "repositoryRootPath");
-    this.results = results;
+    this.results = Objects.requireNonNull(results);
   }
 
   private Set<PhysicalLocation> getLocationsWithinFile(final File target) {
@@ -48,8 +51,9 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
         .collect(Collectors.toUnmodifiableSet());
   }
 
-  private boolean isWithinPhysicalLocation(Set<PhysicalLocation> locations, XMLEvent xmlEvent) {
-    var xmlLocation = xmlEvent.getLocation();
+  private static boolean isWithinPhysicalLocation(
+      final Set<PhysicalLocation> locations, final XMLEvent xmlEvent) {
+    final var xmlLocation = xmlEvent.getLocation();
     return locations.stream()
         .anyMatch(
             pl ->
@@ -57,6 +61,15 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
                     && xmlLocation.getLineNumber() <= pl.getRegion().getEndLine()
                     && xmlLocation.getColumnNumber() >= pl.getRegion().getStartColumn()
                     && xmlLocation.getColumnNumber() <= pl.getRegion().getEndColumn());
+  }
+
+  private int secondEventOffset(File file, XMLInputFactory xmlInputFactory) throws Exception {
+    try (FileInputStream fileIS = new FileInputStream(file)) {
+      final var xmlReader = xmlInputFactory.createXMLEventReader(fileIS);
+      xmlReader.nextEvent();
+      var second = xmlReader.nextEvent();
+      return second.getLocation().getCharacterOffset();
+    }
   }
 
   @Override
@@ -70,56 +83,86 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
       final File file,
       final FileWeavingContext weavingContext,
       final Set<ChangedFile> changedJavaFiles) {
-    // Not even a xml
-    if (!file.getPath().endsWith("xml"))
+    // Not even an xml
+    if (!file.getName().toLowerCase().endsWith("xml")) {
       return WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
+    }
 
     // No suggested changes within file
-    var locations = getLocationsWithinFile(file);
-    if (locations.isEmpty())
+    final var locations = getLocationsWithinFile(file);
+    if (locations.isEmpty()) {
       return WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
+    }
 
-    var xmlInputFactory = XMLInputFactory.newInstance();
-    var xmlOutputFactory = XMLOutputFactory.newInstance();
-    var xmlEventFactory = XMLEventFactory.newInstance();
+    final var xmlInputFactory = XMLInputFactory.newInstance();
+    final var xmlOutputFactory = XMLOutputFactory.newInstance();
+    final var xmlEventFactory = XMLEventFactory.newInstance();
     try {
-      final File modifiedFile =
+      final File tempFile =
           File.createTempFile(file.getName(), getExtension(file.getName()).orElse(".tmp"));
       try (FileInputStream fileIS = new FileInputStream(file);
-          FileWriter fileWriter = new FileWriter(modifiedFile)) {
-        var xmlReader = xmlInputFactory.createXMLEventReader(fileIS);
-        var xmlWriter = xmlOutputFactory.createXMLEventWriter(fileWriter);
+          FileWriter fileWriter = new FileWriter(tempFile)) {
+        final var xmlReader = xmlInputFactory.createXMLEventReader(fileIS);
+        final var xmlWriter = xmlOutputFactory.createXMLEventWriter(fileWriter);
         while (xmlReader.hasNext()) {
-          var nextEvent = xmlReader.nextEvent();
+          final var nextEvent = xmlReader.nextEvent();
           xmlWriter.add(nextEvent);
           // We search for any url tag and check if it's within any physical location
           if (nextEvent.isStartElement()
               && nextEvent.asStartElement().getName().getLocalPart().equals("url")
               && isWithinPhysicalLocation(locations, nextEvent)) {
-            var startElement = nextEvent.asStartElement();
-            var url = xmlReader.nextEvent().asCharacters().getData();
-            var line = startElement.getLocation().getLineNumber();
+            final var startElement = nextEvent.asStartElement();
+            final var url = xmlReader.nextEvent().asCharacters().getData();
+            final var line = startElement.getLocation().getLineNumber();
             if (url.startsWith("http:")) {
-              var fixed = "https:" + url.substring(5);
+              final var fixed = "https:" + url.substring(5);
               xmlWriter.add(xmlEventFactory.createCharacters(fixed));
-              var weave = Weave.from(line, ruleId());
+              final var weave = Weave.from(line, ruleId());
               weavingContext.addWeave(weave);
             } else if (url.startsWith("ftp:")) {
-              var fixed = "ftps:" + url.substring(4);
+              final var fixed = "ftps:" + url.substring(4);
               xmlWriter.add(xmlEventFactory.createCharacters(fixed));
-              var weave = Weave.from(line, ruleId());
+              final var weave = Weave.from(line, ruleId());
               weavingContext.addWeave(weave);
-            } else xmlWriter.add(startElement);
+            } else {
+              xmlWriter.add(startElement);
+            }
           }
         }
-        if (!weavingContext.madeWeaves())
-          return WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
-        var changedFile =
-            ChangedFile.createDefault(
-                file.getCanonicalPath(), modifiedFile.getAbsolutePath(), weavingContext.weaves());
-        return WeavingResult.createDefault(Set.of(changedFile), Collections.emptySet());
       }
-    } catch (Exception e) {
+      if (!weavingContext.madeWeaves()) {
+        return WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
+      }
+      // Workaround for a bug (?) where the whitespaces between prolog and the first tag are ignored
+      // Get all the characters until the first 2 events
+      // The first one will be the prolog, if it exists
+      var originalOffset = secondEventOffset(file, xmlInputFactory);
+      var tempOffset = secondEventOffset(tempFile, xmlInputFactory);
+
+      // We want to glue the "head" of the original file with the tail of the tempFile
+      var originalHead = "";
+      try (FileInputStream fileIS = new FileInputStream(file)) {
+        originalHead = new String(fileIS.readNBytes(originalOffset));
+      }
+
+      final File modifiedFile =
+          File.createTempFile(file.getName(), getExtension(file.getName()).orElse(".tmp"));
+      try (BufferedReader reader = new BufferedReader(new FileReader(tempFile));
+          BufferedWriter writer = new BufferedWriter(new FileWriter(modifiedFile))) {
+        reader.skip(tempOffset);
+        writer.append(originalHead);
+        while (reader.ready()) {
+          writer.write(reader.read());
+        }
+      }
+      tempFile.delete();
+
+      final var changedFile =
+          ChangedFile.createDefault(
+              file.getCanonicalPath(), modifiedFile.getAbsolutePath(), weavingContext.weaves());
+      return WeavingResult.createDefault(Set.of(changedFile), Collections.emptySet());
+    } catch (final Exception e) {
+      e.printStackTrace();
       LOG.debug("Problem handling file: {}", file.getPath());
       return WeavingResult.createDefault(Collections.emptySet(), Set.of(file.getAbsolutePath()));
     }

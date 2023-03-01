@@ -46,7 +46,7 @@ public interface VisitorAssembler {
     @Override
     public List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(
         final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
-      List<VisitorFactory> defaultVisitorFactories =
+      final List<VisitorFactory> defaultVisitorFactories =
           List.of(
               new ApacheMultipartVisitorFactory(),
               new DeserializationVisitorFactory(),
@@ -71,7 +71,7 @@ public interface VisitorAssembler {
       final List<SarifProcessorPlugin> sarifProcessorPlugins =
           List.of(new CodeQlPlugin(), new ContrastScanPlugin());
 
-      List<VisitorFactory> pluginFactories =
+      final List<VisitorFactory> pluginFactories =
           new PluginVisitorFinder(sarifs)
               .getPluginFactories(repositoryRoot, ruleContext, sarifProcessorPlugins);
 
@@ -91,20 +91,23 @@ public interface VisitorAssembler {
       // Plugin visitors
       final List<SarifProcessorPlugin> sarifProcessorPlugins =
           List.of(new CodeQlPlugin(), new ContrastScanPlugin());
-      List<FileBasedVisitor> pluginVisitors =
+      final List<FileBasedVisitor> pluginVisitors =
           new PluginVisitorFinder(sarifs)
               .getPluginFileBasedVisitors(repositoryRoot, ruleContext, sarifProcessorPlugins);
-      pluginVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
 
       // Default visitors
-      List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
+      final List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
       defaultVisitors.add(new DependencyInjectingVisitor());
       defaultVisitors.add(new JspScriptletXSSVisitor());
       defaultVisitors.add(new VerbTamperingVisitor());
       defaultVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
 
-      return Stream.concat(defaultVisitors.stream(), pluginVisitors.stream())
-          .collect(Collectors.toUnmodifiableList());
+      final var allVisitors =
+          Stream.concat(defaultVisitors.stream(), pluginVisitors.stream())
+              .collect(Collectors.toList());
+      allVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
+
+      return Collections.unmodifiableList(allVisitors);
     }
   }
 

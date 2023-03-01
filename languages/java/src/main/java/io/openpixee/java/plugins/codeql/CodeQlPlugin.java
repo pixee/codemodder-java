@@ -33,11 +33,11 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
   @Override
   protected List<VisitorFactory> getVendorToolSpecificFactories(
       final File repositoryRoot, final Run run, final RuleContext ruleContext) {
-    Map<String, Set<Result>> ruleIdToResultsMap = getRuleIdToResultsMap(run);
-    List<VisitorFactory> visitors = new ArrayList<>();
-    Set<Map.Entry<String, Set<Result>>> ruleFindings = ruleIdToResultsMap.entrySet();
+    final Map<String, Set<Result>> ruleIdToResultsMap = getRuleIdToResultsMap(run);
+    final List<VisitorFactory> visitors = new ArrayList<>();
+    final Set<Map.Entry<String, Set<Result>>> ruleFindings = ruleIdToResultsMap.entrySet();
     for (final Map.Entry<String, Set<Result>> ruleFinding : ruleFindings) {
-      String ruleId = ruleFinding.getKey();
+      final String ruleId = ruleFinding.getKey();
       if (ruleContext.isRuleAllowed(ruleId)) {
         if ("java/stack-trace-exposure".equals(ruleId)) {
           visitors.add(
@@ -64,7 +64,7 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
   @NotNull
   Map<String, Set<Result>> getRuleIdToResultsMap(final Run run) {
 
-    Optional<ReportingDescriptor[]> maybeRules =
+    final Optional<ReportingDescriptor[]> maybeRules =
         run.getTool().getExtensions().stream()
             .filter(ext -> "codeql/java-queries".equals(ext.getName()))
             .findFirst()
@@ -72,16 +72,16 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
             .map(s -> s.toArray(new ReportingDescriptor[0]));
 
     if (maybeRules.isPresent()) {
-      var rules = maybeRules.get();
+      final var rules = maybeRules.get();
       // map the findings to their given rule
-      Map<String, Set<Result>> ruleIdToResultsMap = new HashMap<>();
+      final Map<String, Set<Result>> ruleIdToResultsMap = new HashMap<>();
       run.getResults()
           .forEach(
               (entry) -> {
-                ReportingDescriptorReference ruleReference = entry.getRule();
-                Integer ruleIndex = ruleReference.getIndex();
-                ReportingDescriptor rule = rules[ruleIndex];
-                Set<Result> results =
+                final ReportingDescriptorReference ruleReference = entry.getRule();
+                final Integer ruleIndex = ruleReference.getIndex();
+                final ReportingDescriptor rule = rules[ruleIndex];
+                final Set<Result> results =
                     ruleIdToResultsMap.computeIfAbsent(rule.getName(), (k) -> new HashSet<>());
                 results.add(entry);
               });
@@ -91,9 +91,9 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
 
   @Override
   public List<FileBasedVisitor> getFileWeaversFor(
-      final File repositoryRoot, final Run run, RuleContext context) {
-    Set<Result> pomResults = getPOMResults(run, "java/maven/non-https-url");
-    var weavers = new ArrayList<FileBasedVisitor>();
+      final File repositoryRoot, final Run run, final RuleContext context) {
+    final Set<Result> pomResults = getPOMResults(run, "java/maven/non-https-url");
+    final var weavers = new ArrayList<FileBasedVisitor>();
     if (!pomResults.isEmpty()) {
       weavers.add(new MavenSecureURLVisitor(repositoryRoot, pomResults));
     }
@@ -111,6 +111,7 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
                     .getPhysicalLocation()
                     .getArtifactLocation()
                     .getUri()
+                    .toLowerCase()
                     .endsWith("xml"))
         .collect(Collectors.toUnmodifiableSet());
   }
