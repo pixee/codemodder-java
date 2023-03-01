@@ -152,10 +152,10 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
         reader.skip(tempOffset);
         writer.append(originalHead);
         while (reader.ready()) {
-          writer.write(reader.read());
+          writer.write(reader.readLine());
         }
       }
-      tempFile.delete();
+      tempFile.deleteOnExit();
 
       final var changedFile =
           ChangedFile.createDefault(
