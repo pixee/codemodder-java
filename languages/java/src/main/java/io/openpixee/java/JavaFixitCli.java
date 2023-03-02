@@ -132,7 +132,7 @@ public final class JavaFixitCli implements Callable<Integer> {
           "web.xml",
           "**/web.xml");
 
-  @VisibleForTesting static final List<String> defaultExcludes = List.of("**/test/**");
+  @VisibleForTesting static final List<String> defaultExcludes = List.of("**/test/**", "**/target/**", "**/build/**");
 
   private static final int cliSuccessCode = 0;
   private static final int cliErrorCode = -1;
