@@ -54,6 +54,7 @@ class QueryByResolver : AbstractSimpleQueryCommand() {
         TODO("Not yet implemented")
     }
 
+    @Suppress("DEPRECATION")
     override fun execute(c: ProjectModel): Boolean {
         /*
          * Aether's components implement org.eclipse.aether.spi.locator.Service to ease manual wiring and using the

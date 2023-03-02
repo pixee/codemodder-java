@@ -4,6 +4,7 @@ import io.openpixee.maven.operator.Util.selectXPathNodes
 import org.dom4j.Document
 import org.dom4j.Element
 import java.net.URL
+import java.nio.charset.Charset
 
 /**
  * ProjectModel represents the input parameters for the chain
@@ -20,6 +21,11 @@ class ProjectModel internal constructor(
     val activeProfiles: Set<String>,
     val overrideIfAlreadyExists: Boolean,
     val queryType: QueryType = QueryType.NONE,
+
+    var charset: Charset,
+    var endl: String,
+    var indent: String,
+    var originalElements : Set<Int>,
 ) {
     internal var modifiedByCommand = false
 

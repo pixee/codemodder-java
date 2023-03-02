@@ -84,6 +84,7 @@ class Chain(vararg commands: Command) {
                     val commandClassName = "io.openpixee.maven.operator.${it.second}"
 
                     try {
+                        @Suppress("DEPRECATION")
                         Class.forName(commandClassName).newInstance() as Command
                     } catch (e: Throwable) {
                         LOGGER.warn("Creating class '{}': ", commandClassName, e)

@@ -1,11 +1,14 @@
 package io.openpixee.maven.operator
 
-import org.dom4j.io.OutputFormat
-import org.dom4j.io.SAXWriter
-import org.dom4j.io.XMLWriter
-import java.lang.IllegalStateException
+import org.apache.commons.lang3.StringUtils
+import org.dom4j.Comment
+import org.dom4j.Element
+import org.dom4j.Text
+import org.dom4j.VisitorSupport
+import org.mozilla.universalchardet.UniversalDetector
 import java.nio.charset.Charset
 import javax.xml.stream.XMLInputFactory
+import javax.xml.stream.events.Characters
 import javax.xml.stream.events.StartDocument
 import javax.xml.stream.events.StartElement
 
@@ -16,22 +19,115 @@ import javax.xml.stream.events.StartElement
  */
 class FormatCommand : AbstractSimpleCommand() {
     /**
-     * Since the PI is Optional, we can actually leverage and store its charset to facilitate rendering when needed
-     */
-    private var charset: Charset = Charset.defaultCharset()
-
-    /**
      * Preamble Contents are stored here
      */
     private var preamble: String = ""
 
+    /**
+     * Afterword - if needed
+     */
+    private var suffix: String = ""
+
+    /**
+     * StAX InputFactory
+     */
+    private val inputFactory = XMLInputFactory.newInstance()
+
     override fun execute(c: ProjectModel): Boolean {
+        storeOriginalElements(c)
+
+        parseXmlAndCharset(c)
+
+        parseLineEndings(c)
+
+        c.endl = parseLineEndings(c)
+        c.indent = guessIndent(c)
+
+        return super.execute(c)
+    }
+
+    private fun storeOriginalElements(c: ProjectModel) {
+        val elementSet : MutableSet<Int> = mutableSetOf()
+
+        c.resultPom.accept(object : VisitorSupport() {
+            override fun visit(node: Element?) {
+                elementSet.add(System.identityHashCode(node!!))
+
+                super.visit(node)
+            }
+
+            override fun visit(node: Comment?) {
+                elementSet.add(System.identityHashCode(node!!))
+
+                super.visit(node)
+            }
+
+            override fun visit(node: Text?) {
+                elementSet.add(System.identityHashCode(node!!))
+
+                super.visit(node)
+            }
+        })
+
+        c.originalElements = elementSet.toSet()
+    }
+
+    private fun guessIndent(c: ProjectModel): String {
+        val eventReader = inputFactory.createXMLEventReader(c.originalPom.inputStream())
+
+        val indent = " "
+        val freqMap: MutableMap<Int, Int> = mutableMapOf()
+
+        /**
+         * Parse, while grabbing whitespace sequences and counting
+         */
+        while (eventReader.hasNext()) {
+            val event = eventReader.nextEvent()
+
+            if (event is Characters) {
+                if (StringUtils.isWhitespace(event.asCharacters().data)) {
+                    val patterns = event.asCharacters().data.split(*LINE_ENDINGS.toTypedArray())
+
+                    /**
+                     * Updates space frequencies
+                     */
+                    patterns
+                        .filter { it.length != 0 }
+                        .filter { StringUtils.isAllBlank(it) }
+                        .map { it to it.length }
+                        .forEach {
+                            freqMap.merge(it.second, 1) { a, b -> a + b}
+                        }
+                }
+            }
+        }
+
+        val indentLength = freqMap.entries.minBy { it.key }.key
+
+        return StringUtils.repeat(indent, indentLength)
+    }
+
+    private fun parseLineEndings(c: ProjectModel): String {
+        val str = String(c.originalPom.inputStream().readBytes(), c.charset)
+
+        return LINE_ENDINGS
+            .map { it to str.split(it).size }
+            .toMap()
+            .maxBy { it.value }
+            .key
+    }
+
+    private fun parseXmlAndCharset(c: ProjectModel) {
         /**
          * Performs a StAX Parsing to Grab the first element
          */
-        val inputFactory = XMLInputFactory.newInstance()
         val eventReader = inputFactory.createXMLEventReader(c.originalPom.inputStream())
 
+        var charset: Charset? = null
+
+        /**
+         * Parse, while grabbing its preamble and encoding
+         */
         while (true) {
             val event = eventReader.nextEvent()
 
@@ -39,25 +135,38 @@ class FormatCommand : AbstractSimpleCommand() {
                 /**
                  * Processing Instruction Found - Store its Character Encoding
                  */
-                this.charset = Charset.forName((event as StartDocument).characterEncodingScheme)
+                charset = Charset.forName(event.characterEncodingScheme)
             } else if (event.isStartElement) {
                 /**
                  * First Element ("Tag") found - store its offset
                  */
                 val startElementEvent = (event as StartElement)
 
-                var offset = startElementEvent.location.characterOffset
+                val offset = startElementEvent.location.characterOffset
 
-                preamble = c.originalPom.toString(this.charset).substring(0, offset)
+                preamble = c.originalPom.toString(c.charset).substring(0, offset)
 
                 break
             }
 
-            if (! eventReader.hasNext())
+            if (!eventReader.hasNext())
                 throw IllegalStateException("Couldn't find document start")
         }
 
-        return super.execute(c)
+        if (null == charset) {
+            val detectedCharsetName = UniversalDetector.detectCharset(c.originalPom.inputStream())
+
+            charset = Charset.forName(detectedCharsetName)
+        }
+
+        c.charset = charset!!
+
+        val lastLine = String(c.originalPom, c.charset)
+
+        val lastLineTrimmed = lastLine.trimEnd()
+
+        this.suffix = lastLine.substring(lastLineTrimmed.length)
+
     }
 
     /**
@@ -65,8 +174,6 @@ class FormatCommand : AbstractSimpleCommand() {
      * but apply the original formatting as well
      */
     override fun postProcess(c: ProjectModel): Boolean {
-        val writer = SAXWriter()
-
         var xmlRepresentation = c.resultPom.asXML()
 
         /**
@@ -76,7 +183,9 @@ class FormatCommand : AbstractSimpleCommand() {
          * Grab the same initial offset from the formatted element like we did
          */
         val inputFactory = XMLInputFactory.newInstance()
-        val eventReader = inputFactory.createXMLEventReader(xmlRepresentation.toByteArray(this.charset).inputStream())
+        val eventReader = inputFactory.createXMLEventReader(
+            xmlRepresentation.toByteArray(c.charset).inputStream()
+        )
 
         while (true) {
             val event = eventReader.nextEvent()
@@ -87,9 +196,10 @@ class FormatCommand : AbstractSimpleCommand() {
                  */
                 val startElementEvent = (event as StartElement)
 
-                var offset = startElementEvent.location.characterOffset
+                val offset = startElementEvent.location.characterOffset
 
-                xmlRepresentation = this.preamble + xmlRepresentation.substring(offset)
+                xmlRepresentation =
+                    this.preamble + xmlRepresentation.substring(offset) + this.suffix
 
                 break
             }
@@ -97,15 +207,19 @@ class FormatCommand : AbstractSimpleCommand() {
             /**
              * This code shouldn't be unreachable at all
              */
-            if (! eventReader.hasNext())
+            if (!eventReader.hasNext())
                 throw IllegalStateException("Couldn't find document start")
         }
 
         /**
          * Serializes it back
          */
-        c.resultPomBytes = xmlRepresentation.toByteArray(this.charset)
+        c.resultPomBytes = xmlRepresentation.toByteArray(c.charset)
 
         return super.postProcess(c)
+    }
+
+    companion object {
+        val LINE_ENDINGS = setOf("\r\n", "\n", "\r")
     }
 }

@@ -2,8 +2,8 @@ name: Java CI
 
 on:
   push:
-    branches:
-      - '!master'
+    branches-ignore:
+      - 'master'
 
 env:
   MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2"
@@ -43,6 +43,7 @@ jobs:
       - name: Integration Testing (Linux Only)
         if: matrix.platform == 'ubuntu-latest'
         run: |
+          mvn -N -B -Dmaven.test.skip install
           mvn -N -B -P integration-testing verify
       - name: Generate Coverage Badge
         id: jacoco

@@ -9,100 +9,92 @@ import org.apache.commons.lang3.text.StrSubstitutor
 import org.dom4j.Element
 import org.dom4j.Node
 import org.dom4j.Text
-import org.dom4j.io.OutputFormat
-import org.dom4j.io.SAXReader
-import org.dom4j.io.XMLWriter
 import org.dom4j.tree.DefaultText
 import org.jaxen.SimpleNamespaceContext
 import org.jaxen.XPath
 import org.jaxen.dom4j.Dom4jXPath
-import java.io.File
-import java.io.StringReader
-import java.io.StringWriter
-import kotlin.math.ceil
+import java.io.*
+
 
 /**
  * Common Utilities
  */
 object Util {
     /**
-     * Formats a XML Element Node
+     * Extension Method that easily allows to add an element inside another while
+     * retaining formatting
+     *
+     * @param c ProjectModel / Context
+     * @param name new element ("tag") name
+     * @return created element inside `this` object, already indented after and (optionally) before
      */
-    internal fun formatNode(node: Element) {
-        val parent = node.parent
-        //val siblings = parent.content()
+    fun Element.addIndentedElement(c: ProjectModel, name: String): Element {
+        val contentList = this.content()
 
-        val indentLevel = findIndentLevel(node)
+        val indentLevel = findIndentLevel(this)
 
-        val clonedNode = node.clone() as Element
+        val prefix = c.endl + StringUtils.repeat(c.indent, 1 + indentLevel)
 
-        val out = StringWriter()
+        val suffix = c.endl + StringUtils.repeat(c.indent, indentLevel)
 
-        val outputFormat = OutputFormat.createPrettyPrint()
+        if (contentList.isNotEmpty() && contentList.last() is Text) {
+            val lastElement = contentList.last() as Text
 
-        val xmlWriter = XMLWriter(out, outputFormat)
+            if (StringUtils.isWhitespace(lastElement.text)) {
+                contentList.remove(contentList.last())
+            }
+        }
 
-        xmlWriter.setIndentLevel(ceil(indentLevel.toDouble() / 2).toInt())
+        contentList.add(DefaultText(prefix))
 
-        xmlWriter.write(clonedNode)
+        val newElement = this.addElement(name)
 
-        val content = out.toString()
+        contentList.add(DefaultText(suffix))
 
-        val newElement = SAXReader().read(StringReader(content)).rootElement.clone() as Element
-
-        parent.remove(node)
-
-        parent.add(DefaultText("\n" + StringUtils.repeat(" ", indentLevel)))
-        parent.add(newElement)
-        parent.add(DefaultText("\n" + StringUtils.repeat(" ", ((indentLevel - 1) / 2))))
+        return newElement
     }
 
     /**
      * Guesses the current indent level of the nearest nodes
+     *
+     * @return indent level
      */
-    internal fun findIndentLevel(node: Element): Int {
-        val siblings = node.parent.content()
-        val myIndex = siblings.indexOf(node)
+    internal fun findIndentLevel(startingNode: Element): Int {
+        var level = 0
 
-        if (myIndex > 0) {
-            val lastElement = siblings.subList(0, myIndex).findLast {
-                (it is Text) && it.text.matches(Regex("\\n+\\s+"))
-            }
+        var node = startingNode
 
-            val lastElementText = lastElement?.text ?: ""
-
-            return lastElementText.trimStart('\n').length
+        while (node.parent != null) {
+            level += 1
+            node = node.parent
         }
 
-        return 0
+        return level
     }
 
     /**
      * Represents a Property Reference - as a regex
      */
-    internal val PROPERTY_REFERENCE_REGEX = Regex("^\\\$\\{(.*)}$")
+    private val PROPERTY_REFERENCE_REGEX = Regex("^\\\$\\{(.*)}$")
 
     /**
      * Upserts a given property
      */
-    internal fun upgradeProperty(c: ProjectModel, propertyName: String) {
+    private fun upgradeProperty(c: ProjectModel, propertyName: String) {
         if (null == c.resultPom.rootElement.element("properties")) {
-            val propertyElement = c.resultPom.rootElement.addElement("properties")
-
-            formatNode(propertyElement)
+            c.resultPom.rootElement.addIndentedElement(c, "properties")
         }
 
         val parentPropertyElement = c.resultPom.rootElement.element("properties")
 
         if (null == parentPropertyElement.element(propertyName)) {
-            val newElement = parentPropertyElement.addElement(propertyName)
-
-            formatNode(newElement)
+            parentPropertyElement.addIndentedElement(c, propertyName)
         } else {
             if (!c.overrideIfAlreadyExists) {
                 val propertyReferenceRE = Regex.fromLiteral("\${$propertyName}")
 
-                val numberOfAllCurrentMatches = propertyReferenceRE.findAll(c.pomDocument.asXML()).toList().size
+                val numberOfAllCurrentMatches =
+                    propertyReferenceRE.findAll(c.pomDocument.asXML()).toList().size
 
                 if (numberOfAllCurrentMatches > 1) {
                     throw IllegalStateException("Property $propertyName is already defined - and used more than once.")
@@ -113,8 +105,6 @@ object Util {
         val propertyElement = parentPropertyElement.element(propertyName)
 
         propertyElement.text = c.dependency!!.version
-
-        formatNode(propertyElement)
     }
 
     /**
@@ -143,12 +133,13 @@ object Util {
         val currentVersion = Version.valueOf(currentVersionNodeText)
         val newVersion = Version.valueOf(c.dependency!!.version)
 
-        @Suppress("UnnecessaryVariable") val versionsAreIncreasing = newVersion.greaterThan(currentVersion)
+        @Suppress("UnnecessaryVariable") val versionsAreIncreasing =
+            newVersion.greaterThan(currentVersion)
 
         return versionsAreIncreasing
     }
 
-    internal fun resolveVersion(c: ProjectModel, versionText: String): String =
+    private fun resolveVersion(c: ProjectModel, versionText: String): String =
         if (PROPERTY_REFERENCE_REGEX.matches(versionText)) {
             @Suppress("DEPRECATION")
             StrSubstitutor(c.resolvedProperties).replace(versionText)
@@ -159,7 +150,7 @@ object Util {
     /**
      * Escapes a Property Name
      */
-    internal fun escapedPropertyName(propertyName: String): String =
+    private fun escapedPropertyName(propertyName: String): String =
         "\${$propertyName}"
 
     /**
@@ -272,5 +263,4 @@ object Util {
 
         return result
     }
-
 }

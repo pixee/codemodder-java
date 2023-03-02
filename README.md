@@ -55,7 +55,7 @@ mvn clean package source:jar javadoc:jar deploy
 git commit -am "Generating Tag"
 git tag 0.0.2
 git push && git push --tags
-mvn versions:set -DnewVersion=0.0.3-SNAPSHOT
+V=0.0.3 mvn versions:set -DnewVersion=0.0.3-SNAPSHOT && (cd java-sample ; mvn versions:set -DnewVersion=0.0.3-SNAPSHOT)
 git commit -am "Generating Development Version"
 ```
 

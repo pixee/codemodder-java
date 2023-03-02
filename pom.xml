@@ -6,7 +6,7 @@
 
     <groupId>io.openpixee.maven</groupId>
     <artifactId>pom-operator</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.3</version>
 
     <scm>
         <connection>scm:git:${project.scm.url}</connection>
@@ -204,6 +204,11 @@
             <artifactId>maven-model-builder</artifactId>
             <version>3.8.6</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.albfernandez</groupId>
+            <artifactId>juniversalchardet</artifactId>
+            <version>2.4.0</version>
         </dependency>
     </dependencies>
     <build>

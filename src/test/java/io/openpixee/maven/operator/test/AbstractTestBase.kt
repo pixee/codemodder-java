@@ -70,7 +70,7 @@ open class AbstractTestBase {
 
             LOGGER.warn("File $resultFilePath not found - writing results instead and ignorning assertions at all")
 
-            File(resultFilePath).writeText(context.resultPom.asXML())
+            File(resultFilePath).writeBytes(context.resultPomBytes)
         }
 
         return context

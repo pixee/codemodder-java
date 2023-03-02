@@ -3,10 +3,10 @@ package io.openpixee.maven.operator
 import org.apache.commons.io.IOUtils
 import org.dom4j.Document
 import org.dom4j.io.SAXReader
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 import java.net.URL
+import java.nio.charset.Charset
 
 /**
  * Builder Object for ProjectModel instances
@@ -20,7 +20,7 @@ class ProjectModelFactory private constructor(
     private var useProperties: Boolean = false,
     private var activeProfiles: Set<String> = emptySet(),
     private var overrideIfAlreadyExists: Boolean = false,
-    private var queryType: QueryType = QueryType.SAFE,
+    private var queryType: QueryType = QueryType.NONE,
 ) {
     /**
      * Fluent Setter
@@ -90,6 +90,10 @@ class ProjectModelFactory private constructor(
             activeProfiles = activeProfiles,
             overrideIfAlreadyExists = overrideIfAlreadyExists,
             queryType = queryType,
+            charset = Charset.defaultCharset(),
+            endl = "",
+            indent = "",
+            originalElements = emptySet(),
         )
     }
 
