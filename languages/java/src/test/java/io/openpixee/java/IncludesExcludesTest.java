@@ -14,7 +14,7 @@ final class IncludesExcludesTest {
   @Test
   void it_handles_globs_and_negates() {
     IncludesExcludes includesExcludes =
-        IncludesExcludes.fromConfiguration(
+        IncludesExcludes.withSettings(
             new File("."), List.of("*.java", "**/*.java"), List.of("**/test/**/*.java"));
 
     assertThat(includesExcludes.shouldInspect(new File("src/main/java/Foo.java")), is(true));
@@ -24,7 +24,7 @@ final class IncludesExcludesTest {
   @Test
   void it_handles_lines() {
     IncludesExcludes includesExcludes =
-        IncludesExcludes.fromConfiguration(
+        IncludesExcludes.withSettings(
             new File("."), List.of("src/main/java/Foo.java:16"), Collections.emptyList());
     var file = new File("src/main/java/Foo.java");
     assertThat(includesExcludes.shouldInspect(file), is(true));
@@ -39,7 +39,7 @@ final class IncludesExcludesTest {
   @Test
   void it_handles_conflicting_include_and_excludes() {
     IncludesExcludes includesExcludes =
-        IncludesExcludes.fromConfiguration(
+        IncludesExcludes.withSettings(
             new File("."), List.of("*.java", "**/*.java"), List.of("src/main/java/Foo.java"));
     assertThat(includesExcludes.shouldInspect(new File("src/main/java/Foo.java")), is(false));
   }
@@ -47,7 +47,7 @@ final class IncludesExcludesTest {
   @Test
   void it_handles_conflicting_include_and_excludes_line() {
     IncludesExcludes includesExcludes =
-        IncludesExcludes.fromConfiguration(
+        IncludesExcludes.withSettings(
             new File("."), List.of("*.java", "**/*.java"), List.of("src/main/java/Foo.java:16"));
     File file = new File("src/main/java/Foo.java");
     assertThat(includesExcludes.shouldInspect(file), is(true));
@@ -58,12 +58,29 @@ final class IncludesExcludesTest {
   }
 
   @Test
+  void it_throws_on_null_includes_or_excludes() {
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          IncludesExcludes.withSettings(
+              new File("."), null, List.of("src/main/java/com/acme/Foo.java:17"));
+        });
+
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          IncludesExcludes.withSettings(
+              new File("."), List.of("src/main/java/com/acme/Foo.java:17"), null);
+        });
+  }
+
+  @Test
   void it_throws_on_illegal_combination() {
     assertThrows(
         IllegalArgumentException.class,
         () -> {
           IncludesExcludes includesExcludes =
-              IncludesExcludes.fromConfiguration(
+              IncludesExcludes.withSettings(
                   new File("."),
                   List.of("src/main/java/com/acme/Foo.java:16"),
                   List.of("src/main/java/com/acme/Foo.java:17"));

@@ -1,7 +1,6 @@
 package io.openpixee.java;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Collections;
 import java.util.List;
 
 /** Describes the 'paths' section of the YAML configuration. */
@@ -14,10 +13,10 @@ public class PathConfiguration {
   private List<String> excludes;
 
   public List<String> getIncludes() {
-    return includes != null ? includes : Collections.emptyList();
+    return includes;
   }
 
   public List<String> getExcludes() {
-    return excludes != null ? excludes : Collections.emptyList();
+    return excludes;
   }
 }

@@ -78,7 +78,7 @@ public abstract class WeavingTests {
     return assertJavaWeaveWorkedAndWontReweave(
         pathToVulnerableFile,
         factory,
-        IncludesExcludes.fromConfiguration(
+        IncludesExcludes.withSettings(
             new File(pathToVulnerableFile).getParentFile(),
             Collections.emptyList(),
             Collections.emptyList()));

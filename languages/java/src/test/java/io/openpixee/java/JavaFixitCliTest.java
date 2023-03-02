@@ -11,7 +11,7 @@ final class JavaFixitCliTest {
   @Test
   void defaults_includes_excludes_are_good() {
     IncludesExcludes includesExcludes =
-        IncludesExcludes.fromConfiguration(
+        IncludesExcludes.withSettings(
             new File("."), JavaFixitCli.defaultIncludes, JavaFixitCli.defaultExcludes);
     assertThat(includesExcludes.shouldInspect(file("src/main/java/Foo.java")), is(true));
     assertThat(
