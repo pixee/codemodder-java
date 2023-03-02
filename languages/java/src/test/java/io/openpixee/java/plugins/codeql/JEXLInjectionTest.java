@@ -25,7 +25,6 @@ final class JEXLInjectionTest {
   @Test
   void it_does_nothing() throws IOException {}
 
-  @Disabled
   @Test
   void it_sandboxes_jexl_injection() throws IOException {
     String insecureFilePath =

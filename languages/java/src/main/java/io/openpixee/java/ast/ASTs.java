@@ -85,6 +85,14 @@ public final class ASTs {
     var type = cu.getPrimaryTypeName().orElse("unknown_type");
     return packageName.isBlank() ? type : packageName + "." + type;
   }
+  /**
+   * Given a {@link LocalVariableDeclaration} verifies if it is final or never assigned. See <a
+   * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-4.html">Java Language
+   * Specification - Section 4.12.14</a> for the definitions of final variables.
+   */
+  public static boolean isFinalOrNeverAssigned(LocalVariableDeclaration lvd) {
+    return isFinalOrNeverAssigned(lvd.getVariableDeclarator(), lvd.getScope());
+  }
 
   /**
    * Given a {@link SimpleName} {@code name} and a {@link VariableDeclarationExpr} with a declarator

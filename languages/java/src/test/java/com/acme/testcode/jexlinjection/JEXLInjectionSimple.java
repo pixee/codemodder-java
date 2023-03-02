@@ -10,7 +10,7 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 
-public class JEXLInjectionSimple {
+public final class JEXLInjectionSimple {
 
   public void method(Socket socket) throws IOException {
     try (BufferedReader reader =
