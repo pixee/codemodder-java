@@ -7,6 +7,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +34,8 @@ public interface VisitorAssembler {
    * @param ruleContext the rules
    * @return the {@link FileBasedVisitor} types that are allowed to operate
    */
-  List<FileBasedVisitor> assembleFileVisitors(RuleContext ruleContext);
+  List<FileBasedVisitor> assembleFileVisitors(
+      File repositoryRoot, RuleContext ruleContext, List<File> sarifs);
 
   static VisitorAssembler createDefault() {
     return new Default();
@@ -43,7 +46,7 @@ public interface VisitorAssembler {
     @Override
     public List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(
         final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
-      List<VisitorFactory> defaultVisitorFactories =
+      final List<VisitorFactory> defaultVisitorFactories =
           List.of(
               new ApacheMultipartVisitorFactory(),
               new DeserializationVisitorFactory(),
@@ -68,9 +71,9 @@ public interface VisitorAssembler {
       final List<SarifProcessorPlugin> sarifProcessorPlugins =
           List.of(new CodeQlPlugin(), new ContrastScanPlugin());
 
-      List<VisitorFactory> pluginFactories =
-          new PluginFactoryFinder()
-              .getPluginFactories(repositoryRoot, ruleContext, sarifs, sarifProcessorPlugins);
+      final List<VisitorFactory> pluginFactories =
+          new PluginVisitorFinder(sarifs)
+              .getPluginFactories(repositoryRoot, ruleContext, sarifProcessorPlugins);
 
       final List<VisitorFactory> factories = new ArrayList<>();
       factories.addAll(defaultVisitorFactories);
@@ -83,13 +86,28 @@ public interface VisitorAssembler {
     }
 
     @Override
-    public List<FileBasedVisitor> assembleFileVisitors(final RuleContext ruleContext) {
-      List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
+    public List<FileBasedVisitor> assembleFileVisitors(
+        final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
+      // Plugin visitors
+      final List<SarifProcessorPlugin> sarifProcessorPlugins =
+          List.of(new CodeQlPlugin(), new ContrastScanPlugin());
+      final List<FileBasedVisitor> pluginVisitors =
+          new PluginVisitorFinder(sarifs)
+              .getPluginFileBasedVisitors(repositoryRoot, ruleContext, sarifProcessorPlugins);
+
+      // Default visitors
+      final List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
       defaultVisitors.add(new DependencyInjectingVisitor());
       defaultVisitors.add(new JspScriptletXSSVisitor());
       defaultVisitors.add(new VerbTamperingVisitor());
       defaultVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
-      return Collections.unmodifiableList(defaultVisitors);
+
+      final var allVisitors =
+          Stream.concat(defaultVisitors.stream(), pluginVisitors.stream())
+              .collect(Collectors.toList());
+      allVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
+
+      return Collections.unmodifiableList(allVisitors);
     }
   }
 
