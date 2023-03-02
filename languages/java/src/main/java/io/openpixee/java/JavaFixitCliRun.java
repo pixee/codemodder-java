@@ -79,7 +79,7 @@ public final class JavaFixitCliRun {
 
     // parse the includes & exclude rules we'll need for all the scanning
     final IncludesExcludes includesExcludes =
-        IncludesExcludes.fromConfiguration(repositoryRoot, includePatterns, excludePatterns);
+        IncludesExcludes.withSettings(repositoryRoot, includePatterns, excludePatterns);
 
     final List<SourceDirectory> sourceDirectories =
         directorySearcher.listJavaSourceDirectories(List.of(repositoryRoot));
