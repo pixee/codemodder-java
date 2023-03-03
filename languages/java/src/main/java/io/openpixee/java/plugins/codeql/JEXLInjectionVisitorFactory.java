@@ -4,6 +4,7 @@ import com.contrastsecurity.sarif.PhysicalLocation;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import io.openpixee.java.DoNothingVisitor;
@@ -86,12 +87,41 @@ final class JEXLInjectionVisitorFactory implements VisitorFactory {
     }
 
     @Override
+    public Visitable visit(final NameExpr nameExpr, final FileWeavingContext context) {
+      Predicate<PhysicalLocation> matchLocation =
+          pl ->
+              nameExpr
+                  .getRange()
+                  .map(
+                      r ->
+                          pl.getRegion().getStartLine() == r.begin.line
+                              && pl.getRegion().getStartColumn() == r.begin.column
+                              && pl.getRegion().getEndLine() == r.end.line
+                              && pl.getRegion().getEndColumn() - 1 == r.end.column)
+                  .orElse(false);
+
+      // Checks if a PhysicalLocation matches nameExpr location
+      if (locations.stream().anyMatch(matchLocation)) {
+        JEXLInjectionFixer.checkAndFix(nameExpr)
+            .map(i -> Weave.from(i, JEXLInjectionRuleId))
+            .ifPresent(context::addWeave);
+      }
+
+      return super.visit(nameExpr, context);
+    }
+
+    @Override
     public Visitable visit(final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
       Predicate<PhysicalLocation> matchLocation =
           pl ->
               methodCallExpr
                   .getRange()
-                  .map(r -> pl.getRegion().getStartLine() == r.begin.line)
+                  .map(
+                      r ->
+                          pl.getRegion().getStartLine() == r.begin.line
+                              && pl.getRegion().getStartColumn() == r.begin.column
+                              && pl.getRegion().getEndLine() == r.end.line
+                              && pl.getRegion().getEndColumn() - 1 == r.end.column)
                   .orElse(false);
 
       // Checks if a PhysicalLocation matches methodCallExpr location
@@ -101,7 +131,7 @@ final class JEXLInjectionVisitorFactory implements VisitorFactory {
             .ifPresent(context::addWeave);
       }
 
-      return methodCallExpr;
+      return super.visit(methodCallExpr, context);
     }
   }
 

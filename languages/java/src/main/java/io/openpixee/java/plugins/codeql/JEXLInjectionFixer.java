@@ -4,6 +4,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
@@ -24,24 +25,25 @@ import org.apache.commons.jexl3.JexlExpression;
 public final class JEXLInjectionFixer {
 
   /**
-   * Detects if a {@link MethodCallExpr} evaluation of a {@link
+   * Detects if a {@link Expression} that is the scope of a {@link
    * JexlExpression#evaluate(org.apache.commons.jexl3.JexlContext)} can be sandboxed and tries to
    * fix it. Combines {@code isFixable} and {@code tryToFix}.
    */
-  public static Optional<Integer> checkAndFix(final MethodCallExpr mce) {
-    return isFixable(mce).flatMap(JEXLInjectionFixer::tryToFix);
+  public static Optional<Integer> checkAndFix(final Expression expr) {
+    return isFixable(expr).flatMap(JEXLInjectionFixer::tryToFix);
   }
 
   /**
    * Returns true if there exists a local {@link JexlEngine} used to create and evaluate the
-   * expression of {@code mce} that can be sandboxed.
+   * expression of {@code expr} that can be sandboxed.
    */
-  public static Optional<MethodCallExpr> isFixable(final MethodCallExpr mce) {
-    return findJEXLCreateExpression(mce).flatMap(JEXLInjectionFixer::findJEXLBuilderCreate);
+  public static Optional<MethodCallExpr> isFixable(final Expression expr) {
+    return findJEXLCreateExpression(expr).flatMap(JEXLInjectionFixer::findJEXLBuilderCreate);
   }
 
   /** Tries to sandbox the {@link JexlEngine#create()} and returns its line if it does. */
   public static Optional<Integer> tryToFix(final MethodCallExpr mce) {
+    final var cu = mce.findCompilationUnit().get();
     final var maybeStmt = ASTs.findParentStatementFrom(mce);
     if (maybeStmt.isEmpty()) {
       return Optional.empty();
@@ -73,41 +75,38 @@ public final class JEXLInjectionFixer {
     ASTTransforms.addStatementBeforeStatement(stmt, sandboxDecl);
     ASTTransforms.addStatementBeforeStatement(stmt, sandboxFor);
 
+    // always has scope
     final var sandboxCall =
         new MethodCallExpr(
             mce.getScope().get(), "sandbox", new NodeList<>(new NameExpr("sandbox")));
     final var newCreate = new MethodCallExpr(sandboxCall, "create");
-    ASTTransforms.addImportIfMissing(
-        mce.findCompilationUnit().get(), "io.openpixee.security.UnwantedTypes");
-    ASTTransforms.addImportIfMissing(
-        mce.findCompilationUnit().get(), "org.apache.commons.jexl3.introspection.JexlSandbox");
-    // System.out.println(mce.findCompilationUnit().get().toString());
+    ASTTransforms.addImportIfMissing(cu, "io.openpixee.security.UnwantedTypes");
+    ASTTransforms.addImportIfMissing(cu, "org.apache.commons.jexl3.introspection.JexlSandbox");
     mce.replace(newCreate);
     return mce.getBegin().map(b -> b.line);
   }
 
   /**
-   * Given an {@code <expr>.evaluate()}, where {@code expr} is a {@link JexlExpression} object,
-   * tries to find the {@link JexlEngine#createExpression(String)} method that spawns it.
+   * Given an expression {@code <expr>} that is the scope of an {@link
+   * JexlExpression#evaluate(org.apache.commons.jexl3.JexlContext)} call, tries to find the {@link
+   * JexlEngine#createExpression(String)} method that spawns it.
    */
-  private static Optional<MethodCallExpr> findJEXLCreateExpression(final MethodCallExpr mce) {
-    // Always has a scope
-    final var scope = mce.getScope().get();
-    // immediate call
-    if (scope instanceof MethodCallExpr) {
-      if (scope.asMethodCallExpr().getName().equals("createExpression"))
-        return Optional.of(scope.asMethodCallExpr());
+  private static Optional<MethodCallExpr> findJEXLCreateExpression(final Expression expr) {
+    // Is itself a createExpression
+    if (expr instanceof MethodCallExpr) {
+      if (expr.asMethodCallExpr().getNameAsString().equals("createExpression"))
+        return Optional.of(expr.asMethodCallExpr());
     }
 
     // is a variable, track its definition
     // TODO should we care if it is final or never assigned?
-    if (scope instanceof NameExpr) {
+    if (expr instanceof NameExpr) {
       final var maybeLVD =
           ASTs.findEarliestLocalDeclarationOf(
-              scope.asNameExpr(), scope.asNameExpr().getNameAsString());
+              expr.asNameExpr(), expr.asNameExpr().getNameAsString());
       return maybeLVD
           .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
-          .map(expr -> expr.isMethodCallExpr() ? expr.asMethodCallExpr() : null)
+          .map(e -> e.isMethodCallExpr() ? e.asMethodCallExpr() : null)
           .filter(mcexpr -> mcexpr.getNameAsString().equals("createExpression"));
     }
     return Optional.empty();
@@ -123,7 +122,7 @@ public final class JEXLInjectionFixer {
     final var scope = mce.getScope().get();
     // immediate call
     if (scope instanceof MethodCallExpr) {
-      if (scope.asMethodCallExpr().getName().equals("create"))
+      if (scope.asMethodCallExpr().getNameAsString().equals("create"))
         return Optional.of(scope.asMethodCallExpr());
     }
 

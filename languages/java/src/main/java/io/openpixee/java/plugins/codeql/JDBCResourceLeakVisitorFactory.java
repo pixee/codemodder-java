@@ -101,7 +101,7 @@ final class JDBCResourceLeakVisitorFactory implements VisitorFactory {
             .ifPresent(context::addWeave);
       }
 
-      return methodCallExpr;
+      return super.visit(methodCallExpr, context);
     }
   }
 
