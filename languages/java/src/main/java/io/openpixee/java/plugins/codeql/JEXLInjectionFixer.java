@@ -88,7 +88,6 @@ final class JEXLInjectionFixer {
     ASTTransforms.addImportIfMissing(cu, "io.openpixee.security.UnwantedTypes");
     ASTTransforms.addImportIfMissing(cu, "org.apache.commons.jexl3.introspection.JexlSandbox");
     mce.replace(newCreate);
-    System.out.println(cu);
     return mce.getBegin().map(b -> b.line);
   }
 
