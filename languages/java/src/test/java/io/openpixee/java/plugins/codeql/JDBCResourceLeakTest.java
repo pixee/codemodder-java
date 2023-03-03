@@ -1,15 +1,9 @@
 package io.openpixee.java.plugins.codeql;
 
-import com.contrastsecurity.sarif.ArtifactLocation;
-import com.contrastsecurity.sarif.Location;
-import com.contrastsecurity.sarif.PhysicalLocation;
-import com.contrastsecurity.sarif.Region;
-import com.contrastsecurity.sarif.Result;
 import io.openpixee.java.IncludesExcludes;
 import io.openpixee.java.protections.WeavingTests;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +21,7 @@ final class JDBCResourceLeakTest {
     WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 13))),
+            new File("."), Set.of(ResultMockFactory.buildResult(insecureFilePath, 13, 16, 13, 38))),
         new IncludesExcludes.MatchesEverything());
   }
 
@@ -38,7 +32,7 @@ final class JDBCResourceLeakTest {
     WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 13))),
+            new File("."), Set.of(ResultMockFactory.buildResult(insecureFilePath, 14, 18, 14, 40))),
         new IncludesExcludes.MatchesEverything());
   }
 
@@ -49,7 +43,7 @@ final class JDBCResourceLeakTest {
     WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 13))),
+            new File("."), Set.of(ResultMockFactory.buildResult(insecureFilePath, 14, 16, 14, 38))),
         new IncludesExcludes.MatchesEverything());
   }
 
@@ -60,7 +54,7 @@ final class JDBCResourceLeakTest {
     WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 13))),
+            new File("."), Set.of(ResultMockFactory.buildResult(insecureFilePath, 19, 16, 19, 38))),
         new IncludesExcludes.MatchesEverything());
   }
 
@@ -71,7 +65,7 @@ final class JDBCResourceLeakTest {
     WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 14))),
+            new File("."), Set.of(ResultMockFactory.buildResult(insecureFilePath, 14, 20, 14, 44))),
         new IncludesExcludes.MatchesEverything());
   }
 
@@ -81,19 +75,7 @@ final class JDBCResourceLeakTest {
     WeavingTests.assertJavaWeaveWorkedAndWontReweave(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
-            new File("."), Set.of(buildResult(insecureFilePath, 13))),
+            new File("."), Set.of(ResultMockFactory.buildResult(insecureFilePath, 13, 22, 13, 44))),
         new IncludesExcludes.MatchesEverything());
-  }
-
-  private Result buildResult(final String insecureFilePath, final int i) {
-    return new Result().withLocations(List.of(buildLocation(insecureFilePath, i)));
-  }
-
-  private Location buildLocation(final String insecureFilePath, final int line) {
-    return new Location()
-        .withPhysicalLocation(
-            new PhysicalLocation()
-                .withRegion(new Region().withStartLine(line))
-                .withArtifactLocation(new ArtifactLocation().withUri(insecureFilePath)));
   }
 }

@@ -91,7 +91,12 @@ final class JDBCResourceLeakVisitorFactory implements VisitorFactory {
           pl ->
               methodCallExpr
                   .getRange()
-                  .map(r -> pl.getRegion().getStartLine() == r.begin.line)
+                  .map(
+                      r ->
+                          pl.getRegion().getStartLine() == r.begin.line
+                              && pl.getRegion().getStartColumn() == r.begin.column
+                              && pl.getRegion().getEndLine() == r.end.line
+                              && pl.getRegion().getEndColumn() - 1 == r.end.column)
                   .orElse(false);
 
       // Checks if a PhysicalLocation matches methodCallExpr location

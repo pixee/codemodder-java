@@ -34,14 +34,14 @@ public final class JEXLInjectionFixer {
   }
 
   /**
-   * Returns true if there exists a local {@link JexlEngine} used to create and evaluate the
-   * expression of {@code expr} that can be sandboxed.
+   * Checks if there exists a local {@link JexlBuilder#create()} call used to create and evaluate
+   * the expression of {@code expr} that can be sandboxed.
    */
   public static Optional<MethodCallExpr> isFixable(final Expression expr) {
     return findJEXLCreateExpression(expr).flatMap(JEXLInjectionFixer::findJEXLBuilderCreate);
   }
 
-  /** Tries to sandbox the {@link JexlEngine#create()} and returns its line if it does. */
+  /** Tries to sandbox the {@link JexlBuilder#create()} and returns its line if it does. */
   public static Optional<Integer> tryToFix(final MethodCallExpr mce) {
     final var cu = mce.findCompilationUnit().get();
     final var maybeStmt = ASTs.findParentStatementFrom(mce);
@@ -94,8 +94,9 @@ public final class JEXLInjectionFixer {
   private static Optional<MethodCallExpr> findJEXLCreateExpression(final Expression expr) {
     // Is itself a createExpression
     if (expr instanceof MethodCallExpr) {
-      if (expr.asMethodCallExpr().getNameAsString().equals("createExpression"))
+      if (expr.asMethodCallExpr().getNameAsString().equals("createExpression")) {
         return Optional.of(expr.asMethodCallExpr());
+      }
     }
 
     // is a variable, track its definition
@@ -112,7 +113,6 @@ public final class JEXLInjectionFixer {
     return Optional.empty();
   }
 
-  // jexl.createExpression -> JexlBuilder.create()
   /**
    * Given an {@code <expr>.createExpression()}, where {@code expr} is a {@link JexlEngine} object,
    * tries to find the {@link JexlBuilder#create()} method that spawns it.

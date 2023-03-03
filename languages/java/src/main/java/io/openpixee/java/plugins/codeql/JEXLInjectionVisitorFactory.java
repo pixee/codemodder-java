@@ -7,6 +7,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import io.openpixee.java.DependencyGAV;
 import io.openpixee.java.DoNothingVisitor;
 import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.VisitorFactory;
@@ -127,7 +128,10 @@ final class JEXLInjectionVisitorFactory implements VisitorFactory {
       // Checks if a PhysicalLocation matches methodCallExpr location
       if (locations.stream().anyMatch(matchLocation)) {
         JEXLInjectionFixer.checkAndFix(methodCallExpr)
-            .map(i -> Weave.from(i, JEXLInjectionRuleId))
+            .map(
+                i ->
+                    Weave.from(
+                        i, JEXLInjectionRuleId, DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT))
             .ifPresent(context::addWeave);
       }
 
