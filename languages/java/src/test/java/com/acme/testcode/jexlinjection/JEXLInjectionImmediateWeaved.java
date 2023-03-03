@@ -19,7 +19,9 @@ public final class JEXLInjectionImmediateWeaved {
       String input = reader.readLine();
       JexlContext context = new MapContext();
       JexlSandbox sandbox = new JexlSandbox(true);
-      for (String cls : UnwantedTypes.all()) sandbox.block(cls);
+      for (String cls : UnwantedTypes.all()) {
+        sandbox.block(cls);
+      }
       new JexlBuilder().sandbox(sandbox).create().createExpression(input).evaluate(context);
     }
   }

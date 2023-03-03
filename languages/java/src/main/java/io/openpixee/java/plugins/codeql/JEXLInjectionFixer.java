@@ -9,6 +9,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import io.openpixee.java.ast.ASTTransforms;
@@ -67,9 +68,13 @@ public final class JEXLInjectionFixer {
             new VariableDeclarationExpr(
                 new VariableDeclarator(StaticJavaParser.parseType("String"), "cls")),
             new MethodCallExpr(new NameExpr("UnwantedTypes"), "all"),
-            new ExpressionStmt(
-                new MethodCallExpr(
-                    new NameExpr("sandbox"), "block", new NodeList<>(new NameExpr("cls")))));
+            new BlockStmt(
+                new NodeList<>(
+                    new ExpressionStmt(
+                        new MethodCallExpr(
+                            new NameExpr("sandbox"),
+                            "block",
+                            new NodeList<>(new NameExpr("cls")))))));
 
     final var stmt = maybeStmt.get();
     ASTTransforms.addStatementBeforeStatement(stmt, sandboxDecl);
@@ -117,7 +122,7 @@ public final class JEXLInjectionFixer {
    * Given an {@code <expr>.createExpression()}, where {@code expr} is a {@link JexlEngine} object,
    * tries to find the {@link JexlBuilder#create()} method that spawns it.
    */
-  public static Optional<MethodCallExpr> findJEXLBuilderCreate(final MethodCallExpr mce) {
+  private static Optional<MethodCallExpr> findJEXLBuilderCreate(final MethodCallExpr mce) {
     // Always has a scope
     final var scope = mce.getScope().get();
     // immediate call

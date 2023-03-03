@@ -20,7 +20,9 @@ public final class JEXLInjectionSimpleWeaved {
 
       String input = reader.readLine();
       JexlSandbox sandbox = new JexlSandbox(true);
-      for (String cls : UnwantedTypes.all()) sandbox.block(cls);
+      for (String cls : UnwantedTypes.all()) {
+        sandbox.block(cls);
+      }
       JexlEngine jexl = new JexlBuilder().sandbox(sandbox).create();
       JexlExpression expression = jexl.createExpression(input);
       JexlContext context = new MapContext();

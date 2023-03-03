@@ -1,4 +1,4 @@
-package io.openpixee.java.plugins.codeql;
+package io.openpixee.java.plugins;
 
 import com.contrastsecurity.sarif.ArtifactLocation;
 import com.contrastsecurity.sarif.Location;
@@ -7,8 +7,10 @@ import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import java.util.List;
 
-public final class ResultMockFactory {
+/** A collection of methods to build mock objects representing SARIF properties and attributes */
+public final class JavaSarifMockFactory {
 
+  /** Builds {@link Result} objects based on a path and file coordinates. */
   public static Result buildResult(
       final String insecureFilePath,
       final int beginLine,
@@ -20,6 +22,7 @@ public final class ResultMockFactory {
             List.of(buildLocation(insecureFilePath, beginLine, beginColumn, endLine, endColumn)));
   }
 
+  /** Builds {@link Location} objects based on a path and file coordinates. */
   public static Location buildLocation(
       final String insecureFilePath,
       final int beginLine,

@@ -1,6 +1,7 @@
 package io.openpixee.java.plugins.codeql;
 
 import io.openpixee.java.IncludesExcludes;
+import io.openpixee.java.plugins.JavaSarifMockFactory;
 import io.openpixee.java.protections.WeavingTests;
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +33,8 @@ final class JEXLInjectionTest {
     WeavingTests.scanAndAssertNoErrorsWithNoFilesChanged(
         insecureFilePath,
         new JEXLInjectionVisitorFactory(
-            new File("."), Set.of(ResultMockFactory.buildResult(insecureFilePath, 21, 7, 21, 17))),
+            new File("."),
+            Set.of(JavaSarifMockFactory.buildResult(insecureFilePath, 21, 7, 21, 17))),
         new IncludesExcludes.MatchesEverything());
   }
 
@@ -43,7 +45,8 @@ final class JEXLInjectionTest {
     WeavingTests.assertJavaWeaveWorkedAndWontReweave(
         insecureFilePath,
         new JEXLInjectionVisitorFactory(
-            new File("."), Set.of(ResultMockFactory.buildResult(insecureFilePath, 19, 7, 19, 57))),
+            new File("."),
+            Set.of(JavaSarifMockFactory.buildResult(insecureFilePath, 19, 7, 19, 57))),
         new IncludesExcludes.MatchesEverything());
   }
 
@@ -54,7 +57,8 @@ final class JEXLInjectionTest {
     WeavingTests.assertJavaWeaveWorkedAndWontReweave(
         insecureFilePath,
         new JEXLInjectionVisitorFactory(
-            new File("."), Set.of(ResultMockFactory.buildResult(insecureFilePath, 23, 7, 23, 17))),
+            new File("."),
+            Set.of(JavaSarifMockFactory.buildResult(insecureFilePath, 23, 7, 23, 17))),
         new IncludesExcludes.MatchesEverything());
   }
 }
