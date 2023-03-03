@@ -23,14 +23,14 @@ import org.apache.commons.jexl3.JexlExpression;
  * A library that contains methods for automatically fixing JEXL injections detected by CodeQL's
  * rule "java/jexl-expression-injection" whenever possible.
  */
-public final class JEXLInjectionFixer {
+final class JEXLInjectionFixer {
 
   /**
    * Detects if a {@link Expression} that is the scope of a {@link
    * JexlExpression#evaluate(org.apache.commons.jexl3.JexlContext)} can be sandboxed and tries to
    * fix it. Combines {@code isFixable} and {@code tryToFix}.
    */
-  public static Optional<Integer> checkAndFix(final Expression expr) {
+  static Optional<Integer> checkAndFix(final Expression expr) {
     return isFixable(expr).flatMap(JEXLInjectionFixer::tryToFix);
   }
 
@@ -38,12 +38,12 @@ public final class JEXLInjectionFixer {
    * Checks if there exists a local {@link JexlBuilder#create()} call used to create and evaluate
    * the expression of {@code expr} that can be sandboxed.
    */
-  public static Optional<MethodCallExpr> isFixable(final Expression expr) {
+  static Optional<MethodCallExpr> isFixable(final Expression expr) {
     return findJEXLCreateExpression(expr).flatMap(JEXLInjectionFixer::findJEXLBuilderCreate);
   }
 
   /** Tries to sandbox the {@link JexlBuilder#create()} and returns its line if it does. */
-  public static Optional<Integer> tryToFix(final MethodCallExpr mce) {
+  static Optional<Integer> tryToFix(final MethodCallExpr mce) {
     final var cu = mce.findCompilationUnit().get();
     final var maybeStmt = ASTs.findParentStatementFrom(mce);
     if (maybeStmt.isEmpty()) {
@@ -88,6 +88,7 @@ public final class JEXLInjectionFixer {
     ASTTransforms.addImportIfMissing(cu, "io.openpixee.security.UnwantedTypes");
     ASTTransforms.addImportIfMissing(cu, "org.apache.commons.jexl3.introspection.JexlSandbox");
     mce.replace(newCreate);
+    System.out.println(cu);
     return mce.getBegin().map(b -> b.line);
   }
 
