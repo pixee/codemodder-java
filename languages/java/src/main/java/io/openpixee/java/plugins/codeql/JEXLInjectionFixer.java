@@ -100,12 +100,12 @@ public final class JEXLInjectionFixer {
     }
 
     // is a variable, track its definition
-    // TODO should we care if it is final or never assigned?
     if (expr instanceof NameExpr) {
       final var maybeLVD =
           ASTs.findEarliestLocalDeclarationOf(
               expr.asNameExpr(), expr.asNameExpr().getNameAsString());
       return maybeLVD
+          .filter(ASTs::isFinalOrNeverAssigned)
           .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
           .map(e -> e.isMethodCallExpr() ? e.asMethodCallExpr() : null)
           .filter(mcexpr -> mcexpr.getNameAsString().equals("createExpression"));
@@ -127,12 +127,12 @@ public final class JEXLInjectionFixer {
     }
 
     // is a variable, track its definition
-    // TODO should we care if it is final or never assigned?
     if (scope instanceof NameExpr) {
       final var maybeLVD =
           ASTs.findEarliestLocalDeclarationOf(
               scope.asNameExpr(), scope.asNameExpr().getNameAsString());
       return maybeLVD
+          .filter(ASTs::isFinalOrNeverAssigned)
           .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
           .map(expr -> expr.isMethodCallExpr() ? expr.asMethodCallExpr() : null)
           .filter(mcexpr -> mcexpr.getNameAsString().equals("create"));
