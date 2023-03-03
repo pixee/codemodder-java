@@ -93,13 +93,18 @@ public interface IncludesExcludes {
   }
 
   /**
-   * Create an {@link IncludesExcludes} based on the configuration we're using -- the include
-   * patterns and exclude patterns.
+   * Create an {@link IncludesExcludes}.
+   *
+   * @throws NullPointerException if any value is null
    */
-  static IncludesExcludes fromConfiguration(
+  static IncludesExcludes withSettings(
       final File repositoryRoot,
       final List<String> includePatterns,
       final List<String> excludePatterns) {
+
+    Objects.requireNonNull(repositoryRoot, "repositoryRoot");
+    Objects.requireNonNull(includePatterns, "includePatterns");
+    Objects.requireNonNull(includePatterns, "excludePatterns");
 
     if (noPatternsSpecified(includePatterns, excludePatterns)) {
       return new MatchesEverything();
@@ -151,8 +156,7 @@ public interface IncludesExcludes {
 
   private static boolean noPatternsSpecified(
       final List<String> includePatterns, final List<String> excludePatterns) {
-    return (includePatterns == null || includePatterns.isEmpty())
-        && (excludePatterns == null || excludePatterns.isEmpty());
+    return includePatterns.isEmpty() && excludePatterns.isEmpty();
   }
 
   class MatchesEverything implements IncludesExcludes {

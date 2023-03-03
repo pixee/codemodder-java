@@ -60,7 +60,7 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.maven.model)
     implementation("io.openpixee:java-jdbc-parameterizer:0.0.7") // TODO bring into monorepo
-    implementation("io.openpixee.maven:pom-operator:0.0.2") // TODO bring into monorepo
+    implementation("io.openpixee.maven:pom-operator:0.0.3") // TODO bring into monorepo
     implementation(libs.openpixee.toolkit)
     implementation(libs.openpixee.toolkit.xstream)
     implementation(libs.picocli)
