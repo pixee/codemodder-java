@@ -25,7 +25,6 @@ class ProjectModel internal constructor(
     var charset: Charset,
     var endl: String,
     var indent: String,
-    var originalElements : Set<Int>,
 ) {
     internal var modifiedByCommand = false
 

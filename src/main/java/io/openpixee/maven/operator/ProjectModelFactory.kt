@@ -93,7 +93,6 @@ class ProjectModelFactory private constructor(
             charset = Charset.defaultCharset(),
             endl = "",
             indent = "",
-            originalElements = emptySet(),
         )
     }
 

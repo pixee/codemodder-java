@@ -1,10 +1,6 @@
 package io.openpixee.maven.operator
 
 import org.apache.commons.lang3.StringUtils
-import org.dom4j.Comment
-import org.dom4j.Element
-import org.dom4j.Text
-import org.dom4j.VisitorSupport
 import org.mozilla.universalchardet.UniversalDetector
 import java.nio.charset.Charset
 import javax.xml.stream.XMLInputFactory
@@ -34,8 +30,6 @@ class FormatCommand : AbstractSimpleCommand() {
     private val inputFactory = XMLInputFactory.newInstance()
 
     override fun execute(c: ProjectModel): Boolean {
-        storeOriginalElements(c)
-
         parseXmlAndCharset(c)
 
         parseLineEndings(c)
@@ -44,32 +38,6 @@ class FormatCommand : AbstractSimpleCommand() {
         c.indent = guessIndent(c)
 
         return super.execute(c)
-    }
-
-    private fun storeOriginalElements(c: ProjectModel) {
-        val elementSet : MutableSet<Int> = mutableSetOf()
-
-        c.resultPom.accept(object : VisitorSupport() {
-            override fun visit(node: Element?) {
-                elementSet.add(System.identityHashCode(node!!))
-
-                super.visit(node)
-            }
-
-            override fun visit(node: Comment?) {
-                elementSet.add(System.identityHashCode(node!!))
-
-                super.visit(node)
-            }
-
-            override fun visit(node: Text?) {
-                elementSet.add(System.identityHashCode(node!!))
-
-                super.visit(node)
-            }
-        })
-
-        c.originalElements = elementSet.toSet()
     }
 
     private fun guessIndent(c: ProjectModel): String {
@@ -92,7 +60,7 @@ class FormatCommand : AbstractSimpleCommand() {
                      * Updates space frequencies
                      */
                     patterns
-                        .filter { it.length != 0 }
+                        .filter { it.isNotEmpty() }
                         .filter { StringUtils.isAllBlank(it) }
                         .map { it to it.length }
                         .forEach {
@@ -110,9 +78,7 @@ class FormatCommand : AbstractSimpleCommand() {
     private fun parseLineEndings(c: ProjectModel): String {
         val str = String(c.originalPom.inputStream().readBytes(), c.charset)
 
-        return LINE_ENDINGS
-            .map { it to str.split(it).size }
-            .toMap()
+        return LINE_ENDINGS.associateWith { str.split(it).size }
             .maxBy { it.value }
             .key
     }
