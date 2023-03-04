@@ -72,11 +72,21 @@ public final class JavaFixitCli implements Callable<Integer> {
       required = false)
   private boolean verbose;
 
+  @CommandLine.Option(
+      names = {"--p", "--prevent-exit"},
+      description = "Specify whether the process should terminate after running",
+      defaultValue = "false",
+      required = false)
+  private boolean preventExitOnEnd;
+
   public static void main(final String[] args) throws IOException {
-    String banner = FigletFont.convertOneLine("open-pixee");
+    String banner = FigletFont.convertOneLine("codemodder!");
     System.out.println(banner);
-    final int exitCode = new CommandLine(new JavaFixitCli()).execute(args);
-    System.exit(exitCode);
+    JavaFixitCli cli = new JavaFixitCli();
+    final int exitCode = new CommandLine(cli).execute(args);
+    if (!cli.preventExitOnEnd) {
+      System.exit(exitCode);
+    }
   }
 
   @Override
