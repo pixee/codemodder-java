@@ -25,9 +25,14 @@ public final class ASTTransforms {
     for (int i = 0; i < imports.size(); i++) {
       ImportDeclaration existingImport = imports.get(i);
 
-      if (existingImport.getNameAsString().compareToIgnoreCase(className) > 0) {
-
-        imports.addBefore(newImport, existingImport);
+      if (existingImport.getNameAsString().compareTo(className) > 0) {
+        // Workaround for a bug caused by adding imports at the top
+        // It adds an extra empty line
+        if (i == 0) {
+          existingImport.replace(newImport);
+          imports.addAfter(existingImport, newImport);
+          return;
+        } else imports.addBefore(newImport, existingImport);
         return;
       }
     }

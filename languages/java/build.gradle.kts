@@ -44,6 +44,7 @@ dependencies {
 
     implementation(libs.codescan.sarif)
     implementation(libs.commons.collections4)
+    implementation(libs.commons.jexl)
     implementation(libs.commons.lang3)
     implementation(libs.contrast.sarif)
     implementation(libs.immutables)

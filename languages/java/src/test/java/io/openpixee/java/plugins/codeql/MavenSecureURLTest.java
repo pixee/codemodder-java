@@ -12,6 +12,7 @@ import com.github.difflib.patch.Patch;
 import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.IncludesExcludes;
 import io.openpixee.java.Weave;
+import io.openpixee.java.plugins.JavaSarifMockFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,7 +33,7 @@ final class MavenSecureURLTest {
   void it_changes_http_to_https() {
     final var pom = new File("src/test/resources/poms/pom-insecureurl1.xml");
 
-    final var results = Set.of(buildResult(pom.getName(), 22, 8, 27, 22));
+    final var results = Set.of(JavaSarifMockFactory.buildResult(pom.getName(), 22, 8, 27, 22));
 
     final var weavingResult =
         new MavenSecureURLVisitor(pom.getParentFile(), results)
@@ -53,7 +54,7 @@ final class MavenSecureURLTest {
   void it_changes_ftp_to_sftp() {
     final var pom = new File("src/test/resources/poms/pom-insecureurl2.xml");
 
-    final var results = Set.of(buildResult(pom.getName(), 22, 8, 27, 22));
+    final var results = Set.of(JavaSarifMockFactory.buildResult(pom.getName(), 22, 8, 27, 22));
 
     final var weavingResult =
         new MavenSecureURLVisitor(pom.getParentFile(), results)
@@ -74,7 +75,7 @@ final class MavenSecureURLTest {
   void it_does_not_change_ftp_because_it_is_not_in_the_results() {
     final var pom = new File("src/test/resources/poms/pom-insecureurl2.xml");
 
-    final var results = Set.of(buildResult(pom.getName(), 22, 8, 27, 22));
+    final var results = Set.of(JavaSarifMockFactory.buildResult(pom.getName(), 22, 8, 27, 22));
 
     final var weavingResult =
         new MavenSecureURLVisitor(pom.getParentFile(), results)
@@ -116,7 +117,7 @@ final class MavenSecureURLTest {
   void it_preserves_whitespaces() throws IOException {
     final var pom = new File("src/test/resources/poms/pom-insecureurlwonky.xml");
 
-    final var results = Set.of(buildResult(pom.getName(), 26, 8, 37, 22));
+    final var results = Set.of(JavaSarifMockFactory.buildResult(pom.getName(), 26, 8, 37, 22));
 
     final var weavingResult =
         new MavenSecureURLVisitor(pom.getParentFile(), results)
@@ -144,34 +145,5 @@ final class MavenSecureURLTest {
       final List<String> originalLines, final List<String> comparedLines) {
     final Patch<String> patch = DiffUtils.diff(originalLines, comparedLines);
     return patch.getDeltas();
-  }
-
-  private static Result buildResult(
-      final String insecureFilePath,
-      final int startLine,
-      final int startColumn,
-      final int endLine,
-      final int endColumn) {
-    return new Result()
-        .withLocations(
-            List.of(buildLocation(insecureFilePath, startLine, startColumn, endLine, endColumn)));
-  }
-
-  private static Location buildLocation(
-      final String insecureFilePath,
-      final int startLine,
-      final int startColumn,
-      final int endLine,
-      final int endColumn) {
-    return new Location()
-        .withPhysicalLocation(
-            new PhysicalLocation()
-                .withRegion(
-                    new Region()
-                        .withStartLine(startLine)
-                        .withEndLine(endLine)
-                        .withStartColumn(startColumn)
-                        .withEndColumn(endColumn))
-                .withArtifactLocation(new ArtifactLocation().withUri(insecureFilePath)));
   }
 }
