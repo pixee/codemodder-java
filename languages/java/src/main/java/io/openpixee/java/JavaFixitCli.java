@@ -73,10 +73,10 @@ public final class JavaFixitCli implements Callable<Integer> {
   private boolean verbose;
 
   @CommandLine.Option(
-          names = {"--p", "--prevent-exit"},
-          description = "Specify whether the process should terminate after running",
-          defaultValue = "false",
-          required = false)
+      names = {"--p", "--prevent-exit"},
+      description = "Specify whether the process should terminate after running",
+      defaultValue = "false",
+      required = false)
   private boolean preventExitOnEnd;
 
   public static void main(final String[] args) throws IOException {
@@ -84,7 +84,7 @@ public final class JavaFixitCli implements Callable<Integer> {
     System.out.println(banner);
     JavaFixitCli cli = new JavaFixitCli();
     final int exitCode = new CommandLine(cli).execute(args);
-    if(!cli.preventExitOnEnd) {
+    if (!cli.preventExitOnEnd) {
       System.exit(exitCode);
     }
   }
