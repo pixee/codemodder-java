@@ -157,7 +157,7 @@ public interface SourceWeaver {
           });
 
       // do it with codemods
-      ChangedFile execute = codemodInvoker.execute(Path.of(javaFile.toURI()), context);
+      codemodInvoker.execute(Path.of(javaFile.toURI()), context);
 
       if (context.madeWeaves()) {
         final String encoding = detectEncoding(javaFile);
