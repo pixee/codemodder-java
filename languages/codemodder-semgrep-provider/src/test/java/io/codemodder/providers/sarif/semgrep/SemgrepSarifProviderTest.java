@@ -18,7 +18,8 @@ import org.junit.jupiter.api.io.TempDir;
 final class SemgrepSarifProviderTest {
 
   @Test
-  void it_injects_sarif(@TempDir Path repositoryDir) throws IOException, URISyntaxException {
+  void it_runs_semgrep_and_produces_expected_sarif(@TempDir Path repositoryDir)
+      throws IOException, URISyntaxException {
 
     // create vulnerable code in a new temporary repository dir
     Path javaFile = Files.createTempFile(repositoryDir, "WeakRandom", ".java");
