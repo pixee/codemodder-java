@@ -2,6 +2,7 @@ package io.openpixee.java;
 
 import static java.nio.file.Files.walk;
 
+import io.codemodder.ChangedFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;

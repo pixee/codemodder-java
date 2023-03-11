@@ -61,11 +61,18 @@ dependencies {
     implementation(libs.maven.model)
     implementation("io.openpixee:java-jdbc-parameterizer:0.0.7") // TODO bring into monorepo
     implementation("io.openpixee.maven:pom-operator:0.0.3") // TODO bring into monorepo
+    {
+        exclude(group = "com.google.inject", module = "guice")
+    }
     implementation(libs.openpixee.toolkit)
     implementation(libs.openpixee.toolkit.xstream)
     implementation(libs.picocli)
     implementation(libs.progressbar)
     implementation(libs.slf4j.api)
+
+    implementation(project(":languages:codemodder-common"))
+    implementation(project(":languages:codemodder-framework-java"))
+    implementation(project(":languages:codemodder-default-codemods"))
 
     testCompileOnly(libs.jetbrains.annotations)
 

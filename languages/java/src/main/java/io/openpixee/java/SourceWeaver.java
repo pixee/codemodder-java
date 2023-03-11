@@ -9,6 +9,7 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import io.codemodder.ChangedFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -66,6 +67,8 @@ public interface SourceWeaver {
 
       LOG.debug("Files to scan: {}", totalFiles);
 
+      // CodemodInvoker codemodInvoker = new CodemodInvoker();
+
       try (ProgressBar pb =
           CLI.createProgressBuilderBase()
               .setTaskName("Scanning source files")
@@ -74,10 +77,16 @@ public interface SourceWeaver {
         for (String javaFile : javaSourceFiles) {
           try {
             pb.step();
-            final ChangedFile changedFile =
+            ChangedFile changedFile =
                 scanIndividualJavaFile(javaParser, javaFile, visitorFactories, includesExcludes);
             if (changedFile != null) {
               changedFiles.add(changedFile);
+            } else {
+              changedFile =
+                  scanIndividualJavaFileWithCodemodders(javaParser, javaFile, includesExcludes);
+              if (changedFile != null) {
+                changedFiles.add(changedFile);
+              }
             }
           } catch (UnparseableFileException e) {
             LOG.debug("Problem parsing file {}", javaFile, e);
@@ -87,6 +96,14 @@ public interface SourceWeaver {
       }
 
       return new WeavingResult.Default(changedFiles, unscannableFiles);
+    }
+
+    private ChangedFile scanIndividualJavaFileWithCodemodders(
+        final JavaParser javaParser,
+        final String javaFile,
+        final IncludesExcludes includesExcludes) {
+
+      return null;
     }
 
     private static class UnparseableFileException extends Exception {
@@ -140,7 +157,7 @@ public interface SourceWeaver {
         File modifiedFile = File.createTempFile(javaFile.getName(), ".java");
         FileUtils.write(modifiedFile, modified, encoding);
 
-        return new ChangedFile.Default(
+        return ChangedFile.createDefault(
             javaFile.getAbsolutePath(), modifiedFile.getAbsolutePath(), context.weaves());
       }
 

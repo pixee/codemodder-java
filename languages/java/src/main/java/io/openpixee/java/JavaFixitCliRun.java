@@ -2,6 +2,8 @@ package io.openpixee.java;
 
 import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.codemodder.ChangedFile;
+import io.codemodder.Weave;
 import io.github.pixee.codetf.CodeTFReport;
 import java.io.File;
 import java.io.IOException;

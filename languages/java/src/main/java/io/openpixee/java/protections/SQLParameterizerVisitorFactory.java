@@ -4,9 +4,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import io.codemodder.Weave;
 import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.VisitorFactory;
-import io.openpixee.java.Weave;
 import io.openpixee.jdbcparameterizer.SQLParameterizer;
 import java.io.File;
 

@@ -2,7 +2,7 @@ package io.openpixee.java.protections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.openpixee.java.ChangedFile;
+import io.codemodder.ChangedFile;
 import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.IncludesExcludes;

@@ -2,10 +2,10 @@ package io.openpixee.java.plugins.codeql;
 
 import com.contrastsecurity.sarif.PhysicalLocation;
 import com.contrastsecurity.sarif.Result;
-import io.openpixee.java.ChangedFile;
+import io.codemodder.ChangedFile;
+import io.codemodder.Weave;
 import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.FileWeavingContext;
-import io.openpixee.java.Weave;
 import io.openpixee.java.WeavingResult;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
