@@ -1,7 +1,6 @@
 package io.codemodder;
 
 import com.google.inject.AbstractModule;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -16,7 +15,4 @@ public interface CodemodProvider {
    * @return a set of modules that perform dependency injection
    */
   Set<AbstractModule> getModules();
-
-  /** Provide a changer handler for the given {@link Changer} if they want to support it. */
-  Optional<ChangerHandler> getChangerHandler(Changer changer);
 }

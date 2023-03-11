@@ -37,6 +37,9 @@ public final class CodemodInvoker {
             .collect(Collectors.toUnmodifiableList());
     Set<AbstractModule> allModules = new HashSet<>();
 
+    // add default module
+    allModules.add(new CodeDirectoryModule(repositoryDir));
+
     for (CodemodProvider provider : providers) {
       Set<AbstractModule> modules = provider.getModules();
       allModules.addAll(modules);
@@ -59,7 +62,7 @@ public final class CodemodInvoker {
   // will spit out CodeTF or whatever
 
   /**
-   * @param javaFile
+   * @param file
    * @param context
    * @return
    */

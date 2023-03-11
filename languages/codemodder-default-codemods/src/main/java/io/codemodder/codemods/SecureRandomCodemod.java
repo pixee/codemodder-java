@@ -6,6 +6,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import io.codemodder.ChangeConstructorTypeVisitor;
 import io.codemodder.ChangeContext;
+import io.codemodder.CodeDirectory;
 import io.codemodder.Codemod;
 import io.codemodder.JavaParserChanger;
 import io.codemodder.ReviewGuidance;
@@ -29,9 +30,10 @@ public final class SecureRandomCodemod implements JavaParserChanger {
   private final SarifSchema210 sarif;
 
   @Inject
-  public SecureRandomCodemod(final SemgrepSarifProvider sarifProvider)
+  public SecureRandomCodemod(
+      final CodeDirectory codeDirectory, final SemgrepSarifProvider sarifProvider)
       throws IOException, URISyntaxException {
-    this.sarif = sarifProvider.getSarif("secure-random.semgrep");
+    this.sarif = sarifProvider.getSarif(codeDirectory.asPath(), "secure-random.semgrep");
   }
 
   @Override
