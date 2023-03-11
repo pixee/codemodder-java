@@ -10,9 +10,9 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import io.codemodder.DependencyGAV;
+import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
 import io.openpixee.java.DoNothingVisitor;
-import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.Sarif;
 import io.openpixee.java.TypeLocator;
 import io.openpixee.java.VisitorFactory;
@@ -100,7 +100,8 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
               Optional<Result> resultRef =
                   Sarif.getFirstMatchingResult(
                       results, startLine, methodCallExpr.getNameAsString());
-              if (resultRef.isPresent() && context.isLineIncluded(methodCallExpr)) {
+              if (resultRef.isPresent()
+                  && context.isLineIncluded(methodCallExpr.getRange().get().begin.line)) {
                 ASTTransforms.addImportIfMissing(cu, Reflection.class);
                 MethodCallExpr safeCall = new MethodCallExpr();
                 safeCall.setName("loadAndVerify");

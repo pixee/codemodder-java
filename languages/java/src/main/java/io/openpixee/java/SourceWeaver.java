@@ -10,10 +10,15 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import io.codemodder.ChangedFile;
+import io.codemodder.CodemodInvoker;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.IncludesExcludes;
+import io.codemodder.codemods.SecureRandomCodemod;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +35,7 @@ public interface SourceWeaver {
 
   /** Go through the given source directories and return a {@link WeavingResult}. */
   WeavingResult weave(
+      File repository,
       List<SourceDirectory> javaSourceDirectories,
       List<String> javaFiles,
       List<VisitorFactory> visitorFactories,
@@ -51,6 +57,7 @@ public interface SourceWeaver {
 
     @Override
     public @NotNull WeavingResult weave(
+        final File repository,
         final List<SourceDirectory> javaSourceDirectories,
         final List<String> javaSourceFiles,
         final List<VisitorFactory> visitorFactories,
@@ -67,7 +74,8 @@ public interface SourceWeaver {
 
       LOG.debug("Files to scan: {}", totalFiles);
 
-      // CodemodInvoker codemodInvoker = new CodemodInvoker();
+      CodemodInvoker codemodInvoker =
+          new CodemodInvoker(List.of(SecureRandomCodemod.class), Path.of(repository.toURI()));
 
       try (ProgressBar pb =
           CLI.createProgressBuilderBase()
@@ -78,15 +86,10 @@ public interface SourceWeaver {
           try {
             pb.step();
             ChangedFile changedFile =
-                scanIndividualJavaFile(javaParser, javaFile, visitorFactories, includesExcludes);
+                scanIndividualJavaFile(
+                    codemodInvoker, javaParser, javaFile, visitorFactories, includesExcludes);
             if (changedFile != null) {
               changedFiles.add(changedFile);
-            } else {
-              changedFile =
-                  scanIndividualJavaFileWithCodemodders(javaParser, javaFile, includesExcludes);
-              if (changedFile != null) {
-                changedFiles.add(changedFile);
-              }
             }
           } catch (UnparseableFileException e) {
             LOG.debug("Problem parsing file {}", javaFile, e);
@@ -115,6 +118,7 @@ public interface SourceWeaver {
     /** Scan the file. */
     @Nullable
     private ChangedFile scanIndividualJavaFile(
+        final CodemodInvoker codemodInvoker,
         final JavaParser javaParser,
         final String javaFile,
         final List<VisitorFactory> visitorFactories,
@@ -129,11 +133,12 @@ public interface SourceWeaver {
 
       final CompilationUnit cu = result.getResult().orElseThrow();
       LexicalPreservingPrinter.setup(cu);
-      return scanType(file, cu, visitorFactories, includesExcludes);
+      return scanType(codemodInvoker, file, cu, visitorFactories, includesExcludes);
     }
 
     /** For each type in a Java source file, we scan through the code. */
     private ChangedFile scanType(
+        final CodemodInvoker codemodInvoker,
         final File javaFile,
         final CompilationUnit cu,
         final List<VisitorFactory> visitorFactories,
@@ -141,14 +146,18 @@ public interface SourceWeaver {
         throws IOException {
 
       final FileWeavingContext context =
-          new FileWeavingContext.Default(includesExcludes.getIncludesExcludesForFile(javaFile));
+          FileWeavingContext.createDefault(includesExcludes.getIncludesExcludesForFile(javaFile));
 
+      // do it the old school way
       visitorFactories.forEach(
           vf -> {
             final ModifierVisitor<FileWeavingContext> visitor =
                 vf.createJavaCodeVisitorFor(javaFile, cu);
             cu.accept(visitor, context);
           });
+
+      // do it with codemods
+      ChangedFile execute = codemodInvoker.execute(Path.of(javaFile.toURI()), context);
 
       if (context.madeWeaves()) {
         final String encoding = detectEncoding(javaFile);

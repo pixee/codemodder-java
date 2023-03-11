@@ -5,8 +5,8 @@ import static org.mockito.Mockito.mock;
 
 import io.codemodder.ChangedFile;
 import io.codemodder.DependencyGAV;
+import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
-import io.openpixee.java.FileWeavingContext;
 import io.openpixee.maven.operator.Dependency;
 import io.openpixee.maven.operator.POMOperator;
 import io.openpixee.maven.operator.ProjectModel;

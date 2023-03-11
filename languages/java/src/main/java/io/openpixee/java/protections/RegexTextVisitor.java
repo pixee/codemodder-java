@@ -2,9 +2,9 @@ package io.openpixee.java.protections;
 
 import io.codemodder.ChangedFile;
 import io.codemodder.DependencyGAV;
+import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
 import io.openpixee.java.FileBasedVisitor;
-import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.WeavingResult;
 import java.io.File;
 import java.io.IOException;

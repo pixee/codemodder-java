@@ -3,6 +3,7 @@ package io.openpixee.java;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import io.codemodder.IncludesExcludes;
 import java.io.File;
 import org.junit.jupiter.api.Test;
 

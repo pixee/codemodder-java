@@ -15,9 +15,9 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import io.codemodder.DependencyGAV;
+import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
 import io.openpixee.java.DoNothingVisitor;
-import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.Sarif;
 import io.openpixee.java.TypeLocator;
 import io.openpixee.java.VisitorFactory;
@@ -102,7 +102,8 @@ final class JavaXssVisitorFactory implements VisitorFactory {
     public Visitable visit(final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
       if (httpResponseWriteNames.contains(methodCallExpr.getNameAsString())) {
         Optional<Range> expRange = methodCallExpr.getRange();
-        if (expRange.isPresent() && context.isLineIncluded(methodCallExpr)) {
+        if (expRange.isPresent()
+            && context.isLineIncluded(methodCallExpr.getRange().get().begin.line)) {
           int startLine = expRange.get().begin.line;
           Optional<Result> resultRef =
               Sarif.getFirstMatchingResult(results, startLine, methodCallExpr.getNameAsString());

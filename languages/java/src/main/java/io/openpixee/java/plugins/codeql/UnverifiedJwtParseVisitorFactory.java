@@ -8,9 +8,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
 import io.openpixee.java.DoNothingVisitor;
-import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.VisitorFactory;
 import java.io.File;
 import java.io.IOException;
@@ -94,7 +94,8 @@ final class UnverifiedJwtParseVisitorFactory implements VisitorFactory {
       if ("parse".equals(methodCallExpr.getNameAsString())
           && methodCallExpr.getArguments().size() == 1) {
         Optional<Range> expRange = methodCallExpr.getRange();
-        if (expRange.isPresent() && context.isLineIncluded(methodCallExpr)) {
+        if (expRange.isPresent()
+            && context.isLineIncluded(methodCallExpr.getRange().get().begin.line)) {
           boolean instrumentedThisMethodCall = false;
           for (int i = 0; i < locations.size() && !instrumentedThisMethodCall; i++) {
             PhysicalLocation location = locations.get(i);

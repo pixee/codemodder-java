@@ -3,6 +3,8 @@ package io.openpixee.java;
 import static java.nio.file.Files.walk;
 
 import io.codemodder.ChangedFile;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.IncludesExcludes;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -53,7 +55,7 @@ interface FileWeaver {
               for (File filePath : files) {
                 var canonicalFile = filePath.getCanonicalFile();
                 var context =
-                    new FileWeavingContext.Default(
+                    FileWeavingContext.createDefault(
                         includesExcludes.getIncludesExcludesForFile(filePath));
                 WeavingResult result =
                     fileBasedWeaver.visitRepositoryFile(

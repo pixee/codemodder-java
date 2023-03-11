@@ -60,9 +60,10 @@ public final class CodemodInvoker {
 
   /**
    * @param javaFile
+   * @param context
    * @return
    */
-  public ChangedFile execute(final String javaFile) {
+  public ChangedFile execute(final Path file, final FileWeavingContext context) {
 
     // find a provider that can handle invoking the codemod "change phase"
     for (Class<? extends Changer> type : codemodTypes) {
@@ -96,8 +97,8 @@ public final class CodemodInvoker {
     }
 
     String id = codemodAnnotation.value();
-    if (isValidCodemodId(id)) {
-      throw new IllegalArgumentException("must have an author");
+    if (!isValidCodemodId(id)) {
+      throw new IllegalArgumentException("must have valid codemod id");
     }
 
     ReviewGuidance reviewGuidance = codemodAnnotation.reviewGuidance();

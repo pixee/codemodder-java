@@ -3,6 +3,7 @@ package io.openpixee.java;
 import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.codemodder.ChangedFile;
+import io.codemodder.IncludesExcludes;
 import io.codemodder.Weave;
 import io.github.pixee.codetf.CodeTFReport;
 import java.io.File;
@@ -110,7 +111,8 @@ public final class JavaFixitCliRun {
 
     // run the Java code visitors
     final var javaSourceWeaveResult =
-        javaSourceWeaver.weave(sourceDirectories, allJavaFiles, factories, includesExcludes);
+        javaSourceWeaver.weave(
+            repositoryRoot, sourceDirectories, allJavaFiles, factories, includesExcludes);
 
     // get the non-Java code visitors
     final List<FileBasedVisitor> fileBasedVisitors =

@@ -3,9 +3,9 @@ package io.openpixee.java.protections;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.codemodder.ChangedFile;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.IncludesExcludes;
 import io.openpixee.java.FileBasedVisitor;
-import io.openpixee.java.FileWeavingContext;
-import io.openpixee.java.IncludesExcludes;
 import io.openpixee.java.SourceDirectory;
 import io.openpixee.java.SourceWeaver;
 import io.openpixee.java.VisitorFactory;
@@ -91,7 +91,12 @@ public abstract class WeavingTests {
       final IncludesExcludes includesExcludes)
       throws IOException {
     var weave =
-        analyzer.weave(List.of(directory), directory.files(), visitorFactories, includesExcludes);
+        analyzer.weave(
+            new File("src/test"),
+            List.of(directory),
+            directory.files(),
+            visitorFactories,
+            includesExcludes);
     assertThat(weave).isNotNull();
     assertThat(weave.unscannableFiles()).isEmpty();
     var changedFiles = weave.changedFiles();
@@ -123,7 +128,12 @@ public abstract class WeavingTests {
       final IncludesExcludes includesExcludes)
       throws IOException {
     var weave =
-        analyzer.weave(List.of(directory), directory.files(), visitorFactories, includesExcludes);
+        analyzer.weave(
+            new File("src/test"),
+            List.of(directory),
+            directory.files(),
+            visitorFactories,
+            includesExcludes);
     assertThat(weave).isNotNull();
 
     assertThat(weave.unscannableFiles()).isEmpty();
