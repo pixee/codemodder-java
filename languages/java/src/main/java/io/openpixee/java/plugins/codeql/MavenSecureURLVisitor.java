@@ -7,6 +7,8 @@ import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
 import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.WeavingResult;
+import io.openpixee.security.BoundedLineReader;
+import io.openpixee.security.XMLInputFactorySecurity;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -94,7 +96,7 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
       return WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
     }
 
-    final var xmlInputFactory = XMLInputFactory.newInstance();
+    final var xmlInputFactory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newInstance());
     final var xmlOutputFactory = XMLOutputFactory.newInstance();
     final var xmlEventFactory = XMLEventFactory.newInstance();
     try {
@@ -152,7 +154,7 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
         reader.skip(tempOffset);
         writer.append(originalHead);
         while (reader.ready()) {
-          writer.write(reader.readLine());
+          writer.write(BoundedLineReader.readLine(reader, 1000000));
         }
       }
       tempFile.deleteOnExit();
