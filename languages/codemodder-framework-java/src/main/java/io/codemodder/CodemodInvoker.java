@@ -28,10 +28,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class CodemodInvoker {
 
-  private final Set<AbstractModule> allModules;
   private final Injector injector;
   private final List<Class<? extends Changer>> codemodTypes;
-  private final Path repsitoryDir;
+  private final Path repositoryDir;
 
   public CodemodInvoker(
       final List<Class<? extends Changer>> codemodTypes, final Path repositoryDir) {
@@ -50,8 +49,7 @@ public final class CodemodInvoker {
       allModules.addAll(modules);
     }
 
-    this.repsitoryDir = Objects.requireNonNull(repositoryDir);
-    this.allModules = Collections.unmodifiableSet(allModules);
+    this.repositoryDir = Objects.requireNonNull(repositoryDir);
     this.injector = Guice.createInjector(allModules);
     this.codemodTypes = Collections.unmodifiableList(codemodTypes);
 
@@ -77,7 +75,7 @@ public final class CodemodInvoker {
         JavaParserChanger javaParserChanger = (JavaParserChanger) changer;
         Optional<ModifierVisitor<FileWeavingContext>> modifierVisitor =
             javaParserChanger.createModifierVisitor(
-                new DefaultCodeDirectory(repsitoryDir), path, cu);
+                new DefaultCodeDirectory(repositoryDir), path, cu);
         modifierVisitor.ifPresent(
             changeContextModifierVisitor -> cu.accept(changeContextModifierVisitor, context));
       } else {
