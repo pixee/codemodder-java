@@ -3,8 +3,14 @@ package io.openpixee.java;
 import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.codemodder.ChangedFile;
+import io.codemodder.Changer;
+import io.codemodder.CodemodInvoker;
+import io.codemodder.DefaultRuleSetting;
 import io.codemodder.IncludesExcludes;
+import io.codemodder.RuleContext;
 import io.codemodder.Weave;
+import io.codemodder.codemods.DefaultCodemods;
+import io.codemodder.codemods.SecureRandomCodemod;
 import io.github.pixee.codetf.CodeTFReport;
 import java.io.File;
 import java.io.IOException;
@@ -107,12 +113,21 @@ public final class JavaFixitCliRun {
                     .filter(file -> includesExcludes.shouldInspect(new File(file)))
                     .collect(Collectors.toList())));
 
-    LOG.debug("Scanning following files: {}", allJavaFiles);
+    LOG.debug("Scanning following files: {}", allJavaFiles.size());
 
+    List<Class<? extends Changer>> defaultCodemodTypes = DefaultCodemods.asList();
+    CodemodInvoker codemodInvoker =
+        new CodemodInvoker(
+            List.of(SecureRandomCodemod.class), ruleContext, repositoryRoot.toPath());
     // run the Java code visitors
     final var javaSourceWeaveResult =
         javaSourceWeaver.weave(
-            repositoryRoot, sourceDirectories, allJavaFiles, factories, includesExcludes);
+            repositoryRoot,
+            sourceDirectories,
+            allJavaFiles,
+            factories,
+            codemodInvoker,
+            includesExcludes);
 
     // get the non-Java code visitors
     final List<FileBasedVisitor> fileBasedVisitors =

@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import io.codemodder.DefaultRuleSetting;
+import io.codemodder.RuleContext;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;

@@ -13,12 +13,10 @@ import io.codemodder.ChangedFile;
 import io.codemodder.CodemodInvoker;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
-import io.codemodder.codemods.SecureRandomCodemod;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +37,7 @@ public interface SourceWeaver {
       List<SourceDirectory> javaSourceDirectories,
       List<String> javaFiles,
       List<VisitorFactory> visitorFactories,
+      CodemodInvoker codemodInvoker,
       IncludesExcludes includesExcludes)
       throws IOException;
 
@@ -61,6 +60,7 @@ public interface SourceWeaver {
         final List<SourceDirectory> javaSourceDirectories,
         final List<String> javaSourceFiles,
         final List<VisitorFactory> visitorFactories,
+        final CodemodInvoker codemodInvoker,
         final IncludesExcludes includesExcludes)
         throws IOException {
       /*
@@ -73,9 +73,6 @@ public interface SourceWeaver {
       final long totalFiles = javaSourceFiles.size();
 
       LOG.debug("Files to scan: {}", totalFiles);
-
-      CodemodInvoker codemodInvoker =
-          new CodemodInvoker(List.of(SecureRandomCodemod.class), Path.of(repository.toURI()));
 
       try (ProgressBar pb =
           CLI.createProgressBuilderBase()

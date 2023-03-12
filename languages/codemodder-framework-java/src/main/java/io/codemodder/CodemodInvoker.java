@@ -6,6 +6,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,12 +29,18 @@ import org.slf4j.LoggerFactory;
  */
 public final class CodemodInvoker {
 
-  private final Injector injector;
-  private final List<Class<? extends Changer>> codemodTypes;
+  private final List<Changer> codemods;
   private final Path repositoryDir;
 
   public CodemodInvoker(
       final List<Class<? extends Changer>> codemodTypes, final Path repositoryDir) {
+    this(codemodTypes, RuleContext.of(DefaultRuleSetting.ENABLED, List.of()), repositoryDir);
+  }
+
+  public CodemodInvoker(
+      final List<Class<? extends Changer>> codemodTypes,
+      final RuleContext ruleContext,
+      final Path repositoryDir) {
     // get all the providers ready for dependency injection & codemod instantiation
     List<CodemodProvider> providers =
         ServiceLoader.load(CodemodProvider.class).stream()
@@ -49,15 +56,19 @@ public final class CodemodInvoker {
       allModules.addAll(modules);
     }
 
-    this.repositoryDir = Objects.requireNonNull(repositoryDir);
-    this.injector = Guice.createInjector(allModules);
-    this.codemodTypes = Collections.unmodifiableList(codemodTypes);
-
-    // validate all of the codemods
+    // validate and instantiate the codemods
+    Injector injector = Guice.createInjector(allModules);
+    List<Changer> codemods = new ArrayList<>();
     for (Class<? extends Changer> type : codemodTypes) {
       Codemod codemodAnnotation = type.getAnnotation(Codemod.class);
       validateRequiredFields(codemodAnnotation);
+      Changer changer = injector.getInstance(type);
+      if (ruleContext.isRuleAllowed(changer.getCodemodId())) {
+        codemods.add(changer);
+      }
     }
+    this.codemods = Collections.unmodifiableList(codemods);
+    this.repositoryDir = Objects.requireNonNull(repositoryDir);
   }
 
   /**
@@ -67,10 +78,7 @@ public final class CodemodInvoker {
    * @param context a model we should keep updating as we process the file
    */
   public void execute(final Path path, final CompilationUnit cu, final FileWeavingContext context) {
-
-    // find a provider that can handle invoking the codemod "change phase"
-    for (Class<? extends Changer> type : codemodTypes) {
-      Changer changer = injector.getInstance(type);
+    for (Changer changer : codemods) {
       if (changer instanceof JavaParserChanger) {
         JavaParserChanger javaParserChanger = (JavaParserChanger) changer;
         Optional<ModifierVisitor<FileWeavingContext>> modifierVisitor =

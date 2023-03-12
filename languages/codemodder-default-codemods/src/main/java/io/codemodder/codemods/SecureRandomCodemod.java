@@ -51,5 +51,10 @@ public final class SecureRandomCodemod implements JavaParserChanger {
     return Optional.empty();
   }
 
+  @Override
+  public String getCodemodId() {
+    return "pixee:java/secure-random";
+  }
+
   private static final Logger logger = LoggerFactory.getLogger(SecureRandomCodemod.class);
 }

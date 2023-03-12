@@ -1,5 +1,6 @@
 package io.openpixee.java;
 
+import io.codemodder.RuleContext;
 import io.openpixee.java.plugins.codeql.CodeQlPlugin;
 import io.openpixee.java.plugins.contrast.ContrastScanPlugin;
 import io.openpixee.java.protections.*;

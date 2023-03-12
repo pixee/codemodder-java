@@ -12,19 +12,34 @@ final class CodemodInvokerTest {
       value = "test_mod",
       author = "valid@valid.com",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class InvalidCodemodName implements Changer {}
+  static class InvalidCodemodName implements Changer {
+    @Override
+    public String getCodemodId() {
+      return "test:java/invalidname";
+    }
+  }
 
   @Codemod(
       value = "test_mod",
       author = " ",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  class EmptyCodemodAuthor implements Changer {}
+  class EmptyCodemodAuthor implements Changer {
+    @Override
+    public String getCodemodId() {
+      return "test:java/emptyauthor";
+    }
+  }
 
   @Codemod(
       value = "pixee:java/id",
       author = "valid@valid.com",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  final class ValidCodemod implements Changer {}
+  final class ValidCodemod implements Changer {
+    @Override
+    public String getCodemodId() {
+      return "test:java/id";
+    }
+  }
 
   @Test
   void it_validates_codemod_ids() {

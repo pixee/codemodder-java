@@ -3,8 +3,10 @@ package io.openpixee.java.protections;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.codemodder.ChangedFile;
+import io.codemodder.CodemodInvoker;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
+import io.codemodder.codemods.SecureRandomCodemod;
 import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.SourceDirectory;
 import io.openpixee.java.SourceWeaver;
@@ -46,14 +48,17 @@ public abstract class WeavingTests {
     assertThat(fixedFile).isFile();
 
     List<VisitorFactory> visitorFactories = List.of(factory);
+
     var analyzer = SourceWeaver.createDefault();
     var testCodeDir = new File(vulnerableFile.getParent());
+    var codemodInvoker =
+        new CodemodInvoker(List.of(SecureRandomCodemod.class), testCodeDir.toPath());
     var directory =
         SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
 
     var changedFile =
         scanAndAssertNoErrorsWithOneFileChanged(
-            analyzer, directory, visitorFactories, includesExcludes);
+            analyzer, directory, visitorFactories, codemodInvoker, includesExcludes);
     var expectedContents = FileUtils.readFileToString(fixedFile, Charset.defaultCharset());
 
     var typeName = vulnerableFile.getName().replace(".java", "");
@@ -68,7 +73,7 @@ public abstract class WeavingTests {
 
     directory = SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToFixedFile));
     scanAndAssertNoErrorsWithNoFilesChanged(
-        analyzer, directory, visitorFactories, includesExcludes);
+        analyzer, directory, visitorFactories, codemodInvoker, includesExcludes);
 
     return changedFile;
   }
@@ -88,6 +93,7 @@ public abstract class WeavingTests {
       final SourceWeaver analyzer,
       final SourceDirectory directory,
       final List<VisitorFactory> visitorFactories,
+      final CodemodInvoker codemodInvoker,
       final IncludesExcludes includesExcludes)
       throws IOException {
     var weave =
@@ -96,6 +102,7 @@ public abstract class WeavingTests {
             List.of(directory),
             directory.files(),
             visitorFactories,
+            codemodInvoker,
             includesExcludes);
     assertThat(weave).isNotNull();
     assertThat(weave.unscannableFiles()).isEmpty();
@@ -115,16 +122,20 @@ public abstract class WeavingTests {
     List<VisitorFactory> visitorFactories = List.of(factory);
     var analyzer = SourceWeaver.createDefault();
     var testCodeDir = new File(vulnerableFile.getParent());
+    var codemodInvoker =
+        new CodemodInvoker(List.of(SecureRandomCodemod.class), testCodeDir.toPath());
     var directory =
         SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
+
     scanAndAssertNoErrorsWithNoFilesChanged(
-        analyzer, directory, visitorFactories, includesExcludes);
+        analyzer, directory, visitorFactories, codemodInvoker, includesExcludes);
   }
 
   private static void scanAndAssertNoErrorsWithNoFilesChanged(
       final SourceWeaver analyzer,
       final SourceDirectory directory,
       final List<VisitorFactory> visitorFactories,
+      final CodemodInvoker codemodInvoker,
       final IncludesExcludes includesExcludes)
       throws IOException {
     var weave =
@@ -133,6 +144,7 @@ public abstract class WeavingTests {
             List.of(directory),
             directory.files(),
             visitorFactories,
+            codemodInvoker,
             includesExcludes);
     assertThat(weave).isNotNull();
 
