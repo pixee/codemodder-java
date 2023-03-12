@@ -7,6 +7,8 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep
     env:
       ORG_GRADLE_PROJECT_pixeeArtifactoryUsername: ${{ secrets.PIXEE_ARTIFACTORY_USERNAME }}
       ORG_GRADLE_PROJECT_pixeeArtifactoryPassword: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
