@@ -6,7 +6,7 @@
 
     <groupId>io.openpixee.maven</groupId>
     <artifactId>pom-operator</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5</version>
 
     <scm>
         <connection>scm:git:${project.scm.url}</connection>

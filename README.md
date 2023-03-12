@@ -63,6 +63,6 @@ mvn -N -B deploy  -DaltDeploymentRepository=pixee-libs-release::default::https:/
 ```
 
 - ~~better readme~~
-- be able to guess existing indenting for existing documents
-- investigate leverage whats on [versions-maven-plugin](https://github.com/mojohaus/versions-maven-plugin)
+- ~~be able to guess existing indenting for existing documents~~
+- ~~investigate leverage whats on [versions-maven-plugin](https://github.com/mojohaus/versions-maven-plugin)~~
 - consider fuzzying when testing
