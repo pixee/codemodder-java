@@ -11,8 +11,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.xmlunit.diff.ComparisonType
 import java.io.File
-import kotlin.test.assertFails
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /**
@@ -200,6 +198,75 @@ class POMOperatorTest : AbstractTestBase() {
             "Dependencies Section did change",
             effectivePom.selectXPathNodes(buildLookupExpressionForDependency(dependencyToUpgrade))
                 .isNotEmpty()
+        )
+    }
+
+    @Test
+    fun testCaseWithEmptyElement() {
+        val dependencyToUpgrade =
+            Dependency("io.openpixee", "java-security-toolkit", version = "1.0.0")
+
+        val context = gwt(
+            "case-5",
+            ProjectModelFactory.load(
+                POMOperatorTest::class.java.getResource("pom-case-5.xml")!!,
+            ).withDependency(dependencyToUpgrade).withUseProperties(true)
+        )
+
+        val resultPomAsString = String(context.resultPomBytes)
+
+        assertTrue(
+            resultPomAsString.contains("<project\n"),
+            "There must be an unformatted preamble first line"
+        )
+        assertTrue(
+            resultPomAsString.contains("        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">"),
+            "There must be an unformatted preamble last line"
+        )
+
+        assertTrue(
+            resultPomAsString.contains("<email></email>"),
+            "There must be a dumb empty element"
+        )
+        assertTrue(
+            resultPomAsString.contains("<email/>"),
+            "There must be an empty element with zero spaces"
+        )
+        assertTrue(
+            resultPomAsString.contains("<email />"),
+            "There must be an empty element with one spaces"
+        )
+    }
+
+    @Test
+    fun testCaseWithEmptyElementHiddenInComment() {
+        val dependencyToUpgrade =
+            Dependency("io.openpixee", "java-security-toolkit", version = "1.0.0")
+
+        val context = gwt(
+            "case-6",
+            ProjectModelFactory.load(
+                POMOperatorTest::class.java.getResource("pom-case-6.xml")!!,
+            ).withDependency(dependencyToUpgrade).withUseProperties(true)
+        )
+
+        val resultPomAsString = String(context.resultPomBytes)
+
+        assertTrue(
+            resultPomAsString.contains("<email></email>"),
+            "There must be a dumb empty element"
+        )
+        assertTrue(
+            resultPomAsString.contains("<email/>"),
+            "There must be an empty element with zero spaces"
+        )
+        assertTrue(
+            resultPomAsString.contains("<email />"),
+            "There must be an empty element with one spaces"
+        )
+        assertTrue(
+            resultPomAsString.contains("<email   /> -->"),
+            "There must be an empty element with three spaces inside a comment"
         )
     }
 

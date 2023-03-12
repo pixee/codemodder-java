@@ -2,11 +2,24 @@ package io.openpixee.maven.operator
 
 import org.apache.commons.lang3.StringUtils
 import org.mozilla.universalchardet.UniversalDetector
+import java.io.StringWriter
 import java.nio.charset.Charset
+import java.util.BitSet
 import javax.xml.stream.XMLInputFactory
+import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.events.Characters
+import javax.xml.stream.events.EndElement
 import javax.xml.stream.events.StartDocument
 import javax.xml.stream.events.StartElement
+
+/**
+ * Data Class used to keep track of matches (ranges, content, referring tag name)
+ */
+data class MatchData(
+    val range: IntRange,
+    val content: String,
+    val elementName: String
+)
 
 /**
  * This Command handles Formatting - particularly storing the original document preamble (the Processing Instruction and the first XML Element contents),
@@ -29,6 +42,11 @@ class FormatCommand : AbstractSimpleCommand() {
      */
     private val inputFactory = XMLInputFactory.newInstance()
 
+    /**
+     * StAX OutputFactory
+     */
+    private val outputFactory = XMLOutputFactory.newInstance()
+
     override fun execute(c: ProjectModel): Boolean {
         parseXmlAndCharset(c)
 
@@ -39,6 +57,41 @@ class FormatCommand : AbstractSimpleCommand() {
 
         return super.execute(c)
     }
+
+    private fun elementBitSet(doc: ByteArray): BitSet {
+        val result = BitSet()
+        val eventReader = inputFactory.createXMLEventReader(doc.inputStream())
+        val eventContent = StringWriter()
+        val xmlEventWriter = outputFactory.createXMLEventWriter(eventContent)
+
+        while (eventReader.hasNext()) {
+            val next = eventReader.nextEvent()
+
+            if (next is StartElement || next is EndElement) {
+                val startIndex = next.location.characterOffset
+
+                eventContent.buffer.setLength(0)
+
+                xmlEventWriter.add(next)
+                xmlEventWriter.flush()
+
+                val endIndex = startIndex + eventContent.buffer.length
+
+                result.set(startIndex, startIndex + endIndex)
+            }
+        }
+
+        return result
+    }
+
+    private fun findSingleElementMatchesFrom(pomDocument: String) =
+        RE_EMPTY_ELEMENT.findAll(pomDocument).map {
+            it.range.first to MatchData(
+                range = it.range,
+                content = it.value,
+                elementName = ((it.groups[1]?.value ?: it.groups[2]?.value)!!)
+            )
+        }.sortedByDescending { it.first }.toMap(LinkedHashMap())
 
     private fun guessIndent(c: ProjectModel): String {
         val eventReader = inputFactory.createXMLEventReader(c.originalPom.inputStream())
@@ -102,13 +155,13 @@ class FormatCommand : AbstractSimpleCommand() {
                  * Processing Instruction Found - Store its Character Encoding
                  */
                 charset = Charset.forName(event.characterEncodingScheme)
-            } else if (event.isStartElement) {
+            } else if (event.isEndElement) {
                 /**
-                 * First Element ("Tag") found - store its offset
+                 * First End of Element ("Tag") found - store its offset
                  */
-                val startElementEvent = (event as StartElement)
+                val endElementEvent = (event as EndElement)
 
-                val offset = startElementEvent.location.characterOffset
+                val offset = endElementEvent.location.characterOffset
 
                 preamble = c.originalPom.toString(c.charset).substring(0, offset)
 
@@ -140,7 +193,29 @@ class FormatCommand : AbstractSimpleCommand() {
      * but apply the original formatting as well
      */
     override fun postProcess(c: ProjectModel): Boolean {
-        var xmlRepresentation = c.resultPom.asXML()
+        var xmlRepresentation = c.resultPom.asXML().toString()
+
+        val originalElementMap = elementBitSet(c.originalPom)
+        val targetElementMap = elementBitSet(xmlRepresentation.toByteArray())
+
+        // Let's find out the original empty elements from the original pom and store into a stack
+        val elementsToReplace : MutableList<MatchData> = ArrayList<MatchData>().apply{
+            val matches = findSingleElementMatchesFrom(c.originalPom.toString(c.charset)).values
+
+            val filteredMatches = matches.filter { originalElementMap[it.range.first] }
+
+            this.addAll(filteredMatches)
+        }
+
+        // Lets to the replacements backwards on the existing, current pom
+        val emptyElements = findSingleElementMatchesFrom(xmlRepresentation)
+            .filter { targetElementMap[it.value.range.first] }
+
+        emptyElements.forEach { (_, match) ->
+            val nextMatch = elementsToReplace.removeFirst()
+
+            xmlRepresentation = xmlRepresentation.replaceRange(match.range, nextMatch.content)
+        }
 
         /**
          * We might need to replace the beginning of the POM with the same content
@@ -156,13 +231,13 @@ class FormatCommand : AbstractSimpleCommand() {
         while (true) {
             val event = eventReader.nextEvent()
 
-            if (event.isStartElement) {
+            if (event.isEndElement) {
                 /**
                  * Apply the formatting and tweak its XML Representation
                  */
-                val startElementEvent = (event as StartElement)
+                val endElementEvent = (event as EndElement)
 
-                val offset = startElementEvent.location.characterOffset
+                val offset = endElementEvent.location.characterOffset
 
                 xmlRepresentation =
                     this.preamble + xmlRepresentation.substring(offset) + this.suffix
@@ -187,5 +262,7 @@ class FormatCommand : AbstractSimpleCommand() {
 
     companion object {
         val LINE_ENDINGS = setOf("\r\n", "\n", "\r")
+
+        val RE_EMPTY_ELEMENT = Regex("""<(\p{Alnum}+)></\1>|<(\p{Alnum}+)\s*/>""")
     }
 }

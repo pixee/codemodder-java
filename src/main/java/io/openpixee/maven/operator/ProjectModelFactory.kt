@@ -114,7 +114,9 @@ class ProjectModelFactory private constructor(
         fun load(url: URL): ProjectModelFactory {
             val originalPom: ByteArray = IOUtils.toByteArray(url.openStream())
 
-            val pomDocument = SAXReader().read(originalPom.inputStream())
+            val saxReader = SAXReader()
+
+            val pomDocument = saxReader.read(originalPom.inputStream())
 
             return ProjectModelFactory(pomPath = url, pomDocument = pomDocument, originalPom = originalPom)
         }
