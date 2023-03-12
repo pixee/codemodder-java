@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.javaparser.symbolsolver.core)
     implementation(libs.javaparser.symbolsolver.logic)
     implementation(libs.javaparser.symbolsolver.model)
+    implementation(project(":languages:codemodder-common"))
     implementation(project(":languages:codemodder-framework-java"))
     implementation(project(":languages:codemodder-semgrep-provider"))
 

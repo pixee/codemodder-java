@@ -62,7 +62,6 @@ public interface VisitorAssembler {
               new RuntimeExecVisitorFactory(),
               new SpringMultipartVisitorFactory(),
               new UnsafeReadlineVisitorFactory(),
-              new WeakPRNGVisitorFactory(),
               new XMLDecoderVisitorFactory(),
               new XStreamVisitorFactory(),
               new XXEVisitorFactory(),

@@ -7,7 +7,6 @@ import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,8 +17,7 @@ import org.junit.jupiter.api.io.TempDir;
 final class SemgrepSarifProviderTest {
 
   @Test
-  void it_runs_semgrep_and_produces_expected_sarif(@TempDir Path repositoryDir)
-      throws IOException, URISyntaxException {
+  void it_runs_semgrep_and_produces_expected_sarif(@TempDir Path repositoryDir) throws IOException {
 
     // create vulnerable code in a new temporary repository dir
     Path javaFile = Files.createTempFile(repositoryDir, "WeakRandom", ".java");

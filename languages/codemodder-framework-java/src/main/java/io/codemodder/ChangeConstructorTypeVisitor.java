@@ -16,26 +16,32 @@ import java.util.Objects;
  * A utility type that makes switching one type's constructor for another, with no changes to
  * arguments.
  */
-public final class ChangeConstructorTypeVisitor extends ModifierVisitor<ChangeContext> {
+public final class ChangeConstructorTypeVisitor extends ModifierVisitor<FileWeavingContext> {
 
   private final List<Region> regions;
   private final String newType;
   private final String newTypeSimpleName;
+  private final String codemodId;
 
-  public ChangeConstructorTypeVisitor(final List<Region> regions, final String newType) {
+  public ChangeConstructorTypeVisitor(
+      final List<Region> regions, final String newType, final String codemodId) {
     this.regions = Objects.requireNonNull(regions);
     this.newType = Objects.requireNonNull(newType);
     this.newTypeSimpleName = toSimpleName(newType);
+    this.codemodId = Objects.requireNonNull(codemodId);
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
   @Override
-  public Visitable visit(final ObjectCreationExpr objectCreationExpr, final ChangeContext context) {
+  public Visitable visit(
+      final ObjectCreationExpr objectCreationExpr, final FileWeavingContext context) {
     if (regions.stream().anyMatch(region -> regionMatchesNode(objectCreationExpr, region))) {
-      objectCreationExpr.setType(new ClassOrInterfaceType(newTypeSimpleName));
-      addImportIfMissing(objectCreationExpr.findCompilationUnit().get(), newType);
-      Position begin = objectCreationExpr.getRange().get().begin;
-      context.record(begin.line, begin.column);
+      if (context.isLineIncluded(objectCreationExpr.getRange().get().begin.line)) {
+        objectCreationExpr.setType(new ClassOrInterfaceType(newTypeSimpleName));
+        addImportIfMissing(objectCreationExpr.findCompilationUnit().get(), newType);
+        Position begin = objectCreationExpr.getRange().get().begin;
+        context.addWeave(Weave.from(begin.line, codemodId));
+      }
     }
     return super.visit(objectCreationExpr, context);
   }

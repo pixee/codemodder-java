@@ -1,13 +1,17 @@
 package io.codemodder;
 
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -29,7 +33,8 @@ public final class CodemodInvoker {
   private final List<Class<? extends Changer>> codemodTypes;
   private final Path repsitoryDir;
 
-  public CodemodInvoker(final List<Class<? extends Changer>> codemodTypes, Path repositoryDir) {
+  public CodemodInvoker(
+      final List<Class<? extends Changer>> codemodTypes, final Path repositoryDir) {
     // get all the providers ready for dependency injection & codemod instantiation
     List<CodemodProvider> providers =
         ServiceLoader.load(CodemodProvider.class).stream()
@@ -57,40 +62,38 @@ public final class CodemodInvoker {
     }
   }
 
-  // will invoke every changer for every file, collecting the diffs
-  // will collate report
-  // will spit out CodeTF or whatever
-
   /**
-   * @param file
-   * @param context
-   * @return
+   * Run the codemods we've collected on the given file.
+   *
+   * @param cu the parsed JavaParser representation of the file
+   * @param context a model we should keep updating as we process the file
    */
-  public void execute(final Path file, final FileWeavingContext context) {
+  public void execute(final Path path, final CompilationUnit cu, final FileWeavingContext context) {
 
     // find a provider that can handle invoking the codemod "change phase"
     for (Class<? extends Changer> type : codemodTypes) {
-      //      Changer changer = injector.getInstance(type);
-      //      if(changer instanceof JavaParserChanger) {
-      ////        CompilationUnit cu = parseJavaCode(javaFilePath);
-      ////        ((JavaParserChanger) changer).createModifierVisitor(cu);
-      ////        serializeBack();
-      //      } else if (changer instanceof SpoonChanger) {
-      //
-      //      } else {
-      //        throw new IllegalArgumentException("");
-      //      }
-      //      for(CodemodProvider provider : providers) {
-      //        provider.get
-      //      }
+      Changer changer = injector.getInstance(type);
+      if (changer instanceof JavaParserChanger) {
+        JavaParserChanger javaParserChanger = (JavaParserChanger) changer;
+        Optional<ModifierVisitor<FileWeavingContext>> modifierVisitor =
+            javaParserChanger.createModifierVisitor(
+                new DefaultCodeDirectory(repsitoryDir), path, cu);
+        modifierVisitor.ifPresent(
+            changeContextModifierVisitor -> cu.accept(changeContextModifierVisitor, context));
+      } else {
+        throw new UnsupportedOperationException("unknown or not");
+      }
     }
-    return;
   }
 
-  /** Invoke the given codemods. */
+  /**
+   * This is the entry point custom-built codemods are supposed to go through. Right now, this is
+   * not useful directly as we're worried about
+   */
   public static void run(final Class<? extends Changer>... codemodTypes) {
-    // loop through every file
-    // new CodemodInvoker(codemodTypes).execute();
+    new CodemodInvoker(Arrays.asList(codemodTypes), Path.of("."));
+    // TODO: loop through the files and invoke the codemods on each file
+    // codemodInvoker.execute();
   }
 
   private static void validateRequiredFields(final Codemod codemodAnnotation) {

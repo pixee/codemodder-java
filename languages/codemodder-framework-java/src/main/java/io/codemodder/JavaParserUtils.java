@@ -1,6 +1,7 @@
 package io.codemodder;
 
 import com.contrastsecurity.sarif.Region;
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
@@ -41,6 +42,13 @@ public final class JavaParserUtils {
    * @return true, if the node is within the region
    */
   public static boolean regionMatchesNode(final Node node, final Region region) {
-    return false;
+    Range sarifRange =
+        Range.range(
+            region.getStartLine(),
+            region.getStartColumn(),
+            region.getEndLine(),
+            region.getEndColumn());
+    Range observedRange = node.getRange().get();
+    return observedRange.overlapsWith(sarifRange);
   }
 }

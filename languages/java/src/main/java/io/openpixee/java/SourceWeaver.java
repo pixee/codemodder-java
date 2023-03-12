@@ -101,14 +101,6 @@ public interface SourceWeaver {
       return new WeavingResult.Default(changedFiles, unscannableFiles);
     }
 
-    private ChangedFile scanIndividualJavaFileWithCodemodders(
-        final JavaParser javaParser,
-        final String javaFile,
-        final IncludesExcludes includesExcludes) {
-
-      return null;
-    }
-
     private static class UnparseableFileException extends Exception {
       private UnparseableFileException(final String javaFile) {
         super(javaFile);
@@ -157,7 +149,7 @@ public interface SourceWeaver {
           });
 
       // do it with codemods
-      codemodInvoker.execute(Path.of(javaFile.toURI()), context);
+      codemodInvoker.execute(javaFile.toPath(), cu, context);
 
       if (context.madeWeaves()) {
         final String encoding = detectEncoding(javaFile);

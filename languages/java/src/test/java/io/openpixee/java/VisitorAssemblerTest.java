@@ -14,15 +14,15 @@ final class VisitorAssemblerTest {
   @Test
   void it_filters_java_factories_based_on_configuration() {
     VisitorAssembler assembler = VisitorAssembler.createDefault();
-    RuleContext everythingButSecureRandom =
-        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/secure-random"));
+    RuleContext everythingButUnsafeReadline =
+        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/limit-readline"));
     RuleContext everything = RuleContext.of(DefaultRuleSetting.ENABLED, List.of());
     File repositoryRoot = new File(".");
     List<VisitorFactory> allFactories =
         assembler.assembleJavaCodeScanningVisitorFactories(repositoryRoot, everything, List.of());
     List<VisitorFactory> allButOne =
         assembler.assembleJavaCodeScanningVisitorFactories(
-            repositoryRoot, everythingButSecureRandom, List.of());
+            repositoryRoot, everythingButUnsafeReadline, List.of());
 
     // just make sure we're getting a reasonable number of factories
     assertThat(allFactories.isEmpty(), is(false));

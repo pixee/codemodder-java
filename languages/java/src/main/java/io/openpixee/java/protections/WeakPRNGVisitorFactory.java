@@ -21,6 +21,7 @@ import java.util.function.Predicate;
  * This visitor replaces instance creation of {@link java.util.Random} with {@link
  * java.security.SecureRandom}.
  */
+@SuppressWarnings("unused") // will remove once we're happy with the codemod
 public final class WeakPRNGVisitorFactory implements VisitorFactory {
 
   @Override
