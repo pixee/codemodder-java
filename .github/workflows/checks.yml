@@ -22,12 +22,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-      - uses: graalvm/setup-graalvm@v1
-        with:
-          version: 'latest'
-          java-version: '17'
-          components: 'js,native-image'
-          github-token: ${{ secrets.github_token }}
+#      - uses: graalvm/setup-graalvm@v1
+#        with:
+#          version: 'latest'
+#          java-version: '17'
+#          components: 'js,native-image'
+#          github-token: ${{ secrets.github_token }}
       - uses: gradle/gradle-build-action@v2
         with:
           arguments: check
