@@ -11,10 +11,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-final class SemgrepSarifProviderTest {
+final class SemgrepRunnerTest {
 
   @Test
   void it_runs_semgrep_and_produces_expected_sarif(@TempDir Path repositoryDir) throws IOException {
@@ -24,9 +25,11 @@ final class SemgrepSarifProviderTest {
     String insecureRandomJavaClass = "class Foo { Random rnd = new Random(); }";
     Files.write(javaFile, insecureRandomJavaClass.getBytes(StandardCharsets.UTF_8));
 
+    Path ruleFile = Files.createTempFile(repositoryDir, "example", ".yaml");
+    Files.write(ruleFile, IOUtils.toByteArray(getClass().getResourceAsStream("/example.semgrep")));
+
     // run the scan
-    SarifSchema210 sarif =
-        new DefaultSemgrepSarifProvider().getSarif(repositoryDir, "example.semgrep");
+    SarifSchema210 sarif = new DefaultSemgrepRunner().run(List.of(ruleFile), repositoryDir);
 
     // assert the scan went as we think it should
     List<Run> runs = sarif.getRuns();

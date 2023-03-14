@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,26 +20,24 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
 
   /** {@inheritDoc} */
   @Override
-  public SarifSchema210 runWithSingleRule(final Path rule, final Path repository)
-      throws IOException {
-    String ruleDirectoryPath = rule.toString();
+  public SarifSchema210 run(final List<Path> ruleYamls, final Path repository) throws IOException {
     String repositoryPath = repository.toString();
     File sarifFile = File.createTempFile("semgrep", ".sarif");
     sarifFile.deleteOnExit();
 
-    String[] args =
-        new String[] {
-          "semgrep",
-          "--sarif",
-          "-o",
-          sarifFile.getAbsolutePath(),
-          "--config",
-          ruleDirectoryPath,
-          repositoryPath
-        };
+    List<String> args = new ArrayList<>();
+    args.add("semgrep");
+    args.add("--sarif");
+    args.add("-o");
+    args.add(sarifFile.getAbsolutePath());
+    for (Path ruleYamlPath : ruleYamls) {
+      args.add("--config");
+      args.add(ruleYamlPath.toString());
+    }
+    args.add(repositoryPath);
 
     // backup existing .segmrepignore if it exists
-    File existingSemgrepFile = new File(".semgrepignore");
+    File existingSemgrepFile = new File(repository.toFile(), ".semgrepignore");
     Optional<File> backup = Optional.empty();
 
     if (existingSemgrepFile.exists()) {

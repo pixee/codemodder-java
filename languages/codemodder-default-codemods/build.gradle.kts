@@ -19,7 +19,6 @@ application {
 
 spotless {
     java {
-        // do we need anything here?
     }
 }
 

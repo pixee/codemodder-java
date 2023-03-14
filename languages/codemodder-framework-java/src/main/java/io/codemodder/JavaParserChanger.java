@@ -1,8 +1,6 @@
 package io.codemodder;
 
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
-import java.nio.file.Path;
 import java.util.Optional;
 
 /** {@inheritDoc} Uses JavaParser to change Java source files. */
@@ -13,5 +11,5 @@ public interface JavaParserChanger extends Changer {
    * determine if and how source file should be changed.
    */
   Optional<ModifierVisitor<FileWeavingContext>> createModifierVisitor(
-      CodeDirectory codeDirectory, Path path, CompilationUnit cu);
+      CodemodInvocationContext context);
 }

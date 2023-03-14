@@ -1,6 +1,8 @@
 package io.codemodder;
 
 import com.google.inject.AbstractModule;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -14,5 +16,5 @@ public interface CodemodProvider {
    *
    * @return a set of modules that perform dependency injection
    */
-  Set<AbstractModule> getModules();
+  Set<AbstractModule> getModules(Path repository, List<Class<? extends Changer>> codemodTypes);
 }

@@ -9,37 +9,22 @@ import org.junit.jupiter.api.Test;
 final class CodemodInvokerTest {
 
   @Codemod(
-      value = "test_mod",
+      id = "test_mod",
       author = "valid@valid.com",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class InvalidCodemodName implements Changer {
-    @Override
-    public String getCodemodId() {
-      return "test:java/invalidname";
-    }
-  }
+  static class InvalidCodemodName implements Changer {}
 
   @Codemod(
-      value = "test_mod",
+      id = "test_mod",
       author = " ",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  class EmptyCodemodAuthor implements Changer {
-    @Override
-    public String getCodemodId() {
-      return "test:java/emptyauthor";
-    }
-  }
+  class EmptyCodemodAuthor implements Changer {}
 
   @Codemod(
-      value = "pixee:java/id",
+      id = "pixee:java/id",
       author = "valid@valid.com",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  final class ValidCodemod implements Changer {
-    @Override
-    public String getCodemodId() {
-      return "test:java/id";
-    }
-  }
+  final class ValidCodemod implements Changer {}
 
   @Test
   void it_validates_codemod_ids() {

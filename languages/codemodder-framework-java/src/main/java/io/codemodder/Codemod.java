@@ -22,7 +22,7 @@ public @interface Codemod {
    *   <li>codeql:java/xss
    * </ul>
    */
-  String value();
+  String id();
 
   /**
    * The codemod author, hopefully "email", "First Last (email)", or "Team Name (email)".

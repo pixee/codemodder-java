@@ -10,7 +10,6 @@ import io.codemodder.IncludesExcludes;
 import io.codemodder.RuleContext;
 import io.codemodder.Weave;
 import io.codemodder.codemods.DefaultCodemods;
-import io.codemodder.codemods.SecureRandomCodemod;
 import io.github.pixee.codetf.CodeTFReport;
 import java.io.File;
 import java.io.IOException;
@@ -117,8 +116,7 @@ public final class JavaFixitCliRun {
 
     List<Class<? extends Changer>> defaultCodemodTypes = DefaultCodemods.asList();
     CodemodInvoker codemodInvoker =
-        new CodemodInvoker(
-            List.of(SecureRandomCodemod.class), ruleContext, repositoryRoot.toPath());
+        new CodemodInvoker(defaultCodemodTypes, ruleContext, repositoryRoot.toPath());
     // run the Java code visitors
     final var javaSourceWeaveResult =
         javaSourceWeaver.weave(

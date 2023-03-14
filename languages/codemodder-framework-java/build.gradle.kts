@@ -15,7 +15,6 @@ java {
 
 spotless {
     java {
-        // do we need anything here?
     }
 }
 

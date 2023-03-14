@@ -9,8 +9,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -31,6 +33,7 @@ public final class CodemodInvoker {
 
   private final List<Changer> codemods;
   private final Path repositoryDir;
+  private final Map<Changer, String> changerToCodemodIds;
 
   public CodemodInvoker(
       final List<Class<? extends Changer>> codemodTypes, final Path repositoryDir) {
@@ -42,6 +45,7 @@ public final class CodemodInvoker {
       final RuleContext ruleContext,
       final Path repositoryDir) {
     // get all the providers ready for dependency injection & codemod instantiation
+
     List<CodemodProvider> providers =
         ServiceLoader.load(CodemodProvider.class).stream()
             .map(ServiceLoader.Provider::get)
@@ -51,10 +55,14 @@ public final class CodemodInvoker {
     // add default module
     allModules.add(new CodeDirectoryModule(repositoryDir));
 
+    // add all provider modules
     for (CodemodProvider provider : providers) {
-      Set<AbstractModule> modules = provider.getModules();
+      Set<AbstractModule> modules = provider.getModules(repositoryDir, codemodTypes);
       allModules.addAll(modules);
     }
+
+    // record which changers are associated with which codemod ids
+    Map<Changer, String> changerToCodemodIds = new HashMap<>();
 
     // validate and instantiate the codemods
     Injector injector = Guice.createInjector(allModules);
@@ -63,10 +71,14 @@ public final class CodemodInvoker {
       Codemod codemodAnnotation = type.getAnnotation(Codemod.class);
       validateRequiredFields(codemodAnnotation);
       Changer changer = injector.getInstance(type);
-      if (ruleContext.isRuleAllowed(changer.getCodemodId())) {
+      String codemodId = codemodAnnotation.id();
+      if (ruleContext.isRuleAllowed(codemodId)) {
         codemods.add(changer);
+        changerToCodemodIds.put(changer, codemodId);
       }
     }
+
+    this.changerToCodemodIds = Collections.unmodifiableMap(changerToCodemodIds);
     this.codemods = Collections.unmodifiableList(codemods);
     this.repositoryDir = Objects.requireNonNull(repositoryDir);
   }
@@ -83,7 +95,11 @@ public final class CodemodInvoker {
         JavaParserChanger javaParserChanger = (JavaParserChanger) changer;
         Optional<ModifierVisitor<FileWeavingContext>> modifierVisitor =
             javaParserChanger.createModifierVisitor(
-                new DefaultCodeDirectory(repositoryDir), path, cu);
+                new DefaultCodemodInvocationContext(
+                    new DefaultCodeDirectory(repositoryDir),
+                    path,
+                    changerToCodemodIds.get(changer),
+                    context));
         modifierVisitor.ifPresent(
             changeContextModifierVisitor -> cu.accept(changeContextModifierVisitor, context));
       } else {
@@ -108,7 +124,7 @@ public final class CodemodInvoker {
       throw new IllegalArgumentException("must have an author");
     }
 
-    String id = codemodAnnotation.value();
+    String id = codemodAnnotation.id();
     if (!isValidCodemodId(id)) {
       throw new IllegalArgumentException("must have valid codemod id");
     }
