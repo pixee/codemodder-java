@@ -7,6 +7,7 @@ import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.Weave;
 import io.openpixee.java.WeavingResult;
+import io.openpixee.security.XMLInputFactorySecurity;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -94,7 +95,8 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
       return WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
     }
 
-    final var xmlInputFactory = XMLInputFactory.newInstance();
+    final var xmlInputFactory =
+        XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newInstance());
     final var xmlOutputFactory = XMLOutputFactory.newInstance();
     final var xmlEventFactory = XMLEventFactory.newInstance();
     try {
