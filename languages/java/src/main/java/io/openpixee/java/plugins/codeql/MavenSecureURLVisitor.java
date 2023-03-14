@@ -95,7 +95,8 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
       return WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
     }
 
-    final var xmlInputFactory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newInstance());
+    final var xmlInputFactory =
+        XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newInstance());
     final var xmlOutputFactory = XMLOutputFactory.newInstance();
     final var xmlEventFactory = XMLEventFactory.newInstance();
     try {
