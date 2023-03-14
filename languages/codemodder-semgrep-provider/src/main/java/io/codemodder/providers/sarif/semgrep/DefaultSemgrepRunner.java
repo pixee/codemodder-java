@@ -37,7 +37,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     args.add(repositoryPath);
 
     // backup existing .segmrepignore if it exists
-    File existingSemgrepFile = new File(repository.toFile(), ".semgrepignore");
+    File existingSemgrepFile = new File(".semgrepignore");
     Optional<File> backup = Optional.empty();
 
     if (existingSemgrepFile.exists()) {
