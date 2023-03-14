@@ -18,6 +18,7 @@ import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 final class ASTsTest {
@@ -104,6 +105,61 @@ final class ASTsTest {
     LexicalPreservingPrinter.setup(cu);
     ASTTransforms.addStatementAfterStatement(estmt, bstmt);
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
+  }
+
+  @Disabled
+  @Test
+  void it_works_when_LexicalPreservingPrinter_prints_lambda_changes() {
+    var original =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    Consumer<Integer> lambda = a -> System.out.println(a);\n"
+            + "  }\n"
+            + "}";
+    var expected =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    Consumer<Integer> lambda = a -> {\n"
+            + "      break;\n"
+            + "      System.out.println(a);\n"
+            + "    };\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(original).getResult().get();
+    var bstmt = new BreakStmt();
+    var estmt = cu.findAll(ExpressionStmt.class).get(1);
+    LexicalPreservingPrinter.setup(cu);
+    ASTTransforms.addStatementBeforeStatement(estmt, bstmt);
+    assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
+  }
+
+  @Test
+  void it_works_when_break_is_added_inside_lambda_body_before_print() {
+    var original =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    Consumer<Integer> lambda = a -> System.out.println(a);\n"
+            + "  }\n"
+            + "}";
+    var expected =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    Consumer<Integer> lambda = a -> {\n"
+            + "      break;\n"
+            + "      System.out.println(a);\n"
+            + "    };\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(original).getResult().get();
+    var bstmt = new BreakStmt();
+    var estmt = cu.findAll(ExpressionStmt.class).get(1);
+    LexicalPreservingPrinter.setup(cu);
+    ASTTransforms.addStatementBeforeStatement(estmt, bstmt);
+    assertEqualsIgnoreSpace(cu.toString(), expected);
   }
 
   @Test
