@@ -1,6 +1,6 @@
 package io.openpixee.java.plugins.codeql;
 
-import io.openpixee.java.IncludesExcludes;
+import io.codemodder.IncludesExcludes;
 import io.openpixee.java.plugins.JavaSarifMockFactory;
 import io.openpixee.java.protections.WeavingTests;
 import java.io.File;

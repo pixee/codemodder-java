@@ -1,0 +1,7 @@
+rules:
+  - id: implicit-yaml-path
+    pattern: new Thing()
+    message: Finds nothing useful
+    languages:
+      - java
+    severity: WARNING

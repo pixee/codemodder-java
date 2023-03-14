@@ -6,10 +6,10 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
-import io.openpixee.java.DependencyGAV;
-import io.openpixee.java.FileWeavingContext;
+import io.codemodder.DependencyGAV;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.Weave;
 import io.openpixee.java.VisitorFactory;
-import io.openpixee.java.Weave;
 import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.security.*;
 import java.io.File;
@@ -45,7 +45,8 @@ public final class SSRFVisitorFactory implements VisitorFactory {
         ClassOrInterfaceType type = n.getType().asClassOrInterfaceType();
         if (type.getNameAsString().equals("URL") || type.getNameAsString().equals("java.net.URL")) {
           if (!n.getArguments().isEmpty()) {
-            if (!hasAllConstantArguments(n.getArguments()) && context.isLineIncluded(n)) {
+            if (!hasAllConstantArguments(n.getArguments())
+                && context.isLineIncluded(n.getRange().get().begin.line)) {
               /*
                * We need to replace:
                *

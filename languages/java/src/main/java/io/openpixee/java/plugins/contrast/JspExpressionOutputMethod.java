@@ -1,6 +1,6 @@
 package io.openpixee.java.plugins.contrast;
 
-import io.openpixee.java.DependencyGAV;
+import io.codemodder.DependencyGAV;
 import io.openpixee.java.JspLineWeave;
 import org.apache.commons.lang3.StringUtils;
 

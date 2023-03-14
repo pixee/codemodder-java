@@ -1,7 +1,7 @@
 package io.openpixee.java.protections;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.openpixee.java.DependencyGAV;
+import io.codemodder.DependencyGAV;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 

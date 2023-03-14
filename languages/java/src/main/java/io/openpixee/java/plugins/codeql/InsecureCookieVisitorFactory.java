@@ -12,11 +12,11 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.Weave;
 import io.openpixee.java.DoNothingVisitor;
-import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.Sarif;
 import io.openpixee.java.VisitorFactory;
-import io.openpixee.java.Weave;
 import io.openpixee.java.ast.ASTTransforms;
 import io.openpixee.java.ast.ASTs;
 import java.io.File;
@@ -87,7 +87,8 @@ final class InsecureCookieVisitorFactory implements VisitorFactory {
       if ("addCookie".equals(methodCallExpr.getNameAsString())
           && methodCallExpr.getArguments().size() > 0) {
         Optional<Range> expRange = methodCallExpr.getRange();
-        if (expRange.isPresent() && context.isLineIncluded(methodCallExpr)) {
+        if (expRange.isPresent()
+            && context.isLineIncluded(methodCallExpr.getRange().get().begin.line)) {
           boolean instrumentedThisMethodCall = false;
           for (int i = 0; i < locations.size() && !instrumentedThisMethodCall; i++) {
             PhysicalLocation location = locations.get(i);

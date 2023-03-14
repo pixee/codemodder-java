@@ -1,6 +1,6 @@
 package io.openpixee.java.protections;
 
-import io.openpixee.java.Weave;
+import io.codemodder.Weave;
 import java.util.Objects;
 import java.util.Optional;
 

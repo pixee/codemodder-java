@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHM
 import com.github.lalyos.jfiglet.FigletFont;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import io.codemodder.DefaultRuleSetting;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
