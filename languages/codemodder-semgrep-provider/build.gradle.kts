@@ -23,11 +23,6 @@ publishing {
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation(libs.guice)
-    implementation(libs.contrast.sarif)
-    implementation(libs.java.security.toolkit)
-    implementation(libs.slf4j.api)
-    implementation(libs.javaparser.core)
     implementation(project(":languages:codemodder-common"))
     implementation(project(":languages:codemodder-framework-java"))
 

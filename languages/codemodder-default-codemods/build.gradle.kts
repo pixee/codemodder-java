@@ -3,22 +3,12 @@ plugins {
     id("io.openpixee.codetl.base")
     id("io.openpixee.codetl.java-library")
     id("io.openpixee.codetl.maven-publish")
-    id("application")
     alias(libs.plugins.fileversioning)
 }
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
-    }
-}
-
-application {
-    mainClass.set("io.codemodder.codemods.Runner")
-}
-
-spotless {
-    java {
     }
 }
 
@@ -32,12 +22,6 @@ publishing {
 }
 
 dependencies {
-//    implementation(libs.slf4j.api)
-//    implementation(libs.javaparser.core)
-//    implementation(libs.javaparser.symbolsolver.core)
-//    implementation(libs.javaparser.symbolsolver.logic)
-//    implementation(libs.javaparser.symbolsolver.model)
-//    implementation(project(":languages:codemodder-common"))
     implementation(project(":languages:codemodder-framework-java"))
     implementation(project(":languages:codemodder-semgrep-provider"))
 

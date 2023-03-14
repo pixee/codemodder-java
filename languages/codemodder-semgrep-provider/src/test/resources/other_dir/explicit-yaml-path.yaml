@@ -1,0 +1,7 @@
+rules:
+  - id: explicit-yaml-path
+    pattern: new Stuff()
+    message: Finds nothing useful
+    languages:
+      - java
+    severity: WARNING

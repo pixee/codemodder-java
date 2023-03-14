@@ -26,7 +26,7 @@ public @interface SemgrepScan {
    * file in /com/acme/codemods/my-rule.yaml, you would simply specify "my-rule.yaml" for this
    * value.
    */
-  String pathToYaml();
+  String pathToYaml() default "";
 
   /**
    * The Semgrep rule "id" field from the YAML. This is needed to disambiguate Semgrep results as we
