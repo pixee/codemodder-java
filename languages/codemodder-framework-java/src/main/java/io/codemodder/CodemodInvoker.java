@@ -9,10 +9,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -33,7 +31,7 @@ public final class CodemodInvoker {
 
   private final List<Changer> codemods;
   private final Path repositoryDir;
-  private final Map<Changer, String> changerToCodemodIds;
+  private final List<IdentifiedChanger> changers;
 
   public CodemodInvoker(
       final List<Class<? extends Changer>> codemodTypes, final Path repositoryDir) {
@@ -62,7 +60,7 @@ public final class CodemodInvoker {
     }
 
     // record which changers are associated with which codemod ids
-    Map<Changer, String> changerToCodemodIds = new HashMap<>();
+    List<IdentifiedChanger> changers = new ArrayList<>();
 
     // validate and instantiate the codemods
     Injector injector = Guice.createInjector(allModules);
@@ -74,13 +72,23 @@ public final class CodemodInvoker {
       String codemodId = codemodAnnotation.id();
       if (ruleContext.isRuleAllowed(codemodId)) {
         codemods.add(changer);
-        changerToCodemodIds.put(changer, codemodId);
+        changers.add(new IdentifiedChanger(codemodId, changer));
       }
     }
 
-    this.changerToCodemodIds = Collections.unmodifiableMap(changerToCodemodIds);
+    this.changers = Collections.unmodifiableList(changers);
     this.codemods = Collections.unmodifiableList(codemods);
     this.repositoryDir = Objects.requireNonNull(repositoryDir);
+  }
+
+  private static final class IdentifiedChanger {
+    final String id;
+    final Changer changer;
+
+    private IdentifiedChanger(final String id, final Changer changer) {
+      this.id = id;
+      this.changer = changer;
+    }
   }
 
   /**
@@ -98,7 +106,11 @@ public final class CodemodInvoker {
                 new DefaultCodemodInvocationContext(
                     new DefaultCodeDirectory(repositoryDir),
                     path,
-                    changerToCodemodIds.get(changer),
+                    changers.stream()
+                        .filter(ic -> ic.changer == changer)
+                        .findFirst()
+                        .orElseThrow()
+                        .id,
                     context));
         modifierVisitor.ifPresent(
             changeContextModifierVisitor -> cu.accept(changeContextModifierVisitor, context));

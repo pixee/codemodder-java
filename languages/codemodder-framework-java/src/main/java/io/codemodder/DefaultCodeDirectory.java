@@ -1,21 +1,25 @@
 package io.codemodder;
 
-import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-/** {@inheritDoc} */
 final class DefaultCodeDirectory implements CodeDirectory {
 
   private final Path repositoryDir;
 
   DefaultCodeDirectory(final Path repositoryDir) {
-    this.repositoryDir = Objects.requireNonNull(repositoryDir);
-  }
+    if (!Files.exists(repositoryDir)) {
+      throw new IllegalArgumentException("code directory doesn't exist");
+    }
+    if (!Files.isDirectory(repositoryDir)) {
+      throw new IllegalArgumentException("code directory isn't a directory");
+    }
+    if (!Files.isReadable(repositoryDir)) {
+      throw new IllegalArgumentException("code directory isn't readable");
+    }
 
-  @Override
-  public File asFile() {
-    return repositoryDir.toFile();
+    this.repositoryDir = Objects.requireNonNull(repositoryDir);
   }
 
   @Override

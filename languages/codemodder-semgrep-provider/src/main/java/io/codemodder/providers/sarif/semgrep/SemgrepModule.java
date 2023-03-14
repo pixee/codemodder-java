@@ -7,6 +7,7 @@ import io.codemodder.Changer;
 import io.codemodder.RuleSarif;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.nio.charset.StandardCharsets;
@@ -24,15 +25,10 @@ final class SemgrepModule extends AbstractModule {
 
   private final List<Class<? extends Changer>> codemodTypes;
   private final Path codeDirectory;
-  private final SemgrepRunner runner;
 
-  SemgrepModule(
-      final Path codeDirectory,
-      final List<Class<? extends Changer>> codemodTypes,
-      final SemgrepRunner runner) {
+  SemgrepModule(final Path codeDirectory, final List<Class<? extends Changer>> codemodTypes) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
-    this.runner = Objects.requireNonNull(runner);
   }
 
   @Override
@@ -88,14 +84,14 @@ final class SemgrepModule extends AbstractModule {
       // actually run the SARIF only once
       SarifSchema210 sarif;
       try {
-        sarif = runner.run(yamlRuleFiles, codeDirectory);
+        sarif = new DefaultSemgrepRunner().run(yamlRuleFiles, codeDirectory);
       } catch (IOException e) {
         throw new IllegalArgumentException("Semgrep execution failed", e);
       }
 
       // bind the SARIF results
       for (SemgrepScan sarifAnnotation : toBind) {
-        SemgrepSarif semgrepSarif = new SemgrepSarif(sarifAnnotation.ruleId(), sarif);
+        SemgrepRuleSarif semgrepSarif = new SemgrepRuleSarif(sarifAnnotation.ruleId(), sarif);
         bind(RuleSarif.class).annotatedWith(sarifAnnotation).toInstance(semgrepSarif);
       }
     }
@@ -106,16 +102,15 @@ final class SemgrepModule extends AbstractModule {
    * exception re-throwing but this is being used from a lambda and this shouldn't fail ever anyway.
    */
   private Path saveClasspathResourceToTemp(final String yamlClasspathResourcePath) {
-    try {
-      InputStream ruleInputStream = getClass().getResource(yamlClasspathResourcePath).openStream();
+    try (InputStream ruleInputStream =
+        getClass().getResource(yamlClasspathResourcePath).openStream()) {
       String ruleYaml = IOUtils.toString(ruleInputStream, StandardCharsets.UTF_8);
       ruleInputStream.close();
-
       Path semgrepRuleFile = Files.createTempFile("semgrep", ".yaml");
       Files.write(semgrepRuleFile, ruleYaml.getBytes(StandardCharsets.UTF_8));
       return semgrepRuleFile;
     } catch (IOException e) {
-      throw new RuntimeException("failed to write write yaml to disk", e);
+      throw new UncheckedIOException("failed to write write yaml to disk", e);
     }
   }
 }

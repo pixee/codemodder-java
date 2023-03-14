@@ -7,7 +7,10 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 
+/** Holds common AST utilities in JavaParser. */
 public final class JavaParserUtils {
+
+  private JavaParserUtils() {}
 
   /**
    * Adds a type to the import list if it's not in there directly, and if it's not implied by a
@@ -22,11 +25,8 @@ public final class JavaParserUtils {
     if (imports.contains(newImport)) {
       return;
     }
-    for (int i = 0; i < imports.size(); i++) {
-      ImportDeclaration existingImport = imports.get(i);
-
+    for (ImportDeclaration existingImport : imports) {
       if (existingImport.getNameAsString().compareToIgnoreCase(className) > 0) {
-
         imports.addBefore(newImport, existingImport);
         return;
       }

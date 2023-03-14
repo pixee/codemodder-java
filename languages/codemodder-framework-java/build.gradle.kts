@@ -3,18 +3,12 @@ plugins {
     id("io.openpixee.codetl.base")
     id("io.openpixee.codetl.java-library")
     id("io.openpixee.codetl.maven-publish")
-    id("application")
     alias(libs.plugins.fileversioning)
 }
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
-    }
-}
-
-spotless {
-    java {
     }
 }
 
@@ -32,16 +26,16 @@ dependencies {
 
     api("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo
 
-    implementation(libs.guice)
-    implementation(libs.contrast.sarif)
-    implementation(libs.javaparser.core)
-    implementation(libs.javaparser.symbolsolver.core)
-    implementation(libs.javaparser.symbolsolver.logic)
-    implementation(libs.javaparser.symbolsolver.model)
+    api(libs.guice)
+    api(libs.contrast.sarif)
+    api(libs.javaparser.core)
+    api(libs.javaparser.symbolsolver.core)
+    api(libs.javaparser.symbolsolver.logic)
+    api(libs.javaparser.symbolsolver.model)
     implementation(libs.logback.classic)
     implementation(libs.maven.model)
-    implementation(libs.slf4j.api)
-    implementation(project(":languages:codemodder-common"))
+    api(libs.slf4j.api)
+    api(project(":languages:codemodder-common"))
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)

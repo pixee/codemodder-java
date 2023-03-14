@@ -10,33 +10,38 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/** {@inheritDoc} */
-public final class SemgrepSarif implements RuleSarif {
+/**
+ * {@inheritDoc}
+ *
+ * <p>Semgrep's SARIF has a relatively simple model but the "ruleId" in the document is weird. It
+ * places the whole path to the rule in the field. This means our filtering logic is a little weird
+ * and unexpected, but it works.
+ */
+public final class SemgrepRuleSarif implements RuleSarif {
 
   private final SarifSchema210 sarif;
   private final String ruleId;
 
-  SemgrepSarif(final String ruleId, final SarifSchema210 sarif) {
+  SemgrepRuleSarif(final String ruleId, final SarifSchema210 sarif) {
     this.sarif = Objects.requireNonNull(sarif);
     this.ruleId = Objects.requireNonNull(ruleId);
   }
 
-  /** {@inheritDoc} */
   @Override
   public SarifSchema210 rawDocument() {
     return sarif;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getRule() {
     return ruleId;
   }
 
-  /** {@inheritDoc} */
   @Override
-  public List<Region> getRegionsFromResultsByRule(final Path path, final String ruleId) {
+  public List<Region> getRegionsFromResultsByRule(final Path path) {
     List<Result> resultsFilteredByRule =
         sarif.getRuns().get(0).getResults().stream()
             .filter(result -> result.getRuleId().endsWith("." + ruleId))
@@ -55,6 +60,7 @@ public final class SemgrepSarif implements RuleSarif {
                   try {
                     return Files.isSameFile(path, Path.of(uri));
                   } catch (IOException e) { // this should never happen
+                    logger.error("Problem inspecting SARIF to find code regions", e);
                     return false;
                   }
                 })
@@ -63,4 +69,6 @@ public final class SemgrepSarif implements RuleSarif {
         .map(result -> result.getLocations().get(0).getPhysicalLocation().getRegion())
         .collect(Collectors.toUnmodifiableList());
   }
+
+  private static final Logger logger = LoggerFactory.getLogger(SemgrepRuleSarif.class);
 }

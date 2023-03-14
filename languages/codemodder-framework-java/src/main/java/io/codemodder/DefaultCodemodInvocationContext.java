@@ -3,7 +3,6 @@ package io.codemodder;
 import java.nio.file.Path;
 import java.util.Objects;
 
-/** {@inheritDoc} */
 final class DefaultCodemodInvocationContext implements CodemodInvocationContext {
 
   private final CodeDirectory codeDirectory;
@@ -22,25 +21,21 @@ final class DefaultCodemodInvocationContext implements CodemodInvocationContext 
     this.changeRecorder = Objects.requireNonNull(changeRecorder);
   }
 
-  /** {@inheritDoc} */
   @Override
   public FileWeavingContext changeRecorder() {
     return changeRecorder;
   }
 
-  /** {@inheritDoc} */
   @Override
   public CodeDirectory codeDirectory() {
     return codeDirectory;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Path path() {
     return path;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String codemodId() {
     return codemodId;

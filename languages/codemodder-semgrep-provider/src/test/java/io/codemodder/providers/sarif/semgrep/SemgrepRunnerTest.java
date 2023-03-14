@@ -7,11 +7,13 @@ import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
-import org.apache.commons.io.IOUtils;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -26,7 +28,9 @@ final class SemgrepRunnerTest {
     Files.write(javaFile, insecureRandomJavaClass.getBytes(StandardCharsets.UTF_8));
 
     Path ruleFile = Files.createTempFile(repositoryDir, "example", ".yaml");
-    Files.write(ruleFile, IOUtils.toByteArray(getClass().getResourceAsStream("/example.semgrep")));
+    InputStream resourceAsStream =
+        Objects.requireNonNull(getClass().getResourceAsStream("/example.semgrep"));
+    Files.copy(resourceAsStream, ruleFile, StandardCopyOption.REPLACE_EXISTING);
 
     // run the scan
     SarifSchema210 sarif = new DefaultSemgrepRunner().run(List.of(ruleFile), repositoryDir);

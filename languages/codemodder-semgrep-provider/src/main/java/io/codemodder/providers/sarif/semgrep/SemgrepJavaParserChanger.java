@@ -22,11 +22,8 @@ public abstract class SemgrepJavaParserChanger implements JavaParserChanger {
   @Override
   public Optional<ModifierVisitor<FileWeavingContext>> createModifierVisitor(
       final CodemodInvocationContext context) {
-    List<Region> regions = sarif.getRegionsFromResultsByRule(context.path(), sarif.getRule());
-    if (!regions.isEmpty()) {
-      return Optional.of(createVisitor(context, regions));
-    }
-    return Optional.empty();
+    List<Region> regions = sarif.getRegionsFromResultsByRule(context.path());
+    return !regions.isEmpty() ? Optional.of(createVisitor(context, regions)) : Optional.empty();
   }
 
   /**

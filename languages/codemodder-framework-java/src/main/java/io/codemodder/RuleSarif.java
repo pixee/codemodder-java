@@ -12,10 +12,9 @@ public interface RuleSarif {
    * Get all the regions for the SARIF with the matching rule ID
    *
    * @param path the file being scanned
-   * @param ruleId the semgrep rule ID
    * @return the source code regions where the given rule was found in the given file
    */
-  List<Region> getRegionsFromResultsByRule(Path path, String ruleId);
+  List<Region> getRegionsFromResultsByRule(Path path);
 
   /** Return the entire SARIF as a model in case more comprehensive inspection is needed. */
   SarifSchema210 rawDocument();

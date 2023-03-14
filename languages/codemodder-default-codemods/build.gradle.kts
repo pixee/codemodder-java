@@ -32,14 +32,12 @@ publishing {
 }
 
 dependencies {
-    implementation(libs.javax.inject)
-    implementation(libs.contrast.sarif)
-    implementation(libs.slf4j.api)
-    implementation(libs.javaparser.core)
-    implementation(libs.javaparser.symbolsolver.core)
-    implementation(libs.javaparser.symbolsolver.logic)
-    implementation(libs.javaparser.symbolsolver.model)
-    implementation(project(":languages:codemodder-common"))
+//    implementation(libs.slf4j.api)
+//    implementation(libs.javaparser.core)
+//    implementation(libs.javaparser.symbolsolver.core)
+//    implementation(libs.javaparser.symbolsolver.logic)
+//    implementation(libs.javaparser.symbolsolver.model)
+//    implementation(project(":languages:codemodder-common"))
     implementation(project(":languages:codemodder-framework-java"))
     implementation(project(":languages:codemodder-semgrep-provider"))
 
