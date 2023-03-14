@@ -6,6 +6,6 @@ import static io.codemodder.CodemodInvoker.run;
 public final class Runner {
 
   public static void main(final String[] args) {
-    run(SecureRandomCodemod.class);
+    run(args, SecureRandomCodemod.class);
   }
 }

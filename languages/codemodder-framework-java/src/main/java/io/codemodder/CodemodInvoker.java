@@ -110,12 +110,11 @@ public final class CodemodInvoker {
 
   /**
    * This is the entry point custom-built codemods are supposed to go through. Right now, this is
-   * not useful directly as we're worried about
+   * not useful directly as we're worried primarily about the legacy entrypoints.
    */
-  public static void run(final Class<? extends Changer>... codemodTypes) {
-    new CodemodInvoker(Arrays.asList(codemodTypes), Path.of("."));
-    // TODO: loop through the files and invoke the codemods on each file
-    // codemodInvoker.execute();
+  @SuppressWarnings("unused")
+  public static void run(String[] args, final Class<? extends Changer>... codemodTypes) {
+    CodemodInvoker invoker = new CodemodInvoker(Arrays.asList(codemodTypes), Path.of("."));
   }
 
   private static void validateRequiredFields(final Codemod codemodAnnotation) {
