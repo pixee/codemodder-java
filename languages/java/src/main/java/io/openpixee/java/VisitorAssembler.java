@@ -1,5 +1,6 @@
 package io.openpixee.java;
 
+import io.codemodder.RuleContext;
 import io.openpixee.java.plugins.codeql.CodeQlPlugin;
 import io.openpixee.java.plugins.contrast.ContrastScanPlugin;
 import io.openpixee.java.protections.*;
@@ -62,7 +63,6 @@ public interface VisitorAssembler {
               new RuntimeExecVisitorFactory(),
               new SpringMultipartVisitorFactory(),
               new UnsafeReadlineVisitorFactory(),
-              new WeakPRNGVisitorFactory(),
               new XMLDecoderVisitorFactory(),
               new XStreamVisitorFactory(),
               new XXEVisitorFactory(),

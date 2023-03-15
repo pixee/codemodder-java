@@ -2,8 +2,8 @@ package io.openpixee.java.protections;
 
 import static io.openpixee.java.protections.JspScriptletXSSVisitor.xssJspScriptletRuleId;
 
-import io.openpixee.java.DependencyGAV;
-import io.openpixee.java.Weave;
+import io.codemodder.DependencyGAV;
+import io.codemodder.Weave;
 import java.io.IOException;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;

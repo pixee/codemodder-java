@@ -4,12 +4,12 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
-import io.openpixee.java.FileWeavingContext;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.Weave;
 import io.openpixee.java.ObjectCreationPredicateFactory;
 import io.openpixee.java.ObjectCreationTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
-import io.openpixee.java.Weave;
 import io.openpixee.java.ast.ASTTransforms;
 import java.io.File;
 import java.security.SecureRandom;
@@ -21,6 +21,7 @@ import java.util.function.Predicate;
  * This visitor replaces instance creation of {@link java.util.Random} with {@link
  * java.security.SecureRandom}.
  */
+@SuppressWarnings("unused") // will remove once we're happy with the codemod
 public final class WeakPRNGVisitorFactory implements VisitorFactory {
 
   @Override

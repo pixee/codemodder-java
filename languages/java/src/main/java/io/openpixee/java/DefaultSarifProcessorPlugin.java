@@ -2,6 +2,7 @@ package io.openpixee.java;
 
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.Tool;
+import io.codemodder.RuleContext;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;

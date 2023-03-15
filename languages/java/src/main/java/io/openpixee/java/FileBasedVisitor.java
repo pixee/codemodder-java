@@ -1,5 +1,7 @@
 package io.openpixee.java;
 
+import io.codemodder.ChangedFile;
+import io.codemodder.FileWeavingContext;
 import java.io.File;
 import java.util.Set;
 

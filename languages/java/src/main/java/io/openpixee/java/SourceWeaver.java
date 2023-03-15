@@ -9,6 +9,10 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import io.codemodder.ChangedFile;
+import io.codemodder.CodemodInvoker;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.IncludesExcludes;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,9 +33,11 @@ public interface SourceWeaver {
 
   /** Go through the given source directories and return a {@link WeavingResult}. */
   WeavingResult weave(
+      File repository,
       List<SourceDirectory> javaSourceDirectories,
       List<String> javaFiles,
       List<VisitorFactory> visitorFactories,
+      CodemodInvoker codemodInvoker,
       IncludesExcludes includesExcludes)
       throws IOException;
 
@@ -50,9 +56,11 @@ public interface SourceWeaver {
 
     @Override
     public @NotNull WeavingResult weave(
+        final File repository,
         final List<SourceDirectory> javaSourceDirectories,
         final List<String> javaSourceFiles,
         final List<VisitorFactory> visitorFactories,
+        final CodemodInvoker codemodInvoker,
         final IncludesExcludes includesExcludes)
         throws IOException {
       /*
@@ -74,8 +82,9 @@ public interface SourceWeaver {
         for (String javaFile : javaSourceFiles) {
           try {
             pb.step();
-            final ChangedFile changedFile =
-                scanIndividualJavaFile(javaParser, javaFile, visitorFactories, includesExcludes);
+            ChangedFile changedFile =
+                scanIndividualJavaFile(
+                    codemodInvoker, javaParser, javaFile, visitorFactories, includesExcludes);
             if (changedFile != null) {
               changedFiles.add(changedFile);
             }
@@ -98,6 +107,7 @@ public interface SourceWeaver {
     /** Scan the file. */
     @Nullable
     private ChangedFile scanIndividualJavaFile(
+        final CodemodInvoker codemodInvoker,
         final JavaParser javaParser,
         final String javaFile,
         final List<VisitorFactory> visitorFactories,
@@ -112,11 +122,12 @@ public interface SourceWeaver {
 
       final CompilationUnit cu = result.getResult().orElseThrow();
       LexicalPreservingPrinter.setup(cu);
-      return scanType(file, cu, visitorFactories, includesExcludes);
+      return scanType(codemodInvoker, file, cu, visitorFactories, includesExcludes);
     }
 
     /** For each type in a Java source file, we scan through the code. */
     private ChangedFile scanType(
+        final CodemodInvoker codemodInvoker,
         final File javaFile,
         final CompilationUnit cu,
         final List<VisitorFactory> visitorFactories,
@@ -124,14 +135,18 @@ public interface SourceWeaver {
         throws IOException {
 
       final FileWeavingContext context =
-          new FileWeavingContext.Default(includesExcludes.getIncludesExcludesForFile(javaFile));
+          FileWeavingContext.createDefault(includesExcludes.getIncludesExcludesForFile(javaFile));
 
+      // do it the old school way
       visitorFactories.forEach(
           vf -> {
             final ModifierVisitor<FileWeavingContext> visitor =
                 vf.createJavaCodeVisitorFor(javaFile, cu);
             cu.accept(visitor, context);
           });
+
+      // do it with codemods
+      codemodInvoker.execute(javaFile.toPath(), cu, context);
 
       if (context.madeWeaves()) {
         final String encoding = detectEncoding(javaFile);
@@ -140,7 +155,7 @@ public interface SourceWeaver {
         File modifiedFile = File.createTempFile(javaFile.getName(), ".java");
         FileUtils.write(modifiedFile, modified, encoding);
 
-        return new ChangedFile.Default(
+        return ChangedFile.createDefault(
             javaFile.getAbsolutePath(), modifiedFile.getAbsolutePath(), context.weaves());
       }
 

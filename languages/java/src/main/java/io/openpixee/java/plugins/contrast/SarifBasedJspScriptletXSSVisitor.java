@@ -1,12 +1,12 @@
 package io.openpixee.java.plugins.contrast;
 
 import com.contrastsecurity.sarif.Result;
-import io.openpixee.java.ChangedFile;
-import io.openpixee.java.DependencyGAV;
+import io.codemodder.ChangedFile;
+import io.codemodder.DependencyGAV;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.Weave;
 import io.openpixee.java.FileBasedVisitor;
-import io.openpixee.java.FileWeavingContext;
 import io.openpixee.java.JspLineWeave;
-import io.openpixee.java.Weave;
 import io.openpixee.java.WeavingResult;
 import java.io.File;
 import java.io.IOException;

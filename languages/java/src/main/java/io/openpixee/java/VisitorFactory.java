@@ -2,6 +2,7 @@ package io.openpixee.java;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
+import io.codemodder.FileWeavingContext;
 import java.io.File;
 
 /**

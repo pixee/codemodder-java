@@ -2,9 +2,9 @@ package io.openpixee.java.plugins.codeql;
 
 import com.contrastsecurity.sarif.*;
 import com.google.common.annotations.VisibleForTesting;
+import io.codemodder.RuleContext;
 import io.openpixee.java.DefaultSarifProcessorPlugin;
 import io.openpixee.java.FileBasedVisitor;
-import io.openpixee.java.RuleContext;
 import io.openpixee.java.VisitorFactory;
 import java.io.File;
 import java.util.ArrayList;
