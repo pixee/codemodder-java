@@ -1,4 +1,4 @@
-package io.openpixee.java;
+package io.codemodder;
 
 import java.util.Objects;
 

@@ -1,5 +1,6 @@
 package io.openpixee.java;
 
+import io.codemodder.DependencyGAV;
 import java.util.Objects;
 import java.util.Optional;
 import org.jetbrains.annotations.Nullable;

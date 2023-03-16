@@ -4,6 +4,7 @@ import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.contrastsecurity.sarif.ToolComponent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.codemodder.RuleContext;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;

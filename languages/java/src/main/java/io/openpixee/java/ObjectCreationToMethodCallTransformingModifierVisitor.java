@@ -5,6 +5,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import io.codemodder.FileWeavingContext;
 import io.openpixee.java.protections.TransformationResult;
 import java.util.List;
 import java.util.Objects;
@@ -40,7 +41,7 @@ public class ObjectCreationToMethodCallTransformingModifierVisitor
           return super.visit(objectCreationExpr, context);
         }
       }
-      if (context.isLineIncluded(objectCreationExpr)) {
+      if (context.isLineIncluded(objectCreationExpr.getRange().get().begin.line)) {
         try {
           TransformationResult<MethodCallExpr> result =
               transformer.transform(objectCreationExpr, context);

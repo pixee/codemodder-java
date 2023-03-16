@@ -1,6 +1,5 @@
-package io.openpixee.java;
+package io.codemodder;
 
-import com.github.javaparser.ast.Node;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +14,6 @@ public interface FileWeavingContext {
   List<Weave> weaves();
 
   boolean madeWeaves();
-
-  /** Intended to be used when dealing with AST objects. */
-  boolean isLineIncluded(Node n);
 
   /** Intended to be used in non-JavaParser situations. */
   boolean isLineIncluded(int line);
@@ -48,14 +44,6 @@ public interface FileWeavingContext {
     }
 
     @Override
-    public boolean isLineIncluded(final Node n) {
-      if (n.getRange().isEmpty()) {
-        return true;
-      }
-      return includesExcludes.matches(n.getRange().get().begin.line);
-    }
-
-    @Override
     public boolean isLineIncluded(final int line) {
       return includesExcludes.matches(line);
     }
@@ -64,5 +52,9 @@ public interface FileWeavingContext {
   static FileWeavingContext createDefault(
       final File file, final IncludesExcludes includesExcludes) {
     return new Default(includesExcludes.getIncludesExcludesForFile(file));
+  }
+
+  static FileWeavingContext createDefault(final LineIncludesExcludes includesExcludesForFile) {
+    return new Default(includesExcludesForFile);
   }
 }

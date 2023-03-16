@@ -1,4 +1,4 @@
-package io.openpixee.java;
+package io.codemodder;
 
 import java.io.File;
 import java.nio.file.FileSystem;
@@ -7,13 +7,13 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 /** This type is used in include/exclude logic for matching paths. */
-final class PathMatcher {
+public final class PathMatcher {
 
   private final Integer line;
   private final String repositoryRootPath;
   private final java.nio.file.PathMatcher matcher;
 
-  PathMatcher(
+  public PathMatcher(
       final FileSystem fs,
       final File repositoryRoot,
       final String pathPattern,
@@ -25,7 +25,7 @@ final class PathMatcher {
   }
 
   /** Return if this path matcher matches the given file. */
-  boolean matches(final File file) {
+  public boolean matches(final File file) {
     String candidateFilePath = Path.of(file.getAbsolutePath()).normalize().toString();
     String relativeCandidateFilePath = candidateFilePath.substring(repositoryRootPath.length());
     if (!relativeCandidateFilePath.startsWith("/")) {
@@ -34,11 +34,11 @@ final class PathMatcher {
     return matcher.matches(Paths.get(relativeCandidateFilePath));
   }
 
-  Integer line() {
+  public Integer line() {
     return line;
   }
 
-  boolean targetsLine() {
+  public boolean targetsLine() {
     return line != null;
   }
 

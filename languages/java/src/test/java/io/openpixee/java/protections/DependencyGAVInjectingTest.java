@@ -3,10 +3,10 @@ package io.openpixee.java.protections;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import io.openpixee.java.ChangedFile;
-import io.openpixee.java.DependencyGAV;
-import io.openpixee.java.FileWeavingContext;
-import io.openpixee.java.Weave;
+import io.codemodder.ChangedFile;
+import io.codemodder.DependencyGAV;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.Weave;
 import io.openpixee.maven.operator.Dependency;
 import io.openpixee.maven.operator.POMOperator;
 import io.openpixee.maven.operator.ProjectModel;

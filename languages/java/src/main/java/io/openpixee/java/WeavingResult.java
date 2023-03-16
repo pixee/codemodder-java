@@ -1,5 +1,6 @@
 package io.openpixee.java;
 
+import io.codemodder.ChangedFile;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
