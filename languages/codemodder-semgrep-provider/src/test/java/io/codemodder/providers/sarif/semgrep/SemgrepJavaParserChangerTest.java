@@ -6,8 +6,9 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.contrastsecurity.sarif.Region;
-import com.github.javaparser.ast.visitor.ModifierVisitor;
+import com.contrastsecurity.sarif.Result;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.codemodder.CodeDirectory;
@@ -22,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,8 +33,7 @@ final class SemgrepJavaParserChangerTest {
       author = "pixee",
       id = "pixee-test:java/finds-stuff",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class FindsStuffCodemod extends SemgrepJavaParserChanger {
-    private final RuleSarif ruleSarif;
+  static class FindsStuffCodemod extends SemgrepJavaParserChanger<ObjectCreationExpr> {
 
     @Inject
     FindsStuffCodemod(
@@ -42,15 +41,15 @@ final class SemgrepJavaParserChangerTest {
                 pathToYaml = "/other_dir/explicit-yaml-path.yaml",
                 ruleId = "explicit-yaml-path")
             RuleSarif ruleSarif) {
-      super(ruleSarif);
-      this.ruleSarif = ruleSarif;
+      super(ruleSarif, ObjectCreationExpr.class);
     }
 
     @Override
-    public ModifierVisitor<FileWeavingContext> createVisitor(
-        final CodemodInvocationContext context, final List<Region> regions) {
-      return new ModifierVisitor<>();
-    }
+    public void onSemgrepResultFound(
+        final CodemodInvocationContext context,
+        final CompilationUnit cu,
+        final ObjectCreationExpr node,
+        final Result result) {}
   }
 
   @Test
@@ -61,7 +60,7 @@ final class SemgrepJavaParserChangerTest {
     SemgrepModule module = new SemgrepModule(tmpDir, List.of(FindsStuffCodemod.class));
     Injector injector = Guice.createInjector(module);
     FindsStuffCodemod instance = injector.getInstance(FindsStuffCodemod.class);
-    RuleSarif ruleSarif = instance.ruleSarif;
+    RuleSarif ruleSarif = instance.sarif;
     assertThat(ruleSarif, is(notNullValue()));
     assertThat(ruleSarif.getRegionsFromResultsByRule(javaFile).size(), is(1));
 
@@ -75,14 +74,7 @@ final class SemgrepJavaParserChangerTest {
     when(context.changeRecorder()).thenReturn(mock(FileWeavingContext.class));
 
     // we should get a visitor for this file
-    Optional<ModifierVisitor<FileWeavingContext>> modifierVisitor =
-        instance.createModifierVisitor(context);
-    assertThat(modifierVisitor.isPresent(), is(true));
 
-    // now change it so the path is to a file that should not find results for
-    when(context.path()).thenReturn(javaFile.getParent());
-    modifierVisitor = instance.createModifierVisitor(context);
-    assertThat(modifierVisitor.isEmpty(), is(true));
   }
 
   private Path writeJavaFile(final Path tmpDir, final String javaCode) throws IOException {

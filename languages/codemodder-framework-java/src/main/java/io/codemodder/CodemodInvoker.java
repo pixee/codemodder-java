@@ -1,7 +1,6 @@
 package io.codemodder;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -12,7 +11,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -64,12 +62,17 @@ public final class CodemodInvoker {
 
     // validate and instantiate the codemods
     Injector injector = Guice.createInjector(allModules);
+    Set<String> codemodIds = new HashSet<>();
     List<Changer> codemods = new ArrayList<>();
     for (Class<? extends Changer> type : codemodTypes) {
       Codemod codemodAnnotation = type.getAnnotation(Codemod.class);
       validateRequiredFields(codemodAnnotation);
       Changer changer = injector.getInstance(type);
       String codemodId = codemodAnnotation.id();
+      if (codemodIds.contains(codemodId)) {
+        throw new UnsupportedOperationException("multiple codemods under id: " + codemodId);
+      }
+      codemodIds.add(codemodId);
       if (ruleContext.isRuleAllowed(codemodId)) {
         codemods.add(changer);
         changers.add(new IdentifiedChanger(codemodId, changer));
@@ -101,19 +104,13 @@ public final class CodemodInvoker {
     for (Changer changer : codemods) {
       if (changer instanceof JavaParserChanger) {
         JavaParserChanger javaParserChanger = (JavaParserChanger) changer;
-        Optional<ModifierVisitor<FileWeavingContext>> modifierVisitor =
-            javaParserChanger.createModifierVisitor(
-                new DefaultCodemodInvocationContext(
-                    new DefaultCodeDirectory(repositoryDir),
-                    path,
-                    changers.stream()
-                        .filter(ic -> ic.changer == changer)
-                        .findFirst()
-                        .orElseThrow()
-                        .id,
-                    context));
-        modifierVisitor.ifPresent(
-            changeContextModifierVisitor -> cu.accept(changeContextModifierVisitor, context));
+        CodemodInvocationContext invocationContext =
+            new DefaultCodemodInvocationContext(
+                new DefaultCodeDirectory(repositoryDir),
+                path,
+                changers.stream().filter(ic -> ic.changer == changer).findFirst().orElseThrow().id,
+                context);
+        javaParserChanger.visit(invocationContext, cu);
       } else {
         throw new UnsupportedOperationException("unknown or not");
       }

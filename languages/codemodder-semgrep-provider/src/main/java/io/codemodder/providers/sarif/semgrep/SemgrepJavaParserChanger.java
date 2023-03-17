@@ -1,40 +1,64 @@
 package io.codemodder.providers.sarif.semgrep;
 
 import com.contrastsecurity.sarif.Region;
-import com.github.javaparser.ast.visitor.ModifierVisitor;
+import com.contrastsecurity.sarif.Result;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import io.codemodder.CodemodInvocationContext;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.JavaParserChanger;
+import io.codemodder.JavaParserUtils;
 import io.codemodder.RuleSarif;
+import io.codemodder.Weave;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Provides base functionality for making JavaParser-based changes with Semgrep. */
-public abstract class SemgrepJavaParserChanger implements JavaParserChanger {
+public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaParserChanger {
 
   protected final RuleSarif sarif;
+  private final Class<? extends Node> nodeType;
 
-  protected SemgrepJavaParserChanger(final RuleSarif semgrepSarif) {
+  protected SemgrepJavaParserChanger(
+      final RuleSarif semgrepSarif, final Class<? extends Node> nodeType) {
     this.sarif = Objects.requireNonNull(semgrepSarif);
+    this.nodeType = Objects.requireNonNull(nodeType);
   }
 
   @Override
-  public Optional<ModifierVisitor<FileWeavingContext>> createModifierVisitor(
-      final CodemodInvocationContext context) {
-    List<Region> regions = sarif.getRegionsFromResultsByRule(context.path());
-    return !regions.isEmpty() ? Optional.of(createVisitor(context, regions)) : Optional.empty();
+  public final void visit(final CodemodInvocationContext context, final CompilationUnit cu) {
+
+    List<Result> results = sarif.getResultsByPath(context.path());
+    List<? extends Node> allNodes = cu.findAll(nodeType);
+
+    for (Result result : results) {
+      for (Node node : allNodes) {
+        Region region = result.getLocations().get(0).getPhysicalLocation().getRegion();
+        if (!node.getClass().isAssignableFrom(nodeType)) {
+          logger.error("Unexpected node encountered in {}:{}", context.path(), region);
+          return;
+        }
+        if (JavaParserUtils.regionMatchesNodeStart(node, region)) {
+          onSemgrepResultFound(context, cu, (T) node, result);
+          FileWeavingContext changeRecorder = context.changeRecorder();
+          changeRecorder.addWeave(Weave.from(region.getStartLine(), context.codemodId()));
+        }
+      }
+    }
   }
 
   /**
    * Creates a visitor for the given context and locations.
    *
    * @param context the context of this files transformation
-   * @param regions the places in this file that have been identified as needing change by the
-   *     static analysis
-   * @return a visitor that will perform the necessary changes in the given source code file
-   *     positions
+   * @param cu the parsed model of the file being transformed
+   * @param node the node to act on
+   * @param result the given SARIF result to act on
    */
-  public abstract ModifierVisitor<FileWeavingContext> createVisitor(
-      CodemodInvocationContext context, List<Region> regions);
+  public abstract void onSemgrepResultFound(
+      CodemodInvocationContext context, CompilationUnit cu, T node, Result result);
+
+  private static final Logger logger = LoggerFactory.getLogger(SemgrepJavaParserChanger.class);
 }

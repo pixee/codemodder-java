@@ -6,13 +6,14 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.contrastsecurity.sarif.Region;
-import com.github.javaparser.ast.visitor.ModifierVisitor;
+import com.contrastsecurity.sarif.Result;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.codemodder.Changer;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodInvocationContext;
-import io.codemodder.FileWeavingContext;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import java.io.IOException;
@@ -46,8 +47,7 @@ final class SemgrepModuleTest {
       author = "pixee",
       id = "pixee-test:java/explicit-yaml-test",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class UsesExplicitYamlPath extends SemgrepJavaParserChanger {
-    private final RuleSarif ruleSarif;
+  static class UsesExplicitYamlPath extends SemgrepJavaParserChanger<ObjectCreationExpr> {
 
     @Inject
     UsesExplicitYamlPath(
@@ -55,15 +55,15 @@ final class SemgrepModuleTest {
                 pathToYaml = "/other_dir/explicit-yaml-path.yaml",
                 ruleId = "explicit-yaml-path")
             RuleSarif ruleSarif) {
-      super(ruleSarif);
-      this.ruleSarif = ruleSarif;
+      super(ruleSarif, ObjectCreationExpr.class);
     }
 
     @Override
-    public ModifierVisitor<FileWeavingContext> createVisitor(
-        final CodemodInvocationContext context, final List<Region> regions) {
-      return new ModifierVisitor<>();
-    }
+    public void onSemgrepResultFound(
+        final CodemodInvocationContext context,
+        final CompilationUnit cu,
+        final ObjectCreationExpr node,
+        final Result result) {}
   }
 
   @Codemod(
@@ -111,7 +111,7 @@ final class SemgrepModuleTest {
     SemgrepModule module = new SemgrepModule(tmpDir, List.of(UsesExplicitYamlPath.class));
     Injector injector = Guice.createInjector(module);
     UsesExplicitYamlPath instance = injector.getInstance(UsesExplicitYamlPath.class);
-    RuleSarif ruleSarif = instance.ruleSarif;
+    RuleSarif ruleSarif = instance.sarif;
     assertThat(ruleSarif, is(notNullValue()));
     assertThat(ruleSarif.getRegionsFromResultsByRule(javaFile).size(), is(1));
   }

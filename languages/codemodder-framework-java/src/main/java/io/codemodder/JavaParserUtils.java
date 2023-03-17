@@ -1,6 +1,7 @@
 package io.codemodder;
 
 import com.contrastsecurity.sarif.Region;
+import com.github.javaparser.Position;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -25,7 +26,8 @@ public final class JavaParserUtils {
     if (imports.contains(newImport)) {
       return;
     }
-    for (ImportDeclaration existingImport : imports) {
+    for (int i = 0; i < imports.size(); i++) {
+      ImportDeclaration existingImport = imports.get(i);
       if (existingImport.getNameAsString().compareToIgnoreCase(className) > 0) {
         imports.addBefore(newImport, existingImport);
         return;
@@ -50,5 +52,17 @@ public final class JavaParserUtils {
             region.getEndColumn());
     Range observedRange = node.getRange().get();
     return observedRange.overlapsWith(sarifRange);
+  }
+
+  /**
+   * Return true if the {@link Node} is {@link Region} start at the same location.
+   *
+   * @param node the AST node to compare
+   * @param region the SARIF region to compare
+   * @return true, if the two locations have equivalent start line and columns
+   */
+  public static boolean regionMatchesNodeStart(final Node node, final Region region) {
+    Position position = node.getRange().get().begin;
+    return region.getStartLine() == position.line && region.getStartColumn() == position.column;
   }
 }
