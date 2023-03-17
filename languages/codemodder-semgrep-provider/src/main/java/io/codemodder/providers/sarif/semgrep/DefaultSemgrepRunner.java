@@ -38,7 +38,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     Path semgrepIgnoreFile = Files.createFile(tmpDir.resolve(".semgrepignore"));
     Files.write(semgrepIgnoreFile, OUR_SEMGREPIGNORE_CONTENTS.getBytes(StandardCharsets.UTF_8));
 
-    Process p = new ProcessBuilder(args).inheritIO().start();
+    Process p = new ProcessBuilder(args).directory(tmpDir.toString()).inheritIO().start();
     try {
       int rc = p.waitFor();
       if (rc != 0) {
