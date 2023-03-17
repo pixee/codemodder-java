@@ -42,31 +42,27 @@ public final class SemgrepRuleSarif implements RuleSarif {
 
   @Override
   public List<Region> getRegionsFromResultsByRule(final Path path) {
-    List<Result> resultsFilteredByRule =
-        sarif.getRuns().get(0).getResults().stream()
-            .filter(result -> result.getRuleId().endsWith("." + ruleId))
-            .collect(Collectors.toUnmodifiableList());
-    List<Result> resultsFilteredByRuleAndPath =
-        resultsFilteredByRule.stream()
-            .filter(
-                result -> {
-                  String uri =
-                      result
-                          .getLocations()
-                          .get(0)
-                          .getPhysicalLocation()
-                          .getArtifactLocation()
-                          .getUri();
-                  try {
-                    return Files.isSameFile(path, Path.of(uri));
-                  } catch (IOException e) { // this should never happen
-                    logger.error("Problem inspecting SARIF to find code regions", e);
-                    return false;
-                  }
-                })
-            .collect(Collectors.toUnmodifiableList());
-    return resultsFilteredByRuleAndPath.stream()
+    return getResultsByPath(path).stream()
+        .filter(result -> result.getRuleId().endsWith("." + ruleId))
         .map(result -> result.getLocations().get(0).getPhysicalLocation().getRegion())
+        .collect(Collectors.toUnmodifiableList());
+  }
+
+  @Override
+  public List<Result> getResultsByPath(final Path path) {
+    return sarif.getRuns().get(0).getResults().stream()
+        .filter(result -> result.getRuleId().endsWith("." + ruleId))
+        .filter(
+            result -> {
+              String uri =
+                  result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri();
+              try {
+                return Files.isSameFile(path, Path.of(uri));
+              } catch (IOException e) { // this should never happen
+                logger.error("Problem inspecting SARIF to find code results", e);
+                return false;
+              }
+            })
         .collect(Collectors.toUnmodifiableList());
   }
 

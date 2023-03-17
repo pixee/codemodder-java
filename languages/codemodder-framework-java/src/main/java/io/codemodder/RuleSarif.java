@@ -1,6 +1,7 @@
 package io.codemodder;
 
 import com.contrastsecurity.sarif.Region;
+import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
 import java.nio.file.Path;
 import java.util.List;
@@ -15,6 +16,14 @@ public interface RuleSarif {
    * @return the source code regions where the given rule was found in the given file
    */
   List<Region> getRegionsFromResultsByRule(Path path);
+
+  /**
+   * Get all the SARIF results with the matching path
+   *
+   * @param path the file being scanned
+   * @return the results associated with the given file
+   */
+  List<Result> getResultsByPath(Path path);
 
   /** Return the entire SARIF as a model in case more comprehensive inspection is needed. */
   SarifSchema210 rawDocument();
