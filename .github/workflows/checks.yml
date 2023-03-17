@@ -33,4 +33,4 @@ jobs:
           github-token: ${{ secrets.github_token }}
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: check
+          arguments: check --stacktrace
