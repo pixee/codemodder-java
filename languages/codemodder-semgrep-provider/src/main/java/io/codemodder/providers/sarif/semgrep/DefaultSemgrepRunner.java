@@ -19,7 +19,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
 
   @Override
   public SarifSchema210 run(final List<Path> ruleYamls, final Path repository) throws IOException {
-    String repositoryPath = repository.toString();
+    String repositoryPath = repository.toAbsolutePath().toString();
     Path sarifFile = Files.createTempFile("semgrep", ".sarif");
 
     List<String> args = new ArrayList<>();
@@ -33,12 +33,15 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     }
     args.add(repositoryPath);
 
-    // create an empty .semgrepignore file
+    /*
+     * Create an empty directory to be the working directory, and add an .semgrepignore file that allows scanning
+     * everything. If we don't do this, Semgrep will use its defaults which exclude a lot of stuff we want to scan.
+     */
     Path tmpDir = Files.createTempDirectory("codemodder-semgrep");
     Path semgrepIgnoreFile = Files.createFile(tmpDir.resolve(".semgrepignore"));
     Files.write(semgrepIgnoreFile, OUR_SEMGREPIGNORE_CONTENTS.getBytes(StandardCharsets.UTF_8));
 
-    Process p = new ProcessBuilder(args).directory(tmpDir.toFile()).inheritIO().start();
+    Process p = new ProcessBuilder(args).directory(tmpDir.toFile()).start();
     try {
       int rc = p.waitFor();
       if (rc != 0) {
