@@ -2,14 +2,13 @@ package io.codemodder.providers.sarif.semgrep;
 
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 final class DefaultSemgrepRunner implements SemgrepRunner {
 
@@ -35,21 +34,10 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     }
     args.add(repositoryPath);
 
-    // backup existing .segmrepignore if it exists
-    Path existingSemgrepFile = Path.of(".semgrepignore").toAbsolutePath();
-    Optional<Path> backup = Optional.empty();
-
-    if (Files.exists(existingSemgrepFile)) {
-      Path backupFile = Files.createTempFile("backup", ".semgrepignore");
-      if (Files.exists(backupFile)) {
-        Files.delete(backupFile);
-      }
-      Files.copy(existingSemgrepFile, backupFile);
-      backup = Optional.of(backupFile);
-    }
-
     // create an empty .semgrepignore file
-    Files.write(existingSemgrepFile, OUR_SEMGREPIGNORE_CONTENTS.getBytes(StandardCharsets.UTF_8));
+    Path tmpDir = Files.createTempDirectory("codemodder-semgrep");
+    Path semgrepIgnoreFile = Files.createFile(tmpDir.resolve(".semgrepignore"));
+    Files.write(semgrepIgnoreFile, OUR_SEMGREPIGNORE_CONTENTS.getBytes(StandardCharsets.UTF_8));
 
     Process p = new ProcessBuilder(args).inheritIO().start();
     try {
@@ -61,15 +49,11 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
       throw new RuntimeException("problem waiting for semgrep process execution", e);
     }
 
-    // restore existing .semgrepignore if it exists
-    if (backup.isPresent()) {
-      Files.copy(backup.get(), existingSemgrepFile, StandardCopyOption.REPLACE_EXISTING);
-    } else {
-      Files.delete(existingSemgrepFile);
-    }
 
     SarifSchema210 sarif =
         objectMapper.readValue(Files.newInputStream(sarifFile), SarifSchema210.class);
+    Files.delete(semgrepIgnoreFile);
+    Files.delete(tmpDir);
     Files.delete(sarifFile);
     return sarif;
   }
