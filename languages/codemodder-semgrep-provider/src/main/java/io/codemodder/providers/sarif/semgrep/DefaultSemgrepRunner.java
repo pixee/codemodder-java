@@ -2,7 +2,6 @@ package io.codemodder.providers.sarif.semgrep;
 
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -48,7 +47,6 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     } catch (InterruptedException e) {
       throw new RuntimeException("problem waiting for semgrep process execution", e);
     }
-
 
     SarifSchema210 sarif =
         objectMapper.readValue(Files.newInputStream(sarifFile), SarifSchema210.class);
