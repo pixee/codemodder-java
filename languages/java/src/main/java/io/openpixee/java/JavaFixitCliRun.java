@@ -14,6 +14,7 @@ import io.github.pixee.codetf.CodeTFReport;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -115,7 +116,7 @@ public final class JavaFixitCliRun {
 
     LOG.debug("Scanning following files: {}", allJavaFiles.size());
 
-    new Random();
+    new SecureRandom();
 
     List<Class<? extends Changer>> defaultCodemodTypes = DefaultCodemods.asList();
     CodemodInvoker codemodInvoker =
