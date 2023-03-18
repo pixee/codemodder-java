@@ -24,6 +24,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
 
     List<String> args = new ArrayList<>();
     args.add("semgrep");
+    args.add("--no-error");
     args.add("--sarif");
     args.add("-o");
     args.add(sarifFile.toAbsolutePath().toString());
@@ -41,7 +42,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     Path semgrepIgnoreFile = Files.createFile(tmpDir.resolve(".semgrepignore"));
     Files.write(semgrepIgnoreFile, OUR_SEMGREPIGNORE_CONTENTS.getBytes(StandardCharsets.UTF_8));
 
-    Process p = new ProcessBuilder(args).directory(tmpDir.toFile()).start();
+    Process p = new ProcessBuilder(args).directory(tmpDir.toFile()).inheritIO().start();
     try {
       int rc = p.waitFor();
       if (rc != 0) {

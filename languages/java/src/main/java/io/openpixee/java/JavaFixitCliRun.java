@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -113,6 +114,8 @@ public final class JavaFixitCliRun {
                     .collect(Collectors.toList())));
 
     LOG.debug("Scanning following files: {}", allJavaFiles.size());
+
+    new Random();
 
     List<Class<? extends Changer>> defaultCodemodTypes = DefaultCodemods.asList();
     CodemodInvoker codemodInvoker =
