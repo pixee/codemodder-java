@@ -2,12 +2,15 @@ package io.codemodder.providers.sarif.semgrep;
 
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class DefaultSemgrepRunner implements SemgrepRunner {
 
@@ -19,21 +22,24 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
 
   @Override
   public SarifSchema210 run(final List<Path> ruleYamls, final Path repository) throws IOException {
-    String repositoryPath = repository.toAbsolutePath().toString();
+    Path repositoryPath = repository.toAbsolutePath();
     Path sarifFile = Files.createTempFile("semgrep", ".sarif");
 
+    LOG.info("Repository: {}", dumpInfo(repositoryPath));
     List<String> args = new ArrayList<>();
     args.add("semgrep");
     args.add("--no-error");
     args.add("--sarif");
     args.add("-o");
     args.add(sarifFile.toAbsolutePath().toString());
+
     for (Path ruleYamlPath : ruleYamls) {
       args.add("--config");
       args.add(ruleYamlPath.toString());
     }
-    args.add(repositoryPath);
+    args.add(repositoryPath.toString());
 
+    LOG.info("Process arguments: {}", args);
     /*
      * Create an empty directory to be the working directory, and add an .semgrepignore file that allows scanning
      * everything. If we don't do this, Semgrep will use its defaults which exclude a lot of stuff we want to scan.
@@ -42,9 +48,14 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     Path semgrepIgnoreFile = Files.createFile(tmpDir.resolve(".semgrepignore"));
     Files.write(semgrepIgnoreFile, OUR_SEMGREPIGNORE_CONTENTS.getBytes(StandardCharsets.UTF_8));
 
+    LOG.info("Will execute Semgrep from this directory: {}", dumpInfo(tmpDir));
+    LOG.info("Semgrep ignore file is located at: {}", dumpInfo(semgrepIgnoreFile));
+    LOG.info("SARIF file will be located at: {}", dumpInfo(sarifFile));
+
     Process p = new ProcessBuilder(args).directory(tmpDir.toFile()).inheritIO().start();
     try {
       int rc = p.waitFor();
+      LOG.info("Semgrep return code: {}", rc);
       if (rc != 0) {
         throw new RuntimeException("error code seen from semgrep execution: " + rc);
       }
@@ -60,5 +71,11 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     return sarif;
   }
 
+  private String dumpInfo(final Path path) {
+    File file = path.toFile();
+    return path + " (canRead=" + file.canRead() + ", canWrite=" + file.canWrite() + ")";
+  }
+
   private static final String OUR_SEMGREPIGNORE_CONTENTS = "# dont ignore anything";
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultSemgrepRunner.class);
 }
