@@ -1,12 +1,20 @@
 package io.openpixee.java.ast;
 
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.RecordDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.stmt.CatchClause;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
+import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
+import com.github.javaparser.ast.stmt.LocalRecordDeclarationStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import java.util.Optional;
@@ -109,6 +117,130 @@ public final class ASTPatterns {
       final var maybeVD = vde.getVariables().stream().filter(isVDOf).findFirst();
       if (maybeVD.isPresent()) {
         return Optional.of(new Triplet<>(fstmt, vde, maybeVD.get()));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link LambdaExpr} ({@code node}) -&gt; {@link Parameter} -&gt; {@link
+   * SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<LambdaExpr, Parameter>> isLambdaExprParameterOf(
+      final Node node, final String name) {
+    if (node instanceof LambdaExpr) {
+      var lexpr = (LambdaExpr) node;
+      for (var parameter : lexpr.getParameters()) {
+        if (parameter.getNameAsString().equals(name))
+          return Optional.of(new Pair<>(lexpr, parameter));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link CatchClause} ({@code node}) -&gt; {@link Parameter} -&gt; {@link
+   * SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<CatchClause, Parameter>> isExceptionParameterOf(
+      final Node node, final String name) {
+    if (node instanceof CatchClause) {
+      var catchClause = (CatchClause) node;
+      if (catchClause.getParameter().getNameAsString().equals(name))
+        return Optional.of(new Pair<>(catchClause, catchClause.getParameter()));
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link MethodDeclaration} ({@code node}) -&gt; {@link Parameter} -&gt;
+   * {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<MethodDeclaration, Parameter>> isMethodFormalParameterOf(
+      final Node node, final String name) {
+    if (node instanceof MethodDeclaration) {
+      var mdecl = (MethodDeclaration) node;
+      for (var parameter : mdecl.getParameters()) {
+        if (parameter.getNameAsString().equals(name))
+          return Optional.of(new Pair<>(mdecl, parameter));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link ConstructorDeclaration} ({@code node}) -&gt; {@link Parameter}
+   * -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<ConstructorDeclaration, Parameter>> isConstructorFormalParameter(
+      final Node node, final String name) {
+    if (node instanceof ConstructorDeclaration) {
+      var mdecl = (ConstructorDeclaration) node;
+      for (var parameter : mdecl.getParameters()) {
+        if (parameter.getNameAsString().equals(name))
+          return Optional.of(new Pair<>(mdecl, parameter));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link LocalClassDeclarationStmt} ({@code node}) -&gt; {@link
+   * ClassOrInterfaceDeclaration} -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<LocalClassDeclarationStmt, ClassOrInterfaceDeclaration>>
+      isLocalTypeDeclarationOf(final Node node, final String name) {
+    if (node instanceof LocalClassDeclarationStmt) {
+      var stmtDecl = (LocalClassDeclarationStmt) node;
+      if (stmtDecl.getClassDeclaration().getNameAsString().equals(name)) {
+        return Optional.of(new Pair<>(stmtDecl, stmtDecl.getClassDeclaration()));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link LocalRecordDeclarationStmt} ({@code node}) -&gt; {@link
+   * RecordDeclaration} -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<LocalRecordDeclarationStmt, RecordDeclaration>>
+      isLocalRecordDeclarationOf(final Node node, final String name) {
+    if (node instanceof LocalRecordDeclarationStmt) {
+      var stmtDecl = (LocalRecordDeclarationStmt) node;
+      if (stmtDecl.getRecordDeclaration().getNameAsString().equals(name)) {
+        return Optional.of(new Pair<>(stmtDecl, stmtDecl.getRecordDeclaration()));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link ClassOrInterfaceDeclaration} ({@code node}) -&gt; {@link
+   * FieldDeclaration} -&gt; {@link VariableDeclarator} -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Triplet<ClassOrInterfaceDeclaration, FieldDeclaration, VariableDeclarator>>
+      hasFieldDeclarationOf(final Node node, final String name) {
+    if (node instanceof ClassOrInterfaceDeclaration) {
+      var classDecl = (ClassOrInterfaceDeclaration) node;
+      for (var field : classDecl.getFields()) {
+        for (var vd : field.getVariables()) {
+          if (vd.getNameAsString().equals(name))
+            return Optional.of(new Triplet<>(classDecl, field, vd));
+        }
       }
     }
     return Optional.empty();

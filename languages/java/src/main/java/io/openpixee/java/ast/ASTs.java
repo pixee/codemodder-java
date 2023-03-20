@@ -2,13 +2,20 @@ package io.openpixee.java.ast;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
@@ -16,6 +23,7 @@ import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -125,7 +133,7 @@ public final class ASTs {
     Predicate<AssignExpr> isLHS =
         ae ->
             ae.getTarget().isNameExpr()
-                && ae.getTarget().asNameExpr().getName().asString().equals(vd.getName().asString());
+                && ae.getTarget().asNameExpr().getNameAsString().equals(vd.getNameAsString());
     if (vd.getInitializer().isPresent()) {
       for (var stmt : scope.getStatements())
         if (stmt.findFirst(AssignExpr.class, isLHS).isPresent()) return false;
@@ -173,6 +181,166 @@ public final class ASTs {
     if (p instanceof ForStmt) return LocalVariableScope.fromForDeclaration((ForStmt) p, vd);
     // Should not happen
     return null;
+  }
+
+  public static ReverseEvaluationOrder reversePreOrderIterator(Node n) {
+    if (n.getParentNode().isPresent()) {
+      int pos = n.getParentNode().get().getChildNodes().indexOf(n);
+      return new ReverseEvaluationOrder(n, pos);
+    } else {
+      return new ReverseEvaluationOrder(n, 0);
+    }
+  }
+
+  public static final class ReverseEvaluationOrder implements Iterator<Node> {
+
+    private Node current;
+    private int posFromParent;
+
+    ReverseEvaluationOrder(Node n, int posFromParent) {
+      this.current = n;
+      this.posFromParent = posFromParent;
+    }
+
+    @Override
+    public Node next() {
+      var parent = current.getParentNode().get();
+      if (posFromParent == 0) {
+        current = current.getParentNode().get();
+        if (current.getParentNode().isPresent()) {
+          posFromParent = current.getParentNode().get().getChildNodes().indexOf(current);
+        } else {
+          posFromParent = 0;
+        }
+        return current;
+      } else {
+        current = parent.getChildNodes().get(--posFromParent);
+        return current;
+      }
+    }
+
+    @Override
+    public boolean hasNext() {
+      return current.getParentNode().isPresent();
+    }
+  }
+
+  private static Optional<Node> isLocalNameSource(Node n, String name) {
+    if (ASTPatterns.isExpressionStmtDeclarationOf(n, name).isPresent()
+        || ASTPatterns.isResourceOf(n, name).isPresent()
+        || ASTPatterns.isForVariableDeclarationOf(n, name).isPresent()
+        || ASTPatterns.isForEachVariableDeclarationOf(n, name).isPresent()
+        || ASTPatterns.isLambdaExprParameterOf(n, name).isPresent()
+        || ASTPatterns.isExceptionParameterOf(n, name).isPresent()
+        || ASTPatterns.isMethodFormalParameterOf(n, name).isPresent()
+        || ASTPatterns.isConstructorFormalParameter(n, name).isPresent()
+        || ASTPatterns.isLocalTypeDeclarationOf(n, name).isPresent()
+        || ASTPatterns.isLocalRecordDeclarationOf(n, name).isPresent()) {
+      return Optional.of(n);
+    }
+    return Optional.empty();
+    //	PatternExpr -> SimpleName
+    // Field:
+    // 	FieldDeclaration -> VariableDeclarator -> SimpleName
+    // Annotation interface declaration
+    // imported type
+    // imported static member
+  }
+
+  /**
+   * Checks if there exists a non-callable member with {@code name} in an @{link
+   * ClassOrInterfaceDeclaration}. If so, returns the {@link Node} with the declaration.
+   */
+  public static Optional<Node> isClassOrNonCallableMemberOf(
+      final ClassOrInterfaceDeclaration classDecl, final String name) {
+    if (classDecl.getNameAsString().equals(name)) return Optional.of(classDecl);
+    for (var m : classDecl.getMembers()) {
+      if (m instanceof CallableDeclaration) {
+        // ignore callable
+      }
+      // AnnotationMemberDeclaration,  CompactConstructorDeclaration,
+      // EnumConstantDeclaration, TypeDeclaration
+      else if (m instanceof NodeWithSimpleName<?>) {
+        var named = (NodeWithSimpleName<?>) m;
+        if (named.getNameAsString().equals(name)) {
+          return Optional.of(m);
+        }
+      } else if (m instanceof FieldDeclaration) {
+        var maybeVD =
+            m.asFieldDeclaration().getVariables().stream()
+                .filter(vd -> vd.getNameAsString().equals(name))
+                .findFirst();
+        if (maybeVD.isPresent()) return Optional.of(m);
+      }
+      // InitializerDeclaration does not introduce fields
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Checks if there exists a enum entry with {@code name} in an @{link EnumDeclaration}. If so,
+   * returns the {@link Node} with the declaration.
+   */
+  public static Optional<Node> isEnumMemberOf(final EnumDeclaration enumDecl, final String name) {
+    return enumDecl.getEntries().stream()
+        .filter(ecd -> ecd.getNameAsString().equals(name))
+        .findFirst()
+        .map(ecd -> ecd);
+  }
+
+  private static Optional<Node> findLocalNameSource(Node current, final String name) {
+    var it = reversePreOrderIterator(current);
+    while (!(current instanceof TypeDeclaration) && it.hasNext()) {
+      current = it.next();
+      var maybeFound = isLocalNameSource(current, name);
+      if (maybeFound.isPresent()) return maybeFound;
+    }
+    return Optional.empty();
+  }
+
+  /** Finds the {@link ClassOrInterfaceDeclaration} that is referenced by a {@link ThisExpr}. */
+  public static ClassOrInterfaceDeclaration findThisDeclaration(final ThisExpr thisExpr) {
+    Node current = thisExpr;
+    while (current.hasParentNode() && !(current instanceof ClassOrInterfaceDeclaration)) {
+      current = current.getParentNode().get();
+    }
+    return (ClassOrInterfaceDeclaration) current;
+  }
+
+  /**
+   * Tries to find the declaration that originates a {@link SimpleName} use that is not a name of a
+   * {@link MethodCallExpr} or {@link MethodReferenceExpr}.
+   */
+  public static Optional<Node> findNonCallableSimpleNameSource(final SimpleName name) {
+    // Callable names need more context like signatures to be found. Also can be overloaded
+    // TODO consider type parameters?
+    // TODO consider reflexivity? class A{} -> A -> class A{}
+    Node current = name;
+    // Search locally first
+    while (current.hasParentNode()) {
+      current = current.getParentNode().get();
+      // try locally first, goes reverse pre order until it reaches a type declaration
+      var maybeDecl = findLocalNameSource(current, name.asString());
+      if (maybeDecl.isPresent()) {
+        return maybeDecl;
+      }
+      // TypeDeclaration: ClassOrInterfaceDeclaration, EnumDeclaration, RecordDeclaration
+      if (current instanceof ClassOrInterfaceDeclaration) {
+        maybeDecl =
+            isClassOrNonCallableMemberOf((ClassOrInterfaceDeclaration) current, name.asString());
+      }
+      if (maybeDecl.isPresent()) {
+        return maybeDecl;
+      }
+    }
+    // reached CompilationUnit check for top level classes
+    var topLevelTypes = current.findCompilationUnit().get().getTypes();
+    var maybeDecl =
+        topLevelTypes.stream().filter(t -> t.getNameAsString().equals(name.asString())).findFirst();
+    if (maybeDecl.isPresent()) return maybeDecl.map(n -> n);
+
+    // it's either wildcard imported, inherited, or in the package namespace
+    return Optional.empty();
   }
 
   public static Optional<LocalVariableDeclaration> findEarliestLocalDeclarationOf(
