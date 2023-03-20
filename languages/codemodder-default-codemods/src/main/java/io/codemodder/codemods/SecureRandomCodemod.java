@@ -1,16 +1,17 @@
 package io.codemodder.codemods;
 
-import com.contrastsecurity.sarif.Region;
-import com.github.javaparser.ast.visitor.ModifierVisitor;
-import io.codemodder.ChangeConstructorTypeVisitor;
+import static io.codemodder.JavaParserUtils.addImportIfMissing;
+
+import com.contrastsecurity.sarif.Result;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodInvocationContext;
-import io.codemodder.FileWeavingContext;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import java.util.List;
+import java.security.SecureRandom;
 import javax.inject.Inject;
 
 /** Turns {@link java.util.Random} into {@link java.security.SecureRandom}. */
@@ -18,19 +19,22 @@ import javax.inject.Inject;
     id = "pixee:java/secure-random",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class SecureRandomCodemod extends SemgrepJavaParserChanger {
+public final class SecureRandomCodemod extends SemgrepJavaParserChanger<ObjectCreationExpr> {
 
   @Inject
   public SecureRandomCodemod(
       @SemgrepScan(pathToYaml = "/secure-random.yaml", ruleId = "secure-random")
           final RuleSarif sarif) {
-    super(sarif);
+    super(sarif, ObjectCreationExpr.class);
   }
 
   @Override
-  public ModifierVisitor<FileWeavingContext> createVisitor(
-      final CodemodInvocationContext context, final List<Region> regions) {
-    return new ChangeConstructorTypeVisitor(
-        regions, "java.security.SecureRandom", context.codemodId());
+  public void onSemgrepResultFound(
+      final CodemodInvocationContext context,
+      final CompilationUnit cu,
+      final ObjectCreationExpr objectCreationExpr,
+      final Result result) {
+    objectCreationExpr.setType("SecureRandom");
+    addImportIfMissing(cu, SecureRandom.class.getName());
   }
 }

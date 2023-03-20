@@ -2,11 +2,14 @@ package io.openpixee.java.protections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.visitor.ModifierVisitor;
 import io.codemodder.ChangedFile;
 import io.codemodder.CodemodInvoker;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
 import io.codemodder.codemods.SecureRandomCodemod;
+import io.openpixee.java.DoNothingVisitor;
 import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.SourceDirectory;
 import io.openpixee.java.SourceWeaver;
@@ -76,6 +79,30 @@ public abstract class WeavingTests {
         analyzer, directory, visitorFactories, codemodInvoker, includesExcludes);
 
     return changedFile;
+  }
+
+  /**
+   * This overload is for facilitating the migration from the old legacy {@link VisitorFactory}
+   * strategy to the {@link io.codemodder.Codemod} strategy. This follows all the same testing path,
+   * except it uses a dummy visitor that won't do anything useful, so we can be sure that the
+   * changes that occur due to codemods.
+   */
+  public static ChangedFile assertJavaWeaveWorkedAndWontReweave(final String pathToVulnerableFile)
+      throws IOException {
+    return assertJavaWeaveWorkedAndWontReweave(
+        pathToVulnerableFile,
+        new VisitorFactory() {
+          @Override
+          public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
+              final File file, final CompilationUnit cu) {
+            return new DoNothingVisitor();
+          }
+
+          @Override
+          public String ruleId() {
+            return "pixee:java/unused";
+          }
+        });
   }
 
   public static ChangedFile assertJavaWeaveWorkedAndWontReweave(

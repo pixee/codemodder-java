@@ -1,11 +1,14 @@
 package io.openpixee.java.protections;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BreakStmt;
 import com.github.javaparser.ast.stmt.EmptyStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.openpixee.java.ast.ASTTransforms;
 import org.junit.jupiter.api.Disabled;
@@ -45,5 +48,23 @@ final class LexicalTest {
     LexicalPreservingPrinter.setup(cu);
     ASTTransforms.addStatementBeforeStatement(estmt, bstmt);
     assertThat(LexicalPreservingPrinter.print(cu), equalTo(expected));
+  }
+
+  @Test
+  void javaparser_doesnt_change_lines_in_realtime() {
+    var original = "class A {\n" + "  void foo() {\n" + "    bar();\n" + "  }\n" + "}";
+    var expected =
+        "class A {\n" + "  void foo() {\n" + "    newCall();\n" + "    bar();\n" + "  }\n" + "}";
+    var cu = new JavaParser().parse(original).getResult().get();
+    LexicalPreservingPrinter.setup(cu);
+    var barMethodCallStmt = cu.findAll(ExpressionStmt.class).stream().findFirst().get();
+    var newCallStmt = new ExpressionStmt(new MethodCallExpr("newCall"));
+    assertThat(newCallStmt.getRange().isEmpty(), is(true));
+    assertThat(barMethodCallStmt.getRange().get().begin.line, equalTo(3));
+    ASTTransforms.addStatementBeforeStatement(barMethodCallStmt, newCallStmt);
+    assertThat(newCallStmt.getRange().isEmpty(), is(true));
+    assertThat(barMethodCallStmt.getRange().get().begin.line, equalTo(3));
+    assertThat(LexicalPreservingPrinter.print(cu), equalTo(expected));
+    assertThat(barMethodCallStmt.getRange().get().begin.line, equalTo(3));
   }
 }

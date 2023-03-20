@@ -2,14 +2,15 @@ package io.codemodder.providers.sarif.semgrep;
 
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class DefaultSemgrepRunner implements SemgrepRunner {
 
@@ -21,39 +22,44 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
 
   @Override
   public SarifSchema210 run(final List<Path> ruleYamls, final Path repository) throws IOException {
-    String repositoryPath = repository.toString();
+    Path repositoryPath = repository.toAbsolutePath();
     Path sarifFile = Files.createTempFile("semgrep", ".sarif");
 
+    LOG.info("Repository: {}", dumpInfo(repositoryPath));
     List<String> args = new ArrayList<>();
     args.add("semgrep");
+    args.add("--no-error");
     args.add("--sarif");
     args.add("-o");
     args.add(sarifFile.toAbsolutePath().toString());
+
     for (Path ruleYamlPath : ruleYamls) {
       args.add("--config");
       args.add(ruleYamlPath.toString());
     }
-    args.add(repositoryPath);
+    args.add(repositoryPath.toString());
 
-    // backup existing .segmrepignore if it exists
-    Path existingSemgrepFile = Path.of(".semgrepignore").toAbsolutePath();
-    Optional<Path> backup = Optional.empty();
+    LOG.info("Process arguments: {}", args);
+    /*
+     * Create an empty directory to be the working directory, and add an .semgrepignore file that allows scanning
+     * everything. If we don't do this, Semgrep will use its defaults which exclude a lot of stuff we want to scan.
+     */
+    Path tmpDir = Files.createTempDirectory("codemodder-semgrep");
+    Path semgrepIgnoreFile = Files.createFile(tmpDir.resolve(".semgrepignore"));
+    Files.write(semgrepIgnoreFile, OUR_SEMGREPIGNORE_CONTENTS.getBytes(StandardCharsets.UTF_8));
 
-    if (Files.exists(existingSemgrepFile)) {
-      Path backupFile = Files.createTempFile("backup", ".semgrepignore");
-      if (Files.exists(backupFile)) {
-        Files.delete(backupFile);
-      }
-      Files.copy(existingSemgrepFile, backupFile);
-      backup = Optional.of(backupFile);
-    }
+    LOG.info("Will execute Semgrep from this directory: {}", dumpInfo(tmpDir));
+    LOG.info("Semgrep ignore file is located at: {}", dumpInfo(semgrepIgnoreFile));
+    LOG.info("SARIF file will be located at: {}", dumpInfo(sarifFile));
 
-    // create an empty .semgrepignore file
-    Files.write(existingSemgrepFile, OUR_SEMGREPIGNORE_CONTENTS.getBytes(StandardCharsets.UTF_8));
-
-    Process p = new ProcessBuilder(args).inheritIO().start();
+    Path semgrepHome = Files.createTempDirectory("semgrep-home").toAbsolutePath();
+    LOG.info("Semgrep home will be: {}", dumpInfo(semgrepHome));
+    ProcessBuilder pb = new ProcessBuilder(args);
+    pb.environment().put("HOME", semgrepHome.toString());
+    Process p = pb.directory(tmpDir.toFile()).inheritIO().start();
     try {
       int rc = p.waitFor();
+      LOG.info("Semgrep return code: {}", rc);
       if (rc != 0) {
         throw new RuntimeException("error code seen from semgrep execution: " + rc);
       }
@@ -61,18 +67,19 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
       throw new RuntimeException("problem waiting for semgrep process execution", e);
     }
 
-    // restore existing .semgrepignore if it exists
-    if (backup.isPresent()) {
-      Files.copy(backup.get(), existingSemgrepFile, StandardCopyOption.REPLACE_EXISTING);
-    } else {
-      Files.delete(existingSemgrepFile);
-    }
-
     SarifSchema210 sarif =
         objectMapper.readValue(Files.newInputStream(sarifFile), SarifSchema210.class);
+    Files.delete(semgrepIgnoreFile);
+    Files.delete(tmpDir);
     Files.delete(sarifFile);
     return sarif;
   }
 
+  private String dumpInfo(final Path path) {
+    File file = path.toFile();
+    return path + " (canRead=" + file.canRead() + ", canWrite=" + file.canWrite() + ")";
+  }
+
   private static final String OUR_SEMGREPIGNORE_CONTENTS = "# dont ignore anything";
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultSemgrepRunner.class);
 }

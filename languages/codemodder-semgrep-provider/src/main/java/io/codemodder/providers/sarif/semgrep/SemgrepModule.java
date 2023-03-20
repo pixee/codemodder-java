@@ -84,6 +84,11 @@ final class SemgrepModule extends AbstractModule {
             }
           });
 
+      if (toBind.isEmpty()) {
+        logger.info("No Semgrep-based codemods, not running");
+        return;
+      }
+
       // copy the yaml out of the classpath onto disk so semgrep can use them
       List<Path> yamlRuleFiles =
           yamlClasspathPathsToRun.stream()
