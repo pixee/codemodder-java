@@ -52,7 +52,11 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     LOG.info("Semgrep ignore file is located at: {}", dumpInfo(semgrepIgnoreFile));
     LOG.info("SARIF file will be located at: {}", dumpInfo(sarifFile));
 
-    Process p = new ProcessBuilder(args).directory(tmpDir.toFile()).inheritIO().start();
+    Path semgrepHome = Files.createTempDirectory("semgrep-home").toAbsolutePath();
+    LOG.info("Semgrep home will be: {}", dumpInfo(semgrepHome));
+    ProcessBuilder pb = new ProcessBuilder(args);
+    pb.environment().put("HOME", semgrepHome.toString());
+    Process p = pb.directory(tmpDir.toFile()).inheritIO().start();
     try {
       int rc = p.waitFor();
       LOG.info("Semgrep return code: {}", rc);
