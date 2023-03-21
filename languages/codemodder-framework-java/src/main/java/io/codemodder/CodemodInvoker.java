@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import io.openpixee.security.XMLInputFactorySecurity;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -149,7 +150,7 @@ public final class CodemodInvoker {
    */
   public Optional<ChangedFile> executeXmlFile(final Path path, final FileWeavingContext context)
       throws XMLStreamException, IOException {
-    XMLInputFactory inputFactory = XMLInputFactory.newFactory();
+    XMLInputFactory inputFactory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory());
     XMLOutputFactory outputFactory = XMLOutputFactory.newFactory();
     StringWriter sw = new StringWriter();
 
