@@ -183,7 +183,8 @@ public final class CodemodInvoker {
       for (final XMLEventChangerContext changerContext : xmlChangers) {
         XMLEventElementChanger changer = changerContext.changer;
         CodemodInvocationContext codemodContext = changerContext.context;
-        boolean changed = changer.process(codemodContext, xmlReader, xmlWriter, currentEvent);
+        boolean changed =
+            changer.onXmlEventRead(codemodContext, xmlReader, xmlWriter, currentEvent);
         if (!changed) {
           xmlWriter.add(currentEvent);
         } else {

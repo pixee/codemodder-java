@@ -5,14 +5,16 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
-/** TODO: this */
+/** A changer for XML files which acts on {@link org.xml.sax.XMLReader} events. */
 public interface XMLEventElementChanger extends Changer {
 
   /**
-   * Return true if this was modified and we shouldn't call {@link XMLEventWriter#add(XMLEvent)} on
-   * the given event.
+   * An event that is fired when an {@link XMLEvent} has been read from an XML file.
+   *
+   * @return true if the state was updated, false if the event should be written to the {@link
+   *     XMLEventWriter}
    */
-  boolean process(
+  boolean onXmlEventRead(
       final CodemodInvocationContext invocationContext,
       XMLEventReader xmlReader,
       XMLEventWriter xmlWriter,

@@ -15,17 +15,22 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-/** TODO: this */
+/**
+ * This changer reads XML results from SARIF, matches them to events that are being visited, and
+ * forwards the matching events to subtypes. It is worth noting that this type is limited to
+ * forwarding SARIF results that match {@link StartElement} events -- meaning you can only use
+ * Semgrep that points to elements, not inner text, attributes, or any other kinds of nodes.
+ */
 public abstract class SemgrepXMLElementChanger implements XMLEventElementChanger {
 
   private final RuleSarif sarif;
 
-  public SemgrepXMLElementChanger(final RuleSarif semgrepSarif) {
-    this.sarif = Objects.requireNonNull(semgrepSarif);
+  public SemgrepXMLElementChanger(final RuleSarif sarif) {
+    this.sarif = Objects.requireNonNull(sarif);
   }
 
   @Override
-  public boolean process(
+  public boolean onXmlEventRead(
       final CodemodInvocationContext invocationContext,
       final XMLEventReader xmlReader,
       final XMLEventWriter xmlWriter,
@@ -57,7 +62,14 @@ public abstract class SemgrepXMLElementChanger implements XMLEventElementChanger
                     && xmlLocation.getColumnNumber() <= region.getEndColumn());
   }
 
-  /** TODO: this */
+  /**
+   * Perform whatever action is needed on this {@link StartElement} that was identified by the
+   * Semgrep SARIF.
+   *
+   * @param xmlReader the reader processing the XML
+   * @param xmlWriter the writer which is creating the transformed XML
+   * @param element the XML element being visited that matches a SARIF result
+   */
   protected abstract void onSemgrepResultFound(
       final XMLEventReader xmlReader, final XMLEventWriter xmlWriter, final StartElement element)
       throws XMLStreamException;

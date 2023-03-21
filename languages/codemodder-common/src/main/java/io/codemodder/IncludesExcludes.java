@@ -171,6 +171,7 @@ public interface IncludesExcludes {
     }
   }
 
+  /** Return an {@link IncludesExcludes} that matches all files and lines. */
   static IncludesExcludes any() {
     return new MatchesEverything();
   }

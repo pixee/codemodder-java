@@ -67,9 +67,8 @@ interface FileWeaver {
                         canonicalFile,
                         context,
                         javaSourceWeaveResult.changedFiles());
-
-                unscannableFiles.addAll(result.unscannableFiles());
                 changedFiles.addAll(result.changedFiles());
+                unscannableFiles.addAll(result.unscannableFiles());
               }
             } catch (IOException e) {
               LOG.error("Problem scanning repository files", e);
