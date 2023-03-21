@@ -32,7 +32,8 @@ final class VerbTamperingCodemodTest {
     assertThat(changedFile.isPresent(), is(true));
 
     String modifiedFile = Files.readString(Path.of(changedFile.get().modifiedFile()));
-    String expectedXml = Files.readString(Path.of(dir, "web-after-codemod.xml"));
+    String expectedXml =
+        Files.readString(Path.of("src/test/resources/verb-tampering/web-after-codemod.xml"));
     assertThat(modifiedFile, equalTo(expectedXml));
   }
 }
