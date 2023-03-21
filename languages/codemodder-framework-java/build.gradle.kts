@@ -28,6 +28,7 @@ dependencies {
 
     api(libs.guice)
     api(libs.contrast.sarif)
+    api(libs.java.security.toolkit)
     api(libs.javaparser.core)
     api(libs.javaparser.symbolsolver.core)
     api(libs.javaparser.symbolsolver.logic)
