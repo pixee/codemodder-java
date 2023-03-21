@@ -99,7 +99,7 @@ public interface VisitorAssembler {
       final List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
       defaultVisitors.add(new DependencyInjectingVisitor());
       defaultVisitors.add(new JspScriptletXSSVisitor());
-      defaultVisitors.add(new VerbTamperingVisitor());
+      //      defaultVisitors.add(new VerbTamperingVisitor());
       defaultVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
 
       final var allVisitors =

@@ -6,19 +6,27 @@ import io.codemodder.ChangedFile;
 import io.codemodder.Changer;
 import io.codemodder.CodemodInvoker;
 import io.codemodder.DefaultRuleSetting;
+import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
 import io.codemodder.RuleContext;
 import io.codemodder.Weave;
+import io.codemodder.WeavingResult;
 import io.codemodder.codemods.DefaultCodemods;
 import io.github.pixee.codetf.CodeTFReport;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.xml.stream.XMLStreamException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
@@ -117,6 +125,7 @@ public final class JavaFixitCliRun {
     List<Class<? extends Changer>> defaultCodemodTypes = DefaultCodemods.asList();
     CodemodInvoker codemodInvoker =
         new CodemodInvoker(defaultCodemodTypes, ruleContext, repositoryRoot.toPath());
+
     // run the Java code visitors
     final var javaSourceWeaveResult =
         javaSourceWeaver.weave(
@@ -132,11 +141,27 @@ public final class JavaFixitCliRun {
         visitorAssembler.assembleFileVisitors(repositoryRoot, ruleContext, sarifs);
 
     // run the non-Java code visitors
-    final var fileBasedWeaveResults =
+    var fileBasedWeaveResults =
         fileWeaver.weave(
-            fileBasedVisitors, repositoryRoot, javaSourceWeaveResult, includesExcludes);
+            fileBasedVisitors,
+            codemodInvoker,
+            repositoryRoot,
+            javaSourceWeaveResult,
+            includesExcludes);
 
-    // merge the results into one
+    // if the file visitors had no changes to make, offer it to codemods
+    List<Path> filesAlreadyChanged =
+        fileBasedWeaveResults.changedFiles().stream()
+            .map(file -> Path.of(file.originalFilePath()))
+            .collect(Collectors.toUnmodifiableList());
+    var codemodRawFileWeaveResults =
+        invokeXmlCodemods(
+            codemodInvoker, repositoryRoot.toPath(), filesAlreadyChanged, includesExcludes);
+
+    // merge the two types of ways we transform non-Java files
+    fileBasedWeaveResults = merge(fileBasedWeaveResults, codemodRawFileWeaveResults);
+
+    // merge the both results into one
     final var allWeaveResults = merge(javaSourceWeaveResult, fileBasedWeaveResults);
     final var changesCount =
         allWeaveResults.changedFiles().stream()
@@ -176,6 +201,47 @@ public final class JavaFixitCliRun {
     ObjectMapper mapper = new ObjectMapper();
     FileUtils.write(output, mapper.writeValueAsString(report), StandardCharsets.UTF_8);
     return report;
+  }
+
+  /**
+   * Invoke {@link io.codemodder.Codemod} types that offer XML transformation, making sure not to
+   * alter any files that have already been modified by legacy {@link FileBasedVisitor} types.
+   */
+  private WeavingResult invokeXmlCodemods(
+      final CodemodInvoker codemodInvoker,
+      final Path repositoryRoot,
+      final List<Path> filesAlreadyChanged,
+      final IncludesExcludes includesExcludes) {
+    Set<ChangedFile> changedFiles = new HashSet<>();
+    Set<String> unscannableFiles = new HashSet<>();
+
+    try (Stream<Path> stream = Files.walk(repositoryRoot, Integer.MAX_VALUE)) {
+      List<File> files =
+          stream
+              .filter(filesAlreadyChanged::contains)
+              .map(Path::toFile)
+              .filter(file -> file.getName().toLowerCase().endsWith(".xml"))
+              .filter(includesExcludes::shouldInspect)
+              .sorted()
+              .collect(Collectors.toList());
+
+      for (File filePath : files) {
+        var canonicalFile = filePath.getCanonicalFile();
+        var context =
+            FileWeavingContext.createDefault(includesExcludes.getIncludesExcludesForFile(filePath));
+        try {
+          Optional<ChangedFile> changedFile =
+              codemodInvoker.executeXmlFile(canonicalFile.toPath(), context);
+          changedFile.ifPresent(changedFiles::add);
+        } catch (XMLStreamException e) {
+          LOG.error("Problem visiting XML", e);
+        }
+      }
+    } catch (IOException e) {
+      LOG.error("Problem scanning repository files with codemods", e);
+    }
+
+    return WeavingResult.createDefault(changedFiles, unscannableFiles);
   }
 
   /** Dynamically raises the log level to DEBUG for more output! */

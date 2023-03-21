@@ -3,8 +3,10 @@ package io.openpixee.java;
 import static java.nio.file.Files.walk;
 
 import io.codemodder.ChangedFile;
+import io.codemodder.CodemodInvoker;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
+import io.codemodder.WeavingResult;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,6 +26,7 @@ interface FileWeaver {
 
   WeavingResult weave(
       List<FileBasedVisitor> repositoryWideWeavers,
+      CodemodInvoker invoker,
       File repositoryRoot,
       WeavingResult javaSourceWeaveResult,
       IncludesExcludes includesExcludes);
@@ -37,6 +40,7 @@ interface FileWeaver {
     @Override
     public WeavingResult weave(
         final List<FileBasedVisitor> repositoryWideWeavers,
+        final CodemodInvoker codemodInvoker,
         final File repositoryRoot,
         final WeavingResult javaSourceWeaveResult,
         final IncludesExcludes includesExcludes) {
@@ -63,8 +67,9 @@ interface FileWeaver {
                         canonicalFile,
                         context,
                         javaSourceWeaveResult.changedFiles());
-                changedFiles.addAll(result.changedFiles());
+
                 unscannableFiles.addAll(result.unscannableFiles());
+                changedFiles.addAll(result.changedFiles());
               }
             } catch (IOException e) {
               LOG.error("Problem scanning repository files", e);

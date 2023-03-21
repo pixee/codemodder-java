@@ -1,0 +1,11 @@
+rules:
+  - id: verb-tampering
+    patterns:
+      - pattern: <http-method>...</http-method>
+    paths:
+      include:
+        - "**/web.xml"
+    message: Semgrep found a match
+    languages:
+      - xml
+    severity: WARNING

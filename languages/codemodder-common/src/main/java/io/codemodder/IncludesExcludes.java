@@ -170,4 +170,8 @@ public interface IncludesExcludes {
       return new LineIncludesExcludes.MatchesEverything();
     }
   }
+
+  static IncludesExcludes any() {
+    return new MatchesEverything();
+  }
 }
