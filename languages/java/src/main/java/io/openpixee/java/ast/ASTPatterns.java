@@ -123,6 +123,20 @@ public final class ASTPatterns {
   }
 
   /**
+   * Test for this pattern: {@link PatternExpr} ({@code node}) -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<PatternExpr> isPatternExprDeclarationOf(
+      final Node node, final String name) {
+    if (node instanceof PatternExpr) {
+      var pexpr = (PatternExpr) node;
+      if (pexpr.getNameAsString().equals(name)) return Optional.of(pexpr);
+    }
+    return Optional.empty();
+  }
+
+  /**
    * Test for this pattern: {@link LambdaExpr} ({@code node}) -&gt; {@link Parameter} -&gt; {@link
    * SimpleName}
    *

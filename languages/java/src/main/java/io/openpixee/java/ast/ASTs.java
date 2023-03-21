@@ -230,6 +230,7 @@ public final class ASTs {
         || ASTPatterns.isResourceOf(n, name).isPresent()
         || ASTPatterns.isForVariableDeclarationOf(n, name).isPresent()
         || ASTPatterns.isForEachVariableDeclarationOf(n, name).isPresent()
+        || ASTPatterns.isPatternExprDeclarationOf(n, name).isPresent()
         || ASTPatterns.isLambdaExprParameterOf(n, name).isPresent()
         || ASTPatterns.isExceptionParameterOf(n, name).isPresent()
         || ASTPatterns.isMethodFormalParameterOf(n, name).isPresent()
@@ -239,12 +240,6 @@ public final class ASTs {
       return Optional.of(n);
     }
     return Optional.empty();
-    //	PatternExpr -> SimpleName
-    // Field:
-    // 	FieldDeclaration -> VariableDeclarator -> SimpleName
-    // Annotation interface declaration
-    // imported type
-    // imported static member
   }
 
   /**
@@ -261,6 +256,7 @@ public final class ASTs {
       // AnnotationMemberDeclaration,  CompactConstructorDeclaration,
       // EnumConstantDeclaration, TypeDeclaration
       else if (m instanceof NodeWithSimpleName<?>) {
+        System.out.println("NodeWithSimpleName");
         var named = (NodeWithSimpleName<?>) m;
         if (named.getNameAsString().equals(name)) {
           return Optional.of(m);
@@ -312,22 +308,31 @@ public final class ASTs {
    * {@link MethodCallExpr} or {@link MethodReferenceExpr}.
    */
   public static Optional<Node> findNonCallableSimpleNameSource(final SimpleName name) {
+    return findNonCallableSimpleNameSource(name, name.asString());
+  }
+
+  /**
+   * starting from a {@link Node} {@code start}, tries to find the declaration that originates
+   * {@code name} use that is not a name of a {@link MethodCallExpr} or {@link MethodReferenceExpr}
+   * .
+   */
+  public static Optional<Node> findNonCallableSimpleNameSource(
+      final Node start, final String name) {
     // Callable names need more context like signatures to be found. Also can be overloaded
     // TODO consider type parameters?
     // TODO consider reflexivity? class A{} -> A -> class A{}
-    Node current = name;
+    Node current = start;
     // Search locally first
     while (current.hasParentNode()) {
       current = current.getParentNode().get();
       // try locally first, goes reverse pre order until it reaches a type declaration
-      var maybeDecl = findLocalNameSource(current, name.asString());
+      var maybeDecl = findLocalNameSource(current, name);
       if (maybeDecl.isPresent()) {
         return maybeDecl;
       }
       // TypeDeclaration: ClassOrInterfaceDeclaration, EnumDeclaration, RecordDeclaration
       if (current instanceof ClassOrInterfaceDeclaration) {
-        maybeDecl =
-            isClassOrNonCallableMemberOf((ClassOrInterfaceDeclaration) current, name.asString());
+        maybeDecl = isClassOrNonCallableMemberOf((ClassOrInterfaceDeclaration) current, name);
       }
       if (maybeDecl.isPresent()) {
         return maybeDecl;
@@ -336,7 +341,7 @@ public final class ASTs {
     // reached CompilationUnit check for top level classes
     var topLevelTypes = current.findCompilationUnit().get().getTypes();
     var maybeDecl =
-        topLevelTypes.stream().filter(t -> t.getNameAsString().equals(name.asString())).findFirst();
+        topLevelTypes.stream().filter(t -> t.getNameAsString().equals(name)).findFirst();
     if (maybeDecl.isPresent()) return maybeDecl.map(n -> n);
 
     // it's either wildcard imported, inherited, or in the package namespace
