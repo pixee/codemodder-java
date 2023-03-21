@@ -22,9 +22,12 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.XMLEvent;
 import org.codehaus.plexus.util.StringUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -156,48 +159,47 @@ public final class CodemodInvoker {
     StringWriter sw = new StringWriter();
 
     String xml = Files.readString(path);
-    StringReader reader = new StringReader(xml);
-    final var xmlReader = inputFactory.createXMLEventReader(reader);
-    final var xmlWriter = outputFactory.createXMLEventWriter(sw);
+    try (StringReader reader = new StringReader(xml); ) {
+      XMLEventReader xmlReader = inputFactory.createXMLEventReader(reader);
+      XMLEventWriter xmlWriter = outputFactory.createXMLEventWriter(sw);
+      List<XMLEventChangerContext> xmlChangers =
+          codemods.stream()
+              .filter(changer -> changer instanceof XMLEventElementChanger)
+              .map(changer -> (XMLEventElementChanger) changer)
+              .map(
+                  changer -> {
+                    CodemodInvocationContext invocationContext =
+                        new DefaultCodemodInvocationContext(
+                            new DefaultCodeDirectory(repositoryDir),
+                            path,
+                            changers.stream()
+                                .filter(ic -> ic.changer == changer)
+                                .findFirst()
+                                .orElseThrow()
+                                .id,
+                            context);
+                    return new XMLEventChangerContext(changer, invocationContext);
+                  })
+              .collect(Collectors.toUnmodifiableList());
 
-    List<XMLEventChangerContext> xmlChangers =
-        codemods.stream()
-            .filter(changer -> changer instanceof XMLEventElementChanger)
-            .map(changer -> (XMLEventElementChanger) changer)
-            .map(
-                changer -> {
-                  CodemodInvocationContext invocationContext =
-                      new DefaultCodemodInvocationContext(
-                          new DefaultCodeDirectory(repositoryDir),
-                          path,
-                          changers.stream()
-                              .filter(ic -> ic.changer == changer)
-                              .findFirst()
-                              .orElseThrow()
-                              .id,
-                          context);
-                  return new XMLEventChangerContext(changer, invocationContext);
-                })
-            .collect(Collectors.toUnmodifiableList());
-
-    while (xmlReader.hasNext()) {
-      final var currentEvent = xmlReader.nextEvent();
-      for (final XMLEventChangerContext changerContext : xmlChangers) {
-        XMLEventElementChanger changer = changerContext.changer;
-        CodemodInvocationContext codemodContext = changerContext.context;
-        boolean changed =
-            changer.onXmlEventRead(codemodContext, xmlReader, xmlWriter, currentEvent);
-        if (!changed) {
-          xmlWriter.add(currentEvent);
-        } else {
-          break; // a codemod changed this node, so we assume they cleaned up the state handling
+      while (xmlReader.hasNext()) {
+        final XMLEvent currentEvent = xmlReader.nextEvent();
+        for (final XMLEventChangerContext changerContext : xmlChangers) {
+          XMLEventElementChanger changer = changerContext.changer;
+          CodemodInvocationContext codemodContext = changerContext.context;
+          boolean changed =
+              changer.onXmlEventRead(codemodContext, xmlReader, xmlWriter, currentEvent);
+          if (!changed) {
+            xmlWriter.add(currentEvent);
+          } else {
+            break; // a codemod changed this node, so we assume they cleaned up the state handling
+          }
         }
       }
-    }
 
-    reader.close();
-    xmlReader.close();
-    xmlWriter.close();
+      xmlReader.close();
+      xmlWriter.close();
+    }
 
     if (context.weaves().isEmpty()) {
       return Optional.empty();

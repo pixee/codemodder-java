@@ -5,7 +5,7 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
-/** A changer for XML files which acts on {@link org.xml.sax.XMLReader} events. */
+/** A changer for XML files which acts on {@link XMLEventReader} events. */
 public interface XMLEventElementChanger extends Changer {
 
   /**

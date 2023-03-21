@@ -10,8 +10,9 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 
-/** Removes all &lt;http-method&gt; XML elements from files named web.xml. */
+/** Removes all {@code <http-method>} XML elements from files named web.xml. */
 @Codemod(
     id = "pixee:java/fix-verb-tampering",
     author = "arshan@pixee.ai",
@@ -28,8 +29,16 @@ public final class VerbTamperingCodemod extends SemgrepXMLElementChanger {
       final XMLEventReader xmlReader, final XMLEventWriter xmlWriter, final StartElement element)
       throws XMLStreamException {
     // skip the inner text element which contains the HTTP method
-    xmlReader.nextEvent();
+    XMLEvent httpMethodTextEvent = xmlReader.nextEvent();
+    if (!httpMethodTextEvent.isCharacters()) {
+      throw new UnsupportedOperationException(
+          "unexpected type of event when removing http-method elements");
+    }
     // skip the </http-method> closing tag
-    xmlReader.nextEvent();
+    XMLEvent closingTagEvent = xmlReader.nextEvent();
+    if (!closingTagEvent.isEndElement()) {
+      throw new UnsupportedOperationException(
+          "unexpected type of event when removing http-method elements");
+    }
   }
 }
