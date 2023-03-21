@@ -95,7 +95,9 @@ public interface VisitorAssembler {
           new PluginVisitorFinder(sarifs)
               .getPluginFileBasedVisitors(repositoryRoot, ruleContext, sarifProcessorPlugins);
 
-      // Default visitors
+      // Default visitors -- make sure DependencyInjectingVisitor is last. If other visitors come
+      // after it, they won't
+      // have a chance to inject their dependencies.
       final List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
       defaultVisitors.add(new JspScriptletXSSVisitor());
       defaultVisitors.add(new VerbTamperingVisitor());
