@@ -27,6 +27,36 @@ final class WebGoat822Test extends GitRepositoryTest {
   }
 
   @Test
+  void it_injects_dependency_even_when_no_poms_included() throws Exception {
+    int exitCode =
+        new CommandLine(new JavaFixitCli())
+            .execute(
+                "--include", "**/InsecureDeserializationTask.java",
+                "-o", outputFile.getPath(),
+                "-r", repoDir.getPath());
+
+    assertThat(exitCode, is(0));
+
+    var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
+
+    assertThat(report.getRun().getFailedFiles().size(), is(0));
+    List<CodeTFResult> results = report.getResults();
+    assertThat(results.size(), is(2));
+
+    // we only inject into a couple files
+    assertThat(
+        results.stream()
+            .anyMatch(
+                changedFile -> changedFile.getPath().endsWith("InsecureDeserializationTask.java")),
+        is(true));
+
+    // and inject the correct pom
+    var pomPath = "webgoat-lessons$insecure-deserialization$pom.xml".replace("$", File.separator);
+    assertThat(
+        results.stream().anyMatch(changedFile -> changedFile.getPath().equals(pomPath)), is(true));
+  }
+
+  @Test
   void it_transforms_webgoat_normally() throws Exception {
     int exitCode =
         new CommandLine(new JavaFixitCli())
