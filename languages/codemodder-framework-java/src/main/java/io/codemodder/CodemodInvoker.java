@@ -150,7 +150,8 @@ public final class CodemodInvoker {
    */
   public Optional<ChangedFile> executeXmlFile(final Path path, final FileWeavingContext context)
       throws XMLStreamException, IOException {
-    XMLInputFactory inputFactory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory());
+    XMLInputFactory inputFactory =
+        XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory());
     XMLOutputFactory outputFactory = XMLOutputFactory.newFactory();
     StringWriter sw = new StringWriter();
 
