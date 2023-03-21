@@ -97,13 +97,13 @@ public interface VisitorAssembler {
 
       // Default visitors
       final List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
-      defaultVisitors.add(new DependencyInjectingVisitor());
       defaultVisitors.add(new JspScriptletXSSVisitor());
       defaultVisitors.add(new VerbTamperingVisitor());
+      defaultVisitors.add(new DependencyInjectingVisitor());
       defaultVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
 
       final var allVisitors =
-          Stream.concat(defaultVisitors.stream(), pluginVisitors.stream())
+          Stream.concat(pluginVisitors.stream(), defaultVisitors.stream())
               .collect(Collectors.toList());
       allVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
 
