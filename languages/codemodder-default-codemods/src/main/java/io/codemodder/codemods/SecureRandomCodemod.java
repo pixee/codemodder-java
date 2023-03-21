@@ -22,9 +22,7 @@ import javax.inject.Inject;
 public final class SecureRandomCodemod extends SemgrepJavaParserChanger<ObjectCreationExpr> {
 
   @Inject
-  public SecureRandomCodemod(
-      @SemgrepScan(pathToYaml = "/secure-random.yaml", ruleId = "secure-random")
-          final RuleSarif sarif) {
+  public SecureRandomCodemod(@SemgrepScan(ruleId = "secure-random") final RuleSarif sarif) {
     super(sarif, ObjectCreationExpr.class);
   }
 

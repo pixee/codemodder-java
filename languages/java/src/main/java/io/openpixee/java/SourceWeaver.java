@@ -13,6 +13,7 @@ import io.codemodder.ChangedFile;
 import io.codemodder.CodemodInvoker;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
+import io.codemodder.WeavingResult;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -95,7 +96,7 @@ public interface SourceWeaver {
         }
       }
 
-      return new WeavingResult.Default(changedFiles, unscannableFiles);
+      return WeavingResult.createDefault(changedFiles, unscannableFiles);
     }
 
     private static class UnparseableFileException extends Exception {
