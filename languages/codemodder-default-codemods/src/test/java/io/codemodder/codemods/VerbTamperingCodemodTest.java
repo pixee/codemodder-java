@@ -39,7 +39,10 @@ final class VerbTamperingCodemodTest {
   @ParameterizedTest
   @MethodSource("cases")
   void it_removes_verb_tampering(
-      final String webXmlDir, final Set<Integer> expectedAffectedLines, final @TempDir Path tmpDir)
+      final String webXmlDir,
+      final boolean expectChange,
+      final Set<Integer> expectedAffectedLines,
+      final @TempDir Path tmpDir)
       throws IOException {
     String dir = "src/test/resources/verb-tampering/" + webXmlDir;
     copyDir(Path.of(dir), tmpDir);
@@ -48,16 +51,20 @@ final class VerbTamperingCodemodTest {
     FileWeavingContext context =
         FileWeavingContext.createDefault(webxml.toFile(), IncludesExcludes.any());
     Optional<ChangedFile> changedFileOptional = codemodInvoker.executeFile(webxml, context);
-    assertThat(changedFileOptional.isPresent(), is(true));
-    ChangedFile changedFile = changedFileOptional.get();
-    String modifiedFile = Files.readString(Path.of(changedFile.modifiedFile()));
 
-    List<Integer> linesAffected =
-        changedFile.weaves().stream()
-            .map(Weave::lineNumber)
-            .collect(Collectors.toUnmodifiableList());
-    assertThat(linesAffected, hasItems(expectedAffectedLines.toArray(new Integer[0])));
-    assertThat(modifiedFile, equalTo(safeXmlAfterCodemod));
+    assertThat(changedFileOptional.isPresent(), is(expectChange));
+
+    if (expectChange) {
+      ChangedFile changedFile = changedFileOptional.get();
+      String modifiedFile = Files.readString(Path.of(changedFile.modifiedFile()));
+
+      List<Integer> linesAffected =
+          changedFile.weaves().stream()
+              .map(Weave::lineNumber)
+              .collect(Collectors.toUnmodifiableList());
+      assertThat(linesAffected, hasItems(expectedAffectedLines.toArray(new Integer[0])));
+      assertThat(modifiedFile, equalTo(safeXmlAfterCodemod));
+    }
   }
 
   private static void copyDir(Path src, Path dest) throws IOException {
@@ -79,8 +86,9 @@ final class VerbTamperingCodemodTest {
 
   static Stream<Arguments> cases() {
     return Stream.of(
-        Arguments.of("on_own_line", Set.of(5, 6)),
-        Arguments.of("sharing_line", Set.of(5)),
-        Arguments.of("sharing_line_with_others", Set.of(4)));
+        Arguments.of("on_own_line", true, Set.of(5, 6)),
+        Arguments.of("sharing_line", true, Set.of(5)),
+        Arguments.of("sharing_line_with_others", true, Set.of(4)),
+        Arguments.of("safe", false, Set.of()));
   }
 }

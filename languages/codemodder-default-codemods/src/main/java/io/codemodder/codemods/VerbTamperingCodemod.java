@@ -14,6 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.Set;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import org.dom4j.DocumentException;
@@ -46,20 +48,7 @@ public final class VerbTamperingCodemod implements RawFileChanger {
     XPathStreamProcessor processor = XPathStreamProcessor.createDefault();
     Optional<XPathStreamProcessChange> change =
         processor.process(
-            file,
-            "//web-resource-collection/http-method",
-            (xmlEventReader, xmlEventWriter, currentEvent) -> {
-              // skip the text event
-              XMLEvent httpMethodEvent = xmlEventReader.nextEvent();
-              if (!httpMethodEvent.isCharacters()) {
-                throw new IllegalStateException("was expecting HTTP method");
-              }
-              // skip the end element event
-              XMLEvent endHttpMethodTag = xmlEventReader.nextEvent();
-              if (!endHttpMethodTag.isEndElement()) {
-                throw new IllegalStateException("was expecting end element");
-              }
-            });
+            file, "//web-resource-collection/http-method", VerbTamperingCodemod::handle);
 
     if (change.isEmpty()) {
       return;
@@ -68,12 +57,34 @@ public final class VerbTamperingCodemod implements RawFileChanger {
     XPathStreamProcessChange xmlChange = change.get();
     Set<Integer> linesAffected = xmlChange.linesAffected();
 
+    // add the weaves to the context
     FileWeavingContext fileWeavingContext = context.changeRecorder();
     linesAffected.stream()
         .map(line -> Weave.from(line, context.codemodId()))
         .forEach(fileWeavingContext::addWeave);
 
+    // overwrite the previous web.xml with the new one
     Files.copy(xmlChange.transformedXml(), file, StandardCopyOption.REPLACE_EXISTING);
+  }
+
+  /*
+   * Skip the events in the XML that constitute the {@code <http-method>} element.
+   */
+  private static void handle(
+      final XMLEventReader xmlEventReader,
+      final XMLEventWriter xmlEventWriter,
+      final XMLEvent currentEvent)
+      throws XMLStreamException {
+    // skip the text event
+    XMLEvent httpMethodEvent = xmlEventReader.nextEvent();
+    if (!httpMethodEvent.isCharacters()) {
+      throw new IllegalStateException("was expecting HTTP method");
+    }
+    // skip the end element event
+    XMLEvent endHttpMethodTag = xmlEventReader.nextEvent();
+    if (!endHttpMethodTag.isEndElement()) {
+      throw new IllegalStateException("was expecting end element");
+    }
   }
 
   private static final Logger logger = LoggerFactory.getLogger(VerbTamperingCodemod.class);
