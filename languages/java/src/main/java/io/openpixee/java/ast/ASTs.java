@@ -2,20 +2,17 @@ package io.openpixee.java.ast;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.EnumDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
@@ -226,62 +223,20 @@ public final class ASTs {
   }
 
   private static Optional<Node> isLocalNameSource(Node n, String name) {
-    if (ASTPatterns.isExpressionStmtDeclarationOf(n, name).isPresent()
-        || ASTPatterns.isResourceOf(n, name).isPresent()
-        || ASTPatterns.isForVariableDeclarationOf(n, name).isPresent()
-        || ASTPatterns.isForEachVariableDeclarationOf(n, name).isPresent()
-        || ASTPatterns.isPatternExprDeclarationOf(n, name).isPresent()
-        || ASTPatterns.isLambdaExprParameterOf(n, name).isPresent()
-        || ASTPatterns.isExceptionParameterOf(n, name).isPresent()
-        || ASTPatterns.isMethodFormalParameterOf(n, name).isPresent()
-        || ASTPatterns.isConstructorFormalParameter(n, name).isPresent()
-        || ASTPatterns.isLocalTypeDeclarationOf(n, name).isPresent()
-        || ASTPatterns.isLocalRecordDeclarationOf(n, name).isPresent()) {
-      return Optional.of(n);
-    }
-    return Optional.empty();
-  }
-
-  /**
-   * Checks if there exists a non-callable member with {@code name} in an @{link
-   * ClassOrInterfaceDeclaration}. If so, returns the {@link Node} with the declaration.
-   */
-  public static Optional<Node> isClassOrNonCallableMemberOf(
-      final ClassOrInterfaceDeclaration classDecl, final String name) {
-    if (classDecl.getNameAsString().equals(name)) return Optional.of(classDecl);
-    for (var m : classDecl.getMembers()) {
-      if (m instanceof CallableDeclaration) {
-        // ignore callable
-      }
-      // AnnotationMemberDeclaration,  CompactConstructorDeclaration,
-      // EnumConstantDeclaration, TypeDeclaration
-      else if (m instanceof NodeWithSimpleName<?>) {
-        System.out.println("NodeWithSimpleName");
-        var named = (NodeWithSimpleName<?>) m;
-        if (named.getNameAsString().equals(name)) {
-          return Optional.of(m);
-        }
-      } else if (m instanceof FieldDeclaration) {
-        var maybeVD =
-            m.asFieldDeclaration().getVariables().stream()
-                .filter(vd -> vd.getNameAsString().equals(name))
-                .findFirst();
-        if (maybeVD.isPresent()) return Optional.of(m);
-      }
-      // InitializerDeclaration does not introduce fields
-    }
-    return Optional.empty();
-  }
-
-  /**
-   * Checks if there exists a enum entry with {@code name} in an @{link EnumDeclaration}. If so,
-   * returns the {@link Node} with the declaration.
-   */
-  public static Optional<Node> isEnumMemberOf(final EnumDeclaration enumDecl, final String name) {
-    return enumDecl.getEntries().stream()
-        .filter(ecd -> ecd.getNameAsString().equals(name))
-        .findFirst()
-        .map(ecd -> ecd);
+    var maybe = ASTPatterns.isExpressionStmtDeclarationOf(n, name).map(x -> n);
+    return maybe
+        .or(() -> ASTPatterns.isResourceOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isForVariableDeclarationOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isForEachVariableDeclarationOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isLambdaExprParameterOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isExceptionParameterOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isMethodFormalParameterOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isMethodTypeParameterOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isConstructorFormalParameterOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isConstructorTypeParameterOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isLocalTypeDeclarationOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isLocalRecordDeclarationOf(n, name).map(t -> n))
+        .or(() -> ASTPatterns.isPatternExprDeclarationOf(n, name).map(t -> n));
   }
 
   private static Optional<Node> findLocalNameSource(Node current, final String name) {
@@ -312,30 +267,36 @@ public final class ASTs {
   }
 
   /**
-   * starting from a {@link Node} {@code start}, tries to find the declaration that originates
+   * Starting from a {@link Node} {@code start}, tries to find the declaration that originates
    * {@code name} use that is not a name of a {@link MethodCallExpr} or {@link MethodReferenceExpr}
    * .
    */
   public static Optional<Node> findNonCallableSimpleNameSource(
       final Node start, final String name) {
-    // Callable names need more context like signatures to be found. Also can be overloaded
-    // TODO consider type parameters?
-    // TODO consider reflexivity? class A{} -> A -> class A{}
+    // Callable names need more context like signatures to be found. Also, can be overloaded
     Node current = start;
-    // Search locally first
     while (current.hasParentNode()) {
       current = current.getParentNode().get();
-      // try locally first, goes reverse pre order until it reaches a type declaration
+      // try locally first, goes reverse pre-order until it reaches a type declaration
       var maybeDecl = findLocalNameSource(current, name);
       if (maybeDecl.isPresent()) {
         return maybeDecl;
       }
       // TypeDeclaration: ClassOrInterfaceDeclaration, EnumDeclaration, RecordDeclaration
       if (current instanceof ClassOrInterfaceDeclaration) {
-        maybeDecl = isClassOrNonCallableMemberOf((ClassOrInterfaceDeclaration) current, name);
-      }
-      if (maybeDecl.isPresent()) {
-        return maybeDecl;
+        var classDecl = (ClassOrInterfaceDeclaration) current;
+        maybeDecl =
+            Optional.of(classDecl)
+                .filter(cd -> cd.getNameAsString().equals(name))
+                .map(c -> (Node) c)
+                .or(() -> ASTPatterns.isNonCallableMemberOf(classDecl, name))
+                .or(
+                    () ->
+                        ASTPatterns.isClassTypeParameterOf(classDecl, name)
+                            .map(t -> t.getValue0()));
+        if (maybeDecl.isPresent()) {
+          return maybeDecl;
+        }
       }
     }
     // reached CompilationUnit check for top level classes

@@ -239,10 +239,6 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(3);
     var decl = cu.findAll(FieldDeclaration.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    System.out.println(
-        access.getParentNode().flatMap(n -> n.getParentNode()).flatMap(n -> n.getParentNode()));
-    System.out.println(decl);
-    System.out.println(maybeFound);
     assertThat(maybeFound.get() == decl, is(true));
   }
 
@@ -297,10 +293,18 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(8);
     var decl = cu.findAll(ClassOrInterfaceDeclaration.class).get(1);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    System.out.println(
-        access.getParentNode().flatMap(n -> n.getParentNode()).flatMap(n -> n.getParentNode()));
-    System.out.println(decl);
-    System.out.println(maybeFound);
+    assertThat(maybeFound.get() == decl, is(true));
+  }
+
+  @Test
+  void it_finds_method_type_parameter() {
+    String code =
+        "class A<T> {\n" + "  <T> void foo(T arg) {\n" + "    T t = arg;\n" + "  }\n" + "}";
+    var cu = StaticJavaParser.parse(code);
+    LexicalPreservingPrinter.setup(cu);
+    var access = cu.findAll(SimpleName.class).get(5);
+    var decl = cu.findAll(MethodDeclaration.class).get(0);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl, is(true));
   }
 
