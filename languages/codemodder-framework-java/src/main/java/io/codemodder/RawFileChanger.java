@@ -1,3 +1,8 @@
 package io.codemodder;
 
-public interface RawFileChanger extends Changer {}
+/** TODO: this */
+public interface RawFileChanger extends Changer {
+
+  /** TODO: this */
+  void visitFile(CodemodInvocationContext context);
+}

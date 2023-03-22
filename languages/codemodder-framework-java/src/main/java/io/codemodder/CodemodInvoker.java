@@ -4,13 +4,10 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.openpixee.security.XMLInputFactorySecurity;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,12 +19,6 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.XMLEvent;
 import org.codehaus.plexus.util.StringUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -130,114 +121,49 @@ public final class CodemodInvoker {
     }
   }
 
-  private static class XMLEventChangerContext {
-    private XMLEventChangerContext(
-        XMLEventElementChanger changer, CodemodInvocationContext context) {
-      this.changer = Objects.requireNonNull(changer);
-      this.context = Objects.requireNonNull(context);
-    }
-
-    XMLEventElementChanger changer;
-    CodemodInvocationContext context;
-  }
-
   /**
-   * Run the codemods we've collected on the given XML file. Note that for any given event, the
-   * first {@link XMLEventElementChanger} to act on the event "wins", and no one else will have a
-   * chance to operate on it. This limits how much multiple codemods can operate on the same
-   * elements in a document.
+   * Run the codemods we've collected on the given file.
    *
-   * @param path the path to an XML file
+   * @param path the path to a file
    * @param context a model we should keep updating as we process the file
-   * @return the modified XML contents, if changed at all
+   * @return the modified file, if changed at all
    */
-  public Optional<ChangedFile> executeXmlFile(final Path path, final FileWeavingContext context)
-      throws XMLStreamException, IOException {
-    XMLInputFactory inputFactory =
-        XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory());
-    XMLOutputFactory outputFactory = XMLOutputFactory.newFactory();
-    StringWriter sw = new StringWriter();
+  public Optional<ChangedFile> executeFile(final Path path, final FileWeavingContext context)
+      throws IOException {
+    List<RawFileChanger> rawFileChangers =
+        codemods.stream()
+            .filter(changer -> changer instanceof RawFileChanger)
+            .map(changer -> (RawFileChanger) changer)
+            .collect(Collectors.toUnmodifiableList());
 
-    String xml = Files.readString(path);
-    try (StringReader reader = new StringReader(xml); ) {
-      XMLEventReader xmlReader = inputFactory.createXMLEventReader(reader);
-      XMLEventWriter xmlWriter = outputFactory.createXMLEventWriter(sw);
-      List<XMLEventChangerContext> xmlChangers =
-          codemods.stream()
-              .filter(changer -> changer instanceof XMLEventElementChanger)
-              .map(changer -> (XMLEventElementChanger) changer)
-              .map(
-                  changer -> {
-                    CodemodInvocationContext invocationContext =
-                        new DefaultCodemodInvocationContext(
-                            new DefaultCodeDirectory(repositoryDir),
-                            path,
-                            changers.stream()
-                                .filter(ic -> ic.changer == changer)
-                                .findFirst()
-                                .orElseThrow()
-                                .id,
-                            context);
-                    return new XMLEventChangerContext(changer, invocationContext);
-                  })
-              .collect(Collectors.toUnmodifiableList());
+    Path originalFileCopy = Files.createTempFile("codemodder-raw", ".original");
+    Files.copy(path, originalFileCopy, StandardCopyOption.REPLACE_EXISTING);
 
-      while (xmlReader.hasNext()) {
-        final XMLEvent currentEvent = xmlReader.nextEvent();
-        for (final XMLEventChangerContext changerContext : xmlChangers) {
-          XMLEventElementChanger changer = changerContext.changer;
-          CodemodInvocationContext codemodContext = changerContext.context;
-          boolean changed =
-              changer.onXmlEventRead(codemodContext, xmlReader, xmlWriter, currentEvent);
-          if (!changed) {
-            xmlWriter.add(currentEvent);
-          } else {
-            break; // a codemod changed this node, so we assume they cleaned up the state handling
-          }
-        }
-      }
-
-      xmlReader.close();
-      xmlWriter.close();
+    for (RawFileChanger changer : rawFileChangers) {
+      CodemodInvocationContext invocationContext =
+          new DefaultCodemodInvocationContext(
+              new DefaultCodeDirectory(repositoryDir),
+              path,
+              changers.stream().filter(ic -> ic.changer == changer).findFirst().orElseThrow().id,
+              context);
+      changer.visitFile(invocationContext);
     }
 
-    if (context.weaves().isEmpty()) {
+    List<Weave> weaves = context.weaves();
+    if (weaves.isEmpty()) {
+      Files.delete(originalFileCopy);
       return Optional.empty();
     }
 
-    // transform the xml back to what they're expecting, starting by not including an <?xml> header
-    // if they didn't have one
-    String transformedXml = sw.toString();
-    if (transformedXml.startsWith("<?xml") && !xml.startsWith("<?xml")) {
-      transformedXml = transformedXml.substring(transformedXml.indexOf('>') + 1);
-    }
+    // copy the file that's now been modified by multiple codemods to a temp file
+    Path modifiedFileCopy = Files.createTempFile("codemodder-raw", ".modified");
+    Files.copy(path, modifiedFileCopy, StandardCopyOption.REPLACE_EXISTING);
 
-    // remove the empty leftover lines affected by our changes if there are any
-    Set<Integer> linesAffected =
-        context.weaves().stream().map(Weave::lineNumber).collect(Collectors.toUnmodifiableSet());
-    List<String> lines = transformedXml.lines().collect(Collectors.toUnmodifiableList());
-    List<String> updatedLines = new ArrayList<>(lines.size() - linesAffected.size());
-    for (int i = 1; i <= lines.size(); i++) {
-      String actualLine = lines.get(i - 1);
-      if (linesAffected.contains(i) && actualLine.isBlank()) {
-        continue;
-      }
-      updatedLines.add(actualLine);
-    }
+    // restore the original file
+    Files.copy(originalFileCopy, path, StandardCopyOption.REPLACE_EXISTING);
 
-    transformedXml = String.join("\n", updatedLines);
-
-    // if the old file ended with a blank line, make sure to provide one
-    if (xml.endsWith("\n") && !transformedXml.endsWith("\n")) {
-      transformedXml += "\n";
-    }
-
-    Path modifiedFile = Files.createTempFile("codemod", ".xml");
-    Files.write(modifiedFile, transformedXml.getBytes(StandardCharsets.UTF_8));
-    ChangedFile changedFile =
-        ChangedFile.createDefault(
-            path.toFile().getAbsolutePath(), modifiedFile.toString(), context.weaves());
-    return Optional.of(changedFile);
+    return Optional.of(
+        ChangedFile.createDefault(path.toString(), modifiedFileCopy.toString(), weaves));
   }
 
   /**

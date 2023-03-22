@@ -1,44 +1,80 @@
 package io.codemodder.codemods;
 
 import io.codemodder.Codemod;
+import io.codemodder.CodemodInvocationContext;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.RawFileChanger;
 import io.codemodder.ReviewGuidance;
-import io.codemodder.RuleSarif;
-import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import io.codemodder.providers.sarif.semgrep.SemgrepXMLElementChanger;
-import javax.inject.Inject;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
+import io.codemodder.Weave;
+import io.codemodder.XPathStreamProcessChange;
+import io.codemodder.XPathStreamProcessor;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Optional;
+import java.util.Set;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+import org.dom4j.DocumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 /** Removes all {@code <http-method>} XML elements from files named web.xml. */
 @Codemod(
     id = "pixee:java/fix-verb-tampering",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class VerbTamperingCodemod extends SemgrepXMLElementChanger {
-
-  @Inject
-  public VerbTamperingCodemod(@SemgrepScan(ruleId = "verb-tampering") final RuleSarif ruleSarif) {
-    super(ruleSarif);
-  }
+public final class VerbTamperingCodemod implements RawFileChanger {
 
   @Override
-  protected void onSemgrepResultFound(
-      final XMLEventReader xmlReader, final XMLEventWriter xmlWriter, final StartElement element)
-      throws XMLStreamException {
-    // skip the inner text element which contains the HTTP method
-    XMLEvent httpMethodTextEvent = xmlReader.nextEvent();
-    if (!httpMethodTextEvent.isCharacters()) {
-      throw new UnsupportedOperationException(
-          "unexpected type of event when removing http-method elements");
+  public void visitFile(final CodemodInvocationContext context) {
+    Path file = context.path();
+    if (!file.toFile().getName().equalsIgnoreCase("web.xml")) {
+      return;
     }
-    // skip the </http-method> closing tag
-    XMLEvent closingTagEvent = xmlReader.nextEvent();
-    if (!closingTagEvent.isEndElement()) {
-      throw new UnsupportedOperationException(
-          "unexpected type of event when removing http-method elements");
+    try {
+      processWebXml(context, file);
+    } catch (SAXException | IOException | DocumentException | XMLStreamException e) {
+      logger.error("Problem scanning web.xml file", e);
     }
   }
+
+  private void processWebXml(final CodemodInvocationContext context, final Path file)
+      throws SAXException, IOException, DocumentException, XMLStreamException {
+    XPathStreamProcessor processor = XPathStreamProcessor.createDefault();
+    Optional<XPathStreamProcessChange> change =
+        processor.process(
+            file,
+            "//web-resource-collection/http-method",
+            (xmlEventReader, xmlEventWriter, currentEvent) -> {
+              // skip the text event
+              XMLEvent httpMethodEvent = xmlEventReader.nextEvent();
+              if (!httpMethodEvent.isCharacters()) {
+                throw new IllegalStateException("was expecting HTTP method");
+              }
+              // skip the end element event
+              XMLEvent endHttpMethodTag = xmlEventReader.nextEvent();
+              if (!endHttpMethodTag.isEndElement()) {
+                throw new IllegalStateException("was expecting end element");
+              }
+            });
+
+    if (change.isEmpty()) {
+      return;
+    }
+
+    XPathStreamProcessChange xmlChange = change.get();
+    Set<Integer> linesAffected = xmlChange.linesAffected();
+
+    FileWeavingContext fileWeavingContext = context.changeRecorder();
+    linesAffected.stream()
+        .map(line -> Weave.from(line, context.codemodId()))
+        .forEach(fileWeavingContext::addWeave);
+
+    Files.copy(xmlChange.transformedXml(), file, StandardCopyOption.REPLACE_EXISTING);
+  }
+
+  private static final Logger logger = LoggerFactory.getLogger(VerbTamperingCodemod.class);
 }

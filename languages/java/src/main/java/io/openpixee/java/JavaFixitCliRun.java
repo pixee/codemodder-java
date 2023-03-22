@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.stream.XMLStreamException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
@@ -220,7 +219,7 @@ public final class JavaFixitCliRun {
           stream
               .filter(filesAlreadyChanged::contains)
               .map(Path::toFile)
-              .filter(file -> file.getName().toLowerCase().endsWith(".xml"))
+              .filter(file -> !file.getName().toLowerCase().endsWith(".java"))
               .filter(includesExcludes::shouldInspect)
               .sorted()
               .collect(Collectors.toList());
@@ -229,13 +228,9 @@ public final class JavaFixitCliRun {
         var canonicalFile = filePath.getCanonicalFile();
         var context =
             FileWeavingContext.createDefault(includesExcludes.getIncludesExcludesForFile(filePath));
-        try {
-          Optional<ChangedFile> changedFile =
-              codemodInvoker.executeXmlFile(canonicalFile.toPath(), context);
-          changedFile.ifPresent(changedFiles::add);
-        } catch (XMLStreamException e) {
-          LOG.error("Problem visiting XML", e);
-        }
+        Optional<ChangedFile> changedFile =
+            codemodInvoker.executeFile(canonicalFile.toPath(), context);
+        changedFile.ifPresent(changedFiles::add);
       }
     } catch (IOException e) {
       LOG.error("Problem scanning repository files with codemods", e);

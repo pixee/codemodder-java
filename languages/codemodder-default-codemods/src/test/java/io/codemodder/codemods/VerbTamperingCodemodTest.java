@@ -1,6 +1,7 @@
 package io.codemodder.codemods;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -8,32 +9,78 @@ import io.codemodder.ChangedFile;
 import io.codemodder.CodemodInvoker;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
+import io.codemodder.Weave;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
-import javax.xml.stream.XMLStreamException;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 final class VerbTamperingCodemodTest {
 
+  private static String safeXmlAfterCodemod;
+
+  @BeforeAll
+  static void setup() throws IOException {
+    safeXmlAfterCodemod =
+        Files.readString(Path.of("src/test/resources/verb-tampering/web-after-codemod.xml"));
+  }
+
   @ParameterizedTest
-  @CsvSource({"on_own_line", "sharing_line", "sharing_line_with_others"})
-  void it_removes_verb_tampering(final String webXmlDir) throws XMLStreamException, IOException {
+  @MethodSource("cases")
+  void it_removes_verb_tampering(
+      final String webXmlDir, final Set<Integer> expectedAffectedLines, final @TempDir Path tmpDir)
+      throws IOException {
     String dir = "src/test/resources/verb-tampering/" + webXmlDir;
-    CodemodInvoker codemodInvoker =
-        new CodemodInvoker(List.of(VerbTamperingCodemod.class), Path.of(dir));
-    Path webxml = Path.of(dir, "web.xml");
+    copyDir(Path.of(dir), tmpDir);
+    CodemodInvoker codemodInvoker = new CodemodInvoker(List.of(VerbTamperingCodemod.class), tmpDir);
+    Path webxml = tmpDir.resolve("web.xml");
     FileWeavingContext context =
         FileWeavingContext.createDefault(webxml.toFile(), IncludesExcludes.any());
-    Optional<ChangedFile> changedFile = codemodInvoker.executeXmlFile(webxml, context);
-    assertThat(changedFile.isPresent(), is(true));
+    Optional<ChangedFile> changedFileOptional = codemodInvoker.executeFile(webxml, context);
+    assertThat(changedFileOptional.isPresent(), is(true));
+    ChangedFile changedFile = changedFileOptional.get();
+    String modifiedFile = Files.readString(Path.of(changedFile.modifiedFile()));
 
-    String modifiedFile = Files.readString(Path.of(changedFile.get().modifiedFile()));
-    String expectedXml =
-        Files.readString(Path.of("src/test/resources/verb-tampering/web-after-codemod.xml"));
-    assertThat(modifiedFile, equalTo(expectedXml));
+    List<Integer> linesAffected =
+        changedFile.weaves().stream()
+            .map(Weave::lineNumber)
+            .collect(Collectors.toUnmodifiableList());
+    assertThat(linesAffected, hasItems(expectedAffectedLines.toArray(new Integer[0])));
+    assertThat(modifiedFile, equalTo(safeXmlAfterCodemod));
+  }
+
+  private static void copyDir(Path src, Path dest) throws IOException {
+    String srcPath = src.toString();
+    String destPath = dest.toString();
+    Files.walk(Paths.get(srcPath))
+        .forEach(
+            a -> {
+              Path b = Paths.get(destPath, a.toString().substring(srcPath.length()));
+              if (!a.toString().equals(srcPath)) {
+                try {
+                  Files.copy(a, b, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
+                }
+              }
+            });
+  }
+
+  static Stream<Arguments> cases() {
+    return Stream.of(
+        Arguments.of("on_own_line", Set.of(5, 6)),
+        Arguments.of("sharing_line", Set.of(5)),
+        Arguments.of("sharing_line_with_others", Set.of(4)));
   }
 }
