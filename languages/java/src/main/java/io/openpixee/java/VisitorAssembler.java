@@ -95,14 +95,16 @@ public interface VisitorAssembler {
           new PluginVisitorFinder(sarifs)
               .getPluginFileBasedVisitors(repositoryRoot, ruleContext, sarifProcessorPlugins);
 
-      // Default visitors
+      // Default visitors -- make sure DependencyInjectingVisitor is last. If other visitors come
+      // after it, they won't
+      // have a chance to inject their dependencies.
       final List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
-      defaultVisitors.add(new DependencyInjectingVisitor());
       defaultVisitors.add(new JspScriptletXSSVisitor());
+      defaultVisitors.add(new DependencyInjectingVisitor());
       defaultVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
 
       final var allVisitors =
-          Stream.concat(defaultVisitors.stream(), pluginVisitors.stream())
+          Stream.concat(pluginVisitors.stream(), defaultVisitors.stream())
               .collect(Collectors.toList());
       allVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
 

@@ -26,6 +26,13 @@ public interface IncludesExcludes {
 
     @Override
     public boolean shouldInspect(final File file) {
+      /*
+       * Dependency manifests must always be inspected so that we can inject dependencies. If you wish to disable
+       * dependency injection, you can do so by disabling the pom-changing rule (pixee:java/mvn-dependency-injection).
+       */
+      if ("pom.xml".equalsIgnoreCase(file.getName())) {
+        return true;
+      }
       if (!pathIncludes.isEmpty()) {
         for (PathMatcher pathInclude : pathIncludes) {
           if (pathInclude.matches(file)) {

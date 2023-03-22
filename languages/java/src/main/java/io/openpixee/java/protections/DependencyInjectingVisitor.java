@@ -185,9 +185,5 @@ public final class DependencyInjectingVisitor implements FileBasedVisitor {
   }
 
   @VisibleForTesting static final String pomInjectionRuleId = "pixee:java/mvn-dependency-injection";
-  @VisibleForTesting static final String projectArtifactId = "java-code-security-toolkit";
-  @VisibleForTesting static final String projectGroup = "io.github.pixee";
-  @VisibleForTesting static final String projectVersion = "0.0.2";
-  private static final String nl = System.getProperty("line.separator");
   private static final Logger LOG = LoggerFactory.getLogger(DependencyInjectingVisitor.class);
 }
