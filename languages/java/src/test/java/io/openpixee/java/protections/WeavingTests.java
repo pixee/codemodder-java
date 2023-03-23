@@ -76,8 +76,6 @@ public abstract class WeavingTests {
         .isEqualToIgnoringWhitespace(expectedContents);
 
     directory = SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToFixedFile));
-    codemodInvoker =
-        new CodemodInvoker(DefaultCodemods.asList(), testCodeDir.toPath()); // get a new set
     scanAndAssertNoErrorsWithNoFilesChanged(
         analyzer, directory, visitorFactories, codemodInvoker, includesExcludes);
 

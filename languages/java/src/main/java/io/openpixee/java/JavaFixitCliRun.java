@@ -153,7 +153,6 @@ public final class JavaFixitCliRun {
         fileBasedWeaveResults.changedFiles().stream()
             .map(file -> Path.of(file.originalFilePath()))
             .collect(Collectors.toUnmodifiableList());
-
     var codemodRawFileWeaveResults =
         invokeXmlCodemods(
             codemodInvoker, repositoryRoot.toPath(), filesAlreadyChanged, includesExcludes);
@@ -163,7 +162,6 @@ public final class JavaFixitCliRun {
 
     // merge the both results into one
     final var allWeaveResults = merge(javaSourceWeaveResult, fileBasedWeaveResults);
-
     final var changesCount =
         allWeaveResults.changedFiles().stream()
             .map(changedFile -> changedFile.weaves().size())
