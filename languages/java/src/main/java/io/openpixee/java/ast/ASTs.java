@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import org.javatuples.Pair;
+import org.javatuples.Triplet;
 
 /** Utility methods that may be useful for many visitors. */
 public final class ASTs {
@@ -38,7 +40,7 @@ public final class ASTs {
         && !(node.getParentNode().get() instanceof MethodDeclaration)) {
       node = node.getParentNode().get();
     }
-    var methodDeclarationOrNullRef = node.getParentNode();
+    final var methodDeclarationOrNullRef = node.getParentNode();
     return methodDeclarationOrNullRef.map(value -> (MethodDeclaration) value);
   }
 
@@ -78,16 +80,16 @@ public final class ASTs {
         && !(node.getParentNode().get() instanceof ClassOrInterfaceDeclaration)) {
       node = node.getParentNode().get();
     }
-    var type = node.getParentNode();
+    final var type = node.getParentNode();
     return (ClassOrInterfaceDeclaration) type.orElse(null);
   }
 
   /** Return a string description of the type and method that contain this {@link Node}. */
   public static String describeType(final Node node) {
-    var cu = node.findCompilationUnit().get();
-    var filePackage = cu.getPackageDeclaration().orElse(new PackageDeclaration());
-    var packageName = filePackage.getNameAsString();
-    var type = cu.getPrimaryTypeName().orElse("unknown_type");
+    final var cu = node.findCompilationUnit().get();
+    final var filePackage = cu.getPackageDeclaration().orElse(new PackageDeclaration());
+    final var packageName = filePackage.getNameAsString();
+    final var type = cu.getPrimaryTypeName().orElse("unknown_type");
     return packageName.isBlank() ? type : packageName + "." + type;
   }
   /**
@@ -95,7 +97,7 @@ public final class ASTs {
    * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-4.html">Java Language
    * Specification - Section 4.12.14</a> for the definitions of final variables.
    */
-  public static boolean isFinalOrNeverAssigned(LocalVariableDeclaration lvd) {
+  public static boolean isFinalOrNeverAssigned(final LocalVariableDeclaration lvd) {
     return isFinalOrNeverAssigned(lvd.getVariableDeclarator(), lvd.getScope());
   }
 
@@ -105,14 +107,15 @@ public final class ASTs {
    * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-4.html">Java Language
    * Specification - Section 4.12.14</a> for the definitions of final variables.
    */
-  public static boolean isFinalOrNeverAssigned(VariableDeclarator vd, LocalVariableScope scope) {
+  public static boolean isFinalOrNeverAssigned(
+      final VariableDeclarator vd, final LocalVariableScope scope) {
     // Assumes vde contains a declarator with name
-    var vde = (VariableDeclarationExpr) vd.getParentNode().get();
+    final var vde = (VariableDeclarationExpr) vd.getParentNode().get();
     // has final modifier
     if (vde.isFinal()) return true;
 
     // Effectively Final: never operand of unary operator
-    Predicate<UnaryExpr> isOperand =
+    final Predicate<UnaryExpr> isOperand =
         ue ->
             ue.getExpression().isNameExpr()
                 && ue.getExpression()
@@ -120,40 +123,44 @@ public final class ASTs {
                     .getName()
                     .asString()
                     .equals(vd.getName().asString());
-    for (var expr : scope.getExpressions()) {
+    for (final var expr : scope.getExpressions()) {
       if (expr.findFirst(UnaryExpr.class, isOperand).isPresent()) return false;
     }
-    for (var stmt : scope.getStatements()) {
+    for (final var stmt : scope.getStatements()) {
       if (stmt.findFirst(UnaryExpr.class, isOperand).isPresent()) return false;
     }
 
-    Predicate<AssignExpr> isLHS =
+    final Predicate<AssignExpr> isLHS =
         ae ->
             ae.getTarget().isNameExpr()
                 && ae.getTarget().asNameExpr().getNameAsString().equals(vd.getNameAsString());
     if (vd.getInitializer().isPresent()) {
-      for (var stmt : scope.getStatements())
+      for (final var stmt : scope.getStatements())
         if (stmt.findFirst(AssignExpr.class, isLHS).isPresent()) return false;
-      for (var expr : scope.getExpressions())
+      for (final var expr : scope.getExpressions())
         if (expr.findFirst(AssignExpr.class, isLHS).isPresent()) return false;
       return true;
     }
-    // TODO If not initialized, always definitively unassigned whenever lhs of assignment
+    // If not initialized, always definitively unassigned whenever lhs of assignment
     return false;
   }
 
-  public static boolean isNotInitializedAndAssignedAtMostOnce(
-      VariableDeclarator vd, LocalVariableScope scope) {
-    Predicate<AssignExpr> isLHS =
+  /** Checks if a local variable is not initialized and is assigned at most once. */
+  public static boolean isNotInitializedAndAssignedAtMostOnce(LocalVariableDeclaration lvd) {
+    final Predicate<AssignExpr> isLHS =
         ae ->
             ae.getTarget().isNameExpr()
-                && ae.getTarget().asNameExpr().getName().asString().equals(vd.getName().asString());
-    if (vd.getInitializer().isEmpty()) {
-      var allAssignments =
+                && ae.getTarget()
+                    .asNameExpr()
+                    .getName()
+                    .asString()
+                    .equals(lvd.getVariableDeclarator().getName().asString());
+    if (lvd.getVariableDeclarator().getInitializer().isEmpty()) {
+      final var allAssignments =
           Stream.concat(
-              scope.getExpressions().stream()
+              lvd.getScope().getExpressions().stream()
                   .flatMap(e -> e.findAll(AssignExpr.class, isLHS).stream()),
-              scope.getStatements().stream()
+              lvd.getScope().getStatements().stream()
                   .flatMap(s -> s.findAll(AssignExpr.class, isLHS).stream()));
       return allAssignments.count() == 1;
     }
@@ -166,8 +173,8 @@ public final class ASTs {
    * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.3">Java Language
    * Specification - Section 6.3 </a>} for how the scope of local declarations are defined.
    */
-  public static LocalVariableScope findLocalVariableScope(VariableDeclarator vd) {
-    var p = vd.getParentNode().get().getParentNode().get();
+  public static LocalVariableScope findLocalVariableScope(final VariableDeclarator vd) {
+    final var p = vd.getParentNode().get().getParentNode().get();
     // Statement of local variable declarations are always contained in blocks
     if (p instanceof ExpressionStmt)
       return LocalVariableScope.fromLocalDeclaration((ExpressionStmt) p, vd);
@@ -180,28 +187,36 @@ public final class ASTs {
     return null;
   }
 
-  public static ReverseEvaluationOrder reversePreOrderIterator(Node n) {
+  /**
+   * Returns an iterator for all the nodes in the AST that precedes {@code n} in the pre-order
+   * ordering.
+   */
+  public static ReverseEvaluationOrder reversePreOrderIterator(final Node n) {
     if (n.getParentNode().isPresent()) {
-      int pos = n.getParentNode().get().getChildNodes().indexOf(n);
+      final int pos = n.getParentNode().get().getChildNodes().indexOf(n);
       return new ReverseEvaluationOrder(n, pos);
     } else {
       return new ReverseEvaluationOrder(n, 0);
     }
   }
 
+  /**
+   * A {@link Node} iterator iterating over all the nodes that precedes a given node in the
+   * pre-order of its AST.
+   */
   public static final class ReverseEvaluationOrder implements Iterator<Node> {
 
     private Node current;
     private int posFromParent;
 
-    ReverseEvaluationOrder(Node n, int posFromParent) {
+    ReverseEvaluationOrder(final Node n, final int posFromParent) {
       this.current = n;
       this.posFromParent = posFromParent;
     }
 
     @Override
     public Node next() {
-      var parent = current.getParentNode().get();
+      final var parent = current.getParentNode().get();
       if (posFromParent == 0) {
         current = current.getParentNode().get();
         if (current.getParentNode().isPresent()) {
@@ -222,32 +237,32 @@ public final class ASTs {
     }
   }
 
-  private static Optional<Node> isLocalNameSource(Node n, String name) {
-    Optional<Node> maybe =
-        ASTPatterns.isExpressionStmtDeclarationOf(n, name).map(t -> t.getValue2());
+  private static Optional<Node> isLocalNameSource(final Node n, final String name) {
+    final Optional<Node> maybe =
+        ASTPatterns.isExpressionStmtDeclarationOf(n, name).map(Triplet::getValue2);
     // Possible returns: Parameter, VariableDeclarator, TypeParameter, RecordDeclaration,
     // PatternExpr, ClassOrInterfaceDeclaration
     return maybe
-        .or(() -> ASTPatterns.isResourceOf(n, name).map(t -> t.getValue2()))
-        .or(() -> ASTPatterns.isForVariableDeclarationOf(n, name).map(t -> t.getValue2()))
-        .or(() -> ASTPatterns.isForEachVariableDeclarationOf(n, name).map(t -> t.getValue2()))
-        .or(() -> ASTPatterns.isLambdaExprParameterOf(n, name).map(t -> t.getValue1()))
-        .or(() -> ASTPatterns.isExceptionParameterOf(n, name).map(t -> t.getValue1()))
-        .or(() -> ASTPatterns.isMethodFormalParameterOf(n, name).map(t -> t.getValue1()))
-        .or(() -> ASTPatterns.isMethodTypeParameterOf(n, name).map(t -> t.getValue1()))
-        .or(() -> ASTPatterns.isConstructorFormalParameterOf(n, name).map(t -> t.getValue1()))
-        .or(() -> ASTPatterns.isConstructorTypeParameterOf(n, name).map(t -> t.getValue1()))
-        .or(() -> ASTPatterns.isLocalTypeDeclarationOf(n, name).map(t -> t.getValue1()))
-        .or(() -> ASTPatterns.isLocalRecordDeclarationOf(n, name).map(t -> t.getValue1()))
+        .or(() -> ASTPatterns.isResourceOf(n, name).map(Triplet::getValue2))
+        .or(() -> ASTPatterns.isForVariableDeclarationOf(n, name).map(Triplet::getValue2))
+        .or(() -> ASTPatterns.isForEachVariableDeclarationOf(n, name).map(Triplet::getValue2))
+        .or(() -> ASTPatterns.isLambdaExprParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTPatterns.isExceptionParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTPatterns.isMethodFormalParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTPatterns.isMethodTypeParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTPatterns.isConstructorFormalParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTPatterns.isConstructorTypeParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTPatterns.isLocalTypeDeclarationOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTPatterns.isLocalRecordDeclarationOf(n, name).map(Pair::getValue1))
         .or(() -> ASTPatterns.isPatternExprDeclarationOf(n, name).map(t -> t));
   }
 
   private static Optional<Node> findLocalNameSource(Node current, final String name) {
     // Traverse the tree in reverse pre-order until it hits a declaration
-    var it = reversePreOrderIterator(current);
+    final var it = reversePreOrderIterator(current);
     while (!(current instanceof TypeDeclaration) && it.hasNext()) {
       current = it.next();
-      var maybeFound = isLocalNameSource(current, name);
+      final var maybeFound = isLocalNameSource(current, name);
       if (maybeFound.isPresent()) return maybeFound;
     }
     return Optional.empty();
@@ -291,24 +306,21 @@ public final class ASTs {
       // No local declaration. Either hit root or a TypeDeclaration after its search
       // TypeDeclaration: ClassOrInterfaceDeclaration, EnumDeclaration, RecordDeclaration
       if (current instanceof ClassOrInterfaceDeclaration) {
-        var classDecl = (ClassOrInterfaceDeclaration) current;
+        final var classDecl = (ClassOrInterfaceDeclaration) current;
         maybeDecl =
             Optional.of(classDecl)
                 .filter(cd -> cd.getNameAsString().equals(name))
                 .map(c -> (Node) c)
                 .or(() -> ASTPatterns.isNonCallableMemberOf(classDecl, name))
-                .or(
-                    () ->
-                        ASTPatterns.isClassTypeParameterOf(classDecl, name)
-                            .map(t -> t.getValue0()));
+                .or(() -> ASTPatterns.isClassTypeParameterOf(classDecl, name).map(Pair::getValue0));
         if (maybeDecl.isPresent()) {
           return maybeDecl;
         }
       }
     }
     // reached CompilationUnit check for top level classes
-    var topLevelTypes = current.findCompilationUnit().get().getTypes();
-    var maybeDecl =
+    final var topLevelTypes = current.findCompilationUnit().get().getTypes();
+    final var maybeDecl =
         topLevelTypes.stream().filter(t -> t.getNameAsString().equals(name)).findFirst();
     if (maybeDecl.isPresent()) return maybeDecl.map(n -> n);
 
@@ -322,12 +334,12 @@ public final class ASTs {
    */
   public static Optional<LocalVariableDeclaration> findEarliestLocalDeclarationOf(
       final Node start, final String name) {
-    var maybeSource =
+    final var maybeSource =
         findNonCallableSimpleNameSource(start, name)
             .map(n -> n instanceof VariableDeclarator ? (VariableDeclarator) n : null);
     if (maybeSource.isPresent()) {
-      var vd = maybeSource.get();
-      Optional<LocalVariableDeclaration> maybeEVD =
+      final var vd = maybeSource.get();
+      final Optional<LocalVariableDeclaration> maybeEVD =
           ASTPatterns.isVariableOfLocalDeclarationStmt(vd)
               .map(
                   t ->
@@ -355,8 +367,8 @@ public final class ASTs {
    * Returns the unique path from {@code n} to the root of the tree. The path includes {@code n}
    * itself.
    */
-  public static ArrayList<Node> pathToRoot(Node n) {
-    ArrayList<Node> path = new ArrayList<>(List.of(n));
+  public static ArrayList<Node> pathToRoot(final Node n) {
+    final ArrayList<Node> path = new ArrayList<>(List.of(n));
     var currentNode = n;
     while (currentNode.getParentNode().isPresent()) {
       path.add(currentNode.getParentNode().get());
@@ -366,9 +378,9 @@ public final class ASTs {
   }
 
   /** Returns the lowest common ancestor of a pair of nodes. */
-  public static Node lowestCommonAncestor(Node n1, Node n2) {
-    var n1Path = pathToRoot(n1);
-    var n2Path = pathToRoot(n2);
+  public static Node lowestCommonAncestor(final Node n1, final Node n2) {
+    final var n1Path = pathToRoot(n1);
+    final var n2Path = pathToRoot(n2);
     var i1 = n1Path.size() - 1;
     var i2 = n2Path.size() - 1;
     while (n1Path.get(i1).equals(n2Path.get(i2)) && i1 >= 0 && i2 >= 0) {
@@ -379,10 +391,10 @@ public final class ASTs {
   }
 
   /** Returns true if and only if {@code n1} &lt;= {@code n2} in post-order. */
-  public static boolean postOrderLessThanOrEqual(Node n1, Node n2) {
+  public static boolean postOrderLessThanOrEqual(final Node n1, final Node n2) {
     if (n1.equals(n2)) return true;
-    var n1Path = pathToRoot(n1);
-    var n2Path = pathToRoot(n2);
+    final var n1Path = pathToRoot(n1);
+    final var n2Path = pathToRoot(n2);
     var i1 = n1Path.size() - 1;
     var i2 = n2Path.size() - 1;
     while (i1 >= 0 && i2 >= 0 && n1Path.get(i1).equals(n2Path.get(i2))) {
@@ -390,15 +402,15 @@ public final class ASTs {
       i2 -= 1;
     }
     // lowestCommonAncestor
-    var lca = n1Path.get(i1 + 1);
+    final var lca = n1Path.get(i1 + 1);
     System.out.println(lca);
     if (lca.equals(n2)) return true;
     if (lca.equals(n1)) return false;
 
-    var lcaDirectChild1 = n1Path.get(i1);
-    var lcaDirectChild2 = n2Path.get(i2);
+    final var lcaDirectChild1 = n1Path.get(i1);
+    final var lcaDirectChild2 = n2Path.get(i2);
 
-    for (Node n : lca.getChildNodes()) {
+    for (final Node n : lca.getChildNodes()) {
       if (n.equals(lcaDirectChild1)) return true;
       if (n.equals(lcaDirectChild2)) return false;
     }

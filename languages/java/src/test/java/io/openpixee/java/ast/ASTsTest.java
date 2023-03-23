@@ -374,9 +374,14 @@ final class ASTsTest {
             + "  }\n"
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
-    var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
-    assertThat(
-        ASTs.isNotInitializedAndAssignedAtMostOnce(vd, ASTs.findLocalVariableScope(vd)), is(true));
+    var es = cu.findAll(ExpressionStmt.class).get(0);
+    var lvd =
+        new ExpressionStmtVariableDeclaration(
+            es,
+            es.getExpression().asVariableDeclarationExpr(),
+            es.getExpression().asVariableDeclarationExpr().getVariable(0));
+
+    assertThat(ASTs.isNotInitializedAndAssignedAtMostOnce(lvd), is(true));
   }
 
   @Test
