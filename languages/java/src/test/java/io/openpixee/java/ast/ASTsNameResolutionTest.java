@@ -41,7 +41,9 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(6);
     var decl = cu.findAll(ExpressionStmt.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    assertThat(maybeFound.get() == decl, is(true));
+    assertThat(
+        maybeFound.get() == decl.getExpression().asVariableDeclarationExpr().getVariable(0),
+        is(true));
   }
 
   @Test

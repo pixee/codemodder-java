@@ -58,6 +58,47 @@ public final class ASTPatterns {
   }
 
   /**
+   * Test for this pattern: {@link TryStmt} -&gt; {@link VariableDeclarationExpr} -&gt; {@link
+   * VariableDeclarator} ({@code vd})
+   */
+  public static Optional<Pair<TryStmt, VariableDeclarationExpr>> isResource(
+      final VariableDeclarator vd) {
+    return vd.getParentNode()
+        .map(n -> n instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) n : null)
+        .flatMap(vde -> isResource(vde).map(stmt -> new Pair<>(stmt, vde)));
+  }
+
+  /**
+   * Test for this pattern: {@link ForStmt} -&gt; {@link VariableDeclarationExpr} -&gt; {@link
+   * VariableDeclarator} ({@code vd})
+   */
+  public static Optional<Pair<ForStmt, VariableDeclarationExpr>> isForInitVariable(
+      final VariableDeclarator vd) {
+    return vd.getParentNode()
+        .map(n -> n instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) n : null)
+        .flatMap(
+            vde ->
+                vde.getParentNode()
+                    .map(p -> p instanceof ForStmt ? (ForStmt) p : null)
+                    .map(fs -> new Pair<>(fs, vde)));
+  }
+
+  /**
+   * Test for this pattern: {@link ForEachStmt} -&gt; {@link VariableDeclarationExpr} -&gt; {@link
+   * VariableDeclarator} ({@code vd})
+   */
+  public static Optional<Pair<ForEachStmt, VariableDeclarationExpr>> isForEachVariable(
+      final VariableDeclarator vd) {
+    return vd.getParentNode()
+        .map(n -> n instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) n : null)
+        .flatMap(
+            vde ->
+                vde.getParentNode()
+                    .map(p -> p instanceof ForEachStmt ? (ForEachStmt) p : null)
+                    .map(fs -> new Pair<>(fs, vde)));
+  }
+
+  /**
    * Given an {@link Expression} {@code expr}, check if {@code expr} is the scope of a {@link
    * MethodCallExpr}.
    *

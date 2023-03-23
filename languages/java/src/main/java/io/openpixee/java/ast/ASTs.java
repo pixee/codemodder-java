@@ -223,7 +223,8 @@ public final class ASTs {
   }
 
   private static Optional<Node> isLocalNameSource(Node n, String name) {
-    var maybe = ASTPatterns.isExpressionStmtDeclarationOf(n, name).map(x -> n);
+    Optional<Node> maybe =
+        ASTPatterns.isExpressionStmtDeclarationOf(n, name).map(t -> t.getValue2());
     // Possible returns: Parameter, VariableDeclarator, TypeParameter, RecordDeclaration,
     // PatternExpr, ClassOrInterfaceDeclaration
     return maybe
@@ -278,13 +279,16 @@ public final class ASTs {
       final Node start, final String name) {
     // Callable names need more context like signatures to be found. Also, can be overloaded
     Node current = start;
+    // Alternate its search from local (i.e. method level) to class level. It may happen because of
+    // local type declarations.
     while (current.hasParentNode()) {
       current = current.getParentNode().get();
-      // try locally first, goes reverse pre-order until it reaches a type declaration
+      // try locally first
       var maybeDecl = findLocalNameSource(current, name);
       if (maybeDecl.isPresent()) {
         return maybeDecl;
       }
+      // No local declaration. Either hit root or a TypeDeclaration after its search
       // TypeDeclaration: ClassOrInterfaceDeclaration, EnumDeclaration, RecordDeclaration
       if (current instanceof ClassOrInterfaceDeclaration) {
         var classDecl = (ClassOrInterfaceDeclaration) current;
@@ -312,60 +316,39 @@ public final class ASTs {
     return Optional.empty();
   }
 
+  /**
+   * Staring from the {@link Node} {@code start}, checks if there exists a local declaration whose
+   * name is {@code name}.
+   */
   public static Optional<LocalVariableDeclaration> findEarliestLocalDeclarationOf(
-      Node start, String name) {
-    var maybeParent = start.getParentNode();
-    if (maybeParent.isEmpty()) return Optional.empty();
-    var parent = maybeParent.get();
-    if (parent instanceof BlockStmt) {
-      var block = (BlockStmt) parent;
-      for (var stmt : block.getStatements()) {
-        if (stmt.equals(start)) break;
-        var maybeExprStmtTriplet = ASTPatterns.isExpressionStmtDeclarationOf(stmt, name);
-        if (maybeExprStmtTriplet.isPresent())
-          return Optional.of(
-              new ExpressionStmtVariableDeclaration(
-                  maybeExprStmtTriplet.get().getValue0(),
-                  maybeExprStmtTriplet.get().getValue1(),
-                  maybeExprStmtTriplet.get().getValue2()));
-      }
-      return findEarliestLocalDeclarationOf(parent, name);
-    } else if (parent instanceof TryStmt) {
-      var maybeResource = ASTPatterns.isResourceOf(parent, name);
-      if (maybeResource.isPresent()) {
-        return Optional.of(
-            new TryResourceDeclaration(
-                maybeResource.get().getValue0(),
-                maybeResource.get().getValue1(),
-                maybeResource.get().getValue2()));
-      }
-    } else if (parent instanceof ExpressionStmt) {
-      var maybeExpressionDeclaration = ASTPatterns.isExpressionStmtDeclarationOf(parent, name);
-      if (maybeExpressionDeclaration.isPresent()) {
-        return Optional.of(
-            new ExpressionStmtVariableDeclaration(
-                maybeExpressionDeclaration.get().getValue0(),
-                maybeExpressionDeclaration.get().getValue1(),
-                maybeExpressionDeclaration.get().getValue2()));
-      }
-    } else if (parent instanceof ForEachStmt) {
-      var maybeForDeclaration = ASTPatterns.isForEachVariableDeclarationOf(parent, name);
-      if (maybeForDeclaration.isPresent())
-        return Optional.of(
-            new ForEachDeclaration(
-                maybeForDeclaration.get().getValue0(),
-                maybeForDeclaration.get().getValue1(),
-                maybeForDeclaration.get().getValue2()));
-    } else if (parent instanceof ForStmt) {
-      var maybeForDeclaration = ASTPatterns.isForVariableDeclarationOf(parent, name);
-      if (maybeForDeclaration.isPresent())
-        return Optional.of(
-            new ForInitDeclaration(
-                maybeForDeclaration.get().getValue0(),
-                maybeForDeclaration.get().getValue1(),
-                maybeForDeclaration.get().getValue2()));
+      final Node start, final String name) {
+    var maybeSource =
+        findNonCallableSimpleNameSource(start, name)
+            .map(n -> n instanceof VariableDeclarator ? (VariableDeclarator) n : null);
+    if (maybeSource.isPresent()) {
+      var vd = maybeSource.get();
+      Optional<LocalVariableDeclaration> maybeEVD =
+          ASTPatterns.isVariableOfLocalDeclarationStmt(vd)
+              .map(
+                  t ->
+                      new ExpressionStmtVariableDeclaration(
+                          t.getValue0(), t.getValue1(), t.getValue2()));
+      return maybeEVD
+          .or(
+              () ->
+                  ASTPatterns.isResource(vd)
+                      .map(p -> new TryResourceDeclaration(p.getValue0(), p.getValue1(), vd)))
+          .or(
+              () ->
+                  ASTPatterns.isForInitVariable(vd)
+                      .map(p -> new ForInitDeclaration(p.getValue0(), p.getValue1(), vd)))
+          .or(
+              () ->
+                  ASTPatterns.isForEachVariable(vd)
+                      .map(p -> new ForEachDeclaration(p.getValue0(), p.getValue1(), vd)));
     }
-    return findEarliestLocalDeclarationOf(parent, name);
+
+    return Optional.empty();
   }
 
   /**
