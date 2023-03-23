@@ -44,7 +44,8 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
         if (changeRecorder.isLineIncluded(region.getStartLine())
             && JavaParserUtils.regionMatchesNodeStart(node, region)) {
           onSemgrepResultFound(context, cu, (T) node, result);
-          changeRecorder.addWeave(Weave.from(region.getStartLine(), context.codemodId()));
+          changeRecorder.addWeave(
+              Weave.from(region.getStartLine(), context.codemodId(), dependenciesRequired()));
         }
       }
     }

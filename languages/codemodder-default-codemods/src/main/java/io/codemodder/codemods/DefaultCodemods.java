@@ -11,6 +11,6 @@ public final class DefaultCodemods {
 
   /** Get a list of all the codemods in our default set. */
   public static List<Class<? extends Changer>> asList() {
-    return List.of(SecureRandomCodemod.class, VerbTamperingCodemod.class);
+    return List.of(SecureRandomCodemod.class, VerbTamperingCodemod.class, SSRFCodemod.class);
   }
 }

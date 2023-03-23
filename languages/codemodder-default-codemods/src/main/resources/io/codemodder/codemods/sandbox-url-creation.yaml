@@ -1,0 +1,17 @@
+rules:
+  - id: sandbox-url-creation
+    patterns:
+      - pattern-either:
+          - pattern: new URL($PRIMARY)
+          - pattern: new URL($PRIMARY, ...)
+      - pattern-not: new URL("...")
+      - pattern-not: new URL("...", "...", ...)
+      - pattern-not-inside: |
+          class $CLASS {
+            ...
+            final String $PRIMARY = "...";
+          }
+    message: Unbounded URL creation
+    languages:
+      - java
+    severity: WARNING
