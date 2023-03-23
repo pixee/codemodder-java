@@ -59,7 +59,9 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(6);
     var decl = cu.findAll(TryStmt.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    assertThat(maybeFound.get() == decl, is(true));
+    assertThat(
+        maybeFound.get() == decl.getResources().get(0).asVariableDeclarationExpr().getVariable(0),
+        is(true));
   }
 
   @Test
@@ -77,7 +79,10 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(3);
     var decl = cu.findAll(ForStmt.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    assertThat(maybeFound.get() == decl, is(true));
+    assertThat(
+        maybeFound.get()
+            == decl.getInitialization().get(0).asVariableDeclarationExpr().getVariable(0),
+        is(true));
   }
 
   @Test
@@ -95,7 +100,7 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(7);
     var decl = cu.findAll(ForEachStmt.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    assertThat(maybeFound.get() == decl, is(true));
+    assertThat(maybeFound.get() == decl.getVariableDeclarator(), is(true));
   }
 
   @Test
@@ -133,7 +138,7 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(7);
     var decl = cu.findAll(CatchClause.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    assertThat(maybeFound.get() == decl, is(true));
+    assertThat(maybeFound.get() == decl.getParameter(), is(true));
   }
 
   @Test
@@ -150,7 +155,7 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(7);
     var decl = cu.findAll(LambdaExpr.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    assertThat(maybeFound.get() == decl, is(true));
+    assertThat(maybeFound.get() == decl.getParameter(0), is(true));
   }
 
   @Test
@@ -167,7 +172,7 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(5);
     var decl = cu.findAll(MethodDeclaration.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    assertThat(maybeFound.get() == decl, is(true));
+    assertThat(maybeFound.get() == decl.getParameter(0), is(true));
   }
 
   @Test
@@ -184,7 +189,7 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(5);
     var decl = cu.findAll(ConstructorDeclaration.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    assertThat(maybeFound.get() == decl, is(true));
+    assertThat(maybeFound.get() == decl.getParameter(0), is(true));
   }
 
   @Test
@@ -222,7 +227,7 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(5);
     var decl = cu.findAll(LocalClassDeclarationStmt.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    assertThat(maybeFound.get() == decl, is(true));
+    assertThat(maybeFound.get() == decl.getClassDeclaration(), is(true));
   }
 
   @Test
@@ -305,7 +310,7 @@ final class ASTsNameResolutionTest {
     var access = cu.findAll(SimpleName.class).get(5);
     var decl = cu.findAll(MethodDeclaration.class).get(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
-    assertThat(maybeFound.get() == decl, is(true));
+    assertThat(maybeFound.get() == decl.getTypeParameter(0), is(true));
   }
 
   @Test

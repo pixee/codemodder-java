@@ -224,22 +224,25 @@ public final class ASTs {
 
   private static Optional<Node> isLocalNameSource(Node n, String name) {
     var maybe = ASTPatterns.isExpressionStmtDeclarationOf(n, name).map(x -> n);
+    // Possible returns: Parameter, VariableDeclarator, TypeParameter, RecordDeclaration,
+    // PatternExpr, ClassOrInterfaceDeclaration
     return maybe
-        .or(() -> ASTPatterns.isResourceOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isForVariableDeclarationOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isForEachVariableDeclarationOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isLambdaExprParameterOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isExceptionParameterOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isMethodFormalParameterOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isMethodTypeParameterOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isConstructorFormalParameterOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isConstructorTypeParameterOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isLocalTypeDeclarationOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isLocalRecordDeclarationOf(n, name).map(t -> n))
-        .or(() -> ASTPatterns.isPatternExprDeclarationOf(n, name).map(t -> n));
+        .or(() -> ASTPatterns.isResourceOf(n, name).map(t -> t.getValue2()))
+        .or(() -> ASTPatterns.isForVariableDeclarationOf(n, name).map(t -> t.getValue2()))
+        .or(() -> ASTPatterns.isForEachVariableDeclarationOf(n, name).map(t -> t.getValue2()))
+        .or(() -> ASTPatterns.isLambdaExprParameterOf(n, name).map(t -> t.getValue1()))
+        .or(() -> ASTPatterns.isExceptionParameterOf(n, name).map(t -> t.getValue1()))
+        .or(() -> ASTPatterns.isMethodFormalParameterOf(n, name).map(t -> t.getValue1()))
+        .or(() -> ASTPatterns.isMethodTypeParameterOf(n, name).map(t -> t.getValue1()))
+        .or(() -> ASTPatterns.isConstructorFormalParameterOf(n, name).map(t -> t.getValue1()))
+        .or(() -> ASTPatterns.isConstructorTypeParameterOf(n, name).map(t -> t.getValue1()))
+        .or(() -> ASTPatterns.isLocalTypeDeclarationOf(n, name).map(t -> t.getValue1()))
+        .or(() -> ASTPatterns.isLocalRecordDeclarationOf(n, name).map(t -> t.getValue1()))
+        .or(() -> ASTPatterns.isPatternExprDeclarationOf(n, name).map(t -> t));
   }
 
   private static Optional<Node> findLocalNameSource(Node current, final String name) {
+    // Traverse the tree in reverse pre-order until it hits a declaration
     var it = reversePreOrderIterator(current);
     while (!(current instanceof TypeDeclaration) && it.hasNext()) {
       current = it.next();
