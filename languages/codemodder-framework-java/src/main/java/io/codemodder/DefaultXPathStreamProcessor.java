@@ -47,7 +47,7 @@ final class DefaultXPathStreamProcessor implements XPathStreamProcessor {
   @Override
   public Optional<XPathStreamProcessChange> process(
       final Path path, final String xpathExpression, final XPathStreamEventHandler handler)
-      throws SAXException, IOException, DocumentException, XMLStreamException {
+      throws SAXException, IOException, XMLStreamException {
     SAXReader reader = new PositionCapturingReader();
     reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
     reader.setFeature("http://xml.org/sax/features/external-general-entities", false);
@@ -57,7 +57,12 @@ final class DefaultXPathStreamProcessor implements XPathStreamProcessor {
     reader.setDocumentFactory(new LocatorAwareDocumentFactory());
 
     String xml = Files.readString(path);
-    Document doc = reader.read(new StringReader(xml));
+    Document doc;
+    try {
+      doc = reader.read(new StringReader(xml));
+    } catch (DocumentException e) {
+      throw new IOException("Problem reading document", e);
+    }
 
     List<Position> httpMethodPositions =
         DocumentHelper.selectNodes(xpathExpression, doc).stream()

@@ -54,6 +54,7 @@ public final class CodemodInvoker {
 
     // add default module
     allModules.add(new CodeDirectoryModule(repositoryDir));
+    allModules.add(new XPathStreamProcessorModule());
 
     // add all provider modules
     for (CodemodProvider provider : providers) {
