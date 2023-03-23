@@ -41,7 +41,6 @@ final class SemgrepModule extends AbstractModule {
      * to do that binding ourselves.
      */
     List<String> yamlClasspathPathsToRun = new ArrayList<>();
-    List<SemgrepScan> toBind = new ArrayList<>();
 
     for (Class<? extends Changer> codemodType : codemodTypes) {
       // find all constructors that are marked with @Inject
@@ -52,41 +51,40 @@ final class SemgrepModule extends AbstractModule {
               .collect(Collectors.toUnmodifiableList());
 
       // find all @SemgrepScan annotations in their parameters and batch them up for running
+      List<SemgrepScan> toBind = new ArrayList<>();
       List<Parameter> parameters =
           injectableConstructors.stream()
               .flatMap(constructor -> Stream.of(constructor.getParameters()))
+              .filter(parameter -> parameter.getAnnotation(SemgrepScan.class) != null)
               .collect(Collectors.toUnmodifiableList());
       parameters.forEach(
           parameter -> {
             SemgrepScan semgrepScanAnnotation = parameter.getAnnotation(SemgrepScan.class);
-            if (semgrepScanAnnotation != null) {
-              if (!RuleSarif.class.equals(parameter.getType())) {
-                throw new IllegalArgumentException(
-                    "Can only inject semgrep results into "
-                        + RuleSarif.class.getSimpleName()
-                        + " types");
-              }
-              String yamlPath = semgrepScanAnnotation.pathToYaml();
-              if ("".equals(yamlPath)) {
-                yamlPath =
-                    "/"
-                        + codemodType.getPackageName().replace(".", "/")
-                        + "/"
-                        + semgrepScanAnnotation.ruleId()
-                        + ".yaml";
-                logger.info(
-                    "Codemod {} didn't provide yaml path, assuming {}",
-                    codemodType.getSimpleName(),
-                    yamlPath);
-              }
-              yamlClasspathPathsToRun.add(yamlPath);
-              toBind.add(semgrepScanAnnotation);
+            if (!RuleSarif.class.equals(parameter.getType())) {
+              throw new IllegalArgumentException(
+                  "Can only inject semgrep results into "
+                      + RuleSarif.class.getSimpleName()
+                      + " types");
             }
+            String yamlPath = semgrepScanAnnotation.pathToYaml();
+            if ("".equals(yamlPath)) {
+              yamlPath =
+                  "/"
+                      + codemodType.getPackageName().replace(".", "/")
+                      + "/"
+                      + semgrepScanAnnotation.ruleId()
+                      + ".yaml";
+              logger.info(
+                  "Codemod {} didn't provide yaml path, assuming {}",
+                  codemodType.getSimpleName(),
+                  yamlPath);
+            }
+            yamlClasspathPathsToRun.add(yamlPath);
+            toBind.add(semgrepScanAnnotation);
           });
 
       if (toBind.isEmpty()) {
-        logger.info("No Semgrep-based codemods, not running");
-        return;
+        continue;
       }
 
       // copy the yaml out of the classpath onto disk so semgrep can use them

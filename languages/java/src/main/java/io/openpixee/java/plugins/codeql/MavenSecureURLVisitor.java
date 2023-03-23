@@ -5,8 +5,9 @@ import com.contrastsecurity.sarif.Result;
 import io.codemodder.ChangedFile;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
+import io.codemodder.WeavingResult;
 import io.openpixee.java.FileBasedVisitor;
-import io.openpixee.java.WeavingResult;
+import io.openpixee.security.BoundedLineReader;
 import io.openpixee.security.XMLInputFactorySecurity;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -86,7 +87,7 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
       final Set<ChangedFile> changedJavaFiles) {
     // Not even an xml
     if (!file.getName().toLowerCase().endsWith("xml")) {
-      return WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
+      return WeavingResult.empty();
     }
 
     // No suggested changes within file
@@ -133,7 +134,7 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
         }
       }
       if (!weavingContext.madeWeaves()) {
-        return WeavingResult.createDefault(Collections.emptySet(), Collections.emptySet());
+        return WeavingResult.empty();
       }
       // Workaround for a bug (?) where the whitespaces between prolog and the first tag are ignored
       // Get all the characters until the first 2 events
@@ -154,7 +155,7 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
         reader.skip(tempOffset);
         writer.append(originalHead);
         while (reader.ready()) {
-          writer.write(reader.readLine());
+          writer.write(BoundedLineReader.readLine(reader, 1000000));
         }
       }
       tempFile.deleteOnExit();
@@ -164,8 +165,7 @@ public final class MavenSecureURLVisitor implements FileBasedVisitor {
               file.getCanonicalPath(), modifiedFile.getAbsolutePath(), weavingContext.weaves());
       return WeavingResult.createDefault(Set.of(changedFile), Collections.emptySet());
     } catch (final Exception e) {
-      e.printStackTrace();
-      LOG.debug("Problem handling file: {}", file.getPath());
+      LOG.error("Problem handling file: {}", file.getPath(), e);
       return WeavingResult.createDefault(Collections.emptySet(), Set.of(file.getAbsolutePath()));
     }
   }

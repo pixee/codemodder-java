@@ -2,6 +2,7 @@ package io.openpixee.java;
 
 import io.codemodder.ChangedFile;
 import io.codemodder.FileWeavingContext;
+import io.codemodder.WeavingResult;
 import java.io.File;
 import java.util.Set;
 

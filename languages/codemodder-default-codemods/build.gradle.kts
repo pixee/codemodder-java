@@ -24,6 +24,7 @@ publishing {
 dependencies {
     implementation(project(":languages:codemodder-framework-java"))
     implementation(project(":languages:codemodder-semgrep-provider"))
+    implementation(libs.dom4j)
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)

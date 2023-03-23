@@ -1,0 +1,19 @@
+<servlet>
+    <security-constraint>
+        <web-resource-collection>
+            <url-pattern>/vulnerable/*</url-pattern><http-method>GET</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <web-resource-collection>
+            <url-pattern>/safe/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+</servlet>

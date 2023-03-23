@@ -8,6 +8,7 @@ import io.codemodder.ChangedFile;
 import io.codemodder.CodemodInvoker;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
+import io.codemodder.WeavingResult;
 import io.codemodder.codemods.SecureRandomCodemod;
 import io.openpixee.java.DoNothingVisitor;
 import io.openpixee.java.FileBasedVisitor;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -182,6 +184,32 @@ public abstract class WeavingTests {
   }
 
   /**
+   * This overload is for facilitating the migration from the old legacy {@link FileBasedVisitor}
+   * strategy to the {@link io.codemodder.Codemod} strategy. This follows all the same testing path,
+   * except it uses a dummy visitor that won't do anything useful, so we can be sure that the
+   * changes that occur due to codemods.
+   */
+  public static ChangedFile assertFileWeaveWorkedAndReweave(final String pathToVulnerableFile) {
+    return assertFileWeaveWorkedAndReweave(
+        pathToVulnerableFile,
+        new FileBasedVisitor() {
+          @Override
+          public WeavingResult visitRepositoryFile(
+              final File repositoryRoot,
+              final File file,
+              final FileWeavingContext weavingContext,
+              final Set<ChangedFile> changedJavaFiles) {
+            return WeavingResult.empty();
+          }
+
+          @Override
+          public String ruleId() {
+            return "pixee:java/does-nothing";
+          }
+        });
+  }
+
+  /**
    * This method takes the plaintext file given, asserts the presence of a "_weaved.[ext]" file next
    * to it, and the given weaver, and runs the following play:
    *
@@ -192,7 +220,7 @@ public abstract class WeavingTests {
    */
   @NotNull
   public static ChangedFile assertFileWeaveWorkedAndReweave(
-      final String pathToVulnerableFile, final FileBasedVisitor weaver) throws IOException {
+      final String pathToVulnerableFile, final FileBasedVisitor weaver) {
     var vulnerableFile = new File(pathToVulnerableFile);
     assertThat(vulnerableFile.exists()).isTrue();
     assertThat(vulnerableFile.isFile()).isTrue();

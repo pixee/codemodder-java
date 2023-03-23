@@ -13,10 +13,12 @@ openpixee-toolkit = "1.0.0"
 picocli = "4.7.0"
 slf4j = "2.0.6"
 guice = "5.1.0"
+dom4j = "2.1.4"
 
 [libraries]
 autovalue-annotations = { module = "com.google.auto.value:auto-value-annotations", version.ref = "auto-value" }
 codescan-sarif = "io.codescan:sarif-java:1.0"
+dom4j = { module = "org.dom4j:dom4j", version.ref = "dom4j" }
 commons-jexl = { module= "org.apache.commons:commons-jexl3", version.ref = "commons-jexl"}
 commons-lang3 = "org.apache.commons:commons-lang3:3.12.0"
 commons-collections4 = "org.apache.commons:commons-collections4:4.4"

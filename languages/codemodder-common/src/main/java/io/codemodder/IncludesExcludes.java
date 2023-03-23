@@ -177,4 +177,9 @@ public interface IncludesExcludes {
       return new LineIncludesExcludes.MatchesEverything();
     }
   }
+
+  /** Return an {@link IncludesExcludes} that matches all files and lines. */
+  static IncludesExcludes any() {
+    return new MatchesEverything();
+  }
 }

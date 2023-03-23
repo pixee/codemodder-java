@@ -40,9 +40,10 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
           logger.error("Unexpected node encountered in {}:{}", context.path(), region);
           return;
         }
-        if (JavaParserUtils.regionMatchesNodeStart(node, region)) {
+        FileWeavingContext changeRecorder = context.changeRecorder();
+        if (changeRecorder.isLineIncluded(region.getStartLine())
+            && JavaParserUtils.regionMatchesNodeStart(node, region)) {
           onSemgrepResultFound(context, cu, (T) node, result);
-          FileWeavingContext changeRecorder = context.changeRecorder();
           changeRecorder.addWeave(Weave.from(region.getStartLine(), context.codemodId()));
         }
       }
