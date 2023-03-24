@@ -63,12 +63,12 @@ public interface ChangedFile {
   }
 
   static ChangedFile createDefault(
-      final String javaFile, final String modifiedFile, final Weave weave) {
-    return new Default(javaFile, modifiedFile, List.of(weave));
+      final String file, final String modifiedFile, final Weave weave) {
+    return new Default(file, modifiedFile, List.of(weave));
   }
 
   static ChangedFile createDefault(
-      final String javaFile, final String modifiedFile, final List<Weave> weaves) {
-    return new Default(javaFile, modifiedFile, weaves);
+      final String file, final String modifiedFile, final List<Weave> weaves) {
+    return new Default(file, modifiedFile, weaves);
   }
 }

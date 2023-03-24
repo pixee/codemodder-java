@@ -7,7 +7,9 @@ import io.codemodder.RuleSarif;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -24,10 +26,12 @@ public final class SemgrepRuleSarif implements RuleSarif {
 
   private final SarifSchema210 sarif;
   private final String ruleId;
+  private final Map<Path, List<Region>> regionCache;
 
   SemgrepRuleSarif(final String ruleId, final SarifSchema210 sarif) {
     this.sarif = Objects.requireNonNull(sarif);
     this.ruleId = Objects.requireNonNull(ruleId);
+    this.regionCache = new HashMap<>();
   }
 
   @Override
@@ -42,10 +46,16 @@ public final class SemgrepRuleSarif implements RuleSarif {
 
   @Override
   public List<Region> getRegionsFromResultsByRule(final Path path) {
-    return getResultsByPath(path).stream()
-        .filter(result -> result.getRuleId().endsWith("." + ruleId))
-        .map(result -> result.getLocations().get(0).getPhysicalLocation().getRegion())
-        .collect(Collectors.toUnmodifiableList());
+    if (regionCache.containsKey(path)) {
+      return regionCache.get(path);
+    }
+    List<Region> regions =
+        getResultsByPath(path).stream()
+            .filter(result -> result.getRuleId().endsWith("." + ruleId))
+            .map(result -> result.getLocations().get(0).getPhysicalLocation().getRegion())
+            .collect(Collectors.toUnmodifiableList());
+    regionCache.put(path, regions);
+    return regions;
   }
 
   @Override

@@ -47,7 +47,7 @@ final class VisitorAssemblerTest {
         assembler.assembleFileVisitors(
             repositoryRoot, everythingButDependencyInjection, Collections.emptyList());
 
-    assertThat(allVisitors.size(), equalTo(3));
-    assertThat(allButOne.size(), equalTo(2));
+    assertThat(allVisitors.size(), equalTo(2));
+    assertThat(allButOne.size(), equalTo(1));
   }
 }

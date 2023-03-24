@@ -7,7 +7,7 @@ import com.github.javaparser.ast.Node;
 import io.codemodder.CodemodInvocationContext;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.JavaParserChanger;
-import io.codemodder.JavaParserUtils;
+import io.codemodder.JavaParserSarifUtils;
 import io.codemodder.RuleSarif;
 import io.codemodder.Weave;
 import java.util.List;
@@ -40,10 +40,12 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
           logger.error("Unexpected node encountered in {}:{}", context.path(), region);
           return;
         }
-        if (JavaParserUtils.regionMatchesNodeStart(node, region)) {
+        FileWeavingContext changeRecorder = context.changeRecorder();
+        if (changeRecorder.isLineIncluded(region.getStartLine())
+            && JavaParserSarifUtils.regionMatchesNodeStart(node, region)) {
           onSemgrepResultFound(context, cu, (T) node, result);
-          FileWeavingContext changeRecorder = context.changeRecorder();
-          changeRecorder.addWeave(Weave.from(region.getStartLine(), context.codemodId()));
+          changeRecorder.addWeave(
+              Weave.from(region.getStartLine(), context.codemodId(), dependenciesRequired()));
         }
       }
     }

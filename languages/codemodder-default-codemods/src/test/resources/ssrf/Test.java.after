@@ -1,0 +1,35 @@
+package com.acme.testcode;
+
+import io.openpixee.security.HostValidator;
+import io.openpixee.security.Urls;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+final class Test {
+
+  URL doesUrlStuff(String s, URL other) throws Exception {
+    Urls.create(s, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS).openConnection();
+    try {
+      Urls.create(s, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
+    } catch (MalformedURLException e) {
+    }
+
+    URL foo1 = Urls.create(s, "host", 80, "path", Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
+
+    URL foo2 = Urls.create(s, "host", 80, "path", null, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
+
+    URL foo3 = Urls.create(s, "host", "path", Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
+
+    URL foo4 = Urls.create(Urls.create(s, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS), getSpec(), Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
+
+    URL foo5 = new URL("constant", "constant", 80, null);
+
+    URL foo6 = new URL("http://constant");
+
+    return Urls.create(foo1, getSpec(), null, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
+  }
+
+  private String getSpec() {
+    return "zxc";
+  }
+}

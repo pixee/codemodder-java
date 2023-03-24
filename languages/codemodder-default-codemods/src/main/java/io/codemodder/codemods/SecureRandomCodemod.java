@@ -1,6 +1,6 @@
 package io.codemodder.codemods;
 
-import static io.codemodder.JavaParserUtils.addImportIfMissing;
+import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
@@ -22,9 +22,7 @@ import javax.inject.Inject;
 public final class SecureRandomCodemod extends SemgrepJavaParserChanger<ObjectCreationExpr> {
 
   @Inject
-  public SecureRandomCodemod(
-      @SemgrepScan(pathToYaml = "/secure-random.yaml", ruleId = "secure-random")
-          final RuleSarif sarif) {
+  public SecureRandomCodemod(@SemgrepScan(ruleId = "secure-random") final RuleSarif sarif) {
     super(sarif, ObjectCreationExpr.class);
   }
 

@@ -4,13 +4,17 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -40,8 +44,8 @@ public final class CodemodInvoker {
       final List<Class<? extends Changer>> codemodTypes,
       final RuleContext ruleContext,
       final Path repositoryDir) {
-    // get all the providers ready for dependency injection & codemod instantiation
 
+    // get all the providers ready for dependency injection & codemod instantiation
     List<CodemodProvider> providers =
         ServiceLoader.load(CodemodProvider.class).stream()
             .map(ServiceLoader.Provider::get)
@@ -50,6 +54,7 @@ public final class CodemodInvoker {
 
     // add default module
     allModules.add(new CodeDirectoryModule(repositoryDir));
+    allModules.add(new XPathStreamProcessorModule());
 
     // add all provider modules
     for (CodemodProvider provider : providers) {
@@ -101,20 +106,65 @@ public final class CodemodInvoker {
    * @param context a model we should keep updating as we process the file
    */
   public void execute(final Path path, final CompilationUnit cu, final FileWeavingContext context) {
-    for (Changer changer : codemods) {
-      if (changer instanceof JavaParserChanger) {
-        JavaParserChanger javaParserChanger = (JavaParserChanger) changer;
-        CodemodInvocationContext invocationContext =
-            new DefaultCodemodInvocationContext(
-                new DefaultCodeDirectory(repositoryDir),
-                path,
-                changers.stream().filter(ic -> ic.changer == changer).findFirst().orElseThrow().id,
-                context);
-        javaParserChanger.visit(invocationContext, cu);
-      } else {
-        throw new UnsupportedOperationException("unknown or not");
-      }
+    List<JavaParserChanger> javaParserChangers =
+        codemods.stream()
+            .filter(changer -> changer instanceof JavaParserChanger)
+            .map(changer -> (JavaParserChanger) changer)
+            .collect(Collectors.toUnmodifiableList());
+    for (JavaParserChanger changer : javaParserChangers) {
+      CodemodInvocationContext invocationContext =
+          new DefaultCodemodInvocationContext(
+              new DefaultCodeDirectory(repositoryDir),
+              path,
+              changers.stream().filter(ic -> ic.changer == changer).findFirst().orElseThrow().id,
+              context);
+      changer.visit(invocationContext, cu);
     }
+  }
+
+  /**
+   * Run the codemods we've collected on the given file.
+   *
+   * @param path the path to a file
+   * @param context a model we should keep updating as we process the file
+   * @return the modified file, if changed at all
+   */
+  public Optional<ChangedFile> executeFile(final Path path, final FileWeavingContext context)
+      throws IOException {
+    List<RawFileChanger> rawFileChangers =
+        codemods.stream()
+            .filter(changer -> changer instanceof RawFileChanger)
+            .map(changer -> (RawFileChanger) changer)
+            .collect(Collectors.toUnmodifiableList());
+
+    Path originalFileCopy = Files.createTempFile("codemodder-raw", ".original");
+    Files.copy(path, originalFileCopy, StandardCopyOption.REPLACE_EXISTING);
+
+    for (RawFileChanger changer : rawFileChangers) {
+      CodemodInvocationContext invocationContext =
+          new DefaultCodemodInvocationContext(
+              new DefaultCodeDirectory(repositoryDir),
+              path,
+              changers.stream().filter(ic -> ic.changer == changer).findFirst().orElseThrow().id,
+              context);
+      changer.visitFile(invocationContext);
+    }
+
+    List<Weave> weaves = context.weaves();
+    if (weaves.isEmpty()) {
+      Files.delete(originalFileCopy);
+      return Optional.empty();
+    }
+
+    // copy the file that's now been modified by multiple codemods to a temp file
+    Path modifiedFileCopy = Files.createTempFile("codemodder-raw", ".modified");
+    Files.copy(path, modifiedFileCopy, StandardCopyOption.REPLACE_EXISTING);
+
+    // restore the original file
+    Files.copy(originalFileCopy, path, StandardCopyOption.REPLACE_EXISTING);
+
+    return Optional.of(
+        ChangedFile.createDefault(path.toString(), modifiedFileCopy.toString(), weaves));
   }
 
   /**

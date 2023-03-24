@@ -25,13 +25,10 @@ dependencies {
     compileOnly(libs.jetbrains.annotations)
 
     api("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo
-
+    implementation(libs.dom4j)
     api(libs.guice)
     api(libs.contrast.sarif)
-    api(libs.javaparser.core)
-    api(libs.javaparser.symbolsolver.core)
-    api(libs.javaparser.symbolsolver.logic)
-    api(libs.javaparser.symbolsolver.model)
+    api(libs.java.security.toolkit)
     implementation(libs.logback.classic)
     implementation(libs.maven.model)
     api(libs.slf4j.api)

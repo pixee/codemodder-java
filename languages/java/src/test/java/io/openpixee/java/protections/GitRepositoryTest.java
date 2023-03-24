@@ -2,6 +2,10 @@ package io.openpixee.java.protections;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.stream.Stream;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
@@ -52,6 +56,15 @@ abstract class GitRepositoryTest {
     repoDir = new File(tmpDir, tempDirName);
 
     if (!isCached(repoDir)) {
+      // safeguard to ensure that we can actually clone
+      if (repoDir.exists()) {
+        try (Stream<Path> pathStream = Files.walk(repoDir.toPath())) {
+          for (var it = pathStream.sorted(Comparator.reverseOrder()).iterator(); it.hasNext(); ) {
+            var p = it.next();
+            Files.delete(p);
+          }
+        }
+      }
       var git =
           Git.cloneRepository().setURI(repoURI).setDirectory(repoDir).setBranch(repoBranch).call();
       git.close();

@@ -7,6 +7,7 @@ import com.github.difflib.patch.PatchFailedException;
 import com.google.common.annotations.VisibleForTesting;
 import io.codemodder.ChangedFile;
 import io.codemodder.Weave;
+import io.codemodder.WeavingResult;
 import io.github.pixee.codetf.CodeTFChange;
 import io.github.pixee.codetf.CodeTFConfiguration;
 import io.github.pixee.codetf.CodeTFFileExtensionScanned;
