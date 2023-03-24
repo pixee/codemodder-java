@@ -240,8 +240,7 @@ public final class ASTs {
   private static Optional<Node> isLocalNameSource(final Node n, final String name) {
     final Optional<Node> maybe =
         ASTPatterns.isExpressionStmtDeclarationOf(n, name).map(Triplet::getValue2);
-    // Possible returns: Parameter, VariableDeclarator, TypeParameter, RecordDeclaration,
-    // PatternExpr, ClassOrInterfaceDeclaration
+    // Possible returns:
     return maybe
         .or(() -> ASTPatterns.isResourceOf(n, name).map(Triplet::getValue2))
         .or(() -> ASTPatterns.isForVariableDeclarationOf(n, name).map(Triplet::getValue2))
@@ -278,17 +277,26 @@ public final class ASTs {
   }
 
   /**
-   * Tries to find the declaration that originates a {@link SimpleName} use that is not a name of a
-   * {@link MethodCallExpr} or {@link MethodReferenceExpr}.
+   * Tries to find the declaration that originates a {@link SimpleName} use that is a Simple Expression Name, Simple Type Name, or Type Parameter within the AST.
+   * See <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.6.1"> Java Language Specification - 6.5.6.1 Simple Expression Names </a> and <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.5.1"> Java Language Specification - 6.5.5.1 Simple Type Names </a>.
+   *
+   * @return a {@link Node} that contains a declaration of {@code name} if it exists within the
+   *     file. Will be one of the following: {@link Parameter}, {@link VariableDeclarator}, {@link
+   *     TypeParameter}, {@link RecordDeclaration}, {@link PatternExpr}, {@link
+   *     ClassOrInterfaceDeclaration}.
    */
   public static Optional<Node> findNonCallableSimpleNameSource(final SimpleName name) {
     return findNonCallableSimpleNameSource(name, name.asString());
   }
 
   /**
-   * Starting from a {@link Node} {@code start}, tries to find the declaration that originates
-   * {@code name} use that is not a name of a {@link MethodCallExpr} or {@link MethodReferenceExpr}
-   * .
+   * Tries to find a declaration of {@code name} that is in scope at the given {@link Node} {@code start} within the AST. It assumes {@code name } is either a Simple Expression name, Simple Type Name or Type Parameter. 
+   * See <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.6.1"> Java Language Specification - 6.5.6.1 Simple Expression Names </a> and <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.5.1"> Java Language Specification - 6.5.5.1 Simple Type Names </a>.
+   *
+   * @return a {@link Node} that contains a declaration of {@code name} if it exists within the
+   *     file. Will be one of the following: {@link Parameter}, {@link VariableDeclarator}, {@link
+   *     TypeParameter}, {@link RecordDeclaration}, {@link PatternExpr}, {@link
+   *     ClassOrInterfaceDeclaration}.
    */
   public static Optional<Node> findNonCallableSimpleNameSource(
       final Node start, final String name) {
