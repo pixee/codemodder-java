@@ -7,8 +7,6 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
@@ -277,8 +275,12 @@ public final class ASTs {
   }
 
   /**
-   * Tries to find the declaration that originates a {@link SimpleName} use that is a Simple Expression Name, Simple Type Name, or Type Parameter within the AST.
-   * See <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.6.1"> Java Language Specification - 6.5.6.1 Simple Expression Names </a> and <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.5.1"> Java Language Specification - 6.5.5.1 Simple Type Names </a>.
+   * Tries to find the declaration that originates a {@link SimpleName} use that is a Simple
+   * Expression Name, Simple Type Name, or Type Parameter within the AST. See <a
+   * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.6.1">Java Language
+   * Specification - 6.5.6.1 Simple Expression Names </a> and <a
+   * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.5.1">Java Language
+   * Specification - 6.5.5.1 Simple Type Names </a>.
    *
    * @return a {@link Node} that contains a declaration of {@code name} if it exists within the
    *     file. Will be one of the following: {@link Parameter}, {@link VariableDeclarator}, {@link
@@ -290,8 +292,13 @@ public final class ASTs {
   }
 
   /**
-   * Tries to find a declaration of {@code name} that is in scope at the given {@link Node} {@code start} within the AST. It assumes {@code name } is either a Simple Expression name, Simple Type Name or Type Parameter. 
-   * See <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.6.1"> Java Language Specification - 6.5.6.1 Simple Expression Names </a> and <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.5.1"> Java Language Specification - 6.5.5.1 Simple Type Names </a>.
+   * Tries to find a declaration of {@code name} that is in scope at the given {@link Node} {@code
+   * start} within the AST. It assumes {@code name } is either a Simple Expression name, Simple Type
+   * Name or Type Parameter. See <a
+   * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.6.1">Java Language
+   * Specification - 6.5.6.1 Simple Expression Names </a> and <a
+   * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.5.1">Java Language
+   * Specification - 6.5.5.1 Simple Type Names </a>.
    *
    * @return a {@link Node} that contains a declaration of {@code name} if it exists within the
    *     file. Will be one of the following: {@link Parameter}, {@link VariableDeclarator}, {@link

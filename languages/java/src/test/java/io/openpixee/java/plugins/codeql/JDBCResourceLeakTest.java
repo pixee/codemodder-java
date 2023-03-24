@@ -6,6 +6,7 @@ import io.openpixee.java.protections.WeavingTests;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -78,6 +79,19 @@ final class JDBCResourceLeakTest {
   @Test
   void it_wraps_stmt_as_a_try_resource() throws IOException {
     String insecureFilePath = "src/test/java/com/acme/testcode/resourceleak/JDBCSimpleLeak.java";
+    WeavingTests.assertJavaWeaveWorkedAndWontReweave(
+        insecureFilePath,
+        new JDBCResourceLeakVisitorFactory(
+            new File("."),
+            Set.of(JavaSarifMockFactory.buildResult(insecureFilePath, 13, 22, 13, 44))),
+        new IncludesExcludes.MatchesEverything());
+  }
+
+  @Test
+  @Disabled
+  void it_wraps_stmt_as_a_try_resource_parameter_assigned() throws IOException {
+    String insecureFilePath =
+        "src/test/java/com/acme/testcode/resourceleak/JDBCAssignedToParameterLeak.java";
     WeavingTests.assertJavaWeaveWorkedAndWontReweave(
         insecureFilePath,
         new JDBCResourceLeakVisitorFactory(
