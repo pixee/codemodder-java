@@ -25,8 +25,13 @@ dependencies {
     compileOnly(libs.jetbrains.annotations)
     implementation(libs.guice)
     implementation(libs.contrast.sarif)
+    implementation(libs.tuples)
     implementation(libs.java.security.toolkit)
     implementation(libs.slf4j.api)
+    api(libs.javaparser.core)
+    api(libs.javaparser.symbolsolver.core)
+    api(libs.javaparser.symbolsolver.logic)
+    api(libs.javaparser.symbolsolver.model)
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)

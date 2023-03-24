@@ -1,7 +1,7 @@
 package io.codemodder;
 
-import static io.codemodder.JavaParserUtils.addImportIfMissing;
-import static io.codemodder.JavaParserUtils.regionMatchesNode;
+import static io.codemodder.JavaParserSarifUtils.regionMatchesNode;
+import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 
 import com.contrastsecurity.sarif.Region;
 import com.github.javaparser.Position;

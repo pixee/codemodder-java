@@ -1,6 +1,13 @@
 package io.codemodder.codemods;
 
-import io.codemodder.*;
+import io.codemodder.Codemod;
+import io.codemodder.CodemodInvocationContext;
+import io.codemodder.FileWeavingContext;
+import io.codemodder.RawFileChanger;
+import io.codemodder.ReviewGuidance;
+import io.codemodder.Weave;
+import io.codemodder.XPathStreamProcessChange;
+import io.codemodder.XPathStreamProcessor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,7 +52,6 @@ public final class VerbTamperingCodemod implements RawFileChanger {
 
   private void processWebXml(final CodemodInvocationContext context, final Path file)
       throws SAXException, IOException, DocumentException, XMLStreamException {
-
     Optional<XPathStreamProcessChange> change =
         processor.process(
             file, "//web-resource-collection/http-method", VerbTamperingCodemod::handle);

@@ -1,6 +1,6 @@
 package io.codemodder.codemods;
 
-import static io.codemodder.JavaParserUtils.addImportIfMissing;
+import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;

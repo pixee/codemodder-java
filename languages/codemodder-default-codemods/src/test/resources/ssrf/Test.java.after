@@ -5,7 +5,7 @@ import io.openpixee.security.Urls;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-final class SSRFVulnerabilityWeaved {
+final class Test {
 
   URL doesUrlStuff(String s, URL other) throws Exception {
     Urls.create(s, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS).openConnection();

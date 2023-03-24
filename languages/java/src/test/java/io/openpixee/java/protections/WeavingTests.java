@@ -9,7 +9,7 @@ import io.codemodder.CodemodInvoker;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
 import io.codemodder.WeavingResult;
-import io.codemodder.codemods.SecureRandomCodemod;
+import io.codemodder.codemods.DefaultCodemods;
 import io.openpixee.java.DoNothingVisitor;
 import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.SourceDirectory;
@@ -56,8 +56,7 @@ public abstract class WeavingTests {
 
     var analyzer = SourceWeaver.createDefault();
     var testCodeDir = new File(vulnerableFile.getParent());
-    var codemodInvoker =
-        new CodemodInvoker(List.of(SecureRandomCodemod.class), testCodeDir.toPath());
+    var codemodInvoker = new CodemodInvoker(DefaultCodemods.asList(), testCodeDir.toPath());
     var directory =
         SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
 
@@ -151,8 +150,7 @@ public abstract class WeavingTests {
     List<VisitorFactory> visitorFactories = List.of(factory);
     var analyzer = SourceWeaver.createDefault();
     var testCodeDir = new File(vulnerableFile.getParent());
-    var codemodInvoker =
-        new CodemodInvoker(List.of(SecureRandomCodemod.class), testCodeDir.toPath());
+    var codemodInvoker = new CodemodInvoker(DefaultCodemods.asList(), testCodeDir.toPath());
     var directory =
         SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
 

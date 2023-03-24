@@ -12,7 +12,7 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
-import io.openpixee.java.ast.ASTs;
+import io.codemodder.ast.ASTs;
 import java.util.Optional;
 import java.util.function.Predicate;
 

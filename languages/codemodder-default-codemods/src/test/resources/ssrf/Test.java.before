@@ -3,7 +3,7 @@ package com.acme.testcode;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-final class SSRFVulnerability {
+final class Test {
 
   URL doesUrlStuff(String s, URL other) throws Exception {
     new URL(s).openConnection();
