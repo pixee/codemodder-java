@@ -13,7 +13,7 @@ import java.io.File;
 /** Protects against user data SQL injections by parameterizing the query call. */
 public final class SQLParameterizerVisitorFactory implements VisitorFactory {
 
-  private class SQLParameterizerVisitor extends ModifierVisitor<FileWeavingContext> {
+  private static class SQLParameterizerVisitor extends ModifierVisitor<FileWeavingContext> {
 
     private final CompilationUnit cu;
 
@@ -51,6 +51,6 @@ public final class SQLParameterizerVisitorFactory implements VisitorFactory {
     return sqlParameterizerRuleId;
   }
 
-  private static final int defaultLineMaximum = 1_000_000; // 1 MB
+  // 1 MB
   private static final String sqlParameterizerRuleId = "pixee:java/sql-parameterizer";
 }

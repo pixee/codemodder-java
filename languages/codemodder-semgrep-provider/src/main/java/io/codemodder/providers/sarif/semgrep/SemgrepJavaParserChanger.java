@@ -7,7 +7,7 @@ import com.github.javaparser.ast.Node;
 import io.codemodder.CodemodInvocationContext;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.JavaParserChanger;
-import io.codemodder.JavaParserUtils;
+import io.codemodder.JavaParserSarifUtils;
 import io.codemodder.RuleSarif;
 import io.codemodder.Weave;
 import java.util.List;
@@ -42,7 +42,7 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
         }
         FileWeavingContext changeRecorder = context.changeRecorder();
         if (changeRecorder.isLineIncluded(region.getStartLine())
-            && JavaParserUtils.regionMatchesNodeStart(node, region)) {
+            && JavaParserSarifUtils.regionMatchesNodeStart(node, region)) {
           onSemgrepResultFound(context, cu, (T) node, result);
           changeRecorder.addWeave(
               Weave.from(region.getStartLine(), context.codemodId(), dependenciesRequired()));

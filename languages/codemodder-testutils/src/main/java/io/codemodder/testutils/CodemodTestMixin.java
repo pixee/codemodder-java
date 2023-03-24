@@ -8,6 +8,9 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import io.codemodder.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,6 +49,10 @@ public interface CodemodTestMixin {
 
   private CompilationUnit parseJavaFile(final Path javaFile) throws IOException {
     JavaParser javaParser = new JavaParser();
+
+    final CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+    combinedTypeSolver.add(new ReflectionTypeSolver());
+    javaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
 
     final ParseResult<CompilationUnit> result = javaParser.parse(Files.newInputStream(javaFile));
     if (!result.isSuccessful()) {

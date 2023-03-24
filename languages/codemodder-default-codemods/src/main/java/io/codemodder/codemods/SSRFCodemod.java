@@ -1,6 +1,6 @@
 package io.codemodder.codemods;
 
-import static io.codemodder.JavaParserUtils.addImportIfMissing;
+import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
@@ -32,55 +32,37 @@ public final class SSRFCodemod extends SemgrepJavaParserChanger<ObjectCreationEx
       final ObjectCreationExpr n,
       final Result result) {
     NodeList<Expression> arguments = n.getArguments();
-    if (!arguments.isEmpty()) {
-      if (!hasAllConstantArguments(arguments)) {
-        /*
-         * We need to replace:
-         *
-         * URL u = new URL(foo)
-         *
-         * With:
-         *
-         * import io.openpixee.security.Urls;
-         * ...
-         * URL u = Urls.create(foo, io.openpixee.security.Urls.HTTP_PROTOCOLS, io.openpixee.security.HostValidator.ALLOW_ALL)
-         */
-        addImportIfMissing(cu, Urls.class.getName());
-        addImportIfMissing(cu, HostValidator.class.getName());
-        FieldAccessExpr httpProtocolsExpr = new FieldAccessExpr();
-        httpProtocolsExpr.setScope(new NameExpr(Urls.class.getSimpleName()));
-        httpProtocolsExpr.setName("HTTP_PROTOCOLS");
 
-        FieldAccessExpr denyCommonTargetsExpr = new FieldAccessExpr();
+    /*
+     * We need to replace:
+     *
+     * URL u = new URL(foo)
+     *
+     * With:
+     *
+     * import io.openpixee.security.Urls;
+     * ...
+     * URL u = Urls.create(foo, io.openpixee.security.Urls.HTTP_PROTOCOLS, io.openpixee.security.HostValidator.ALLOW_ALL)
+     */
+    addImportIfMissing(cu, Urls.class.getName());
+    addImportIfMissing(cu, HostValidator.class.getName());
+    FieldAccessExpr httpProtocolsExpr = new FieldAccessExpr();
+    httpProtocolsExpr.setScope(new NameExpr(Urls.class.getSimpleName()));
+    httpProtocolsExpr.setName("HTTP_PROTOCOLS");
 
-        denyCommonTargetsExpr.setScope(new NameExpr(HostValidator.class.getSimpleName()));
-        denyCommonTargetsExpr.setName("DENY_COMMON_INFRASTRUCTURE_TARGETS");
+    FieldAccessExpr denyCommonTargetsExpr = new FieldAccessExpr();
 
-        NodeList<Expression> newArguments = new NodeList<>();
-        newArguments.addAll(
-            arguments); // first are all the arguments they were passing to "new URL"
-        newArguments.add(httpProtocolsExpr); // load the protocols they're allowed
-        newArguments.add(denyCommonTargetsExpr); // load the host validator
-        MethodCallExpr safeCall =
-            new MethodCallExpr(
-                new NameExpr(io.openpixee.security.Urls.class.getSimpleName()),
-                "create",
-                newArguments);
-        n.replace(safeCall);
-      }
-    }
-  }
+    denyCommonTargetsExpr.setScope(new NameExpr(HostValidator.class.getSimpleName()));
+    denyCommonTargetsExpr.setName("DENY_COMMON_INFRASTRUCTURE_TARGETS");
 
-  /** If the call to create a URL is all constant values, there's no risk of injection... */
-  private boolean hasAllConstantArguments(final NodeList<Expression> arguments) {
-    if (arguments.get(0).isStringLiteralExpr()) {
-      if (arguments.size() > 1) {
-        return arguments.get(1).isStringLiteralExpr();
-      } else {
-        return true;
-      }
-    }
-    return false;
+    NodeList<Expression> newArguments = new NodeList<>();
+    newArguments.addAll(arguments); // first are all the arguments they were passing to "new URL"
+    newArguments.add(httpProtocolsExpr); // load the protocols they're allowed
+    newArguments.add(denyCommonTargetsExpr); // load the host validator
+    MethodCallExpr safeCall =
+        new MethodCallExpr(
+            new NameExpr(io.openpixee.security.Urls.class.getSimpleName()), "create", newArguments);
+    n.replace(safeCall);
   }
 
   @Override

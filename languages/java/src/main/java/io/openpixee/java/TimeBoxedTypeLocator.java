@@ -18,7 +18,7 @@ import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclar
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
-import io.openpixee.java.ast.ASTs;
+import io.codemodder.ast.ASTs;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Callable;
