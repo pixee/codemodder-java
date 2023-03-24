@@ -1,4 +1,4 @@
-package io.openpixee.java.ast;
+package io.codemodder.ast;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -16,9 +16,6 @@ import com.github.javaparser.ast.stmt.EmptyStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import io.codemodder.ast.ASTPatterns;
-import io.codemodder.ast.ASTTransforms;
-import io.codemodder.ast.ASTs;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Disabled;
