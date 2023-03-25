@@ -1,0 +1,62 @@
+package sanitize;
+
+import java.io.File;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import com.biz.org.UserData;
+
+public class Cls
+{
+  public void handleUpload(HttpServletRequest request) throws FileUploadException {
+    DiskFileItemFactory factory = new DiskFileItemFactory();
+    factory.setSizeThreshold(500000); // files over 500k will be written to disk temporarily.
+    ServletFileUpload upload = new ServletFileUpload(factory);
+    List<FileItem> items = upload.parseRequest(request);
+    for (FileItem item : items) {
+      String name = item.getName();
+      // ruleid: sanitize-multipart-filename
+      writeFile(new File("my_upload_dir", name));
+    }
+  }
+
+
+    public void handleUploadVuln_PassedToMethod(HttpServletRequest request) throws FileUploadException {
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        List<FileItem> items = upload.parseRequest(request);
+        for (FileItem item : items) {
+            String name = item.getName();
+            // ruleid: sanitize-multipart-filename
+            writeFile(new File("my_upload_dir", name));
+            return "vuln";
+        }
+  }
+
+  public String handleUploadVuln_PassedToConstructor(HttpServletRequest request) throws FileUploadException {
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        List<FileItem> items = upload.parseRequest(request);
+        for (FileItem item : items) {
+            String name = item.getName();
+            // ruleid: sanitize-multipart-filename
+            new File(name);
+            return "vuln";
+        }
+  }
+
+  public String handleUploadVuln_ReturnedWithoutSanitizer(HttpServletRequest request) throws FileUploadException {
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        List<FileItem> items = upload.parseRequest(request);
+        for (FileItem item : items) {
+            String name = item.getName();
+            // ruleid: sanitize-multipart-filename
+            return name;
+        }
+  }
+}
