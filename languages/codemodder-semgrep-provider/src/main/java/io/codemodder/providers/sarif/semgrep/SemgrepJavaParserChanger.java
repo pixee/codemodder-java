@@ -37,8 +37,7 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
       for (Node node : allNodes) {
         Region region = result.getLocations().get(0).getPhysicalLocation().getRegion();
         if (!node.getClass().isAssignableFrom(nodeType)) {
-          logger.error("Unexpected node encountered in {}:{}", context.path(), region);
-          return;
+          continue;
         }
         FileWeavingContext changeRecorder = context.changeRecorder();
         if (changeRecorder.isLineIncluded(region.getStartLine())
