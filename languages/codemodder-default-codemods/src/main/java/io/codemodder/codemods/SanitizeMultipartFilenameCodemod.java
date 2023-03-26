@@ -4,6 +4,7 @@ import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -24,7 +25,7 @@ public final class SanitizeMultipartFilenameCodemod
   @Inject
   public SanitizeMultipartFilenameCodemod(
       @SemgrepScan(ruleId = "sanitize-multipart-filename") RuleSarif semgrepSarif) {
-    super(semgrepSarif, MethodCallExpr.class);
+    super(semgrepSarif, MethodCallExpr.class, RegionExtractor.FROM_FIRST_THREADFLOW_EVENT);
   }
 
   @Override
@@ -38,12 +39,13 @@ public final class SanitizeMultipartFilenameCodemod
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
       final Result result) {
-    addImportIfMissing(cu, Filenames.class);
+    Node parent = methodCallExpr.getParentNode().get();
     MethodCallExpr safeCall =
         new MethodCallExpr(
             new NameExpr(Filenames.class.getSimpleName()),
             "toSimpleFileName",
             NodeList.nodeList(methodCallExpr));
-    methodCallExpr.replace(safeCall);
+    parent.replace(methodCallExpr, safeCall);
+    addImportIfMissing(cu, Filenames.class);
   }
 }

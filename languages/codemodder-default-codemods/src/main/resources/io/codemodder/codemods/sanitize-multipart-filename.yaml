@@ -1,18 +1,5 @@
 rules:
   - id: sanitize-multipart-filename
-    patterns:
-      - pattern-either:
-          - pattern: $X = (org.apache.commons.fileupload.FileItem $Y).getName()
-          - pattern: $X = (FileItem $Y).getName()
-      - focus-metavariable: $Y
-    message: Semgrep found a match
-    languages:
-      - java
-    severity: WARNING
-
-
-rules:
-  - id: sanitize-multipart-filename
     mode: taint
     metadata:
       options:

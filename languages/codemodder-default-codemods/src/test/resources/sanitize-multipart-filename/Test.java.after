@@ -19,7 +19,7 @@ public class Cls
     ServletFileUpload upload = new ServletFileUpload(factory);
     List<FileItem> items = upload.parseRequest(request);
     for (FileItem item : items) {
-      String name = Filenames.toSimpleName(item.getName());
+      String name = Filenames.toSimpleFileName(item.getName());
       // ruleid: sanitize-multipart-filename
       writeFile(new File("my_upload_dir", name));
     }
@@ -31,7 +31,7 @@ public class Cls
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(request);
         for (FileItem item : items) {
-            String name = Filenames.toSimpleName(item.getName());
+            String name = Filenames.toSimpleFileName(item.getName());
             // ruleid: sanitize-multipart-filename
             writeFile(new File("my_upload_dir", name));
             return "vuln";
@@ -43,7 +43,7 @@ public class Cls
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(request);
         for (FileItem item : items) {
-            String name = Filenames.toSimpleName(item.getName());
+            String name = Filenames.toSimpleFileName(item.getName());
             // ruleid: sanitize-multipart-filename
             new File(name);
             return "vuln";
@@ -55,7 +55,7 @@ public class Cls
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(request);
         for (FileItem item : items) {
-            String name = Filenames.toSimpleName(item.getName());
+            String name = Filenames.toSimpleFileName(item.getName());
             // ruleid: sanitize-multipart-filename
             return name;
         }
