@@ -9,6 +9,9 @@ import com.biz.org.UserData;
 
 public class Cls
 {
+
+    private ObjectInputStream in = new ObjectInputStream(getOis());
+
     public UserData deserializeObject(InputStream receivedFile) throws IOException, ClassNotFoundException {
         // ruleid:harden-java-deserialization
         ObjectInputStream in = new ObjectInputStream(receivedFile);
