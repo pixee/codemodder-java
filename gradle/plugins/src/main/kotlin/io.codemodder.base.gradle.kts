@@ -2,7 +2,7 @@ plugins {
     id("com.diffplug.spotless")
 }
 
-group = "io.openpixee.codetl"
+group = "io.codemodder"
 
 spotless {
     kotlinGradle {

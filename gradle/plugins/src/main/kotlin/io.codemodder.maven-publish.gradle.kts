@@ -1,5 +1,5 @@
 plugins {
-    id("io.openpixee.codetl.base")
+    id("io.codemodder.base")
     `maven-publish`
 }
 
