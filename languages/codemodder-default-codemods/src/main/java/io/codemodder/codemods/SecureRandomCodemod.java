@@ -27,12 +27,13 @@ public final class SecureRandomCodemod extends SemgrepJavaParserChanger<ObjectCr
   }
 
   @Override
-  public void onSemgrepResultFound(
+  public boolean onSemgrepResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr objectCreationExpr,
       final Result result) {
     objectCreationExpr.setType("SecureRandom");
     addImportIfMissing(cu, SecureRandom.class.getName());
+    return true;
   }
 }

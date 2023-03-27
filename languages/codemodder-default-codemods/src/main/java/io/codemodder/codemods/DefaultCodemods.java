@@ -16,5 +16,7 @@ public final class DefaultCodemods {
         VerbTamperingCodemod.class,
         SSRFCodemod.class,
         RandomizeSeedCodemod.class);
+        SanitizeMultipartFilenameCodemod.class,
+        HardenJavaDeserializationCodemod.class);
   }
 }

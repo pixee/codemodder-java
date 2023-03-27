@@ -26,7 +26,7 @@ public final class SSRFCodemod extends SemgrepJavaParserChanger<ObjectCreationEx
   }
 
   @Override
-  public void onSemgrepResultFound(
+  public boolean onSemgrepResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr n,
@@ -63,6 +63,8 @@ public final class SSRFCodemod extends SemgrepJavaParserChanger<ObjectCreationEx
         new MethodCallExpr(
             new NameExpr(io.openpixee.security.Urls.class.getSimpleName()), "create", newArguments);
     n.replace(safeCall);
+
+    return true;
   }
 
   @Override

@@ -15,6 +15,7 @@ import io.codemodder.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,11 +87,21 @@ public interface CodemodTestMixin {
 
     // make sure the file is transformed to the expected output
     String transformedJavaCode = LexicalPreservingPrinter.print(cu);
-    assertThat(Files.readString(after), equalTo(transformedJavaCode));
+    assertThat(transformedJavaCode, equalTo(Files.readString(after)));
 
     // make sure the dependencies are added
     List<Weave> weaves = context.weaves();
     List<DependencyGAV> dependenciesNeeded = weaves.get(0).getDependenciesNeeded();
     assertThat(dependenciesNeeded, hasItems(dependencies.toArray(new DependencyGAV[0])));
+
+    // re-run the transformation again and make sure no changes are made
+    Files.copy(after, pathToJavaFile, StandardCopyOption.REPLACE_EXISTING);
+    CompilationUnit rerunCu = parseJavaFile(pathToJavaFile);
+    FileWeavingContext rerunContext =
+        FileWeavingContext.createDefault(pathToJavaFile.toFile(), IncludesExcludes.any());
+    invoker.execute(pathToJavaFile, rerunCu, rerunContext);
+
+    String transformedAgainJavaCode = Files.readString(pathToJavaFile);
+    assertThat(transformedAgainJavaCode, equalTo(Files.readString(after)));
   }
 }
