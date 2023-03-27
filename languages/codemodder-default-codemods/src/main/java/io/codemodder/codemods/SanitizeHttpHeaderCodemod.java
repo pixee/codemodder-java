@@ -26,7 +26,7 @@ public final class SanitizeHttpHeaderCodemod extends SemgrepJavaParserChanger<Me
   }
 
   @Override
-  public void onSemgrepResultFound(
+  public boolean onSemgrepResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr setHeaderCall,
@@ -39,6 +39,7 @@ public final class SanitizeHttpHeaderCodemod extends SemgrepJavaParserChanger<Me
             NodeList.nodeList(headerValueArgument));
     setHeaderCall.setArgument(1, safeCall);
     addImportIfMissing(cu, Newlines.class);
+    return true;
   }
 
   @Override
