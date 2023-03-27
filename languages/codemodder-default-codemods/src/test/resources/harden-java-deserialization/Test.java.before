@@ -35,4 +35,10 @@ public class Cls
             throw e;
         }
     }
+
+    public void mulitVarDeclarations() {
+        var ois = new ObjectInputStream(getIs());
+        ObjectInputStream ois1 = new ObjectInputStream(getIs()), ois2;
+        ObjectInputStream ois3, ois4 = new ObjectInputStream(getIs());
+    }
 }

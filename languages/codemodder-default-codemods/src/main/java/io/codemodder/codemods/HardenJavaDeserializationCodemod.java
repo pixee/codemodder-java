@@ -4,6 +4,9 @@ import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -28,45 +31,56 @@ import javax.inject.Inject;
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenJavaDeserializationCodemod
-    extends SemgrepJavaParserChanger<VariableDeclarationExpr> {
+    extends SemgrepJavaParserChanger<VariableDeclarator> {
 
   @Inject
   public HardenJavaDeserializationCodemod(
       @SemgrepScan(ruleId = "harden-java-deserialization") final RuleSarif sarif) {
-    super(sarif, VariableDeclarationExpr.class);
+    super(sarif, VariableDeclarator.class);
   }
 
   @Override
-  public void onSemgrepResultFound(
+  public boolean onSemgrepResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
-      final VariableDeclarationExpr variableDeclarationExpr,
+      final VariableDeclarator variableDeclarator,
       final Result result) {
+
     Statement newStatement =
-        generateFilterHardeningStatement(
-            variableDeclarationExpr.getVariable(0).getNameAsExpression());
-
-    // if we're not in an expression statement, we might be in a try-with-resources statement
-    Optional<ExpressionStmt> wrappedExpression =
-        variableDeclarationExpr.findAncestor(ExpressionStmt.class);
-    if (wrappedExpression.isPresent()) {
-      ExpressionStmt expressionStmt = wrappedExpression.get();
-      ASTTransforms.addStatementAfterStatement(expressionStmt, newStatement);
-      addImportIfMissing(cu, ObjectInputFilters.class.getName());
-      return;
+        generateFilterHardeningStatement(variableDeclarator.getNameAsExpression());
+    Optional<Node> wrappedParentNode = variableDeclarator.getParentNode();
+    if (wrappedParentNode.isEmpty()) {
+      return false;
     }
 
-    Optional<TryStmt> tryStmt = variableDeclarationExpr.findAncestor(TryStmt.class);
-    if (tryStmt.isPresent()) {
-      TryStmt tryStatement = tryStmt.get();
-      BlockStmt tryBlock = tryStatement.getTryBlock();
-      ASTTransforms.addStatementBeforeStatement(tryBlock.getStatements().get(0), newStatement);
-      addImportIfMissing(cu, ObjectInputFilters.class.getName());
-      return;
+    Node parentNode = wrappedParentNode.get();
+    Class<? extends Node> parentType = parentNode.getClass();
+
+    if (FieldDeclaration.class.equals(parentType)) {
+      return false;
     }
 
-    throw new IllegalArgumentException(
-        "unexpected fix location: " + variableDeclarationExpr.getBegin().get());
+    if (VariableDeclarationExpr.class.equals(parentType)) {
+      Node variableDeclarationParent = parentNode.getParentNode().get();
+      Class<? extends Node> variableDeclarationParentType = variableDeclarationParent.getClass();
+      if (ExpressionStmt.class.equals(variableDeclarationParentType)) {
+        ExpressionStmt expressionStmt = (ExpressionStmt) variableDeclarationParent;
+        ASTTransforms.addStatementAfterStatement(expressionStmt, newStatement);
+        addImportIfMissing(cu, ObjectInputFilters.class.getName());
+        return true;
+      }
+
+      // if we're not in an expression statement, we might be in a try-with-resources statement
+      if (TryStmt.class.equals(variableDeclarationParentType)) {
+        TryStmt tryStatement = (TryStmt) variableDeclarationParent;
+        BlockStmt tryBlock = tryStatement.getTryBlock();
+        ASTTransforms.addStatementBeforeStatement(tryBlock.getStatements().get(0), newStatement);
+        addImportIfMissing(cu, ObjectInputFilters.class.getName());
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

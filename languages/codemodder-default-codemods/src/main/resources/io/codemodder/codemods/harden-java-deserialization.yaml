@@ -1,7 +1,9 @@
 rules:
   - id: harden-java-deserialization
     patterns:
-      - pattern: ObjectInputStream $OIS = new ObjectInputStream(...);
+      - pattern-either:
+          - pattern: var $OIS = new ObjectInputStream(...);
+          - pattern: ObjectInputStream $OIS = new ObjectInputStream(...);
       - pattern-not-inside: |
           $RETURNTYPE $METHOD(...) {
             ...
@@ -14,6 +16,7 @@ rules:
             (io.openpixee.security.ObjectInputFilters).enableObjectFilterIfUnprotected($OIS);
             ...
           }
+      - focus-metavariable: $OIS
     message: Semgrep found a match
     languages:
       - java

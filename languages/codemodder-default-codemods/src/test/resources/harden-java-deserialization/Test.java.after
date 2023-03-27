@@ -38,4 +38,13 @@ public class Cls
             throw e;
         }
     }
+
+    public void mulitVarDeclarations() {
+        var ois = new ObjectInputStream(getIs());
+        ObjectInputFilters.enableObjectFilterIfUnprotected(ois);
+        ObjectInputStream ois1 = new ObjectInputStream(getIs()), ois2;
+        ObjectInputFilters.enableObjectFilterIfUnprotected(ois1);
+        ObjectInputStream ois3, ois4 = new ObjectInputStream(getIs());
+        ObjectInputFilters.enableObjectFilterIfUnprotected(ois4);
+    }
 }
