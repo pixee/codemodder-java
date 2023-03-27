@@ -34,7 +34,7 @@ public final class SanitizeMultipartFilenameCodemod
   }
 
   @Override
-  public void onSemgrepResultFound(
+  public boolean onSemgrepResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
@@ -47,5 +47,6 @@ public final class SanitizeMultipartFilenameCodemod
             NodeList.nodeList(methodCallExpr));
     parent.replace(methodCallExpr, safeCall);
     addImportIfMissing(cu, Filenames.class);
+    return true;
   }
 }
