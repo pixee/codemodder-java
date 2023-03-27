@@ -2,21 +2,15 @@ package io.codemodder.ast;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.expr.SimpleName;
-import com.github.javaparser.ast.expr.ThisExpr;
-import com.github.javaparser.ast.expr.UnaryExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
+import com.github.javaparser.ast.type.TypeParameter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -265,6 +259,34 @@ public final class ASTs {
     return Optional.empty();
   }
 
+  private static Optional<Node> findClassLevelNameSource(
+      final ClassOrInterfaceDeclaration classDeclaration, final String name) {
+    var maybeClassMemberDeclaration =
+        Optional.of(classDeclaration)
+            .filter(cd -> cd.getNameAsString().equals(name))
+            .map(c -> (Node) c)
+            .or(
+                () ->
+                    classDeclaration.getFields().stream()
+                        .flatMap(field -> ASTPatterns.isFieldDeclarationOf(field, name).stream())
+                        .findAny()
+                        .map(p -> p.getValue1()))
+            .or(
+                () ->
+                    classDeclaration.getMembers().stream()
+                        .flatMap(bodyDecl -> ASTPatterns.isNamedMemberOf(bodyDecl, name).stream())
+                        .findAny()
+                        .map(nwn -> (Node) nwn))
+            .or(
+                () ->
+                    ASTPatterns.isClassTypeParameterOf(classDeclaration, name)
+                        .map(Pair::getValue0));
+    if (maybeClassMemberDeclaration.isPresent()) {
+      return maybeClassMemberDeclaration;
+    }
+    return Optional.empty();
+  }
+
   /** Finds the {@link ClassOrInterfaceDeclaration} that is referenced by a {@link ThisExpr}. */
   public static ClassOrInterfaceDeclaration findThisDeclaration(final ThisExpr thisExpr) {
     Node current = thisExpr;
@@ -321,28 +343,10 @@ public final class ASTs {
       // No local declaration. Either hit root or a TypeDeclaration after its search
       // TypeDeclaration: ClassOrInterfaceDeclaration, EnumDeclaration, RecordDeclaration
       if (current instanceof ClassOrInterfaceDeclaration) {
-        final var classDecl = (ClassOrInterfaceDeclaration) current;
-        var maybeClassMemberDeclaration =
-            Optional.of(classDecl)
-                .filter(cd -> cd.getNameAsString().equals(name))
-                .map(c -> (Node) c)
-                .or(
-                    () ->
-                        classDecl.getFields().stream()
-                            .flatMap(
-                                field -> ASTPatterns.isFieldDeclarationOf(field, name).stream())
-                            .findAny()
-                            .map(p -> p.getValue1()))
-                .or(
-                    () ->
-                        classDecl.getMembers().stream()
-                            .flatMap(
-                                bodyDecl -> ASTPatterns.isNamedMemberOf(bodyDecl, name).stream())
-                            .findAny()
-                            .map(nwn -> (Node) nwn))
-                .or(() -> ASTPatterns.isClassTypeParameterOf(classDecl, name).map(Pair::getValue0));
-        if (maybeClassMemberDeclaration.isPresent()) {
-          return maybeClassMemberDeclaration;
+        final var classDeclaration = (ClassOrInterfaceDeclaration) current;
+        Optional<Node> maybeClassMember = findClassLevelNameSource(classDeclaration, name);
+        if (maybeClassMember.isPresent()) {
+          return maybeClassMember;
         }
       }
     }

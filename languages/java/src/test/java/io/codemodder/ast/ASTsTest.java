@@ -350,7 +350,7 @@ final class ASTsTest {
   }
 
   @Test
-  void it_detects_varible_is_final() {
+  void it_detects_variable_is_final() {
     var code =
         "class A {\n"
             + "\n"
@@ -542,18 +542,9 @@ final class ASTsTest {
         is(true));
   }
 
-  void assertEquals(Stream<String> stream, Stream<String> expected) {
-    var itc = stream.iterator();
-    var ite = expected.iterator();
-    // trim() will make it resistant to format problems
-    while (itc.hasNext() && ite.hasNext()) {
-      assertThat(itc.next(), equalTo(ite.next()));
-    }
-  }
-
   void assertEqualsIgnoreSpace(String string, String expected) {
-    var stream = List.of(string.split("\n")).stream();
-    var expStream = List.of(expected.split("\n")).stream();
+    var stream = Stream.of(string.split("\n"));
+    var expStream = Stream.of(expected.split("\n"));
     var itc = stream.iterator();
     var ite = expStream.iterator();
     // trim() will make it resistant to format problems
