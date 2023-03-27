@@ -314,22 +314,35 @@ public final class ASTs {
     while (current.hasParentNode()) {
       current = current.getParentNode().get();
       // try locally first
-      var maybeDecl = findLocalNameSource(current, name);
-      if (maybeDecl.isPresent()) {
-        return maybeDecl;
+      Optional<Node> maybeDeclaration = findLocalNameSource(current, name);
+      if (maybeDeclaration.isPresent()) {
+        return maybeDeclaration;
       }
       // No local declaration. Either hit root or a TypeDeclaration after its search
       // TypeDeclaration: ClassOrInterfaceDeclaration, EnumDeclaration, RecordDeclaration
       if (current instanceof ClassOrInterfaceDeclaration) {
         final var classDecl = (ClassOrInterfaceDeclaration) current;
-        maybeDecl =
+        var maybeClassMemberDeclaration =
             Optional.of(classDecl)
                 .filter(cd -> cd.getNameAsString().equals(name))
                 .map(c -> (Node) c)
-                .or(() -> ASTPatterns.isNonCallableMemberOf(classDecl, name))
+                .or(
+                    () ->
+                        classDecl.getFields().stream()
+                            .flatMap(
+                                field -> ASTPatterns.isFieldDeclarationOf(field, name).stream())
+                            .findAny()
+                            .map(p -> p.getValue1()))
+                .or(
+                    () ->
+                        classDecl.getMembers().stream()
+                            .flatMap(
+                                bodyDecl -> ASTPatterns.isNamedMemberOf(bodyDecl, name).stream())
+                            .findAny()
+                            .map(nwn -> (Node) nwn))
                 .or(() -> ASTPatterns.isClassTypeParameterOf(classDecl, name).map(Pair::getValue0));
-        if (maybeDecl.isPresent()) {
-          return maybeDecl;
+        if (maybeClassMemberDeclaration.isPresent()) {
+          return maybeClassMemberDeclaration;
         }
       }
     }

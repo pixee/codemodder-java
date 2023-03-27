@@ -271,8 +271,8 @@ public final class ASTPatterns {
   }
 
   /**
-   * Test for this pattern: {@link FieldDeclaration} ({@code bDecl}) -&gt; {@link SimpleName}, with
-   * {@code name} as the {@link SimpleName}.
+   * Test for this pattern: {@link FieldDeclaration} ({@code bDecl}) -&gt; {@link
+   * VariableDeclarator} -&gt; {@link SimpleName}, with {@code name} as the {@link SimpleName}.
    *
    * @return A tuple with the above pattern in order sans the {@link SimpleName}.
    */
@@ -286,19 +286,6 @@ public final class ASTPatterns {
           .map(vd -> new Pair<>(m, vd));
     }
     return Optional.empty();
-  }
-
-  /**
-   * Test for this pattern: {@link ClassOrInterfaceDeclaration} ({@code classDecl}) -&gt; {@link
-   * BodyDeclaration} -&gt; {@link SimpleName}, with {@code name} as the {@link SimpleName}.
-   */
-  public static Optional<BodyDeclaration<?>> isNonCallableMemberOf(
-      final ClassOrInterfaceDeclaration classDecl, final String name) {
-    return classDecl.getMembers().stream()
-        .filter(m -> !(m instanceof CallableDeclaration))
-        .filter(
-            m -> isNamedMemberOf(m, name).isPresent() || isFieldDeclarationOf(m, name).isPresent())
-        .findFirst();
   }
 
   /**
@@ -516,5 +503,12 @@ public final class ASTPatterns {
                         && vde.getParentNode().get() instanceof ExpressionStmt)
                     ? new Triplet<>((ExpressionStmt) vde.getParentNode().get(), vde, vd)
                     : null);
+  }
+
+  /**
+   * Test for this pattern: {@link FieldDeclaration} -&gt; {@link VariableDeclarator} ({@code vd}.
+   */
+  public static Optional<FieldDeclaration> isVariableOfField(final VariableDeclarator vd) {
+    return vd.getParentNode().map(n -> n instanceof FieldDeclaration ? (FieldDeclaration) n : null);
   }
 }

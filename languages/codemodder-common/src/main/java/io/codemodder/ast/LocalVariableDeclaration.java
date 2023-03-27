@@ -41,4 +41,9 @@ public abstract class LocalVariableDeclaration {
   public abstract Statement getStatement();
 
   protected abstract LocalVariableScope findScope();
+
+  @Override
+  public String toString() {
+    return getStatement().toString();
+  }
 }

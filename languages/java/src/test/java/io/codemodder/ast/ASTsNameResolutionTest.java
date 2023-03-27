@@ -244,7 +244,7 @@ final class ASTsNameResolutionTest {
     var cu = StaticJavaParser.parse(code);
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(3);
-    var decl = cu.findAll(FieldDeclaration.class).get(0);
+    var decl = cu.findAll(FieldDeclaration.class).get(0).getVariable(0);
     var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl, is(true));
   }
