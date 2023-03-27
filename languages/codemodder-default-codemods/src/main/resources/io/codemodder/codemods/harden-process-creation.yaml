@@ -1,0 +1,10 @@
+rules:
+  - id: harden-process-creation
+    patterns:
+      - pattern-either:
+          - pattern: (Runtime $RT).exec(...)
+          - pattern: Runtime.getRuntime().exec(...)
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING
