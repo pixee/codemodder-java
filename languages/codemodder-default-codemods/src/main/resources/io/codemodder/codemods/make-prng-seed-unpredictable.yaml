@@ -1,0 +1,11 @@
+rules:
+  - id: make-prng-seed-unpredictable
+    patterns:
+      - pattern: (Random $X).setSeed($NUM)
+      - metavariable-regex:
+          metavariable: $NUM
+          regex: ([0-9]+L?)
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING

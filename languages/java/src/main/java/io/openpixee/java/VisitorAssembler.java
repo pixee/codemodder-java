@@ -55,7 +55,6 @@ public interface VisitorAssembler {
               new SSLEngineSetEnabledProtocolsVisitorFactory(),
               new SSLParametersSetProtocolsVisitorFactory(),
               new SSLSocketSetEnabledProtocolsVisitorFactory(),
-              new PredictableSeedVisitorFactory(),
               new RuntimeExecVisitorFactory(),
               new SpringMultipartVisitorFactory(),
               new UnsafeReadlineVisitorFactory(),
