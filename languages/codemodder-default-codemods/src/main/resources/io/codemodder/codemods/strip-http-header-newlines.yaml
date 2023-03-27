@@ -1,0 +1,15 @@
+rules:
+  - id: strip-http-header-newlines
+    patterns:
+      - pattern: (HttpServletResponse $RESPONSE).setHeader($NAME, $VALUE)
+      - pattern-not: (HttpServletResponse $RESPONSE).setHeader($NAME, "...")
+      - pattern-not-inside: |
+          class $CLASS {
+            ...
+            final String $VALUE = ...;
+            ...
+          }
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING

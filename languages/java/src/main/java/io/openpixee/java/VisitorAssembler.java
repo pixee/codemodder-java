@@ -49,8 +49,6 @@ public interface VisitorAssembler {
         final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
       final List<VisitorFactory> defaultVisitorFactories =
           List.of(
-              new DeserializationVisitorFactory(),
-              new HeaderInjectionVisitorFactory(),
               new JakartaForwardVisitoryFactory(),
               new SQLParameterizerVisitorFactory(),
               new SSLContextGetInstanceVisitorFactory(),

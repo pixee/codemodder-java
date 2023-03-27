@@ -7,8 +7,6 @@ import com.github.javaparser.ast.Node;
 import io.codemodder.*;
 import java.util.List;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Provides base functionality for making JavaParser-based changes with Semgrep. */
 public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaParserChanger {
@@ -46,9 +44,11 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
         FileWeavingContext changeRecorder = context.changeRecorder();
         if (changeRecorder.isLineIncluded(region.getStartLine())
             && JavaParserSarifUtils.regionMatchesNodeStart(node, region)) {
-          onSemgrepResultFound(context, cu, (T) node, result);
-          changeRecorder.addWeave(
-              Weave.from(region.getStartLine(), context.codemodId(), dependenciesRequired()));
+          boolean changeSuccessful = onSemgrepResultFound(context, cu, (T) node, result);
+          if (changeSuccessful) {
+            changeRecorder.addWeave(
+                Weave.from(region.getStartLine(), context.codemodId(), dependenciesRequired()));
+          }
         }
       }
     }
@@ -61,9 +61,8 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
    * @param cu the parsed model of the file being transformed
    * @param node the node to act on
    * @param result the given SARIF result to act on
+   * @return true, if the change was made, false otherwise
    */
-  public abstract void onSemgrepResultFound(
+  public abstract boolean onSemgrepResultFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Result result);
-
-  private static final Logger logger = LoggerFactory.getLogger(SemgrepJavaParserChanger.class);
 }
