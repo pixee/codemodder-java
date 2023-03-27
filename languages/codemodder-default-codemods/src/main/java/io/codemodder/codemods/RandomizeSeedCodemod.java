@@ -28,7 +28,7 @@ public final class RandomizeSeedCodemod extends SemgrepJavaParserChanger<MethodC
   }
 
   @Override
-  public void onSemgrepResultFound(
+  public boolean onSemgrepResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr setSeedCall,
@@ -37,5 +37,6 @@ public final class RandomizeSeedCodemod extends SemgrepJavaParserChanger<MethodC
         new MethodCallExpr(new NameExpr(System.class.getSimpleName()), "currentTimeMillis");
     NodeList<Expression> arguments = setSeedCall.getArguments();
     arguments.set(0, safeExpression);
+    return true;
   }
 }
