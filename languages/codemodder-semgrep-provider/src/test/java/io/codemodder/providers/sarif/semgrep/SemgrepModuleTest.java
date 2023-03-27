@@ -59,11 +59,13 @@ final class SemgrepModuleTest {
     }
 
     @Override
-    public void onSemgrepResultFound(
+    public boolean onSemgrepResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr node,
-        final Result result) {}
+        final Result result) {
+      return true;
+    }
   }
 
   @Codemod(

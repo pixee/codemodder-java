@@ -50,7 +50,6 @@ public interface VisitorAssembler {
       final List<VisitorFactory> defaultVisitorFactories =
           List.of(
               new ApacheMultipartVisitorFactory(),
-              new DeserializationVisitorFactory(),
               new JakartaForwardVisitoryFactory(),
               new SQLParameterizerVisitorFactory(),
               new SSLContextGetInstanceVisitorFactory(),

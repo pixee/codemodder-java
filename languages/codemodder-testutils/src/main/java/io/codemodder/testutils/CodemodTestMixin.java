@@ -86,7 +86,7 @@ public interface CodemodTestMixin {
 
     // make sure the file is transformed to the expected output
     String transformedJavaCode = LexicalPreservingPrinter.print(cu);
-    assertThat(Files.readString(after), equalTo(transformedJavaCode));
+    assertThat(transformedJavaCode, equalTo(Files.readString(after)));
 
     // make sure the dependencies are added
     List<Weave> weaves = context.weaves();

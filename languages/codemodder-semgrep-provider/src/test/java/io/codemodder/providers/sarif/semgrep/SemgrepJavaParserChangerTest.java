@@ -45,11 +45,13 @@ final class SemgrepJavaParserChangerTest {
     }
 
     @Override
-    public void onSemgrepResultFound(
+    public boolean onSemgrepResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr node,
-        final Result result) {}
+        final Result result) {
+      return true;
+    }
   }
 
   @Test
@@ -72,9 +74,6 @@ final class SemgrepJavaParserChangerTest {
     when(context.path()).thenReturn(javaFile);
     when(context.codeDirectory()).thenReturn(directory);
     when(context.changeRecorder()).thenReturn(mock(FileWeavingContext.class));
-
-    // we should get a visitor for this file
-
   }
 
   private Path writeJavaFile(final Path tmpDir, final String javaCode) throws IOException {
