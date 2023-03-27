@@ -1,0 +1,15 @@
+package com.acme.testcode;
+
+import java.security.SecureRandom;
+import java.util.Random;
+
+interface Test {
+
+  default void hasThing() {
+    Random random = new SecureRandom();
+    random.setSeed(512L);
+    random.setSeed(getLong());
+  }
+
+  long getLong();
+}
