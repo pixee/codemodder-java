@@ -16,15 +16,15 @@ final class VisitorAssemblerTest {
   @Test
   void it_filters_java_factories_based_on_configuration() {
     VisitorAssembler assembler = VisitorAssembler.createDefault();
-    RuleContext everythingButUnsafeReadline =
-        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/limit-readline"));
+    RuleContext everythingButXxe =
+        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/harden-xmlinputfactory"));
     RuleContext everything = RuleContext.of(DefaultRuleSetting.ENABLED, List.of());
     File repositoryRoot = new File(".");
     List<VisitorFactory> allFactories =
         assembler.assembleJavaCodeScanningVisitorFactories(repositoryRoot, everything, List.of());
     List<VisitorFactory> allButOne =
         assembler.assembleJavaCodeScanningVisitorFactories(
-            repositoryRoot, everythingButUnsafeReadline, List.of());
+            repositoryRoot, everythingButXxe, List.of());
 
     // just make sure we're getting a reasonable number of factories
     assertThat(allFactories.isEmpty(), is(false));

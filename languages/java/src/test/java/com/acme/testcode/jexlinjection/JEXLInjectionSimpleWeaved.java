@@ -18,7 +18,7 @@ public final class JEXLInjectionSimpleWeaved {
     try (BufferedReader reader =
         new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-      String input = reader.readLine();
+      String input = "" + reader.read();
       JexlSandbox sandbox = new JexlSandbox(true);
       for (String cls : UnwantedTypes.all()) {
         sandbox.block(cls);

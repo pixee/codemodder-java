@@ -74,7 +74,7 @@ final class SemgrepModule extends AbstractModule {
                       + "/"
                       + semgrepScanAnnotation.ruleId()
                       + ".yaml";
-              logger.info(
+              logger.debug(
                   "Codemod {} didn't provide yaml path, assuming {}",
                   codemodType.getSimpleName(),
                   yamlPath);
