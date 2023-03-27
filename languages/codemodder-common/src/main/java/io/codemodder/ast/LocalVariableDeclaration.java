@@ -3,7 +3,12 @@ package io.codemodder.ast;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.ForEachStmt;
+import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.stmt.TryStmt;
+import java.util.Optional;
 
 /**
  * Holds the nodes in the AST that represents several types of local declaration of a variable. See
@@ -45,5 +50,19 @@ public abstract class LocalVariableDeclaration {
   @Override
   public String toString() {
     return getStatement().toString();
+  }
+
+  public static Optional<LocalVariableDeclaration> fromVariableDeclarator(VariableDeclarator vd) {
+    var vde = (VariableDeclarationExpr) vd.getParentNode().get();
+    var stmt = (Statement) vde.getParentNode().get();
+    if (stmt instanceof TryStmt)
+      return Optional.of(new TryResourceDeclaration(stmt.asTryStmt(), vde, vd));
+    if (stmt instanceof ExpressionStmt)
+      return Optional.of(new ExpressionStmtVariableDeclaration(stmt.asExpressionStmt(), vde, vd));
+    if (stmt instanceof ForEachStmt)
+      return Optional.of(new ForEachDeclaration(stmt.asForEachStmt(), vde, vd));
+    if (stmt instanceof ForStmt)
+      return Optional.of(new ForInitDeclaration(stmt.asForStmt(), vde, vd));
+    return Optional.empty();
   }
 }

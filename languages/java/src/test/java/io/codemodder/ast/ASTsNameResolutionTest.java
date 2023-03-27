@@ -316,7 +316,7 @@ final class ASTsNameResolutionTest {
   }
 
   @Test
-  void it_finds_Local() {
+  void it_finds_local_class() {
     String code =
         "class A {\n"
             + "  void foo() {\n"

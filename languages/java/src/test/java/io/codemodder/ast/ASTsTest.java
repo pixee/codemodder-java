@@ -223,7 +223,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
-    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    var scope =
+        LocalVariableDeclaration.fromVariableDeclarator(vde.getVariable(0)).get().getScope();
     assertThat(scope.getExpressions().size(), is(1));
     assertThat(scope.getStatements().size(), is(2));
   }
@@ -240,7 +241,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
-    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    var scope =
+        LocalVariableDeclaration.fromVariableDeclarator(vde.getVariable(0)).get().getScope();
     assertThat(scope.getExpressions().size(), is(1));
     assertThat(scope.getStatements().size(), is(2));
   }
@@ -258,7 +260,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
-    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    var scope =
+        LocalVariableDeclaration.fromVariableDeclarator(vde.getVariable(0)).get().getScope();
     assertThat(scope.getExpressions().size(), is(0));
     assertThat(scope.getStatements().size(), is(2));
   }
@@ -276,7 +279,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
-    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    var scope =
+        LocalVariableDeclaration.fromVariableDeclarator(vde.getVariable(0)).get().getScope();
     assertThat(scope.getExpressions().size(), is(3));
     assertThat(scope.getStatements().size(), is(2));
   }
@@ -306,7 +310,8 @@ final class ASTsTest {
     LexicalPreservingPrinter.setup(cu);
     var stmt = cu.findAll(ExpressionStmt.class).get(0);
     var vde = stmt.getExpression().asVariableDeclarationExpr();
-    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    var scope =
+        LocalVariableDeclaration.fromVariableDeclarator(vde.getVariable(0)).get().getScope();
     assertThat(scope.getExpressions().size(), is(0));
     assertThat(scope.getStatements().size(), is(2));
     ASTTransforms.wrapIntoResource(stmt, vde, scope);
@@ -360,7 +365,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
-    assertThat(ASTs.isFinalOrNeverAssigned(vd, ASTs.findLocalVariableScope(vd)), is(true));
+    var lvd = LocalVariableDeclaration.fromVariableDeclarator(vd).get();
+    assertThat(ASTs.isFinalOrNeverAssigned(lvd), is(true));
   }
 
   @Test
@@ -390,7 +396,8 @@ final class ASTsTest {
         "class A {\n" + "\n" + "  void foo() {\n" + "    int variable = 12;\n" + "  }\n" + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
-    assertThat(ASTs.isFinalOrNeverAssigned(vd, ASTs.findLocalVariableScope(vd)), is(true));
+    var lvd = LocalVariableDeclaration.fromVariableDeclarator(vd).get();
+    assertThat(ASTs.isFinalOrNeverAssigned(lvd), is(true));
   }
 
   @Test
@@ -405,7 +412,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
-    assertThat(ASTs.isFinalOrNeverAssigned(vd, ASTs.findLocalVariableScope(vd)), is(false));
+    var lvd = LocalVariableDeclaration.fromVariableDeclarator(vd).get();
+    assertThat(ASTs.isFinalOrNeverAssigned(lvd), is(false));
   }
 
   @Test
