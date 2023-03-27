@@ -1,3 +1,3 @@
 plugins {
-    id("io.openpixee.codetl.root")
+    id("io.codemodder.root")
 }
