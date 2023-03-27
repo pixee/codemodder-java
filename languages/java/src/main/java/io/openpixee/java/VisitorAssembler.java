@@ -51,7 +51,6 @@ public interface VisitorAssembler {
           List.of(
               new ApacheMultipartVisitorFactory(),
               new DeserializationVisitorFactory(),
-              new HeaderInjectionVisitorFactory(),
               new JakartaForwardVisitoryFactory(),
               new SQLParameterizerVisitorFactory(),
               new SSLContextGetInstanceVisitorFactory(),
