@@ -4,7 +4,7 @@ import java.beans.XMLDecoder;
 import java.io.InputStream;
 import org.xml.sax.InputSource;
 
-final class XMLDecoderVulnerability {
+final class Test {
 
   private static Object stewie2k(InputStream is) {
     XMLDecoder decoder = new XMLDecoder(is);
