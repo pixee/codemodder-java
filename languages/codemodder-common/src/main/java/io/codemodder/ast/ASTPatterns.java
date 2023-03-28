@@ -1,14 +1,27 @@
 package io.codemodder.ast;
 
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.EnumConstantDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.RecordDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
+import com.github.javaparser.ast.stmt.CatchClause;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
+import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
+import com.github.javaparser.ast.stmt.LocalRecordDeclarationStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
+import com.github.javaparser.ast.type.TypeParameter;
 import java.util.Optional;
 import java.util.function.Predicate;
 import org.javatuples.Pair;
@@ -41,6 +54,47 @@ public final class ASTPatterns {
     return vde.getParentNode()
         .map(p -> p instanceof TryStmt ? (TryStmt) p : null)
         .filter(ts -> ts.getResources().stream().anyMatch(rs -> rs == vde));
+  }
+
+  /**
+   * Test for this pattern: {@link TryStmt} -&gt; {@link VariableDeclarationExpr} -&gt; {@link
+   * VariableDeclarator} ({@code vd})
+   */
+  public static Optional<Pair<TryStmt, VariableDeclarationExpr>> isResource(
+      final VariableDeclarator vd) {
+    return vd.getParentNode()
+        .map(n -> n instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) n : null)
+        .flatMap(vde -> isResource(vde).map(stmt -> new Pair<>(stmt, vde)));
+  }
+
+  /**
+   * Test for this pattern: {@link ForStmt} -&gt; {@link VariableDeclarationExpr} -&gt; {@link
+   * VariableDeclarator} ({@code vd})
+   */
+  public static Optional<Pair<ForStmt, VariableDeclarationExpr>> isForInitVariable(
+      final VariableDeclarator vd) {
+    return vd.getParentNode()
+        .map(n -> n instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) n : null)
+        .flatMap(
+            vde ->
+                vde.getParentNode()
+                    .map(p -> p instanceof ForStmt ? (ForStmt) p : null)
+                    .map(fs -> new Pair<>(fs, vde)));
+  }
+
+  /**
+   * Test for this pattern: {@link ForEachStmt} -&gt; {@link VariableDeclarationExpr} -&gt; {@link
+   * VariableDeclarator} ({@code vd})
+   */
+  public static Optional<Pair<ForEachStmt, VariableDeclarationExpr>> isForEachVariable(
+      final VariableDeclarator vd) {
+    return vd.getParentNode()
+        .map(n -> n instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) n : null)
+        .flatMap(
+            vde ->
+                vde.getParentNode()
+                    .map(p -> p instanceof ForEachStmt ? (ForEachStmt) p : null)
+                    .map(fs -> new Pair<>(fs, vde)));
   }
 
   /**
@@ -109,6 +163,245 @@ public final class ASTPatterns {
       final var maybeVD = vde.getVariables().stream().filter(isVDOf).findFirst();
       if (maybeVD.isPresent()) {
         return Optional.of(new Triplet<>(fstmt, vde, maybeVD.get()));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link PatternExpr} ({@code node}) -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<PatternExpr> isPatternExprDeclarationOf(
+      final Node node, final String name) {
+    if (node instanceof PatternExpr) {
+      var pexpr = (PatternExpr) node;
+      if (pexpr.getNameAsString().equals(name)) return Optional.of(pexpr);
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link LambdaExpr} ({@code node}) -&gt; {@link Parameter} -&gt; {@link
+   * SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<LambdaExpr, Parameter>> isLambdaExprParameterOf(
+      final Node node, final String name) {
+    if (node instanceof LambdaExpr) {
+      var lexpr = (LambdaExpr) node;
+      for (var parameter : lexpr.getParameters()) {
+        if (parameter.getNameAsString().equals(name))
+          return Optional.of(new Pair<>(lexpr, parameter));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link CatchClause} ({@code node}) -&gt; {@link Parameter} -&gt; {@link
+   * SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<CatchClause, Parameter>> isExceptionParameterOf(
+      final Node node, final String name) {
+    if (node instanceof CatchClause) {
+      var catchClause = (CatchClause) node;
+      if (catchClause.getParameter().getNameAsString().equals(name))
+        return Optional.of(new Pair<>(catchClause, catchClause.getParameter()));
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link MethodDeclaration} ({@code node}) -&gt; {@link Parameter} -&gt;
+   * {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<MethodDeclaration, Parameter>> isMethodFormalParameterOf(
+      final Node node, final String name) {
+    if (node instanceof MethodDeclaration) {
+      var mdecl = (MethodDeclaration) node;
+      for (var parameter : mdecl.getParameters()) {
+        if (parameter.getNameAsString().equals(name))
+          return Optional.of(new Pair<>(mdecl, parameter));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link MethodDeclaration} ({@code node}) -&gt; {@link TypeParameter}
+   * -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<MethodDeclaration, TypeParameter>> isMethodTypeParameterOf(
+      final Node node, final String name) {
+    if (node instanceof MethodDeclaration) {
+      var mdecl = (MethodDeclaration) node;
+      for (var parameter : mdecl.getTypeParameters()) {
+        if (parameter.getNameAsString().equals(name))
+          return Optional.of(new Pair<>(mdecl, parameter));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link NodeWithSimpleName} ({@code bDecl}) -&gt; {@link SimpleName},
+   * with {@code name} as the {@link SimpleName}.
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<NodeWithSimpleName<?>> isNamedMemberOf(
+      final BodyDeclaration<?> bodyDecl, final String name) {
+    if (bodyDecl instanceof NodeWithSimpleName<?>) {
+      var nwn = (NodeWithSimpleName<?>) bodyDecl;
+      if (nwn.getNameAsString().equals(name)) {
+        return Optional.of(nwn);
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link FieldDeclaration} ({@code bDecl}) -&gt; {@link
+   * VariableDeclarator} -&gt; {@link SimpleName}, with {@code name} as the {@link SimpleName}.
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<FieldDeclaration, VariableDeclarator>> isFieldDeclarationOf(
+      final BodyDeclaration<?> bDecl, final String name) {
+    if (bDecl instanceof FieldDeclaration) {
+      var m = (FieldDeclaration) bDecl;
+      return m.asFieldDeclaration().getVariables().stream()
+          .filter(vd -> vd.getNameAsString().equals(name))
+          .findFirst()
+          .map(vd -> new Pair<>(m, vd));
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link ClassOrInterfaceDeclaration} ({@code classDecl}) -&gt; {@link
+   * TypeParameter} -&gt; {@link SimpleName}, with {@code name} as the {@link SimpleName}.
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<ClassOrInterfaceDeclaration, TypeParameter>> isClassTypeParameterOf(
+      final ClassOrInterfaceDeclaration classDecl, final String name) {
+    for (var parameter : classDecl.getTypeParameters()) {
+      if (parameter.getNameAsString().equals(name))
+        return Optional.of(new Pair<>(classDecl, parameter));
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link EnumDeclaration} ({@code enumDecl}) -&gt; {@link
+   * EnumConstantDeclaration} -&gt; {@link SimpleName}, with {@code name} as the {@link SimpleName}.
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<EnumDeclaration, EnumConstantDeclaration>> isEnumConstantOf(
+      final EnumDeclaration enumDecl, final String name) {
+    var maybeECD =
+        enumDecl.getEntries().stream()
+            .filter(ecd -> ecd.getNameAsString().equals(name))
+            .findFirst();
+    return maybeECD.map(enumConstantDeclaration -> new Pair<>(enumDecl, enumConstantDeclaration));
+  }
+
+  /**
+   * Test for this pattern: {@link ConstructorDeclaration} ({@code node}) -&gt; {@link Parameter}
+   * -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<ConstructorDeclaration, Parameter>> isConstructorFormalParameterOf(
+      final Node node, final String name) {
+    if (node instanceof ConstructorDeclaration) {
+      var mdecl = (ConstructorDeclaration) node;
+      for (var parameter : mdecl.getParameters()) {
+        if (parameter.getNameAsString().equals(name))
+          return Optional.of(new Pair<>(mdecl, parameter));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link ConstructorDeclaration} ({@code node}) -&gt; {@link
+   * TypeParameter} -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<ConstructorDeclaration, TypeParameter>> isConstructorTypeParameterOf(
+      final Node node, final String name) {
+    if (node instanceof ConstructorDeclaration) {
+      var mdecl = (ConstructorDeclaration) node;
+      for (var parameter : mdecl.getTypeParameters()) {
+        if (parameter.getNameAsString().equals(name))
+          return Optional.of(new Pair<>(mdecl, parameter));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link LocalClassDeclarationStmt} ({@code node}) -&gt; {@link
+   * ClassOrInterfaceDeclaration} -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<LocalClassDeclarationStmt, ClassOrInterfaceDeclaration>>
+      isLocalTypeDeclarationOf(final Node node, final String name) {
+    if (node instanceof LocalClassDeclarationStmt) {
+      var stmtDecl = (LocalClassDeclarationStmt) node;
+      if (stmtDecl.getClassDeclaration().getNameAsString().equals(name)) {
+        return Optional.of(new Pair<>(stmtDecl, stmtDecl.getClassDeclaration()));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link LocalRecordDeclarationStmt} ({@code node}) -&gt; {@link
+   * RecordDeclaration} -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Pair<LocalRecordDeclarationStmt, RecordDeclaration>>
+      isLocalRecordDeclarationOf(final Node node, final String name) {
+    if (node instanceof LocalRecordDeclarationStmt) {
+      var stmtDecl = (LocalRecordDeclarationStmt) node;
+      if (stmtDecl.getRecordDeclaration().getNameAsString().equals(name)) {
+        return Optional.of(new Pair<>(stmtDecl, stmtDecl.getRecordDeclaration()));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Test for this pattern: {@link ClassOrInterfaceDeclaration} ({@code node}) -&gt; {@link
+   * FieldDeclaration} -&gt; {@link VariableDeclarator} -&gt; {@link SimpleName}
+   *
+   * @return A tuple with the above pattern in order sans the {@link SimpleName}.
+   */
+  public static Optional<Triplet<ClassOrInterfaceDeclaration, FieldDeclaration, VariableDeclarator>>
+      isClassFieldDeclarationOf(final Node node, final String name) {
+    if (node instanceof ClassOrInterfaceDeclaration) {
+      var classDecl = (ClassOrInterfaceDeclaration) node;
+      for (var field : classDecl.getFields()) {
+        for (var vd : field.getVariables()) {
+          if (vd.getNameAsString().equals(name))
+            return Optional.of(new Triplet<>(classDecl, field, vd));
+        }
       }
     }
     return Optional.empty();
@@ -209,5 +502,12 @@ public final class ASTPatterns {
                         && vde.getParentNode().get() instanceof ExpressionStmt)
                     ? new Triplet<>((ExpressionStmt) vde.getParentNode().get(), vde, vd)
                     : null);
+  }
+
+  /**
+   * Test for this pattern: {@link FieldDeclaration} -&gt; {@link VariableDeclarator} ({@code vd}.
+   */
+  public static Optional<FieldDeclaration> isVariableOfField(final VariableDeclarator vd) {
+    return vd.getParentNode().map(n -> n instanceof FieldDeclaration ? (FieldDeclaration) n : null);
   }
 }
