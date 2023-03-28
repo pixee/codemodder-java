@@ -5,6 +5,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -55,12 +56,14 @@ public final class ASTTransforms {
     // Possible parents of a Statement that is not a BlockStmt:
     // NodeWithBody: ForStmt, ForEachStmt, DoStmt, WhileStmt
     // IfStmt, LabeledStmt
+    // LambdaExpr (mostly due to JavaParser's grammar)
     var parent = existingStatement.getParentNode().get();
     // In those cases we need to create a BlockStmt for
     // the existing and newly added Statement
     if (parent instanceof NodeWithBody
         || parent instanceof IfStmt
-        || parent instanceof LabeledStmt) {
+        || parent instanceof LabeledStmt
+        || parent instanceof LambdaExpr) {
       var newBody = new BlockStmt();
       existingStatement.replace(newBody);
       newBody.addStatement(newStatement);
@@ -93,7 +96,8 @@ public final class ASTTransforms {
     // See comments in addStatementBeforeStatement
     if (parent instanceof NodeWithBody
         || parent instanceof IfStmt
-        || parent instanceof LabeledStmt) {
+        || parent instanceof LabeledStmt
+        || parent instanceof LambdaExpr) {
       var newBody = new BlockStmt();
       existingStatement.replace(newBody);
       newBody.addStatement(existingStatement);

@@ -4,7 +4,7 @@ import io.openpixee.security.BoundedLineReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public final class UnsafeReadlineVulnerabilityWeaved {
+public final class Test {
 
   void stewie2k(BufferedReader br) throws IOException {
     BoundedLineReader.readLine(br, 1000000);

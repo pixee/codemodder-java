@@ -16,7 +16,7 @@ public final class JEXLInjectionSimple {
     try (BufferedReader reader =
         new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-      String input = reader.readLine();
+      String input = "" + reader.read();
       JexlEngine jexl = new JexlBuilder().create();
       JexlExpression expression = jexl.createExpression(input);
       JexlContext context = new MapContext();

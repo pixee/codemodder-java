@@ -3,7 +3,7 @@ package com.acme.testcode;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public final class UnsafeReadlineVulnerability {
+public final class Test {
 
   void stewie2k(BufferedReader br) throws IOException {
     br.readLine();

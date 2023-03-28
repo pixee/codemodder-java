@@ -15,7 +15,7 @@ public final class JEXLInjectionNoFix {
     try (BufferedReader reader =
         new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-      String input = reader.readLine();
+      String input = "" + reader.read();
       JexlExpression expression = jexl.createExpression(input);
       JexlContext context = new MapContext();
       expression.evaluate(context);

@@ -25,7 +25,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     Path repositoryPath = repository.toAbsolutePath();
     Path sarifFile = Files.createTempFile("semgrep", ".sarif");
 
-    LOG.info("Repository: {}", dumpInfo(repositoryPath));
+    LOG.debug("Repository: {}", dumpInfo(repositoryPath));
     List<String> args = new ArrayList<>();
     args.add("semgrep");
     args.add("--no-error");
@@ -40,7 +40,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     }
     args.add(repositoryPath.toString());
 
-    LOG.info("Process arguments: {}", args);
+    LOG.debug("Process arguments: {}", args);
     /*
      * Create an empty directory to be the working directory, and add an .semgrepignore file that allows scanning
      * everything. If we don't do this, Semgrep will use its defaults which exclude a lot of stuff we want to scan.
@@ -49,18 +49,18 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     Path semgrepIgnoreFile = Files.createFile(tmpDir.resolve(".semgrepignore"));
     Files.write(semgrepIgnoreFile, OUR_SEMGREPIGNORE_CONTENTS.getBytes(StandardCharsets.UTF_8));
 
-    LOG.info("Will execute Semgrep from this directory: {}", dumpInfo(tmpDir));
-    LOG.info("Semgrep ignore file is located at: {}", dumpInfo(semgrepIgnoreFile));
-    LOG.info("SARIF file will be located at: {}", dumpInfo(sarifFile));
+    LOG.debug("Will execute Semgrep from this directory: {}", dumpInfo(tmpDir));
+    LOG.debug("Semgrep ignore file is located at: {}", dumpInfo(semgrepIgnoreFile));
+    LOG.debug("SARIF file will be located at: {}", dumpInfo(sarifFile));
 
     Path semgrepHome = Files.createTempDirectory("semgrep-home").toAbsolutePath();
-    LOG.info("Semgrep home will be: {}", dumpInfo(semgrepHome));
+    LOG.debug("Semgrep home will be: {}", dumpInfo(semgrepHome));
     ProcessBuilder pb = new ProcessBuilder(args);
     pb.environment().put("HOME", semgrepHome.toString());
     Process p = pb.directory(tmpDir.toFile()).inheritIO().start();
     try {
       int rc = p.waitFor();
-      LOG.info("Semgrep return code: {}", rc);
+      LOG.debug("Semgrep return code: {}", rc);
       if (rc != 0) {
         throw new RuntimeException("error code seen from semgrep execution: " + rc);
       }
