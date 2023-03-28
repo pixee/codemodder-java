@@ -22,6 +22,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.javatuples.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A library that contains methods for automatically fixing resource leaks detected by CodeQL's rule
@@ -29,12 +31,16 @@ import org.javatuples.Pair;
  */
 public final class JDBCResourceLeakFixer {
 
+  private static final Logger LOG = LoggerFactory.getLogger(JDBCResourceLeakFixer.class);
+
   /**
    * Detects if a {@link MethodCallExpr} of a JDBC resource type is fixable and tries to fix it.
    * Combines {@code isFixable} and {@code tryToFix}.
    */
   public static Optional<Integer> checkAndFix(final MethodCallExpr mce) {
-    if (isFixable(mce)) return tryToFix(mce);
+    if (isFixable(mce)) {
+      return tryToFix(mce);
+    }
     return Optional.empty();
   }
 
@@ -63,17 +69,21 @@ public final class JDBCResourceLeakFixer {
       if (mce.calculateResolvedType().describe().equals("java.sql.ResultSet")) {
         // should always exist and is a *Statement object
         final var mceScope = mce.getScope().get();
-        if (mceScope.isFieldAccessExpr()) return false;
+        if (mceScope.isFieldAccessExpr()) {
+          return false;
+        }
         if (mceScope.isNameExpr()) {
           final var maybeLVD =
               ASTs.findEarliestLocalDeclarationOf(
                   mceScope, mceScope.asNameExpr().getNameAsString());
 
-          if (maybeLVD.filter(lvd -> escapesRootScope(lvd, n -> true)).isPresent()) return false;
+          if (maybeLVD.filter(lvd -> escapesRootScope(lvd, n -> true)).isPresent()) {
+            return false;
+          }
         }
       }
     } catch (final UnsolvedSymbolException e) {
-      e.printStackTrace();
+      LOG.error("Problem resolving type of : {}", mce, e);
       return false;
     }
 
@@ -112,7 +122,7 @@ public final class JDBCResourceLeakFixer {
             localVariableDeclaration.getScope());
         return Optional.of(originalLine);
       }
-      // if vde is multiple declarations, extract the relevant vd and wrap it
+      // TODO if vde is multiple declarations, extract the relevant vd and wrap it
     }
     // other cases here...
     return Optional.empty();
@@ -429,11 +439,8 @@ public final class JDBCResourceLeakFixer {
     if (node instanceof Expression) {
       var expr = (Expression) node;
       if (expr.isFieldAccessExpr()) return true;
-      System.out.println("NOT FAE");
       if (expr.isNameExpr()) {
         var source = ASTs.findNonCallableSimpleNameSource(expr.asNameExpr().getName());
-        System.out.println("SOURCE: " + source);
-        System.out.println("SOURCE: " + source.get().getClass());
         if (source
             .map(n -> n instanceof VariableDeclarator ? (VariableDeclarator) n : null)
             .flatMap(vd -> ASTPatterns.isVariableOfField(vd))
@@ -450,12 +457,11 @@ public final class JDBCResourceLeakFixer {
 
   /** Returns true if {@code expr} itself escapes or flows into a variable that escapes. */
   private static boolean escapesRootScope(final Expression expr, final Predicate<Node> isInScope) {
-    System.out.println(expr);
     if (immediatelyEscapesMethodScope(expr)) return true;
     // find all the variables it flows into
-    // TODO more scrutinity here later, can be made better with name resolution
+    // TODO more scrutinity here later, can be made better with name resolution by calculating
+    // scopes of a few more types (e.g. Parameter)
     final var pair = flowsInto(expr);
-    System.out.println("PAIR: " + pair);
     // flows into anything that is not a local variable
     if (pair.getValue1().stream().anyMatch(JDBCResourceLeakFixer::isAField)) {
       return true;
