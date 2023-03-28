@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
@@ -18,14 +19,14 @@ import org.junit.jupiter.api.TestInstance;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class GitRepositoryTest {
 
-  protected String repoURI;
+  private final String repoURI;
 
-  protected String repoBranch;
+  private final String repoBranch;
 
-  protected String tempDirName;
+  private final String tempDirName;
 
   /** Hash string of the commit the repo should be at. */
-  protected String refHash;
+  private final String refHash;
 
   /** Shared repo dir for all tests. */
   protected File repoDir;
@@ -33,7 +34,14 @@ abstract class GitRepositoryTest {
   /** The output file for each test. */
   protected File outputFile;
 
-  protected static boolean isCached(File dir) throws IOException {
+  protected GitRepositoryTest(final String repoURI, final String repoBranch, final String refHash) {
+    this.repoURI = Objects.requireNonNull(repoURI);
+    this.repoBranch = Objects.requireNonNull(repoBranch);
+    this.tempDirName = getClass().getSimpleName();
+    this.refHash = Objects.requireNonNull(refHash);
+  }
+
+  private static boolean isCached(File dir) throws IOException {
     var rb = new FileRepositoryBuilder();
     rb.findGitDir(dir);
     if (rb.getGitDir() == null) return false;
@@ -45,13 +53,8 @@ abstract class GitRepositoryTest {
     return false;
   }
 
-  /** Must set repoURI, repoBranch, tempDirName at least */
-  abstract void setParameters();
-
   @BeforeAll
   protected void setup() throws GitAPIException, IOException {
-    setParameters();
-
     String tmpDir = System.getProperty("java.io.tmpdir");
     repoDir = new File(tmpDir, tempDirName);
 

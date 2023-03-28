@@ -6,7 +6,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import io.codemodder.ast.ASTs;
-import io.openpixee.java.protections.XMLDecoderVisitorFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,9 +103,9 @@ public interface TypeLocator {
     /**
      * This does a little dark magic here that isn't obvious from the contract of the API. Right now
      * our cache is scoped to the entire {@link CompilationUnit}, but unfortunately you can have two
-     * different methods that have a similar named variable that have different types. In fact our
-     * test case code for {@link XMLDecoderVisitorFactory} tests this scenario. Basically, this
-     * method resets its own cache every time it "senses" we have moved from one method to another.
+     * different methods that have a similar named variable that have different types. Basically,
+     * this method resets its own cache every time it "senses" we have moved from one method to
+     * another.
      *
      * <p>This is an incomplete approach because the problem isn't just similarly named variables in
      * different methods. You can imagine two code scopes within a single method that does the same

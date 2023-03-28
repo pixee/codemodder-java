@@ -18,12 +18,8 @@ import picocli.CommandLine;
 
 final class WebGoat820Test extends GitRepositoryTest {
 
-  void setParameters() {
-    this.repoURI = "https://github.com/WebGoat/WebGoat";
-    this.repoBranch = "main";
-    this.tempDirName = "WebGoat820";
-    // Coincides with the 8.2.0 release
-    this.refHash = "486b81f8ecacf0f751e4a1dd873b6b09545cb2a2";
+  WebGoat820Test() {
+    super("https://github.com/WebGoat/WebGoat", "main", "486b81f8ecacf0f751e4a1dd873b6b09545cb2a2");
   }
 
   @Test

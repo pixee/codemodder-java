@@ -15,7 +15,7 @@ public final class ExpressionStmtVariableDeclaration extends LocalVariableDeclar
 
   private final ExpressionStmt stmt;
 
-  public ExpressionStmtVariableDeclaration(
+  ExpressionStmtVariableDeclaration(
       final ExpressionStmt stmt, final VariableDeclarationExpr vde, final VariableDeclarator vd) {
     this.stmt = Objects.requireNonNull(stmt);
     this.vde = Objects.requireNonNull(vde);

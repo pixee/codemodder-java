@@ -5,7 +5,7 @@ this plugin, because doing so allows us to encapsulate the messy details of how
 the gradle build logic is structured.
 */
 plugins {
-    id("io.openpixee.codetl.base")
+    id("io.codemodder.base")
 }
 
 /*
