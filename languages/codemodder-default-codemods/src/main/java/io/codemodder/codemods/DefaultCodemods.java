@@ -13,6 +13,7 @@ public final class DefaultCodemods {
   public static List<Class<? extends Changer>> asList() {
     return List.of(
         HardenJavaDeserializationCodemod.class,
+        HardenProcessCreationCodemod.class,
         HardenXMLDecoderCodemod.class,
         LimitReadlineCodemod.class,
         RandomizeSeedCodemod.class,
