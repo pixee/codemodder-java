@@ -29,6 +29,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     List<String> args = new ArrayList<>();
     args.add("semgrep");
     args.add("--no-error");
+    args.add("--dataflow-traces");
     args.add("--sarif");
     args.add("-o");
     args.add(sarifFile.toAbsolutePath().toString());

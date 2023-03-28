@@ -49,15 +49,12 @@ public interface VisitorAssembler {
         final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
       final List<VisitorFactory> defaultVisitorFactories =
           List.of(
-              new ApacheMultipartVisitorFactory(),
-              new DeserializationVisitorFactory(),
               new JakartaForwardVisitoryFactory(),
               new SQLParameterizerVisitorFactory(),
               new SSLContextGetInstanceVisitorFactory(),
               new SSLEngineSetEnabledProtocolsVisitorFactory(),
               new SSLParametersSetProtocolsVisitorFactory(),
               new SSLSocketSetEnabledProtocolsVisitorFactory(),
-              new PredictableSeedVisitorFactory(),
               new RuntimeExecVisitorFactory(),
               new SpringMultipartVisitorFactory(),
               new UnsafeReadlineVisitorFactory(),

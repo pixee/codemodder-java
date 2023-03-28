@@ -1,8 +1,8 @@
 @Suppress("DSL_SCOPE_VIOLATION") // https://github.com/gradle/gradle/issues/22797
 plugins {
-    id("io.openpixee.codetl.base")
-    id("io.openpixee.codetl.java-library")
-    id("io.openpixee.codetl.maven-publish")
+    id("io.codemodder.base")
+    id("io.codemodder.java-library")
+    id("io.codemodder.maven-publish")
     alias(libs.plugins.fileversioning)
 }
 
