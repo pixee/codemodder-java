@@ -14,6 +14,7 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
+import io.github.pixee.security.UnwantedTypes;
 import java.util.Optional;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
@@ -85,7 +86,7 @@ final class JEXLInjectionFixer {
         new MethodCallExpr(
             mce.getScope().get(), "sandbox", new NodeList<>(new NameExpr("sandbox")));
     final var newCreate = new MethodCallExpr(sandboxCall, "create");
-    ASTTransforms.addImportIfMissing(cu, "io.openpixee.security.UnwantedTypes");
+    ASTTransforms.addImportIfMissing(cu, UnwantedTypes.class.getName());
     ASTTransforms.addImportIfMissing(cu, "org.apache.commons.jexl3.introspection.JexlSandbox");
     mce.replace(newCreate);
     return mce.getBegin().map(b -> b.line);

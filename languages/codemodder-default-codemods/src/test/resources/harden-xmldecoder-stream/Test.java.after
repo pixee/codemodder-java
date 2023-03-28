@@ -1,6 +1,6 @@
 package com.acme.testcode;
 
-import io.openpixee.security.XMLDecoderSecurity;
+import io.github.pixee.security.XMLDecoderSecurity;
 import java.beans.XMLDecoder;
 import java.io.InputStream;
 import org.xml.sax.InputSource;

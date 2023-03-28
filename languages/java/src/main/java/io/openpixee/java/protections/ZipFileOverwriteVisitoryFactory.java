@@ -9,11 +9,11 @@ import io.codemodder.DependencyGAV;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
 import io.codemodder.ast.ASTTransforms;
+import io.github.pixee.security.ZipSecurity;
 import io.openpixee.java.ObjectCreationPredicateFactory;
 import io.openpixee.java.ObjectCreationToMethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
-import io.openpixee.security.ZipSecurity;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +48,7 @@ public final class ZipFileOverwriteVisitoryFactory implements VisitorFactory {
                 Weave.from(
                     objectCreationExpr.getRange().get().begin.line,
                     zipHardeningRuleId,
-                    DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+                    DependencyGAV.JAVA_SECURITY_TOOLKIT);
             return new TransformationResult<>(Optional.of(securedCall), weave);
           }
         };

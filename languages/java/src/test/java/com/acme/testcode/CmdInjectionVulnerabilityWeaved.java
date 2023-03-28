@@ -1,6 +1,6 @@
 package com.acme.testcode;
 
-import io.openpixee.security.SystemCommand;
+import io.github.pixee.security.SystemCommand;
 import java.io.File;
 import java.io.IOException;
 

@@ -1,6 +1,6 @@
 package com.acme.testcode;
 
-import io.openpixee.security.BoundedLineReader;
+import io.github.pixee.security.BoundedLineReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 

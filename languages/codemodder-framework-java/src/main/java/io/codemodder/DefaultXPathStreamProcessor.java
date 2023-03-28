@@ -1,6 +1,6 @@
 package io.codemodder;
 
-import io.openpixee.security.XMLInputFactorySecurity;
+import io.github.pixee.security.XMLInputFactorySecurity;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;

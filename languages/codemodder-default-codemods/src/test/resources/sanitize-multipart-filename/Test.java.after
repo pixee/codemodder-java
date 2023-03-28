@@ -1,6 +1,6 @@
 package sanitize;
 
-import io.openpixee.security.Filenames;
+import io.github.pixee.security.Filenames;
 import java.io.File;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;

@@ -10,11 +10,11 @@ import io.codemodder.DependencyGAV;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
 import io.codemodder.ast.ASTTransforms;
+import io.github.pixee.security.Filenames;
 import io.openpixee.java.MethodCallPredicateFactory;
 import io.openpixee.java.MethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
-import io.openpixee.security.Filenames;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +54,7 @@ public final class SpringMultipartVisitorFactory implements VisitorFactory {
                 Weave.from(
                     methodCallExpr.getRange().get().begin.line,
                     springMultipartFilenameSanitizerRuleId,
-                    DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+                    DependencyGAV.JAVA_SECURITY_TOOLKIT);
             return new TransformationResult<>(Optional.of(safeCall), weave);
           }
         };

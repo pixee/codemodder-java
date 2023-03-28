@@ -11,7 +11,7 @@ import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import io.openpixee.security.SystemCommand;
+import io.github.pixee.security.SystemCommand;
 import java.util.List;
 import javax.inject.Inject;
 
@@ -38,7 +38,7 @@ public final class HardenProcessCreationCodemod extends SemgrepJavaParserChanger
     Expression scope = methodCallExpr.getScope().get();
     ASTTransforms.addImportIfMissing(cu, SystemCommand.class);
     NameExpr callbackClass =
-        new NameExpr(io.openpixee.security.SystemCommand.class.getSimpleName());
+        new NameExpr(io.github.pixee.security.SystemCommand.class.getSimpleName());
     MethodCallExpr safeExpression = new MethodCallExpr(callbackClass, "runCommand");
     NodeList<Expression> nodeList = new NodeList<>();
     nodeList.add(scope);
@@ -51,6 +51,6 @@ public final class HardenProcessCreationCodemod extends SemgrepJavaParserChanger
 
   @Override
   public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 }

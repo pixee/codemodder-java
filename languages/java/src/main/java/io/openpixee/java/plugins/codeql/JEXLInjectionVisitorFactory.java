@@ -128,10 +128,7 @@ final class JEXLInjectionVisitorFactory implements VisitorFactory {
       // Checks if a PhysicalLocation matches methodCallExpr location
       if (locations.stream().anyMatch(matchLocation)) {
         JEXLInjectionFixer.checkAndFix(methodCallExpr)
-            .map(
-                i ->
-                    Weave.from(
-                        i, JEXLInjectionRuleId, DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT))
+            .map(i -> Weave.from(i, JEXLInjectionRuleId, DependencyGAV.JAVA_SECURITY_TOOLKIT))
             .ifPresent(context::addWeave);
       }
 

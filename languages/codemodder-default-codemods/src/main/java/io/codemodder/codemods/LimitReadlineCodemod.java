@@ -12,7 +12,7 @@ import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import io.openpixee.security.BoundedLineReader;
+import io.github.pixee.security.BoundedLineReader;
 import java.util.List;
 import javax.inject.Inject;
 
@@ -47,7 +47,7 @@ public final class LimitReadlineCodemod extends SemgrepJavaParserChanger<MethodC
 
   @Override
   public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 
   private static final int defaultLineMaximum = 1_000_000; // 1 MB
