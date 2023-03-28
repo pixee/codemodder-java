@@ -36,7 +36,7 @@ public final class HardenJavaDeserializationCodemod
   @Inject
   public HardenJavaDeserializationCodemod(
       @SemgrepScan(ruleId = "harden-java-deserialization") final RuleSarif sarif) {
-    super(sarif, VariableDeclarator.class);
+    super(sarif, VariableDeclarator.class, RegionNodeMatcher.MATCHES_START);
   }
 
   @Override
