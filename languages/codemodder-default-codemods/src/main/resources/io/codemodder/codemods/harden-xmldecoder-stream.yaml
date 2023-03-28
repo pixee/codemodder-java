@@ -1,0 +1,15 @@
+rules:
+  - id: harden-xmldecoder-stream
+    patterns:
+      - pattern: new XMLDecoder((InputStream $IS), ...)
+      - pattern-not: new XMLDecoder(XMLDecoderSecurity.hardenStream($ARG), ...)
+      - pattern-not-inside: |
+          $RT $METHOD ($ARGS) {
+            ...
+            $IS = XMLDecoderSecurity.hardenStream(...);
+            ...
+          }
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING
