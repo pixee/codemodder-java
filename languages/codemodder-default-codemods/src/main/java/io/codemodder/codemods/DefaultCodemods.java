@@ -17,7 +17,8 @@ public final class DefaultCodemods {
         HardenXMLDecoderCodemod.class,
         LimitReadlineCodemod.class,
         RandomizeSeedCodemod.class,
-        SanitizeMultipartFilenameCodemod.class,
+        SanitizeApacheMultipartFilenameCodemod.class,
+        SanitizeSpringMultipartFilenameCodemod.class,
         SecureRandomCodemod.class,
         SSRFCodemod.class,
         VerbTamperingCodemod.class);

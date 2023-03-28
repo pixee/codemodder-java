@@ -17,14 +17,14 @@ import javax.inject.Inject;
 
 /** Sanitizes multipart filename inputs from HTTP requests. */
 @Codemod(
-    id = "pixee:java/sanitize-multipart-filename",
+    id = "pixee:java/sanitize-apache-multipart-filename",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class SanitizeMultipartFilenameCodemod
+public final class SanitizeApacheMultipartFilenameCodemod
     extends SemgrepJavaParserChanger<MethodCallExpr> {
   @Inject
-  public SanitizeMultipartFilenameCodemod(
-      @SemgrepScan(ruleId = "sanitize-multipart-filename") RuleSarif semgrepSarif) {
+  public SanitizeApacheMultipartFilenameCodemod(
+      @SemgrepScan(ruleId = "sanitize-apache-multipart-filename") RuleSarif semgrepSarif) {
     super(semgrepSarif, MethodCallExpr.class, RegionExtractor.FROM_FIRST_THREADFLOW_EVENT);
   }
 

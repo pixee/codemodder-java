@@ -13,6 +13,11 @@ public interface RegionNodeMatcher {
   /** Return true if the given {@link Region} matches the given {@link Range}. */
   boolean matches(Region region, Range range);
 
+  /**
+   * Return true if the {@link Node} and {@link Region} start and end at the same location. Some
+   * SARIF providers seem report an end column that is +1 more than you think -- the spec probably
+   * says the value is exclusive or something.
+   */
   RegionNodeMatcher EXACT_MATCH =
       (region, range) -> {
         return region.getStartLine() == range.begin.line
@@ -21,13 +26,7 @@ public interface RegionNodeMatcher {
             && region.getEndColumn() == range.end.column + 1;
       };
 
-  /**
-   * Return true if the {@link Node} is {@link Region} start at the same location.
-   *
-   * @param range the AST node to compare
-   * @param region the SARIF region to compare
-   * @return true, if the two locations have equivalent start line and columns
-   */
+  /** Return true if the {@link Node} is {@link Region} start at the same location. */
   RegionNodeMatcher MATCHES_START =
       (region, range) -> {
         return region.getStartLine() == range.begin.line
