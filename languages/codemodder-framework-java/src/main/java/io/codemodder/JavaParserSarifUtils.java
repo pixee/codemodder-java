@@ -4,6 +4,7 @@ import com.contrastsecurity.sarif.Region;
 import com.github.javaparser.Position;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.Node;
+import java.util.Optional;
 
 /** Holds common AST utilities in JavaParser. */
 public final class JavaParserSarifUtils {
@@ -36,7 +37,11 @@ public final class JavaParserSarifUtils {
    * @return true, if the two locations have equivalent start line and columns
    */
   public static boolean regionMatchesNodeStart(final Node node, final Region region) {
-    Position position = node.getRange().get().begin;
-    return region.getStartLine() == position.line && region.getStartColumn() == position.column;
+    Optional<Range> range = node.getRange();
+    if (range.isPresent()) {
+      Position position = range.get().begin;
+      return region.getStartLine() == position.line && region.getStartColumn() == position.column;
+    }
+    return false;
   }
 }

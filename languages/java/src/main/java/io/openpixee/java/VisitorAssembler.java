@@ -57,7 +57,6 @@ public interface VisitorAssembler {
               new SSLSocketSetEnabledProtocolsVisitorFactory(),
               new RuntimeExecVisitorFactory(),
               new SpringMultipartVisitorFactory(),
-              new UnsafeReadlineVisitorFactory(),
               new XStreamVisitorFactory(),
               new XXEVisitorFactory(),
               new ZipFileOverwriteVisitoryFactory());
