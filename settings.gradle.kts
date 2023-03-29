@@ -1,11 +1,15 @@
-rootProject.name = "codemodder"
+rootProject.name = "codemodder-java"
 
 pluginManagement {
-    includeBuild("gradle/settings")
+    includeBuild("gradle/build-plugins")
+    includeBuild("gradle/build-settings")
 }
 
 plugins {
-    id("io.codemodder.settings")
+    id("io.codemodder.repositories")
 }
 
-include("cli", "languages:java", "languages:javascript", "languages:codemodder-framework-java", "languages:codemodder-semgrep-provider", "languages:codemodder-default-codemods", "languages:codemodder-common", "languages:codemodder-testutils")
+includeBuild("codemodder-community-codemods")
+includeBuild("framework")
+includeBuild("legacy")
+includeBuild("plugins")

@@ -1,11 +1,10 @@
-# codemodder
+# Codemodder
 
-The codemodder framework builds on traditional codemod frameworks by providing
-codemods with additional context and services. The codemodder framework, through
-an internal extension point called a provider, injects codemods with the context
-and services they need to perform complex transforms. Providers and the complex
-transforms they enable distinguish codemodder codemods from traditional
-codemods.
+The Codemodder framework builds on traditional codemod frameworks by providing
+codemods with additional context and services. Codemodder plugins inject
+codemods with the context and services they need to perform complex transforms.
+Plugins and the complex transforms they enable distinguish codemodder codemods
+from traditional codemods.
 
 ## Developing
 

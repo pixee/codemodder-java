@@ -12,25 +12,23 @@ java {
     }
 }
 
-publishing {
-    publications {
-        register<MavenPublication>("maven") {
-            from(components["java"])
-            artifactId = "codemodder-default-codemods"
-        }
-    }
-}
-
 dependencies {
-    implementation(project(":languages:codemodder-framework-java"))
-    implementation(project(":languages:codemodder-semgrep-provider"))
+    compileOnly(libs.jetbrains.annotations)
 
+    api("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo
     implementation(libs.dom4j)
+    api(libs.guice)
+    api(libs.contrast.sarif)
+    api(libs.java.security.toolkit)
+    implementation(libs.logback.classic)
+    implementation(libs.maven.model)
+    api(libs.slf4j.api)
+    api(project(":codemodder-common"))
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
     testImplementation(testlibs.assertj)
     testImplementation(testlibs.mockito)
-    testImplementation(project(":languages:codemodder-testutils"))
+
     testRuntimeOnly(testlibs.junit.jupiter.engine)
 }
