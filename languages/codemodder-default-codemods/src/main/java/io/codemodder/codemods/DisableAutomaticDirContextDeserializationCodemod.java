@@ -33,9 +33,6 @@ public final class DisableAutomaticDirContextDeserializationCodemod
       final CompilationUnit cu,
       final ObjectCreationExpr objectCreationExpr,
       final Result result) {
-	  System.out.println("FOUND");
-	  System.out.println(objectCreationExpr);
-	  System.out.println(objectCreationExpr.getRange());
     objectCreationExpr.getArgument(4).replace(new BooleanLiteralExpr(false));
     return true;
   }
