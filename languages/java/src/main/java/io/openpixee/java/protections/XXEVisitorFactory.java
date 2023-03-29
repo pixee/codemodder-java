@@ -14,11 +14,11 @@ import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
+import io.github.pixee.security.XMLInputFactorySecurity;
 import io.openpixee.java.MethodCallPredicateFactory;
 import io.openpixee.java.MethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
-import io.openpixee.security.XMLInputFactorySecurity;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -88,7 +88,7 @@ public final class XXEVisitorFactory implements VisitorFactory {
                 Weave.from(
                     methodCallExpr.getRange().get().begin.line,
                     hardenXmlInputFactoryCode,
-                    DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+                    DependencyGAV.JAVA_SECURITY_TOOLKIT);
             return new TransformationResult<>(Optional.of(wrapperExpr), weave);
           }
         };

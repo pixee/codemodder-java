@@ -8,11 +8,11 @@ import io.codemodder.DependencyGAV;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
 import io.codemodder.ast.ASTTransforms;
+import io.github.pixee.security.*;
 import io.openpixee.java.MethodCallPredicateFactory;
 import io.openpixee.java.MethodCallTransformingModifierVisitor;
 import io.openpixee.java.Transformer;
 import io.openpixee.java.VisitorFactory;
-import io.openpixee.security.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.util.List;
@@ -50,7 +50,7 @@ public final class UnsafeReadlineVisitorFactory implements VisitorFactory {
                 Weave.from(
                     methodCallExpr.getRange().get().begin.line,
                     readlineRuleId,
-                    DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+                    DependencyGAV.JAVA_SECURITY_TOOLKIT);
             ASTTransforms.addImportIfMissing(cu, BoundedLineReader.class);
             methodCallExpr.getParentNode().get().replace(methodCallExpr, safeExpression);
             return new TransformationResult<>(Optional.of(safeExpression), weave);

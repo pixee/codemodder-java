@@ -9,7 +9,7 @@ import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import io.openpixee.security.Newlines;
+import io.github.pixee.security.Newlines;
 import java.util.List;
 import javax.inject.Inject;
 
@@ -44,6 +44,6 @@ public final class SanitizeHttpHeaderCodemod extends SemgrepJavaParserChanger<Me
 
   @Override
   public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 }

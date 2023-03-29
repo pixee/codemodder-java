@@ -13,11 +13,11 @@ import io.codemodder.DependencyGAV;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.Weave;
 import io.codemodder.ast.ASTTransforms;
+import io.github.pixee.security.Reflection;
 import io.openpixee.java.DoNothingVisitor;
 import io.openpixee.java.Sarif;
 import io.openpixee.java.TypeLocator;
 import io.openpixee.java.VisitorFactory;
-import io.openpixee.security.Reflection;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -111,7 +111,7 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
                     Weave.from(
                         scopeRange.get().begin.line,
                         ID,
-                        List.of(DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT)));
+                        List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT)));
                 return super.visit(safeCall, context);
               }
             }

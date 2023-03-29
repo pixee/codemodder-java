@@ -39,12 +39,12 @@ final class DependencyGAVInjectingTest {
                 ChangedFile.createDefault(
                     "src/test/resources/poms/fake_repo_root/code/Foo.java",
                     "/tmp/fixed_path",
-                    Weave.from(5, "some-code", DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT))));
+                    Weave.from(5, "some-code", DependencyGAV.JAVA_SECURITY_TOOLKIT))));
 
     assertHasDependencies(
         new File(changedFile.changedFiles().iterator().next().modifiedFile()),
         slf4jDependency,
-        DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+        DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 
   @Test
@@ -59,7 +59,7 @@ final class DependencyGAVInjectingTest {
                 ChangedFile.createDefault(
                     "src/test/resources/poms/fake_repo_root/code/Foo.java",
                     "/tmp/fixed_path",
-                    Weave.from(5, "some-code", DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT)),
+                    Weave.from(5, "some-code", DependencyGAV.JAVA_SECURITY_TOOLKIT)),
                 ChangedFile.createDefault(
                     "src/test/resources/poms/fake_repo_root/code/Foo.java",
                     "/tmp/fixed_path",
@@ -68,7 +68,7 @@ final class DependencyGAVInjectingTest {
     assertHasDependencies(
         new File(changedFile.changedFiles().iterator().next().modifiedFile()),
         slf4jDependency,
-        DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT,
+        DependencyGAV.JAVA_SECURITY_TOOLKIT,
         DependencyGAV.OWASP_XSS_JAVA_ENCODER);
   }
 

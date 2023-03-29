@@ -75,11 +75,10 @@ public interface DependencyGAV {
   }
 
   /**
-   * The OpenPixee Java Security Toolkit is required by many weaves/visitors so we'll expose it
-   * here.
+   * The pixee Java Security Toolkit is required by many weaves/visitors so we'll expose it here.
    */
-  DependencyGAV OPENPIXEE_JAVA_SECURITY_TOOLKIT =
-      createDefault("io.openpixee", "java-security-toolkit", "1.0.0");
+  DependencyGAV JAVA_SECURITY_TOOLKIT =
+      createDefault("io.github.pixee", "java-security-toolkit", "1.0.1");
 
   /** There are multiple XSS rules require an XSS encoder. */
   DependencyGAV OWASP_XSS_JAVA_ENCODER =
