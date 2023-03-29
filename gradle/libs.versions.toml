@@ -1,6 +1,5 @@
 [versions]
 auto-value = "1.9"
-graalvm = "22.3.0"
 jackson = "2.13.1"
 javaparser-core = "3.25.0"
 javaparser-symbolsolver = "3.15.15"
@@ -23,7 +22,6 @@ commons-jexl = { module= "org.apache.commons:commons-jexl3", version.ref = "comm
 commons-lang3 = "org.apache.commons:commons-lang3:3.12.0"
 commons-collections4 = "org.apache.commons:commons-collections4:4.4"
 contrast-sarif = "com.contrastsecurity:java-sarif:2.0"
-graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
 gson = "com.google.code.gson:gson:2.9.0"
 guice = { module = "com.google.inject:guice", version.ref = "guice" }
 immutables = "org.immutables:value:2.9.0"
@@ -47,6 +45,3 @@ picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "pico
 progressbar = "me.tongfei:progressbar:0.9.3"
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 tuples = "org.javatuples:javatuples:1.2"
-
-[plugins]
-fileversioning = "de.epitschke.gradle-file-versioning:1.3.0"

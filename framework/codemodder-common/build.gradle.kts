@@ -3,7 +3,6 @@ plugins {
     id("io.codemodder.base")
     id("io.codemodder.java-library")
     id("io.codemodder.maven-publish")
-    alias(libs.plugins.fileversioning)
 }
 
 java {

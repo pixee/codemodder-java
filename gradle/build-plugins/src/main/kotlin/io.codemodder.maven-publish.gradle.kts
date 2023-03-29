@@ -1,5 +1,6 @@
 plugins {
     id("io.codemodder.base")
+    id("de.epitschke.gradle-file-versioning")
     `maven-publish`
 }
 
