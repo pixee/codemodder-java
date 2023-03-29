@@ -70,11 +70,10 @@ dependencies {
     implementation(libs.progressbar)
     implementation(libs.slf4j.api)
 
-    api(project(":languages:codemodder-common"))
-    api(project(":languages:codemodder-semgrep-provider"))
-    api(project(":languages:codemodder-common"))
-    api(project(":languages:codemodder-framework-java"))
-    api(project(":languages:codemodder-default-codemods"))
+    api("io.codemodder:codemodder-common")
+    api("io.codemodder:codemodder-core")
+    api("io.codemodder:codemodder-plugin-semgrep")
+    api("io.codemodder:codemodder-community-codemods")
 
     testCompileOnly(libs.jetbrains.annotations)
 

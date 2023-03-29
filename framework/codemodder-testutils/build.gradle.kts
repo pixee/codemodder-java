@@ -12,18 +12,9 @@ java {
     }
 }
 
-publishing {
-    publications {
-        register<MavenPublication>("maven") {
-            from(components["java"])
-            artifactId = "codemodder-testutils"
-        }
-    }
-}
-
 dependencies {
-    api(project(":languages:codemodder-common"))
-    api(project(":languages:codemodder-framework-java"))
+    api(project(":codemodder-common"))
+    api(project(":codemodder-core"))
 
     implementation(testlibs.bundles.junit.jupiter)
     implementation(testlibs.bundles.hamcrest)

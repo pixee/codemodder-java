@@ -12,19 +12,17 @@ java {
     }
 }
 
-publishing {
-    publications {
-        register<MavenPublication>("maven") {
-            from(components["java"])
-            artifactId = "codemodder-provider-sarif-semgrep"
-        }
-    }
-}
-
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation(project(":languages:codemodder-common"))
-    implementation(project(":languages:codemodder-framework-java"))
+    implementation(libs.guice)
+    implementation(libs.contrast.sarif)
+    implementation(libs.tuples)
+    implementation(libs.java.security.toolkit)
+    implementation(libs.slf4j.api)
+    api(libs.javaparser.core)
+    api(libs.javaparser.symbolsolver.core)
+    api(libs.javaparser.symbolsolver.logic)
+    api(libs.javaparser.symbolsolver.model)
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)

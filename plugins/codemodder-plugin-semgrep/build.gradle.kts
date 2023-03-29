@@ -16,28 +16,20 @@ publishing {
     publications {
         register<MavenPublication>("maven") {
             from(components["java"])
-            artifactId = "codemodder-framework-java"
+            artifactId = "codemodder-provider-sarif-semgrep"
         }
     }
 }
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-
-    api("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo
-    implementation(libs.dom4j)
-    api(libs.guice)
-    api(libs.contrast.sarif)
-    api(libs.java.security.toolkit)
-    implementation(libs.logback.classic)
-    implementation(libs.maven.model)
-    api(libs.slf4j.api)
-    api(project(":languages:codemodder-common"))
+    implementation("io.codemodder:codemodder-common")
+    implementation("io.codemodder:codemodder-core")
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
     testImplementation(testlibs.assertj)
+    testImplementation(testlibs.jgit)
     testImplementation(testlibs.mockito)
-
     testRuntimeOnly(testlibs.junit.jupiter.engine)
 }
