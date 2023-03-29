@@ -16,7 +16,7 @@ public final class JEXLInjectionImmediateWeaved {
     try (BufferedReader reader =
         new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-      String input = reader.readLine();
+      String input = "" + reader.read();
       JexlContext context = new MapContext();
       JexlSandbox sandbox = new JexlSandbox(true);
       for (String cls : UnwantedTypes.all()) {

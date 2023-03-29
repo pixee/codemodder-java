@@ -34,16 +34,6 @@ import org.xml.sax.XMLReader;
 
 final class DefaultXPathStreamProcessor implements XPathStreamProcessor {
 
-  private static class Position {
-    int line;
-    int column;
-
-    private Position(int line, int column) {
-      this.line = line;
-      this.column = column;
-    }
-  }
-
   @Override
   public Optional<XPathStreamProcessChange> process(
       final Path path, final String xpathExpression, final XPathStreamEventHandler handler)
@@ -98,7 +88,7 @@ final class DefaultXPathStreamProcessor implements XPathStreamProcessor {
 
     // remove the empty leftover lines affected by our changes if there are any
     Set<Integer> linesAffected =
-        httpMethodPositions.stream().map(pos -> pos.line).collect(Collectors.toUnmodifiableSet());
+        httpMethodPositions.stream().map(pos -> pos.line()).collect(Collectors.toUnmodifiableSet());
     List<String> lines = transformedXml.lines().collect(Collectors.toUnmodifiableList());
     List<String> updatedLines = new ArrayList<>(lines.size() - linesAffected.size());
     for (int i = 1; i <= lines.size(); i++) {
@@ -127,8 +117,8 @@ final class DefaultXPathStreamProcessor implements XPathStreamProcessor {
     return positions.stream()
         .anyMatch(
             position ->
-                position.column == location.getColumnNumber()
-                    && position.line == location.getLineNumber());
+                position.column() == location.getColumnNumber()
+                    && position.line() == location.getLineNumber());
   }
 
   private static class PositionCapturingReader extends SAXReader {

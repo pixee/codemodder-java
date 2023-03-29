@@ -14,7 +14,7 @@ public final class JEXLInjectionImmediate {
     try (BufferedReader reader =
         new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-      String input = reader.readLine();
+      String input = "" + reader.read();
       JexlContext context = new MapContext();
       new JexlBuilder().create().createExpression(input).evaluate(context);
     }

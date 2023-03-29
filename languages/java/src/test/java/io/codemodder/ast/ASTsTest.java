@@ -1,4 +1,4 @@
-package io.openpixee.java.ast;
+package io.codemodder.ast;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -16,11 +16,9 @@ import com.github.javaparser.ast.stmt.EmptyStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import io.codemodder.ast.ASTPatterns;
-import io.codemodder.ast.ASTTransforms;
-import io.codemodder.ast.ASTs;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 final class ASTsTest {
@@ -109,6 +107,61 @@ final class ASTsTest {
     assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
   }
 
+  @Disabled
+  @Test
+  void it_works_when_LexicalPreservingPrinter_prints_lambda_changes() {
+    var original =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    Consumer<Integer> lambda = a -> System.out.println(a);\n"
+            + "  }\n"
+            + "}";
+    var expected =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    Consumer<Integer> lambda = a -> {\n"
+            + "      break;\n"
+            + "      System.out.println(a);\n"
+            + "    };\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(original).getResult().get();
+    var bstmt = new BreakStmt();
+    var estmt = cu.findAll(ExpressionStmt.class).get(1);
+    LexicalPreservingPrinter.setup(cu);
+    ASTTransforms.addStatementBeforeStatement(estmt, bstmt);
+    assertEqualsIgnoreSpace(LexicalPreservingPrinter.print(cu), expected);
+  }
+
+  @Test
+  void it_works_when_break_is_added_inside_lambda_body_before_print() {
+    var original =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    Consumer<Integer> lambda = a -> System.out.println(a);\n"
+            + "  }\n"
+            + "}";
+    var expected =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    Consumer<Integer> lambda = a -> {\n"
+            + "      break;\n"
+            + "      System.out.println(a);\n"
+            + "    };\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(original).getResult().get();
+    var bstmt = new BreakStmt();
+    var estmt = cu.findAll(ExpressionStmt.class).get(1);
+    LexicalPreservingPrinter.setup(cu);
+    ASTTransforms.addStatementBeforeStatement(estmt, bstmt);
+    assertEqualsIgnoreSpace(cu.toString(), expected);
+  }
+
   @Test
   void it_works_when_break_is_added_after_empty() {
     var original = "class A {\n" + "  void foo() {\n" + "    ;\n" + "  }\n" + "}";
@@ -170,7 +223,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
-    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    var scope =
+        LocalVariableDeclaration.fromVariableDeclarator(vde.getVariable(0)).get().getScope();
     assertThat(scope.getExpressions().size(), is(1));
     assertThat(scope.getStatements().size(), is(2));
   }
@@ -187,7 +241,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
-    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    var scope =
+        LocalVariableDeclaration.fromVariableDeclarator(vde.getVariable(0)).get().getScope();
     assertThat(scope.getExpressions().size(), is(1));
     assertThat(scope.getStatements().size(), is(2));
   }
@@ -205,7 +260,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
-    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    var scope =
+        LocalVariableDeclaration.fromVariableDeclarator(vde.getVariable(0)).get().getScope();
     assertThat(scope.getExpressions().size(), is(0));
     assertThat(scope.getStatements().size(), is(2));
   }
@@ -223,7 +279,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vde = cu.findAll(VariableDeclarationExpr.class).get(0);
-    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    var scope =
+        LocalVariableDeclaration.fromVariableDeclarator(vde.getVariable(0)).get().getScope();
     assertThat(scope.getExpressions().size(), is(3));
     assertThat(scope.getStatements().size(), is(2));
   }
@@ -253,7 +310,8 @@ final class ASTsTest {
     LexicalPreservingPrinter.setup(cu);
     var stmt = cu.findAll(ExpressionStmt.class).get(0);
     var vde = stmt.getExpression().asVariableDeclarationExpr();
-    var scope = ASTs.findLocalVariableScope(vde.getVariable(0));
+    var scope =
+        LocalVariableDeclaration.fromVariableDeclarator(vde.getVariable(0)).get().getScope();
     assertThat(scope.getExpressions().size(), is(0));
     assertThat(scope.getStatements().size(), is(2));
     ASTTransforms.wrapIntoResource(stmt, vde, scope);
@@ -297,7 +355,7 @@ final class ASTsTest {
   }
 
   @Test
-  void it_detects_varible_is_final() {
+  void it_detects_variable_is_final() {
     var code =
         "class A {\n"
             + "\n"
@@ -307,7 +365,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
-    assertThat(ASTs.isFinalOrNeverAssigned(vd, ASTs.findLocalVariableScope(vd)), is(true));
+    var lvd = LocalVariableDeclaration.fromVariableDeclarator(vd).get();
+    assertThat(ASTs.isFinalOrNeverAssigned(lvd), is(true));
   }
 
   @Test
@@ -321,9 +380,14 @@ final class ASTsTest {
             + "  }\n"
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
-    var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
-    assertThat(
-        ASTs.isNotInitializedAndAssignedAtMostOnce(vd, ASTs.findLocalVariableScope(vd)), is(true));
+    var es = cu.findAll(ExpressionStmt.class).get(0);
+    var lvd =
+        new ExpressionStmtVariableDeclaration(
+            es,
+            es.getExpression().asVariableDeclarationExpr(),
+            es.getExpression().asVariableDeclarationExpr().getVariable(0));
+
+    assertThat(ASTs.isNotInitializedAndAssignedAtMostOnce(lvd), is(true));
   }
 
   @Test
@@ -332,7 +396,8 @@ final class ASTsTest {
         "class A {\n" + "\n" + "  void foo() {\n" + "    int variable = 12;\n" + "  }\n" + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
-    assertThat(ASTs.isFinalOrNeverAssigned(vd, ASTs.findLocalVariableScope(vd)), is(true));
+    var lvd = LocalVariableDeclaration.fromVariableDeclarator(vd).get();
+    assertThat(ASTs.isFinalOrNeverAssigned(lvd), is(true));
   }
 
   @Test
@@ -347,7 +412,8 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
-    assertThat(ASTs.isFinalOrNeverAssigned(vd, ASTs.findLocalVariableScope(vd)), is(false));
+    var lvd = LocalVariableDeclaration.fromVariableDeclarator(vd).get();
+    assertThat(ASTs.isFinalOrNeverAssigned(lvd), is(false));
   }
 
   @Test
@@ -484,18 +550,9 @@ final class ASTsTest {
         is(true));
   }
 
-  void assertEquals(Stream<String> stream, Stream<String> expected) {
-    var itc = stream.iterator();
-    var ite = expected.iterator();
-    // trim() will make it resistant to format problems
-    while (itc.hasNext() && ite.hasNext()) {
-      assertThat(itc.next(), equalTo(ite.next()));
-    }
-  }
-
   void assertEqualsIgnoreSpace(String string, String expected) {
-    var stream = List.of(string.split("\n")).stream();
-    var expStream = List.of(expected.split("\n")).stream();
+    var stream = Stream.of(string.split("\n"));
+    var expStream = Stream.of(expected.split("\n"));
     var itc = stream.iterator();
     var ite = expStream.iterator();
     // trim() will make it resistant to format problems

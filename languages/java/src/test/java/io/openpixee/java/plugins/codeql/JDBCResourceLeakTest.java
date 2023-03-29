@@ -85,4 +85,16 @@ final class JDBCResourceLeakTest {
             Set.of(JavaSarifMockFactory.buildResult(insecureFilePath, 13, 22, 13, 44))),
         new IncludesExcludes.MatchesEverything());
   }
+
+  @Test
+  void it_wraps_stmt_as_a_try_resource_parameter_assigned() throws IOException {
+    String insecureFilePath =
+        "src/test/java/com/acme/testcode/resourceleak/JDBCAssignedToParameterLeak.java";
+    WeavingTests.assertJavaWeaveWorkedAndWontReweave(
+        insecureFilePath,
+        new JDBCResourceLeakVisitorFactory(
+            new File("."),
+            Set.of(JavaSarifMockFactory.buildResult(insecureFilePath, 13, 22, 13, 44))),
+        new IncludesExcludes.MatchesEverything());
+  }
 }
