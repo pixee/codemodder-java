@@ -13,6 +13,7 @@ import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.openpixee.security.Filenames;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** Sanitizes multipart filename inputs from HTTP requests. */
@@ -39,14 +40,18 @@ public final class SanitizeSpringMultipartFilenameCodemod
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
       final Result result) {
-    Node parent = methodCallExpr.getParentNode().get();
-    MethodCallExpr safeCall =
-        new MethodCallExpr(
-            new NameExpr(Filenames.class.getSimpleName()),
-            "toSimpleFileName",
-            NodeList.nodeList(methodCallExpr));
-    parent.replace(methodCallExpr, safeCall);
-    addImportIfMissing(cu, Filenames.class);
-    return true;
+    Optional<Node> parentNode = methodCallExpr.getParentNode();
+    if (parentNode.isPresent()) {
+      Node parent = parentNode.get();
+      MethodCallExpr safeCall =
+          new MethodCallExpr(
+              new NameExpr(Filenames.class.getSimpleName()),
+              "toSimpleFileName",
+              NodeList.nodeList(methodCallExpr));
+      parent.replace(methodCallExpr, safeCall);
+      addImportIfMissing(cu, Filenames.class);
+      return true;
+    }
+    return false;
   }
 }
