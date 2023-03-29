@@ -1,6 +1,6 @@
 package deserialize;
 
-import io.openpixee.security.ObjectInputFilters;
+import io.github.pixee.security.ObjectInputFilters;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;

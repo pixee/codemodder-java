@@ -1,6 +1,6 @@
 package com.acme.testcode.jexlinjection;
 
-import io.openpixee.security.UnwantedTypes;
+import io.github.pixee.security.UnwantedTypes;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

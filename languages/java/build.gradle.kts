@@ -64,8 +64,8 @@ dependencies {
     {
         exclude(group = "com.google.inject", module = "guice")
     }
-    implementation(libs.openpixee.toolkit)
-    implementation(libs.openpixee.toolkit.xstream)
+    implementation(libs.java.security.toolkit)
+    implementation(libs.java.security.toolkit.xstream)
     implementation(libs.picocli)
     implementation(libs.progressbar)
     implementation(libs.slf4j.api)

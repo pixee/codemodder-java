@@ -11,7 +11,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import io.openpixee.security.Filenames;
+import io.github.pixee.security.Filenames;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;

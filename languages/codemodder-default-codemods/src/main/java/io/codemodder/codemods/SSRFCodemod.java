@@ -9,8 +9,8 @@ import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import io.openpixee.security.HostValidator;
-import io.openpixee.security.Urls;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.util.List;
 import javax.inject.Inject;
 
@@ -40,9 +40,9 @@ public final class SSRFCodemod extends SemgrepJavaParserChanger<ObjectCreationEx
      *
      * With:
      *
-     * import io.openpixee.security.Urls;
+     * import io.github.pixee.security.Urls;
      * ...
-     * URL u = Urls.create(foo, io.openpixee.security.Urls.HTTP_PROTOCOLS, io.openpixee.security.HostValidator.ALLOW_ALL)
+     * URL u = Urls.create(foo, io.github.pixee.security.Urls.HTTP_PROTOCOLS, io.openpixee.security.HostValidator.ALLOW_ALL)
      */
     addImportIfMissing(cu, Urls.class.getName());
     addImportIfMissing(cu, HostValidator.class.getName());
@@ -61,7 +61,9 @@ public final class SSRFCodemod extends SemgrepJavaParserChanger<ObjectCreationEx
     newArguments.add(denyCommonTargetsExpr); // load the host validator
     MethodCallExpr safeCall =
         new MethodCallExpr(
-            new NameExpr(io.openpixee.security.Urls.class.getSimpleName()), "create", newArguments);
+            new NameExpr(io.github.pixee.security.Urls.class.getSimpleName()),
+            "create",
+            newArguments);
     n.replace(safeCall);
 
     return true;
@@ -69,6 +71,6 @@ public final class SSRFCodemod extends SemgrepJavaParserChanger<ObjectCreationEx
 
   @Override
   public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 }

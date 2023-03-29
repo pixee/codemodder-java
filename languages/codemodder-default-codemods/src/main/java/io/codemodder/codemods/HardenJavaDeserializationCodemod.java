@@ -19,7 +19,7 @@ import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import io.openpixee.security.ObjectInputFilters;
+import io.github.pixee.security.ObjectInputFilters;
 import java.io.ObjectInputStream;
 import java.util.List;
 import java.util.Optional;
@@ -85,8 +85,8 @@ public final class HardenJavaDeserializationCodemod
 
   /**
    * Generates an expression to invoke {@link
-   * io.openpixee.security.ObjectInputFilters#enableObjectFilterIfUnprotected(ObjectInputStream)} on
-   * the original scope (the {@link ObjectInputStream}).
+   * io.github.pixee.security.ObjectInputFilters#enableObjectFilterIfUnprotected(ObjectInputStream)}
+   * on the original scope (the {@link ObjectInputStream}).
    */
   private Statement generateFilterHardeningStatement(final Expression originalScope) {
     // this statement is the callback to our hardening code
@@ -98,6 +98,6 @@ public final class HardenJavaDeserializationCodemod
 
   @Override
   public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 }
