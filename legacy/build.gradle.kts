@@ -4,7 +4,6 @@ plugins {
     id("io.codemodder.java-library")
     id("io.codemodder.maven-publish")
     id("application")
-    alias(libs.plugins.fileversioning)
 }
 
 java {
