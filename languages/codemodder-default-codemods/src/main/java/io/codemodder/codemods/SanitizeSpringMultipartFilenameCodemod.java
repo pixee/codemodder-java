@@ -31,7 +31,7 @@ public final class SanitizeSpringMultipartFilenameCodemod
 
   @Override
   public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.OPENPIXEE_JAVA_SECURITY_TOOLKIT);
+    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 
   @Override

@@ -62,7 +62,7 @@ final class JEXLInjectionFixer {
                     new ObjectCreationExpr(
                         null, sandboxType, new NodeList<>(new BooleanLiteralExpr(true))))));
 
-    // for(String cls : io.openpixee.security.UnwantedTypes.all())
+    // for(String cls : io.github.pixee.security.UnwantedTypes.all())
     // 	sandbox.block(cls);
     final var sandboxFor =
         new ForEachStmt(
