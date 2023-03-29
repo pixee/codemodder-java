@@ -18,7 +18,6 @@ public final class DefaultCodemods {
         LimitReadlineCodemod.class,
         RandomizeSeedCodemod.class,
         SanitizeMultipartFilenameCodemod.class,
-        HardenJavaDeserializationCodemod.class,
         DisableAutomaticDirContextDeserializationCodemod.class,
         SecureRandomCodemod.class,
         SSRFCodemod.class,
