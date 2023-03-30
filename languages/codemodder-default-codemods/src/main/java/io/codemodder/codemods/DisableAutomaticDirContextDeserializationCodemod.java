@@ -33,10 +33,7 @@ public final class DisableAutomaticDirContextDeserializationCodemod
       final CompilationUnit cu,
       final ObjectCreationExpr objectCreationExpr,
       final Result result) {
-    if (objectCreationExpr.getArgument(4).equals(new BooleanLiteralExpr(true))) {
-      objectCreationExpr.setArgument(4, new BooleanLiteralExpr(false));
-      return true;
-    }
-    return false;
+    objectCreationExpr.setArgument(4, new BooleanLiteralExpr(false));
+    return true;
   }
 }

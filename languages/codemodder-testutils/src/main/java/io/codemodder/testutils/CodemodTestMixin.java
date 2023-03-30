@@ -95,8 +95,8 @@ public interface CodemodTestMixin {
     assertThat(dependenciesNeeded, hasItems(dependencies.toArray(new DependencyGAV[0])));
 
     // re-run the transformation again and make sure no changes are made
-    CodemodInvoker invokerTheSecond = new CodemodInvoker(List.of(codemod), tmpDir);
     Files.copy(after, pathToJavaFile, StandardCopyOption.REPLACE_EXISTING);
+    CodemodInvoker invokerTheSecond = new CodemodInvoker(List.of(codemod), tmpDir);
     CompilationUnit rerunCu = parseJavaFile(pathToJavaFile);
     FileWeavingContext rerunContext =
         FileWeavingContext.createDefault(pathToJavaFile.toFile(), IncludesExcludes.any());
