@@ -1,12 +1,9 @@
 rules:
   - id: disable-dircontext-deserialization
-    mode: taint
-    pattern-sources:
-      - pattern: new SearchControls(...,...,...,...,true,...)
-    pattern-sinks:
-      - pattern: (DirContext $DC).search(...)
-      - pattern: (new InitialDirContext(...)).search(...)
-      - pattern: (new InitialLdapContext(...)).search(...)
+    pattern-either:
+      - pattern: (DirContext $DC).search(...,(SearchControls $SC),...)
+      - pattern: (new InitialDirContext(...)).search(...,(SearchControls $SC),...)
+      - pattern: (new InitialLdapContext(...)).search(...,(SearchControls $SC),...)
     message: Semgrep found a match.
     languages: [java]
     severity: WARNING

@@ -6,6 +6,9 @@ import javax.naming.directory.SearchControls;
 
 public final class Test {
 
+  public static final SearchControls posField = new SearchControls(0, 0, 0, null, true, false);
+  public static final SearchControls negField = new SearchControls(0, 0, 0, null, false, false);
+
   public void directInstantiation() {
     DirContext ctx = new InitialDirContext();
     ctx.search("query", "filter", new SearchControls(0, 0, 0, null, true, false));
@@ -44,4 +47,13 @@ public final class Test {
     ctx.search("query", "filter", controls);
   }
 
+  public void negFieldNoFix() {
+    DirContext ctx = new InitialDirContext();
+    ctx.search("query", "filter", negField);
+  }
+
+  public void posField() {
+    DirContext ctx = new InitialDirContext();
+    ctx.search("query", "filter", posField);
+  }
 }
