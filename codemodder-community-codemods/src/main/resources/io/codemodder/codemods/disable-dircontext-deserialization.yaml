@@ -1,0 +1,6 @@
+rules:
+  - id: disable-dircontext-deserialization
+    pattern: new SearchControls(...,...,...,...,true,...)
+    message: Semgrep found a match.
+    languages: [java]
+    severity: WARNING

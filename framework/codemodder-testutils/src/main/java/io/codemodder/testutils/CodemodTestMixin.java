@@ -96,10 +96,11 @@ public interface CodemodTestMixin {
 
     // re-run the transformation again and make sure no changes are made
     Files.copy(after, pathToJavaFile, StandardCopyOption.REPLACE_EXISTING);
+    CodemodInvoker invokerTheSecond = new CodemodInvoker(List.of(codemod), tmpDir);
     CompilationUnit rerunCu = parseJavaFile(pathToJavaFile);
     FileWeavingContext rerunContext =
         FileWeavingContext.createDefault(pathToJavaFile.toFile(), IncludesExcludes.any());
-    invoker.execute(pathToJavaFile, rerunCu, rerunContext);
+    invokerTheSecond.execute(pathToJavaFile, rerunCu, rerunContext);
 
     String transformedAgainJavaCode = Files.readString(pathToJavaFile);
     assertThat(transformedAgainJavaCode, equalTo(Files.readString(after)));
