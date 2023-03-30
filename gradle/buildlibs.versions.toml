@@ -2,8 +2,8 @@
 spotless = "6.12.0"
 
 [libraries]
+fileversioning = "gradle.plugin.de.epitschke.gradle:de.epitschke.gradle-file-versioning:1.3.0"
 spotless = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
-graalvm-nativeImage = "org.graalvm.buildtools.native:org.graalvm.buildtools.native.gradle.plugin:0.9.19"
 
 [plugins]
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

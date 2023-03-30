@@ -1,0 +1,24 @@
+package com.acme.testcode;
+
+import io.github.pixee.security.BoundedLineReader;
+import java.io.BufferedReader;
+import java.io.IOException;
+
+public final class Test {
+
+  void stewie2k(BufferedReader br) throws IOException {
+    BoundedLineReader.readLine(br, 1000000);
+  }
+
+  void tarik(BufferedReader br) throws IOException {
+    System.out.println(BoundedLineReader.readLine(br, 1000000));
+  }
+
+  void skadoodle(final BufferedReader br) {
+    try {
+      String a = BoundedLineReader.readLine(br, 1000000);
+      System.out.println(a);
+    } catch (IOException e) {
+    }
+  }
+}

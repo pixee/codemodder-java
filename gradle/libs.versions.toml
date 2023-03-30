@@ -1,15 +1,14 @@
 [versions]
 auto-value = "1.9"
-graalvm = "22.3.0"
 jackson = "2.13.1"
 javaparser-core = "3.25.0"
 javaparser-symbolsolver = "3.15.15"
-java-security-toolkit = "1.0.0"
+java-security-toolkit = "1.0.1"
+java-security-toolkit-xstream = "1.0.1"
 javax-inject = "1"
 commons-jexl = "3.2.1"
 logback = "1.4.5"
 maven = "3.8.7"
-openpixee-toolkit = "1.0.0"
 picocli = "4.7.0"
 slf4j = "2.0.6"
 guice = "5.1.0"
@@ -23,7 +22,6 @@ commons-jexl = { module= "org.apache.commons:commons-jexl3", version.ref = "comm
 commons-lang3 = "org.apache.commons:commons-lang3:3.12.0"
 commons-collections4 = "org.apache.commons:commons-collections4:4.4"
 contrast-sarif = "com.contrastsecurity:java-sarif:2.0"
-graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
 gson = "com.google.code.gson:gson:2.9.0"
 guice = { module = "com.google.inject:guice", version.ref = "guice" }
 immutables = "org.immutables:value:2.9.0"
@@ -34,20 +32,16 @@ javaparser-core = { module = "com.github.javaparser:javaparser-core", version.re
 javaparser-symbolsolver-core = { module = "com.github.javaparser:javaparser-symbol-solver-core", version.ref = "javaparser-core" }
 javaparser-symbolsolver-model = { module = "com.github.javaparser:javaparser-symbol-solver-model", version.ref = "javaparser-symbolsolver" }
 javaparser-symbolsolver-logic = { module = "com.github.javaparser:javaparser-symbol-solver-logic", version.ref = "javaparser-symbolsolver" }
-java-security-toolkit = { module = "io.openpixee:java-security-toolkit", version.ref = "java-security-toolkit" }
+java-security-toolkit = { module = "io.github.pixee:java-security-toolkit", version.ref = "java-security-toolkit" }
+java-security-toolkit-xstream = { module = "io.github.pixee:java-security-toolkit-xstream", version.ref = "java-security-toolkit-xstream" }
 javax-inject = { module="javax.inject:javax.inject", version.ref = "javax-inject"}
 jetbrains-annotations = "org.jetbrains:annotations:23.0.0"
 jfiglet = "com.github.lalyos:jfiglet:0.0.8"
 juniversalchardet = "com.github.albfernandez:juniversalchardet:2.4.0"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
-openpixee-toolkit = { module = "io.openpixee:java-security-toolkit", version.ref = "openpixee-toolkit" }
-openpixee-toolkit-xstream = { module = "io.openpixee:java-security-toolkit-xstream", version.ref = "openpixee-toolkit" }
 picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
 picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
 progressbar = "me.tongfei:progressbar:0.9.3"
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 tuples = "org.javatuples:javatuples:1.2"
-
-[plugins]
-fileversioning = "de.epitschke.gradle-file-versioning:1.3.0"
