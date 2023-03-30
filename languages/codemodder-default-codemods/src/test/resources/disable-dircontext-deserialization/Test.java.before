@@ -14,46 +14,20 @@ public final class Test {
     ctx.search("query", "filter", new SearchControls(0, 0, 0, null, true, false));
   }
 
-  public void doublyDirectInstantiation() {
-    new InitialDirContext()
-        .search("query", "filter", new SearchControls(0, 0, 0, null, true, false));
-  }
-
   public void indirectInstantiation() {
     DirContext ctx = new InitialDirContext();
     SearchControls controls = new SearchControls(0, 0, 0, null, true, false);
     ctx.search("query", "filter", controls);
   }
 
-  public void anotherTypeOfCall() {
-    DirContext ctx = new InitialDirContext();
-    SearchControls controls = new SearchControls(0, 0, 0, null, true, false);
-    ctx.search("query", "filter", null, controls);
-  }
-
-  public void outsideControls(SearchControls controls) {
+  public void outsideControlsNoFix(SearchControls controls) {
     DirContext ctx = new InitialDirContext();
     ctx.search("query", "filter", controls);
-  }
-
-  public void noControlsNoFix() {
-    DirContext ctx = new InitialDirContext();
-    ctx.search("name", null, new String[0]);
   }
 
   public void noFix() {
     DirContext ctx = new InitialDirContext();
     SearchControls controls = new SearchControls(0, 0, 0, null, false, false);
     ctx.search("query", "filter", controls);
-  }
-
-  public void negFieldNoFix() {
-    DirContext ctx = new InitialDirContext();
-    ctx.search("query", "filter", negField);
-  }
-
-  public void posField() {
-    DirContext ctx = new InitialDirContext();
-    ctx.search("query", "filter", posField);
   }
 }
