@@ -1,6 +1,6 @@
 package com.acme.testcode;
 
-import io.openpixee.security.Filenames;
+import io.github.pixee.security.Filenames;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
