@@ -1,5 +1,5 @@
 rules:
-  - id: sanitize-multipart-filename
+  - id: sanitize-apache-multipart-filename
     mode: taint
     metadata:
       options:
