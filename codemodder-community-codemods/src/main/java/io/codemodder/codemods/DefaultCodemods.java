@@ -12,6 +12,7 @@ public final class DefaultCodemods {
   /** Get a list of all the codemods in our default set. */
   public static List<Class<? extends Changer>> asList() {
     return List.of(
+        DisableAutomaticDirContextDeserializationCodemod.class,
         HardenJavaDeserializationCodemod.class,
         HardenProcessCreationCodemod.class,
         HardenXMLDecoderCodemod.class,

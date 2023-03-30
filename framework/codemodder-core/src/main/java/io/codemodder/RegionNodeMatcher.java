@@ -18,7 +18,8 @@ public interface RegionNodeMatcher {
         return region.getStartLine() == range.begin.line
             && region.getStartColumn() == range.begin.column
             && region.getEndLine() == range.end.line
-            && region.getEndColumn() == range.end.column + 1;
+            && (region.getEndColumn() == range.end.column + 1
+                || region.getEndColumn() == range.end.column);
       };
 
   /**
