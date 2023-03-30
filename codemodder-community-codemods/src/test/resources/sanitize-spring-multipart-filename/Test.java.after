@@ -1,0 +1,25 @@
+package com.acme.testcode;
+
+import io.openpixee.security.Filenames;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+
+final class Test {
+
+  public void handleSpringUpload_Direct(MultipartFile file) {
+    // ruleid: sanitize-spring-multipart-filename
+    writeFile(new File("my_spring_dir", Filenames.toSimpleFileName(file.getOriginalFilename())));
+  }
+
+  public void handleSpringUpload_Flowed(MultipartFile file) {
+    String name = Filenames.toSimpleFileName(file.getOriginalFilename());
+    String lowerName = name.toLowerCase();
+    // ruleid: sanitize-spring-multipart-filename
+    writeFile(new File("my_spring_dir", lowerName));
+  }
+
+  private void writeFile(File myUploadDir) {
+    // nop
+  }
+}
