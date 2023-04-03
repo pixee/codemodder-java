@@ -1,0 +1,23 @@
+rules:
+  - id: harden-xmlinputfactory
+    patterns:
+      - pattern-either:
+          - pattern: $XMLF = XMLInputFactory.newInstance(...)
+          - pattern: $XMLF = XMLInputFactory.newFactory(...)
+      - pattern-not-inside: |
+          $RT $METHOD ($ARGS) {
+            ...
+            XMLInputFactorySecurity.hardenFactory($XMLF);
+            ...
+          }
+      - pattern-not-inside: |
+          $RT $METHOD ($ARGS) {
+            ...
+            io.github.pixee.security.XMLInputFactorySecurity.hardenFactory(...);
+            ...
+          }
+      - focus-metavariable: $XMLF
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING

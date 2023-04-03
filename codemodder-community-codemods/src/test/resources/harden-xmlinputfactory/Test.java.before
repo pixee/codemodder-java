@@ -1,0 +1,23 @@
+package com.acme.testcode;
+
+import java.io.StringReader;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+
+final class Test {
+
+  void readXml(String str) throws XMLStreamException {
+    // ruleid: harden-xmlinputfactory
+    XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
+    XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(new StringReader(str));
+    xmlEventReader.nextEvent();
+  }
+
+  void readXml2(String str) throws XMLStreamException {
+    // ruleid: harden-xmlinputfactory
+    var xmlInputFactory = XMLInputFactory.newInstance("", this.getClass().getClassLoader());
+    XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(new StringReader(str));
+    xmlEventReader.nextEvent();
+  }
+}
