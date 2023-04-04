@@ -50,7 +50,6 @@ public interface VisitorAssembler {
       final List<VisitorFactory> defaultVisitorFactories =
           List.of(
               new JakartaForwardVisitoryFactory(),
-              new SQLParameterizerVisitorFactory(),
               new SSLContextGetInstanceVisitorFactory(),
               new SSLEngineSetEnabledProtocolsVisitorFactory(),
               new SSLParametersSetProtocolsVisitorFactory(),

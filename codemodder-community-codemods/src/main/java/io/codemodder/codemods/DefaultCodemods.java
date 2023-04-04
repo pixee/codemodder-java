@@ -24,6 +24,7 @@ public final class DefaultCodemods {
         SanitizeHttpHeaderCodemod.class,
         SanitizeSpringMultipartFilenameCodemod.class,
         SecureRandomCodemod.class,
+        SQLParameterizerCodemod.class,
         SSRFCodemod.class,
         VerbTamperingCodemod.class);
   }

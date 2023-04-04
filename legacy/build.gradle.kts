@@ -58,7 +58,6 @@ dependencies {
     implementation(libs.juniversalchardet)
     implementation(libs.logback.classic)
     implementation(libs.maven.model)
-    implementation("io.openpixee:java-jdbc-parameterizer:0.0.7") // TODO bring into monorepo
     implementation("io.openpixee.maven:pom-operator:0.0.5") // TODO bring into monorepo
     {
         exclude(group = "com.google.inject", module = "guice")
@@ -68,6 +67,7 @@ dependencies {
     implementation(libs.picocli)
     implementation(libs.progressbar)
     implementation(libs.slf4j.api)
+    implementation(libs.tuples)
 
     api("io.codemodder:codemodder-common")
     api("io.codemodder:codemodder-core")
