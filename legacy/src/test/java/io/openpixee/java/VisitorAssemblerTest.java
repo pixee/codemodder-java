@@ -32,7 +32,6 @@ final class VisitorAssemblerTest {
 
     // make sure that only disabling one allows it to
     assertThat(allFactories.size() - allButOne.size(), equalTo(1));
-    System.out.println(allFactories);
   }
 
   //
