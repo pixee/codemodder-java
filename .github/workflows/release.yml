@@ -37,7 +37,7 @@ jobs:
           github-token: ${{ secrets.github_token }}
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: -q setVersion -PnewVersion=${{ inputs.version }}
+          arguments: -p legacy -q setVersion -PnewVersion=${{ inputs.version }}
       - uses: gradle/gradle-build-action@v2
         with:
           arguments: build publish
