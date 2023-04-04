@@ -63,7 +63,6 @@ dependencies {
         exclude(group = "com.google.inject", module = "guice")
     }
     implementation(libs.java.security.toolkit)
-    implementation(libs.java.security.toolkit.xstream)
     implementation(libs.picocli)
     implementation(libs.progressbar)
     implementation(libs.slf4j.api)
@@ -91,4 +90,5 @@ dependencies {
     testImplementation(testcodelibs.servlet)
     testImplementation(testcodelibs.spring.web)
     testImplementation(testcodelibs.xstream)
+    testImplementation(testcodelibs.java.security.toolkit.xstream)
 }

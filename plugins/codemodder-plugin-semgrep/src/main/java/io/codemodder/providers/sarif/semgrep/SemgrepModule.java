@@ -42,6 +42,9 @@ final class SemgrepModule extends AbstractModule {
      */
     List<String> yamlClasspathPathsToRun = new ArrayList<>();
 
+    // find all @SemgrepScan annotations in their parameters and batch them up for running
+    List<SemgrepScan> toBind = new ArrayList<>();
+
     for (Class<? extends Changer> codemodType : codemodTypes) {
       // find all constructors that are marked with @Inject
       Constructor<?>[] constructors = codemodType.getDeclaredConstructors();
@@ -50,8 +53,6 @@ final class SemgrepModule extends AbstractModule {
               .filter(constructor -> constructor.getAnnotation(javax.inject.Inject.class) != null)
               .collect(Collectors.toUnmodifiableList());
 
-      // find all @SemgrepScan annotations in their parameters and batch them up for running
-      List<SemgrepScan> toBind = new ArrayList<>();
       List<Parameter> parameters =
           injectableConstructors.stream()
               .flatMap(constructor -> Stream.of(constructor.getParameters()))
@@ -82,30 +83,31 @@ final class SemgrepModule extends AbstractModule {
             yamlClasspathPathsToRun.add(yamlPath);
             toBind.add(semgrepScanAnnotation);
           });
+    }
 
-      if (toBind.isEmpty()) {
-        continue;
-      }
+    if(toBind.isEmpty()) {
+      // no reason to run semgrep if there are no annotations
+      return;
+    }
 
-      // copy the yaml out of the classpath onto disk so semgrep can use them
-      List<Path> yamlRuleFiles =
-          yamlClasspathPathsToRun.stream()
-              .map(this::saveClasspathResourceToTemp)
-              .collect(Collectors.toUnmodifiableList());
+    // copy the yaml out of the classpath onto disk so semgrep can use them
+    List<Path> yamlRuleFiles =
+            yamlClasspathPathsToRun.stream()
+                    .map(this::saveClasspathResourceToTemp)
+                    .collect(Collectors.toUnmodifiableList());
 
-      // actually run the SARIF only once
-      SarifSchema210 sarif;
-      try {
-        sarif = new DefaultSemgrepRunner().run(yamlRuleFiles, codeDirectory);
-      } catch (IOException e) {
-        throw new IllegalArgumentException("Semgrep execution failed", e);
-      }
+    // actually run the SARIF only once
+    SarifSchema210 sarif;
+    try {
+      sarif = new DefaultSemgrepRunner().run(yamlRuleFiles, codeDirectory);
+    } catch (IOException e) {
+      throw new IllegalArgumentException("Semgrep execution failed", e);
+    }
 
-      // bind the SARIF results
-      for (SemgrepScan sarifAnnotation : toBind) {
-        SemgrepRuleSarif semgrepSarif = new SemgrepRuleSarif(sarifAnnotation.ruleId(), sarif);
-        bind(RuleSarif.class).annotatedWith(sarifAnnotation).toInstance(semgrepSarif);
-      }
+    // bind the SARIF results
+    for (SemgrepScan sarifAnnotation : toBind) {
+      SemgrepRuleSarif semgrepSarif = new SemgrepRuleSarif(sarifAnnotation.ruleId(), sarif);
+      bind(RuleSarif.class).annotatedWith(sarifAnnotation).toInstance(semgrepSarif);
     }
   }
 
