@@ -89,7 +89,6 @@ public interface VisitorAssembler {
       // after it, they won't
       // have a chance to inject their dependencies.
       final List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
-      defaultVisitors.add(new JspScriptletXSSVisitor());
       defaultVisitors.add(new DependencyInjectingVisitor());
       defaultVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
 

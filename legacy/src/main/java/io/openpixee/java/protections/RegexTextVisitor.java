@@ -1,10 +1,6 @@
 package io.openpixee.java.protections;
 
-import io.codemodder.ChangedFile;
-import io.codemodder.DependencyGAV;
-import io.codemodder.FileWeavingContext;
-import io.codemodder.Weave;
-import io.codemodder.WeavingResult;
+import io.codemodder.*;
 import io.openpixee.java.FileBasedVisitor;
 import java.io.File;
 import java.io.IOException;
