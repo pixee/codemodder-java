@@ -16,15 +16,15 @@ final class VisitorAssemblerTest {
   @Test
   void it_filters_java_factories_based_on_configuration() {
     VisitorAssembler assembler = VisitorAssembler.createDefault();
-    RuleContext everythingButXxe =
-        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/harden-xmlinputfactory"));
+    RuleContext everythingButSql =
+        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/sql-parameterizer"));
     RuleContext everything = RuleContext.of(DefaultRuleSetting.ENABLED, List.of());
     File repositoryRoot = new File(".");
     List<VisitorFactory> allFactories =
         assembler.assembleJavaCodeScanningVisitorFactories(repositoryRoot, everything, List.of());
     List<VisitorFactory> allButOne =
         assembler.assembleJavaCodeScanningVisitorFactories(
-            repositoryRoot, everythingButXxe, List.of());
+            repositoryRoot, everythingButSql, List.of());
 
     // just make sure we're getting a reasonable number of factories
     assertThat(allFactories.isEmpty(), is(false));
