@@ -95,7 +95,7 @@ final class SemgrepModule extends AbstractModule {
             yamlClasspathPathsToRun.stream()
                     .map(this::saveClasspathResourceToTemp)
                     .collect(Collectors.toUnmodifiableList());
-    
+
     // actually run the SARIF only once
     SarifSchema210 sarif;
     try {

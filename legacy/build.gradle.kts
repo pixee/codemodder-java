@@ -68,7 +68,7 @@ dependencies {
     implementation(libs.progressbar)
     implementation(libs.slf4j.api)
     implementation(libs.tuples)
-    implementation(libs.xstream)
+    api(libs.xstream)
 
     api("io.codemodder:codemodder-common")
     api("io.codemodder:codemodder-core")
