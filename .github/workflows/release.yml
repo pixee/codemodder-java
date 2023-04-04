@@ -40,7 +40,7 @@ jobs:
           arguments: -p legacy -q setVersion -PnewVersion=${{ inputs.version }}
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: build publish
+          arguments: -p legacy build publish
 
       # share version bump
       - run: |
