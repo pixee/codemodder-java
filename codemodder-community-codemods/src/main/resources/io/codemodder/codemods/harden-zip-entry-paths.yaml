@@ -1,0 +1,20 @@
+rules:
+  - id: harden-zip-entry-paths
+    patterns:
+      - pattern: $ZIS = new ZipInputStream(...)
+      - pattern-not-inside: |
+          $RT $METHOD ($ARGS) {
+            ...
+            ZipSecurity.createHardenedInputStream($ZIS, ...);
+            ...
+          }
+      - pattern-not-inside: >
+          $RT $METHOD ($ARGS) {
+            ...
+            io.github.pixee.security.ZipSecurity.createHardenedInputStream($ZIS, ...);
+            ...
+          }
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING

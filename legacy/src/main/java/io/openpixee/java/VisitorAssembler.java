@@ -54,8 +54,7 @@ public interface VisitorAssembler {
               new SSLEngineSetEnabledProtocolsVisitorFactory(),
               new SSLParametersSetProtocolsVisitorFactory(),
               new SSLSocketSetEnabledProtocolsVisitorFactory(),
-              new XStreamVisitorFactory(),
-              new ZipFileOverwriteVisitoryFactory());
+              new XStreamVisitorFactory());
 
       final List<SarifProcessorPlugin> sarifProcessorPlugins =
           List.of(new CodeQlPlugin(), new ContrastScanPlugin());

@@ -1,0 +1,17 @@
+package com.acme.testcode;
+
+import io.github.pixee.security.ZipSecurity;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.zip.ZipInputStream;
+
+public final class Test {
+
+  private InputStream is;
+
+  public void openZip() {
+    var zip = ZipSecurity.createHardenedInputStream(is, StandardCharsets.UTF_8);
+    zip.nextEntry();
+  }
+
+}
