@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.progressbar)
     implementation(libs.slf4j.api)
     implementation(libs.tuples)
+    implementation(libs.xstream)
 
     api("io.codemodder:codemodder-common")
     api("io.codemodder:codemodder-core")
@@ -90,5 +91,4 @@ dependencies {
     testImplementation(testcodelibs.owasp)
     testImplementation(testcodelibs.servlet)
     testImplementation(testcodelibs.spring.web)
-    testImplementation(testcodelibs.xstream)
 }
