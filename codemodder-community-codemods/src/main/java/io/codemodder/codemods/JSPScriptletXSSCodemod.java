@@ -1,11 +1,11 @@
-package io.openpixee.java.protections;
+package io.codemodder.codemods;
 
-import static org.apache.commons.lang3.StringUtils.endsWithIgnoreCase;
-
-import com.google.common.annotations.VisibleForTesting;
+import io.codemodder.Codemod;
 import io.codemodder.DependencyGAV;
+import io.codemodder.RegexFileChanger;
+import io.codemodder.ReviewGuidance;
+import java.util.List;
 import java.util.regex.Pattern;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * This type corrects simple and obvious XSS vulnerabilities in JSPs. It looks for patterns like:
@@ -16,23 +16,22 @@ import org.jetbrains.annotations.NotNull;
  * want to find 100% certain cases when its uncontrolled user input which can escape any context and
  * achieve exploitation.
  */
-public final class JspScriptletXSSVisitor extends RegexTextVisitor {
+@Codemod(
+    id = "pixee:java/encode-jsp-scriptlet",
+    author = "arshan@pixee.ai",
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+public final class JSPScriptletXSSCodemod extends RegexFileChanger {
 
-  public JspScriptletXSSVisitor() {
+  public JSPScriptletXSSCodemod() {
     super(
-        file -> endsWithIgnoreCase(file.getName(), ".jsp"),
+        path -> path.getFileName().toString().toLowerCase().endsWith(".jsp"),
         scriptlet,
-        xssJspScriptletRuleId,
-        DependencyGAV.OWASP_XSS_JAVA_ENCODER);
+        true,
+        List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER));
   }
 
   @Override
-  public String ruleId() {
-    return xssJspScriptletRuleId;
-  }
-
-  @Override
-  public @NotNull String getReplacementFor(final String matchingSnippet) {
+  public String getReplacementFor(final String matchingSnippet) {
     var codeWithinScriptlet =
         matchingSnippet.substring(matchingSnippet.indexOf('=') + 1, matchingSnippet.length() - 2);
     return "<%=org.owasp.encoder.Encode.forHtml(" + codeWithinScriptlet + ")%>";
@@ -42,5 +41,4 @@ public final class JspScriptletXSSVisitor extends RegexTextVisitor {
       Pattern.compile(
           "<%(\\s*)=(\\s*)request(\\s*).(\\s*)get((Header|Parameter)(\\s*)\\((\\s*)\".*\"(\\s*)\\)|QueryString\\((\\s*)\\))(\\s*)%>",
           Pattern.MULTILINE);
-  @VisibleForTesting static final String xssJspScriptletRuleId = "pixee:java/encode-jsp-scriptlet";
 }
