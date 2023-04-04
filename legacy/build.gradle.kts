@@ -1,6 +1,5 @@
-@Suppress("DSL_SCOPE_VIOLATION") // https://github.com/gradle/gradle/issues/22797
 plugins {
-    id("io.codemodder.base")
+    id("io.codemodder.root")
     id("io.codemodder.java-library")
     id("io.codemodder.maven-publish")
     id("application")

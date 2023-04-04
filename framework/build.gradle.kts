@@ -1,3 +1,3 @@
 plugins {
-    id("io.codemodder.base")
+    id("io.codemodder.root")
 }

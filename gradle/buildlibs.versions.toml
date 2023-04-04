@@ -1,9 +1,11 @@
 [versions]
+fileversioning = "1.3.0"
 spotless = "6.12.0"
 
 [libraries]
-fileversioning = "gradle.plugin.de.epitschke.gradle:de.epitschke.gradle-file-versioning:1.3.0"
+fileversioning = { module = "gradle.plugin.de.epitschke.gradle:de.epitschke.gradle-file-versioning", version.ref = "fileversioning" }
 spotless = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 
 [plugins]
+fileversioning = { id = "de.epitschke.gradle-file-versioning", version.ref = "fileversioning" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
