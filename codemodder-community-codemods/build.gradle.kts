@@ -16,6 +16,7 @@ dependencies {
     implementation("io.codemodder:codemodder-plugin-semgrep")
 
     implementation(libs.dom4j)
+    implementation("io.openpixee:java-jdbc-parameterizer:0.0.8") // TODO bring into monorepo
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)

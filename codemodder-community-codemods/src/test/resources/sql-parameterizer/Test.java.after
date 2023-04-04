@@ -1,0 +1,19 @@
+package com.acme.testcode;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public final class Test {
+
+  private Connection conn;
+
+  public ResultSet doUserLookup_single_concat_single_quote(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = ?";
+    PreparedStatement stmt = conn.prepareStatement(sql);
+    stmt.setString(1, input);
+    return stmt.executeQuery();
+  }
+}

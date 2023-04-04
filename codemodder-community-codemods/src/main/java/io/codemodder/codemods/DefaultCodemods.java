@@ -20,6 +20,7 @@ public final class DefaultCodemods {
         RandomizeSeedCodemod.class,
         SanitizeMultipartFilenameCodemod.class,
         SecureRandomCodemod.class,
+        SQLParameterizerCodemod.class,
         SSRFCodemod.class,
         VerbTamperingCodemod.class);
   }
