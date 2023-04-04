@@ -17,7 +17,8 @@ final class VisitorAssemblerTest {
   void it_filters_java_factories_based_on_configuration() {
     VisitorAssembler assembler = VisitorAssembler.createDefault();
     RuleContext everythingButJakarta =
-        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/validate-jakarta-forward-path"));
+        RuleContext.of(
+            DefaultRuleSetting.ENABLED, List.of("pixee:java/validate-jakarta-forward-path"));
     RuleContext everything = RuleContext.of(DefaultRuleSetting.ENABLED, List.of());
     File repositoryRoot = new File(".");
     List<VisitorFactory> allFactories =
