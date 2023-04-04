@@ -54,9 +54,7 @@ public interface VisitorAssembler {
               new SSLEngineSetEnabledProtocolsVisitorFactory(),
               new SSLParametersSetProtocolsVisitorFactory(),
               new SSLSocketSetEnabledProtocolsVisitorFactory(),
-              new SpringMultipartVisitorFactory(),
               new XStreamVisitorFactory(),
-              new XXEVisitorFactory(),
               new ZipFileOverwriteVisitoryFactory());
 
       final List<SarifProcessorPlugin> sarifProcessorPlugins =
@@ -90,7 +88,6 @@ public interface VisitorAssembler {
       // after it, they won't
       // have a chance to inject their dependencies.
       final List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
-      defaultVisitors.add(new JspScriptletXSSVisitor());
       defaultVisitors.add(new DependencyInjectingVisitor());
       defaultVisitors.removeIf(visitor -> !ruleContext.isRuleAllowed(visitor.ruleId()));
 

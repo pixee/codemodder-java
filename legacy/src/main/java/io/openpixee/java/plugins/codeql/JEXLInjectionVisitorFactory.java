@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Fixes issues reported under CodeQL's id "java/database-resource-leak" */
+/** Fixes issues reported under CodeQL's id "java/jexl-expression-injection" */
 final class JEXLInjectionVisitorFactory implements VisitorFactory {
 
   /** The locations of each result. */

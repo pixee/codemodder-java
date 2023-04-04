@@ -1,0 +1,1 @@
+hi <%=request.getParameter("name")%>
