@@ -56,7 +56,6 @@ public interface VisitorAssembler {
               new SSLParametersSetProtocolsVisitorFactory(),
               new SSLSocketSetEnabledProtocolsVisitorFactory(),
               new XStreamVisitorFactory(),
-              new XXEVisitorFactory(),
               new ZipFileOverwriteVisitoryFactory());
 
       final List<SarifProcessorPlugin> sarifProcessorPlugins =
