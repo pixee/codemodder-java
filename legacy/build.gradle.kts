@@ -63,12 +63,10 @@ dependencies {
         exclude(group = "com.google.inject", module = "guice")
     }
     implementation(libs.java.security.toolkit)
-    implementation(libs.java.security.toolkit.xstream)
     implementation(libs.picocli)
     implementation(libs.progressbar)
     implementation(libs.slf4j.api)
     implementation(libs.tuples)
-    api(libs.xstream)
 
     api("io.codemodder:codemodder-common")
     api("io.codemodder:codemodder-core")
@@ -91,4 +89,6 @@ dependencies {
     testImplementation(testcodelibs.owasp)
     testImplementation(testcodelibs.servlet)
     testImplementation(testcodelibs.spring.web)
+    testImplementation(testcodelibs.xstream)
+    testImplementation(testcodelibs.java.security.toolkit.xstream)
 }

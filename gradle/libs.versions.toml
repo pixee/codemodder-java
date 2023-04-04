@@ -45,4 +45,3 @@ picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "pico
 progressbar = "me.tongfei:progressbar:0.9.3"
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 tuples = "org.javatuples:javatuples:1.2"
-xstream = "com.thoughtworks.xstream:xstream:1.4.7"
