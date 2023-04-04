@@ -16,21 +16,22 @@ final class VisitorAssemblerTest {
   @Test
   void it_filters_java_factories_based_on_configuration() {
     VisitorAssembler assembler = VisitorAssembler.createDefault();
-    RuleContext everythingButSql =
-        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/sql-parameterizer"));
+    RuleContext everythingButJakarta =
+        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/validate-jakarta-forward-path"));
     RuleContext everything = RuleContext.of(DefaultRuleSetting.ENABLED, List.of());
     File repositoryRoot = new File(".");
     List<VisitorFactory> allFactories =
         assembler.assembleJavaCodeScanningVisitorFactories(repositoryRoot, everything, List.of());
     List<VisitorFactory> allButOne =
         assembler.assembleJavaCodeScanningVisitorFactories(
-            repositoryRoot, everythingButSql, List.of());
+            repositoryRoot, everythingButJakarta, List.of());
 
     // just make sure we're getting a reasonable number of factories
     assertThat(allFactories.isEmpty(), is(false));
 
     // make sure that only disabling one allows it to
     assertThat(allFactories.size() - allButOne.size(), equalTo(1));
+    System.out.println(allFactories);
   }
 
   //
