@@ -19,6 +19,7 @@ dependencies {
     api(libs.guice)
     api(libs.contrast.sarif)
     api(libs.java.security.toolkit)
+    api(libs.commons.lang3)
     implementation(libs.logback.classic)
     implementation(libs.maven.model)
     api(libs.slf4j.api)

@@ -16,6 +16,7 @@ public final class DefaultCodemods {
         HardenJavaDeserializationCodemod.class,
         HardenProcessCreationCodemod.class,
         HardenXMLDecoderCodemod.class,
+        JSPScriptletXSSCodemod.class,
         LimitReadlineCodemod.class,
         RandomizeSeedCodemod.class,
         SanitizeApacheMultipartFilenameCodemod.class,
