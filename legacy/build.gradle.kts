@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.picocli)
     implementation(libs.progressbar)
     implementation(libs.slf4j.api)
+    implementation(libs.tuples)
 
     api("io.codemodder:codemodder-common")
     api("io.codemodder:codemodder-core")
