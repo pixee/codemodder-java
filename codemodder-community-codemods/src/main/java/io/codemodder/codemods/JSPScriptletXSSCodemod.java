@@ -4,7 +4,6 @@ import io.codemodder.Codemod;
 import io.codemodder.DependencyGAV;
 import io.codemodder.RegexFileChanger;
 import io.codemodder.ReviewGuidance;
-
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -18,29 +17,28 @@ import java.util.regex.Pattern;
  * achieve exploitation.
  */
 @Codemod(
-        id = "pixee:java/encode-jsp-scriptlet",
-        author = "arshan@pixee.ai",
-        reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    id = "pixee:java/encode-jsp-scriptlet",
+    author = "arshan@pixee.ai",
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class JSPScriptletXSSCodemod extends RegexFileChanger {
 
-    public JSPScriptletXSSCodemod() {
-        super(
-                path -> path.getFileName().toString().toLowerCase().endsWith(".jsp"),
-                scriptlet,
-                true,
-                List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER)
-        );
-    }
+  public JSPScriptletXSSCodemod() {
+    super(
+        path -> path.getFileName().toString().toLowerCase().endsWith(".jsp"),
+        scriptlet,
+        true,
+        List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER));
+  }
 
-    @Override
-    public String getReplacementFor(final String matchingSnippet) {
-        var codeWithinScriptlet =
-                matchingSnippet.substring(matchingSnippet.indexOf('=') + 1, matchingSnippet.length() - 2);
-        return "<%=org.owasp.encoder.Encode.forHtml(" + codeWithinScriptlet + ")%>";
-    }
+  @Override
+  public String getReplacementFor(final String matchingSnippet) {
+    var codeWithinScriptlet =
+        matchingSnippet.substring(matchingSnippet.indexOf('=') + 1, matchingSnippet.length() - 2);
+    return "<%=org.owasp.encoder.Encode.forHtml(" + codeWithinScriptlet + ")%>";
+  }
 
-    private static final Pattern scriptlet =
-            Pattern.compile(
-                    "<%(\\s*)=(\\s*)request(\\s*).(\\s*)get((Header|Parameter)(\\s*)\\((\\s*)\".*\"(\\s*)\\)|QueryString\\((\\s*)\\))(\\s*)%>",
-                    Pattern.MULTILINE);
+  private static final Pattern scriptlet =
+      Pattern.compile(
+          "<%(\\s*)=(\\s*)request(\\s*).(\\s*)get((Header|Parameter)(\\s*)\\((\\s*)\".*\"(\\s*)\\)|QueryString\\((\\s*)\\))(\\s*)%>",
+          Pattern.MULTILINE);
 }

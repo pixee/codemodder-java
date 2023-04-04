@@ -1,12 +1,9 @@
 package io.codemodder.codemods;
 
-import io.codemodder.*;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
+import io.codemodder.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,12 +14,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 final class JSPScriptletXSSCodemodTest {
-
 
   @ParameterizedTest
   @MethodSource("cases")
@@ -34,14 +31,15 @@ final class JSPScriptletXSSCodemodTest {
       throws IOException {
     String dir = "src/test/resources/encode-jsp-scriptlet/" + jspDir;
     copyDir(Path.of(dir), tmpDir);
-    CodemodInvoker codemodInvoker = new CodemodInvoker(List.of(JSPScriptletXSSCodemod.class), tmpDir);
+    CodemodInvoker codemodInvoker =
+        new CodemodInvoker(List.of(JSPScriptletXSSCodemod.class), tmpDir);
 
-
-    Path testJsp = tmpDir.resolve("test.jsp.before");
-    Files.copy(testJsp, tmpDir.resolve("test.jsp"));
+    Path beforeJsp = tmpDir.resolve("test.jsp.before");
+    Path jsp = tmpDir.resolve("test.jsp");
+    Files.copy(beforeJsp, jsp);
     FileWeavingContext context =
-        FileWeavingContext.createDefault(testJsp.toFile(), IncludesExcludes.any());
-    Optional<ChangedFile> changedFileOptional = codemodInvoker.executeFile(testJsp, context);
+        FileWeavingContext.createDefault(beforeJsp.toFile(), IncludesExcludes.any());
+    Optional<ChangedFile> changedFileOptional = codemodInvoker.executeFile(jsp, context);
 
     assertThat(changedFileOptional.isPresent(), is(expectChange));
 
