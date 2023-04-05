@@ -1,7 +1,7 @@
 rootProject.name = "legacy"
 
 pluginManagement {
-    includeBuild("../gradle/build-settings")
+    includeBuild("../build-logic")
 }
 
 plugins {

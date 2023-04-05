@@ -1,5 +1,23 @@
+@Suppress("DSL_SCOPE_VIOLATION") // https://github.com/gradle/gradle/issues/22797
 plugins {
-    id("io.codemodder.base")
+    `kotlin-dsl`
+    alias(buildlibs.plugins.spotless)
+}
+
+spotless {
+    kotlinGradle {
+        target("*.gradle.kts", "src/main/kotlin/*.gradle.kts")
+        ktlint()
+    }
+}
+
+dependencies {
+    implementation(buildlibs.spotless)
+    implementation(buildlibs.fileversioning)
+}
+
+tasks.check {
+    dependsOn(tasks.spotlessCheck)
 }
 
 /*
@@ -11,7 +29,7 @@ val lifecycleTasks = listOf(
     LifecycleBasePlugin.BUILD_TASK_NAME,
     LifecycleBasePlugin.CHECK_TASK_NAME,
     LifecycleBasePlugin.CLEAN_TASK_NAME,
-    "spotlessApply"
+    "spotlessApply",
 )
 for (task in lifecycleTasks) {
     tasks.named(task) {

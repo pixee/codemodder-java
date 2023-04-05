@@ -1,13 +1,12 @@
 rootProject.name = "codemodder-java"
 
 pluginManagement {
-    includeBuild("gradle/build-plugins")
-    includeBuild("gradle/build-settings")
+    includeBuild("build-logic")
 }
 
 dependencyResolutionManagement {
     versionCatalogs.create("buildlibs") {
-        from(files("gradle/buildlibs.versions.toml"))
+        from(files("build-logic/gradle/buildlibs.versions.toml"))
     }
 }
 

@@ -7,5 +7,5 @@ pluginManagement {
             credentials(PasswordCredentials::class)
         }
     }
-    includeBuild("../gradle/build-plugins")
+    includeBuild("../build-logic")
 }
