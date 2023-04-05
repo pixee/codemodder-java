@@ -24,8 +24,7 @@ spotless {
 
 publishing {
     publications {
-        register<MavenPublication>("maven") {
-            from(components["java"])
+        named<MavenPublication>("maven") {
             group = "io.openpixee.codetl"
             artifactId = "codetl-java-language-provider"
         }
