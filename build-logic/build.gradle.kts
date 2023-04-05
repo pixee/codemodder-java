@@ -1,7 +1,7 @@
 @Suppress("DSL_SCOPE_VIOLATION") // https://github.com/gradle/gradle/issues/22797
 plugins {
     `kotlin-dsl`
-    alias(buildlibs.plugins.spotless)
+    alias(libs.plugins.spotless)
 }
 
 spotless {
@@ -12,8 +12,8 @@ spotless {
 }
 
 dependencies {
-    implementation(buildlibs.spotless)
-    implementation(buildlibs.fileversioning)
+    implementation(libs.spotless)
+    implementation(libs.fileversioning)
 }
 
 tasks.check {

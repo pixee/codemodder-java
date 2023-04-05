@@ -6,9 +6,6 @@ dependencyResolutionManagement {
             credentials(PasswordCredentials::class)
         }
     }
-    versionCatalogs.create("buildlibs") {
-        from(files("gradle/buildlibs.versions.toml"))
-    }
 }
 
 pluginManagement {

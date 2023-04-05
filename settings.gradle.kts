@@ -5,8 +5,8 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    versionCatalogs.create("buildlibs") {
-        from(files("build-logic/gradle/buildlibs.versions.toml"))
+    versionCatalogs.create("libs") {
+        from(files("build-logic/gradle/libs.versions.toml"))
     }
 }
 
