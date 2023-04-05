@@ -37,10 +37,10 @@ jobs:
           github-token: ${{ secrets.github_token }}
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: -p legacy -q setVersion -PnewVersion=${{ inputs.version }}
+          arguments: -q setVersion -PnewVersion=${{ inputs.version }}
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: -p legacy build publish
+          arguments: build publish
 
       # share version bump
       - run: |
@@ -53,7 +53,7 @@ jobs:
       # set version for next release
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: -p legacy -q bumpPatch applySnapshot
+          arguments: -q bumpPatch applySnapshot
       - run: |
           git add version.txt
           git commit -m '🚧 prepare for next development iteration'
