@@ -5,6 +5,12 @@ pluginManagement {
     includeBuild("gradle/build-settings")
 }
 
+dependencyResolutionManagement {
+    versionCatalogs.create("buildlibs") {
+        from(files("gradle/buildlibs.versions.toml"))
+    }
+}
+
 plugins {
     id("io.codemodder.repositories")
 }

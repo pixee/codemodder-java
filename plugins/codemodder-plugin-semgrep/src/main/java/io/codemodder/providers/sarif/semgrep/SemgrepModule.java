@@ -85,16 +85,16 @@ final class SemgrepModule extends AbstractModule {
           });
     }
 
-    if(toBind.isEmpty()) {
+    if (toBind.isEmpty()) {
       // no reason to run semgrep if there are no annotations
       return;
     }
 
     // copy the yaml out of the classpath onto disk so semgrep can use them
     List<Path> yamlRuleFiles =
-            yamlClasspathPathsToRun.stream()
-                    .map(this::saveClasspathResourceToTemp)
-                    .collect(Collectors.toUnmodifiableList());
+        yamlClasspathPathsToRun.stream()
+            .map(this::saveClasspathResourceToTemp)
+            .collect(Collectors.toUnmodifiableList());
 
     // actually run the SARIF only once
     SarifSchema210 sarif;
