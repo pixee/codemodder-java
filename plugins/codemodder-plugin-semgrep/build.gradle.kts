@@ -1,4 +1,3 @@
-@Suppress("DSL_SCOPE_VIOLATION") // https://github.com/gradle/gradle/issues/22797
 plugins {
     id("io.codemodder.base")
     id("io.codemodder.java-library")
@@ -13,8 +12,7 @@ java {
 
 publishing {
     publications {
-        register<MavenPublication>("maven") {
-            from(components["java"])
+        named<MavenPublication>("maven") {
             artifactId = "codemodder-provider-sarif-semgrep"
         }
     }

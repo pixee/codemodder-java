@@ -18,6 +18,20 @@ for (task in lifecycleTasks) {
     tasks.register(task) {
         group = "lifecycle"
         description = "Runs the $task task for all included builds."
-        dependsOn(gradle.includedBuilds.map { it.task(":$task") })
+        val tasks = gradle.includedBuilds.map {it.task(":$task") }
+        dependsOn(tasks)
     }
+}
+
+tasks.register(PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME) {
+    group = "lifecycle"
+    description = "Runs the ${PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME} task for all included builds."
+    val tasks =
+        gradle.includedBuilds.filter {
+            // filter out the gradle build logic builds, because we never publish artifacts from there
+            !it.projectDir.parentFile.name.equals("gradle")
+        }.map {
+            it.task(":${PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME}")
+        }
+    dependsOn(tasks)
 }
