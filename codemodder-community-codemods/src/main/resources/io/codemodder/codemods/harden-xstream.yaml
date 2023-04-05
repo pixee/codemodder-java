@@ -1,0 +1,27 @@
+rules:
+  - id: harden-xstream
+    patterns:
+      - pattern: $X = new XStream(...);
+      - pattern-not-inside: |
+          $RETURNTYPE $METHOD(...) {
+            ...
+            $X.registerConverter(...);
+            ...
+          }
+      - pattern-not-inside: |
+          $RETURNTYPE $METHOD(...) {
+            ...
+            $X.allowTypes(...);
+            ...
+          }
+      - pattern-not-inside: |
+          $RETURNTYPE $METHOD(...) {
+            ...
+            $X.denyTypes(...);
+            ...
+          }
+      - focus-metavariable: $X
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING

@@ -39,7 +39,7 @@ final class WebGoat820Test extends GitRepositoryTest {
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
-    assertThat(report.getResults().size(), is(24));
+    assertThat(report.getResults().size(), is(25));
 
     // count the changes associated with missing-jwt-signature-check from codeql
     List<CodeTFChange> changes =
