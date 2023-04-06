@@ -16,16 +16,15 @@ final class VisitorAssemblerTest {
   @Test
   void it_filters_java_factories_based_on_configuration() {
     VisitorAssembler assembler = VisitorAssembler.createDefault();
-    RuleContext everythingButJakarta =
-        RuleContext.of(
-            DefaultRuleSetting.ENABLED, List.of("pixee:java/validate-jakarta-forward-path"));
+    RuleContext everythingButSslContext =
+        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/upgrade-sslcontext-tls"));
     RuleContext everything = RuleContext.of(DefaultRuleSetting.ENABLED, List.of());
     File repositoryRoot = new File(".");
     List<VisitorFactory> allFactories =
         assembler.assembleJavaCodeScanningVisitorFactories(repositoryRoot, everything, List.of());
     List<VisitorFactory> allButOne =
         assembler.assembleJavaCodeScanningVisitorFactories(
-            repositoryRoot, everythingButJakarta, List.of());
+            repositoryRoot, everythingButSslContext, List.of());
 
     // just make sure we're getting a reasonable number of factories
     assertThat(allFactories.isEmpty(), is(false));

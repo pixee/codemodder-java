@@ -74,7 +74,7 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
     for (Result result : results) {
       for (Node node : allNodes) {
         Region region = regionExtractor.from(result);
-        if (!node.getClass().isAssignableFrom(nodeType)) {
+        if (!nodeType.isAssignableFrom(node.getClass())) {
           continue;
         }
         FileWeavingContext changeRecorder = context.changeRecorder();

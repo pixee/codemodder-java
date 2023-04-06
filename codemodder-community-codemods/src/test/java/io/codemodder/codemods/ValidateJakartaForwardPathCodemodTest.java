@@ -4,7 +4,7 @@ import io.codemodder.testutils.CodemodTestMixin;
 import io.codemodder.testutils.Metadata;
 
 @Metadata(
-    codemodType = HardenXMLInputFactoryCodemod.class,
-    testResourceDir = "harden-xmlinputfactory",
+    codemodType = ValidateJakartaForwardPathCodemod.class,
+    testResourceDir = "validate-jakarta-forward-path",
     dependencies = "io.github.pixee:java-security-toolkit:1.0.2")
-final class HardenXMLInputFactoryCodemodTest implements CodemodTestMixin {}
+final class ValidateJakartaForwardPathCodemodTest implements CodemodTestMixin {}
