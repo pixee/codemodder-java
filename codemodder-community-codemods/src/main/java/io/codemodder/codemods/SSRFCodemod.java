@@ -42,7 +42,7 @@ public final class SSRFCodemod extends SemgrepJavaParserChanger<ObjectCreationEx
      *
      * import io.github.pixee.security.Urls;
      * ...
-     * URL u = Urls.create(foo, io.github.pixee.security.Urls.HTTP_PROTOCOLS, io.openpixee.security.HostValidator.ALLOW_ALL)
+     * URL u = Urls.create(foo, io.github.pixee.security.Urls.HTTP_PROTOCOLS, io.github.pixee.security.HostValidator.ALLOW_ALL)
      */
     addImportIfMissing(cu, Urls.class.getName());
     addImportIfMissing(cu, HostValidator.class.getName());

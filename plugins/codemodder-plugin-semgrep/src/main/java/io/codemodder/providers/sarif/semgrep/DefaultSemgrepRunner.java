@@ -70,6 +70,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
 
     SarifSchema210 sarif =
         objectMapper.readValue(Files.newInputStream(sarifFile), SarifSchema210.class);
+    LOG.debug("SARIF results: {}", sarif.getRuns().get(0).getResults().size());
     Files.delete(semgrepIgnoreFile);
     Files.delete(tmpDir);
     Files.delete(sarifFile);

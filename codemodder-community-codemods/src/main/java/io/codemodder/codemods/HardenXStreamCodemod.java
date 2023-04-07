@@ -38,7 +38,7 @@ public final class HardenXStreamCodemod extends SemgrepJavaParserChanger<Variabl
     Statement fixStatement = buildFixStatement(nameAsString);
     Statement existingStatement = newXStreamVariable.findAncestor(Statement.class).get();
     ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
-    ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.HardeningConverter");
+    ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.xstream.HardeningConverter");
     return true;
   }
 
@@ -59,5 +59,5 @@ public final class HardenXStreamCodemod extends SemgrepJavaParserChanger<Variabl
   }
 
   private static final DependencyGAV JAVA_SECURITY_TOOLKIT_XSTREAM =
-      DependencyGAV.createDefault("io.github.pixee", "java-security-toolkit-xstream", "1.0.1");
+      DependencyGAV.createDefault("io.github.pixee", "java-security-toolkit-xstream", "1.0.2");
 }
