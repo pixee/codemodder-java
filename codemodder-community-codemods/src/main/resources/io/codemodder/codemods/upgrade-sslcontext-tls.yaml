@@ -1,0 +1,10 @@
+rules:
+  - id: upgrade-sslcontext-tls
+    patterns:
+      - pattern-either:
+          - pattern: SSLContext.getInstance("TLSv1")
+          - pattern: SSLContext.getInstance("TLSv1.1")
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING

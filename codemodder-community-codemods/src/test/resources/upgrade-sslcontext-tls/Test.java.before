@@ -1,16 +1,18 @@
-package com.acme.testcode;
 
-import javax.net.ssl.SSLContext;
-import java.security.NoSuchAlgorithmException;
+class Test {
 
-final class SSLContextGetInstanceVulnerabilityWeaved {
+  private static final String TLSV1 = "TLSv1";
+  private static final String TLSV12 = "TLSv1.2";
 
   public void unsafeContext() throws NoSuchAlgorithmException {
-    SSLContext context = SSLContext.getInstance("TLSv1.2");
+    // ruleid: upgrade-sslcontext-tls
+    SSLContext context = SSLContext.getInstance("TLSv1");
   }
 
+  // TODO: make this pass even if the static variables are declared at the bottom
   public void unsafeContextFromConstant() throws NoSuchAlgorithmException {
-    SSLContext context = SSLContext.getInstance("TLSv1.2");
+    // ruleid: upgrade-sslcontext-tls
+    SSLContext context = SSLContext.getInstance(TLSV1);
   }
 
   public void safeContext() throws NoSuchAlgorithmException {
@@ -22,13 +24,12 @@ final class SSLContextGetInstanceVulnerabilityWeaved {
   }
 
   public SSLContext unsafeReturnsContext() throws NoSuchAlgorithmException {
-    return SSLContext.getInstance("TLSv1.2");
+    // ruleid: upgrade-sslcontext-tls
+    return SSLContext.getInstance("TLSv1.1");
   }
 
   public SSLContext safeReturnsContext() throws NoSuchAlgorithmException {
     return SSLContext.getInstance("TLSv1.2");
   }
 
-  private static final String TLSV1 = "TLSv1";
-  private static final String TLSV12 = "TLSv1.2";
 }

@@ -47,12 +47,7 @@ public interface VisitorAssembler {
     @Override
     public List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(
         final File repositoryRoot, final RuleContext ruleContext, final List<File> sarifs) {
-      final List<VisitorFactory> defaultVisitorFactories =
-          List.of(
-              new SSLContextGetInstanceVisitorFactory(),
-              new SSLEngineSetEnabledProtocolsVisitorFactory(),
-              new SSLParametersSetProtocolsVisitorFactory(),
-              new SSLSocketSetEnabledProtocolsVisitorFactory());
+      final List<VisitorFactory> defaultVisitorFactories = List.of();
 
       final List<SarifProcessorPlugin> sarifProcessorPlugins =
           List.of(new CodeQlPlugin(), new ContrastScanPlugin());
