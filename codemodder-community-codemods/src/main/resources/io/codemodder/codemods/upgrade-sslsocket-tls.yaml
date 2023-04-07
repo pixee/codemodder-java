@@ -1,0 +1,22 @@
+rules:
+  - id: upgrade-sslsocket-tls
+    patterns:
+      - pattern: (SSLSocket $SSL).setEnabledProtocols($PROTOCOLS)
+      - metavariable-pattern:
+          metavariable: $PROTOCOLS
+          patterns:
+            - pattern-either:
+                - pattern: new String[]{"TLSv1"}
+                - pattern: new String[]{"TLSv1.1"}
+                - pattern: new String[]{"TLSv1","TLSv1.1"}
+                - pattern: new String[]{"TLSv1.1","TLSv1"}
+                - pattern-inside: |
+                    class $CLASS {
+                      ...
+                      String[] $PROTOCOLS = new String[]{"TLSv1"};
+                      ...
+                    }
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING
