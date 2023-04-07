@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils
 import org.mozilla.universalchardet.UniversalDetector
 import java.io.StringWriter
 import java.nio.charset.Charset
-import java.util.BitSet
+import java.util.*
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.events.Characters
@@ -93,14 +93,21 @@ class FormatCommand : AbstractSimpleCommand() {
             )
         }.sortedByDescending { it.first }.toMap(LinkedHashMap())
 
+    /**
+     * Guesses the indent character (spaces / tabs) and length from the original document
+     * formatting settings
+     *
+     * @param c (project model) where it takes its input pom
+     * @return indent string
+     */
     private fun guessIndent(c: ProjectModel): String {
         val eventReader = inputFactory.createXMLEventReader(c.originalPom.inputStream())
 
-        val indent = " "
         val freqMap: MutableMap<Int, Int> = mutableMapOf()
+        val charFreqMap: MutableMap<Char, Int> = mutableMapOf()
 
         /**
-         * Parse, while grabbing whitespace sequences and counting
+         * Parse, while grabbing whitespace sequences and examining it
          */
         while (eventReader.hasNext()) {
             val event = eventReader.nextEvent()
@@ -110,22 +117,52 @@ class FormatCommand : AbstractSimpleCommand() {
                     val patterns = event.asCharacters().data.split(*LINE_ENDINGS.toTypedArray())
 
                     /**
-                     * Updates space frequencies
+                     * Updates space / character frequencies found
                      */
-                    patterns
+                    val blankPatterns = patterns
                         .filter { it.isNotEmpty() }
                         .filter { StringUtils.isAllBlank(it) }
+
+                    blankPatterns
                         .map { it to it.length }
                         .forEach {
-                            freqMap.merge(it.second, 1) { a, b -> a + b}
+                            freqMap.merge(it.second, 1) { a, b -> a + b }
+                        }
+
+                    blankPatterns.map { it[0] }
+                        .forEach {
+                            charFreqMap.merge(it, 1) { a, b ->
+                                a + b
+                            }
                         }
                 }
             }
         }
 
+        /**
+         * Assign most frequent indent char
+         */
+        val indentCharacter: Char = charFreqMap.entries.maxBy { it.value }.key
+
+        /**
+         * Casts as a String
+         */
+        val indentcharacterAsString = String(charArrayOf(indentCharacter))
+
+        /**
+         * Picks the length
+         */
         val indentLength = freqMap.entries.minBy { it.key }.key
 
-        return StringUtils.repeat(indent, indentLength)
+        /**
+         * Builds the standard indent string (length vs char)
+         */
+        val indentString = StringUtils.repeat(indentcharacterAsString, indentLength)
+
+        /**
+         * Returns it
+         */
+        return indentString
     }
 
     private fun parseLineEndings(c: ProjectModel): String {
@@ -199,7 +236,7 @@ class FormatCommand : AbstractSimpleCommand() {
         val targetElementMap = elementBitSet(xmlRepresentation.toByteArray())
 
         // Let's find out the original empty elements from the original pom and store into a stack
-        val elementsToReplace : MutableList<MatchData> = ArrayList<MatchData>().apply{
+        val elementsToReplace: MutableList<MatchData> = ArrayList<MatchData>().apply {
             val matches = findSingleElementMatchesFrom(c.originalPom.toString(c.charset)).values
 
             val filteredMatches = matches.filter { originalElementMap[it.range.first] }
