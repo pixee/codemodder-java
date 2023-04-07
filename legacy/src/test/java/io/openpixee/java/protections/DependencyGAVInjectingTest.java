@@ -65,23 +65,17 @@ final class DependencyGAVInjectingTest {
                     "/tmp/fixed_path",
                     Weave.from(5, "some-code", DependencyGAV.JAVA_SECURITY_TOOLKIT))));
 
-    assertHasDependencies(
-        new File(changedFile.changedFiles().iterator().next().modifiedFile()),
-        slf4jDependency,
-        DependencyGAV.JAVA_SECURITY_TOOLKIT);
+    File modifiedPomFile = new File(changedFile.changedFiles().iterator().next().modifiedFile());
 
-    assertHasMatches(
-        new File(changedFile.changedFiles().iterator().next().modifiedFile()),
-        "<distributionManagement></distributionManagement>",
-        1);
-    assertHasMatches(
-        new File(changedFile.changedFiles().iterator().next().modifiedFile()), "<email/>", 1);
-    assertHasMatches(
-        new File(changedFile.changedFiles().iterator().next().modifiedFile()),
-        "<email></email>",
-        1);
-    assertHasMatches(
-        new File(changedFile.changedFiles().iterator().next().modifiedFile()), "<email />", 1);
+    assertHasDependencies(modifiedPomFile, slf4jDependency, DependencyGAV.JAVA_SECURITY_TOOLKIT);
+
+    assertHasMatches(modifiedPomFile, "<distributionManagement></distributionManagement>", 1);
+
+    assertHasMatches(modifiedPomFile, "<email/>", 1);
+
+    assertHasMatches(modifiedPomFile, "<email></email>", 1);
+
+    assertHasMatches(modifiedPomFile, "<email />", 1);
   }
 
   private void assertHasMatches(File sourceFile, String textPattern, int expectedNoOcurrences)
