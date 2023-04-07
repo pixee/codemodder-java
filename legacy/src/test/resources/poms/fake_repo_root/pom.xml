@@ -7,8 +7,23 @@
     <artifactId>testcode</artifactId>
     <version>5.1</version>
 
-    <distributionManagement>
-    </distributionManagement>
+    <developers>
+        <developer>
+            <id>foo</id>
+            <email/>
+        </developer>
+        <developer>
+            <id>bar</id>
+            <email></email>
+        </developer>
+        <developer>
+            <id>baz</id>
+            <email />
+        </developer>
+    </developers>
+
+
+    <distributionManagement></distributionManagement>
 
     <dependencies>
         <dependency>
