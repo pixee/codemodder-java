@@ -44,11 +44,8 @@ public class CodeQLModule extends AbstractModule {
           Stream.of(constructors)
               .filter(constructor -> constructor.getAnnotation(javax.inject.Inject.class) != null)
               .flatMap(constructor -> Stream.of(constructor.getParameters()))
-              .flatMap(
-                  parameter ->
-                      parameter.getAnnotation(CodeQLScan.class) == null
-                          ? Stream.of()
-                          : Stream.of(parameter.getAnnotation(CodeQLScan.class)))
+              .map(parameter -> parameter.getAnnotation(CodeQLScan.class))
+              .filter(Objects::nonNull)
               .findFirst();
 
       if (annotation.isPresent()) {
