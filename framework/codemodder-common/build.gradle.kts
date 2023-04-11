@@ -21,6 +21,8 @@ dependencies {
     api(libs.javaparser.symbolsolver.core)
     api(libs.javaparser.symbolsolver.logic)
     api(libs.javaparser.symbolsolver.model)
+    api(libs.javadiff)
+    api(libs.commons.lang3)
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)

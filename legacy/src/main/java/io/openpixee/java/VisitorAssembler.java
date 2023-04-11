@@ -26,7 +26,7 @@ public interface VisitorAssembler {
    * @return the {@link VisitorFactory} types that are allowed to operate
    */
   List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(
-          File repositoryRoot, CodemodRegulator codemodRegulator, List<File> sarifs);
+      File repositoryRoot, CodemodRegulator codemodRegulator, List<File> sarifs);
 
   /**
    * Given the context, assemble of a list of {@link FileBasedVisitor} we'll use in our non-Java
@@ -36,7 +36,7 @@ public interface VisitorAssembler {
    * @return the {@link FileBasedVisitor} types that are allowed to operate
    */
   List<FileBasedVisitor> assembleFileVisitors(
-          File repositoryRoot, CodemodRegulator codemodRegulator, List<File> sarifs);
+      File repositoryRoot, CodemodRegulator codemodRegulator, List<File> sarifs);
 
   static VisitorAssembler createDefault() {
     return new Default();
@@ -46,7 +46,9 @@ public interface VisitorAssembler {
 
     @Override
     public List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(
-            final File repositoryRoot, final CodemodRegulator codemodRegulator, final List<File> sarifs) {
+        final File repositoryRoot,
+        final CodemodRegulator codemodRegulator,
+        final List<File> sarifs) {
       final List<VisitorFactory> defaultVisitorFactories = List.of();
 
       final List<SarifProcessorPlugin> sarifProcessorPlugins =
@@ -68,7 +70,9 @@ public interface VisitorAssembler {
 
     @Override
     public List<FileBasedVisitor> assembleFileVisitors(
-            final File repositoryRoot, final CodemodRegulator codemodRegulator, final List<File> sarifs) {
+        final File repositoryRoot,
+        final CodemodRegulator codemodRegulator,
+        final List<File> sarifs) {
       // Plugin visitors
       final List<SarifProcessorPlugin> sarifProcessorPlugins =
           List.of(new CodeQlPlugin(), new ContrastScanPlugin());

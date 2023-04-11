@@ -57,7 +57,9 @@ final class PluginVisitorFinder {
           return sarifProcessorPlugins.stream()
               .flatMap(
                   plugin ->
-                      plugin.getJavaVisitorFactoriesFor(repositoryRoot, run, codemodRegulator).stream());
+                      plugin
+                          .getJavaVisitorFactoriesFor(repositoryRoot, run, codemodRegulator)
+                          .stream());
         };
 
     return sarifs.stream()
@@ -81,7 +83,8 @@ final class PluginVisitorFinder {
               tool.getVersion());
           return sarifProcessorPlugins.stream()
               .flatMap(
-                  plugin -> plugin.getFileWeaversFor(repositoryRoot, run, codemodRegulator).stream());
+                  plugin ->
+                      plugin.getFileWeaversFor(repositoryRoot, run, codemodRegulator).stream());
         };
 
     return sarifs.stream()
