@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -37,13 +38,25 @@ public final class CodemodInvoker {
 
   public CodemodInvoker(
       final List<Class<? extends Changer>> codemodTypes, final Path repositoryDir) {
-    this(codemodTypes, RuleContext.of(DefaultRuleSetting.ENABLED, List.of()), repositoryDir);
+    this(
+        codemodTypes,
+        RuleContext.of(DefaultRuleSetting.ENABLED, List.of()),
+        repositoryDir,
+        Map.of());
   }
 
   public CodemodInvoker(
       final List<Class<? extends Changer>> codemodTypes,
       final RuleContext ruleContext,
       final Path repositoryDir) {
+    this(codemodTypes, ruleContext, repositoryDir, Map.of());
+  }
+
+  public CodemodInvoker(
+      final List<Class<? extends Changer>> codemodTypes,
+      final RuleContext ruleContext,
+      final Path repositoryDir,
+      final Map<String, List<RuleSarif>> ruleSarifByTool) {
 
     // get all the providers ready for dependency injection & codemod instantiation
     List<CodemodProvider> providers =
@@ -58,7 +71,13 @@ public final class CodemodInvoker {
 
     // add all provider modules
     for (CodemodProvider provider : providers) {
-      Set<AbstractModule> modules = provider.getModules(repositoryDir, codemodTypes);
+      List<String> wantsSarif = getWantsSarif(provider);
+      var allWantedSarifs =
+          wantsSarif.stream()
+              .flatMap(toolName -> ruleSarifByTool.getOrDefault(toolName, List.of()).stream())
+              .collect(Collectors.toUnmodifiableList());
+      Set<AbstractModule> modules =
+          provider.getModules(repositoryDir, codemodTypes, allWantedSarifs);
       allModules.addAll(modules);
     }
 
@@ -87,6 +106,12 @@ public final class CodemodInvoker {
     this.changers = Collections.unmodifiableList(changers);
     this.codemods = Collections.unmodifiableList(codemods);
     this.repositoryDir = Objects.requireNonNull(repositoryDir);
+  }
+
+  private static final List<String> getWantsSarif(final CodemodProvider provider) {
+    return Optional.ofNullable(provider.getClass().getAnnotation(WantsSarif.class))
+        .map(wants -> Arrays.asList(wants.toolNames()))
+        .orElse(List.of());
   }
 
   private static final class IdentifiedChanger {

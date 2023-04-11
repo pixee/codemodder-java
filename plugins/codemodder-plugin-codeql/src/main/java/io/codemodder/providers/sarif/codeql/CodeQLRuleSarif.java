@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** {@inheritDoc} An implementation of the {@link RuleSarif } for SARIFs produced by CodeQL. */
-public class CodeQLRuleSarif implements RuleSarif {
+/** {@inheritDoc} An implementation of the {@link RuleSarif} for SARIFs produced by CodeQL. */
+public final class CodeQLRuleSarif implements RuleSarif {
 
   private final SarifSchema210 sarif;
   private final String ruleId;
@@ -78,10 +78,8 @@ public class CodeQLRuleSarif implements RuleSarif {
 
   @Override
   public String getDriver() {
-    return TOOL_NAME;
+    return "CodeQL";
   }
-
-  public static final String TOOL_NAME = "CodeQL";
 
   private static final Logger logger = LoggerFactory.getLogger(CodeQLRuleSarif.class);
 }

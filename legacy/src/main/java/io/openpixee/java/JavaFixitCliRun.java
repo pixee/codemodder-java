@@ -9,6 +9,7 @@ import io.codemodder.DefaultRuleSetting;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
 import io.codemodder.RuleContext;
+import io.codemodder.RuleSarif;
 import io.codemodder.Weave;
 import io.codemodder.WeavingResult;
 import io.codemodder.codemods.DefaultCodemods;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -105,9 +107,6 @@ public final class JavaFixitCliRun {
           LOG.debug("Scanning Java source files from that directory: {}", sourceDirectory.files());
         });
 
-    // set up basic rule sarif provider
-    StaticRuleSarifProvider.parseAndSet(sarifs, repositoryRoot.toPath());
-
     // get the Java code visitors
     RuleContext ruleContext = RuleContext.of(defaultRuleSetting, ruleExceptions);
     final List<VisitorFactory> factories =
@@ -124,9 +123,13 @@ public final class JavaFixitCliRun {
 
     LOG.debug("Scanning following files: {}", allJavaFiles.size());
 
+    Map<String, List<RuleSarif>> ruleSarifByTool =
+        StaticSarifParser.parseIntoMap(sarifs, repositoryRoot.toPath());
+
     List<Class<? extends Changer>> defaultCodemodTypes = DefaultCodemods.asList();
     CodemodInvoker codemodInvoker =
-        new CodemodInvoker(defaultCodemodTypes, ruleContext, repositoryRoot.toPath());
+        new CodemodInvoker(
+            defaultCodemodTypes, ruleContext, repositoryRoot.toPath(), ruleSarifByTool);
 
     // run the Java code visitors
     final var javaSourceWeaveResult =

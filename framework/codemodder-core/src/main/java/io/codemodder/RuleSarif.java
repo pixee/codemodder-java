@@ -9,6 +9,8 @@ import java.util.List;
 /** Defines a model for interacting with SARIF. */
 public interface RuleSarif {
 
+  public static final RuleSarif EMPTY = new EmptyRuleSarif();
+
   /**
    * Get all the regions for the SARIF with the matching rule ID
    *
@@ -31,6 +33,35 @@ public interface RuleSarif {
   /** Returns the string ID for the rule. */
   String getRule();
 
-  /** Returns the tool driver that produced this SARIF */
+  /** Returns the tool driver that produced this SARIF. */
   String getDriver();
+
+  /** An empty implementation of {@link RuleSarif} for binding codemods with no SARIF results. */
+  final class EmptyRuleSarif implements RuleSarif {
+
+    @Override
+    public List<Region> getRegionsFromResultsByRule(Path path) {
+      return List.of();
+    }
+
+    @Override
+    public List<Result> getResultsByPath(Path path) {
+      return List.of();
+    }
+
+    @Override
+    public String getRule() {
+      return "";
+    }
+
+    @Override
+    public String getDriver() {
+      return "";
+    }
+
+    @Override
+    public SarifSchema210 rawDocument() {
+      return new SarifSchema210();
+    }
+  }
 }
