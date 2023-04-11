@@ -30,4 +30,7 @@ public interface RuleSarif {
 
   /** Returns the string ID for the rule. */
   String getRule();
+
+  /** Returns the tool driver that produced this SARIF */
+  String getDriver();
 }

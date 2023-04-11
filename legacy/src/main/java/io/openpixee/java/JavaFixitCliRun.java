@@ -105,6 +105,9 @@ public final class JavaFixitCliRun {
           LOG.debug("Scanning Java source files from that directory: {}", sourceDirectory.files());
         });
 
+    // set up basic rule sarif provider
+    StaticRuleSarifProvider.parseAndSet(sarifs, repositoryRoot.toPath());
+
     // get the Java code visitors
     RuleContext ruleContext = RuleContext.of(defaultRuleSetting, ruleExceptions);
     final List<VisitorFactory> factories =
