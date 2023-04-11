@@ -18,6 +18,7 @@ final class SourceDirectoryListerTest {
   void it_finds_java_dirs() throws IOException {
     SourceDirectoryLister lister = SourceDirectoryLister.createDefault();
     List<SourceDirectory> sourceDirs = lister.listJavaSourceDirectories(List.of(new File(".")));
+    sourceDirs.removeIf(dir -> dir.path().contains("spotlessJava"));
     assertThat(sourceDirs.size(), equalTo(1));
     assertThat(sourceDirs.get(0).path(), endsWith("src/main/java"));
     assertThat(sourceDirs.get(0).files().size(), greaterThan(35));

@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.maven.model)
     implementation(libs.picocli)
+    implementation(libs.juniversalchardet)
     api(libs.slf4j.api)
     api(project(":codemodder-common"))
 

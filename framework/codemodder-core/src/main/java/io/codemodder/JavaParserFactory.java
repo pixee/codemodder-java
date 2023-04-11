@@ -2,17 +2,16 @@ package io.codemodder;
 
 import com.github.javaparser.JavaParser;
 import java.io.IOException;
-import java.nio.file.Path;
+import java.util.List;
 
 /** Responsible for generating {@link JavaParser} instances. */
 interface JavaParserFactory {
 
   /**
-   * Create a JavaParser instance for the given project path that understands the project structure.
+   * Create a JavaParser instance for the given project source directories
    *
-   * @param projectPath the path to the project
-   * @return a JavaParser instance that is setup to understand the project's types and anything else
-   *     it needs
+   * @param sourceDirectories the path to the project
+   * @return a JavaParser instance based on the given source directories
    */
-  JavaParser create(Path projectPath) throws IOException;
+  JavaParser create(List<SourceDirectory> sourceDirectories) throws IOException;
 }
