@@ -1,4 +1,4 @@
-package io.openpixee.java;
+package io.codemodder.codetf;
 
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
@@ -8,12 +8,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.codemodder.ChangedFile;
 import io.codemodder.Weave;
 import io.codemodder.WeavingResult;
-import io.github.pixee.codetf.CodeTFChange;
-import io.github.pixee.codetf.CodeTFConfiguration;
-import io.github.pixee.codetf.CodeTFFileExtensionScanned;
-import io.github.pixee.codetf.CodeTFReport;
-import io.github.pixee.codetf.CodeTFResult;
-import io.github.pixee.codetf.CodeTFRun;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,7 +27,7 @@ import org.apache.commons.lang3.StringUtils;
  * This type is responsible for generating a {@link CodeTFReport} based on the domain objects
  * representing our inputs and outputs.
  */
-interface CodeTFReportGenerator {
+public interface CodeTFReportGenerator {
 
   /**
    * Creates the report.

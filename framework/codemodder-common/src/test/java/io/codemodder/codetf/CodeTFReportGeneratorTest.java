@@ -1,10 +1,9 @@
-package io.openpixee.java;
+package io.codemodder.codetf;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import io.github.pixee.codetf.CodeTFFileExtensionScanned;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
