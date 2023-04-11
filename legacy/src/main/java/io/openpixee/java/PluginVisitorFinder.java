@@ -4,7 +4,7 @@ import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.contrastsecurity.sarif.ToolComponent;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.codemodder.RuleContext;
+import io.codemodder.CodemodRegulator;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -43,7 +43,7 @@ final class PluginVisitorFinder {
 
   List<VisitorFactory> getPluginFactories(
       final File repositoryRoot,
-      final RuleContext ruleContext,
+      final CodemodRegulator codemodRegulator,
       final List<SarifProcessorPlugin> sarifProcessorPlugins) {
     final Function<Run, Stream<VisitorFactory>> runToFactories =
         run -> {
@@ -57,7 +57,7 @@ final class PluginVisitorFinder {
           return sarifProcessorPlugins.stream()
               .flatMap(
                   plugin ->
-                      plugin.getJavaVisitorFactoriesFor(repositoryRoot, run, ruleContext).stream());
+                      plugin.getJavaVisitorFactoriesFor(repositoryRoot, run, codemodRegulator).stream());
         };
 
     return sarifs.stream()
@@ -68,7 +68,7 @@ final class PluginVisitorFinder {
 
   List<FileBasedVisitor> getPluginFileBasedVisitors(
       final File repositoryRoot,
-      final RuleContext ruleContext,
+      final CodemodRegulator codemodRegulator,
       final List<SarifProcessorPlugin> sarifProcessorPlugins) {
     final Function<Run, Stream<FileBasedVisitor>> runToVisitors =
         run -> {
@@ -81,7 +81,7 @@ final class PluginVisitorFinder {
               tool.getVersion());
           return sarifProcessorPlugins.stream()
               .flatMap(
-                  plugin -> plugin.getFileWeaversFor(repositoryRoot, run, ruleContext).stream());
+                  plugin -> plugin.getFileWeaversFor(repositoryRoot, run, codemodRegulator).stream());
         };
 
     return sarifs.stream()

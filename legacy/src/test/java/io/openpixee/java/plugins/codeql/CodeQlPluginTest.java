@@ -10,7 +10,7 @@ import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.codemodder.DefaultRuleSetting;
-import io.codemodder.RuleContext;
+import io.codemodder.CodemodRegulator;
 import io.openpixee.java.VisitorFactory;
 import java.io.File;
 import java.io.FileReader;
@@ -62,7 +62,7 @@ final class CodeQlPluginTest {
         plugin.getJavaVisitorFactoriesFor(
             new File("src/test/resources"),
             runs.get(0),
-            RuleContext.of(DefaultRuleSetting.ENABLED, Collections.emptyList()));
+            CodemodRegulator.of(DefaultRuleSetting.ENABLED, Collections.emptyList()));
 
     assertThat(factories.size(), equalTo(3));
     assertThat(factories.get(0), instanceOf(InsecureCookieVisitorFactory.class));

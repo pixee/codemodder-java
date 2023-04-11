@@ -1,7 +1,7 @@
 package io.openpixee.java;
 
 import com.contrastsecurity.sarif.Run;
-import io.codemodder.RuleContext;
+import io.codemodder.CodemodRegulator;
 import java.io.File;
 import java.util.List;
 
@@ -10,11 +10,11 @@ public interface SarifProcessorPlugin {
 
   /** Create a set of Java factories associated with the given SARIF {@link Run}. */
   List<VisitorFactory> getJavaVisitorFactoriesFor(
-      File repositoryRoot, Run run, RuleContext ruleContext);
+      File repositoryRoot, Run run, CodemodRegulator codemodRegulator);
 
   /**
    * Create a set of file based weavers intended to handle vulnerabilities found in the given SARIF
    * {@link Run}.
    */
-  List<FileBasedVisitor> getFileWeaversFor(File repositoryRoot, Run run, RuleContext ruleContext);
+  List<FileBasedVisitor> getFileWeaversFor(File repositoryRoot, Run run, CodemodRegulator codemodRegulator);
 }

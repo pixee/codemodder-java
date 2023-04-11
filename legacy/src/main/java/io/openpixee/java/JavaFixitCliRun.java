@@ -8,7 +8,7 @@ import io.codemodder.CodemodInvoker;
 import io.codemodder.DefaultRuleSetting;
 import io.codemodder.FileWeavingContext;
 import io.codemodder.IncludesExcludes;
-import io.codemodder.RuleContext;
+import io.codemodder.CodemodRegulator;
 import io.codemodder.Weave;
 import io.codemodder.WeavingResult;
 import io.codemodder.codemods.DefaultCodemods;
@@ -106,10 +106,10 @@ public final class JavaFixitCliRun {
         });
 
     // get the Java code visitors
-    RuleContext ruleContext = RuleContext.of(defaultRuleSetting, ruleExceptions);
+    CodemodRegulator codemodRegulator = CodemodRegulator.of(defaultRuleSetting, ruleExceptions);
     final List<VisitorFactory> factories =
         visitorAssembler.assembleJavaCodeScanningVisitorFactories(
-            repositoryRoot, ruleContext, sarifs);
+            repositoryRoot, codemodRegulator, sarifs);
 
     List<String> allJavaFiles = new ArrayList<>();
     sourceDirectories.forEach(
@@ -123,7 +123,7 @@ public final class JavaFixitCliRun {
 
     List<Class<? extends Changer>> defaultCodemodTypes = DefaultCodemods.asList();
     CodemodInvoker codemodInvoker =
-        new CodemodInvoker(defaultCodemodTypes, ruleContext, repositoryRoot.toPath());
+        new CodemodInvoker(defaultCodemodTypes, codemodRegulator, repositoryRoot.toPath());
 
     // run the Java code visitors
     final var javaSourceWeaveResult =
@@ -137,7 +137,7 @@ public final class JavaFixitCliRun {
 
     // get the non-Java code visitors
     final List<FileBasedVisitor> fileBasedVisitors =
-        visitorAssembler.assembleFileVisitors(repositoryRoot, ruleContext, sarifs);
+        visitorAssembler.assembleFileVisitors(repositoryRoot, codemodRegulator, sarifs);
 
     // run the non-Java code visitors
     var fileBasedWeaveResults =

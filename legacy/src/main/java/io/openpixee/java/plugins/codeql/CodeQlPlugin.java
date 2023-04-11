@@ -2,7 +2,7 @@ package io.openpixee.java.plugins.codeql;
 
 import com.contrastsecurity.sarif.*;
 import com.google.common.annotations.VisibleForTesting;
-import io.codemodder.RuleContext;
+import io.codemodder.CodemodRegulator;
 import io.openpixee.java.DefaultSarifProcessorPlugin;
 import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.VisitorFactory;
@@ -32,13 +32,13 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
 
   @Override
   protected List<VisitorFactory> getVendorToolSpecificFactories(
-      final File repositoryRoot, final Run run, final RuleContext ruleContext) {
+      final File repositoryRoot, final Run run, final CodemodRegulator codemodRegulator) {
     final Map<String, Set<Result>> ruleIdToResultsMap = getRuleIdToResultsMap(run);
     final List<VisitorFactory> visitors = new ArrayList<>();
     final Set<Map.Entry<String, Set<Result>>> ruleFindings = ruleIdToResultsMap.entrySet();
     for (final Map.Entry<String, Set<Result>> ruleFinding : ruleFindings) {
       final String ruleId = ruleFinding.getKey();
-      if (ruleContext.isRuleAllowed(ruleId)) {
+      if (codemodRegulator.isAllowed(ruleId)) {
         if ("java/stack-trace-exposure".equals(ruleId)) {
           visitors.add(
               new StackTraceExposureVisitorFactory(repositoryRoot, ruleFinding.getValue()));
@@ -93,7 +93,7 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
 
   @Override
   public List<FileBasedVisitor> getFileWeaversFor(
-      final File repositoryRoot, final Run run, final RuleContext context) {
+      final File repositoryRoot, final Run run, final CodemodRegulator context) {
     final Set<Result> pomResults = getPOMResults(run, "java/maven/non-https-url");
     final var weavers = new ArrayList<FileBasedVisitor>();
     if (!pomResults.isEmpty()) {
