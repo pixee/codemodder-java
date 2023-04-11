@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 
+import io.codemodder.SourceDirectory;
+import io.codemodder.SourceDirectoryLister;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;

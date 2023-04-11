@@ -1,4 +1,4 @@
-package io.openpixee.java;
+package io.codemodder;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import me.tongfei.progressbar.ProgressBar;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -30,13 +29,6 @@ public interface SourceDirectoryLister {
         throws IOException {
       final List<SourceDirectory> javaSourceDirectories = new ArrayList<>();
       var javaSourceDir = "src" + File.separatorChar + "main" + File.separatorChar + "java";
-
-      ProgressBar pb =
-          CLI.createProgressBuilderBase()
-              .setTaskName("Scanning for source directories")
-              .setInitialMax(0)
-              .setUnit("%", 1)
-              .build();
       for (File directory : directories) {
         List<Path> javaSourceDirectoryPaths =
             getSourceDirectoryPathsWithSuffix(directory, javaSourceDir);
@@ -44,8 +36,6 @@ public interface SourceDirectoryLister {
             convertToSourceDirectories(javaSourceDirectoryPaths);
         javaSourceDirectories.addAll(sourceDirectories);
       }
-      pb.stepTo(100);
-      pb.close();
       return javaSourceDirectories;
     }
 
