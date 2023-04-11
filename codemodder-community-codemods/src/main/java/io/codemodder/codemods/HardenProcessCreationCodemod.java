@@ -9,7 +9,6 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.SystemCommand;
 import java.util.List;
@@ -20,7 +19,8 @@ import javax.inject.Inject;
     id = "pixee:java/harden-process-creation",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class HardenProcessCreationCodemod extends SemgrepJavaParserChanger<MethodCallExpr> {
+public final class HardenProcessCreationCodemod
+    extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public HardenProcessCreationCodemod(
@@ -29,7 +29,7 @@ public final class HardenProcessCreationCodemod extends SemgrepJavaParserChanger
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,

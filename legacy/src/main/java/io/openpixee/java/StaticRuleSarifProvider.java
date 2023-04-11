@@ -39,20 +39,19 @@ public class StaticRuleSarifProvider implements RuleSarifProvider {
       final Run run, final SarifSchema210 sarif) {
     // driver name
     var toolName = run.getTool().getDriver().getName();
+    var allResults =
+        run.getResults().stream()
+            .map(result -> result.getRuleId())
+            .filter(Objects::nonNull)
+            .distinct();
     if (toolName.equals(SemgrepRuleSarif.TOOL_NAME)) {
-      return run.getResults().stream()
-          .map(result -> result.getRuleId())
-          .filter(Objects::nonNull)
-          .distinct()
-          .map(rule -> new Pair<>(toolName, new SemgrepRuleSarif(rule, sarif)));
+      return allResults.map(rule -> new Pair<>(toolName, new SemgrepRuleSarif(rule, sarif)));
     }
     if (toolName.equals(CodeQLRuleSarif.TOOL_NAME)) {
-      return run.getResults().stream()
-          .map(result -> result.getRuleId())
-          .filter(Objects::nonNull)
-          .distinct()
-          .map(rule -> new Pair<>(toolName, new CodeQLRuleSarif(rule, sarif, repositoryRoot)));
+      return allResults.map(
+          rule -> new Pair<>(toolName, new CodeQLRuleSarif(rule, sarif, repositoryRoot)));
     }
+    LOG.info("Found SARIF from unsupported tool: {}", toolName);
     return Stream.empty();
   }
 

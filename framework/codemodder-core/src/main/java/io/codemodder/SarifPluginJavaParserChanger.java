@@ -5,6 +5,7 @@ import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,7 +15,7 @@ import java.util.Objects;
  */
 public abstract class SarifPluginJavaParserChanger<T extends Node> implements JavaParserChanger {
 
-  protected final RuleSarif sarif;
+  @VisibleForTesting public final RuleSarif sarif;
   private final Class<? extends Node> nodeType;
   private final RegionExtractor regionExtractor;
   private final RegionNodeMatcher regionNodeMatcher;

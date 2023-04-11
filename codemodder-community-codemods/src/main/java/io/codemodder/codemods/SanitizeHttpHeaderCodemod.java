@@ -7,7 +7,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.Newlines;
 import java.util.List;
@@ -17,7 +16,7 @@ import javax.inject.Inject;
     id = "pixee:java/strip-http-header-newlines",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class SanitizeHttpHeaderCodemod extends SemgrepJavaParserChanger<MethodCallExpr> {
+public final class SanitizeHttpHeaderCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public SanitizeHttpHeaderCodemod(
@@ -26,7 +25,7 @@ public final class SanitizeHttpHeaderCodemod extends SemgrepJavaParserChanger<Me
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr setHeaderCall,

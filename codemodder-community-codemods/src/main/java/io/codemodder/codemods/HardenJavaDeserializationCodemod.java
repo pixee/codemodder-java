@@ -17,7 +17,6 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.ObjectInputFilters;
 import java.io.ObjectInputStream;
@@ -31,7 +30,7 @@ import javax.inject.Inject;
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenJavaDeserializationCodemod
-    extends SemgrepJavaParserChanger<VariableDeclarator> {
+    extends SarifPluginJavaParserChanger<VariableDeclarator> {
 
   @Inject
   public HardenJavaDeserializationCodemod(
@@ -40,7 +39,7 @@ public final class HardenJavaDeserializationCodemod
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator variableDeclarator,

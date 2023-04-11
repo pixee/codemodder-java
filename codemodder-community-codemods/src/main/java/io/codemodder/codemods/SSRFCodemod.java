@@ -7,7 +7,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.HostValidator;
 import io.github.pixee.security.Urls;
@@ -18,7 +17,7 @@ import javax.inject.Inject;
     id = "pixee:java/sandbox-url-creation",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class SSRFCodemod extends SemgrepJavaParserChanger<ObjectCreationExpr> {
+public final class SSRFCodemod extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
   @Inject
   public SSRFCodemod(@SemgrepScan(ruleId = "sandbox-url-creation") RuleSarif semgrepSarif) {
@@ -26,7 +25,7 @@ public final class SSRFCodemod extends SemgrepJavaParserChanger<ObjectCreationEx
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr n,

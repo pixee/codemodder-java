@@ -4,12 +4,7 @@ import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.RegionExtractor;
-import io.codemodder.ReviewGuidance;
-import io.codemodder.RuleSarif;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
+import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -19,7 +14,7 @@ import javax.inject.Inject;
     author = "andre.silva@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class DisableAutomaticDirContextDeserializationCodemod
-    extends SemgrepJavaParserChanger<ObjectCreationExpr> {
+    extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
   @Inject
   public DisableAutomaticDirContextDeserializationCodemod(
@@ -28,7 +23,7 @@ public final class DisableAutomaticDirContextDeserializationCodemod
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr objectCreationExpr,

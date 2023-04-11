@@ -11,11 +11,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.codemodder.Changer;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.ReviewGuidance;
-import io.codemodder.RuleSarif;
+import io.codemodder.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -47,7 +43,7 @@ final class SemgrepModuleTest {
       author = "pixee",
       id = "pixee-test:java/explicit-yaml-test",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class UsesExplicitYamlPath extends SemgrepJavaParserChanger<ObjectCreationExpr> {
+  static class UsesExplicitYamlPath extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
     @Inject
     UsesExplicitYamlPath(
@@ -59,7 +55,7 @@ final class SemgrepModuleTest {
     }
 
     @Override
-    public boolean onSemgrepResultFound(
+    public boolean onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr node,
