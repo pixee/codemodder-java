@@ -37,12 +37,12 @@ public final class CodemodInvoker {
 
   public CodemodInvoker(
       final List<Class<? extends Changer>> codemodTypes, final Path repositoryDir) {
-    this(codemodTypes, RuleContext.of(DefaultRuleSetting.ENABLED, List.of()), repositoryDir);
+    this(codemodTypes, CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()), repositoryDir);
   }
 
   public CodemodInvoker(
       final List<Class<? extends Changer>> codemodTypes,
-      final RuleContext ruleContext,
+      final CodemodRegulator codemodRegulator,
       final Path repositoryDir) {
 
     // get all the providers ready for dependency injection & codemod instantiation
@@ -78,7 +78,7 @@ public final class CodemodInvoker {
         throw new UnsupportedOperationException("multiple codemods under id: " + codemodId);
       }
       codemodIds.add(codemodId);
-      if (ruleContext.isRuleAllowed(codemodId)) {
+      if (codemodRegulator.isAllowed(codemodId)) {
         codemods.add(changer);
         changers.add(new IdentifiedChanger(codemodId, changer));
       }

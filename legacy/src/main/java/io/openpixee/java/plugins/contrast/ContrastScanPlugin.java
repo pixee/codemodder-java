@@ -8,7 +8,7 @@ import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.Tool;
 import com.contrastsecurity.sarif.ToolComponent;
 import com.google.common.annotations.VisibleForTesting;
-import io.codemodder.RuleContext;
+import io.codemodder.CodemodRegulator;
 import io.openpixee.java.DefaultSarifProcessorPlugin;
 import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.VisitorFactory;
@@ -43,12 +43,12 @@ public final class ContrastScanPlugin extends DefaultSarifProcessorPlugin {
 
   @Override
   protected List<VisitorFactory> getVendorToolSpecificFactories(
-      final File repositoryRoot, final Run run, final RuleContext ruleContext) {
+      final File repositoryRoot, final Run run, final CodemodRegulator codemodRegulator) {
 
     List<Result> results = run.getResults();
     List<VisitorFactory> visitorFactories = new ArrayList<>();
 
-    if (ruleContext.isRuleAllowed("contrast:java/reflected-xss")) {
+    if (codemodRegulator.isAllowed("contrast:java/reflected-xss")) {
       Set<Map.Entry<String, Set<Result>>> xssEntries =
           getRuleEntries(results, List.of("reflected-xss"));
       for (final Map.Entry<String, Set<Result>> xssEntry : xssEntries) {
@@ -57,7 +57,7 @@ public final class ContrastScanPlugin extends DefaultSarifProcessorPlugin {
       }
     }
 
-    if (ruleContext.isRuleAllowed("contrast:java/stored-xss")) {
+    if (codemodRegulator.isAllowed("contrast:java/stored-xss")) {
       Set<Map.Entry<String, Set<Result>>> xssEntries =
           getRuleEntries(results, List.of("stored-xss"));
       for (final Map.Entry<String, Set<Result>> xssEntry : xssEntries) {
@@ -66,7 +66,7 @@ public final class ContrastScanPlugin extends DefaultSarifProcessorPlugin {
       }
     }
 
-    if (ruleContext.isRuleAllowed(ReflectionInjectionVisitorFactory.ID)) {
+    if (codemodRegulator.isAllowed(ReflectionInjectionVisitorFactory.ID)) {
       Set<Map.Entry<String, Set<Result>>> reflectionInjectionEntries =
           getRuleEntries(results, List.of("reflection-injection"));
       for (final Map.Entry<String, Set<Result>> reflectionInjectionEntry :
@@ -131,7 +131,7 @@ public final class ContrastScanPlugin extends DefaultSarifProcessorPlugin {
 
   @Override
   public List<FileBasedVisitor> getFileWeaversFor(
-      final File repositoryRoot, final Run run, RuleContext context) {
+      final File repositoryRoot, final Run run, CodemodRegulator context) {
     List<Result> storedJspXss = getXssJspResults(run, "stored-xss");
     List<Result> reflectedJspXss = getXssJspResults(run, "reflected-xss");
     List<FileBasedVisitor> weavers = new ArrayList<>();

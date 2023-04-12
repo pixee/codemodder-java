@@ -20,6 +20,8 @@ dependencies {
     api(libs.commons.lang3)
     implementation(libs.logback.classic)
     implementation(libs.maven.model)
+    implementation(libs.picocli)
+    implementation(libs.juniversalchardet)
     api(libs.slf4j.api)
     api(project(":codemodder-common"))
 

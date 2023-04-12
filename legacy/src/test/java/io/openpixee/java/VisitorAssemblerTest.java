@@ -3,8 +3,8 @@ package io.openpixee.java;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import io.codemodder.CodemodRegulator;
 import io.codemodder.DefaultRuleSetting;
-import io.codemodder.RuleContext;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -15,10 +15,11 @@ final class VisitorAssemblerTest {
   @Test
   void it_filters_file_visitors_based_on_configuration() {
     VisitorAssembler assembler = VisitorAssembler.createDefault();
-    RuleContext everythingButDependencyInjection =
-        RuleContext.of(DefaultRuleSetting.ENABLED, List.of("pixee:java/mvn-dependency-injection"));
+    CodemodRegulator everythingButDependencyInjection =
+        CodemodRegulator.of(
+            DefaultRuleSetting.ENABLED, List.of("pixee:java/mvn-dependency-injection"));
     File repositoryRoot = new File(".");
-    RuleContext everything = RuleContext.of(DefaultRuleSetting.ENABLED, List.of());
+    CodemodRegulator everything = CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of());
     List<FileBasedVisitor> allVisitors =
         assembler.assembleFileVisitors(repositoryRoot, everything, Collections.emptyList());
     List<FileBasedVisitor> allButOne =
