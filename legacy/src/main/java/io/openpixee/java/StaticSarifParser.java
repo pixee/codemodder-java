@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * Parses a list of sarif {@link File}s to a {@link Map} of {@link RuleSarif}s organized by tool
  * name.
  */
-public class StaticSarifParser {
+public final class StaticSarifParser {
 
   private static Optional<SarifSchema210> readSarifFile(final File sarifFile) {
     try {
@@ -36,8 +36,8 @@ public class StaticSarifParser {
   private static Stream<Pair<String, RuleSarif>> fromSarif(
       final Run run, final SarifSchema210 sarif, final Path repositoryRoot) {
     // driver name
-    var toolName = run.getTool().getDriver().getName();
-    var allResults =
+    final var toolName = run.getTool().getDriver().getName();
+    final var allResults =
         run.getResults().stream().map(Result::getRuleId).filter(Objects::nonNull).distinct();
     if (toolName.equals("semgrep")) {
       return allResults.map(rule -> new Pair<>(toolName, new SemgrepRuleSarif(rule, sarif)));
@@ -56,7 +56,7 @@ public class StaticSarifParser {
    */
   public static Map<String, List<RuleSarif>> parseIntoMap(
       final List<File> sarifFiles, final Path repositoryRoot) {
-    var map = new HashMap<String, List<RuleSarif>>();
+    final var map = new HashMap<String, List<RuleSarif>>();
     sarifFiles.stream()
         .flatMap(f -> readSarifFile(f).stream())
         .flatMap(

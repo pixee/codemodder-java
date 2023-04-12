@@ -9,7 +9,7 @@ import java.util.List;
 /** Defines a model for interacting with SARIF. */
 public interface RuleSarif {
 
-  public static final RuleSarif EMPTY = new EmptyRuleSarif();
+  RuleSarif EMPTY = new EmptyRuleSarif();
 
   /**
    * Get all the regions for the SARIF with the matching rule ID
