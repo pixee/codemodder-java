@@ -1,9 +1,10 @@
-package io.openpixee.java;
+package io.codemodder.testutils;
 
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.javaparser.utils.Pair;
 import io.codemodder.RuleSarif;
 import io.codemodder.providers.sarif.codeql.CodeQLRuleSarif;
 import io.codemodder.providers.sarif.semgrep.SemgrepRuleSarif;
@@ -13,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
-import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,8 +64,8 @@ public class StaticSarifParser {
         .forEach(
             p ->
                 map.merge(
-                    p.getValue0(),
-                    new ArrayList<>(Collections.singletonList(p.getValue1())),
+                    p.a,
+                    new ArrayList<>(Collections.singletonList(p.b)),
                     (l1, l2) -> {
                       l1.add(l2.get(0));
                       return l1;

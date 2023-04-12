@@ -16,6 +16,7 @@ dependencies {
     implementation("io.codemodder:codemodder-plugin-codeql")
 
     implementation(libs.dom4j)
+    implementation(libs.commons.jexl)
     implementation("io.openpixee:java-jdbc-parameterizer:0.0.8") // TODO bring into monorepo
 
     testImplementation(testlibs.bundles.junit.jupiter)

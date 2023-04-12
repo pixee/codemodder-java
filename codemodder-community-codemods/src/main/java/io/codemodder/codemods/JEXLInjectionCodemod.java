@@ -26,8 +26,7 @@ public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expressio
 
   @Override
   public boolean onResultFound(
-      CodemodInvocationContext context, CompilationUnit cu, Expression node, Result result) {
-    System.out.println("JEXL Injection Node: " + node);
-    return false;
+      CodemodInvocationContext context, CompilationUnit cu, Expression expression, Result result) {
+    return JEXLInjectionFixer.checkAndFix(expression).isPresent();
   }
 }

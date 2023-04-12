@@ -1,4 +1,4 @@
-package io.openpixee.java.plugins.codeql;
+package io.codemodder.codemods;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.NodeList;

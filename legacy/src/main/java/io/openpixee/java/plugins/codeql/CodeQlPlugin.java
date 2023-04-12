@@ -49,8 +49,6 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
           visitors.add(new InsecureCookieVisitorFactory(repositoryRoot, ruleFinding.getValue()));
         } else if ("java/database-resource-leak".equals(ruleId)) {
           visitors.add(new JDBCResourceLeakVisitorFactory(repositoryRoot, ruleFinding.getValue()));
-        } else if ("java/jexl-expression-injection".equals(ruleId)) {
-          visitors.add(new JEXLInjectionVisitorFactory(repositoryRoot, ruleFinding.getValue()));
         }
       }
     }

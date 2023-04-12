@@ -12,12 +12,15 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import io.codemodder.*;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -77,8 +80,18 @@ public interface CodemodTestMixin {
     Path pathToJavaFile = tmpDir.resolve("Test.java");
     Files.copy(before, pathToJavaFile);
 
+    // Check for any sarif files and build the RuleSarif map
+    List<File> allSarifs = new ArrayList<>();
+    Files.newDirectoryStream(testResourceDir, "*.sarif")
+        .iterator()
+        .forEachRemaining(p -> allSarifs.add(p.toFile()));
+
+    Path sarif = testResourceDir.resolve("out.sarif");
+    Map<String, List<RuleSarif>> map =
+        StaticSarifParser.parseIntoMap(List.of(sarif.toFile()), tmpDir);
+
     // run the codemod
-    CodemodInvoker invoker = new CodemodInvoker(List.of(codemod), tmpDir);
+    CodemodInvoker invoker = new CodemodInvoker(List.of(codemod), tmpDir, map);
     CompilationUnit cu = parseJavaFile(pathToJavaFile);
 
     FileWeavingContext context =

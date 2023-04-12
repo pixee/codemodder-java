@@ -47,6 +47,17 @@ public final class CodemodInvoker {
 
   public CodemodInvoker(
       final List<Class<? extends Changer>> codemodTypes,
+      final Path repositoryDir,
+      Map<String, List<RuleSarif>> ruleSarifByTool) {
+    this(
+        codemodTypes,
+        RuleContext.of(DefaultRuleSetting.ENABLED, List.of()),
+        repositoryDir,
+        ruleSarifByTool);
+  }
+
+  public CodemodInvoker(
+      final List<Class<? extends Changer>> codemodTypes,
       final RuleContext ruleContext,
       final Path repositoryDir) {
     this(codemodTypes, ruleContext, repositoryDir, Map.of());
