@@ -114,18 +114,20 @@ public interface CodeTFReportGenerator {
 
     /** Turn the results from our format into {@link CodeTFResult}. */
     private List<CodeTFResult> toCodeTFResults(
-        final WeavingResult results, final String repositoryRootPath)
+        final WeavingResult results, final String repositoryRoot)
         throws IOException, PatchFailedException {
       List<CodeTFResult> codetfResults = new ArrayList<>();
       Set<ChangedFile> changedFiles = results.changedFiles();
+      Path repositoryRootPath = new File(repositoryRoot).getCanonicalFile().toPath();
       for (ChangedFile changedFile : changedFiles) {
-        String originalFilePath = changedFile.originalFilePath();
-        String newFile = changedFile.modifiedFile();
-        File originalFile = new File(originalFilePath);
-        List<String> original = Files.readAllLines(originalFile.toPath());
-        List<String> patched = Files.readAllLines(new File(newFile).toPath());
+        Path modifiedPath =
+            new File(changedFile.modifiedFile()).getCanonicalFile().toPath().toAbsolutePath();
+        Path originalPath =
+            new File(changedFile.originalFilePath()).getCanonicalFile().toPath().toAbsolutePath();
+        List<String> original = Files.readAllLines(originalPath);
+        List<String> patched = Files.readAllLines(modifiedPath);
         Patch<String> patch = DiffUtils.diff(original, patched);
-        String path = originalFilePath.substring(repositoryRootPath.length());
+        String path = originalPath.toString().substring(repositoryRootPath.toString().length());
         if (path.startsWith("/")) {
           path = path.substring(1);
         }
@@ -141,7 +143,7 @@ public interface CodeTFReportGenerator {
                             weave.lineNumber(),
                             Collections.emptyMap(),
                             weave.changeCode(),
-                            "fill description for " + weave.changeCode()))
+                            "no description"))
                 .collect(Collectors.toList());
 
         if (StringUtils.isNotBlank(diff)) {

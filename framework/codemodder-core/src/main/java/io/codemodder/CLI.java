@@ -3,6 +3,7 @@ package io.codemodder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
@@ -39,6 +40,7 @@ final class CLI implements Callable<Integer> {
   private final JavaParserFactory javaParserFactory;
   private final EncodingDetector encodingDetector;
   private final SourceDirectoryLister sourceDirectoryLister;
+  private final CodeTFReportGenerator reportGenerator;
 
   @CommandLine.Option(
       names = {"--output"},
@@ -119,7 +121,8 @@ final class CLI implements Callable<Integer> {
         new DefaultFileFinder(),
         new DefaultJavaParserFactory(),
         new DefaultEncodingDetector(),
-        SourceDirectoryLister.createDefault());
+        SourceDirectoryLister.createDefault(),
+        CodeTFReportGenerator.createDefault());
   }
 
   CLI(
@@ -128,7 +131,8 @@ final class CLI implements Callable<Integer> {
       final FileFinder fileFinder,
       final JavaParserFactory javaParserFactory,
       final EncodingDetector encodingDetector,
-      final SourceDirectoryLister sourceDirectoryLister) {
+      final SourceDirectoryLister sourceDirectoryLister,
+      final CodeTFReportGenerator reportGenerator) {
     Objects.requireNonNull(codemods);
     this.codemods = Collections.unmodifiableList(codemods);
     this.clock = Objects.requireNonNull(clock);
@@ -136,6 +140,7 @@ final class CLI implements Callable<Integer> {
     this.javaParserFactory = Objects.requireNonNull(javaParserFactory);
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
     this.sourceDirectoryLister = Objects.requireNonNull(sourceDirectoryLister);
+    this.reportGenerator = Objects.requireNonNull(reportGenerator);
   }
 
   @VisibleForTesting
@@ -157,9 +162,9 @@ final class CLI implements Callable<Integer> {
       combinedTypeSolver.add(new ReflectionTypeSolver());
       sourceDirectories.forEach(
           javaDirectory -> combinedTypeSolver.add(new JavaParserTypeSolver(javaDirectory.path())));
-      javaParser
-          .getParserConfiguration()
-          .setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
+      ParserConfiguration parserConfiguration = javaParser.getParserConfiguration();
+      parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.BLEEDING_EDGE);
+      parserConfiguration.setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
       return javaParser;
     }
   }
@@ -306,7 +311,6 @@ final class CLI implements Callable<Integer> {
 
     // write out the output
     if (OutputFormat.CODETF.equals(outputFormat)) {
-      CodeTFReportGenerator reportGenerator = CodeTFReportGenerator.createDefault();
       CodeTFReport report =
           reportGenerator.createReport(
               projectDirectory, pathIncludes, pathExcludes, results, elapsed);
