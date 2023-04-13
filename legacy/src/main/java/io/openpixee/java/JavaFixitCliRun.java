@@ -6,6 +6,7 @@ import io.codemodder.*;
 import io.codemodder.codemods.DefaultCodemods;
 import io.codemodder.codetf.CodeTFReport;
 import io.codemodder.codetf.CodeTFReportGenerator;
+import io.codemodder.plugins.maven.MavenProvider;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,14 +30,12 @@ public final class JavaFixitCliRun {
 
   private final SourceDirectoryLister directorySearcher;
   private final SourceWeaver javaSourceWeaver;
-  private final FileWeaver fileWeaver;
   private final VisitorAssembler visitorAssembler;
   private final CodeTFReportGenerator reportGenerator;
 
   public JavaFixitCliRun() {
     this.directorySearcher = SourceDirectoryLister.createDefault();
     this.javaSourceWeaver = SourceWeaver.createDefault();
-    this.fileWeaver = FileWeaver.createDefault();
     this.visitorAssembler = VisitorAssembler.createDefault();
     this.reportGenerator = CodeTFReportGenerator.createDefault();
   }
@@ -119,7 +118,7 @@ public final class JavaFixitCliRun {
         new CodemodInvoker(defaultCodemodTypes, codemodRegulator, repositoryRoot.toPath());
 
     // run the Java code visitors
-    final var javaSourceWeaveResult =
+    WeavingResult javaSourceWeaveResult =
         javaSourceWeaver.weave(
             repositoryRoot,
             sourceDirectories,
@@ -128,33 +127,44 @@ public final class JavaFixitCliRun {
             codemodInvoker,
             includesExcludes);
 
-    // get the non-Java code visitors
-    final List<FileBasedVisitor> fileBasedVisitors =
-        visitorAssembler.assembleFileVisitors(repositoryRoot, codemodRegulator, sarifs);
+    WeavingResult codemodRawFileResults =
+        invokeRawFileCodemods(codemodInvoker, repositoryRoot.toPath(), List.of(), includesExcludes);
 
-    // run the non-Java code visitors
-    var fileBasedWeaveResults =
-        fileWeaver.weave(
-            fileBasedVisitors,
-            codemodInvoker,
-            repositoryRoot,
-            javaSourceWeaveResult,
-            includesExcludes);
+    Set<ChangedFile> preDependencyCombinedChangedFiles = new HashSet<>();
+    preDependencyCombinedChangedFiles.addAll(javaSourceWeaveResult.changedFiles());
+    preDependencyCombinedChangedFiles.addAll(codemodRawFileResults.changedFiles());
 
-    // if the file visitors had no changes to make, offer it to codemods
-    List<Path> filesAlreadyChanged =
-        fileBasedWeaveResults.changedFiles().stream()
-            .map(file -> Path.of(file.originalFilePath()))
-            .collect(Collectors.toUnmodifiableList());
-    var codemodRawFileWeaveResults =
-        invokeXmlCodemods(
-            codemodInvoker, repositoryRoot.toPath(), filesAlreadyChanged, includesExcludes);
+    // build the needed for the new dependency updater we'll use with the codemods
+    List<FileDependency> fileDependencies =
+        preDependencyCombinedChangedFiles.stream()
+            .map(
+                file ->
+                    FileDependency.create(
+                        Path.of(file.originalFilePath()),
+                        file.weaves().stream()
+                            .map(Weave::getDependenciesNeeded)
+                            .flatMap(List::stream)
+                            .collect(Collectors.toList())))
+            .collect(Collectors.toList());
 
-    // merge the two types of ways we transform non-Java files
-    fileBasedWeaveResults = merge(fileBasedWeaveResults, codemodRawFileWeaveResults);
+    // update the dependencies
+    MavenProvider mavenProvider = new MavenProvider();
+    DependencyUpdateResult dependencyUpdate =
+        mavenProvider.updateDependencies(
+            repositoryRoot.toPath(), preDependencyCombinedChangedFiles, fileDependencies);
+    Set<ChangedFile> finalChangedFiles = dependencyUpdate.updatedChanges();
+    Set<String> finalUnscannableFiles = new HashSet<>();
+    finalUnscannableFiles.addAll(
+        dependencyUpdate.erroredFiles().stream()
+            .map(Path::toAbsolutePath)
+            .map(Path::toString)
+            .collect(Collectors.toUnmodifiableList()));
+    finalUnscannableFiles.addAll(javaSourceWeaveResult.unscannableFiles());
+    finalUnscannableFiles.addAll(codemodRawFileResults.unscannableFiles());
 
-    // merge the both results into one
-    final var allWeaveResults = merge(javaSourceWeaveResult, fileBasedWeaveResults);
+    // merge the both the file results and the dependency results into one
+    final var allWeaveResults =
+        WeavingResult.createDefault(finalChangedFiles, finalUnscannableFiles);
     final var changesCount =
         allWeaveResults.changedFiles().stream()
             .map(changedFile -> changedFile.weaves().size())
@@ -196,10 +206,10 @@ public final class JavaFixitCliRun {
   }
 
   /**
-   * Invoke {@link io.codemodder.Codemod} types that offer XML transformation, making sure not to
-   * alter any files that have already been modified by legacy {@link FileBasedVisitor} types.
+   * Invoke {@link io.codemodder.Codemod} types that offer raw file transformation, making sure not
+   * to alter any files that have already been modified by legacy {@link FileBasedVisitor} types.
    */
-  private WeavingResult invokeXmlCodemods(
+  private WeavingResult invokeRawFileCodemods(
       final CodemodInvoker codemodInvoker,
       final Path repositoryRoot,
       final List<Path> filesAlreadyChanged,
@@ -238,24 +248,6 @@ public final class JavaFixitCliRun {
         (ch.qos.logback.classic.Logger)
             LoggerFactory.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME);
     rootLogger.setLevel(Level.toLevel("DEBUG"));
-  }
-
-  /**
-   * When we need to combine the results of multiple analyses, we can combine them with a method
-   * like this one. There is notably some loss of fidelity here when the two sets are combined, but
-   * hopefully all the changers have different domains over different types of files, so there
-   * should be little chance of collision.
-   */
-  private WeavingResult merge(final WeavingResult result1, final WeavingResult result2) {
-    var combinedChangedFiles = new HashSet<ChangedFile>();
-    combinedChangedFiles.addAll(result1.changedFiles());
-    combinedChangedFiles.addAll(result2.changedFiles());
-
-    var combinedUnscannableFiles = new HashSet<String>();
-    combinedUnscannableFiles.addAll(result1.unscannableFiles());
-    combinedUnscannableFiles.addAll(result2.unscannableFiles());
-
-    return WeavingResult.createDefault(combinedChangedFiles, combinedUnscannableFiles);
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(JavaFixitCliRun.class);
