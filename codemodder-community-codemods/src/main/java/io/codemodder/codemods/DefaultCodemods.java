@@ -32,6 +32,7 @@ public final class DefaultCodemods {
         UpgradeSSLEngineTLSCodemod.class,
         UpgradeSSLParametersTLSCodemod.class,
         UpgradeSSLSocketProtocolsTLSCodemod.class,
+        ValidateJakartaForwardPathCodemod.class,
         VerbTamperingCodemod.class);
   }
 }
