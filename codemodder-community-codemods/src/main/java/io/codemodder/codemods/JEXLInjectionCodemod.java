@@ -5,11 +5,13 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodInvocationContext;
+import io.codemodder.DependencyGAV;
 import io.codemodder.RegionExtractor;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.SarifPluginJavaParserChanger;
 import io.codemodder.providers.sarif.codeql.CodeQLScan;
+import java.util.List;
 import javax.inject.Inject;
 
 @Codemod(
@@ -28,5 +30,10 @@ public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expressio
   public boolean onResultFound(
       CodemodInvocationContext context, CompilationUnit cu, Expression expression, Result result) {
     return JEXLInjectionFixer.checkAndFix(expression).isPresent();
+  }
+
+  @Override
+  public List<DependencyGAV> dependenciesRequired() {
+    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 }
