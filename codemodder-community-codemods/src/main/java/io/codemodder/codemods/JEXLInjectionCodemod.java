@@ -37,9 +37,9 @@ import org.apache.commons.jexl3.JexlExpression;
  * "java/jexl-expression-injection" whenever possible.
  */
 @Codemod(
-        id = "codeql:java/jexl-expression-injection",
-        author = "andre.silva@pixee.ai",
-        reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    id = "codeql:java/jexl-expression-injection",
+    author = "andre.silva@pixee.ai",
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expression> {
 
   @Inject

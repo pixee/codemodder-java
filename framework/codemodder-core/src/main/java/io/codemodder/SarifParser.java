@@ -20,7 +20,10 @@ import org.slf4j.LoggerFactory;
  */
 public interface SarifParser {
 
-  /** Given a list of sarif {@link File}s, organize them into a {@Link Map} containing {@link RuleSarif}s organized by tool name. */
+  /**
+   * Given a list of sarif {@link File}s, organize them into a {@Link Map} containing {@link
+   * RuleSarif}s organized by tool name.
+   */
   Map<String, List<RuleSarif>> parseIntoMap(List<File> sarifFiles, Path repositoryRoot);
 
   final class Default implements SarifParser {
