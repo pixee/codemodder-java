@@ -168,8 +168,7 @@ final class CLI implements Callable<Integer> {
   static class DefaultFileFinder implements FileFinder {
     @Override
     public List<Path> findFiles(
-        final List<SourceDirectory> sourceDirectories, final IncludesExcludes includesExcludes)
-        throws IOException {
+        final List<SourceDirectory> sourceDirectories, final IncludesExcludes includesExcludes) {
       List<Path> allFiles = new ArrayList<>();
       for (SourceDirectory directory : sourceDirectories) {
         allFiles.addAll(
