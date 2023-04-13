@@ -7,7 +7,7 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import java.util.Objects;
 
 /**
- * Holds the nodes in the AST that represents a variable declaration in a enhanced for statement .
+ * Holds the nodes in the AST that represents a variable declaration in an enhanced for statement .
  * See <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-14.html#jls-14.14">Java
  * Language Specification - Section 14.14.14</a> for more details.
  */

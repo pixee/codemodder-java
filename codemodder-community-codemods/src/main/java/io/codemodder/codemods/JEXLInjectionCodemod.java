@@ -28,6 +28,9 @@ import io.github.pixee.security.UnwantedTypes;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlExpression;
 
 @Codemod(
     id = "codeql:java/jexl-expression-injection",

@@ -184,11 +184,10 @@ public final class ASTs {
         } else {
           posFromParent = 0;
         }
-        return current;
       } else {
         current = parent.getChildNodes().get(--posFromParent);
-        return current;
       }
+      return current;
     }
 
     @Override

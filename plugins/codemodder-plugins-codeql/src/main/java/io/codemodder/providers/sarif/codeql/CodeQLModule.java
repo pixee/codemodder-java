@@ -42,13 +42,9 @@ public final class CodeQLModule extends AbstractModule {
               .findFirst();
 
       if (annotation.isPresent()) {
-        if (map.containsKey(annotation.get().ruleId())) {
-          bind(RuleSarif.class)
-              .annotatedWith(annotation.get())
-              .toInstance(map.get(annotation.get().ruleId()));
-        } else {
-          bind(RuleSarif.class).annotatedWith(annotation.get()).toInstance(RuleSarif.EMPTY);
-        }
+        bind(RuleSarif.class)
+            .annotatedWith(annotation.get())
+            .toInstance(map.getOrDefault(annotation.get().ruleId(), RuleSarif.EMPTY));
       }
     }
   }

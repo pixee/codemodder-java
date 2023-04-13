@@ -78,9 +78,7 @@ final class SemgrepModuleTest {
   void it_fails_when_injecting_nonsarif_type(@TempDir Path tmpDir) {
     assertThrows(
         IllegalArgumentException.class,
-        () -> {
-          new SemgrepModule(tmpDir, List.of(BindsToIncorrectObject.class)).configure();
-        });
+        () -> new SemgrepModule(tmpDir, List.of(BindsToIncorrectObject.class)).configure());
   }
 
   @Test

@@ -119,7 +119,7 @@ public final class CodemodInvoker {
     this.repositoryDir = Objects.requireNonNull(repositoryDir);
   }
 
-  private static final List<String> getWantsSarif(final CodemodProvider provider) {
+  private static List<String> getWantsSarif(final CodemodProvider provider) {
     return Optional.ofNullable(provider.getClass().getAnnotation(WantsSarif.class))
         .map(wants -> Arrays.asList(wants.toolNames()))
         .orElse(List.of());
