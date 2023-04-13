@@ -9,7 +9,6 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.XMLDecoderSecurity;
 import java.util.List;
@@ -20,7 +19,8 @@ import javax.inject.Inject;
     id = "pixee:java/harden-xmldecoder-stream",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class HardenXMLDecoderCodemod extends SemgrepJavaParserChanger<ObjectCreationExpr> {
+public final class HardenXMLDecoderCodemod
+    extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
   @Inject
   public HardenXMLDecoderCodemod(
@@ -29,7 +29,7 @@ public final class HardenXMLDecoderCodemod extends SemgrepJavaParserChanger<Obje
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr newXmlDecoderCall,

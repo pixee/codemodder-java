@@ -7,7 +7,6 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import javax.inject.Inject;
@@ -20,7 +19,8 @@ import javax.inject.Inject;
     id = "pixee:java/validate-jakarta-forward-path",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class ValidateJakartaForwardPathCodemod extends SemgrepJavaParserChanger<Expression> {
+public final class ValidateJakartaForwardPathCodemod
+    extends SarifPluginJavaParserChanger<Expression> {
 
   @Inject
   public ValidateJakartaForwardPathCodemod(
@@ -29,7 +29,7 @@ public final class ValidateJakartaForwardPathCodemod extends SemgrepJavaParserCh
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final Expression path,

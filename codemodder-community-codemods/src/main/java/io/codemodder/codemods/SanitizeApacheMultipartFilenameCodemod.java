@@ -9,7 +9,6 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.Filenames;
 import java.util.List;
@@ -21,7 +20,7 @@ import javax.inject.Inject;
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SanitizeApacheMultipartFilenameCodemod
-    extends SemgrepJavaParserChanger<MethodCallExpr> {
+    extends SarifPluginJavaParserChanger<MethodCallExpr> {
   @Inject
   public SanitizeApacheMultipartFilenameCodemod(
       @SemgrepScan(ruleId = "sanitize-apache-multipart-filename") RuleSarif semgrepSarif) {
@@ -34,7 +33,7 @@ public final class SanitizeApacheMultipartFilenameCodemod
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,

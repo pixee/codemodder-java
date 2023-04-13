@@ -19,6 +19,7 @@ public final class DefaultCodemods {
         HardenXMLInputFactoryCodemod.class,
         HardenXStreamCodemod.class,
         HardenZipEntryPathsCodemod.class,
+        JEXLInjectionCodemod.class,
         JSPScriptletXSSCodemod.class,
         LimitReadlineCodemod.class,
         RandomizeSeedCodemod.class,

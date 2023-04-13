@@ -11,12 +11,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.codemodder.CodeDirectory;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.FileWeavingContext;
-import io.codemodder.ReviewGuidance;
-import io.codemodder.RuleSarif;
+import io.codemodder.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -33,7 +28,7 @@ final class SemgrepJavaParserChangerTest {
       author = "pixee",
       id = "pixee-test:java/finds-stuff",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class FindsStuffCodemod extends SemgrepJavaParserChanger<ObjectCreationExpr> {
+  static class FindsStuffCodemod extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
     @Inject
     FindsStuffCodemod(
@@ -45,7 +40,7 @@ final class SemgrepJavaParserChangerTest {
     }
 
     @Override
-    public boolean onSemgrepResultFound(
+    public boolean onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr node,

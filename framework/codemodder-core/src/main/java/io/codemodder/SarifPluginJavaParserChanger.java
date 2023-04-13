@@ -1,48 +1,50 @@
-package io.codemodder.providers.sarif.semgrep;
+package io.codemodder;
 
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
-import io.codemodder.*;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Objects;
 
-/** Provides base functionality for making JavaParser-based changes with Semgrep. */
-public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaParserChanger {
+/**
+ * Provides base functionality for making JavaParser-based changes based on results found by a sarif
+ * file.
+ */
+public abstract class SarifPluginJavaParserChanger<T extends Node> implements JavaParserChanger {
 
-  protected final RuleSarif sarif;
+  @VisibleForTesting public final RuleSarif sarif;
   private final Class<? extends Node> nodeType;
   private final RegionExtractor regionExtractor;
   private final RegionNodeMatcher regionNodeMatcher;
 
-  protected SemgrepJavaParserChanger(
-      final RuleSarif semgrepSarif, final Class<? extends Node> nodeType) {
-    this(
-        semgrepSarif, nodeType, RegionExtractor.FROM_FIRST_LOCATION, RegionNodeMatcher.EXACT_MATCH);
+  protected SarifPluginJavaParserChanger(
+      final RuleSarif sarif, final Class<? extends Node> nodeType) {
+    this(sarif, nodeType, RegionExtractor.FROM_FIRST_LOCATION, RegionNodeMatcher.EXACT_MATCH);
   }
 
-  protected SemgrepJavaParserChanger(
-      final RuleSarif semgrepSarif,
+  protected SarifPluginJavaParserChanger(
+      final RuleSarif sarif,
       final Class<? extends Node> nodeType,
       final RegionExtractor regionExtractor) {
-    this(semgrepSarif, nodeType, regionExtractor, RegionNodeMatcher.EXACT_MATCH);
+    this(sarif, nodeType, regionExtractor, RegionNodeMatcher.EXACT_MATCH);
   }
 
-  protected SemgrepJavaParserChanger(
-      final RuleSarif semgrepSarif,
+  protected SarifPluginJavaParserChanger(
+      final RuleSarif sarif,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher) {
-    this(semgrepSarif, nodeType, RegionExtractor.FROM_FIRST_LOCATION, regionNodeMatcher);
+    this(sarif, nodeType, RegionExtractor.FROM_FIRST_LOCATION, regionNodeMatcher);
   }
 
-  protected SemgrepJavaParserChanger(
-      final RuleSarif semgrepSarif,
+  protected SarifPluginJavaParserChanger(
+      final RuleSarif sarif,
       final Class<? extends Node> nodeType,
       final RegionExtractor regionExtractor,
       final RegionNodeMatcher regionNodeMatcher) {
-    this.sarif = Objects.requireNonNull(semgrepSarif);
+    this.sarif = Objects.requireNonNull(sarif);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionExtractor = Objects.requireNonNull(regionExtractor);
     this.regionNodeMatcher = Objects.requireNonNull(regionNodeMatcher);
@@ -50,7 +52,6 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
 
   @Override
   public final void visit(final CodemodInvocationContext context, final CompilationUnit cu) {
-
     List<Result> results = sarif.getResultsByPath(context.path());
     List<? extends Node> allNodes = cu.findAll(nodeType);
 
@@ -82,7 +83,7 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
           if (node.getRange().isPresent()) {
             Range range = node.getRange().get();
             if (regionNodeMatcher.matches(region, range)) {
-              boolean changeSuccessful = onSemgrepResultFound(context, cu, (T) node, result);
+              boolean changeSuccessful = onResultFound(context, cu, (T) node, result);
               if (changeSuccessful) {
                 changeRecorder.addWeave(
                     Weave.from(region.getStartLine(), context.codemodId(), dependenciesRequired()));
@@ -103,6 +104,6 @@ public abstract class SemgrepJavaParserChanger<T extends Node> implements JavaPa
    * @param result the given SARIF result to act on
    * @return true, if the change was made, false otherwise
    */
-  public abstract boolean onSemgrepResultFound(
+  public abstract boolean onResultFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Result result);
 }

@@ -10,7 +10,6 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import io.codemodder.*;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -22,7 +21,8 @@ import javax.inject.Inject;
     id = "pixee:java/upgrade-sslparameters-tls",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class UpgradeSSLParametersTLSCodemod extends SemgrepJavaParserChanger<MethodCallExpr> {
+public final class UpgradeSSLParametersTLSCodemod
+    extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public UpgradeSSLParametersTLSCodemod(
@@ -31,7 +31,7 @@ public final class UpgradeSSLParametersTLSCodemod extends SemgrepJavaParserChang
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr setEnabledProtocolsCall,

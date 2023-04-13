@@ -1,0 +1,555 @@
+{
+  "$schema" : "https://json.schemastore.org/sarif-2.1.0.json",
+  "version" : "2.1.0",
+  "runs" : [ {
+    "tool" : {
+      "driver" : {
+        "name" : "CodeQL",
+        "organization" : "GitHub",
+        "semanticVersion" : "2.11.6",
+        "rules" : [ {
+          "id" : "java/jexl-expression-injection",
+          "name" : "java/jexl-expression-injection",
+          "shortDescription" : {
+            "text" : "Expression language injection (JEXL)"
+          },
+          "fullDescription" : {
+            "text" : "Evaluation of a user-controlled JEXL expression may lead to arbitrary code execution."
+          },
+          "defaultConfiguration" : {
+            "enabled" : true,
+            "level" : "error"
+          },
+          "properties" : {
+            "tags" : [ "security", "external/cwe/cwe-094" ],
+            "description" : "Evaluation of a user-controlled JEXL expression\n              may lead to arbitrary code execution.",
+            "id" : "java/jexl-expression-injection",
+            "kind" : "path-problem",
+            "name" : "Expression language injection (JEXL)",
+            "precision" : "high",
+            "problem.severity" : "error",
+            "security-severity" : "9.3"
+          }
+        } ]
+      },
+      "extensions" : [ {
+        "name" : "legacy-upgrades",
+        "semanticVersion" : "0.0.0",
+        "locations" : [ {
+          "uri" : "file:///opt/codeql/legacy-upgrades/",
+          "description" : {
+            "text" : "The QL pack root directory."
+          }
+        }, {
+          "uri" : "file:///opt/codeql/legacy-upgrades/qlpack.yml",
+          "description" : {
+            "text" : "The QL pack definition file."
+          }
+        } ]
+      }, {
+        "name" : "codeql/java-queries",
+        "semanticVersion" : "0.4.6+5ae770f33996156df494a9b915139bea4160a120",
+        "locations" : [ {
+          "uri" : "file:///home/andrecs/.codeql/packages/codeql/java-queries/0.4.6/",
+          "description" : {
+            "text" : "The QL pack root directory."
+          }
+        }, {
+          "uri" : "file:///home/andrecs/.codeql/packages/codeql/java-queries/0.4.6/qlpack.yml",
+          "description" : {
+            "text" : "The QL pack definition file."
+          }
+        } ]
+      } ]
+    },
+    "artifacts" : [ {
+      "location" : {
+        "uri" : "Test.java",
+        "uriBaseId" : "%SRCROOT%",
+        "index" : 0
+      }
+    } ],
+    "results" : [ {
+      "ruleId" : "java/jexl-expression-injection",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/jexl-expression-injection",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "JEXL expression depends on a [user-provided value](1)."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 23,
+            "startColumn" : 7,
+            "endColumn" : 17
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "dfb1bb268a18cc16:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      },
+      "codeFlows" : [ {
+        "threadFlows" : [ {
+          "locations" : [ {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 17,
+                  "startColumn" : 50,
+                  "endColumn" : 73
+                }
+              },
+              "message" : {
+                "text" : "getInputStream(...) : InputStream"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 17,
+                  "startColumn" : 28,
+                  "endColumn" : 74
+                }
+              },
+              "message" : {
+                "text" : "new InputStreamReader(...) : InputStreamReader"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 17,
+                  "startColumn" : 9,
+                  "endColumn" : 75
+                }
+              },
+              "message" : {
+                "text" : "new BufferedReader(...) : BufferedReader"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 19,
+                  "startColumn" : 27,
+                  "endColumn" : 33
+                }
+              },
+              "message" : {
+                "text" : "reader : BufferedReader"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 19,
+                  "startColumn" : 27,
+                  "endColumn" : 40
+                }
+              },
+              "message" : {
+                "text" : "read(...) : Number"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 23,
+                  "startColumn" : 7,
+                  "endColumn" : 17
+                }
+              },
+              "message" : {
+                "text" : "expression"
+              }
+            }
+          } ]
+        } ]
+      } ],
+      "relatedLocations" : [ {
+        "id" : 1,
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 17,
+            "startColumn" : 50,
+            "endColumn" : 73
+          }
+        },
+        "message" : {
+          "text" : "user-provided value"
+        }
+      } ]
+    }, {
+      "ruleId" : "java/jexl-expression-injection",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/jexl-expression-injection",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "JEXL expression depends on a [user-provided value](1)."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 33,
+            "startColumn" : 7,
+            "endColumn" : 57
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "e9fab551201524cd:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      },
+      "codeFlows" : [ {
+        "threadFlows" : [ {
+          "locations" : [ {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 29,
+                  "startColumn" : 50,
+                  "endColumn" : 73
+                }
+              },
+              "message" : {
+                "text" : "getInputStream(...) : InputStream"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 29,
+                  "startColumn" : 28,
+                  "endColumn" : 74
+                }
+              },
+              "message" : {
+                "text" : "new InputStreamReader(...) : InputStreamReader"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 29,
+                  "startColumn" : 9,
+                  "endColumn" : 75
+                }
+              },
+              "message" : {
+                "text" : "new BufferedReader(...) : BufferedReader"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 31,
+                  "startColumn" : 27,
+                  "endColumn" : 33
+                }
+              },
+              "message" : {
+                "text" : "reader : BufferedReader"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 31,
+                  "startColumn" : 27,
+                  "endColumn" : 40
+                }
+              },
+              "message" : {
+                "text" : "read(...) : Number"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 33,
+                  "startColumn" : 7,
+                  "endColumn" : 57
+                }
+              },
+              "message" : {
+                "text" : "createExpression(...)"
+              }
+            }
+          } ]
+        } ]
+      } ],
+      "relatedLocations" : [ {
+        "id" : 1,
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 29,
+            "startColumn" : 50,
+            "endColumn" : 73
+          }
+        },
+        "message" : {
+          "text" : "user-provided value"
+        }
+      } ]
+    }, {
+      "ruleId" : "java/jexl-expression-injection",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/jexl-expression-injection",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "JEXL expression depends on a [user-provided value](1)."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 44,
+            "startColumn" : 7,
+            "endColumn" : 17
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "d19bf9ca937bca02:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      },
+      "codeFlows" : [ {
+        "threadFlows" : [ {
+          "locations" : [ {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 39,
+                  "startColumn" : 50,
+                  "endColumn" : 73
+                }
+              },
+              "message" : {
+                "text" : "getInputStream(...) : InputStream"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 39,
+                  "startColumn" : 28,
+                  "endColumn" : 74
+                }
+              },
+              "message" : {
+                "text" : "new InputStreamReader(...) : InputStreamReader"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 39,
+                  "startColumn" : 9,
+                  "endColumn" : 75
+                }
+              },
+              "message" : {
+                "text" : "new BufferedReader(...) : BufferedReader"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 41,
+                  "startColumn" : 27,
+                  "endColumn" : 33
+                }
+              },
+              "message" : {
+                "text" : "reader : BufferedReader"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 41,
+                  "startColumn" : 27,
+                  "endColumn" : 40
+                }
+              },
+              "message" : {
+                "text" : "read(...) : Number"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 44,
+                  "startColumn" : 7,
+                  "endColumn" : 17
+                }
+              },
+              "message" : {
+                "text" : "expression"
+              }
+            }
+          } ]
+        } ]
+      } ],
+      "relatedLocations" : [ {
+        "id" : 1,
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 39,
+            "startColumn" : 50,
+            "endColumn" : 73
+          }
+        },
+        "message" : {
+          "text" : "user-provided value"
+        }
+      } ]
+    } ],
+    "columnKind" : "utf16CodeUnits",
+    "properties" : {
+      "semmle.formatSpecifier" : "sarifv2.1.0"
+    }
+  } ]
+}

@@ -6,7 +6,6 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -18,7 +17,8 @@ import javax.inject.Inject;
     id = "pixee:java/upgrade-sslcontext-tls",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class UpgradeSSLContextTLSCodemod extends SemgrepJavaParserChanger<MethodCallExpr> {
+public final class UpgradeSSLContextTLSCodemod
+    extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public UpgradeSSLContextTLSCodemod(
@@ -27,7 +27,7 @@ public final class UpgradeSSLContextTLSCodemod extends SemgrepJavaParserChanger<
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr getInstanceCall,

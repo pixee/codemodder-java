@@ -41,7 +41,6 @@ dependencies {
 
     implementation(libs.codescan.sarif)
     implementation(libs.commons.collections4)
-    implementation(libs.commons.jexl)
     implementation(libs.contrast.sarif)
     implementation(libs.immutables)
     implementation(libs.gson)
@@ -67,8 +66,9 @@ dependencies {
 
     api("io.codemodder:codemodder-common")
     api("io.codemodder:codemodder-core")
-    api("io.codemodder:codemodder-plugin-semgrep")
+    api("io.codemodder:codemodder-plugin-codeql")
     api("io.codemodder:codemodder-plugin-maven")
+    api("io.codemodder:codemodder-plugin-semgrep")
     api("io.codemodder:codemodder-community-codemods")
 
     testCompileOnly(libs.jetbrains.annotations)

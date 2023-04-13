@@ -8,7 +8,6 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.XMLInputFactorySecurity;
 import java.util.List;
@@ -20,7 +19,7 @@ import javax.inject.Inject;
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenXMLInputFactoryCodemod
-    extends SemgrepJavaParserChanger<VariableDeclarator> {
+    extends SarifPluginJavaParserChanger<VariableDeclarator> {
 
   @Inject
   public HardenXMLInputFactoryCodemod(
@@ -29,7 +28,7 @@ public final class HardenXMLInputFactoryCodemod
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator newFactoryVariable,

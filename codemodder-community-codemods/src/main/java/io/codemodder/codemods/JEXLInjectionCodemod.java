@@ -1,6 +1,8 @@
-package io.openpixee.java.plugins.codeql;
+package io.codemodder.codemods;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
@@ -12,19 +14,50 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
+import io.codemodder.Codemod;
+import io.codemodder.CodemodInvocationContext;
+import io.codemodder.DependencyGAV;
+import io.codemodder.RegionExtractor;
+import io.codemodder.ReviewGuidance;
+import io.codemodder.RuleSarif;
+import io.codemodder.SarifPluginJavaParserChanger;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
+import io.codemodder.providers.sarif.codeql.CodeQLScan;
 import io.github.pixee.security.UnwantedTypes;
+import java.util.List;
 import java.util.Optional;
+import javax.inject.Inject;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 
 /**
- * A library that contains methods for automatically fixing JEXL injections detected by CodeQL's
- * rule "java/jexl-expression-injection" whenever possible.
+ * A codemod for automatically fixing JEXL injections detected by CodeQL's rule
+ * "java/jexl-expression-injection" whenever possible.
  */
-final class JEXLInjectionFixer {
+@Codemod(
+    id = "codeql:java/jexl-expression-injection",
+    author = "andre.silva@pixee.ai",
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expression> {
+
+  @Inject
+  public JEXLInjectionCodemod(
+      @CodeQLScan(ruleId = "java/jexl-expression-injection") final RuleSarif sarif) {
+    super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
+  }
+
+  @Override
+  public boolean onResultFound(
+      CodemodInvocationContext context, CompilationUnit cu, Expression expression, Result result) {
+    return checkAndFix(expression).isPresent();
+  }
+
+  @Override
+  public List<DependencyGAV> dependenciesRequired() {
+    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+  }
 
   /**
    * Detects if a {@link Expression} that is the scope of a {@link
@@ -32,7 +65,7 @@ final class JEXLInjectionFixer {
    * fix it. Combines {@code isFixable} and {@code tryToFix}.
    */
   static Optional<Integer> checkAndFix(final Expression expr) {
-    return isFixable(expr).flatMap(JEXLInjectionFixer::tryToFix);
+    return isFixable(expr).flatMap(JEXLInjectionCodemod::tryToFix);
   }
 
   /**
@@ -40,7 +73,7 @@ final class JEXLInjectionFixer {
    * the expression of {@code expr} that can be sandboxed.
    */
   static Optional<MethodCallExpr> isFixable(final Expression expr) {
-    return findJEXLCreateExpression(expr).flatMap(JEXLInjectionFixer::findJEXLBuilderCreate);
+    return findJEXLCreateExpression(expr).flatMap(JEXLInjectionCodemod::findJEXLBuilderCreate);
   }
 
   /** Tries to sandbox the {@link JexlBuilder#create()} and returns its line if it does. */

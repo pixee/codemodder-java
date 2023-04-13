@@ -11,7 +11,6 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import javax.inject.Inject;
@@ -21,7 +20,7 @@ import javax.inject.Inject;
     id = "pixee:java/harden-xstream",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class HardenXStreamCodemod extends SemgrepJavaParserChanger<VariableDeclarator> {
+public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<VariableDeclarator> {
 
   @Inject
   public HardenXStreamCodemod(@SemgrepScan(ruleId = "harden-xstream") final RuleSarif sarif) {
@@ -29,7 +28,7 @@ public final class HardenXStreamCodemod extends SemgrepJavaParserChanger<Variabl
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator newXStreamVariable,

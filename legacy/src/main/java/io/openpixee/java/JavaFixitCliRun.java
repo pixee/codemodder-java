@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -113,9 +114,13 @@ public final class JavaFixitCliRun {
 
     LOG.debug("Scanning following files: {}", allJavaFiles.size());
 
+    Map<String, List<RuleSarif>> ruleSarifByTool =
+        new SarifParser.Default().parseIntoMap(sarifs, repositoryRoot.toPath());
+
     List<Class<? extends Changer>> defaultCodemodTypes = DefaultCodemods.asList();
     CodemodInvoker codemodInvoker =
-        new CodemodInvoker(defaultCodemodTypes, codemodRegulator, repositoryRoot.toPath());
+        new CodemodInvoker(
+            defaultCodemodTypes, codemodRegulator, repositoryRoot.toPath(), ruleSarifByTool);
 
     // run the Java code visitors
     WeavingResult javaSourceWeaveResult =

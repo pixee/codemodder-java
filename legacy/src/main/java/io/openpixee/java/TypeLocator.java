@@ -120,7 +120,7 @@ public interface TypeLocator {
      *             doSomethingToInputSource(is);
      *         }
      *     }
-     *
+     * <p>
      * </code> However we are in enough of a rare situation here we can kick the can down the road.
      * Eventually we probably need a listener in the visitor that can tell us when and what to evict
      * from the cache.

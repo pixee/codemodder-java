@@ -10,7 +10,6 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import io.codemodder.*;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -23,7 +22,7 @@ import javax.inject.Inject;
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class UpgradeSSLSocketProtocolsTLSCodemod
-    extends SemgrepJavaParserChanger<MethodCallExpr> {
+    extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public UpgradeSSLSocketProtocolsTLSCodemod(
@@ -32,7 +31,7 @@ public final class UpgradeSSLSocketProtocolsTLSCodemod
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr setEnabledProtocolsCall,

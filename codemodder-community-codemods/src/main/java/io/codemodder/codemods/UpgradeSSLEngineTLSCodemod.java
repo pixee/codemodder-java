@@ -10,7 +10,6 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import io.codemodder.*;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -22,7 +21,7 @@ import javax.inject.Inject;
     id = "pixee:java/upgrade-sslengine-tls",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class UpgradeSSLEngineTLSCodemod extends SemgrepJavaParserChanger<MethodCallExpr> {
+public final class UpgradeSSLEngineTLSCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public UpgradeSSLEngineTLSCodemod(
@@ -31,7 +30,7 @@ public final class UpgradeSSLEngineTLSCodemod extends SemgrepJavaParserChanger<M
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr setEnabledProtocolsCall,

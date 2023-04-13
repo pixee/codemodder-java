@@ -19,18 +19,17 @@ public interface RegionNodeMatcher {
    * says the value is exclusive or something.
    */
   RegionNodeMatcher EXACT_MATCH =
-      (region, range) -> {
-        return region.getStartLine() == range.begin.line
-            && region.getStartColumn() == range.begin.column
-            && region.getEndLine() == range.end.line
-            && (region.getEndColumn() == range.end.column + 1
-                || region.getEndColumn() == range.end.column);
-      };
+      (region, range) ->
+          region.getStartLine() == range.begin.line
+              && region.getStartColumn() == range.begin.column
+              && (region.getEndLine() != null ? region.getEndLine() : region.getStartLine())
+                  == range.end.line
+              && (region.getEndColumn() == range.end.column + 1
+                  || region.getEndColumn() == range.end.column);
 
   /** Return true if the {@link Node} is {@link Region} start at the same location. */
   RegionNodeMatcher MATCHES_START =
-      (region, range) -> {
-        return region.getStartLine() == range.begin.line
-            && region.getStartColumn() == range.begin.column;
-      };
+      (region, range) ->
+          region.getStartLine() == range.begin.line
+              && region.getStartColumn() == range.begin.column;
 }

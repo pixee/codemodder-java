@@ -6,11 +6,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.ReviewGuidance;
-import io.codemodder.RuleSarif;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
+import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -19,7 +15,7 @@ import javax.inject.Inject;
     id = "pixee:java/make-prng-seed-unpredictable",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class RandomizeSeedCodemod extends SemgrepJavaParserChanger<MethodCallExpr> {
+public final class RandomizeSeedCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public RandomizeSeedCodemod(
@@ -28,7 +24,7 @@ public final class RandomizeSeedCodemod extends SemgrepJavaParserChanger<MethodC
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr setSeedCall,

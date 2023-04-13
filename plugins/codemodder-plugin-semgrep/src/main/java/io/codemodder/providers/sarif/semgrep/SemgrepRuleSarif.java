@@ -28,7 +28,7 @@ public final class SemgrepRuleSarif implements RuleSarif {
   private final String ruleId;
   private final Map<Path, List<Result>> resultsCache;
 
-  SemgrepRuleSarif(final String ruleId, final SarifSchema210 sarif) {
+  public SemgrepRuleSarif(final String ruleId, final SarifSchema210 sarif) {
     this.sarif = Objects.requireNonNull(sarif);
     this.ruleId = Objects.requireNonNull(ruleId);
     this.resultsCache = new HashMap<>();
@@ -80,5 +80,11 @@ public final class SemgrepRuleSarif implements RuleSarif {
     return results;
   }
 
+  @Override
+  public String getDriver() {
+    return toolName;
+  }
+
+  static final String toolName = "semgrep";
   private static final Logger logger = LoggerFactory.getLogger(SemgrepRuleSarif.class);
 }

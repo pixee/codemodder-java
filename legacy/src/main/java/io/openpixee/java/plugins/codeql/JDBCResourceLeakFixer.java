@@ -396,12 +396,10 @@ public final class JDBCResourceLeakFixer {
       if (ae.getTarget().isFieldAccessExpr()) return true;
       if (ae.getTarget().isNameExpr()) {
         var source = ASTs.findNonCallableSimpleNameSource(ae.getTarget().asNameExpr().getName());
-        if (source
+        return source
             .map(n -> n instanceof VariableDeclarator ? (VariableDeclarator) n : null)
             .flatMap(vd -> ASTPatterns.isVariableOfField(vd))
-            .isPresent()) {
-          return true;
-        }
+            .isPresent();
       }
     }
     return false;
@@ -449,10 +447,7 @@ public final class JDBCResourceLeakFixer {
         }
       }
     }
-    if (node instanceof VariableDeclarator) {
-      return true;
-    }
-    return false;
+    return node instanceof VariableDeclarator;
   }
 
   /** Returns true if {@code expr} itself escapes or flows into a variable that escapes. */

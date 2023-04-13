@@ -6,7 +6,6 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.providers.sarif.semgrep.SemgrepJavaParserChanger;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.ZipSecurity;
 import java.util.List;
@@ -17,7 +16,8 @@ import javax.inject.Inject;
     id = "pixee:java/harden-zip-entry-paths",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class HardenZipEntryPathsCodemod extends SemgrepJavaParserChanger<VariableDeclarator> {
+public final class HardenZipEntryPathsCodemod
+    extends SarifPluginJavaParserChanger<VariableDeclarator> {
 
   @Inject
   public HardenZipEntryPathsCodemod(
@@ -26,7 +26,7 @@ public final class HardenZipEntryPathsCodemod extends SemgrepJavaParserChanger<V
   }
 
   @Override
-  public boolean onSemgrepResultFound(
+  public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator variableDeclarator,
