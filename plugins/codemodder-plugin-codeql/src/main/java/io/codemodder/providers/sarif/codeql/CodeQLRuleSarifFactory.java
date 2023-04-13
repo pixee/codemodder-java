@@ -6,6 +6,7 @@ import io.codemodder.RuleSarifFactory;
 import java.nio.file.Path;
 import java.util.Optional;
 
+/** A factory for building {@link CodeQLRuleSarif}s. */
 public class CodeQLRuleSarifFactory implements RuleSarifFactory {
 
   @Override

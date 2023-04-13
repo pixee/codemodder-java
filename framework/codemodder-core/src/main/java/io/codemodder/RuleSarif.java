@@ -9,6 +9,7 @@ import java.util.List;
 /** Defines a model for interacting with SARIF. */
 public interface RuleSarif {
 
+  /** A {@link RuleSarif} with no results. */
   RuleSarif EMPTY = new EmptyRuleSarif();
 
   /**

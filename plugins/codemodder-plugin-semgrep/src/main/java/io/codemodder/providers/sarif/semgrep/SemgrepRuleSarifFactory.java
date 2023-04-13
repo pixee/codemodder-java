@@ -6,6 +6,7 @@ import io.codemodder.RuleSarifFactory;
 import java.nio.file.Path;
 import java.util.Optional;
 
+/** A factory for building {@link SemgrepRuleSarif}s. */
 public class SemgrepRuleSarifFactory implements RuleSarifFactory {
 
   @Override

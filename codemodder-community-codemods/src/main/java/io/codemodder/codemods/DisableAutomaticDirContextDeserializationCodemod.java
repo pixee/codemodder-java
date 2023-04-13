@@ -8,7 +8,7 @@ import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
-/** Disables automatic return of objects in {@link javax.naming.DirContext#search}. */
+/** Disables automatic return of objects in {@code javax.naming.DirContext#search}. */
 @Codemod(
     id = "pixee:java/disable-dircontext-deserialization",
     author = "andre.silva@pixee.ai",
