@@ -1,7 +1,0 @@
-rules:
-  - id: secure-random
-    pattern: new Random()
-    message: Insecure PRNG
-    languages:
-      - java
-    severity: WARNING

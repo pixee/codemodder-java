@@ -297,9 +297,7 @@ final class CLI implements Callable<Integer> {
               .map(Objects::toString)
               .collect(Collectors.toList()));
       changedFiles = result.updatedChanges();
-      if (result.injectedDependencies().isEmpty()) {
-        break;
-      }
+      fileDependencies.removeAll(result.injectedDependencies());
     }
 
     WeavingResult results = WeavingResult.createDefault(changedFiles, unscannableFiles);
