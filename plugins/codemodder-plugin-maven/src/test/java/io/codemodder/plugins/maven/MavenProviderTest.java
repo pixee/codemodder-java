@@ -217,65 +217,56 @@ final class MavenProviderTest {
     assertThat(map.get(rootPom)).containsOnly(jspDependency);
   }
 
+  /**
+   * This tests that we can update a pom file that has already been changed by another codemod
+   * previously.
+   */
+  @Test
+  void it_can_update_pom_after_existing_changes(final @TempDir Path tmpDir) throws IOException {
+
+    MavenProvider provider = new MavenProvider(dependencyMapper, pomUpdater);
+
+    // we record a change to the module1/pom.xml file, which started as an empty project, but has
+    // been
+    // changed into the simplePom value
+    Path tmpPomFile = tmpDir.resolve("pom.xml");
+    ChangedFile alreadyChangedPom1 = mock(ChangedFile.class);
+    when(alreadyChangedPom1.originalFilePath()).thenReturn(module1Pom.toAbsolutePath().toString());
+    when(alreadyChangedPom1.modifiedFile()).thenReturn(tmpPomFile.toAbsolutePath().toString());
+    String initialPomContents = "<?xml version=\"1.0\"?><project></project>";
+    Files.write(module1Pom, initialPomContents.getBytes(StandardCharsets.UTF_8));
+    Files.write(tmpPomFile, simplePom.getBytes(StandardCharsets.UTF_8));
+
+    // after updating, the old change record should be gone, and the new change record should have
+    // the contents of the
+    // simplePomAfterChanges. we should also have the old file backup restored
+    ChangedFile secondChangePom1 = mock(ChangedFile.class);
+    when(secondChangePom1.originalFilePath()).thenReturn(module1Pom.toAbsolutePath().toString());
+    Path module1PomAfterSecondChange = Files.createTempFile("pom", "xml");
+    Files.write(
+        module1PomAfterSecondChange, simplePomAfterChanges.getBytes(StandardCharsets.UTF_8));
+    when(secondChangePom1.modifiedFile())
+        .thenReturn(module1PomAfterSecondChange.toAbsolutePath().toString());
+
+    when(pomUpdater.updatePom(eq(module1Pom), any())).thenReturn(Optional.of(secondChangePom1));
+    when(pomUpdater.updatePom(eq(module2Pom), any())).thenReturn(Optional.empty());
+    when(pomUpdater.updatePom(eq(module3Pom), any())).thenReturn(Optional.empty());
+    when(pomUpdater.updatePom(eq(rootPom), any())).thenReturn(Optional.empty());
+    Set<ChangedFile> changes = Set.of(irrelevant, alreadyChangedPom1);
+
+    DependencyUpdateResult result =
+        provider.updateDependencies(projectDir, changes, List.of(marsDependency, venusDependency));
+
+    Set<ChangedFile> updatedChanges = result.updatedChanges();
+    assertThat(updatedChanges).containsOnly(irrelevant, secondChangePom1);
+
+    // confirm the file was successfully restored up
+    assertThat(Files.readString(module1Pom, StandardCharsets.UTF_8)).isEqualTo(initialPomContents);
+  }
+
   @Test
   void it_updates_poms_correctly() throws IOException {
     PomFileUpdater updater = new MavenProvider.DefaultPomFileUpdater();
-    String simplePom =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
-            + "    <modelVersion>4.0.0</modelVersion>\n"
-            + "    <groupId>link.sharpe</groupId>\n"
-            + "    <artifactId>mavenproject1</artifactId>\n"
-            + "    <version>1.0-SNAPSHOT</version>\n"
-            + "</project>";
-
-    String expectedPomContents =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "  <project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
-            + "      <modelVersion>4.0.0</modelVersion>\n"
-            + "      <groupId>link.sharpe</groupId>\n"
-            + "      <artifactId>mavenproject1</artifactId>\n"
-            + "      <version>1.0-SNAPSHOT</version>\n"
-            + "      <dependencyManagement>\n"
-            + "          <dependencies>\n"
-            + "              <dependency>\n"
-            + "                  <groupId>com.acme.mars</groupId>\n"
-            + "                  <artifactId>mars1</artifactId>\n"
-            + "                  <version>${versions.mars1}</version>\n"
-            + "              </dependency>\n"
-            + "              <dependency>\n"
-            + "                  <groupId>com.acme.mars</groupId>\n"
-            + "                  <artifactId>mars2</artifactId>\n"
-            + "                  <version>${versions.mars2}</version>\n"
-            + "              </dependency>\n"
-            + "              <dependency>\n"
-            + "                  <groupId>com.acme.venus</groupId>\n"
-            + "                  <artifactId>venus</artifactId>\n"
-            + "                  <version>${versions.venus}</version>\n"
-            + "              </dependency>\n"
-            + "          </dependencies>\n"
-            + "      </dependencyManagement>\n"
-            + "      <properties>\n"
-            + "          <versions.mars1>1.0.1</versions.mars1>\n"
-            + "          <versions.mars2>1.0.1</versions.mars2>\n"
-            + "          <versions.venus>1.0.2</versions.venus>\n"
-            + "      </properties>\n"
-            + "      <dependencies>\n"
-            + "          <dependency>\n"
-            + "              <groupId>com.acme.mars</groupId>\n"
-            + "              <artifactId>mars1</artifactId>\n"
-            + "          </dependency>\n"
-            + "          <dependency>\n"
-            + "              <groupId>com.acme.mars</groupId>\n"
-            + "              <artifactId>mars2</artifactId>\n"
-            + "          </dependency>\n"
-            + "          <dependency>\n"
-            + "              <groupId>com.acme.venus</groupId>\n"
-            + "              <artifactId>venus</artifactId>\n"
-            + "          </dependency>\n"
-            + "      </dependencies>\n"
-            + "  </project>";
-
     Files.write(module1Pom, simplePom.getBytes(StandardCharsets.UTF_8));
     Optional<ChangedFile> result =
         updater.updatePom(module1Pom, List.of(marsDependency, venusDependency));
@@ -283,6 +274,62 @@ final class MavenProviderTest {
     assertThat(result.get().originalFilePath()).isEqualTo(module1Pom.toAbsolutePath().toString());
     String modifiedFile = result.get().modifiedFile();
     String updatedPomContents = Files.readString(Path.of(modifiedFile), StandardCharsets.UTF_8);
-    assertThat(updatedPomContents).isEqualToIgnoringWhitespace(expectedPomContents);
+    assertThat(updatedPomContents).isEqualToIgnoringWhitespace(simplePomAfterChanges);
   }
+
+  private static final String simplePom =
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+          + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
+          + "    <modelVersion>4.0.0</modelVersion>\n"
+          + "    <groupId>link.sharpe</groupId>\n"
+          + "    <artifactId>mavenproject1</artifactId>\n"
+          + "    <version>1.0-SNAPSHOT</version>\n"
+          + "</project>";
+
+  private static final String simplePomAfterChanges =
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+          + "  <project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
+          + "      <modelVersion>4.0.0</modelVersion>\n"
+          + "      <groupId>link.sharpe</groupId>\n"
+          + "      <artifactId>mavenproject1</artifactId>\n"
+          + "      <version>1.0-SNAPSHOT</version>\n"
+          + "      <dependencyManagement>\n"
+          + "          <dependencies>\n"
+          + "              <dependency>\n"
+          + "                  <groupId>com.acme.mars</groupId>\n"
+          + "                  <artifactId>mars1</artifactId>\n"
+          + "                  <version>${versions.mars1}</version>\n"
+          + "              </dependency>\n"
+          + "              <dependency>\n"
+          + "                  <groupId>com.acme.mars</groupId>\n"
+          + "                  <artifactId>mars2</artifactId>\n"
+          + "                  <version>${versions.mars2}</version>\n"
+          + "              </dependency>\n"
+          + "              <dependency>\n"
+          + "                  <groupId>com.acme.venus</groupId>\n"
+          + "                  <artifactId>venus</artifactId>\n"
+          + "                  <version>${versions.venus}</version>\n"
+          + "              </dependency>\n"
+          + "          </dependencies>\n"
+          + "      </dependencyManagement>\n"
+          + "      <properties>\n"
+          + "          <versions.mars1>1.0.1</versions.mars1>\n"
+          + "          <versions.mars2>1.0.1</versions.mars2>\n"
+          + "          <versions.venus>1.0.2</versions.venus>\n"
+          + "      </properties>\n"
+          + "      <dependencies>\n"
+          + "          <dependency>\n"
+          + "              <groupId>com.acme.mars</groupId>\n"
+          + "              <artifactId>mars1</artifactId>\n"
+          + "          </dependency>\n"
+          + "          <dependency>\n"
+          + "              <groupId>com.acme.mars</groupId>\n"
+          + "              <artifactId>mars2</artifactId>\n"
+          + "          </dependency>\n"
+          + "          <dependency>\n"
+          + "              <groupId>com.acme.venus</groupId>\n"
+          + "              <artifactId>venus</artifactId>\n"
+          + "          </dependency>\n"
+          + "      </dependencies>\n"
+          + "  </project>";
 }
