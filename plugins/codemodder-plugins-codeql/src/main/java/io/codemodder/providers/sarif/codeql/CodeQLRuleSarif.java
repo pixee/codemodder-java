@@ -78,8 +78,10 @@ public final class CodeQLRuleSarif implements RuleSarif {
 
   @Override
   public String getDriver() {
-    return "CodeQL";
+    return toolName;
   }
+
+  static final String toolName = "CodeQL";
 
   private static final Logger logger = LoggerFactory.getLogger(CodeQLRuleSarif.class);
 }

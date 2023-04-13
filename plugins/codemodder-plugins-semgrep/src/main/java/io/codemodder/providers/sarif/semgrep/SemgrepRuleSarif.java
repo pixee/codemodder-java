@@ -82,8 +82,9 @@ public final class SemgrepRuleSarif implements RuleSarif {
 
   @Override
   public String getDriver() {
-    return "semgrep";
+    return toolName;
   }
 
+  static final String toolName = "semgrep";
   private static final Logger logger = LoggerFactory.getLogger(SemgrepRuleSarif.class);
 }

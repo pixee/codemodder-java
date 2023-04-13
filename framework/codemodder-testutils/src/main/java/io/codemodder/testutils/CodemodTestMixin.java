@@ -87,8 +87,7 @@ public interface CodemodTestMixin {
         .forEachRemaining(p -> allSarifs.add(p.toFile()));
 
     Path sarif = testResourceDir.resolve("out.sarif");
-    Map<String, List<RuleSarif>> map =
-        StaticSarifParser.parseIntoMap(List.of(sarif.toFile()), tmpDir);
+    Map<String, List<RuleSarif>> map = new SarifParser.Default().parseIntoMap(allSarifs, tmpDir);
 
     // run the codemod
     CodemodInvoker invoker = new CodemodInvoker(List.of(codemod), tmpDir, map);

@@ -2,16 +2,7 @@ package io.openpixee.java;
 
 import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.codemodder.ChangedFile;
-import io.codemodder.Changer;
-import io.codemodder.CodemodInvoker;
-import io.codemodder.DefaultRuleSetting;
-import io.codemodder.FileWeavingContext;
-import io.codemodder.IncludesExcludes;
-import io.codemodder.RuleContext;
-import io.codemodder.RuleSarif;
-import io.codemodder.Weave;
-import io.codemodder.WeavingResult;
+import io.codemodder.*;
 import io.codemodder.codemods.DefaultCodemods;
 import io.github.pixee.codetf.CodeTFReport;
 import java.io.File;
@@ -124,7 +115,7 @@ public final class JavaFixitCliRun {
     LOG.debug("Scanning following files: {}", allJavaFiles.size());
 
     Map<String, List<RuleSarif>> ruleSarifByTool =
-        StaticSarifParser.parseIntoMap(sarifs, repositoryRoot.toPath());
+        new SarifParser.Default().parseIntoMap(sarifs, repositoryRoot.toPath());
 
     List<Class<? extends Changer>> defaultCodemodTypes = DefaultCodemods.asList();
     CodemodInvoker codemodInvoker =
