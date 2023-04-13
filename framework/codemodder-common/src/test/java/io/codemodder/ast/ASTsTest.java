@@ -64,6 +64,40 @@ final class ASTsTest {
   }
 
   @Test
+  void it_adds_static_import_when_last() {
+    String code = "package foo;\nimport aaa;\nclass Bar {}";
+    CompilationUnit cu = new JavaParser().parse(code).getResult().get();
+    ASTTransforms.addStaticImportIfMissing(cu, "org.acme.Widget.doThing");
+    assertThat(
+        cu.getImports(),
+        equalTo(List.of(toSimpleImport("aaa"), toSimpleStaticImport("org.acme.Widget.doThing"))));
+  }
+
+  @Test
+  void it_adds_static_import_when_first() {
+    String code = "package foo;\nimport zzz;\nclass Bar {}";
+    CompilationUnit cu = new JavaParser().parse(code).getResult().get();
+    ASTTransforms.addStaticImportIfMissing(cu, "org.acme.Widget.doThing");
+    assertThat(
+        cu.getImports(),
+        equalTo(List.of(toSimpleStaticImport("org.acme.Widget.doThing"), toSimpleImport("zzz"))));
+  }
+
+  @Test
+  void it_adds_static_import_when_middle() {
+    String code = "package foo;\nimport aaa;\nimport zzz;\nclass Bar {}";
+    CompilationUnit cu = new JavaParser().parse(code).getResult().get();
+    ASTTransforms.addStaticImportIfMissing(cu, "org.acme.Widget.doThing");
+    assertThat(
+        cu.getImports(),
+        equalTo(
+            List.of(
+                toSimpleImport("aaa"),
+                toSimpleStaticImport("org.acme.Widget.doThing"),
+                toSimpleImport("zzz"))));
+  }
+
+  @Test
   void it_works_when_break_is_added_inside_if_before_empty() {
     var original =
         "class A {\n" + "  void foo() {\n" + "    if(true)\n" + "      ;\n" + "  }\n" + "}";
@@ -563,5 +597,9 @@ final class ASTsTest {
 
   private ImportDeclaration toSimpleImport(final String typeName) {
     return new ImportDeclaration(typeName, false, false);
+  }
+
+  private ImportDeclaration toSimpleStaticImport(final String typeName) {
+    return new ImportDeclaration(typeName, true, false);
   }
 }

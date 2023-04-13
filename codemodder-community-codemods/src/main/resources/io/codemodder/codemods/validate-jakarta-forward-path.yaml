@@ -1,0 +1,13 @@
+rules:
+  - id: validate-jakarta-forward-path
+    patterns:
+      - pattern: (HttpServletRequest $REQ).getRequestDispatcher($PATH)
+      - pattern-not: (HttpServletRequest $REQ).getRequestDispatcher("...")
+      - metavariable-regex:
+          metavariable: $PATH
+          regex: (?!(validate|sanitize|strip).*)
+      - focus-metavariable: $PATH
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING

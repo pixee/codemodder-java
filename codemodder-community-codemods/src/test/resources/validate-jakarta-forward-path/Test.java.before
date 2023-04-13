@@ -1,0 +1,22 @@
+class Foo {
+
+  private static final String CONSTANT_FOO = "foo";
+
+  public void request(HttpServletRequest request, String url) {
+    request.getRequestDispatcher(CONSTANT_FOO);
+    request.getRequestDispatcher("foo");
+    request.getRequestDispatcher(validateThing(foo));
+    request.getRequestDispatcher(sanitizeThing(foo));
+
+    // ruleid: validate-jakarta-forward-path
+    request.getRequestDispatcher(doStuff(url));
+
+    // ruleid: validate-jakarta-forward-path
+    request.getRequestDispatcher(getFoo());
+
+    // ruleid: validate-jakarta-forward-path
+    request.getRequestDispatcher(url);
+
+  }
+
+}

@@ -10,14 +10,6 @@ java {
     }
 }
 
-publishing {
-    publications {
-        named<MavenPublication>("maven") {
-            artifactId = "codemodder-provider-sarif-semgrep"
-        }
-    }
-}
-
 dependencies {
     compileOnly(libs.jetbrains.annotations)
     implementation("io.codemodder:codemodder-common")

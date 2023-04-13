@@ -13,7 +13,6 @@ java {
 dependencies {
     compileOnly(libs.jetbrains.annotations)
 
-    api("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo
     implementation(libs.dom4j)
     api(libs.guice)
     api(libs.contrast.sarif)
@@ -21,6 +20,8 @@ dependencies {
     api(libs.commons.lang3)
     implementation(libs.logback.classic)
     implementation(libs.maven.model)
+    implementation(libs.picocli)
+    implementation(libs.juniversalchardet)
     api(libs.slf4j.api)
     api(project(":codemodder-common"))
 

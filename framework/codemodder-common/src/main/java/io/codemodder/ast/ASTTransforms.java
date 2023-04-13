@@ -45,6 +45,29 @@ public final class ASTTransforms {
     addImportIfMissing(cu, clazz.getName());
   }
 
+  public static void addStaticImportIfMissing(final CompilationUnit cu, final String method) {
+    NodeList<ImportDeclaration> imports = cu.getImports();
+    ImportDeclaration newMethodImport = new ImportDeclaration(method, true, false);
+    if (imports.contains(newMethodImport)) {
+      return;
+    }
+    for (int i = 0; i < imports.size(); i++) {
+      ImportDeclaration existingImport = imports.get(i);
+
+      if (existingImport.getNameAsString().compareTo(method) > 0) {
+        // Workaround for a bug caused by adding imports at the top
+        // It adds an extra empty line
+        if (i == 0) {
+          existingImport.replace(newMethodImport);
+          imports.addAfter(existingImport, newMethodImport);
+          return;
+        } else imports.addBefore(newMethodImport, existingImport);
+        return;
+      }
+    }
+    cu.addImport(method, true, false);
+  }
+
   /**
    * Adds an {@link Statement} before another {@link Statement}. Single {@link Statement}s in the
    * body of For/Do/While/If/Labeled Statements are replaced with a {@link BlockStmt} containing

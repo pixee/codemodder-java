@@ -5,9 +5,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.pixee.codetf.CodeTFChange;
-import io.github.pixee.codetf.CodeTFReport;
-import io.github.pixee.codetf.CodeTFResult;
+import io.codemodder.codetf.CodeTFChange;
+import io.codemodder.codetf.CodeTFReport;
+import io.codemodder.codetf.CodeTFResult;
 import io.openpixee.java.JavaFixitCli;
 import java.io.File;
 import java.io.FileReader;
@@ -63,7 +63,7 @@ final class WebGoat822Test extends GitRepositoryTest {
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
-    assertThat(report.getResults().size(), is(21));
+    assertThat(report.getResults().size(), is(22));
 
     // we only inject into a couple files
     assertThat(
@@ -107,7 +107,7 @@ final class WebGoat822Test extends GitRepositoryTest {
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
-    assertThat(report.getResults().size(), is(24));
+    assertThat(report.getResults().size(), is(25));
 
     // we only inject into a couple files
     assertThat(

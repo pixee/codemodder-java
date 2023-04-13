@@ -17,6 +17,7 @@ public final class DefaultCodemods {
         HardenProcessCreationCodemod.class,
         HardenXMLDecoderCodemod.class,
         HardenXMLInputFactoryCodemod.class,
+        HardenXStreamCodemod.class,
         HardenZipEntryPathsCodemod.class,
         JEXLInjectionCodemod.class,
         JSPScriptletXSSCodemod.class,
@@ -28,6 +29,10 @@ public final class DefaultCodemods {
         SecureRandomCodemod.class,
         SQLParameterizerCodemod.class,
         SSRFCodemod.class,
+        UpgradeSSLContextTLSCodemod.class,
+        UpgradeSSLEngineTLSCodemod.class,
+        UpgradeSSLParametersTLSCodemod.class,
+        UpgradeSSLSocketProtocolsTLSCodemod.class,
         VerbTamperingCodemod.class);
   }
 }

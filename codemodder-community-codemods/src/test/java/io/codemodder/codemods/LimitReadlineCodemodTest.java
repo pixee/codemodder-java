@@ -6,5 +6,5 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = LimitReadlineCodemod.class,
     testResourceDir = "limit-readline",
-    dependencies = "io.github.pixee:java-security-toolkit:1.0.1")
+    dependencies = "io.github.pixee:java-security-toolkit:1.0.2")
 final class LimitReadlineCodemodTest implements CodemodTestMixin {}

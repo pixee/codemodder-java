@@ -38,7 +38,6 @@ dependencies {
     compileOnly(libs.jetbrains.annotations)
 
     api(libs.javadiff) // TODO we leak this dependency through exceptions - let's encapsulate those
-    api("io.github.pixee:codetf-java:0.0.2") // TODO bring codetf-java into the monorepo
 
     implementation(libs.codescan.sarif)
     implementation(libs.commons.collections4)
@@ -55,7 +54,7 @@ dependencies {
     implementation(libs.juniversalchardet)
     implementation(libs.logback.classic)
     implementation(libs.maven.model)
-    implementation("io.openpixee.maven:pom-operator:0.0.5") // TODO bring into monorepo
+    implementation("io.openpixee.maven:pom-operator:0.0.6") // TODO bring into monorepo
     {
         exclude(group = "com.google.inject", module = "guice")
     }
@@ -67,8 +66,9 @@ dependencies {
 
     api("io.codemodder:codemodder-common")
     api("io.codemodder:codemodder-core")
-    api("io.codemodder:codemodder-plugin-semgrep")
     api("io.codemodder:codemodder-plugin-codeql")
+    api("io.codemodder:codemodder-plugin-maven")
+    api("io.codemodder:codemodder-plugin-semgrep")
     api("io.codemodder:codemodder-community-codemods")
 
     testCompileOnly(libs.jetbrains.annotations)

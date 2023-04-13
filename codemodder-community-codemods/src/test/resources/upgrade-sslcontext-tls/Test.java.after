@@ -1,0 +1,35 @@
+
+class Test {
+
+  private static final String TLSV1 = "TLSv1";
+  private static final String TLSV12 = "TLSv1.2";
+
+  public void unsafeContext() throws NoSuchAlgorithmException {
+    // ruleid: upgrade-sslcontext-tls
+    SSLContext context = SSLContext.getInstance("TLSv1.2");
+  }
+
+  // TODO: make this pass even if the static variables are declared at the bottom
+  public void unsafeContextFromConstant() throws NoSuchAlgorithmException {
+    // ruleid: upgrade-sslcontext-tls
+    SSLContext context = SSLContext.getInstance("TLSv1.2");
+  }
+
+  public void safeContext() throws NoSuchAlgorithmException {
+    SSLContext context = SSLContext.getInstance("TLSv1.2");
+  }
+
+  public void safeContextFromConstant() throws NoSuchAlgorithmException {
+    SSLContext context = SSLContext.getInstance(TLSV12);
+  }
+
+  public SSLContext unsafeReturnsContext() throws NoSuchAlgorithmException {
+    // ruleid: upgrade-sslcontext-tls
+    return SSLContext.getInstance("TLSv1.2");
+  }
+
+  public SSLContext safeReturnsContext() throws NoSuchAlgorithmException {
+    return SSLContext.getInstance("TLSv1.2");
+  }
+
+}

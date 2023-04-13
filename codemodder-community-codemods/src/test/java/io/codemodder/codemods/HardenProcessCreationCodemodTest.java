@@ -6,5 +6,5 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = HardenProcessCreationCodemod.class,
     testResourceDir = "harden-process-creation",
-    dependencies = {})
+    dependencies = "io.github.pixee:java-security-toolkit:1.0.2")
 final class HardenProcessCreationCodemodTest implements CodemodTestMixin {}
