@@ -8,21 +8,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.codehaus.plexus.util.StringUtils;
 import org.jetbrains.annotations.VisibleForTesting;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is the entry point for codemod authors to invoke their codemods through our framework. Every
@@ -167,15 +157,6 @@ public final class CodemodInvoker {
         ChangedFile.createDefault(path.toString(), modifiedFileCopy.toString(), weaves));
   }
 
-  /**
-   * This is the entry point custom-built codemods are supposed to go through. Right now, this is
-   * not useful directly as we're worried primarily about the legacy entrypoints.
-   */
-  @SuppressWarnings("unused")
-  public static void run(String[] args, final Class<? extends Changer>... codemodTypes) {
-    CodemodInvoker invoker = new CodemodInvoker(Arrays.asList(codemodTypes), Path.of("."));
-  }
-
   private static void validateRequiredFields(final Codemod codemodAnnotation) {
     String author = codemodAnnotation.author();
     if (StringUtils.isBlank(author)) {
@@ -200,6 +181,4 @@ public final class CodemodInvoker {
 
   private static final Pattern codemodIdPattern =
       Pattern.compile("^([A-Za-z0-9]+):([A-Za-z0-9]+)\\/([A-Za-z0-9\\-]+)$");
-
-  private static final Logger log = LoggerFactory.getLogger(CodemodInvoker.class);
 }

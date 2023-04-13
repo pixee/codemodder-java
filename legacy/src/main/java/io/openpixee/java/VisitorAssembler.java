@@ -3,13 +3,10 @@ package io.openpixee.java;
 import io.codemodder.CodemodRegulator;
 import io.openpixee.java.plugins.codeql.CodeQlPlugin;
 import io.openpixee.java.plugins.contrast.ContrastScanPlugin;
-import io.openpixee.java.protections.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,16 +23,6 @@ public interface VisitorAssembler {
    * @return the {@link VisitorFactory} types that are allowed to operate
    */
   List<VisitorFactory> assembleJavaCodeScanningVisitorFactories(
-      File repositoryRoot, CodemodRegulator codemodRegulator, List<File> sarifs);
-
-  /**
-   * Given the context, assemble of a list of {@link FileBasedVisitor} we'll use in our non-Java
-   * code weaving.
-   *
-   * @param codemodRegulator the rules
-   * @return the {@link FileBasedVisitor} types that are allowed to operate
-   */
-  List<FileBasedVisitor> assembleFileVisitors(
       File repositoryRoot, CodemodRegulator codemodRegulator, List<File> sarifs);
 
   static VisitorAssembler createDefault() {
@@ -66,33 +53,6 @@ public interface VisitorAssembler {
       factories.removeIf(factory -> !codemodRegulator.isAllowed(factory.ruleId()));
       LOG.debug("Factories after removing disallowed: {}", factories.size());
       return Collections.unmodifiableList(factories);
-    }
-
-    @Override
-    public List<FileBasedVisitor> assembleFileVisitors(
-        final File repositoryRoot,
-        final CodemodRegulator codemodRegulator,
-        final List<File> sarifs) {
-      // Plugin visitors
-      final List<SarifProcessorPlugin> sarifProcessorPlugins =
-          List.of(new CodeQlPlugin(), new ContrastScanPlugin());
-      final List<FileBasedVisitor> pluginVisitors =
-          new PluginVisitorFinder(sarifs)
-              .getPluginFileBasedVisitors(repositoryRoot, codemodRegulator, sarifProcessorPlugins);
-
-      // Default visitors -- make sure DependencyInjectingVisitor is last. If other visitors come
-      // after it, they won't
-      // have a chance to inject their dependencies.
-      final List<FileBasedVisitor> defaultVisitors = new ArrayList<>();
-      defaultVisitors.add(new DependencyInjectingVisitor());
-      defaultVisitors.removeIf(visitor -> !codemodRegulator.isAllowed(visitor.ruleId()));
-
-      final var allVisitors =
-          Stream.concat(pluginVisitors.stream(), defaultVisitors.stream())
-              .collect(Collectors.toList());
-      allVisitors.removeIf(visitor -> !codemodRegulator.isAllowed(visitor.ruleId()));
-
-      return Collections.unmodifiableList(allVisitors);
     }
   }
 

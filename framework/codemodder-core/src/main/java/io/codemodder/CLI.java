@@ -270,6 +270,38 @@ final class CLI implements Callable<Integer> {
       changedFile.ifPresent(changedFiles::add);
     }
 
+    /*
+     * Now that all the codemods have had a chance to touch all the files, we can ask the project providers to apply
+     * any corrective changers to the project as a whole. This is useful for things like adding a dependency to the
+     * project's pom.xml file.
+     */
+    List<FileDependency> fileDependencies = new ArrayList<>();
+    for (ChangedFile file : changedFiles) {
+      Path path = Path.of(file.modifiedFile());
+      List<DependencyGAV> deps =
+          file.weaves().stream()
+              .map(Weave::getDependenciesNeeded)
+              .flatMap(Collection::stream)
+              .distinct()
+              .collect(Collectors.toList());
+      fileDependencies.add(FileDependency.create(path, deps));
+    }
+
+    List<ProjectProvider> projectProviders = loadProjectProviders();
+    for (ProjectProvider projectProvider : projectProviders) {
+      DependencyUpdateResult result =
+          projectProvider.updateDependencies(projectPath, changedFiles, fileDependencies);
+      unscannableFiles.addAll(
+          result.erroredFiles().stream()
+              .map(Path::toAbsolutePath)
+              .map(Objects::toString)
+              .collect(Collectors.toList()));
+      changedFiles = result.updatedChanges();
+      if (result.injectedDependencies().isEmpty()) {
+        break;
+      }
+    }
+
     WeavingResult results = WeavingResult.createDefault(changedFiles, unscannableFiles);
 
     Instant end = clock.instant();
@@ -331,6 +363,15 @@ final class CLI implements Callable<Integer> {
       changedFile = Optional.of(cf);
     }
     return changedFile;
+  }
+
+  private List<ProjectProvider> loadProjectProviders() {
+    List<ProjectProvider> projectProviders = new ArrayList<>();
+    ServiceLoader<ProjectProvider> loader = ServiceLoader.load(ProjectProvider.class);
+    for (ProjectProvider projectProvider : loader) {
+      projectProviders.add(projectProvider);
+    }
+    return projectProviders;
   }
 
   private static final int SUCCESS = 0;

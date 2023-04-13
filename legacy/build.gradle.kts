@@ -68,6 +68,7 @@ dependencies {
     api("io.codemodder:codemodder-common")
     api("io.codemodder:codemodder-core")
     api("io.codemodder:codemodder-plugin-semgrep")
+    api("io.codemodder:codemodder-plugin-maven")
     api("io.codemodder:codemodder-community-codemods")
 
     testCompileOnly(libs.jetbrains.annotations)
