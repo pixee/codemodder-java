@@ -52,3 +52,8 @@ python -m site
 ```shell
 ./gradlew check
 ```
+
+### Run the Community Codemods
+```shell
+./gradlew :codemodder-community-codemods:run --args='--path-include "--output /path/to/my.codetf --dry-run /path/to/project/'
+```

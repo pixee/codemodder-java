@@ -57,7 +57,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     LOG.debug("Semgrep home will be: {}", dumpInfo(semgrepHome));
     ProcessBuilder pb = new ProcessBuilder(args);
     pb.environment().put("HOME", semgrepHome.toString());
-    Process p = pb.directory(tmpDir.toFile()).inheritIO().start();
+    Process p = pb.directory(tmpDir.toFile()).start();
     try {
       int rc = p.waitFor();
       LOG.debug("Semgrep return code: {}", rc);

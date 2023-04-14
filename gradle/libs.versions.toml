@@ -1,7 +1,7 @@
 [versions]
 auto-value = "1.9"
 jackson = "2.13.1"
-javaparser-core = "3.25.0"
+javaparser-core = "3.25.2"
 javaparser-symbolsolver = "3.15.15"
 java-security-toolkit = "1.0.2"
 java-security-toolkit-xstream = "1.0.2"

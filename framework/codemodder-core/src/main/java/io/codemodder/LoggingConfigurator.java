@@ -1,4 +1,4 @@
-package io.openpixee.java;
+package io.codemodder;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -14,8 +14,6 @@ import java.nio.charset.StandardCharsets;
  * A configurator for the log levels that defaults to "quiet" mode. This can be updated by using the
  * "-v" (verbose) command line setting. It is activated with the {@link java.util.ServiceLoader}
  * API.
- *
- * @see JavaFixitCliRun
  */
 @SuppressWarnings("unused") // this is instantiated
 public final class LoggingConfigurator extends ContextAwareBase implements Configurator {
@@ -34,11 +32,12 @@ public final class LoggingConfigurator extends ContextAwareBase implements Confi
     ca.setEncoder(patternLayoutEncoder);
     ca.start();
     Logger ourLogger = lc.getLogger(OUR_ROOT_LOGGER_NAME);
+    ourLogger.setAdditive(false);
     ourLogger.setLevel(Level.INFO);
     ourLogger.addAppender(ca);
     return Configurator.ExecutionStatus.NEUTRAL;
   }
 
-  public static final String OUR_ROOT_LOGGER_NAME = JavaFixitCli.class.getPackageName();
-  public static final String APPENDER_NAME = "pixeeConsoleAppender";
+  public static final String OUR_ROOT_LOGGER_NAME = LoggingConfigurator.class.getPackageName();
+  public static final String APPENDER_NAME = "codemodderConsoleAppender";
 }

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -51,24 +52,57 @@ public final class MavenProvider implements ProjectProvider {
       Path pomPath = entry.getKey();
       List<FileDependency> dependencies = entry.getValue();
 
-      // TODO: if the file is already changed, we need to merge the changes, not just skip or
-      // overwrite (currently skipping)
-      if (changedFiles.stream()
-          .anyMatch(changedFile -> isSameFile(Path.of(changedFile.originalFilePath()), pomPath))) {
-        continue;
+      // we have to introduce some complexity here to handle the case where one of our codemods has
+      // already updated
+      // this pom. in that case, we need to apply our changes on top of the existing changes. to do
+      // that, we have to
+      // follow this process:
+      // 1. backup the existing pom, which is still actually unchanged in the filesystem
+      // 2. apply the existing changes to the pom on disk so when we "visit" it we are acting on the
+      // updated version
+      // 3. if we changed it again, update the changedFile record to reflect the changes before +
+      // new changes
+      // 4. restore the backup pom
+      Optional<Path> backupFile = Optional.empty();
+      Optional<ChangedFile> existingChangeRecord = Optional.empty();
+      if (fileAlreadyHasChanges(pomPath, changedFiles)) {
+        Path pomBackup = Files.createTempFile("backup", ".pom");
+        Files.copy(pomPath, pomBackup, StandardCopyOption.REPLACE_EXISTING);
+        backupFile = Optional.of(pomBackup);
+        ChangedFile existingChangeForPom =
+            changedFiles.stream()
+                .filter(changedFile -> isSameFile(Path.of(changedFile.originalFilePath()), pomPath))
+                .findFirst()
+                .get();
+        existingChangeRecord = Optional.of(existingChangeForPom);
+        Files.copy(
+            Path.of(existingChangeForPom.modifiedFile()),
+            pomPath,
+            StandardCopyOption.REPLACE_EXISTING);
       }
       try {
         Optional<ChangedFile> changedPom = pomFileUpdater.updatePom(pomPath, dependencies);
         if (changedPom.isPresent()) {
           dependenciesInjected.addAll(dependencies);
+          // remove the backup from the change set, if we have one
+          existingChangeRecord.ifPresent(newChangedFiles::remove);
           newChangedFiles.add(changedPom.get());
         }
       } catch (IOException e) {
         erroredFiles.add(pomPath);
       }
+      if (backupFile.isPresent()) {
+        Files.copy(backupFile.get(), pomPath, StandardCopyOption.REPLACE_EXISTING);
+        Files.delete(backupFile.get());
+      }
     }
 
     return DependencyUpdateResult.create(dependenciesInjected, newChangedFiles, erroredFiles);
+  }
+
+  private boolean fileAlreadyHasChanges(final Path path, final Set<ChangedFile> changedFiles) {
+    return changedFiles.stream()
+        .anyMatch(changedFile -> isSameFile(Path.of(changedFile.originalFilePath()), path));
   }
 
   @VisibleForTesting

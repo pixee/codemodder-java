@@ -27,3 +27,8 @@ dependencies {
     testImplementation("io.codemodder:codemodder-testutils")
     testRuntimeOnly(testlibs.junit.jupiter.engine)
 }
+
+task("run", JavaExec::class) {
+    main = "io.codemodder.codemods.DefaultCodemods"
+    classpath = sourceSets["main"].runtimeClasspath
+}

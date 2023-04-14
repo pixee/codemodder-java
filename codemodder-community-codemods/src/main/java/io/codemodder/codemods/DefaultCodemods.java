@@ -1,6 +1,7 @@
 package io.codemodder.codemods;
 
 import io.codemodder.Changer;
+import io.codemodder.Runner;
 import java.util.List;
 
 /**
@@ -33,6 +34,16 @@ public final class DefaultCodemods {
         UpgradeSSLEngineTLSCodemod.class,
         UpgradeSSLParametersTLSCodemod.class,
         UpgradeSSLSocketProtocolsTLSCodemod.class,
+        ValidateJakartaForwardPathCodemod.class,
         VerbTamperingCodemod.class);
+  }
+
+  /**
+   * Entry point for community codemods.
+   *
+   * @param args the arguments to pass to the runner
+   */
+  public static void main(final String[] args) {
+    Runner.run(asList(), args);
   }
 }
