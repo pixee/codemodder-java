@@ -32,6 +32,7 @@ public final class LoggingConfigurator extends ContextAwareBase implements Confi
     ca.setEncoder(patternLayoutEncoder);
     ca.start();
     Logger ourLogger = lc.getLogger(OUR_ROOT_LOGGER_NAME);
+    ourLogger.setAdditive(false);
     ourLogger.setLevel(Level.INFO);
     ourLogger.addAppender(ca);
     return Configurator.ExecutionStatus.NEUTRAL;
