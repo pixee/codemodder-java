@@ -71,8 +71,8 @@ public interface CodeTFReportGenerator {
 
       CodeTFRun run =
           new CodeTFRun(
-              "pixee",
-              "pixee-java",
+              "io.codemodder",
+              "codemodder",
               null,
               elapsed,
               getFilesScanned(repositoryRoot),
