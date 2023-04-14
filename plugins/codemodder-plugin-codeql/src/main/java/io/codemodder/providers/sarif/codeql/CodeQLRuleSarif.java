@@ -2,6 +2,7 @@ package io.codemodder.providers.sarif.codeql;
 
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
+import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import io.codemodder.RuleSarif;
 import java.io.IOException;
@@ -30,6 +31,25 @@ public final class CodeQLRuleSarif implements RuleSarif {
     this.resultsCache = new HashMap<>();
   }
 
+  private String extractRuleId(final Result result, final Run run) {
+    if (result.getRuleId() == null) {
+      var toolIndex = result.getRule().getToolComponent().getIndex();
+      var ruleIndex = result.getRule().getIndex();
+      var maybeRule =
+          run.getTool().getExtensions().stream()
+              .skip(toolIndex)
+              .findFirst()
+              .flatMap(tool -> tool.getRules().stream().skip(ruleIndex).findFirst())
+              .map(rd -> rd.getId());
+      if (maybeRule.isPresent()) {
+        return maybeRule.get();
+      } else {
+        return null;
+      }
+    }
+    return result.getRuleId();
+  }
+
   @Override
   public List<Region> getRegionsFromResultsByRule(Path path) {
     return getResultsByPath(path).stream()
@@ -43,8 +63,11 @@ public final class CodeQLRuleSarif implements RuleSarif {
       return resultsCache.get(path);
     }
     List<Result> results =
-        sarif.getRuns().get(0).getResults().stream()
-            .filter(result -> result.getRuleId().equals(getRule()))
+        sarif.getRuns().stream()
+            .flatMap(
+                run ->
+                    run.getResults().stream()
+                        .filter(result -> ruleId.equals(extractRuleId(result, run))))
             .filter(
                 result -> {
                   String uri =
