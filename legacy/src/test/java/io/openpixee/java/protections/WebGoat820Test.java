@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
@@ -24,7 +23,6 @@ final class WebGoat820Test extends GitRepositoryTest {
   }
 
   @Test
-  @Disabled
   void it_transforms_webgoat_with_codeql() throws Exception {
     int exitCode =
         new CommandLine(new JavaFixitCli())

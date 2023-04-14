@@ -56,6 +56,26 @@ public interface SarifParser {
       return Optional.empty();
     }
 
+    private String extractRuleId(final Result result, final Run run) {
+      if (result.getRuleId() == null) {
+        var toolIndex = result.getRule().getToolComponent().getIndex();
+        var ruleIndex = result.getRule().getIndex();
+        var maybeRule =
+            run.getTool().getExtensions().stream()
+                .skip(toolIndex)
+                .findFirst()
+                .flatMap(tool -> tool.getRules().stream().skip(ruleIndex).findFirst())
+                .map(rd -> rd.getId());
+        if (maybeRule.isPresent()) {
+          return maybeRule.get();
+        } else {
+          LOG.info("Could not find rule id for result.");
+          return null;
+        }
+      }
+      return result.getRuleId();
+    }
+
     private Stream<Map.Entry<String, RuleSarif>> fromSarif(
         final Run run, final SarifSchema210 sarif, final Path repositoryRoot) {
       // driver name
@@ -65,7 +85,10 @@ public interface SarifParser {
               .map(ServiceLoader.Provider::get)
               .collect(Collectors.toUnmodifiableList());
       final var allResults =
-          run.getResults().stream().map(Result::getRuleId).filter(Objects::nonNull).distinct();
+          run.getResults().stream()
+              .map(result -> extractRuleId(result, run))
+              .filter(Objects::nonNull)
+              .distinct();
 
       return allResults.flatMap(
           rule -> tryToBuild(toolName, rule, sarif, repositoryRoot, factories).stream());
