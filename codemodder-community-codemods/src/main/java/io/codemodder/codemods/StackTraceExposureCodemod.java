@@ -28,13 +28,6 @@ public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expr
     super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
   }
 
-  // StringWriter sw = new StringWriter();
-  // ex.printStackTrace(new PrintWriter(sw));
-  // serv.sendError(0,sw.toString());
-
-  // var msg = ex.getMessage();
-  // serv.sendError(0,msg)
-
   @Override
   public boolean onResultFound(
       CodemodInvocationContext context, CompilationUnit cu, Expression expression, Result result) {
