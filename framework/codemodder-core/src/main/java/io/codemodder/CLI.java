@@ -25,6 +25,8 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.mozilla.universalchardet.UniversalDetector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 /** The mixinStandardHelpOptions provides version and help options. */
@@ -44,8 +46,7 @@ final class CLI implements Callable<Integer> {
 
   @CommandLine.Option(
       names = {"--output"},
-      description = "the output file to produce",
-      required = true)
+      description = "the output file to produce")
   private File output;
 
   @CommandLine.Option(
@@ -97,7 +98,7 @@ final class CLI implements Callable<Integer> {
   private List<String> codemodExcludes;
 
   @CommandLine.Parameters(
-      arity = "1",
+      arity = "0..1",
       paramLabel = "DIRECTORY",
       description = "the directory to run the codemod on")
   private File projectDirectory;
@@ -196,19 +197,29 @@ final class CLI implements Callable<Integer> {
     if (listCodemods) {
       for (Class<? extends Changer> codemod : codemods) {
         Codemod annotation = codemod.getAnnotation(Codemod.class);
-        System.out.println(annotation.id());
+        log.info(annotation.id());
       }
       return SUCCESS;
     }
 
+    if (output == null) {
+      log.error("The output file is required");
+      return ERROR_CANT_WRITE_OUTPUT_FILE;
+    }
+
+    if (projectDirectory == null) {
+      log.error("No project directory specified");
+      return ERROR_CANT_READ_PROJECT_DIRECTORY;
+    }
+
     Path projectPath = projectDirectory.toPath();
     if (!Files.isDirectory(projectPath) || !Files.isReadable(projectPath)) {
-      System.err.println("The project directory is not a readable directory");
+      log.error("The project directory is not a readable directory");
       return ERROR_CANT_READ_PROJECT_DIRECTORY;
     }
     Path outputPath = output.toPath();
     if (!Files.isWritable(outputPath) && !Files.isWritable(outputPath.getParent())) {
-      System.err.println("The output file (or its parent directory) is not writable");
+      log.error("The output file (or its parent directory) is not writable");
       return ERROR_CANT_WRITE_OUTPUT_FILE;
     }
 
@@ -235,7 +246,7 @@ final class CLI implements Callable<Integer> {
     // get codemod includes/excludes
     final CodemodRegulator regulator;
     if (codemodIncludes != null && codemodExcludes != null) {
-      System.err.println("Codemod includes and excludes cannot both be specified");
+      log.error("Codemod includes and excludes cannot both be specified");
       return ERROR_INVALID_ARGUMENT;
     } else if (codemodIncludes == null && codemodExcludes == null) {
       // the user didn't pass any includes, which means all are enabled
@@ -268,7 +279,7 @@ final class CLI implements Callable<Integer> {
           changedFile = invoker.executeFile(filePath, fileContext);
         }
       } catch (Exception e) {
-        System.err.println("Error processing file " + file.getAbsolutePath());
+        log.error("Error processing file {}", file.getAbsolutePath());
         unscannableFiles.add(file.getAbsolutePath());
       }
       changedFile.ifPresent(changedFiles::add);
@@ -327,8 +338,16 @@ final class CLI implements Callable<Integer> {
         Files.write(Path.of(changedFile.originalFilePath()), contents);
       }
     } else {
-      System.out.println("Dry run, not writing any files");
+      log.info("Dry run, not writing any files");
     }
+
+    int totalChanges =
+        changedFiles.stream().map(cf -> cf.weaves().size()).mapToInt(Integer::intValue).sum();
+    log.info(
+        "Scanned {} files, changing {} of them with {} individual changes",
+        filePaths.size(),
+        changedFiles.size(),
+        totalChanges);
 
     return SUCCESS;
   }
@@ -393,4 +412,6 @@ final class CLI implements Callable<Integer> {
 
   private static final List<String> defaultPathExcludes =
       List.of("**/test/**", "**/target/**", "**/build/**");
+
+  private static final Logger log = LoggerFactory.getLogger(CLI.class);
 }

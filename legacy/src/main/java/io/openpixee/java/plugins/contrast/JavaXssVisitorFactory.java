@@ -1,11 +1,7 @@
 package io.openpixee.java.plugins.contrast;
 
-import com.contrastsecurity.sarif.CodeFlow;
-import com.contrastsecurity.sarif.Location;
 import com.contrastsecurity.sarif.PhysicalLocation;
 import com.contrastsecurity.sarif.Result;
-import com.contrastsecurity.sarif.ThreadFlow;
-import com.contrastsecurity.sarif.ThreadFlowLocation;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -24,7 +20,6 @@ import io.openpixee.java.TypeLocator;
 import io.openpixee.java.VisitorFactory;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -143,21 +138,6 @@ final class JavaXssVisitorFactory implements VisitorFactory {
 
     private static final Set<String> httpResponseWriteNames =
         Set.of("print", "println", "printf", "format", "write");
-  }
-
-  private static Set<Integer> getFirst(final Set<Result> results) {
-    Set<Integer> lineNumbers = new HashSet<>();
-    for (Result result : results) {
-      List<CodeFlow> codeFlows = result.getCodeFlows();
-      CodeFlow codeFlow = codeFlows.get(0);
-      List<ThreadFlow> threadFlows = codeFlow.getThreadFlows();
-      ThreadFlow threadFlow = threadFlows.get(0);
-      List<ThreadFlowLocation> locations = threadFlow.getLocations();
-      ThreadFlowLocation lastThreadFlowLocation = locations.get(locations.size() - 1);
-      Location location = lastThreadFlowLocation.getLocation();
-      lineNumbers.add(location.getPhysicalLocation().getRegion().getStartLine());
-    }
-    return lineNumbers;
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(JavaXssVisitorFactory.class);

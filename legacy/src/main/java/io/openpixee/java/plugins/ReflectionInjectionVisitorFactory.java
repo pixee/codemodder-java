@@ -16,7 +16,6 @@ import io.codemodder.ast.ASTTransforms;
 import io.github.pixee.security.Reflection;
 import io.openpixee.java.DoNothingVisitor;
 import io.openpixee.java.Sarif;
-import io.openpixee.java.TypeLocator;
 import io.openpixee.java.VisitorFactory;
 import java.io.File;
 import java.io.IOException;
@@ -72,14 +71,12 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
 
   private static class ReflectionInjectionVisitor extends ModifierVisitor<FileWeavingContext> {
 
-    private final TypeLocator resolver;
     private final NameExpr callbackClass;
     private final Set<Result> results;
     private final CompilationUnit cu;
 
     private ReflectionInjectionVisitor(final CompilationUnit cu, final Set<Result> results) {
       this.cu = cu;
-      this.resolver = TypeLocator.createDefault(cu);
       this.callbackClass = new NameExpr(Reflection.class.getSimpleName());
       this.results = Objects.requireNonNull(results);
     }
