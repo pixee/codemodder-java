@@ -14,7 +14,7 @@ import java.util.Set;
 public final class CodeQLProvider implements CodemodProvider {
 
   @Override
-  public final Set<AbstractModule> getModules(
+  public Set<AbstractModule> getModules(
       final Path repository,
       final List<Class<? extends Changer>> codemodTypes,
       final List<RuleSarif> sarifs) {
