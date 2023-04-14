@@ -39,10 +39,7 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
     for (final Map.Entry<String, Set<Result>> ruleFinding : ruleFindings) {
       final String ruleId = ruleFinding.getKey();
       if (codemodRegulator.isAllowed(ruleId)) {
-        if ("java/stack-trace-exposure".equals(ruleId)) {
-          visitors.add(
-              new StackTraceExposureVisitorFactory(repositoryRoot, ruleFinding.getValue()));
-        } else if ("java/missing-jwt-signature-check".equals(ruleId)) {
+        if ("java/missing-jwt-signature-check".equals(ruleId)) {
           visitors.add(
               new UnverifiedJwtParseVisitorFactory(repositoryRoot, ruleFinding.getValue()));
         } else if ("java/insecure-cookie".equals(ruleId)) {

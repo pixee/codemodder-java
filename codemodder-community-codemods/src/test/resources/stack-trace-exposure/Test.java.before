@@ -1,0 +1,40 @@
+package com.mycompany.app;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public final class Test {
+
+  protected void printToWriter(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    try {
+      throw new Exception();
+    } catch (Exception ex) {
+      ex.printStackTrace(response.getWriter());
+    }
+  }
+
+  protected void flowToSendError(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    try {
+      throw new Exception();
+    } catch (Exception ex) {
+      String msg = ex.getMessage();
+      response.sendError(0, msg);
+    }
+  }
+
+  protected void stringfyThenSend(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    try {
+      throw new Exception();
+    } catch (Exception ex) {
+      StringWriter sw = new StringWriter();
+      ex.printStackTrace(new PrintWriter(sw));
+      response.sendError(0, sw.toString());
+    }
+  }
+}
