@@ -64,8 +64,7 @@ final class CodeQlPluginTest {
             runs.get(0),
             CodemodRegulator.of(DefaultRuleSetting.ENABLED, Collections.emptyList()));
 
-    assertThat(factories.size(), equalTo(2));
-    assertThat(factories.get(0), instanceOf(InsecureCookieVisitorFactory.class));
-    assertThat(factories.get(1), instanceOf(UnverifiedJwtParseVisitorFactory.class));
+    assertThat(factories.size(), equalTo(1));
+    assertThat(factories.get(0), instanceOf(UnverifiedJwtParseVisitorFactory.class));
   }
 }

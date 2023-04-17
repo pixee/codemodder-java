@@ -42,8 +42,6 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
         if ("java/missing-jwt-signature-check".equals(ruleId)) {
           visitors.add(
               new UnverifiedJwtParseVisitorFactory(repositoryRoot, ruleFinding.getValue()));
-        } else if ("java/insecure-cookie".equals(ruleId)) {
-          visitors.add(new InsecureCookieVisitorFactory(repositoryRoot, ruleFinding.getValue()));
         } else if ("java/database-resource-leak".equals(ruleId)) {
           visitors.add(new JDBCResourceLeakVisitorFactory(repositoryRoot, ruleFinding.getValue()));
         }

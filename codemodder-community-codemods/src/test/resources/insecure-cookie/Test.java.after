@@ -3,42 +3,41 @@ package com.acme.testcode;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-public final class InsecureCookieVulnerability {
+public final class TestInsecureCookie {
 
   void fromParameter(HttpServletResponse response, Cookie cookie) {
+    cookie.setSecure(true);
     response.addCookie(cookie);
   }
 
   void fromVariable(HttpServletResponse response) {
     Cookie cookie = new Cookie("foo", "bar");
+    cookie.setSecure(true);
     response.addCookie(cookie);
   }
 
   void fromMethod(HttpServletResponse response) {
     Cookie cookie = getCookie();
+    cookie.setSecure(true);
     response.addCookie(cookie);
-  }
-
-  void fromMethodDirectly(HttpServletResponse response) {
-    // this isn't supported yet
-    response.addCookie(getCookie());
-  }
-
-  void withResponseAsMethodExpression(HttpServletResponse response) {
-    Cookie cookie = new Cookie("foo", "bar");
-    getResponse().addCookie(cookie);
   }
 
   void withBadSecureCall(HttpServletResponse response) {
     Cookie cookie = new Cookie("foo", "bar");
     cookie.setSecure(false);
+    cookie.setSecure(true);
     response.addCookie(cookie);
   }
 
-  void alreadySecure(HttpServletResponse response) {
+  void alreadySecureNoFix(HttpServletResponse response) {
     Cookie cookie = new Cookie("foo", "bar");
     cookie.setSecure(true);
     response.addCookie(cookie);
+  }
+
+  void fromMethodDirectlyNoFix(HttpServletResponse response) {
+    // this isn't supported yet
+    response.addCookie(getCookie());
   }
 
   private Cookie getCookie() {
