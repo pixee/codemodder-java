@@ -1,13 +1,10 @@
 package io.codemodder.codemods;
 
-import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
+import static io.codemodder.JavaParserTransformer.wrapExpression;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.Filenames;
@@ -21,6 +18,7 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SanitizeApacheMultipartFilenameCodemod
     extends SarifPluginJavaParserChanger<MethodCallExpr> {
+
   @Inject
   public SanitizeApacheMultipartFilenameCodemod(
       @SemgrepScan(ruleId = "sanitize-apache-multipart-filename") RuleSarif semgrepSarif) {
@@ -38,14 +36,7 @@ public final class SanitizeApacheMultipartFilenameCodemod
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
       final Result result) {
-    Node parent = methodCallExpr.getParentNode().get();
-    MethodCallExpr safeCall =
-        new MethodCallExpr(
-            new NameExpr(Filenames.class.getSimpleName()),
-            "toSimpleFileName",
-            NodeList.nodeList(methodCallExpr));
-    parent.replace(methodCallExpr, safeCall);
-    addImportIfMissing(cu, Filenames.class);
-    return true;
+    return wrapExpression(methodCallExpr)
+        .withStaticMethod(Filenames.class.getName(), "toSimpleFileName", false);
   }
 }
