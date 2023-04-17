@@ -1,0 +1,218 @@
+{
+  "$schema" : "https://json.schemastore.org/sarif-2.1.0.json",
+  "version" : "2.1.0",
+  "runs" : [ {
+    "tool" : {
+      "driver" : {
+        "name" : "CodeQL",
+        "organization" : "GitHub",
+        "semanticVersion" : "2.11.6",
+        "rules" : [ {
+          "id" : "java/insecure-cookie",
+          "name" : "java/insecure-cookie",
+          "shortDescription" : {
+            "text" : "Failure to use secure cookies"
+          },
+          "fullDescription" : {
+            "text" : "Insecure cookies may be sent in cleartext, which makes them vulnerable to interception."
+          },
+          "defaultConfiguration" : {
+            "enabled" : true,
+            "level" : "error"
+          },
+          "properties" : {
+            "tags" : [ "security", "external/cwe/cwe-614" ],
+            "description" : "Insecure cookies may be sent in cleartext, which makes them vulnerable to\n              interception.",
+            "id" : "java/insecure-cookie",
+            "kind" : "problem",
+            "name" : "Failure to use secure cookies",
+            "precision" : "high",
+            "problem.severity" : "error",
+            "security-severity" : "5.0"
+          }
+        } ]
+      },
+      "extensions" : [ {
+        "name" : "legacy-upgrades",
+        "semanticVersion" : "0.0.0",
+        "locations" : [ {
+          "uri" : "file:///opt/codeql/legacy-upgrades/",
+          "description" : {
+            "text" : "The QL pack root directory."
+          }
+        }, {
+          "uri" : "file:///opt/codeql/legacy-upgrades/qlpack.yml",
+          "description" : {
+            "text" : "The QL pack definition file."
+          }
+        } ]
+      }, {
+        "name" : "codeql/java-queries",
+        "semanticVersion" : "0.4.6+5ae770f33996156df494a9b915139bea4160a120",
+        "locations" : [ {
+          "uri" : "file:///home/andrecs/.codeql/packages/codeql/java-queries/0.4.6/",
+          "description" : {
+            "text" : "The QL pack root directory."
+          }
+        }, {
+          "uri" : "file:///home/andrecs/.codeql/packages/codeql/java-queries/0.4.6/qlpack.yml",
+          "description" : {
+            "text" : "The QL pack definition file."
+          }
+        } ]
+      } ]
+    },
+    "artifacts" : [ {
+      "location" : {
+        "uri" : "Test.java",
+        "uriBaseId" : "%SRCROOT%",
+        "index" : 0
+      }
+    } ],
+    "results" : [ {
+      "ruleId" : "java/insecure-cookie",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/insecure-cookie",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "Cookie is added to response without the 'secure' flag being set."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 9,
+            "startColumn" : 5,
+            "endColumn" : 31
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "76f8ee272c0ef7b7:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      }
+    }, {
+      "ruleId" : "java/insecure-cookie",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/insecure-cookie",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "Cookie is added to response without the 'secure' flag being set."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 14,
+            "startColumn" : 5,
+            "endColumn" : 31
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "bbb73e0e3baa4841:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      }
+    }, {
+      "ruleId" : "java/insecure-cookie",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/insecure-cookie",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "Cookie is added to response without the 'secure' flag being set."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 19,
+            "startColumn" : 5,
+            "endColumn" : 31
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "cc9f7a7ba3197d14:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      }
+    }, {
+      "ruleId" : "java/insecure-cookie",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/insecure-cookie",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "Cookie is added to response without the 'secure' flag being set."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 25,
+            "startColumn" : 5,
+            "endColumn" : 31
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "7f96805ffacd7068:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      }
+    }, {
+      "ruleId" : "java/insecure-cookie",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/insecure-cookie",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "Cookie is added to response without the 'secure' flag being set."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 36,
+            "startColumn" : 5,
+            "endColumn" : 36
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "d7f943de1291a2a1:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      }
+    } ],
+    "columnKind" : "utf16CodeUnits",
+    "properties" : {
+      "semmle.formatSpecifier" : "sarifv2.1.0"
+    }
+  } ]
+}
