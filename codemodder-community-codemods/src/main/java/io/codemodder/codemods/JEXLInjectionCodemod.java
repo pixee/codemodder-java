@@ -14,13 +14,7 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.DependencyGAV;
-import io.codemodder.RegionExtractor;
-import io.codemodder.ReviewGuidance;
-import io.codemodder.RuleSarif;
-import io.codemodder.SarifPluginJavaParserChanger;
+import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
 import io.codemodder.providers.sarif.codeql.CodeQLScan;
@@ -50,7 +44,10 @@ public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expressio
 
   @Override
   public boolean onResultFound(
-      CodemodInvocationContext context, CompilationUnit cu, Expression expression, Result result) {
+      final CodemodInvocationContext context,
+      final CompilationUnit cu,
+      final Expression expression,
+      final Result result) {
     return checkAndFix(expression).isPresent();
   }
 

@@ -5,12 +5,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.RegionExtractor;
-import io.codemodder.ReviewGuidance;
-import io.codemodder.RuleSarif;
-import io.codemodder.SarifPluginJavaParserChanger;
+import io.codemodder.*;
 import io.codemodder.ast.ASTPatterns;
 import io.codemodder.providers.sarif.codeql.CodeQLScan;
 import javax.inject.Inject;
@@ -30,7 +25,10 @@ public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expr
 
   @Override
   public boolean onResultFound(
-      CodemodInvocationContext context, CompilationUnit cu, Expression expression, Result result) {
+      final CodemodInvocationContext context,
+      final CompilationUnit cu,
+      final Expression expression,
+      final Result result) {
     // is printStackTrace to an external stream e.g. ex.printStackTrace(response.getWriter())
     if (expression instanceof MethodCallExpr
         && expression.asMethodCallExpr().getNameAsString().equals("printStackTrace")) {

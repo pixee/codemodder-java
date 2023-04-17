@@ -1,18 +1,14 @@
 package io.codemodder.codemods;
 
-import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
+import static io.codemodder.JavaParserTransformer.wrapExpression;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.Filenames;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 
 /** Sanitizes multipart filename inputs from HTTP requests. */
@@ -39,18 +35,7 @@ public final class SanitizeSpringMultipartFilenameCodemod
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
       final Result result) {
-    Optional<Node> parentNode = methodCallExpr.getParentNode();
-    if (parentNode.isPresent()) {
-      Node parent = parentNode.get();
-      MethodCallExpr safeCall =
-          new MethodCallExpr(
-              new NameExpr(Filenames.class.getSimpleName()),
-              "toSimpleFileName",
-              NodeList.nodeList(methodCallExpr));
-      parent.replace(methodCallExpr, safeCall);
-      addImportIfMissing(cu, Filenames.class);
-      return true;
-    }
-    return false;
+    return wrapExpression(methodCallExpr)
+        .withStaticMethod(Filenames.class.getName(), "toSimpleFileName");
   }
 }
