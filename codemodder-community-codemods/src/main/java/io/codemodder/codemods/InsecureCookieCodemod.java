@@ -33,24 +33,24 @@ public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCa
 
   @Override
   public boolean onResultFound(
-      CodemodInvocationContext context,
-      CompilationUnit cu,
-      MethodCallExpr methodCallExpr,
-      Result result) {
+      final CodemodInvocationContext context,
+      final CompilationUnit cu,
+      final MethodCallExpr methodCallExpr,
+      final Result result) {
     // This assumption is a bit strong, but covers the most common cases while avoiding weird ones
-    var maybeStmt =
+    final var maybeStmt =
         methodCallExpr
             .getParentNode()
             .map(p -> p instanceof Statement ? (Statement) p : null)
             .filter(stmt -> stmt.isExpressionStmt());
 
     // We want to avoid things like: response.addCookie(new Cookie(...)), so we restrict ourselves
-    Optional<Expression> maybeCookieExpression =
+    final Optional<Expression> maybeCookieExpression =
         Optional.of(methodCallExpr.getArgument(0))
             .filter(expr -> expr.isNameExpr() || expr.isFieldAccessExpr());
 
     if (maybeStmt.isPresent() && maybeCookieExpression.isPresent()) {
-      var newStatement =
+      final var newStatement =
           new ExpressionStmt(
               new MethodCallExpr(
                   maybeCookieExpression.get(),
