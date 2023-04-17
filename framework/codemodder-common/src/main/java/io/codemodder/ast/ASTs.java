@@ -1,6 +1,7 @@
 package io.codemodder.ast;
 
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -48,6 +49,24 @@ public final class ASTs {
     }
     if (node.getParentNode().isPresent() && node.getParentNode().get() instanceof Statement) {
       return Optional.of((Statement) node.getParentNode().get());
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Given a statement, find the preceding statement, or empty.
+   *
+   * @param stmt the statement to find the preceding statement for
+   * @return the preceding statement, or empty
+   */
+  public static Optional<Statement> findStatementBefore(final Statement stmt) {
+    Optional<BlockStmt> blockStmt = stmt.findAncestor(BlockStmt.class);
+    if (blockStmt.isPresent()) {
+      NodeList<Statement> statements = blockStmt.get().getStatements();
+      int index = statements.indexOf(stmt);
+      if (index > 0) {
+        return Optional.of(statements.get(index - 1));
+      }
     }
     return Optional.empty();
   }

@@ -1,0 +1,15 @@
+package com.acme.testcode;
+
+import com.fasterxml.jackson.ObjectMapper;
+import java.io.IOUtils;
+
+final class JacksonWaste {
+
+  private ObjectMapper objectMapper;
+
+  Acme convert(InputStream inputStream) {
+    String json = IOUtils.toString(inputStream);
+    Acme acme = objectMapper.readValue(json, Acme.class);
+    return acme;
+  }
+}

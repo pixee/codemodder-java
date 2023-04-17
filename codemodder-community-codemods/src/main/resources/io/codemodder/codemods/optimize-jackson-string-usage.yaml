@@ -1,0 +1,11 @@
+rules:
+  - id: optimize-jackson-string-usage
+    patterns:
+      - pattern: |
+          $STR = IOUtils.toString((InputStream $STREAM));
+          $INSTANCE = (ObjectMapper $MAPPER).readValue($STR, $TYPE);
+      - focus-metavariable: $INSTANCE
+    message: wasteful jackson deserialization
+    languages:
+      - java
+    severity: WARNING
