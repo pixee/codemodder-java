@@ -1,6 +1,7 @@
 package io.codemodder;
 
 import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
+import static io.codemodder.ast.ASTTransforms.addStaticImportIfMissing;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -19,7 +20,8 @@ final class DefaultJavaParserExpressionWrapper
   }
 
   @Override
-  public boolean withStaticMethod(final String className, final String methodName) {
+  public boolean withStaticMethod(
+      final String className, final String methodName, final boolean isStaticImport) {
     Optional<CompilationUnit> cuOpt = expression.findAncestor(CompilationUnit.class);
     if (cuOpt.isEmpty()) {
       return false;
@@ -28,9 +30,16 @@ final class DefaultJavaParserExpressionWrapper
     Node parent = expression.getParentNode().get();
     String simpleName = className.substring(className.lastIndexOf('.') + 1);
     MethodCallExpr safeCall =
-        new MethodCallExpr(new NameExpr(simpleName), methodName, NodeList.nodeList(expression));
+        isStaticImport
+            ? new MethodCallExpr(methodName, expression)
+            : new MethodCallExpr(
+                new NameExpr(simpleName), methodName, NodeList.nodeList(expression));
     parent.replace(expression, safeCall);
-    addImportIfMissing(cu, className);
+    if (isStaticImport) {
+      addStaticImportIfMissing(cu, className + "." + methodName);
+    } else {
+      addImportIfMissing(cu, className);
+    }
     return true;
   }
 }

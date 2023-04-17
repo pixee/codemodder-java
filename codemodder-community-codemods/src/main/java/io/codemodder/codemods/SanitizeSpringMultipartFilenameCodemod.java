@@ -36,6 +36,6 @@ public final class SanitizeSpringMultipartFilenameCodemod
       final MethodCallExpr methodCallExpr,
       final Result result) {
     return wrapExpression(methodCallExpr)
-        .withStaticMethod(Filenames.class.getName(), "toSimpleFileName");
+        .withStaticMethod(Filenames.class.getName(), "toSimpleFileName", false);
   }
 }

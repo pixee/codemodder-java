@@ -1,11 +1,11 @@
 package io.codemodder.codemods;
 
-import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
+import static io.codemodder.JavaParserTransformer.wrapExpression;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.Newlines;
@@ -31,14 +31,8 @@ public final class SanitizeHttpHeaderCodemod extends SarifPluginJavaParserChange
       final MethodCallExpr setHeaderCall,
       final Result result) {
     Expression headerValueArgument = setHeaderCall.getArgument(1);
-    MethodCallExpr safeCall =
-        new MethodCallExpr(
-            new NameExpr(Newlines.class.getSimpleName()),
-            "stripAll",
-            NodeList.nodeList(headerValueArgument));
-    setHeaderCall.setArgument(1, safeCall);
-    addImportIfMissing(cu, Newlines.class);
-    return true;
+    return wrapExpression(headerValueArgument)
+        .withStaticMethod(Newlines.class.getName(), "stripAll", false);
   }
 
   @Override

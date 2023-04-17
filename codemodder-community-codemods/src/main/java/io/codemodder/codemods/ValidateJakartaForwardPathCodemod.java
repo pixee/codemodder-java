@@ -1,12 +1,11 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.JavaParserTransformer.wrapExpression;
+
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
-import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import javax.inject.Inject;
@@ -34,12 +33,9 @@ public final class ValidateJakartaForwardPathCodemod
       final CompilationUnit cu,
       final Expression path,
       final Result result) {
-    ASTTransforms.addStaticImportIfMissing(
-        cu, "io.github.pixee.security.jakarta.PathValidator.validateDispatcherPath");
-    Node parent = path.getParentNode().get();
-    MethodCallExpr validateCall = new MethodCallExpr("validateDispatcherPath", path);
-    parent.replace(path, validateCall);
-    return true;
+    return wrapExpression(path)
+        .withStaticMethod(
+            "io.github.pixee.security.jakarta.PathValidator", "validateDispatcherPath", true);
   }
 
   @Override

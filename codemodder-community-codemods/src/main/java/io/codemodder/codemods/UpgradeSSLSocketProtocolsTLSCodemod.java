@@ -1,14 +1,13 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.JavaParserTransformer.newArray;
+
 import com.contrastsecurity.sarif.Result;
-import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.ArrayCreationExpr;
-import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
@@ -36,14 +35,9 @@ public final class UpgradeSSLSocketProtocolsTLSCodemod
       final CompilationUnit cu,
       final MethodCallExpr setEnabledProtocolsCall,
       final Result result) {
-
-    final ArrayCreationExpr safeArgument =
-        new ArrayCreationExpr(new ClassOrInterfaceType("String"));
-    safeArgument.setLevels(NodeList.nodeList(new ArrayCreationLevel()));
-    safeArgument.setInitializer(
-        new ArrayInitializerExpr(
-            NodeList.nodeList(new StringLiteralExpr(SSLProtocols.safeTlsVersion))));
-    setEnabledProtocolsCall.setArguments(NodeList.nodeList(safeArgument));
+    ArrayCreationExpr safeProtocols =
+        newArray("String", new StringLiteralExpr(SSLProtocols.safeTlsVersion));
+    setEnabledProtocolsCall.setArguments(NodeList.nodeList(safeProtocols));
     return true;
   }
 }
