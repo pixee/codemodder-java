@@ -8,7 +8,30 @@ final class JacksonWaste {
   private ObjectMapper objectMapper;
 
   Acme convert(InputStream inputStream) {
+    // ruleid: optimize-jackson-string-usage-dataflow
     Acme acme = objectMapper.readValue(inputStream, Acme.class);
+    return acme;
+  }
+
+  Acme convert(InputStream inputStream) {
+    // ok: optimize-jackson-string-usage-dataflow
+    Acme acme = objectMapper.readValue(IOUtils.toString(inputStream), Acme.class);
+    return acme;
+  }
+
+  Acme convert(InputStream inputStream) {
+    String json = IOUtils.toString(inputStream);
+    log(json);
+    // ok: optimize-jackson-string-usage-dataflow
+    Acme acme = objectMapper.readValue(json, Acme.class);
+    return acme;
+  }
+
+  Acme convert(InputStream inputStream) {
+    String json = IOUtils.toString(inputStream);
+    String a = b + json;
+    // ok: optimize-jackson-string-usage-dataflow
+    Acme acme = objectMapper.readValue(json, Acme.class);
     return acme;
   }
 }
