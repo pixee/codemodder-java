@@ -52,7 +52,8 @@ public abstract class LocalVariableDeclaration {
     return getStatement().toString();
   }
 
-  public static Optional<LocalVariableDeclaration> fromVariableDeclarator(VariableDeclarator vd) {
+  public static Optional<LocalVariableDeclaration> fromVariableDeclarator(
+      final VariableDeclarator vd) {
     var vde = (VariableDeclarationExpr) vd.getParentNode().get();
     var stmt = (Statement) vde.getParentNode().get();
     if (stmt instanceof TryStmt)

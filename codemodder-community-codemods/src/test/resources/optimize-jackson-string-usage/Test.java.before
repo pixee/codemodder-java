@@ -35,4 +35,13 @@ final class JacksonWaste {
     Acme acme = objectMapper.readValue(json, Acme.class);
     return acme;
   }
+
+  // this one will be found but will be ignored by the codemod
+  Acme convert(InputStream inputStream) {
+    String json = IOUtils.toString(inputStream);
+    // ruleid: optimize-jackson-string-usage-dataflow
+    Acme acme = objectMapper.readValue(json, Acme.class);
+    String a = b + json;
+    return acme;
+  }
 }

@@ -1,18 +1,23 @@
 package io.codemodder.codemods;
 
+import com.contrastsecurity.sarif.PhysicalLocation;
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.ThreadFlowLocation;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.*;
+import io.codemodder.ast.LocalVariableDeclaration;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 @Codemod(
@@ -48,13 +53,26 @@ public final class OptimizeJacksonStringUsageCodemod
       final Result result) {
 
     VariableDeclarationExpr varDeclExpr = varDeclStmt.getExpression().asVariableDeclarationExpr();
-    String variableName = varDeclExpr.getVariable(0).getNameAsString();
-    Expression stream =
-        varDeclExpr.getVariable(0).getInitializer().get().asMethodCallExpr().getArgument(0);
+    VariableDeclarator variable = varDeclExpr.getVariable(0);
+    String variableName = variable.getNameAsString();
+    List<NameExpr> allVariableReferences =
+        LocalVariableDeclaration.fromVariableDeclarator(variable).get().getScope().stream()
+            .flatMap(
+                n ->
+                    n
+                        .findAll(NameExpr.class, ne -> ne.getNameAsString().equals(variableName))
+                        .stream())
+            .collect(Collectors.toList());
+    if (allVariableReferences.size() != 1) {
+      return false;
+    }
+
+    Expression stream = variable.getInitializer().get().asMethodCallExpr().getArgument(0);
     List<ThreadFlowLocation> threadFlow =
         result.getCodeFlows().get(0).getThreadFlows().get(0).getLocations();
-    Region lastEventLocation =
-        threadFlow.get(threadFlow.size() - 1).getLocation().getPhysicalLocation().getRegion();
+    PhysicalLocation lastLocation =
+        threadFlow.get(threadFlow.size() - 1).getLocation().getPhysicalLocation();
+    Region lastRegion = lastLocation.getRegion();
     Optional<MethodDeclaration> methodDeclaration =
         varDeclStmt.findAncestor(MethodDeclaration.class);
     if (methodDeclaration.isEmpty()) {
@@ -68,8 +86,7 @@ public final class OptimizeJacksonStringUsageCodemod
     Optional<MethodCallExpr> readValueCallOpt =
         methodDeclaration.get().findAll(ExpressionStmt.class).stream()
             .filter(es -> es.getRange().isPresent())
-            .filter(
-                es -> RegionNodeMatcher.EXACT_MATCH.matches(lastEventLocation, es.getRange().get()))
+            .filter(es -> RegionNodeMatcher.EXACT_MATCH.matches(lastRegion, es.getRange().get()))
             .filter(es -> es.getExpression() instanceof VariableDeclarationExpr)
             .map(es -> (VariableDeclarationExpr) es.getExpression())
             .map(vd -> vd.getVariable(0))
