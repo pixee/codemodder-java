@@ -80,7 +80,7 @@ public final class OptimizeJacksonStringUsageCodemod
     }
 
     /*
-     * This quite is check robust -- it makes sure that at the last SARIF event location, there is a method call
+     * This check is quite robust -- it makes sure that at the last SARIF event location, there is a method call
      * of the expect name with the expected argument.
      */
     Optional<MethodCallExpr> readValueCallOpt =
