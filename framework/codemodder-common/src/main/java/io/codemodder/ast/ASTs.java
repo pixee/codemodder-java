@@ -7,8 +7,10 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.TypeParameter;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /** Utility methods that may be useful for many visitors. */
@@ -145,6 +147,19 @@ public final class ASTs {
       return allAssignments.count() == 1;
     }
     return false;
+  }
+
+  /** Returns a {@link List} containing all the referenced of {@code localDeclaration} in its scope. */
+  public static List<NameExpr> findAllReferences(LocalVariableDeclaration localDeclaration) {
+    return localDeclaration.getScope().stream()
+        .flatMap(
+            n ->
+                n
+                    .findAll(
+                        NameExpr.class,
+                        ne -> ne.getNameAsString().equals(localDeclaration.getName()))
+                    .stream())
+        .collect(Collectors.toList());
   }
 
   /**

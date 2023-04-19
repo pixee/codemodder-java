@@ -13,11 +13,13 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.*;
+import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 @Codemod(
@@ -55,18 +57,17 @@ public final class OptimizeJacksonStringUsageCodemod
     VariableDeclarationExpr varDeclExpr = varDeclStmt.getExpression().asVariableDeclarationExpr();
     VariableDeclarator variable = varDeclExpr.getVariable(0);
     String variableName = variable.getNameAsString();
+
+    // Since we want to delete the string, we need to check if it is only used once at readValue
     List<NameExpr> allVariableReferences =
-        LocalVariableDeclaration.fromVariableDeclarator(variable).get().getScope().stream()
-            .flatMap(
-                n ->
-                    n
-                        .findAll(NameExpr.class, ne -> ne.getNameAsString().equals(variableName))
-                        .stream())
+        LocalVariableDeclaration.fromVariableDeclarator(variable).stream()
+            .flatMap(lvd -> ASTs.findAllReferences(lvd).stream())
             .collect(Collectors.toList());
     if (allVariableReferences.size() != 1) {
       return false;
     }
 
+    // This get() is safe because of the semgrep rule
     Expression stream = variable.getInitializer().get().asMethodCallExpr().getArgument(0);
     List<ThreadFlowLocation> threadFlow =
         result.getCodeFlows().get(0).getThreadFlows().get(0).getLocations();
@@ -90,8 +91,7 @@ public final class OptimizeJacksonStringUsageCodemod
             .filter(es -> es.getExpression() instanceof VariableDeclarationExpr)
             .map(es -> (VariableDeclarationExpr) es.getExpression())
             .map(vd -> vd.getVariable(0))
-            .filter(vd -> vd.getInitializer().isPresent())
-            .map(vd -> vd.getInitializer().get())
+            .flatMap(vd -> vd.getInitializer().stream())
             .filter(init -> init instanceof MethodCallExpr)
             .map(init -> (MethodCallExpr) init)
             .filter(vd -> vd.getRange().isPresent())
