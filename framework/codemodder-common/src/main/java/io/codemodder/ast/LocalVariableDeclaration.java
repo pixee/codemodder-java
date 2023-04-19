@@ -52,8 +52,17 @@ public abstract class LocalVariableDeclaration {
     return getStatement().toString();
   }
 
-  public static Optional<LocalVariableDeclaration> fromVariableDeclarator(VariableDeclarator vd) {
-    var vde = (VariableDeclarationExpr) vd.getParentNode().get();
+  /**
+   * For a given {@link VariableDeclarator} {@code vd}, check if it is part of a local declaration
+   * and return its associated {@link LocalVariableDeclaration} object, if applicable.
+   */
+  public static Optional<LocalVariableDeclaration> fromVariableDeclarator(
+      final VariableDeclarator vd) {
+    var maybeVDE =
+        vd.getParentNode()
+            .map(p -> p instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) p : null);
+    if (maybeVDE.isEmpty()) return Optional.empty();
+    var vde = maybeVDE.get();
     var stmt = (Statement) vde.getParentNode().get();
     if (stmt instanceof TryStmt)
       return Optional.of(new TryResourceDeclaration(stmt.asTryStmt(), vde, vd));
@@ -63,6 +72,7 @@ public abstract class LocalVariableDeclaration {
       return Optional.of(new ForEachDeclaration(stmt.asForEachStmt(), vde, vd));
     if (stmt instanceof ForStmt)
       return Optional.of(new ForInitDeclaration(stmt.asForStmt(), vde, vd));
+    // Still lacking the case for PatternExpr since it's not supported by JavaParser
     return Optional.empty();
   }
 }
