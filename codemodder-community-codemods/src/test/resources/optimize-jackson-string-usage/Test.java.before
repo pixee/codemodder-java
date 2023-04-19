@@ -44,4 +44,14 @@ final class JacksonWaste {
     String a = b + json;
     return acme;
   }
+
+  // this one will be found but should be ignored because the stream is referenced before readValue()
+  Acme convert(InputStream inputStream) {
+    String json = IOUtils.toString(inputStream);
+    inputStream.close();
+    // ruleid: optimize-jackson-string-usage-dataflow
+    Acme acme = objectMapper.readValue(json, Acme.class);
+    String a = b + json;
+    return acme;
+  }
 }

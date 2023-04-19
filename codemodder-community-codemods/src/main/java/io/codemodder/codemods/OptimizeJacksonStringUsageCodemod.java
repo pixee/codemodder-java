@@ -55,15 +55,15 @@ public final class OptimizeJacksonStringUsageCodemod
 
     // We start by obtaining the String declaration
     VariableDeclarationExpr varDeclExpr = varDeclStmt.getExpression().asVariableDeclarationExpr();
-    VariableDeclarator variable = varDeclExpr.getVariable(0);
-    String variableName = variable.getNameAsString();
+    VariableDeclarator streamVariable = varDeclExpr.getVariable(0);
+    String variableName = streamVariable.getNameAsString();
 
     // Since we want to delete the string, we need to check if it is only used once at readValue
-    List<NameExpr> allVariableReferences =
-        LocalVariableDeclaration.fromVariableDeclarator(variable).stream()
+    List<NameExpr> allJsonStringReferences =
+        LocalVariableDeclaration.fromVariableDeclarator(streamVariable).stream()
             .flatMap(lvd -> ASTs.findAllReferences(lvd).stream())
             .collect(Collectors.toList());
-    if (allVariableReferences.size() != 1) {
+    if (allJsonStringReferences.size() != 1) {
       return false;
     }
 
@@ -74,7 +74,18 @@ public final class OptimizeJacksonStringUsageCodemod
       return false;
     }
     // This get() is safe because of the semgrep rule
-    Expression stream = variable.getInitializer().get().asMethodCallExpr().getArgument(0);
+    Expression stream = streamVariable.getInitializer().get().asMethodCallExpr().getArgument(0);
+
+    // Need to make sure the stream isn't referenced anywhere else besides the read if we want to
+    // change the code
+    List<NameExpr> allStreamReferences =
+        LocalVariableDeclaration.fromVariableDeclarator(streamVariable).stream()
+            .flatMap(lvd -> ASTs.findAllReferences(lvd).stream())
+            .collect(Collectors.toList());
+    if (allStreamReferences.size() != 1) {
+      return false;
+    }
+
     List<ThreadFlowLocation> threadFlow =
         result.getCodeFlows().get(0).getThreadFlows().get(0).getLocations();
     PhysicalLocation lastLocation =
