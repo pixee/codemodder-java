@@ -18,9 +18,12 @@ import javax.inject.Qualifier;
 @Target(ElementType.PARAMETER)
 public @interface SemgrepScan {
 
+  /** A YAML string that represents Semgrep rule(s). */
+  String yaml() default "";
+
   /**
-   * The classpath resource path of the type. It is assumed the path will be in the same package as
-   * the {@link Codemod}.
+   * The classpath resource path of the Semgrep YAML file. It is assumed the path will be in the
+   * same package as the {@link Codemod}.
    *
    * <p>So, for instance, if you had a codemod in <code>com.acme.codemods</code>, and a YAML rule
    * file in /com/acme/codemods/my-rule.yaml, you would simply specify "my-rule.yaml" for this
