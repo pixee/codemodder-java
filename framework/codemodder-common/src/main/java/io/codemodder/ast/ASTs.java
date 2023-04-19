@@ -149,7 +149,9 @@ public final class ASTs {
     return false;
   }
 
-  /** Returns a {@link List} containing all the referenced of {@code localDeclaration} in its scope. */
+  /**
+   * Returns a {@link List} containing all the referenced of {@code localDeclaration} in its scope.
+   */
   public static List<NameExpr> findAllReferences(LocalVariableDeclaration localDeclaration) {
     return localDeclaration.getScope().stream()
         .flatMap(

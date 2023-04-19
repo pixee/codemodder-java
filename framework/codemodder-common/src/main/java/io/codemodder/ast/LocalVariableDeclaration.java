@@ -58,9 +58,10 @@ public abstract class LocalVariableDeclaration {
    */
   public static Optional<LocalVariableDeclaration> fromVariableDeclarator(
       final VariableDeclarator vd) {
-    var maybeVDE = vd.getParentNode().map(p -> p instanceof VariableDeclarationExpr? (VariableDeclarationExpr) p : null);
-    if(maybeVDE.isEmpty())
-	    return Optional.empty();
+    var maybeVDE =
+        vd.getParentNode()
+            .map(p -> p instanceof VariableDeclarationExpr ? (VariableDeclarationExpr) p : null);
+    if (maybeVDE.isEmpty()) return Optional.empty();
     var vde = maybeVDE.get();
     var stmt = (Statement) vde.getParentNode().get();
     if (stmt instanceof TryStmt)

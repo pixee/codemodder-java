@@ -19,7 +19,6 @@ import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 @Codemod(

@@ -4,24 +4,6 @@ rules:
     pattern-sources:
       - patterns:
           - pattern: $STR = IOUtils.toString((InputStream $STREAM));
-          - pattern-not-inside: |
-              $STR = IOUtils.toString((InputStream $STREAM));
-              ...
-              $Z(<... $STR ...>);
-              ...
-              $INSTANCE = (ObjectMapper $MAPPER).readValue($STR, $TYPE);
-          - pattern-not-inside: |
-              $STR = IOUtils.toString((InputStream $STREAM));
-              ...
-              $A = <... $STR ...>;
-              ...
-              $INSTANCE = (ObjectMapper $MAPPER).readValue($STR, $TYPE);
-          - pattern-not-inside: |
-              $STR = IOUtils.toString((InputStream $STREAM));
-              ...
-              $STR = ...;
-              ...
-              $INSTANCE = (ObjectMapper $MAPPER).readValue($STR, $TYPE);
     pattern-sinks:
       - pattern: $INSTANCE = (ObjectMapper $MAPPER).readValue($STR, $TYPE);
     message: wasteful jackson deserialization
