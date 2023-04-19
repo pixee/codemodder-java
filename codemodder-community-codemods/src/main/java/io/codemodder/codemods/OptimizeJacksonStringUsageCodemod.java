@@ -24,7 +24,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "pixee:java/optimize-jackson-string-usage",
     author = "arshan@pixee.ai",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class OptimizeJacksonStringUsageCodemod
     extends SarifPluginJavaParserChanger<ExpressionStmt> {
 
@@ -53,6 +53,7 @@ public final class OptimizeJacksonStringUsageCodemod
       final ExpressionStmt varDeclStmt,
       final Result result) {
 
+    // We start by obtaining the String declaration
     VariableDeclarationExpr varDeclExpr = varDeclStmt.getExpression().asVariableDeclarationExpr();
     VariableDeclarator variable = varDeclExpr.getVariable(0);
     String variableName = variable.getNameAsString();
@@ -66,6 +67,12 @@ public final class OptimizeJacksonStringUsageCodemod
       return false;
     }
 
+    // We now look for the object declaration
+    Optional<MethodDeclaration> methodDeclaration =
+        varDeclStmt.findAncestor(MethodDeclaration.class);
+    if (methodDeclaration.isEmpty()) {
+      return false;
+    }
     // This get() is safe because of the semgrep rule
     Expression stream = variable.getInitializer().get().asMethodCallExpr().getArgument(0);
     List<ThreadFlowLocation> threadFlow =
@@ -73,9 +80,15 @@ public final class OptimizeJacksonStringUsageCodemod
     PhysicalLocation lastLocation =
         threadFlow.get(threadFlow.size() - 1).getLocation().getPhysicalLocation();
     Region lastRegion = lastLocation.getRegion();
-    Optional<MethodDeclaration> methodDeclaration =
-        varDeclStmt.findAncestor(MethodDeclaration.class);
-    if (methodDeclaration.isEmpty()) {
+
+    var maybeObjectDeclaration =
+        methodDeclaration.get().findAll(ExpressionStmt.class).stream()
+            .filter(es -> es.getRange().isPresent())
+            .filter(es -> RegionNodeMatcher.EXACT_MATCH.matches(lastRegion, es.getRange().get()))
+            .findFirst();
+
+    // useless but here for robustness
+    if (maybeObjectDeclaration.isEmpty()) {
       return false;
     }
 
@@ -84,30 +97,30 @@ public final class OptimizeJacksonStringUsageCodemod
      * of the expect name with the expected argument.
      */
     Optional<MethodCallExpr> readValueCallOpt =
-        methodDeclaration.get().findAll(ExpressionStmt.class).stream()
-            .filter(es -> es.getRange().isPresent())
-            .filter(es -> RegionNodeMatcher.EXACT_MATCH.matches(lastRegion, es.getRange().get()))
+        maybeObjectDeclaration
             .filter(es -> es.getExpression() instanceof VariableDeclarationExpr)
             .map(es -> (VariableDeclarationExpr) es.getExpression())
             .map(vd -> vd.getVariable(0))
-            .flatMap(vd -> vd.getInitializer().stream())
+            .flatMap(vd -> vd.getInitializer())
             .filter(init -> init instanceof MethodCallExpr)
             .map(init -> (MethodCallExpr) init)
             .filter(vd -> vd.getRange().isPresent())
             .filter(mc -> "readValue".equals(mc.getNameAsString()))
-            .filter(mc -> mc.getArgument(0).toString().equals(variableName))
-            .findFirst();
+            .filter(mc -> mc.getArgument(0).toString().equals(variableName));
 
     if (readValueCallOpt.isEmpty()) {
       return false;
     }
 
-    // we've successfully located the readValue() call -- first we update the argument
+    // All the checks have passed, we begin the fix
     MethodCallExpr readValueCall = readValueCallOpt.get();
+
+    // We've successfully located the readValue() call -- first we update the argument
     readValueCall.setArgument(0, stream);
 
     // now we remove the IOUtils#toString() assignment statement
     varDeclStmt.remove();
+
     return true;
   }
 }
