@@ -1,0 +1,40 @@
+package io.codemodder.codemods;
+
+import com.contrastsecurity.sarif.Result;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import io.codemodder.Codemod;
+import io.codemodder.CodemodInvocationContext;
+import io.codemodder.RegionExtractor;
+import io.codemodder.ReviewGuidance;
+import io.codemodder.RuleSarif;
+import io.codemodder.SarifPluginJavaParserChanger;
+import io.codemodder.providers.sarif.codeql.CodeQLScan;
+import javax.inject.Inject;
+
+/**
+ * A codemod for automatically fixing JDBC resource leaks detected by CodeQL's rule
+ * "java/database-resource-leak" whenever possible.
+ */
+@Codemod(
+    id = "codeql:java/database-resource-leak",
+    author = "andre.silva@pixee.ai",
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+public class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
+
+  @Inject
+  public JDBCResourceLeakCodemod(
+      @CodeQLScan(ruleId = "java/database-resource-leak") final RuleSarif sarif) {
+    super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
+  }
+
+  @Override
+  public boolean onResultFound(
+      final CodemodInvocationContext context,
+      final CompilationUnit cu,
+      final MethodCallExpr methodCallExpr,
+      final Result result) {
+    return JDBCResourceLeakFixer.checkAndFix(methodCallExpr).isPresent();
+  }
+}

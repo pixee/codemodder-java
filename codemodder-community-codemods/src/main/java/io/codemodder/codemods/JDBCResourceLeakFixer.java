@@ -1,19 +1,11 @@
-package io.openpixee.java.plugins.codeql;
+package io.codemodder.codemods;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
-import io.codemodder.ast.ASTPatterns;
-import io.codemodder.ast.ASTTransforms;
-import io.codemodder.ast.ASTs;
-import io.codemodder.ast.ExpressionStmtVariableDeclaration;
-import io.codemodder.ast.LocalVariableDeclaration;
+import io.codemodder.ast.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * A library that contains methods for automatically fixing resource leaks detected by CodeQL's rule
  * "java/database-resource-leak" whenever possible.
  */
-public final class JDBCResourceLeakFixer {
+final class JDBCResourceLeakFixer {
 
   private static final Logger LOG = LoggerFactory.getLogger(JDBCResourceLeakFixer.class);
 

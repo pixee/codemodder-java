@@ -21,7 +21,7 @@ final class SourceDirectoryListerTest {
     sourceDirs.removeIf(dir -> dir.path().contains("spotlessJava"));
     assertThat(sourceDirs.size(), equalTo(1));
     assertThat(sourceDirs.get(0).path(), endsWith("src/main/java"));
-    assertThat(sourceDirs.get(0).files().size(), greaterThan(35));
+    assertThat(sourceDirs.get(0).files().size(), greaterThan(34));
 
     // assert that we find a real java file
     assertThat(
