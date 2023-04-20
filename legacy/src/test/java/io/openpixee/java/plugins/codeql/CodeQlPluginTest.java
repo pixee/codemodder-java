@@ -2,20 +2,14 @@ package io.openpixee.java.plugins.codeql;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.codemodder.CodemodRegulator;
-import io.codemodder.DefaultRuleSetting;
-import io.openpixee.java.VisitorFactory;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,17 +48,5 @@ final class CodeQlPluginTest {
     assertThat(map.get("java/stack-trace-exposure").size(), equalTo(1));
     assertThat(map.get("java/weak-cryptographic-algorithm").size(), equalTo(1));
     assertThat(map.get("java/unsafe-deserialization").size(), equalTo(1));
-  }
-
-  @Test
-  void it_gives_expected_results() {
-    List<VisitorFactory> factories =
-        plugin.getJavaVisitorFactoriesFor(
-            new File("src/test/resources"),
-            runs.get(0),
-            CodemodRegulator.of(DefaultRuleSetting.ENABLED, Collections.emptyList()));
-
-    assertThat(factories.size(), equalTo(1));
-    assertThat(factories.get(0), instanceOf(UnverifiedJwtParseVisitorFactory.class));
   }
 }
