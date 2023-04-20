@@ -9,15 +9,14 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +39,7 @@ final class SemgrepModule extends AbstractModule {
      * about injecting a dependency which depends on an annotation's property, so we have to do some of the leg work
      * to do that binding ourselves.
      */
-    List<String> yamlClasspathPathsToRun = new ArrayList<>();
+    List<Path> yamlPathsToRun = new ArrayList<>();
 
     // find all @SemgrepScan annotations in their parameters and batch them up for running
     List<SemgrepScan> toBind = new ArrayList<>();
@@ -68,20 +67,35 @@ final class SemgrepModule extends AbstractModule {
                       + " types");
             }
             String yamlPath = semgrepScanAnnotation.pathToYaml();
-            if ("".equals(yamlPath)) {
-              yamlPath =
-                  "/"
-                      + codemodType.getPackageName().replace(".", "/")
-                      + "/"
-                      + semgrepScanAnnotation.ruleId()
-                      + ".yaml";
-            } else {
-              logger.debug(
-                  "Codemod {} provided custom yaml path: {}",
-                  codemodType.getSimpleName(),
-                  yamlPath);
+            String classpathYamlPath =
+                "/"
+                    + codemodType.getPackageName().replace(".", "/")
+                    + "/"
+                    + semgrepScanAnnotation.ruleId()
+                    + ".yaml";
+            boolean foundYaml = false;
+            if (!"".equals(yamlPath)) {
+              classpathYamlPath = yamlPath;
             }
-            yamlClasspathPathsToRun.add(yamlPath);
+            Optional<Path> path = saveClasspathResourceToTemp(classpathYamlPath);
+            if (path.isPresent()) {
+              foundYaml = true;
+              yamlPathsToRun.add(path.get());
+            }
+            String inlineYaml = semgrepScanAnnotation.yaml();
+            if (!"".equals(inlineYaml)) {
+              if (foundYaml) {
+                throw new IllegalArgumentException(
+                    "Cannot specify both inline yaml and yaml file path");
+              }
+              foundYaml = true;
+              yamlPathsToRun.add(saveStringToTemp(inlineYaml));
+            }
+
+            if (!foundYaml) {
+              throw new IllegalArgumentException(
+                  "no semgrep yaml found for " + codemodType.getName());
+            }
             toBind.add(semgrepScanAnnotation);
           });
     }
@@ -91,16 +105,10 @@ final class SemgrepModule extends AbstractModule {
       return;
     }
 
-    // copy the yaml out of the classpath onto disk so semgrep can use them
-    List<Path> yamlRuleFiles =
-        yamlClasspathPathsToRun.stream()
-            .map(this::saveClasspathResourceToTemp)
-            .collect(Collectors.toUnmodifiableList());
-
     // actually run the SARIF only once
     SarifSchema210 sarif;
     try {
-      sarif = new DefaultSemgrepRunner().run(yamlRuleFiles, codeDirectory);
+      sarif = new DefaultSemgrepRunner().run(yamlPathsToRun, codeDirectory);
     } catch (IOException e) {
       throw new IllegalArgumentException("Semgrep execution failed", e);
     }
@@ -112,19 +120,36 @@ final class SemgrepModule extends AbstractModule {
     }
   }
 
+  /** Save the YAML string given to a temporary file. */
+  private Path saveStringToTemp(final String yamlAsString) {
+    try {
+      Path file = Files.createTempFile("semgrep", ".yaml");
+      Files.write(file, yamlAsString.getBytes(StandardCharsets.UTF_8));
+      return file;
+    } catch (IOException e) {
+      throw new UncheckedIOException("Problem saving yaml string to temp", e);
+    }
+  }
+
   /**
    * Turn the yaml resource in the classpath into a file accessible via {@link Path}. Forgive the
    * exception re-throwing but this is being used from a lambda and this shouldn't fail ever anyway.
    */
-  private Path saveClasspathResourceToTemp(final String yamlClasspathResourcePath) {
-    try (InputStream ruleInputStream = getClass().getResourceAsStream(yamlClasspathResourcePath)) {
+  private Optional<Path> saveClasspathResourceToTemp(final String yamlClasspathResourcePath) {
+    InputStream ruleInputStream = getClass().getResourceAsStream(yamlClasspathResourcePath);
+    if (ruleInputStream == null) {
+      return Optional.empty();
+    }
+    try {
       Path semgrepRuleFile = Files.createTempFile("semgrep", ".yaml");
       Objects.requireNonNull(ruleInputStream);
       Files.copy(ruleInputStream, semgrepRuleFile, StandardCopyOption.REPLACE_EXISTING);
       ruleInputStream.close();
-      return semgrepRuleFile;
+      return Optional.of(semgrepRuleFile);
     } catch (IOException e) {
-      throw new UncheckedIOException("failed to write write yaml to disk", e);
+      throw new UncheckedIOException("Problem reading/copying semgrep yaml from classpath", e);
+    } finally {
+      IOUtils.closeQuietly(ruleInputStream);
     }
   }
 

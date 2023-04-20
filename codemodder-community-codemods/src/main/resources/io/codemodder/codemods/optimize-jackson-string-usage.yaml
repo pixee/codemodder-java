@@ -1,0 +1,12 @@
+rules:
+  - id: optimize-jackson-string-usage
+    mode: taint
+    pattern-sources:
+      - patterns:
+          - pattern: $STR = IOUtils.toString((InputStream $STREAM));
+    pattern-sinks:
+      - pattern: $INSTANCE = (ObjectMapper $MAPPER).readValue($STR, $TYPE);
+    message: wasteful jackson deserialization
+    languages:
+      - java
+    severity: WARNING
