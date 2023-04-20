@@ -17,7 +17,7 @@ import io.codemodder.ast.LocalVariableDeclaration;
 import io.codemodder.providers.sarif.codeql.CodeQLScan;
 import javax.inject.Inject;
 
-/** Fixes issues reported under the id "". */
+/** Fixes issues reported under the id "missing-jwt-signature-check". */
 @Codemod(
     id = "codeql:java/missing-jwt-signature-check",
     author = "andre.silva@pixee.ai",
