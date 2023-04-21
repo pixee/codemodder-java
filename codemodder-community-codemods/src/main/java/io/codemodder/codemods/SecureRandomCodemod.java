@@ -17,8 +17,11 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SecureRandomCodemod extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
+  private static final String DETECTION_RULE =
+      "rules:\n" + "  - id: secure-random\n" + "    pattern: new Random()";
+
   @Inject
-  public SecureRandomCodemod(@SemgrepScan(ruleId = "secure-random") final RuleSarif sarif) {
+  public SecureRandomCodemod(@SemgrepScan(yaml = DETECTION_RULE) final RuleSarif sarif) {
     super(sarif, ObjectCreationExpr.class);
   }
 
