@@ -22,5 +22,12 @@ public abstract class SarifPluginRawFileChanger implements RawFileChanger {
     }
   }
 
+  /**
+   * Creates a visitor for the given context and results.
+   *
+   * @param context the context of this files transformation
+   * @param results the given SARIF results to act on
+   * @return a {@link List} of {@Link Weave}s representing changes in the file.
+   */
   public abstract List<Weave> onFileFound(CodemodInvocationContext context, List<Result> results);
 }

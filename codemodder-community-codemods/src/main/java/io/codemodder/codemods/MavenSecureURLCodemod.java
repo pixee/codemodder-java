@@ -26,7 +26,7 @@ import javax.xml.stream.events.XMLEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Fixes issues reported under the id "java/maven-non-https-url". */
+/** Fixes issues reported under the id "java/maven/non-https-url". */
 @Codemod(
     id = "codeql:java/maven/non-https-url",
     author = "andre.silva@pixee.ai",
