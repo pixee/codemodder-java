@@ -1,0 +1,390 @@
+{
+  "$schema" : "https://json.schemastore.org/sarif-2.1.0.json",
+  "version" : "2.1.0",
+  "runs" : [ {
+    "tool" : {
+      "driver" : {
+        "name" : "CodeQL",
+        "organization" : "GitHub",
+        "semanticVersion" : "2.11.6",
+        "rules" : [ {
+          "id" : "java/missing-jwt-signature-check",
+          "name" : "java/missing-jwt-signature-check",
+          "shortDescription" : {
+            "text" : "Missing JWT signature check"
+          },
+          "fullDescription" : {
+            "text" : "Failing to check the Json Web Token (JWT) signature may allow an attacker to forge their own tokens."
+          },
+          "defaultConfiguration" : {
+            "enabled" : true,
+            "level" : "error"
+          },
+          "properties" : {
+            "tags" : [ "security", "external/cwe/cwe-347" ],
+            "description" : "Failing to check the Json Web Token (JWT) signature may allow an attacker to forge their own tokens.",
+            "id" : "java/missing-jwt-signature-check",
+            "kind" : "path-problem",
+            "name" : "Missing JWT signature check",
+            "precision" : "high",
+            "problem.severity" : "error",
+            "security-severity" : "7.8"
+          }
+        } ]
+      },
+      "extensions" : [ {
+        "name" : "legacy-upgrades",
+        "semanticVersion" : "0.0.0",
+        "locations" : [ {
+          "uri" : "file:///opt/codeql/legacy-upgrades/",
+          "description" : {
+            "text" : "The QL pack root directory."
+          }
+        }, {
+          "uri" : "file:///opt/codeql/legacy-upgrades/qlpack.yml",
+          "description" : {
+            "text" : "The QL pack definition file."
+          }
+        } ]
+      }, {
+        "name" : "codeql/java-queries",
+        "semanticVersion" : "0.4.6+5ae770f33996156df494a9b915139bea4160a120",
+        "locations" : [ {
+          "uri" : "file:///home/andrecs/.codeql/packages/codeql/java-queries/0.4.6/",
+          "description" : {
+            "text" : "The QL pack root directory."
+          }
+        }, {
+          "uri" : "file:///home/andrecs/.codeql/packages/codeql/java-queries/0.4.6/qlpack.yml",
+          "description" : {
+            "text" : "The QL pack definition file."
+          }
+        } ]
+      } ]
+    },
+    "artifacts" : [ {
+      "location" : {
+        "uri" : "Test.java",
+        "uriBaseId" : "%SRCROOT%",
+        "index" : 0
+      }
+    } ],
+    "results" : [ {
+      "ruleId" : "java/missing-jwt-signature-check",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/missing-jwt-signature-check",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This parses a [JWT signing key](1), but the signature is not verified."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 12,
+            "startColumn" : 15,
+            "endColumn" : 56
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "b1edf2fcd366a0fd:1",
+        "primaryLocationStartColumnFingerprint" : "10"
+      },
+      "relatedLocations" : [ {
+        "id" : 1,
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 12,
+            "startColumn" : 15,
+            "endColumn" : 56
+          }
+        },
+        "message" : {
+          "text" : "JWT signing key"
+        }
+      } ]
+    }, {
+      "ruleId" : "java/missing-jwt-signature-check",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/missing-jwt-signature-check",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This parses a [JWT signing key](1), but the signature is not verified."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 18,
+            "startColumn" : 31,
+            "endColumn" : 72
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "ef13f9d744c22442:1",
+        "primaryLocationStartColumnFingerprint" : "26"
+      },
+      "relatedLocations" : [ {
+        "id" : 1,
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 18,
+            "startColumn" : 31,
+            "endColumn" : 72
+          }
+        },
+        "message" : {
+          "text" : "JWT signing key"
+        }
+      } ]
+    }, {
+      "ruleId" : "java/missing-jwt-signature-check",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/missing-jwt-signature-check",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This parses a [JWT signing key](1), but the signature is not verified."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 26,
+            "startColumn" : 31,
+            "endColumn" : 40
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "a3e4c71b2ed4ac6c:1",
+        "primaryLocationStartColumnFingerprint" : "26"
+      },
+      "codeFlows" : [ {
+        "threadFlows" : [ {
+          "locations" : [ {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 25,
+                  "startColumn" : 27,
+                  "endColumn" : 61
+                }
+              },
+              "message" : {
+                "text" : "setSigningKey(...) : JwtParser"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 26,
+                  "startColumn" : 31,
+                  "endColumn" : 40
+                }
+              },
+              "message" : {
+                "text" : "jwtParser"
+              }
+            }
+          } ]
+        } ]
+      } ],
+      "relatedLocations" : [ {
+        "id" : 1,
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 25,
+            "startColumn" : 27,
+            "endColumn" : 61
+          }
+        },
+        "message" : {
+          "text" : "JWT signing key"
+        }
+      } ]
+    }, {
+      "ruleId" : "java/missing-jwt-signature-check",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/missing-jwt-signature-check",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This parses a [JWT signing key](1), but the signature is not verified."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 33,
+            "startColumn" : 31,
+            "endColumn" : 40
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "c5b1476c0ec2de3e:1",
+        "primaryLocationStartColumnFingerprint" : "26"
+      },
+      "codeFlows" : [ {
+        "threadFlows" : [ {
+          "locations" : [ {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 32,
+                  "startColumn" : 27,
+                  "endColumn" : 61
+                }
+              },
+              "message" : {
+                "text" : "setSigningKey(...) : JwtParser"
+              }
+            }
+          }, {
+            "location" : {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "Test.java",
+                  "uriBaseId" : "%SRCROOT%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 33,
+                  "startColumn" : 31,
+                  "endColumn" : 40
+                }
+              },
+              "message" : {
+                "text" : "jwtParser"
+              }
+            }
+          } ]
+        } ]
+      } ],
+      "relatedLocations" : [ {
+        "id" : 1,
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 32,
+            "startColumn" : 27,
+            "endColumn" : 61
+          }
+        },
+        "message" : {
+          "text" : "JWT signing key"
+        }
+      } ]
+    }, {
+      "ruleId" : "java/missing-jwt-signature-check",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/missing-jwt-signature-check",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This parses a [JWT signing key](1), but the signature is not verified."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 38,
+            "startColumn" : 31,
+            "endColumn" : 72
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "ee5cda3e64b41516:1",
+        "primaryLocationStartColumnFingerprint" : "26"
+      },
+      "relatedLocations" : [ {
+        "id" : 1,
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 38,
+            "startColumn" : 31,
+            "endColumn" : 72
+          }
+        },
+        "message" : {
+          "text" : "JWT signing key"
+        }
+      } ]
+    } ],
+    "columnKind" : "utf16CodeUnits",
+    "properties" : {
+      "semmle.formatSpecifier" : "sarifv2.1.0"
+    }
+  } ]
+}

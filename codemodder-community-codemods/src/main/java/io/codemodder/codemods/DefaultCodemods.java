@@ -32,6 +32,7 @@ public final class DefaultCodemods {
         SQLParameterizerCodemod.class,
         SSRFCodemod.class,
         StackTraceExposureCodemod.class,
+        UnverifiedJwtCodemod.class,
         UpgradeSSLContextTLSCodemod.class,
         UpgradeSSLEngineTLSCodemod.class,
         UpgradeSSLParametersTLSCodemod.class,

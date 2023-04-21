@@ -1,0 +1,44 @@
+package com.acme.testcode;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+
+final class Test {
+
+  void unsafe(String token) {
+    Jws<Claims> jwt = Jwts.parser().setSigningKey(JWT_PASSWORD).parseClaimsJws(token);
+    System.out.println(jwt.getBody());
+    System.out.println(jwt.getHeader());
+  }
+
+  void unsafeParameterized(String token) {
+    Jws<Claims> jwt = Jwts.parser().setSigningKey(JWT_PASSWORD).parseClaimsJws(token);
+    System.out.println(jwt.getBody());
+    System.out.println(jwt.getHeader());
+  }
+
+  void unsafeParameterizedOverMultipleCalls(String token) {
+    JwtParser parser = Jwts.parser();
+    JwtParser jwtParser = parser.setSigningKey(JWT_PASSWORD);
+    Jws<Claims> jwt = jwtParser.parseClaimsJws(token);
+    System.out.println(jwt.getBody());
+  }
+
+  void unsafeButNoFindingForIt(String token) {
+    JwtParser parser = Jwts.parser();
+    JwtParser jwtParser = parser.setSigningKey(JWT_PASSWORD);
+    Jws<Claims> jwt = jwtParser.parseClaimsJws(token);
+    System.out.println(jwt.getBody());
+  }
+
+  Jwt noFix(String token) {
+    Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(JWT_PASSWORD).parse(token);
+    return jwt;
+  }
+
+  private static final String JWT_PASSWORD = "s3cr3t";
+}
