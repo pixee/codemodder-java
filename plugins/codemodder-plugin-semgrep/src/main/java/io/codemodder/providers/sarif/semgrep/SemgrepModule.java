@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -103,6 +104,35 @@ final class SemgrepModule extends AbstractModule {
     if (toBind.isEmpty()) {
       // no reason to run semgrep if there are no annotations
       return;
+    }
+
+    // fix up the yaml and add missing "message", "languages" and "severity" properties if they
+    // aren't there
+    for (Path yamlPath : yamlPathsToRun) {
+      try {
+        boolean changed = false;
+        String yamlAsString = Files.readString(yamlPath);
+        if (!yamlAsString.contains("message:")) {
+          changed = true;
+          yamlAsString += "\n    message: Semgrep found a match\n";
+        }
+        if (!yamlAsString.contains("severity:")) {
+          changed = true;
+          yamlAsString += "\n    severity: WARNING\n";
+        }
+        if (!yamlAsString.contains("languages:")) {
+          changed = true;
+          yamlAsString += "\n    languages:\n      - java\n";
+        }
+        if (changed) {
+          Files.write(
+              yamlPath,
+              yamlAsString.getBytes(StandardCharsets.UTF_8),
+              StandardOpenOption.TRUNCATE_EXISTING);
+        }
+      } catch (IOException e) {
+        throw new UncheckedIOException("Problem fixing up yaml", e);
+      }
     }
 
     // actually run the SARIF only once
