@@ -37,8 +37,7 @@ public final class HardenProcessCreationCodemod
     Node parent = methodCallExpr.getParentNode().get();
     Expression scope = methodCallExpr.getScope().get();
     ASTTransforms.addImportIfMissing(cu, SystemCommand.class);
-    NameExpr callbackClass =
-        new NameExpr(io.github.pixee.security.SystemCommand.class.getSimpleName());
+    NameExpr callbackClass = new NameExpr(SystemCommand.class.getSimpleName());
     MethodCallExpr safeExpression = new MethodCallExpr(callbackClass, "runCommand");
     NodeList<Expression> nodeList = new NodeList<>();
     nodeList.add(scope);

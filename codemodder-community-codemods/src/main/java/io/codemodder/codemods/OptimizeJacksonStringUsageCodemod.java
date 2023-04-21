@@ -51,17 +51,17 @@ public final class OptimizeJacksonStringUsageCodemod
 
     Optional<MethodCallExpr> toStringCall =
         expect(varDeclStmt)
+            // make sure it's not in a try-with-resources, foreach declaration, etc
             .withBlockParent()
-            . // make sure it's not in a try-with-resources, foreach decl, etc
-            toBeVariableDeclarationStatement()
-            . // make sure it's a variable declaration statement
-            toBeSingleVariableDefinition()
-            . // make sure it's not a multi-variable declaration
-            withDirectReferenceCount(1)
-            . // make sure its only used the one place we expect
-            toBeInitializedByMethodCall()
-            . // make sure it's a method call initializer
-            result();
+            // make sure it's a variable declaration statement
+            .toBeVariableDeclarationStatement()
+            // make sure it's not a multi-variable declaration
+            .toBeSingleVariableDefinition()
+            // make sure its only used the one place we expect
+            .withDirectReferenceCount(1)
+            // make sure it's a method call initializer
+            .toBeInitializedByMethodCall()
+            .result();
 
     if (toStringCall.isEmpty()) {
       return false;

@@ -1,13 +1,12 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.javaparser.JavaParserTransformer.wrap;
+
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
-import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.XMLInputFactorySecurity;
 import java.util.List;
@@ -34,11 +33,8 @@ public final class HardenXMLInputFactoryCodemod
       final VariableDeclarator newFactoryVariable,
       final Result result) {
     final MethodCallExpr newFactory = newFactoryVariable.getInitializer().get().asMethodCallExpr();
-    final NameExpr callbackClass = new NameExpr(XMLInputFactorySecurity.class.getSimpleName());
-    final MethodCallExpr wrapperExpr = new MethodCallExpr(callbackClass, "hardenFactory");
-    wrapperExpr.setArguments(NodeList.nodeList(newFactory));
-    newFactoryVariable.setInitializer(wrapperExpr);
-    ASTTransforms.addImportIfMissing(cu, XMLInputFactorySecurity.class);
+    wrap(newFactory)
+        .withStaticMethod(XMLInputFactorySecurity.class.getName(), "hardenFactory", true);
     return true;
   }
 

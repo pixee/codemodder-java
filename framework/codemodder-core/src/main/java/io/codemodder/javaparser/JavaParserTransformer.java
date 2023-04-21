@@ -13,7 +13,7 @@ public abstract class JavaParserTransformer {
   private JavaParserTransformer() {}
 
   /** Useful for wrapping an expression with a surrounding method call. */
-  public static ExpressionWrapper wrapExpression(Expression expression) {
+  public static ExpressionWrapper wrap(Expression expression) {
     return new DefaultExpressionWrapper(expression);
   }
 

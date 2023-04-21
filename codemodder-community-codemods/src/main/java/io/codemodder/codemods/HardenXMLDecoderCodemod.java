@@ -1,14 +1,12 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.javaparser.JavaParserTransformer.wrap;
+
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
-import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.XMLDecoderSecurity;
 import java.util.List;
@@ -35,11 +33,7 @@ public final class HardenXMLDecoderCodemod
       final ObjectCreationExpr newXmlDecoderCall,
       final Result result) {
     final Expression firstArgument = newXmlDecoderCall.getArgument(0);
-    ASTTransforms.addImportIfMissing(cu, XMLDecoderSecurity.class);
-    MethodCallExpr safeExpr =
-        new MethodCallExpr(new NameExpr(XMLDecoderSecurity.class.getSimpleName()), "hardenStream");
-    safeExpr.setArguments(NodeList.nodeList(firstArgument));
-    newXmlDecoderCall.setArgument(0, safeExpr);
+    wrap(firstArgument).withStaticMethod(XMLDecoderSecurity.class.getName(), "hardenStream", true);
     return true;
   }
 
