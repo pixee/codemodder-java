@@ -76,7 +76,8 @@ public class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
     // Not even an xml
     File file = context.path().toFile();
     // No suggested changes within file
-    final var locations = getLocationsWithinFile(file, results, context.codeDirectory().asPath().toString());
+    final var locations =
+        getLocationsWithinFile(file, results, context.codeDirectory().asPath().toString());
     if (locations.isEmpty()) {
       return List.of();
     }
