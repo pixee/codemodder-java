@@ -2,7 +2,6 @@ package io.codemodder.codemods;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodInvocationContext;
