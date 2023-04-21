@@ -20,31 +20,32 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class MavenSecureURLCodemodTest {
+final class MavenSecureURLCodemodTest {
 
   private Optional<ChangedFile> invokeAndGetChanges(final String pomFilename, final Path tmpDir)
       throws IOException {
-    String dir = "src/test/resources/maven-non-https-url/";
+    final String dir = "src/test/resources/maven-non-https-url/";
     copyDir(Path.of(dir), tmpDir);
 
-    List<File> allSarifs = new ArrayList<>();
+    final List<File> allSarifs = new ArrayList<>();
     Files.newDirectoryStream(tmpDir, "*.sarif")
         .iterator()
         .forEachRemaining(p -> allSarifs.add(p.toFile()));
-    Map<String, List<RuleSarif>> map = new SarifParser.Default().parseIntoMap(allSarifs, tmpDir);
+    final Map<String, List<RuleSarif>> map =
+        new SarifParser.Default().parseIntoMap(allSarifs, tmpDir);
 
-    CodemodInvoker codemodInvoker =
+    final CodemodInvoker codemodInvoker =
         new CodemodInvoker(List.of(MavenSecureURLCodemod.class), tmpDir, map);
-    Path pom = tmpDir.resolve(pomFilename);
-    FileWeavingContext context =
+    final Path pom = tmpDir.resolve(pomFilename);
+    final FileWeavingContext context =
         FileWeavingContext.createDefault(pom.toFile(), IncludesExcludes.any());
     return codemodInvoker.executeFile(pom, context);
   }
 
   @Test
   void it_changes_http_to_https(final @TempDir Path tmpDir) throws IOException {
-    String pomFilename = "pom_insecure_url_1.xml";
-    Optional<ChangedFile> changedFileOptional = invokeAndGetChanges(pomFilename, tmpDir);
+    final String pomFilename = "pom_insecure_url_1.xml";
+    final Optional<ChangedFile> changedFileOptional = invokeAndGetChanges(pomFilename, tmpDir);
     assertThat(
         changedFileOptional.stream()
             .flatMap(cf -> cf.weaves().stream())
@@ -55,8 +56,8 @@ public class MavenSecureURLCodemodTest {
 
   @Test
   void it_changes_ftp_to_sftp(final @TempDir Path tmpDir) throws IOException {
-    String pomFilename = "pom_insecure_url_2.xml";
-    Optional<ChangedFile> changedFileOptional = invokeAndGetChanges(pomFilename, tmpDir);
+    final String pomFilename = "pom_insecure_url_2.xml";
+    final Optional<ChangedFile> changedFileOptional = invokeAndGetChanges(pomFilename, tmpDir);
     assertThat(
         changedFileOptional.stream()
             .flatMap(cf -> cf.weaves().stream())
@@ -67,13 +68,13 @@ public class MavenSecureURLCodemodTest {
 
   @Test
   void it_preserves_whitespaces(final @TempDir Path tmpDir) throws IOException {
-    String pomFilename = "pom_insecure_url_wonky.xml";
-    Optional<ChangedFile> changedFileOptional = invokeAndGetChanges(pomFilename, tmpDir);
+    final String pomFilename = "pom_insecure_url_wonky.xml";
+    final Optional<ChangedFile> changedFileOptional = invokeAndGetChanges(pomFilename, tmpDir);
 
-    var originalLines = Files.readAllLines(tmpDir.resolve(Path.of(pomFilename)));
-    var changedLines =
+    final var originalLines = Files.readAllLines(tmpDir.resolve(Path.of(pomFilename)));
+    final var changedLines =
         Files.readAllLines(new File(changedFileOptional.get().modifiedFile()).toPath());
-    var deltas = getDeltas(originalLines, changedLines);
+    final var deltas = getDeltas(originalLines, changedLines);
 
     assertThat(deltas.size(), lessThanOrEqualTo(1));
     assertThat(
@@ -90,17 +91,17 @@ public class MavenSecureURLCodemodTest {
     return patch.getDeltas();
   }
 
-  private static void copyDir(Path src, Path dest) throws IOException {
-    String srcPath = src.toString();
-    String destPath = dest.toString();
+  private static void copyDir(final Path src, final Path dest) throws IOException {
+    final String srcPath = src.toString();
+    final String destPath = dest.toString();
     Files.walk(Paths.get(srcPath))
         .forEach(
             a -> {
-              Path b = Paths.get(destPath, a.toString().substring(srcPath.length()));
+              final Path b = Paths.get(destPath, a.toString().substring(srcPath.length()));
               if (!a.toString().equals(srcPath)) {
                 try {
                   Files.copy(a, b, StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                   throw new RuntimeException(e);
                 }
               }

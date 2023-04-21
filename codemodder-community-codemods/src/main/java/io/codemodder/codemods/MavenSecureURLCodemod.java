@@ -61,11 +61,12 @@ public class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
                     && xmlLocation.getColumnNumber() <= pl.getRegion().getEndColumn());
   }
 
-  private int secondEventOffset(File file, XMLInputFactory xmlInputFactory) throws Exception {
+  private int secondEventOffset(final File file, final XMLInputFactory xmlInputFactory)
+      throws Exception {
     try (FileInputStream fileIS = new FileInputStream(file)) {
       final var xmlReader = xmlInputFactory.createXMLEventReader(fileIS);
       xmlReader.nextEvent();
-      var second = xmlReader.nextEvent();
+      final var second = xmlReader.nextEvent();
       return second.getLocation().getCharacterOffset();
     }
   }
@@ -74,7 +75,7 @@ public class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
   public List<Weave> onFileFound(
       final CodemodInvocationContext context, final List<Result> results) {
     // Not even an xml
-    File file = context.path().toFile();
+    final File file = context.path().toFile();
     // No suggested changes within file
     final var locations =
         getLocationsWithinFile(file, results, context.codeDirectory().asPath().toString());
@@ -82,7 +83,7 @@ public class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
       return List.of();
     }
 
-    List<Weave> allWeaves = new ArrayList<>();
+    final List<Weave> allWeaves = new ArrayList<>();
 
     final var xmlInputFactory =
         XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newInstance());
@@ -127,8 +128,8 @@ public class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
       // Workaround for a bug (?) where the whitespaces between prolog and the first tag are ignored
       // Get all the characters until the first 2 events
       // The first one will be the prolog, if it exists
-      var originalOffset = secondEventOffset(file, xmlInputFactory);
-      var tempOffset = secondEventOffset(tempFile, xmlInputFactory);
+      final var originalOffset = secondEventOffset(file, xmlInputFactory);
+      final var tempOffset = secondEventOffset(tempFile, xmlInputFactory);
 
       // We want to glue the "head" of the original file with the tail of the tempFile
       var originalHead = "";
