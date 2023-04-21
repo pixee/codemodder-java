@@ -2,21 +2,18 @@ package io.codemodder.codemods;
 
 import static io.codemodder.RegionNodeMatcher.EXACT_MATCH;
 import static io.codemodder.Sarif.getLastDataFlowRegion;
+import static io.codemodder.javaparser.ASTExpectations.expect;
 
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.*;
 import io.codemodder.ast.ASTPatterns;
-import io.codemodder.javaparser.Filters;
-import io.codemodder.javaparser.Mappers;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.Optional;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 
 @Codemod(
@@ -52,33 +49,28 @@ public final class OptimizeJacksonStringUsageCodemod
       final ExpressionStmt varDeclStmt,
       final Result result) {
 
-    Optional<VariableDeclarator> streamVariableInfoOpt =
-        Stream.of(varDeclStmt)
-            .filter(Filters::isInMethodBody)
-            .filter(Filters::isBlockVariableDeclarationAndAssignment)
-            .map(Mappers::toFirstVariableDecorator)
-            .filter(vd -> Filters.isVariableReferencedExactly(vd, 1))
-            .findFirst();
+    Optional<MethodCallExpr> toStringCall =
+        expect(varDeclStmt)
+            .withBlockParent()
+            . // make sure it's not in a try-with-resources, foreach decl, etc
+            toBeVariableDeclarationStatement()
+            . // make sure it's a variable declaration statement
+            toBeSingleVariableDefinition()
+            . // make sure it's not a multi-variable declaration
+            withDirectReferenceCount(1)
+            . // make sure its only used the one place we expect
+            toBeInitializedByMethodCall()
+            . // make sure it's a method call initializer
+            result();
 
-    if (streamVariableInfoOpt.isEmpty()) {
+    if (toStringCall.isEmpty()) {
       return false;
     }
-    VariableDeclarator variableDeclarator = streamVariableInfoOpt.get();
-    String streamVariableName =
-        variableDeclarator
-            .getInitializer()
-            .get()
-            .asMethodCallExpr()
-            .getArgument(0)
-            .asNameExpr()
-            .getNameAsString();
+    String streamVariableName = toStringCall.get().getArgument(0).asNameExpr().getNameAsString();
 
     Region lastRegion = getLastDataFlowRegion(result);
     Optional<MethodCallExpr> readValueCallOpt =
-        ASTPatterns.findMethodBodyFrom(variableDeclarator)
-            .get()
-            .findAll(ExpressionStmt.class)
-            .stream()
+        ASTPatterns.findMethodBodyFrom(varDeclStmt).get().findAll(ExpressionStmt.class).stream()
             .filter(stmt -> stmt.getRange().isPresent())
             .filter(stmt -> EXACT_MATCH.matches(lastRegion, stmt.getRange().get()))
             .map(stmt -> stmt.getExpression().asVariableDeclarationExpr())
