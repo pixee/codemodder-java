@@ -400,7 +400,7 @@ final class ASTsTest {
     var cu = new JavaParser().parse(code).getResult().get();
     var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
     var lvd = LocalVariableDeclaration.fromVariableDeclarator(vd).get();
-    assertThat(ASTs.isFinalOrNeverAssigned(lvd), is(true));
+    assertThat(ASTPatterns.isFinalOrNeverAssigned(lvd), is(true));
   }
 
   @Test
@@ -421,7 +421,7 @@ final class ASTsTest {
             es.getExpression().asVariableDeclarationExpr(),
             es.getExpression().asVariableDeclarationExpr().getVariable(0));
 
-    assertThat(ASTs.isNotInitializedAndAssignedAtMostOnce(lvd), is(true));
+    assertThat(ASTPatterns.isNotInitializedAndAssignedAtMostOnce(lvd), is(true));
   }
 
   @Test
@@ -431,7 +431,7 @@ final class ASTsTest {
     var cu = new JavaParser().parse(code).getResult().get();
     var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
     var lvd = LocalVariableDeclaration.fromVariableDeclarator(vd).get();
-    assertThat(ASTs.isFinalOrNeverAssigned(lvd), is(true));
+    assertThat(ASTPatterns.isFinalOrNeverAssigned(lvd), is(true));
   }
 
   @Test
@@ -447,7 +447,7 @@ final class ASTsTest {
     var cu = new JavaParser().parse(code).getResult().get();
     var vd = cu.findAll(VariableDeclarationExpr.class).get(0).getVariable(0);
     var lvd = LocalVariableDeclaration.fromVariableDeclarator(vd).get();
-    assertThat(ASTs.isFinalOrNeverAssigned(lvd), is(false));
+    assertThat(ASTPatterns.isFinalOrNeverAssigned(lvd), is(false));
   }
 
   @Test
@@ -466,7 +466,7 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(1);
     var local_vd = cu.findAll(VariableDeclarator.class).get(1);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+        ASTPatterns.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
             .get()
             .getVariableDeclarator()
             .equals(local_vd),
@@ -489,7 +489,7 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(1);
     var local_vd = cu.findAll(VariableDeclarator.class).get(1);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+        ASTPatterns.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
             .get()
             .getVariableDeclarator()
             .equals(local_vd),
@@ -511,7 +511,8 @@ final class ASTsTest {
     var cu = new JavaParser().parse(code).getResult().get();
     var ne = cu.findAll(NameExpr.class).get(0);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString()).isEmpty(), is(true));
+        ASTPatterns.findEarliestLocalDeclarationOf(ne, ne.getName().asString()).isEmpty(),
+        is(true));
   }
 
   @Test
@@ -530,7 +531,7 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(0);
     var local_vd = cu.findAll(VariableDeclarator.class).get(1);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+        ASTPatterns.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
             .get()
             .getVariableDeclarator()
             .equals(local_vd),
@@ -553,7 +554,7 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(0);
     var local_vd = cu.findAll(VariableDeclarator.class).get(1);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+        ASTPatterns.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
             .get()
             .getVariableDeclarator()
             .equals(local_vd),
@@ -577,7 +578,7 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(1);
     var local_vd = cu.findAll(VariableDeclarator.class).get(2);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+        ASTPatterns.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
             .get()
             .getVariableDeclarator()
             .equals(local_vd),

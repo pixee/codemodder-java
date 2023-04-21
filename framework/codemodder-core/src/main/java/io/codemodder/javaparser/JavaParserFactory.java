@@ -1,11 +1,12 @@
-package io.codemodder;
+package io.codemodder.javaparser;
 
 import com.github.javaparser.JavaParser;
+import io.codemodder.SourceDirectory;
 import java.io.IOException;
 import java.util.List;
 
 /** Responsible for generating {@link JavaParser} instances. */
-interface JavaParserFactory {
+public interface JavaParserFactory {
 
   /**
    * Create a JavaParser instance for the given project source directories

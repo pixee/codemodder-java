@@ -11,7 +11,6 @@ import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import io.codemodder.ast.ASTPatterns;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.ast.ASTs;
 import io.codemodder.ast.ExpressionStmtVariableDeclaration;
 import io.codemodder.ast.LocalVariableDeclaration;
 import java.util.ArrayList;
@@ -74,7 +73,7 @@ public final class JDBCResourceLeakFixer {
         }
         if (mceScope.isNameExpr()) {
           final var maybeLVD =
-              ASTs.findEarliestLocalDeclarationOf(
+              ASTPatterns.findEarliestLocalDeclarationOf(
                   mceScope, mceScope.asNameExpr().getNameAsString());
 
           if (maybeLVD.filter(lvd -> escapesRootScope(lvd, n -> true)).isPresent()) {
@@ -112,7 +111,7 @@ public final class JDBCResourceLeakFixer {
                     lvd instanceof ExpressionStmtVariableDeclaration
                         ? (ExpressionStmtVariableDeclaration) lvd
                         : null)
-            .filter(lvd -> ASTs.isFinalOrNeverAssigned(lvd));
+            .filter(lvd -> ASTPatterns.isFinalOrNeverAssigned(lvd));
     if (maybeLVD.isPresent()) {
       var localVariableDeclaration = maybeLVD.get();
       if (localVariableDeclaration.getVariableDeclarationExpr().getVariables().size() == 1) {
@@ -139,7 +138,7 @@ public final class JDBCResourceLeakFixer {
     for (final var ae : allAE) {
       if (ae.getTarget().isNameExpr()) {
         final var ne = ae.getTarget().asNameExpr();
-        final var maybeLVD = ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString());
+        final var maybeLVD = ASTPatterns.findEarliestLocalDeclarationOf(ne, ne.getNameAsString());
         maybeLVD.ifPresentOrElse(
             lvd -> {
               if (!memory.contains(lvd.getVariableDeclarator())) allLVD.add(lvd);
@@ -172,7 +171,7 @@ public final class JDBCResourceLeakFixer {
     final var maybeInit = ASTPatterns.isInitExpr(expr);
     if (maybeInit.isPresent()) {
       final var vd = maybeInit.get();
-      var maybeLVD = ASTs.findEarliestLocalDeclarationOf(expr, vd.getNameAsString());
+      var maybeLVD = ASTPatterns.findEarliestLocalDeclarationOf(expr, vd.getNameAsString());
       if (maybeLVD.isPresent()) {
         return combine(
             new Pair<>(new ArrayList<>(List.of(maybeLVD.get())), new ArrayList<>()),
@@ -186,7 +185,7 @@ public final class JDBCResourceLeakFixer {
       final var ae = maybeAE.get();
       if (ae.getTarget().isNameExpr()) {
         final var maybeLVD =
-            ASTs.findEarliestLocalDeclarationOf(
+            ASTPatterns.findEarliestLocalDeclarationOf(
                 ae.getTarget(), ae.getTarget().asNameExpr().getNameAsString());
         if (maybeLVD.isPresent()) {
           return combine(
@@ -317,7 +316,7 @@ public final class JDBCResourceLeakFixer {
     }
     return ASTPatterns.isAssigned(expr)
         .map(ae -> ae.getTarget().isNameExpr() ? ae.getTarget().asNameExpr() : null)
-        .flatMap(ne -> ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()));
+        .flatMap(ne -> ASTPatterns.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()));
   }
 
   /**
@@ -395,7 +394,8 @@ public final class JDBCResourceLeakFixer {
       final var ae = maybeAE.get();
       if (ae.getTarget().isFieldAccessExpr()) return true;
       if (ae.getTarget().isNameExpr()) {
-        var source = ASTs.findNonCallableSimpleNameSource(ae.getTarget().asNameExpr().getName());
+        var source =
+            ASTPatterns.findNonCallableSimpleNameSource(ae.getTarget().asNameExpr().getName());
         return source
             .map(n -> n instanceof VariableDeclarator ? (VariableDeclarator) n : null)
             .flatMap(vd -> ASTPatterns.isVariableOfField(vd))
@@ -438,7 +438,7 @@ public final class JDBCResourceLeakFixer {
       var expr = (Expression) node;
       if (expr.isFieldAccessExpr()) return true;
       if (expr.isNameExpr()) {
-        var source = ASTs.findNonCallableSimpleNameSource(expr.asNameExpr().getName());
+        var source = ASTPatterns.findNonCallableSimpleNameSource(expr.asNameExpr().getName());
         if (source
             .map(n -> n instanceof VariableDeclarator ? (VariableDeclarator) n : null)
             .flatMap(vd -> ASTPatterns.isVariableOfField(vd))

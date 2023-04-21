@@ -1,6 +1,9 @@
-package io.codemodder;
+package io.codemodder.javaparser;
 
 import com.github.javaparser.ast.CompilationUnit;
+import io.codemodder.Changer;
+import io.codemodder.CodemodInvocationContext;
+import io.codemodder.DependencyGAV;
 import java.util.List;
 
 /** Uses JavaParser to change Java source files. */

@@ -6,6 +6,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.google.common.annotations.VisibleForTesting;
+import io.codemodder.javaparser.JavaParserChanger;
 import java.util.List;
 import java.util.Objects;
 

@@ -31,7 +31,7 @@ final class NameResolver {
 
   private static Optional<Node> findLocalNameSource(Node current, final String name) {
     // Traverse the tree in reverse pre-order until it hits a declaration
-    final var it = ASTs.reversePreOrderIterator(current);
+    final var it = ASTPatterns.reversePreOrderIterator(current);
     while (!(current instanceof TypeDeclaration) && it.hasNext()) {
       current = it.next();
       final var maybeFound = isLocalNameSource(current, name);
