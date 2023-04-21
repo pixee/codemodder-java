@@ -39,7 +39,7 @@ public interface CodemodTestMixin {
     Path testResourceDir = Path.of(metadata.testResourceDir());
 
     List<DependencyGAV> dependencies =
-        Arrays.asList(metadata.dependencies()).stream()
+        Arrays.stream(metadata.dependencies())
             .map(
                 dependency -> {
                   String[] tokens = dependency.split(":");
@@ -86,7 +86,6 @@ public interface CodemodTestMixin {
         .iterator()
         .forEachRemaining(p -> allSarifs.add(p.toFile()));
 
-    Path sarif = testResourceDir.resolve("out.sarif");
     Map<String, List<RuleSarif>> map = new SarifParser.Default().parseIntoMap(allSarifs, tmpDir);
 
     // run the codemod

@@ -215,5 +215,5 @@ public final class CodemodInvoker {
   }
 
   private static final Pattern codemodIdPattern =
-      Pattern.compile("^([A-Za-z0-9]+):([A-Za-z0-9]+)\\/([A-Za-z0-9\\-]+)$");
+      Pattern.compile("^([A-Za-z0-9]+):(([A-Za-z0-9]+)\\/)*([A-Za-z0-9\\-]+)$");
 }
