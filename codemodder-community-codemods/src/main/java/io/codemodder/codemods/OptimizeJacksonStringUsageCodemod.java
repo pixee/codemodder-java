@@ -55,8 +55,8 @@ public final class OptimizeJacksonStringUsageCodemod
             .withBlockParent()
             // make sure it's a variable declaration statement
             .toBeVariableDeclarationStatement()
-            // make sure it's not a multi-variable declaration
-            .toBeSingleVariableDefinition()
+            // make sure it's local and not a multi-variable declaration
+            .toBeSingleLocalVariableDefinition()
             // make sure its only used the one place we expect
             .withDirectReferenceCount(1)
             // make sure it's a method call initializer

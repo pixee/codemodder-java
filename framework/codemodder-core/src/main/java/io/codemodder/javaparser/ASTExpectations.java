@@ -3,9 +3,13 @@ package io.codemodder.javaparser;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import io.codemodder.ast.ASTPatterns;
+import io.codemodder.ast.LocalVariableDeclaration;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -46,15 +50,9 @@ public final class ASTExpectations {
       if (nodeRef.isEmpty()) {
         return this;
       }
-      Optional<Node> parentRef = nodeRef.get().getParentNode();
-      if (parentRef.isEmpty()) {
-        nodeRef = Optional.empty();
-        return this;
-      }
-      Node parent = parentRef.get();
-      if (!(parent instanceof BlockStmt)) {
-        nodeRef = Optional.empty();
-      }
+      nodeRef =
+          nodeRef.filter(
+              n -> n.getParentNode().filter(parent -> parent instanceof BlockStmt).isPresent());
       return this;
     }
 
@@ -88,17 +86,25 @@ public final class ASTExpectations {
       this.varDefExprRef = expr;
     }
 
-    /** Return an expectation that asserts the variable declaration has only a single variable. */
-    public SingleVariableDeclaratorExpectation toBeSingleVariableDefinition() {
+    /**
+     * Return an expectation that asserts the local variable declaration has only a single variable.
+     */
+    public LocalVariableDeclaratorExpectation toBeSingleLocalVariableDefinition() {
       if (varDefExprRef.isEmpty()) {
-        return new SingleVariableDeclaratorExpectation(Optional.empty());
+        return new LocalVariableDeclaratorExpectation(Optional.empty());
       }
-      if (varDefExprRef.get().getVariables().size() != 1) {
+      VariableDeclarationExpr variableDeclarationExpr = varDefExprRef.get();
+      if (variableDeclarationExpr.getVariables().size() != 1) {
         varDefExprRef = Optional.empty();
-        return new SingleVariableDeclaratorExpectation(Optional.empty());
+        return new LocalVariableDeclaratorExpectation(Optional.empty());
       }
-      return new SingleVariableDeclaratorExpectation(
-          Optional.of(varDefExprRef.get().getVariables().get(0)));
+      Optional<LocalVariableDeclaration> localVariableDeclaration =
+          LocalVariableDeclaration.fromVariableDeclarator(variableDeclarationExpr.getVariable(0));
+      if (localVariableDeclaration.isPresent()) {
+        return new LocalVariableDeclaratorExpectation(
+            Optional.of(variableDeclarationExpr.getVariables().get(0)));
+      }
+      return new LocalVariableDeclaratorExpectation(Optional.empty());
     }
 
     @Override
@@ -108,21 +114,28 @@ public final class ASTExpectations {
   }
 
   /** A type for querying and filtering a single variable declaration. */
-  public static class SingleVariableDeclaratorExpectation
+  public static class LocalVariableDeclaratorExpectation
       implements ASTExpectationProducer<VariableDeclarator> {
     private Optional<VariableDeclarator> varRef;
 
-    public SingleVariableDeclaratorExpectation(
+    public LocalVariableDeclaratorExpectation(
         final Optional<VariableDeclarator> variableDeclarator) {
       this.varRef = Objects.requireNonNull(variableDeclarator);
     }
 
     /** Return an expectation that asserts the variable declaration has only a single variable. */
-    public SingleVariableDeclaratorExpectation withDirectReferenceCount(final int count) {
+    public LocalVariableDeclaratorExpectation withDirectReferenceCount(final int count) {
       if (varRef.isEmpty()) {
         return this;
       }
-      if (!Filters.isVariableProbablyReferencedExactly(varRef.get(), count)) {
+      Optional<LocalVariableDeclaration> localVariableDeclaration =
+          LocalVariableDeclaration.fromVariableDeclarator(varRef.get());
+      if (localVariableDeclaration.isEmpty()) {
+        varRef = Optional.empty();
+        return this;
+      }
+      List<NameExpr> allReferences = ASTPatterns.findAllReferences(localVariableDeclaration.get());
+      if (allReferences.size() != count) {
         varRef = Optional.empty();
       }
       return this;
