@@ -2,11 +2,11 @@ package io.codemodder.javaparser;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -63,23 +63,14 @@ public final class ASTExpectations {
      * VariableDeclarationExpr} for its expression.
      */
     public VariableDeclarationExprExpectation toBeVariableDeclarationStatement() {
-      if (nodeRef.isEmpty()) {
-        return new VariableDeclarationExprExpectation(null);
-      }
-      Node node = nodeRef.get();
-      if (!(node instanceof ExpressionStmt)) {
-        nodeRef = Optional.empty();
-        return new VariableDeclarationExprExpectation(null);
-      }
-
-      ExpressionStmt stmt = (ExpressionStmt) node;
-      if (!(stmt.getExpression() instanceof VariableDeclarationExpr)) {
-        nodeRef = Optional.empty();
-        return new VariableDeclarationExprExpectation(null);
-      }
-
-      VariableDeclarationExpr variableDeclarator = ((VariableDeclarationExpr) stmt.getExpression());
-      return new VariableDeclarationExprExpectation(variableDeclarator);
+      Optional<VariableDeclarationExpr> vde =
+          nodeRef
+              .map(n -> n instanceof ExpressionStmt ? (ExpressionStmt) n : null)
+              .map(ExpressionStmt::getExpression)
+              .map(
+                  expr ->
+                      expr.isVariableDeclarationExpr() ? expr.asVariableDeclarationExpr() : null);
+      return new VariableDeclarationExprExpectation(vde);
     }
 
     @Override
@@ -91,36 +82,39 @@ public final class ASTExpectations {
   /** A type for querying and filtering variable declaration(s). */
   public static class VariableDeclarationExprExpectation
       implements ASTExpectationProducer<VariableDeclarationExpr> {
-    private Optional<VariableDeclarationExpr> varDefExpr;
+    private Optional<VariableDeclarationExpr> varDefExprRef;
 
-    public VariableDeclarationExprExpectation(final VariableDeclarationExpr expr) {
-      this.varDefExpr = Optional.ofNullable(expr);
+    public VariableDeclarationExprExpectation(final Optional<VariableDeclarationExpr> expr) {
+      this.varDefExprRef = expr;
     }
 
     /** Return an expectation that asserts the variable declaration has only a single variable. */
     public SingleVariableDeclaratorExpectation toBeSingleVariableDefinition() {
-      if (varDefExpr.isEmpty()) {
-        return new SingleVariableDeclaratorExpectation(null);
+      if (varDefExprRef.isEmpty()) {
+        return new SingleVariableDeclaratorExpectation(Optional.empty());
       }
-      if (varDefExpr.get().getVariables().size() != 1) {
-        varDefExpr = Optional.empty();
-        return new SingleVariableDeclaratorExpectation(null);
+      if (varDefExprRef.get().getVariables().size() != 1) {
+        varDefExprRef = Optional.empty();
+        return new SingleVariableDeclaratorExpectation(Optional.empty());
       }
-      return new SingleVariableDeclaratorExpectation(varDefExpr.get().getVariables().get(0));
+      return new SingleVariableDeclaratorExpectation(
+          Optional.of(varDefExprRef.get().getVariables().get(0)));
     }
 
     @Override
     public Optional<VariableDeclarationExpr> result() {
-      return varDefExpr;
+      return varDefExprRef;
     }
   }
 
   /** A type for querying and filtering a single variable declaration. */
-  public static class SingleVariableDeclaratorExpectation {
+  public static class SingleVariableDeclaratorExpectation
+      implements ASTExpectationProducer<VariableDeclarator> {
     private Optional<VariableDeclarator> varRef;
 
-    public SingleVariableDeclaratorExpectation(final VariableDeclarator variableDeclarator) {
-      this.varRef = Optional.ofNullable(variableDeclarator);
+    public SingleVariableDeclaratorExpectation(
+        final Optional<VariableDeclarator> variableDeclarator) {
+      this.varRef = Objects.requireNonNull(variableDeclarator);
     }
 
     /** Return an expectation that asserts the variable declaration has only a single variable. */
@@ -128,40 +122,45 @@ public final class ASTExpectations {
       if (varRef.isEmpty()) {
         return this;
       }
-      if (!Filters.isVariableReferencedExactly(varRef.get(), count)) {
+      if (!Filters.isVariableProbablyReferencedExactly(varRef.get(), count)) {
         varRef = Optional.empty();
       }
       return this;
     }
 
+    /** Return an expectation that asserts that the initializer is a {@link MethodCallExpr}. */
     public MethodCallExpectation toBeInitializedByMethodCall() {
       if (varRef.isEmpty()) {
-        return new MethodCallExpectation(null);
+        return new MethodCallExpectation(Optional.empty());
       }
-      if (varRef.get().getInitializer().isEmpty()) {
+      Optional<MethodCallExpr> mc =
+          varRef
+              .flatMap(VariableDeclarator::getInitializer)
+              .filter(MethodCallExpr.class::isInstance)
+              .map(MethodCallExpr.class::cast);
+
+      if (mc.isEmpty()) {
         varRef = Optional.empty();
-        return new MethodCallExpectation(null);
       }
-      Expression initializer = varRef.get().getInitializer().get();
-      if (!MethodCallExpr.class.equals(initializer.getClass())) {
-        varRef = Optional.empty();
-      }
-      return new MethodCallExpectation((MethodCallExpr) initializer);
+
+      return new MethodCallExpectation(mc);
     }
 
+    @Override
     public Optional<VariableDeclarator> result() {
       return varRef;
     }
   }
 
   /** A type for querying and filtering method call expressions. */
-  public static class MethodCallExpectation {
-    private Optional<MethodCallExpr> methodCallExpr;
+  public static class MethodCallExpectation implements ASTExpectationProducer<MethodCallExpr> {
+    private final Optional<MethodCallExpr> methodCallExpr;
 
-    public MethodCallExpectation(final MethodCallExpr methodCallExpr) {
-      this.methodCallExpr = Optional.ofNullable(methodCallExpr);
+    public MethodCallExpectation(final Optional<MethodCallExpr> methodCallExpr) {
+      this.methodCallExpr = Objects.requireNonNull(methodCallExpr);
     }
 
+    @Override
     public Optional<MethodCallExpr> result() {
       return methodCallExpr;
     }
