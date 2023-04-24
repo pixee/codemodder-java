@@ -33,7 +33,9 @@ public @interface SemgrepScan {
 
   /**
    * The Semgrep rule "id" field from the YAML. This is needed to disambiguate Semgrep results as we
-   * consolidate Semgrep rules into one scan.
+   * consolidate Semgrep rules into one scan. If unspecified, the rule ID will be assumed to be the
+   * one and only rule specified in the YAML. If there are multiple rules in the YAML, the rule
+   * desired by the codemod will be ambiguous and an error will occur.
    */
-  String ruleId();
+  String ruleId() default "";
 }
