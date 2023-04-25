@@ -2,7 +2,3 @@ rules:
   - id: limit-readline
     patterns:
       - pattern: (BufferedReader $X).readLine()
-    message: Semgrep found a match
-    languages:
-      - java
-    severity: WARNING
