@@ -18,7 +18,7 @@ import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclar
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
-import io.codemodder.ast.ASTPatterns;
+import io.codemodder.ast.ASTs;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -76,7 +76,7 @@ final class TimeBoxedTypeLocator implements TypeLocator {
     final ResolvedValueDeclaration valueDeclaration = nameExpr.resolve();
     locatedTypeName = locateTypeName(locatedTypeName, valueDeclaration);
     if (locatedTypeName == null) {
-      Optional<MethodDeclaration> methodBodyRef = ASTPatterns.findMethodBodyFrom(nameExpr);
+      Optional<MethodDeclaration> methodBodyRef = ASTs.findMethodBodyFrom(nameExpr);
       if (methodBodyRef.isEmpty()) {
         return null;
       }

@@ -9,8 +9,8 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
-import io.codemodder.ast.ASTPatterns;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.ast.ASTs;
 import io.codemodder.ast.ExpressionStmtVariableDeclaration;
 import io.codemodder.ast.LocalVariableDeclaration;
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public final class JDBCResourceLeakFixer {
         }
         if (mceScope.isNameExpr()) {
           final var maybeLVD =
-              ASTPatterns.findEarliestLocalDeclarationOf(
+              ASTs.findEarliestLocalDeclarationOf(
                   mceScope, mceScope.asNameExpr().getNameAsString());
 
           if (maybeLVD.filter(lvd -> escapesRootScope(lvd, n -> true)).isPresent()) {
@@ -104,14 +104,14 @@ public final class JDBCResourceLeakFixer {
 
     // Is LocalDeclarationStmt and Never Assigned -> Wrap as a try resource
     final var maybeLVD =
-        ASTPatterns.isInitExpr(mce)
+        ASTs.isInitExpr(mce)
             .flatMap(LocalVariableDeclaration::fromVariableDeclarator)
             .map(
                 lvd ->
                     lvd instanceof ExpressionStmtVariableDeclaration
                         ? (ExpressionStmtVariableDeclaration) lvd
                         : null)
-            .filter(lvd -> ASTPatterns.isFinalOrNeverAssigned(lvd));
+            .filter(lvd -> ASTs.isFinalOrNeverAssigned(lvd));
     if (maybeLVD.isPresent()) {
       var localVariableDeclaration = maybeLVD.get();
       if (localVariableDeclaration.getVariableDeclarationExpr().getVariables().size() == 1) {
@@ -138,7 +138,7 @@ public final class JDBCResourceLeakFixer {
     for (final var ae : allAE) {
       if (ae.getTarget().isNameExpr()) {
         final var ne = ae.getTarget().asNameExpr();
-        final var maybeLVD = ASTPatterns.findEarliestLocalDeclarationOf(ne, ne.getNameAsString());
+        final var maybeLVD = ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString());
         maybeLVD.ifPresentOrElse(
             lvd -> {
               if (!memory.contains(lvd.getVariableDeclarator())) allLVD.add(lvd);
@@ -168,10 +168,10 @@ public final class JDBCResourceLeakFixer {
    */
   public static Pair<List<LocalVariableDeclaration>, List<Node>> flowsInto(final Expression expr) {
     // is immediately assigned as an init expr
-    final var maybeInit = ASTPatterns.isInitExpr(expr);
+    final var maybeInit = ASTs.isInitExpr(expr);
     if (maybeInit.isPresent()) {
       final var vd = maybeInit.get();
-      var maybeLVD = ASTPatterns.findEarliestLocalDeclarationOf(expr, vd.getNameAsString());
+      var maybeLVD = ASTs.findEarliestLocalDeclarationOf(expr, vd.getNameAsString());
       if (maybeLVD.isPresent()) {
         return combine(
             new Pair<>(new ArrayList<>(List.of(maybeLVD.get())), new ArrayList<>()),
@@ -180,12 +180,12 @@ public final class JDBCResourceLeakFixer {
     }
 
     // is immediately assigned
-    final var maybeAE = ASTPatterns.isAssigned(expr);
+    final var maybeAE = ASTs.isAssigned(expr);
     if (maybeAE.isPresent()) {
       final var ae = maybeAE.get();
       if (ae.getTarget().isNameExpr()) {
         final var maybeLVD =
-            ASTPatterns.findEarliestLocalDeclarationOf(
+            ASTs.findEarliestLocalDeclarationOf(
                 ae.getTarget(), ae.getTarget().asNameExpr().getNameAsString());
         if (maybeLVD.isPresent()) {
           return combine(
@@ -309,14 +309,13 @@ public final class JDBCResourceLeakFixer {
    */
   private static Optional<LocalVariableDeclaration> immediatelyFlowsIntoLocalVariable(
       final Expression expr) {
-    final var maybeInit =
-        ASTPatterns.isInitExpr(expr).filter(ASTPatterns::isLocalVariableDeclarator);
+    final var maybeInit = ASTs.isInitExpr(expr).filter(ASTs::isLocalVariableDeclarator);
     if (maybeInit.isPresent()) {
       return maybeInit.flatMap(LocalVariableDeclaration::fromVariableDeclarator);
     }
-    return ASTPatterns.isAssigned(expr)
+    return ASTs.isAssigned(expr)
         .map(ae -> ae.getTarget().isNameExpr() ? ae.getTarget().asNameExpr() : null)
-        .flatMap(ne -> ASTPatterns.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()));
+        .flatMap(ne -> ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()));
   }
 
   /**
@@ -328,7 +327,7 @@ public final class JDBCResourceLeakFixer {
 
     // immediately generates a JDBC resource e.g. <expr>.prepareStatement()
     final var maybeMCE =
-        ASTPatterns.isScopeInMethodCall(expr).filter(JDBCResourceLeakFixer::isJDBCResourceInit);
+        ASTs.isScopeInMethodCall(expr).filter(JDBCResourceLeakFixer::isJDBCResourceInit);
     if (maybeMCE.isPresent()) {
       allDependent.add(maybeMCE.get());
       allDependent.addAll(findDependentResources(maybeMCE.get()));
@@ -338,7 +337,7 @@ public final class JDBCResourceLeakFixer {
     // immediately passed as a constructor argument for a closeable resource
     // the wrapping closeable resource is considered dependent
     final var maybeOCE =
-        ASTPatterns.isConstructorArgument(expr).filter(JDBCResourceLeakFixer::isCloseableType);
+        ASTs.isConstructorArgument(expr).filter(JDBCResourceLeakFixer::isCloseableType);
     if (maybeOCE.isPresent()) {
       allDependent.add(maybeOCE.get());
       allDependent.addAll(findDependentResources(maybeOCE.get()));
@@ -381,24 +380,22 @@ public final class JDBCResourceLeakFixer {
    */
   private static boolean immediatelyEscapesMethodScope(final Expression expr) {
     // Returned or argument of a MethodCallExpr
-    if (ASTPatterns.isReturnExpr(expr).isPresent()
-        || ASTPatterns.isArgumentOfMethodCall(expr).isPresent()) return true;
-
-    // is the init expression of a field
-    if (ASTPatterns.isInitExpr(expr).flatMap(ASTPatterns::isVariableOfField).isPresent())
+    if (ASTs.isReturnExpr(expr).isPresent() || ASTs.isArgumentOfMethodCall(expr).isPresent())
       return true;
 
+    // is the init expression of a field
+    if (ASTs.isInitExpr(expr).flatMap(ASTs::isVariableOfField).isPresent()) return true;
+
     // Is assigned to a field?
-    final var maybeAE = ASTPatterns.isAssigned(expr);
+    final var maybeAE = ASTs.isAssigned(expr);
     if (maybeAE.isPresent()) {
       final var ae = maybeAE.get();
       if (ae.getTarget().isFieldAccessExpr()) return true;
       if (ae.getTarget().isNameExpr()) {
-        var source =
-            ASTPatterns.findNonCallableSimpleNameSource(ae.getTarget().asNameExpr().getName());
+        var source = ASTs.findNonCallableSimpleNameSource(ae.getTarget().asNameExpr().getName());
         return source
             .map(n -> n instanceof VariableDeclarator ? (VariableDeclarator) n : null)
-            .flatMap(vd -> ASTPatterns.isVariableOfField(vd))
+            .flatMap(vd -> ASTs.isVariableOfField(vd))
             .isPresent();
       }
     }
@@ -438,10 +435,10 @@ public final class JDBCResourceLeakFixer {
       var expr = (Expression) node;
       if (expr.isFieldAccessExpr()) return true;
       if (expr.isNameExpr()) {
-        var source = ASTPatterns.findNonCallableSimpleNameSource(expr.asNameExpr().getName());
+        var source = ASTs.findNonCallableSimpleNameSource(expr.asNameExpr().getName());
         if (source
             .map(n -> n instanceof VariableDeclarator ? (VariableDeclarator) n : null)
-            .flatMap(vd -> ASTPatterns.isVariableOfField(vd))
+            .flatMap(vd -> ASTs.isVariableOfField(vd))
             .isPresent()) {
           return true;
         }

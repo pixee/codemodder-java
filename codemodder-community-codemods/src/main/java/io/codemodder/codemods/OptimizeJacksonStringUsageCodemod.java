@@ -11,7 +11,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.*;
-import io.codemodder.ast.ASTPatterns;
+import io.codemodder.ast.ASTs;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -70,7 +70,7 @@ public final class OptimizeJacksonStringUsageCodemod
 
     Region lastRegion = getLastDataFlowRegion(result);
     Optional<MethodCallExpr> readValueCallOpt =
-        ASTPatterns.findMethodBodyFrom(varDeclStmt).get().findAll(ExpressionStmt.class).stream()
+        ASTs.findMethodBodyFrom(varDeclStmt).get().findAll(ExpressionStmt.class).stream()
             .filter(stmt -> stmt.getRange().isPresent())
             .filter(stmt -> EXACT_MATCH.matches(lastRegion, stmt.getRange().get()))
             .map(stmt -> stmt.getExpression().asVariableDeclarationExpr())

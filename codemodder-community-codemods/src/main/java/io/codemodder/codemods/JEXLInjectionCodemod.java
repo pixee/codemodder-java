@@ -15,8 +15,8 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import io.codemodder.*;
-import io.codemodder.ast.ASTPatterns;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.ast.ASTs;
 import io.codemodder.providers.sarif.codeql.CodeQLScan;
 import io.github.pixee.security.UnwantedTypes;
 import java.util.List;
@@ -76,7 +76,7 @@ public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expressio
   /** Tries to sandbox the {@link JexlBuilder#create()} and returns its line if it does. */
   static Optional<Integer> tryToFix(final MethodCallExpr mce) {
     final var cu = mce.findCompilationUnit().get();
-    final var maybeStmt = ASTPatterns.findParentStatementFrom(mce);
+    final var maybeStmt = ASTs.findParentStatementFrom(mce);
     if (maybeStmt.isEmpty()) {
       return Optional.empty();
     }
@@ -138,10 +138,10 @@ public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expressio
     // is a variable, track its definition
     if (expr instanceof NameExpr) {
       final var maybeLVD =
-          ASTPatterns.findEarliestLocalDeclarationOf(
+          ASTs.findEarliestLocalDeclarationOf(
               expr.asNameExpr(), expr.asNameExpr().getNameAsString());
       return maybeLVD
-          .filter(ASTPatterns::isFinalOrNeverAssigned)
+          .filter(ASTs::isFinalOrNeverAssigned)
           .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
           .map(e -> e.isMethodCallExpr() ? e.asMethodCallExpr() : null)
           .filter(mcexpr -> mcexpr.getNameAsString().equals("createExpression"));
@@ -165,10 +165,10 @@ public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expressio
     // is a variable, track its definition
     if (scope instanceof NameExpr) {
       final var maybeLVD =
-          ASTPatterns.findEarliestLocalDeclarationOf(
+          ASTs.findEarliestLocalDeclarationOf(
               scope.asNameExpr(), scope.asNameExpr().getNameAsString());
       return maybeLVD
-          .filter(ASTPatterns::isFinalOrNeverAssigned)
+          .filter(ASTs::isFinalOrNeverAssigned)
           .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
           .map(expr -> expr.isMethodCallExpr() ? expr.asMethodCallExpr() : null)
           .filter(mcexpr -> mcexpr.getNameAsString().equals("create"));

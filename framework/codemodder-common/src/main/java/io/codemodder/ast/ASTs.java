@@ -25,7 +25,7 @@ import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 /** A static library for querying and returning patterns over AST nodes. */
-public final class ASTPatterns {
+public final class ASTs {
 
   /**
    * Test for this pattern: {@link AssignExpr} -&gt; {@link Expression} ({@code expr}), where

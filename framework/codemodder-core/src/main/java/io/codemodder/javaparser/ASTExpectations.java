@@ -7,7 +7,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
-import io.codemodder.ast.ASTPatterns;
+import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
 import java.util.List;
 import java.util.Objects;
@@ -134,7 +134,7 @@ public final class ASTExpectations {
         varRef = Optional.empty();
         return this;
       }
-      List<NameExpr> allReferences = ASTPatterns.findAllReferences(localVariableDeclaration.get());
+      List<NameExpr> allReferences = ASTs.findAllReferences(localVariableDeclaration.get());
       if (allReferences.size() != count) {
         varRef = Optional.empty();
       }

@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.Expression;
-import io.codemodder.ast.ASTPatterns;
+import io.codemodder.ast.ASTs;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,7 +127,7 @@ public interface TypeLocator {
      */
     @Override
     public String locateType(final Expression expr) {
-      Optional<MethodDeclaration> containingMethodRef = ASTPatterns.findMethodBodyFrom(expr);
+      Optional<MethodDeclaration> containingMethodRef = ASTs.findMethodBodyFrom(expr);
       if (lastMethod == null && containingMethodRef.isPresent()) {
         lastMethod = containingMethodRef.get();
       } else if (lastMethod != null && containingMethodRef.isPresent()) {

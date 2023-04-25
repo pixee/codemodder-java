@@ -40,7 +40,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(6);
     var decl = cu.findAll(ExpressionStmt.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(
         maybeFound.get() == decl.getExpression().asVariableDeclarationExpr().getVariable(0),
         is(true));
@@ -60,7 +60,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(6);
     var decl = cu.findAll(TryStmt.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(
         maybeFound.get() == decl.getResources().get(0).asVariableDeclarationExpr().getVariable(0),
         is(true));
@@ -80,7 +80,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(3);
     var decl = cu.findAll(ForStmt.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(
         maybeFound.get()
             == decl.getInitialization().get(0).asVariableDeclarationExpr().getVariable(0),
@@ -101,7 +101,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(7);
     var decl = cu.findAll(ForEachStmt.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl.getVariableDeclarator(), is(true));
   }
 
@@ -120,7 +120,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(7);
     var decl = cu.findAll(PatternExpr.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl, is(true));
   }
 
@@ -139,7 +139,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(7);
     var decl = cu.findAll(CatchClause.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl.getParameter(), is(true));
   }
 
@@ -156,7 +156,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(7);
     var decl = cu.findAll(LambdaExpr.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl.getParameter(0), is(true));
   }
 
@@ -173,7 +173,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(5);
     var decl = cu.findAll(MethodDeclaration.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl.getParameter(0), is(true));
   }
 
@@ -190,7 +190,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(5);
     var decl = cu.findAll(ConstructorDeclaration.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl.getParameter(0), is(true));
   }
 
@@ -209,7 +209,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(5);
     var decl = cu.findAll(LocalRecordDeclarationStmt.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl, is(true));
   }
 
@@ -228,7 +228,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(5);
     var decl = cu.findAll(LocalClassDeclarationStmt.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl.getClassDeclaration(), is(true));
   }
 
@@ -245,7 +245,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(3);
     var decl = cu.findAll(FieldDeclaration.class).get(0).getVariable(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl, is(true));
   }
 
@@ -257,7 +257,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(AnnotationExpr.class).get(0).getName();
     var decl = cu.findAll(AnnotationDeclaration.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access, access.getId());
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access, access.getId());
     assertThat(maybeFound.get() == decl, is(true));
   }
 
@@ -276,7 +276,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(3);
     var decl = cu.findAll(ClassOrInterfaceDeclaration.class).get(1);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl, is(true));
   }
 
@@ -299,7 +299,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(8);
     var decl = cu.findAll(ClassOrInterfaceDeclaration.class).get(1);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl, is(true));
   }
 
@@ -311,7 +311,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(5);
     var decl = cu.findAll(MethodDeclaration.class).get(0);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl.getTypeParameter(0), is(true));
   }
 
@@ -334,7 +334,7 @@ final class ASTsNameResolutionTest {
     LexicalPreservingPrinter.setup(cu);
     var access = cu.findAll(SimpleName.class).get(7);
     var decl = cu.findAll(ClassOrInterfaceDeclaration.class).get(1);
-    var maybeFound = ASTPatterns.findNonCallableSimpleNameSource(access);
+    var maybeFound = ASTs.findNonCallableSimpleNameSource(access);
     assertThat(maybeFound.get() == decl, is(true));
   }
 

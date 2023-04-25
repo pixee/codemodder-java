@@ -12,26 +12,26 @@ final class NameResolver {
 
   private static Optional<Node> isLocalNameSource(final Node n, final String name) {
     final Optional<Node> maybe =
-        ASTPatterns.isExpressionStmtDeclarationOf(n, name).map(Triplet::getValue2);
+        ASTs.isExpressionStmtDeclarationOf(n, name).map(Triplet::getValue2);
     // Possible returns:
     return maybe
-        .or(() -> ASTPatterns.isResourceOf(n, name).map(Triplet::getValue2))
-        .or(() -> ASTPatterns.isForVariableDeclarationOf(n, name).map(Triplet::getValue2))
-        .or(() -> ASTPatterns.isForEachVariableDeclarationOf(n, name).map(Triplet::getValue2))
-        .or(() -> ASTPatterns.isLambdaExprParameterOf(n, name).map(Pair::getValue1))
-        .or(() -> ASTPatterns.isExceptionParameterOf(n, name).map(Pair::getValue1))
-        .or(() -> ASTPatterns.isMethodFormalParameterOf(n, name).map(Pair::getValue1))
-        .or(() -> ASTPatterns.isMethodTypeParameterOf(n, name).map(Pair::getValue1))
-        .or(() -> ASTPatterns.isConstructorFormalParameterOf(n, name).map(Pair::getValue1))
-        .or(() -> ASTPatterns.isConstructorTypeParameterOf(n, name).map(Pair::getValue1))
-        .or(() -> ASTPatterns.isLocalTypeDeclarationOf(n, name).map(Pair::getValue1))
-        .or(() -> ASTPatterns.isLocalRecordDeclarationOf(n, name).map(Pair::getValue1))
-        .or(() -> ASTPatterns.isPatternExprDeclarationOf(n, name).map(t -> t));
+        .or(() -> ASTs.isResourceOf(n, name).map(Triplet::getValue2))
+        .or(() -> ASTs.isForVariableDeclarationOf(n, name).map(Triplet::getValue2))
+        .or(() -> ASTs.isForEachVariableDeclarationOf(n, name).map(Triplet::getValue2))
+        .or(() -> ASTs.isLambdaExprParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTs.isExceptionParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTs.isMethodFormalParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTs.isMethodTypeParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTs.isConstructorFormalParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTs.isConstructorTypeParameterOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTs.isLocalTypeDeclarationOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTs.isLocalRecordDeclarationOf(n, name).map(Pair::getValue1))
+        .or(() -> ASTs.isPatternExprDeclarationOf(n, name).map(t -> t));
   }
 
   private static Optional<Node> findLocalNameSource(Node current, final String name) {
     // Traverse the tree in reverse pre-order until it hits a declaration
-    final var it = ASTPatterns.reversePreOrderIterator(current);
+    final var it = ASTs.reversePreOrderIterator(current);
     while (!(current instanceof TypeDeclaration) && it.hasNext()) {
       current = it.next();
       final var maybeFound = isLocalNameSource(current, name);
@@ -43,7 +43,7 @@ final class NameResolver {
   private static Optional<Node> isFieldOfClass(
       final ClassOrInterfaceDeclaration classDeclaration, final String name) {
     return classDeclaration.getFields().stream()
-        .flatMap(field -> ASTPatterns.isFieldDeclarationOf(field, name).stream())
+        .flatMap(field -> ASTs.isFieldDeclarationOf(field, name).stream())
         .findAny()
         .map(Pair::getValue1);
   }
@@ -51,7 +51,7 @@ final class NameResolver {
   private static Optional<Node> isNamedMemberOfClass(
       final ClassOrInterfaceDeclaration classDeclaration, final String name) {
     return classDeclaration.getMembers().stream()
-        .flatMap(bodyDecl -> ASTPatterns.isNamedMemberOf(bodyDecl, name).stream())
+        .flatMap(bodyDecl -> ASTs.isNamedMemberOf(bodyDecl, name).stream())
         .findAny()
         .map(n -> (Node) n);
   }
@@ -68,7 +68,7 @@ final class NameResolver {
       final ClassOrInterfaceDeclaration classDeclaration, final String name) {
     return isFieldOfClass(classDeclaration, name)
         .or(() -> isNamedMemberOfClass(classDeclaration, name))
-        .or(() -> ASTPatterns.isClassTypeParameterOf(classDeclaration, name).map(Pair::getValue1))
+        .or(() -> ASTs.isClassTypeParameterOf(classDeclaration, name).map(Pair::getValue1))
         .or(() -> isNameOfClass(classDeclaration, name));
   }
 
@@ -120,7 +120,7 @@ final class NameResolver {
             .map(n -> n instanceof VariableDeclarator ? (VariableDeclarator) n : null);
     if (maybeSource.isPresent()) {
       final var vd = maybeSource.get();
-      return ASTPatterns.isVariableOfLocalDeclarationStmt(vd)
+      return ASTs.isVariableOfLocalDeclarationStmt(vd)
           .map(
               t ->
                   (LocalVariableDeclaration)
@@ -128,15 +128,15 @@ final class NameResolver {
                           t.getValue0(), t.getValue1(), t.getValue2()))
           .or(
               () ->
-                  ASTPatterns.isResource(vd)
+                  ASTs.isResource(vd)
                       .map(p -> new TryResourceDeclaration(p.getValue0(), p.getValue1(), vd)))
           .or(
               () ->
-                  ASTPatterns.isForInitVariable(vd)
+                  ASTs.isForInitVariable(vd)
                       .map(p -> new ForInitDeclaration(p.getValue0(), p.getValue1(), vd)))
           .or(
               () ->
-                  ASTPatterns.isForEachVariable(vd)
+                  ASTs.isForEachVariable(vd)
                       .map(p -> new ForEachDeclaration(p.getValue0(), p.getValue1(), vd)));
     }
 
