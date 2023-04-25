@@ -1,0 +1,71 @@
+package com.acme.testcode.resourceleak;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class Test {
+
+  private Connection conn;
+  private ResultSet field;
+
+  public ResultSet noFixReturningResultSet(String query) throws SQLException {
+    ResultSet rs;
+    var stmt = conn.createStatement();
+    rs = stmt.executeQuery(query);
+    return rs;
+  }
+
+  public void noFixRSOutOfScope(String query) throws SQLException {
+    ResultSet rs;
+    {
+      var stmt = conn.createStatement();
+      rs = stmt.executeQuery(query);
+    }
+    rs.getRow();
+  }
+
+  public void noFixAssignedToAField(String query) throws SQLException {
+    ResultSet rs;
+    var stmt = conn.createStatement();
+    rs = stmt.executeQuery(query);
+    field = rs;
+  }
+
+  public void outside(ResultSet rs) {
+    field = rs;
+  }
+
+  public void noFixRSParameter(String query) throws SQLException {
+    ResultSet rs;
+    var stmt = conn.createStatement();
+    rs = stmt.executeQuery(query);
+    outside(rs);
+  }
+
+  public Statement method(String query) throws SQLException {
+    Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery(query);
+    return stmt;
+  }
+
+  public void noFixRSLeakByStmt(String query) throws SQLException {
+    var stmt = method(query);
+    var rs = stmt.getResultSet();
+    rs.getRow();
+  }
+
+  public void simple(String query) throws SQLException {
+    try (Statement stmt = conn.createStatement()) {
+        try (ResultSet rs = stmt.executeQuery(query)) {
+        }
+    }
+  }
+
+  public void assignedToParameter(String query, ResultSet rs) throws SQLException {
+    try (Statement stmt = conn.createStatement()) {
+        rs = stmt.executeQuery(query);
+    }
+  }
+}
