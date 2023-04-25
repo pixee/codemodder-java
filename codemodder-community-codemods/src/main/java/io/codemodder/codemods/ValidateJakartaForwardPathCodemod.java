@@ -1,6 +1,6 @@
 package io.codemodder.codemods;
 
-import static io.codemodder.JavaParserTransformer.wrapExpression;
+import static io.codemodder.javaparser.JavaParserTransformer.wrap;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
@@ -33,7 +33,7 @@ public final class ValidateJakartaForwardPathCodemod
       final CompilationUnit cu,
       final Expression path,
       final Result result) {
-    return wrapExpression(path)
+    return wrap(path)
         .withStaticMethod(
             "io.github.pixee.security.jakarta.PathValidator", "validateDispatcherPath", true);
   }

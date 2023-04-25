@@ -1,6 +1,6 @@
 package com.acme.testcode;
 
-import io.github.pixee.security.XMLInputFactorySecurity;
+import static io.github.pixee.security.XMLInputFactorySecurity.hardenFactory;
 import java.io.StringReader;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -10,14 +10,14 @@ final class Test {
 
   void readXml(String str) throws XMLStreamException {
     // ruleid: harden-xmlinputfactory
-    XMLInputFactory xmlInputFactory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory());
+    XMLInputFactory xmlInputFactory = hardenFactory(XMLInputFactory.newFactory());
     XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(new StringReader(str));
     xmlEventReader.nextEvent();
   }
 
   void readXml2(String str) throws XMLStreamException {
     // ruleid: harden-xmlinputfactory
-    var xmlInputFactory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newInstance("", this.getClass().getClassLoader()));
+    var xmlInputFactory = hardenFactory(XMLInputFactory.newInstance("", this.getClass().getClassLoader()));
     XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(new StringReader(str));
     xmlEventReader.nextEvent();
   }

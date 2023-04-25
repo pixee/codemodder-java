@@ -6,7 +6,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
-import io.codemodder.ast.ASTPatterns;
+import io.codemodder.ast.ASTs;
 import io.codemodder.providers.sarif.codeql.CodeQLScan;
 import javax.inject.Inject;
 
@@ -37,7 +37,7 @@ public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expr
     }
     // is an argument of sendError call e.g. (response.sendError(418,<expression>))
     var maybeSendErrorCall =
-        ASTPatterns.isArgumentOfMethodCall(expression)
+        ASTs.isArgumentOfMethodCall(expression)
             .filter(mce -> mce.getNameAsString().equals("sendError"));
     if (maybeSendErrorCall.isPresent()) {
       var sendErrorCall = maybeSendErrorCall.get();

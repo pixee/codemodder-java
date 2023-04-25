@@ -219,7 +219,7 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var exp = cu.findAll(BooleanLiteralExpr.class).get(0);
-    assertThat(ASTPatterns.isAssigned(exp).isPresent(), is(true));
+    assertThat(ASTs.isAssigned(exp).isPresent(), is(true));
   }
 
   @Test
@@ -227,7 +227,7 @@ final class ASTsTest {
     var code = "class A {\n" + "  void foo() {\n" + "    var a = true;\n" + "  }\n" + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var exp = cu.findAll(BooleanLiteralExpr.class).get(0);
-    assertThat(ASTPatterns.isInitExpr(exp).isPresent(), is(true));
+    assertThat(ASTs.isInitExpr(exp).isPresent(), is(true));
   }
 
   @Test
@@ -240,7 +240,7 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var exp = cu.findAll(VariableDeclarationExpr.class).get(0);
-    assertThat(ASTPatterns.isResource(exp).isPresent(), is(true));
+    assertThat(ASTs.isResource(exp).isPresent(), is(true));
   }
 
   @Test
@@ -363,7 +363,7 @@ final class ASTsTest {
             + "}";
     var cu = new JavaParser().parse(code).getResult().get();
     var ne = cu.findAll(NameExpr.class).get(0);
-    assertThat(ASTPatterns.isScopeInMethodCall(ne).isPresent(), is(true));
+    assertThat(ASTs.isScopeInMethodCall(ne).isPresent(), is(true));
   }
 
   @Test

@@ -1,6 +1,6 @@
 package io.codemodder.codemods;
 
-import static io.codemodder.JavaParserTransformer.wrapExpression;
+import static io.codemodder.javaparser.JavaParserTransformer.wrap;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
@@ -36,7 +36,7 @@ public final class SanitizeApacheMultipartFilenameCodemod
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
       final Result result) {
-    return wrapExpression(methodCallExpr)
+    return wrap(methodCallExpr)
         .withStaticMethod(Filenames.class.getName(), "toSimpleFileName", false);
   }
 }
