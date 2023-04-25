@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +76,6 @@ public class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
   @Override
   public List<Weave> onFileFound(
       final CodemodInvocationContext context, final List<Result> results) {
-    // Not even an xml
     final File file = context.path().toFile();
     // No suggested changes within file
     final var locations =
@@ -92,6 +93,7 @@ public class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
     try {
       final File tempFile =
           File.createTempFile(file.getName(), getExtension(file.getName()).orElse(".tmp"));
+      tempFile.deleteOnExit();
       try (FileInputStream fileIS = new FileInputStream(file);
           FileWriter fileWriter = new FileWriter(tempFile)) {
         final var xmlReader = xmlInputFactory.createXMLEventReader(fileIS);
@@ -139,16 +141,17 @@ public class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
 
       final File modifiedFile =
           File.createTempFile(file.getName(), getExtension(file.getName()).orElse(".tmp"));
+      modifiedFile.deleteOnExit();
       try (BufferedReader reader = new BufferedReader(new FileReader(tempFile));
           BufferedWriter writer = new BufferedWriter(new FileWriter(modifiedFile))) {
         reader.skip(tempOffset);
         writer.append(originalHead);
         while (reader.ready()) {
           writer.write(BoundedLineReader.readLine(reader, 1000000));
+          writer.write('\n');
         }
       }
-      tempFile.deleteOnExit();
-
+      Files.copy(modifiedFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
       return allWeaves;
     } catch (final Exception e) {
       LOG.error("Problem handling file: {}", file.getPath(), e);

@@ -18,19 +18,12 @@
     <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
 
-   <distributionManagement>
-       <repository>
-           <id>secure-releases</id>
-           <name>Insecure Repository Releases</name>
-           <url>https://secure-repository.example</url>
-       </repository>
-   </distributionManagement>
    <repositories>
        <repository>
-           <id>secure</id>
-           <name>secure Repository</name>
+           <id>insecure</id>
+           <name>Insecure Repository</name>
            <!-- BAD! Use FTPS -->
-           <url>ftps://secure-repository.example</url>
+           <url>ftps://insecure-repository.example</url>
        </repository>
    </repositories>
 

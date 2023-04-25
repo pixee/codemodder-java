@@ -78,7 +78,11 @@ public final class CodeQLRuleSarif implements RuleSarif {
                           .getArtifactLocation()
                           .getUri();
                   try {
-                    return Files.isSameFile(path, repositoryRoot.resolve(Path.of(uri)));
+                    if (Files.exists(repositoryRoot.resolve(Path.of(uri)))) {
+                      return Files.isSameFile(path, repositoryRoot.resolve(Path.of(uri)));
+                    } else {
+                      return false;
+                    }
                   } catch (IOException e) { // this should never happen
                     logger.error("Problem inspecting SARIF to find code results", e);
                     return false;
