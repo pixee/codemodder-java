@@ -13,12 +13,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.VisibleForTesting;
 
 /** Responsible for binding Semgrep-related things. */
 final class SemgrepModule extends AbstractModule {
@@ -42,7 +44,7 @@ final class SemgrepModule extends AbstractModule {
     List<Path> yamlPathsToRun = new ArrayList<>();
 
     // find all @SemgrepScan annotations in their parameters and batch them up for running
-    List<SemgrepScan> toBind = new ArrayList<>();
+    List<Pair<String, SemgrepScan>> toBind = new ArrayList<>();
 
     for (Class<? extends Changer> codemodType : codemodTypes) {
       // find all constructors that are marked with @Inject
@@ -57,6 +59,7 @@ final class SemgrepModule extends AbstractModule {
               .flatMap(constructor -> Stream.of(constructor.getParameters()))
               .filter(parameter -> parameter.getAnnotation(SemgrepScan.class) != null)
               .collect(Collectors.toUnmodifiableList());
+
       parameters.forEach(
           parameter -> {
             SemgrepScan semgrepScanAnnotation = parameter.getAnnotation(SemgrepScan.class);
@@ -64,45 +67,94 @@ final class SemgrepModule extends AbstractModule {
               throw new IllegalArgumentException(
                   "Can only inject semgrep results into "
                       + RuleSarif.class.getSimpleName()
-                      + " types");
+                      + " types: "
+                      + codemodType.getName());
             }
             String yamlPath = semgrepScanAnnotation.pathToYaml();
-            String classpathYamlPath =
-                "/"
-                    + codemodType.getPackageName().replace(".", "/")
-                    + "/"
-                    + semgrepScanAnnotation.ruleId()
-                    + ".yaml";
+            String declaredRuleId = semgrepScanAnnotation.ruleId();
+            Path yamlPathToWrite = null;
             boolean foundYaml = false;
-            if (!"".equals(yamlPath)) {
-              classpathYamlPath = yamlPath;
-            }
-            Optional<Path> path = saveClasspathResourceToTemp(classpathYamlPath);
-            if (path.isPresent()) {
-              foundYaml = true;
-              yamlPathsToRun.add(path.get());
+            if (!declaredRuleId.isEmpty()) {
+              String classpathYamlPath =
+                  "/"
+                      + codemodType.getPackageName().replace(".", "/")
+                      + "/"
+                      + declaredRuleId
+                      + ".yaml";
+
+              if (!"".equals(yamlPath)) {
+                classpathYamlPath = yamlPath;
+              }
+              Optional<Path> path = saveClasspathResourceToTemp(classpathYamlPath);
+              if (path.isPresent()) {
+                foundYaml = true;
+                yamlPathToWrite = path.get();
+              }
             }
             String inlineYaml = semgrepScanAnnotation.yaml();
             if (!"".equals(inlineYaml)) {
               if (foundYaml) {
                 throw new IllegalArgumentException(
-                    "Cannot specify both inline yaml and yaml file path");
+                    "Cannot specify both inline yaml and yaml file path: " + codemodType.getName());
               }
               foundYaml = true;
-              yamlPathsToRun.add(saveStringToTemp(inlineYaml));
+              yamlPathToWrite = saveStringToTemp(inlineYaml);
             }
 
             if (!foundYaml) {
               throw new IllegalArgumentException(
-                  "no semgrep yaml found for " + codemodType.getName());
+                  "no semgrep yaml found for: " + codemodType.getName());
             }
-            toBind.add(semgrepScanAnnotation);
+
+            try {
+              if (StringUtils.isEmpty(declaredRuleId)) {
+                String rawYaml = Files.readString(yamlPathToWrite);
+                declaredRuleId = detectSingleRuleFromYaml(rawYaml);
+              }
+            } catch (IOException e) {
+              throw new UncheckedIOException(
+                  "Problem inspecting yaml: " + codemodType.getName(), e);
+            }
+
+            yamlPathsToRun.add(yamlPathToWrite);
+
+            Pair<String, SemgrepScan> rulePair = Pair.of(declaredRuleId, semgrepScanAnnotation);
+            toBind.add(rulePair);
           });
     }
 
     if (toBind.isEmpty()) {
       // no reason to run semgrep if there are no annotations
       return;
+    }
+
+    // fix up the yaml and add missing "message", "languages" and "severity" properties if they
+    // aren't there
+    for (Path yamlPath : yamlPathsToRun) {
+      try {
+        boolean changed = false;
+        String yamlAsString = Files.readString(yamlPath);
+        if (!yamlAsString.contains("message:")) {
+          changed = true;
+          yamlAsString += "\n    message: Semgrep found a match\n";
+        }
+        if (!yamlAsString.contains("severity:")) {
+          changed = true;
+          yamlAsString += "\n    severity: WARNING\n";
+        }
+        if (!yamlAsString.contains("languages:")) {
+          changed = true;
+          yamlAsString += "\n    languages:\n      - java\n";
+        }
+        if (changed) {
+          Files.write(
+              yamlPath,
+              yamlAsString.getBytes(StandardCharsets.UTF_8),
+              StandardOpenOption.TRUNCATE_EXISTING);
+        }
+      } catch (IOException e) {
+        throw new UncheckedIOException("Problem fixing up yaml", e);
+      }
     }
 
     // actually run the SARIF only once
@@ -114,10 +166,27 @@ final class SemgrepModule extends AbstractModule {
     }
 
     // bind the SARIF results
-    for (SemgrepScan sarifAnnotation : toBind) {
-      SemgrepRuleSarif semgrepSarif = new SemgrepRuleSarif(sarifAnnotation.ruleId(), sarif);
+    for (Pair<String, SemgrepScan> bindingPair : toBind) {
+      SemgrepScan sarifAnnotation = bindingPair.getRight();
+      SemgrepRuleSarif semgrepSarif = new SemgrepRuleSarif(bindingPair.getLeft(), sarif);
       bind(RuleSarif.class).annotatedWith(sarifAnnotation).toInstance(semgrepSarif);
     }
+  }
+
+  @VisibleForTesting
+  String detectSingleRuleFromYaml(final String rawYaml) {
+    String ruleIdStartToken = "- id:";
+    int count = StringUtils.countMatches(rawYaml, ruleIdStartToken);
+    if (count > 1) {
+      throw new IllegalArgumentException(
+          "Multiple rules found in yaml, must specify rule single rule id if implicit");
+    } else if (count == 0) {
+      throw new IllegalArgumentException(
+          "No rules found in yaml, must specify rule single rule id if implicit");
+    }
+    int start = rawYaml.indexOf(ruleIdStartToken);
+    int end = rawYaml.indexOf("\n", start);
+    return rawYaml.substring(start + ruleIdStartToken.length(), end).trim();
   }
 
   /** Save the YAML string given to a temporary file. */
@@ -152,6 +221,4 @@ final class SemgrepModule extends AbstractModule {
       IOUtils.closeQuietly(ruleInputStream);
     }
   }
-
-  private static final Logger logger = LoggerFactory.getLogger(SemgrepModule.class);
 }
