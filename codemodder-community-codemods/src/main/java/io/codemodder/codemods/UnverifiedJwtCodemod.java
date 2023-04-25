@@ -11,8 +11,8 @@ import io.codemodder.RegionExtractor;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.SarifPluginJavaParserChanger;
-import io.codemodder.ast.ASTPatterns;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
 import io.codemodder.providers.sarif.codeql.CodeQLScan;
 import javax.inject.Inject;
@@ -43,20 +43,20 @@ public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expressio
       final Result result) {
     // The result points to the expression that calls parse methods:
     // parse(token), parse(token,handler), parseClaimsJwt(token), parsePlaintextJwt(token)
-    var maybeParseCall = ASTPatterns.isScopeInMethodCall(expression);
+    var maybeParseCall = ASTs.isScopeInMethodCall(expression);
 
     // parseClaimsJws returns a different type than the other parse methods
     // Changing types may bring compilation errors in certain situations
 
     // The call itself is the scope in another methodcall, e.g <expr>.parse(token).getBody()
-    if (maybeParseCall.flatMap(mce -> ASTPatterns.isScopeInMethodCall(mce)).isPresent()) {
+    if (maybeParseCall.flatMap(mce -> ASTs.isScopeInMethodCall(mce)).isPresent()) {
       return fix(maybeParseCall.get());
     }
 
     // If the call is the init expression of a local variable
     var maybeLocalDeclaration =
         maybeParseCall
-            .flatMap(mce -> ASTPatterns.isInitExpr(mce))
+            .flatMap(mce -> ASTs.isInitExpr(mce))
             .flatMap(vd -> LocalVariableDeclaration.fromVariableDeclarator(vd));
     if (maybeLocalDeclaration.isPresent()) {
       var parseCall = maybeParseCall.get();
@@ -87,7 +87,7 @@ public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expressio
                           .stream());
 
       // if the only uses is being scope of a method calls, then we can change it
-      if (allNameExpr.allMatch(ne -> ASTPatterns.isScopeInMethodCall(ne).isPresent())) {
+      if (allNameExpr.allMatch(ne -> ASTs.isScopeInMethodCall(ne).isPresent())) {
         localDeclaration.getVariableDeclarator().setType("Jws<Claims>");
         ASTTransforms.addImportIfMissing(cu, "io.jsonwebtoken.Jws");
         ASTTransforms.addImportIfMissing(cu, "io.jsonwebtoken.Claims");
