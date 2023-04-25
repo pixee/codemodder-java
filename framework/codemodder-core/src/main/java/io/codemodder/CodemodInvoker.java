@@ -163,6 +163,7 @@ public final class CodemodInvoker {
             .collect(Collectors.toUnmodifiableList());
 
     final Path originalFileCopy = Files.createTempFile("codemodder-raw", ".original");
+    originalFileCopy.toFile().deleteOnExit();
     Files.copy(path, originalFileCopy, StandardCopyOption.REPLACE_EXISTING);
 
     for (final RawFileChanger changer : rawFileChangers) {
