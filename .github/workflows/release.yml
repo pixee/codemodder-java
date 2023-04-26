@@ -1,10 +1,18 @@
 name: Release
 
+env:
+  AWS_REGION: "us-east-1"
+
 on:
   workflow_dispatch:
     inputs:
       version:
         description: a stable version to set in version.txt before publishing
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
 
 jobs:
   release:
@@ -19,25 +27,39 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
       - name: Install Semgrep
         run: python3 -m pip install semgrep
+
       - uses: actions/setup-node@v3
+
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '11'
+
       - uses: graalvm/setup-graalvm@v1
         with:
           version: 'latest'
           java-version: '17'
           components: 'js,native-image'
           github-token: ${{ secrets.github_token }}
+
+      - name: Fetch AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::218200003247:role/DeployCodemodderImagesRole
+          role-session-name: github
+          aws-region: ${{ env.AWS_REGION }}
+
       - uses: gradle/gradle-build-action@v2
         with:
           arguments: -q setVersion -PnewVersion=${{ inputs.version }}
+
       - uses: gradle/gradle-build-action@v2
         with:
           arguments: build publish
@@ -54,6 +76,7 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           arguments: -q bumpPatch applySnapshot
+
       - run: |
           git add version.txt
           git commit -m '🚧 prepare for next development iteration'

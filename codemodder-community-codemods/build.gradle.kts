@@ -1,7 +1,18 @@
 plugins {
     id("io.codemodder.root")
     id("io.codemodder.java-library")
+    id("io.codemodder.runner")
+    id("io.codemodder.container-publish")
     id("io.codemodder.maven-publish")
+}
+
+application {
+    mainClass.set("io.codemodder.codemods.Runner")
+}
+
+jib.to.image = "218200003247.dkr.ecr.us-east-1.amazonaws.com/pixee/codemodder-java:${project.version}"
+tasks.publish {
+    dependsOn(tasks.jib)
 }
 
 java {
