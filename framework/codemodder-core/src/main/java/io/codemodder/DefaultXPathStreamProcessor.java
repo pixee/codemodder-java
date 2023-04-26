@@ -86,6 +86,14 @@ final class DefaultXPathStreamProcessor implements XPathStreamProcessor {
       transformedXml = transformedXml.substring(transformedXml.indexOf('>') + 1);
     }
 
+    // Fix prolog string, if needed
+    if (xml.stripLeading().startsWith("<?xml")) {
+      var xmlHead = xml.substring(0, xml.indexOf('<', xml.indexOf('<') + 1));
+      var transformedXmlTail =
+          transformedXml.substring(transformedXml.indexOf('<', transformedXml.indexOf('<') + 1));
+      transformedXml = xmlHead + transformedXmlTail;
+    }
+
     // remove the empty leftover lines affected by our changes if there are any
     Set<Integer> linesAffected =
         httpMethodPositions.stream().map(pos -> pos.line()).collect(Collectors.toUnmodifiableSet());

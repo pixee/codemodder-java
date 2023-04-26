@@ -164,6 +164,7 @@ public final class CodemodInvoker {
             .collect(Collectors.toUnmodifiableList());
 
     final Path originalFileCopy = Files.createTempFile("codemodder-raw", ".original");
+    originalFileCopy.toFile().deleteOnExit();
     Files.copy(path, originalFileCopy, StandardCopyOption.REPLACE_EXISTING);
 
     for (final RawFileChanger changer : rawFileChangers) {
@@ -216,5 +217,5 @@ public final class CodemodInvoker {
   }
 
   private static final Pattern codemodIdPattern =
-      Pattern.compile("^([A-Za-z0-9]+):([A-Za-z0-9]+)\\/([A-Za-z0-9\\-]+)$");
+      Pattern.compile("^([A-Za-z0-9]+):(([A-Za-z0-9]+)\\/)+([A-Za-z0-9\\-]+)$");
 }

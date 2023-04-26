@@ -24,6 +24,7 @@ public final class DefaultCodemods {
         JEXLInjectionCodemod.class,
         JSPScriptletXSSCodemod.class,
         LimitReadlineCodemod.class,
+        MavenSecureURLCodemod.class,
         RandomizeSeedCodemod.class,
         SanitizeApacheMultipartFilenameCodemod.class,
         SanitizeHttpHeaderCodemod.class,

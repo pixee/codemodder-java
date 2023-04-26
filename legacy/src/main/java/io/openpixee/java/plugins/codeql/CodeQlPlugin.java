@@ -80,11 +80,9 @@ public final class CodeQlPlugin extends DefaultSarifProcessorPlugin {
   @Override
   public List<FileBasedVisitor> getFileWeaversFor(
       final File repositoryRoot, final Run run, final CodemodRegulator context) {
-    final Set<Result> pomResults = getPOMResults(run, "java/maven/non-https-url");
+    final Set<Result> pomResults = Set.of();
     final var weavers = new ArrayList<FileBasedVisitor>();
-    if (!pomResults.isEmpty()) {
-      weavers.add(new MavenSecureURLVisitor(repositoryRoot, pomResults));
-    }
+    if (!pomResults.isEmpty()) {}
     return weavers;
   }
 

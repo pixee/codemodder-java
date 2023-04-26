@@ -2,7 +2,7 @@ package io.codemodder;
 
 import java.io.IOException;
 
-/** Gives access to raw files for performing arbitrary cahnges. */
+/** Gives access to raw files for performing arbitrary changes. */
 public interface RawFileChanger extends Changer {
 
   /**

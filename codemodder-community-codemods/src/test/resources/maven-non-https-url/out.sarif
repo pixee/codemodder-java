@@ -1,0 +1,241 @@
+{
+  "$schema" : "https://json.schemastore.org/sarif-2.1.0.json",
+  "version" : "2.1.0",
+  "runs" : [ {
+    "tool" : {
+      "driver" : {
+        "name" : "CodeQL",
+        "organization" : "GitHub",
+        "semanticVersion" : "2.11.6",
+        "rules" : [ {
+          "id" : "java/maven/non-https-url",
+          "name" : "java/maven/non-https-url",
+          "shortDescription" : {
+            "text" : "Failure to use HTTPS or SFTP URL in Maven artifact upload/download"
+          },
+          "fullDescription" : {
+            "text" : "Non-HTTPS connections can be intercepted by third parties."
+          },
+          "defaultConfiguration" : {
+            "enabled" : true,
+            "level" : "error"
+          },
+          "properties" : {
+            "tags" : [ "security", "external/cwe/cwe-300", "external/cwe/cwe-319", "external/cwe/cwe-494", "external/cwe/cwe-829" ],
+            "description" : "Non-HTTPS connections can be intercepted by third parties.",
+            "id" : "java/maven/non-https-url",
+            "kind" : "problem",
+            "name" : "Failure to use HTTPS or SFTP URL in Maven artifact upload/download",
+            "precision" : "very-high",
+            "problem.severity" : "error",
+            "security-severity" : "8.1"
+          }
+        } ]
+      },
+      "extensions" : [ {
+        "name" : "legacy-upgrades",
+        "semanticVersion" : "0.0.0",
+        "locations" : [ {
+          "uri" : "file:///opt/codeql/legacy-upgrades/",
+          "description" : {
+            "text" : "The QL pack root directory."
+          }
+        }, {
+          "uri" : "file:///opt/codeql/legacy-upgrades/qlpack.yml",
+          "description" : {
+            "text" : "The QL pack definition file."
+          }
+        } ]
+      }, {
+        "name" : "codeql/java-queries",
+        "semanticVersion" : "0.4.6+5ae770f33996156df494a9b915139bea4160a120",
+        "locations" : [ {
+          "uri" : "file:///home/andrecs/.codeql/packages/codeql/java-queries/0.4.6/",
+          "description" : {
+            "text" : "The QL pack root directory."
+          }
+        }, {
+          "uri" : "file:///home/andrecs/.codeql/packages/codeql/java-queries/0.4.6/qlpack.yml",
+          "description" : {
+            "text" : "The QL pack definition file."
+          }
+        } ]
+      } ]
+    },
+    "artifacts" : [ {
+      "location" : {
+        "uri" : "pom_insecure_url_1.xml",
+        "uriBaseId" : "%SRCROOT%",
+        "index" : 0
+      }
+    }, {
+      "location" : {
+        "uri" : "pom_insecure_url_2.xml",
+        "uriBaseId" : "%SRCROOT%",
+        "index" : 1
+      }
+    }, {
+      "location" : {
+        "uri" : "pom_insecure_url_3.xml",
+        "uriBaseId" : "%SRCROOT%",
+        "index" : 2
+      }
+    }, {
+      "location" : {
+        "uri" : "pom_insecure_url_wonky.xml",
+        "uriBaseId" : "%SRCROOT%",
+        "index" : 3
+      }
+    } ],
+    "results" : [ {
+      "ruleId" : "java/maven/non-https-url",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/maven/non-https-url",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "Downloading or uploading artifacts over insecure protocol (eg. http or ftp) to/from repository http://insecure-repository.example"
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "pom_insecure_url_1.xml",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 22,
+            "startColumn" : 8,
+            "endLine" : 27,
+            "endColumn" : 22
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "8a4c482c80336490:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      }
+    }, {
+      "ruleId" : "java/maven/non-https-url",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/maven/non-https-url",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "Downloading or uploading artifacts over insecure protocol (eg. http or ftp) to/from repository ftp://insecure-repository.example"
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "pom_insecure_url_2.xml",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 1
+          },
+          "region" : {
+            "startLine" : 22,
+            "startColumn" : 8,
+            "endLine" : 27,
+            "endColumn" : 22
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "c0a34d306173617d:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      }
+    }, {
+      "ruleId" : "java/maven/non-https-url",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/maven/non-https-url",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "Downloading or uploading artifacts over insecure protocol (eg. http or ftp) to/from repository http://insecure-repository.example"
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "pom_insecure_url_3.xml",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 2
+          },
+          "region" : {
+            "startLine" : 22,
+            "startColumn" : 8,
+            "endLine" : 27,
+            "endColumn" : 22
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "8a4c482c80336490:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      }
+    }, {
+      "ruleId" : "java/maven/non-https-url",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/maven/non-https-url",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "Downloading or uploading artifacts over insecure protocol (eg. http or ftp) to/from repository ftp://insecure-repository.example"
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "pom_insecure_url_3.xml",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 2
+          },
+          "region" : {
+            "startLine" : 30,
+            "startColumn" : 8,
+            "endLine" : 35,
+            "endColumn" : 22
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "c0a34d306173617d:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      }
+    }, {
+      "ruleId" : "java/maven/non-https-url",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/maven/non-https-url",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "Downloading or uploading artifacts over insecure protocol (eg. http or ftp) to/from repository http://insecure-repository.example"
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "pom_insecure_url_wonky.xml",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 3
+          },
+          "region" : {
+            "startLine" : 26,
+            "startColumn" : 8,
+            "endLine" : 37,
+            "endColumn" : 22
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "7697fa5b428ceb56:1",
+        "primaryLocationStartColumnFingerprint" : "0"
+      }
+    } ],
+    "columnKind" : "utf16CodeUnits",
+    "properties" : {
+      "semmle.formatSpecifier" : "sarifv2.1.0"
+    }
+  } ]
+}

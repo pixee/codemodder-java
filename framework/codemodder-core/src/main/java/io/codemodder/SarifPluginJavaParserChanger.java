@@ -54,6 +54,12 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> implements Ja
   @Override
   public final void visit(final CodemodInvocationContext context, final CompilationUnit cu) {
     List<Result> results = sarif.getResultsByPath(context.path());
+
+    // small shortcut to avoid always executing the expensive findAll
+    if (results.isEmpty()) {
+      return;
+    }
+
     List<? extends Node> allNodes = cu.findAll(nodeType);
 
     /*
