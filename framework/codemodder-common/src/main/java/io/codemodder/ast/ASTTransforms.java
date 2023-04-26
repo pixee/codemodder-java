@@ -20,8 +20,16 @@ public final class ASTTransforms {
   public static void addImportIfMissing(final CompilationUnit cu, final String className) {
     NodeList<ImportDeclaration> imports = cu.getImports();
     ImportDeclaration newImport = new ImportDeclaration(className, false, false);
-    if (imports.contains(newImport)) {
+    if (addInOrdrerIfNeeded(className, imports, newImport)) {
       return;
+    }
+    cu.addImport(className);
+  }
+
+  private static boolean addInOrdrerIfNeeded(
+      String className, NodeList<ImportDeclaration> imports, ImportDeclaration newImport) {
+    if (imports.contains(newImport)) {
+      return true;
     }
     for (int i = 0; i < imports.size(); i++) {
       ImportDeclaration existingImport = imports.get(i);
@@ -32,12 +40,14 @@ public final class ASTTransforms {
         if (i == 0) {
           existingImport.replace(newImport);
           imports.addAfter(existingImport, newImport);
-          return;
-        } else imports.addBefore(newImport, existingImport);
-        return;
+          return true;
+        } else {
+          imports.addBefore(newImport, existingImport);
+        }
+        return true;
       }
     }
-    cu.addImport(className);
+    return false;
   }
 
   /** Add an import in alphabetical order. */
@@ -48,22 +58,8 @@ public final class ASTTransforms {
   public static void addStaticImportIfMissing(final CompilationUnit cu, final String method) {
     NodeList<ImportDeclaration> imports = cu.getImports();
     ImportDeclaration newMethodImport = new ImportDeclaration(method, true, false);
-    if (imports.contains(newMethodImport)) {
+    if (addInOrdrerIfNeeded(method, imports, newMethodImport)) {
       return;
-    }
-    for (int i = 0; i < imports.size(); i++) {
-      ImportDeclaration existingImport = imports.get(i);
-
-      if (existingImport.getNameAsString().compareTo(method) > 0) {
-        // Workaround for a bug caused by adding imports at the top
-        // It adds an extra empty line
-        if (i == 0) {
-          existingImport.replace(newMethodImport);
-          imports.addAfter(existingImport, newMethodImport);
-          return;
-        } else imports.addBefore(newMethodImport, existingImport);
-        return;
-      }
     }
     cu.addImport(method, true, false);
   }

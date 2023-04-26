@@ -1,6 +1,6 @@
 package io.codemodder.codemods;
 
-import static io.codemodder.JavaParserTransformer.wrapExpression;
+import static io.codemodder.javaparser.JavaParserTransformer.wrap;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
@@ -31,8 +31,7 @@ public final class SanitizeHttpHeaderCodemod extends SarifPluginJavaParserChange
       final MethodCallExpr setHeaderCall,
       final Result result) {
     Expression headerValueArgument = setHeaderCall.getArgument(1);
-    return wrapExpression(headerValueArgument)
-        .withStaticMethod(Newlines.class.getName(), "stripAll", false);
+    return wrap(headerValueArgument).withStaticMethod(Newlines.class.getName(), "stripAll", false);
   }
 
   @Override

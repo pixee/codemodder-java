@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import io.codemodder.javaparser.JavaParserChanger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

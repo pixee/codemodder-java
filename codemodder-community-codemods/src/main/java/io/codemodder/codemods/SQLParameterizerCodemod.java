@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.JavaParserChanger;
 import io.openpixee.jdbcparameterizer.SQLParameterizer;
 import java.util.Collections;
 import java.util.List;

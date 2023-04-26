@@ -1,24 +1,19 @@
 package io.codemodder.codemods;
 
-import com.contrastsecurity.sarif.PhysicalLocation;
+import static io.codemodder.RegionNodeMatcher.EXACT_MATCH;
+import static io.codemodder.Sarif.getLastDataFlowRegion;
+import static io.codemodder.javaparser.ASTExpectations.expect;
+
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
-import com.contrastsecurity.sarif.ThreadFlowLocation;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.*;
 import io.codemodder.ast.ASTs;
-import io.codemodder.ast.LocalVariableDeclaration;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 @Codemod(
@@ -44,7 +39,8 @@ public final class OptimizeJacksonStringUsageCodemod
    *   <li>The resulting String is used nowhere else besides the readValue() call.
    * </ol>
    *
-   * We've configured the {@link RegionExtractor} to pull the first data flow event, which is
+   * We've configured the {@link RegionExtractor} to pull the first data flow event, which is the
+   * IOUtils#toString() call.
    */
   @Override
   public boolean onResultFound(
@@ -53,72 +49,35 @@ public final class OptimizeJacksonStringUsageCodemod
       final ExpressionStmt varDeclStmt,
       final Result result) {
 
-    // We start by obtaining the String declaration
-    VariableDeclarationExpr varDeclExpr = varDeclStmt.getExpression().asVariableDeclarationExpr();
-    VariableDeclarator streamVariable = varDeclExpr.getVariable(0);
-    String variableName = streamVariable.getNameAsString();
+    Optional<MethodCallExpr> toStringCall =
+        expect(varDeclStmt)
+            // make sure it's not in a try-with-resources, foreach declaration, etc
+            .withBlockParent()
+            // make sure it's a variable declaration statement
+            .toBeVariableDeclarationStatement()
+            // make sure it's local and not a multi-variable declaration
+            .toBeSingleLocalVariableDefinition()
+            // make sure its only used the one place we expect
+            .withDirectReferenceCount(1)
+            // make sure it's a method call initializer
+            .toBeInitializedByMethodCall()
+            .result();
 
-    // Since we want to delete the string, we need to check if it is only used once at readValue
-    List<NameExpr> allJsonStringReferences =
-        LocalVariableDeclaration.fromVariableDeclarator(streamVariable).stream()
-            .flatMap(lvd -> ASTs.findAllReferences(lvd).stream())
-            .collect(Collectors.toList());
-    if (allJsonStringReferences.size() != 1) {
+    if (toStringCall.isEmpty()) {
       return false;
     }
+    String streamVariableName = toStringCall.get().getArgument(0).asNameExpr().getNameAsString();
 
-    // We now look for the object declaration
-    Optional<MethodDeclaration> methodDeclaration =
-        varDeclStmt.findAncestor(MethodDeclaration.class);
-    if (methodDeclaration.isEmpty()) {
-      return false;
-    }
-    // This get() is safe because of the semgrep rule
-    Expression stream = streamVariable.getInitializer().get().asMethodCallExpr().getArgument(0);
-
-    // Need to make sure the stream isn't referenced anywhere else besides the read if we want to
-    // change the code
-    List<NameExpr> allStreamReferences =
-        LocalVariableDeclaration.fromVariableDeclarator(streamVariable).stream()
-            .flatMap(lvd -> ASTs.findAllReferences(lvd).stream())
-            .collect(Collectors.toList());
-    if (allStreamReferences.size() != 1) {
-      return false;
-    }
-
-    List<ThreadFlowLocation> threadFlow =
-        result.getCodeFlows().get(0).getThreadFlows().get(0).getLocations();
-    PhysicalLocation lastLocation =
-        threadFlow.get(threadFlow.size() - 1).getLocation().getPhysicalLocation();
-    Region lastRegion = lastLocation.getRegion();
-
-    var maybeObjectDeclaration =
-        methodDeclaration.get().findAll(ExpressionStmt.class).stream()
-            .filter(es -> es.getRange().isPresent())
-            .filter(es -> RegionNodeMatcher.EXACT_MATCH.matches(lastRegion, es.getRange().get()))
+    Region lastRegion = getLastDataFlowRegion(result);
+    Optional<MethodCallExpr> readValueCallOpt =
+        ASTs.findMethodBodyFrom(varDeclStmt).get().findAll(ExpressionStmt.class).stream()
+            .filter(stmt -> stmt.getRange().isPresent())
+            .filter(stmt -> EXACT_MATCH.matches(lastRegion, stmt.getRange().get()))
+            .map(stmt -> stmt.getExpression().asVariableDeclarationExpr())
+            .map(vde -> vde.getVariable(0).getInitializer().get().asMethodCallExpr())
             .findFirst();
 
-    // useless but here for robustness
-    if (maybeObjectDeclaration.isEmpty()) {
-      return false;
-    }
-
-    /*
-     * This check is quite robust -- it makes sure that at the last SARIF event location, there is a method call
-     * of the expect name with the expected argument.
-     */
-    Optional<MethodCallExpr> readValueCallOpt =
-        maybeObjectDeclaration
-            .filter(es -> es.getExpression() instanceof VariableDeclarationExpr)
-            .map(es -> (VariableDeclarationExpr) es.getExpression())
-            .map(vd -> vd.getVariable(0))
-            .flatMap(vd -> vd.getInitializer())
-            .filter(init -> init instanceof MethodCallExpr)
-            .map(init -> (MethodCallExpr) init)
-            .filter(vd -> vd.getRange().isPresent())
-            .filter(mc -> "readValue".equals(mc.getNameAsString()))
-            .filter(mc -> mc.getArgument(0).toString().equals(variableName));
-
+    // just for robustness, but should never happen
     if (readValueCallOpt.isEmpty()) {
       return false;
     }
@@ -127,7 +86,7 @@ public final class OptimizeJacksonStringUsageCodemod
     MethodCallExpr readValueCall = readValueCallOpt.get();
 
     // We've successfully located the readValue() call -- first we update the argument
-    readValueCall.setArgument(0, stream);
+    readValueCall.setArgument(0, new NameExpr(streamVariableName));
 
     // now we remove the IOUtils#toString() assignment statement
     varDeclStmt.remove();

@@ -1,4 +1,4 @@
-package io.codemodder;
+package io.codemodder.javaparser;
 
 import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 import static io.codemodder.ast.ASTTransforms.addStaticImportIfMissing;
@@ -11,11 +11,10 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import java.util.Optional;
 
-final class DefaultJavaParserExpressionWrapper
-    implements JavaParserTransformer.JavaParserExpressionWrapper {
+final class DefaultExpressionWrapper implements JavaParserTransformer.ExpressionWrapper {
   private final Expression expression;
 
-  DefaultJavaParserExpressionWrapper(final Expression expression) {
+  DefaultExpressionWrapper(final Expression expression) {
     this.expression = expression;
   }
 

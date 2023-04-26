@@ -1,4 +1,4 @@
-package io.codemodder;
+package io.codemodder.javaparser;
 
 import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.NodeList;
@@ -13,8 +13,8 @@ public abstract class JavaParserTransformer {
   private JavaParserTransformer() {}
 
   /** Useful for wrapping an expression with a surrounding method call. */
-  public static JavaParserExpressionWrapper wrapExpression(Expression expression) {
-    return new DefaultJavaParserExpressionWrapper(expression);
+  public static ExpressionWrapper wrap(Expression expression) {
+    return new DefaultExpressionWrapper(expression);
   }
 
   /** Creates a new array creation expression. */
@@ -25,7 +25,7 @@ public abstract class JavaParserTransformer {
     return array;
   }
 
-  public interface JavaParserExpressionWrapper {
+  public interface ExpressionWrapper {
     /**
      * Performs the actual transformation of wrapping the given expression with the given static
      * method.
