@@ -15,6 +15,7 @@ tasks.check {
 }
 
 dependencies {
+    implementation(buildlibs.jib)
     implementation(buildlibs.fileversioning)
     implementation(buildlibs.spotless)
 }
