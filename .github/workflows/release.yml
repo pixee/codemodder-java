@@ -9,16 +9,12 @@ on:
       version:
         description: a stable version to set in version.txt before publishing
 
-permissions:
-  actions: read
-  contents: read
-  id-token: write
-
 jobs:
   release:
     name: Build & Release
     permissions:
       contents: write
+      id-token: write
     environment: Public Release
     runs-on: "ubuntu-latest"
     env:
