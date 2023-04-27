@@ -7,7 +7,7 @@ plugins {
 }
 
 application {
-    mainClass.set("io.codemodder.codemods.Runner")
+    mainClass.set("io.codemodder.codemods.DefaultCodemods")
 }
 
 jib.to.image = "218200003247.dkr.ecr.us-east-1.amazonaws.com/pixee/codemodder-java:${project.version}"
@@ -37,9 +37,4 @@ dependencies {
     testImplementation(testlibs.mockito)
     testImplementation("io.codemodder:codemodder-testutils")
     testRuntimeOnly(testlibs.junit.jupiter.engine)
-}
-
-task("run", JavaExec::class) {
-    main = "io.codemodder.codemods.DefaultCodemods"
-    classpath = sourceSets["main"].runtimeClasspath
 }
