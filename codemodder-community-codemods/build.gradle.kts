@@ -10,7 +10,16 @@ application {
     mainClass.set("io.codemodder.codemods.DefaultCodemods")
 }
 
-jib.to.image = "218200003247.dkr.ecr.us-east-1.amazonaws.com/pixee/codemodder-java:${project.version}"
+jib {
+    to {
+        image = "218200003247.dkr.ecr.us-east-1.amazonaws.com/pixee/codemodder-java"
+        tags = setOf(de.epitschke.gradle.fileversioning.FileVersioningPlugin.getVersionFromFile())
+        credHelper {
+            helper = "ecr-login"
+        }
+    }
+}
+
 tasks.publish {
     dependsOn(tasks.jib)
 }

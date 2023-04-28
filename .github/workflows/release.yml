@@ -57,7 +57,7 @@ jobs:
 
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: -q setVersion -PnewVersion=${{ inputs.version }}
+          arguments: --console=plain -q setVersion -PnewVersion=${{ inputs.version }}
 
       - uses: gradle/gradle-build-action@v2
         with:
