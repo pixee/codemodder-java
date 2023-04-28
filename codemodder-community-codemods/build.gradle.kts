@@ -6,11 +6,16 @@ plugins {
     id("io.codemodder.maven-publish")
 }
 
+val main = "io.codemodder.codemods.DefaultCodemods"
+
 application {
-    mainClass.set("io.codemodder.codemods.DefaultCodemods")
+    mainClass.set(main)
 }
 
 jib {
+    container {
+        mainClass = main
+    }
     to {
         image = "218200003247.dkr.ecr.us-east-1.amazonaws.com/pixee/codemodder-java"
         tags = setOf(de.epitschke.gradle.fileversioning.FileVersioningPlugin.getVersionFromFile())

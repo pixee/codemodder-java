@@ -61,7 +61,7 @@ jobs:
 
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: --console=plain --info build publish
+          arguments: --console=plain --stacktrace build publish
 
       # share version bump
       - run: |
