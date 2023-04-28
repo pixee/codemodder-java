@@ -57,11 +57,11 @@ jobs:
 
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: --console=plain --info setVersion -PnewVersion=${{ inputs.version }}
+          arguments: --quiet setVersion -PnewVersion=${{ inputs.version }}
 
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: build publish
+          arguments: --console=plain --info build publish
 
       # share version bump
       - run: |
