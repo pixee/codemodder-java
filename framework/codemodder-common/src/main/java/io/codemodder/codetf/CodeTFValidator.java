@@ -5,6 +5,7 @@ import static java.util.Collections.emptyMap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** Holds small utility for validating strings and immutable collections. */
 final class CodeTFValidator {
@@ -43,5 +44,16 @@ final class CodeTFValidator {
       return Collections.emptyList();
     }
     return Collections.unmodifiableList(givenList);
+  }
+
+  /**
+   * Given a {@link java.util.Set} that is possibly null, return an instance that represents an
+   * immutable copy of it, or an empty set.
+   */
+  static <T> Set<T> toImmutableCopyOrEmptyOnNull(final Set<T> givenList) {
+    if (givenList == null) {
+      return Collections.emptySet();
+    }
+    return Collections.unmodifiableSet(givenList);
   }
 }

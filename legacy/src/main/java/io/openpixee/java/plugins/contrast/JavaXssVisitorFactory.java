@@ -10,10 +10,10 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import io.codemodder.CodemodChange;
+import io.codemodder.CodemodChangeRecorder;
 import io.codemodder.DependencyGAV;
-import io.codemodder.FileWeavingContext;
 import io.codemodder.Sarif;
-import io.codemodder.Weave;
 import io.codemodder.ast.ASTTransforms;
 import io.openpixee.java.DoNothingVisitor;
 import io.openpixee.java.TypeLocator;
@@ -50,7 +50,7 @@ final class JavaXssVisitorFactory implements VisitorFactory {
   }
 
   @Override
-  public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
+  public ModifierVisitor<CodemodChangeRecorder> createJavaCodeVisitorFor(
       final File file, final CompilationUnit cu) {
     for (PhysicalLocation location : locations) {
       try {
@@ -83,7 +83,7 @@ final class JavaXssVisitorFactory implements VisitorFactory {
    * to do it carefully, sink-by-sink. Some considerations that will have to go into every API:
    * which argument is the vulnerable one? What data type is it, what if it's a byte[]?
    */
-  private static class JavaXssVisitor extends ModifierVisitor<FileWeavingContext> {
+  private static class JavaXssVisitor extends ModifierVisitor<CodemodChangeRecorder> {
 
     private final Set<Result> results;
     private final CompilationUnit cu;
@@ -94,7 +94,8 @@ final class JavaXssVisitorFactory implements VisitorFactory {
     }
 
     @Override
-    public Visitable visit(final MethodCallExpr methodCallExpr, final FileWeavingContext context) {
+    public Visitable visit(
+        final MethodCallExpr methodCallExpr, final CodemodChangeRecorder context) {
       if (httpResponseWriteNames.contains(methodCallExpr.getNameAsString())) {
         Optional<Range> expRange = methodCallExpr.getRange();
         if (expRange.isPresent()
@@ -115,7 +116,8 @@ final class JavaXssVisitorFactory implements VisitorFactory {
                 safeExpression.setArguments(NodeList.nodeList(argument));
                 methodCallExpr.setArguments(NodeList.nodeList(safeExpression));
                 context.addWeave(
-                    Weave.from(startLine, toWeaveId(result), DependencyGAV.OWASP_XSS_JAVA_ENCODER));
+                    CodemodChange.from(
+                        startLine, toWeaveId(result), DependencyGAV.OWASP_XSS_JAVA_ENCODER));
               } else {
                 LOG.debug(
                     "Ignoring XSS result due to parameter not being a String: {}",

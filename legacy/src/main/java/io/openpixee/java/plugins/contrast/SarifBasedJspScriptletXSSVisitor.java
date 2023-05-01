@@ -1,11 +1,8 @@
 package io.openpixee.java.plugins.contrast;
 
 import com.contrastsecurity.sarif.Result;
-import io.codemodder.ChangedFile;
-import io.codemodder.DependencyGAV;
-import io.codemodder.FileWeavingContext;
-import io.codemodder.Weave;
-import io.codemodder.WeavingResult;
+import io.codemodder.*;
+import io.codemodder.CodemodChange;
 import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.JspLineWeave;
 import java.io.File;
@@ -129,7 +126,7 @@ public final class SarifBasedJspScriptletXSSVisitor implements FileBasedVisitor 
   public WeavingResult visitRepositoryFile(
       final File repositoryRoot,
       final File file,
-      final FileWeavingContext weavingContext,
+      final CodemodChangeRecorder weavingContext,
       final Set<ChangedFile> changedJavaFiles) {
     Set<String> unscannableFiles = Collections.emptySet();
     try {
@@ -157,7 +154,7 @@ public final class SarifBasedJspScriptletXSSVisitor implements FileBasedVisitor 
 
       List<String> lines = FileUtils.readLines(file);
       List<String> rebuiltLines = new ArrayList<>(lines.size());
-      List<Weave> weaves = new ArrayList<>();
+      List<CodemodChange> weaves = new ArrayList<>();
 
       JspLineRewriterStrategy jspLineRewriterStrategy =
           new DefaultJspLineRewriterStrategy(
@@ -190,7 +187,7 @@ public final class SarifBasedJspScriptletXSSVisitor implements FileBasedVisitor 
             rebuiltLines.add(rebuiltLine);
             DependencyGAV dependencyNeeded = lineWeave.getDependencyNeeded();
             weaves.add(
-                Weave.from(
+                CodemodChange.from(
                     lineNumber,
                     lineWeave.getRuleId(),
                     dependencyNeeded != null

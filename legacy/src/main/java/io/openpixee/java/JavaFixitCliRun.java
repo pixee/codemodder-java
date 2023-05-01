@@ -118,8 +118,8 @@ public final class JavaFixitCliRun {
         new SarifParser.Default().parseIntoMap(sarifs, repositoryRoot.toPath());
 
     List<Class<? extends Changer>> defaultCodemodTypes = DefaultCodemods.asList();
-    CodemodInvoker codemodInvoker =
-        new CodemodInvoker(
+    CodemodLoader codemodInvoker =
+        new CodemodLoader(
             defaultCodemodTypes, codemodRegulator, repositoryRoot.toPath(), ruleSarifByTool);
 
     // run the Java code visitors
@@ -146,8 +146,8 @@ public final class JavaFixitCliRun {
                 file ->
                     FileDependency.create(
                         Path.of(file.originalFilePath()),
-                        file.weaves().stream()
-                            .map(Weave::getDependenciesNeeded)
+                        file.changes().stream()
+                            .map(CodemodChange::getDependenciesNeeded)
                             .flatMap(List::stream)
                             .collect(Collectors.toList())))
             .collect(Collectors.toList());
@@ -157,7 +157,7 @@ public final class JavaFixitCliRun {
     DependencyUpdateResult dependencyUpdate =
         mavenProvider.updateDependencies(
             repositoryRoot.toPath(), preDependencyCombinedChangedFiles, fileDependencies);
-    Set<ChangedFile> finalChangedFiles = dependencyUpdate.updatedChanges();
+    Set<ChangedFile> finalChangedFiles = dependencyUpdate.packageChanges();
     Set<String> finalUnscannableFiles = new HashSet<>();
     finalUnscannableFiles.addAll(
         dependencyUpdate.erroredFiles().stream()
@@ -172,7 +172,7 @@ public final class JavaFixitCliRun {
         WeavingResult.createDefault(finalChangedFiles, finalUnscannableFiles);
     final var changesCount =
         allWeaveResults.changedFiles().stream()
-            .map(changedFile -> changedFile.weaves().size())
+            .map(changedFile -> changedFile.changes().size())
             .mapToInt(Integer::intValue)
             .sum();
     LOG.info("Analysis complete!");
@@ -186,9 +186,9 @@ public final class JavaFixitCliRun {
 
     for (ChangedFile changedFile : sortedChangedFiles) {
       LOG.debug("File: {}", changedFile.originalFilePath());
-      List<Weave> sortedWeaves = new ArrayList<>(changedFile.weaves());
-      sortedWeaves.sort(Comparator.comparing(Weave::lineNumber));
-      for (Weave weave : sortedWeaves) {
+      List<CodemodChange> sortedWeaves = new ArrayList<>(changedFile.changes());
+      sortedWeaves.sort(Comparator.comparing(CodemodChange::lineNumber));
+      for (CodemodChange weave : sortedWeaves) {
         LOG.debug("\tLine: {}", weave.lineNumber());
         LOG.debug("\tRule: {}", weave.changeCode());
         LOG.debug("\tDependencies required: {}", weave.getDependenciesNeeded());
@@ -202,7 +202,11 @@ public final class JavaFixitCliRun {
 
     CodeTFReport report =
         reportGenerator.createReport(
-            repositoryRoot, includePatterns, excludePatterns, allWeaveResults, elapsed);
+            repositoryRoot.toPath(),
+            "cmd line",
+            sarifs.stream().map(File::toPath).collect(Collectors.toList()),
+            List.of(),
+            elapsed);
 
     // write out the JSON
     ObjectMapper mapper = new ObjectMapper();
@@ -215,7 +219,7 @@ public final class JavaFixitCliRun {
    * to alter any files that have already been modified by legacy {@link FileBasedVisitor} types.
    */
   private WeavingResult invokeRawFileCodemods(
-      final CodemodInvoker codemodInvoker,
+      final CodemodLoader codemodInvoker,
       final Path repositoryRoot,
       final List<Path> filesAlreadyChanged,
       final IncludesExcludes includesExcludes) {
@@ -235,7 +239,8 @@ public final class JavaFixitCliRun {
       for (File filePath : files) {
         var canonicalFile = filePath.getCanonicalFile();
         var context =
-            FileWeavingContext.createDefault(includesExcludes.getIncludesExcludesForFile(filePath));
+            CodemodChangeRecorder.createDefault(
+                includesExcludes.getIncludesExcludesForFile(filePath));
         Optional<ChangedFile> changedFile =
             codemodInvoker.executeFile(canonicalFile.toPath(), context);
         changedFile.ifPresent(changedFiles::add);

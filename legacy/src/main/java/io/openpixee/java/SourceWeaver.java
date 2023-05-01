@@ -34,7 +34,7 @@ public interface SourceWeaver {
       List<SourceDirectory> javaSourceDirectories,
       List<String> javaFiles,
       List<VisitorFactory> visitorFactories,
-      CodemodInvoker codemodInvoker,
+      CodemodLoader codemodInvoker,
       IncludesExcludes includesExcludes)
       throws IOException;
 
@@ -57,7 +57,7 @@ public interface SourceWeaver {
         final List<SourceDirectory> javaSourceDirectories,
         final List<String> javaSourceFiles,
         final List<VisitorFactory> visitorFactories,
-        final CodemodInvoker codemodInvoker,
+        final CodemodLoader codemodInvoker,
         final IncludesExcludes includesExcludes)
         throws IOException {
       /*
@@ -104,7 +104,7 @@ public interface SourceWeaver {
     /** Scan the file. */
     @Nullable
     private ChangedFile scanIndividualJavaFile(
-        final CodemodInvoker codemodInvoker,
+        final CodemodLoader codemodInvoker,
         final JavaParser javaParser,
         final String javaFile,
         final List<VisitorFactory> visitorFactories,
@@ -124,26 +124,27 @@ public interface SourceWeaver {
 
     /** For each type in a Java source file, we scan through the code. */
     private ChangedFile scanType(
-        final CodemodInvoker codemodInvoker,
+        final CodemodLoader codemodInvoker,
         final File javaFile,
         final CompilationUnit cu,
         final List<VisitorFactory> visitorFactories,
         final IncludesExcludes includesExcludes)
         throws IOException {
 
-      final FileWeavingContext context =
-          FileWeavingContext.createDefault(includesExcludes.getIncludesExcludesForFile(javaFile));
+      final CodemodChangeRecorder context =
+          CodemodChangeRecorder.createDefault(
+              includesExcludes.getIncludesExcludesForFile(javaFile));
 
       // do it the old school way
       visitorFactories.forEach(
           vf -> {
-            final ModifierVisitor<FileWeavingContext> visitor =
+            final ModifierVisitor<CodemodChangeRecorder> visitor =
                 vf.createJavaCodeVisitorFor(javaFile, cu);
             cu.accept(visitor, context);
           });
 
       // do it with codemods
-      codemodInvoker.execute(javaFile.toPath(), cu, context);
+      //      codemodInvoker.execute(javaFile.toPath(), cu, context);
 
       if (context.madeWeaves()) {
         final String encoding = detectEncoding(javaFile);
@@ -152,8 +153,9 @@ public interface SourceWeaver {
         File modifiedFile = File.createTempFile(javaFile.getName(), ".java");
         FileUtils.write(modifiedFile, modified, encoding);
 
-        return ChangedFile.createDefault(
-            javaFile.getAbsolutePath(), modifiedFile.getAbsolutePath(), context.weaves());
+        //        return ChangedFile.createDefault(
+        //            javaFile.getAbsolutePath(), modifiedFile.getAbsolutePath(), context.weaves());
+        return null;
       }
 
       return null;

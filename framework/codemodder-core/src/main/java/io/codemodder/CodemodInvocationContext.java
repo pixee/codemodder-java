@@ -5,11 +5,8 @@ import java.nio.file.Path;
 /** The context we provide to each codemod. */
 public interface CodemodInvocationContext {
 
-  /**
-   * A "flight recorder" that you used to record the changes you make, which will eventually be used
-   * to build a report.
-   */
-  FileWeavingContext changeRecorder();
+  /** The includes/excludes for the file being changed. */
+  LineIncludesExcludes lineIncludesExcludes();
 
   /** The root directory where the project being transformed lives. */
   CodeDirectory codeDirectory();

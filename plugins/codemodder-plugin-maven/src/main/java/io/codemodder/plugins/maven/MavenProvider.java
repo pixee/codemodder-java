@@ -4,6 +4,8 @@ import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
 import io.codemodder.*;
+import io.codemodder.codetf.CodeTFChange;
+import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.openpixee.maven.operator.POMOperator;
 import io.openpixee.maven.operator.ProjectModel;
 import io.openpixee.maven.operator.ProjectModelFactory;
@@ -19,117 +21,48 @@ import org.jetbrains.annotations.VisibleForTesting;
 /** Provides Maven dependency management functions to codemods. */
 public final class MavenProvider implements ProjectProvider {
 
-  private final PomFileDependencyMapper pomFileDependencyMapper;
+  private final PomFileFinder pomFileFinder;
   private final PomFileUpdater pomFileUpdater;
 
   public MavenProvider() {
-    this(new DefaultPomFileDependencyMapper(), new DefaultPomFileUpdater());
+    this(new DefaultPomFileFinder(), new DefaultPomFileUpdater());
   }
 
-  MavenProvider(
-      final PomFileDependencyMapper pomFileDependencyMapper, final PomFileUpdater pomFileUpdater) {
-    this.pomFileDependencyMapper = Objects.requireNonNull(pomFileDependencyMapper);
+  MavenProvider(final PomFileFinder pomFileFinder, final PomFileUpdater pomFileUpdater) {
+    this.pomFileFinder = Objects.requireNonNull(pomFileFinder);
     this.pomFileUpdater = Objects.requireNonNull(pomFileUpdater);
   }
 
   @Override
   public DependencyUpdateResult updateDependencies(
-      final Path projectDir,
-      final Set<ChangedFile> changedFiles,
-      final List<FileDependency> remainingFileDependencies)
+      final Path projectDir, final Path file, final List<DependencyGAV> dependencies)
       throws IOException {
-    Set<ChangedFile> newChangedFiles = new HashSet<>(changedFiles);
-    Set<Path> erroredFiles = new HashSet<>();
-    List<FileDependency> dependenciesInjected = new ArrayList<>();
 
-    // build the map of poms we need to update
-    Map<Path, List<FileDependency>> pomsToUpdate =
-        pomFileDependencyMapper.build(projectDir, remainingFileDependencies);
-
-    // update the poms, keeping track of what succeeds and fails
-    Set<Map.Entry<Path, List<FileDependency>>> entries = pomsToUpdate.entrySet();
-    for (Map.Entry<Path, List<FileDependency>> entry : entries) {
-      Path pomPath = entry.getKey();
-      List<FileDependency> dependencies = entry.getValue();
-
-      // we have to introduce some complexity here to handle the case where one of our codemods has
-      // already updated
-      // this pom. in that case, we need to apply our changes on top of the existing changes. to do
-      // that, we have to
-      // follow this process:
-      // 1. backup the existing pom, which is still actually unchanged in the filesystem
-      // 2. apply the existing changes to the pom on disk so when we "visit" it we are acting on the
-      // updated version
-      // 3. if we changed it again, update the changedFile record to reflect the changes before +
-      // new changes
-      // 4. restore the backup pom
-      Optional<Path> backupFile = Optional.empty();
-      Optional<ChangedFile> existingChangeRecord = Optional.empty();
-      if (fileAlreadyHasChanges(pomPath, changedFiles)) {
-        Path pomBackup = Files.createTempFile("backup", ".pom");
-        Files.copy(pomPath, pomBackup, StandardCopyOption.REPLACE_EXISTING);
-        backupFile = Optional.of(pomBackup);
-        ChangedFile existingChangeForPom =
-            changedFiles.stream()
-                .filter(changedFile -> isSameFile(Path.of(changedFile.originalFilePath()), pomPath))
-                .findFirst()
-                .get();
-        existingChangeRecord = Optional.of(existingChangeForPom);
-        Files.copy(
-            Path.of(existingChangeForPom.modifiedFile()),
-            pomPath,
-            StandardCopyOption.REPLACE_EXISTING);
-      }
-      try {
-        Optional<ChangedFile> changedPom = pomFileUpdater.updatePom(pomPath, dependencies);
-        if (changedPom.isPresent()) {
-          dependenciesInjected.addAll(dependencies);
-          // remove the backup from the change set, if we have one
-          existingChangeRecord.ifPresent(newChangedFiles::remove);
-          newChangedFiles.add(changedPom.get());
-        }
-      } catch (IOException e) {
-        erroredFiles.add(pomPath);
-      }
-      if (backupFile.isPresent()) {
-        Files.copy(backupFile.get(), pomPath, StandardCopyOption.REPLACE_EXISTING);
-        Files.delete(backupFile.get());
-      }
+    // find the map pom.xml path of the pom we need to update
+    Optional<Path> targetPomRef = pomFileFinder.findForFile(projectDir, file);
+    if (targetPomRef.isEmpty()) {
+      return DependencyUpdateResult.EMPTY_UPDATE;
     }
 
-    return DependencyUpdateResult.create(dependenciesInjected, newChangedFiles, erroredFiles);
-  }
+    Path targetPom = targetPomRef.get();
+    try {
+      Optional<CodeTFChangesetEntry> entryRef =
+          pomFileUpdater.updatePom(projectDir, targetPom, dependencies);
+      if (entryRef.isPresent()) {
+        return DependencyUpdateResult.create(dependencies, Set.of(entryRef.get()), Set.of());
+      }
+    } catch (IOException e) {
+      return DependencyUpdateResult.create(List.of(), Set.of(), Set.of(targetPom));
+    }
 
-  private boolean fileAlreadyHasChanges(final Path path, final Set<ChangedFile> changedFiles) {
-    return changedFiles.stream()
-        .anyMatch(changedFile -> isSameFile(Path.of(changedFile.originalFilePath()), path));
+    return DependencyUpdateResult.EMPTY_UPDATE;
   }
 
   @VisibleForTesting
-  static class DefaultPomFileDependencyMapper implements PomFileDependencyMapper {
+  static class DefaultPomFileFinder implements PomFileFinder {
     @Override
-    public Map<Path, List<FileDependency>> build(
-        final Path projectDir, final List<FileDependency> fileDependencies) throws IOException {
-      Map<Path, List<FileDependency>> pomsToUpdate = new HashMap<>();
-      for (FileDependency fileDependency : fileDependencies) {
-        Path filePath = fileDependency.file();
-        Optional<Path> pomPath = findParentPom(projectDir, filePath);
-        pomPath.ifPresent(
-            path -> {
-              if (pomsToUpdate.containsKey(path)) {
-                pomsToUpdate.get(path).add(fileDependency);
-              } else {
-                pomsToUpdate.put(path, new ArrayList<>(Collections.singletonList(fileDependency)));
-              }
-            });
-      }
-
-      return pomsToUpdate;
-    }
-
-    private Optional<Path> findParentPom(final Path projectDir, final Path filePath)
-        throws IOException {
-      Path parent = filePath.getParent();
+    public Optional<Path> findForFile(final Path projectDir, final Path file) throws IOException {
+      Path parent = file.getParent();
       while (parent != null && !Files.isSameFile(projectDir.getParent(), parent)) {
         Path pomPath = parent.resolve("pom.xml");
         if (Files.exists(pomPath)) {
@@ -144,13 +77,11 @@ public final class MavenProvider implements ProjectProvider {
   @VisibleForTesting
   static class DefaultPomFileUpdater implements PomFileUpdater {
     @Override
-    public Optional<ChangedFile> updatePom(
-        final Path pomPath, final List<FileDependency> dependencies) throws IOException {
+    public Optional<CodeTFChangesetEntry> updatePom(
+        final Path projectDir, final Path pomPath, final List<DependencyGAV> dependencies)
+        throws IOException {
       List<io.openpixee.maven.operator.Dependency> mappedDependencies =
           dependencies.stream()
-              .map(FileDependency::dependencies)
-              .flatMap(Collection::stream)
-              .distinct()
               .map(
                   dependencyGAV ->
                       new io.openpixee.maven.operator.Dependency(
@@ -197,21 +128,16 @@ public final class MavenProvider implements ProjectProvider {
       AbstractDelta<String> delta = patch.getDeltas().get(0);
       int position = 1 + delta.getSource().getPosition();
 
-      return Optional.of(
-          ChangedFile.createDefault(
-              pomPath.toAbsolutePath().toString(),
-              newPomFile.toAbsolutePath().toString(),
-              Weave.from(position, pomInjectionRuleId)));
+      CodeTFChange change = new CodeTFChange(position, Collections.emptyMap(), "", List.of());
+      String diff = DiffUtils.diff(originalPomContents, finalPomContents).toString();
+      CodeTFChangesetEntry entry =
+          new CodeTFChangesetEntry(
+              projectDir.relativize(pomPath).toString(), diff, List.of(change));
+
+      // overwrite existing pom
+      Files.copy(newPomFile, pomPath, StandardCopyOption.REPLACE_EXISTING);
+
+      return Optional.of(entry);
     }
   }
-
-  private boolean isSameFile(Path p1, Path p2) {
-    try {
-      return Files.isSameFile(p1, p2);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private static final String pomInjectionRuleId = "pixee:java/maven-pom-injection";
 }

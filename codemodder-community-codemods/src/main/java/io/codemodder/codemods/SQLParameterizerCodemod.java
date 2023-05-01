@@ -15,13 +15,13 @@ import java.util.stream.Collectors;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SQLParameterizerCodemod implements JavaParserChanger {
 
-  private List<Weave> onNodeFound(
+  private List<CodemodChange> onNodeFound(
       CodemodInvocationContext context, MethodCallExpr methodCallExpr, CompilationUnit cu) {
     var fixer = new SQLParameterizer(cu);
     var maybeChanges = fixer.parameterizeStatement(methodCallExpr, methodCallExpr.getArgument(0));
     if (maybeChanges.isLeft()) {
       return maybeChanges.getLeft().stream()
-          .map(c -> Weave.from(c.getLine(), context.codemodId()))
+          .map(c -> CodemodChange.from(c.getLine(), context.codemodId()))
           .collect(Collectors.toList());
     } else {
       return Collections.emptyList();

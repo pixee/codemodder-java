@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.google.common.annotations.VisibleForTesting;
 import io.codemodder.javaparser.JavaParserChanger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,12 +53,13 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> implements Ja
   }
 
   @Override
-  public final void visit(final CodemodInvocationContext context, final CompilationUnit cu) {
+  public final List<CodemodChange> visit(
+      final CodemodInvocationContext context, final CompilationUnit cu) {
     List<Result> results = sarif.getResultsByPath(context.path());
 
     // small shortcut to avoid always executing the expensive findAll
     if (results.isEmpty()) {
-      return;
+      return List.of();
     }
 
     List<? extends Node> allNodes = cu.findAll(nodeType);
@@ -79,27 +81,30 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> implements Ja
      * on is unfortunately a job for the subclass -- they should just "return false" if the event didn't make sense, but
      * we should invest into a general solution if this doesn't scale.
      */
+    List<CodemodChange> codemodChanges = new ArrayList<>();
     for (Result result : results) {
       for (Node node : allNodes) {
         Region region = regionExtractor.from(result);
         if (!nodeType.isAssignableFrom(node.getClass())) {
           continue;
         }
-        FileWeavingContext changeRecorder = context.changeRecorder();
+        CodemodChangeRecorder changeRecorder =
+            CodemodChangeRecorder.createDefault(context.lineIncludesExcludes());
         if (changeRecorder.isLineIncluded(region.getStartLine())) {
           if (node.getRange().isPresent()) {
             Range range = node.getRange().get();
             if (regionNodeMatcher.matches(region, range)) {
               boolean changeSuccessful = onResultFound(context, cu, (T) node, result);
               if (changeSuccessful) {
-                changeRecorder.addWeave(
-                    Weave.from(region.getStartLine(), context.codemodId(), dependenciesRequired()));
+                codemodChanges.add(
+                    CodemodChange.from(region.getStartLine(), dependenciesRequired()));
               }
             }
           }
         }
       }
     }
+    return codemodChanges;
   }
 
   /**

@@ -46,7 +46,7 @@ public abstract class WeavingTests {
 
     var analyzer = SourceWeaver.createDefault();
     var testCodeDir = new File(vulnerableFile.getParent());
-    var codemodInvoker = new CodemodInvoker(List.of(), testCodeDir.toPath());
+    var codemodInvoker = new CodemodLoader(List.of(), testCodeDir.toPath());
     var directory =
         SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
 
@@ -87,7 +87,7 @@ public abstract class WeavingTests {
       final SourceWeaver analyzer,
       final SourceDirectory directory,
       final List<VisitorFactory> visitorFactories,
-      final CodemodInvoker codemodInvoker,
+      final CodemodLoader codemodInvoker,
       final IncludesExcludes includesExcludes)
       throws IOException {
     var weave =
@@ -116,7 +116,7 @@ public abstract class WeavingTests {
     List<VisitorFactory> visitorFactories = List.of(factory);
     var analyzer = SourceWeaver.createDefault();
     var testCodeDir = new File(vulnerableFile.getParent());
-    var codemodInvoker = new CodemodInvoker(List.of(), testCodeDir.toPath());
+    var codemodInvoker = new CodemodLoader(List.of(), testCodeDir.toPath());
     var directory =
         SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
 
@@ -128,7 +128,7 @@ public abstract class WeavingTests {
       final SourceWeaver analyzer,
       final SourceDirectory directory,
       final List<VisitorFactory> visitorFactories,
-      final CodemodInvoker codemodInvoker,
+      final CodemodLoader codemodInvoker,
       final IncludesExcludes includesExcludes)
       throws IOException {
     var weave =
@@ -171,7 +171,7 @@ public abstract class WeavingTests {
         weaver.visitRepositoryFile(
             new File(vulnerableFile.getParent()),
             vulnerableFile,
-            FileWeavingContext.createDefault(
+            CodemodChangeRecorder.createDefault(
                 vulnerableFile, new IncludesExcludes.MatchesEverything()),
             Collections.emptySet());
     assertThat(result.unscannableFiles()).isEmpty();

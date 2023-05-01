@@ -1,32 +1,21 @@
 package io.codemodder;
 
-import com.github.javaparser.ast.CompilationUnit;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.codemodder.javaparser.JavaParserChanger;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.codehaus.plexus.util.StringUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 
-/**
- * This is the entry point for codemod authors to invoke their codemods through our framework. Every
- * codemod should create a codemod then create a separate type with a main() method that invokes
- * this entry point.
- */
-public final class CodemodInvoker {
+/** This type is responsible for loading codemods and the surrounding subsystem. */
+public final class CodemodLoader {
 
-  private final List<Changer> codemods;
-  private final Path repositoryDir;
-  private final List<IdentifiedChanger> changers;
+  private final List<CodemodIdPair> codemods;
 
-  public CodemodInvoker(
+  public CodemodLoader(
       final List<Class<? extends Changer>> codemodTypes, final Path repositoryDir) {
     this(
         codemodTypes,
@@ -35,7 +24,7 @@ public final class CodemodInvoker {
         Map.of());
   }
 
-  public CodemodInvoker(
+  public CodemodLoader(
       final List<Class<? extends Changer>> codemodTypes,
       final Path repositoryDir,
       final Map<String, List<RuleSarif>> ruleSarifByTool) {
@@ -46,14 +35,14 @@ public final class CodemodInvoker {
         ruleSarifByTool);
   }
 
-  public CodemodInvoker(
+  public CodemodLoader(
       final List<Class<? extends Changer>> codemodTypes,
       final CodemodRegulator codemodRegulator,
       final Path repositoryDir) {
     this(codemodTypes, codemodRegulator, repositoryDir, Map.of());
   }
 
-  public CodemodInvoker(
+  public CodemodLoader(
       final List<Class<? extends Changer>> codemodTypes,
       final CodemodRegulator codemodRegulator,
       final Path repositoryDir,
@@ -83,12 +72,11 @@ public final class CodemodInvoker {
     }
 
     // record which changers are associated with which codemod ids
-    final List<IdentifiedChanger> changers = new ArrayList<>();
+    final List<CodemodIdPair> codemods = new ArrayList<>();
 
     // validate and instantiate the codemods
     final Injector injector = Guice.createInjector(allModules);
     final Set<String> codemodIds = new HashSet<>();
-    final List<Changer> codemods = new ArrayList<>();
     for (final Class<? extends Changer> type : codemodTypes) {
       final Codemod codemodAnnotation = type.getAnnotation(Codemod.class);
       validateRequiredFields(codemodAnnotation);
@@ -99,99 +87,21 @@ public final class CodemodInvoker {
       }
       codemodIds.add(codemodId);
       if (codemodRegulator.isAllowed(codemodId)) {
-        codemods.add(changer);
-        changers.add(new IdentifiedChanger(codemodId, changer));
+        codemods.add(new CodemodIdPair(codemodId, changer));
       }
     }
 
-    this.changers = Collections.unmodifiableList(changers);
     this.codemods = Collections.unmodifiableList(codemods);
-    this.repositoryDir = Objects.requireNonNull(repositoryDir);
+  }
+
+  public List<CodemodIdPair> getCodemods() {
+    return codemods;
   }
 
   private static List<String> getWantsSarif(final CodemodProvider provider) {
     return Optional.ofNullable(provider.getClass().getAnnotation(WantsSarif.class))
         .map(wants -> Arrays.asList(wants.toolNames()))
         .orElse(List.of());
-  }
-
-  private static final class IdentifiedChanger {
-    final String id;
-    final Changer changer;
-
-    private IdentifiedChanger(final String id, final Changer changer) {
-      this.id = id;
-      this.changer = changer;
-    }
-  }
-
-  /**
-   * Run the codemods we've collected on the given file.
-   *
-   * @param cu the parsed JavaParser representation of the file
-   * @param context a model we should keep updating as we process the file
-   */
-  public void execute(final Path path, final CompilationUnit cu, final FileWeavingContext context) {
-    final List<JavaParserChanger> javaParserChangers =
-        codemods.stream()
-            .filter(changer -> changer instanceof JavaParserChanger)
-            .map(changer -> (JavaParserChanger) changer)
-            .collect(Collectors.toUnmodifiableList());
-    for (final JavaParserChanger changer : javaParserChangers) {
-      final CodemodInvocationContext invocationContext =
-          new DefaultCodemodInvocationContext(
-              new DefaultCodeDirectory(repositoryDir),
-              path,
-              changers.stream().filter(ic -> ic.changer == changer).findFirst().orElseThrow().id,
-              context);
-      changer.visit(invocationContext, cu);
-    }
-  }
-
-  /**
-   * Run the codemods we've collected on the given file.
-   *
-   * @param path the path to a file
-   * @param context a model we should keep updating as we process the file
-   * @return the modified file, if changed at all
-   */
-  public Optional<ChangedFile> executeFile(final Path path, final FileWeavingContext context)
-      throws IOException {
-    final List<RawFileChanger> rawFileChangers =
-        codemods.stream()
-            .filter(changer -> changer instanceof RawFileChanger)
-            .map(changer -> (RawFileChanger) changer)
-            .collect(Collectors.toUnmodifiableList());
-
-    final Path originalFileCopy = Files.createTempFile("codemodder-raw", ".original");
-    originalFileCopy.toFile().deleteOnExit();
-    Files.copy(path, originalFileCopy, StandardCopyOption.REPLACE_EXISTING);
-
-    for (final RawFileChanger changer : rawFileChangers) {
-      final CodemodInvocationContext invocationContext =
-          new DefaultCodemodInvocationContext(
-              new DefaultCodeDirectory(repositoryDir),
-              path,
-              changers.stream().filter(ic -> ic.changer == changer).findFirst().orElseThrow().id,
-              context);
-      changer.visitFile(invocationContext);
-    }
-
-    final List<Weave> weaves = context.weaves();
-    if (weaves.isEmpty()) {
-      Files.delete(originalFileCopy);
-      return Optional.empty();
-    }
-
-    // copy the file that's now been modified by multiple codemods to a temp file
-    final Path modifiedFileCopy = Files.createTempFile("codemodder-raw", ".modified");
-    Files.copy(path, modifiedFileCopy, StandardCopyOption.REPLACE_EXISTING);
-
-    // restore the original file
-    Files.copy(originalFileCopy, path, StandardCopyOption.REPLACE_EXISTING);
-
-    return Optional.of(
-        ChangedFile.createDefault(path.toString(), modifiedFileCopy.toString(), weaves));
   }
 
   private static void validateRequiredFields(final Codemod codemodAnnotation) {

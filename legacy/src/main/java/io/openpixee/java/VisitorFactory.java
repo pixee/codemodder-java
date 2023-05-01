@@ -2,7 +2,7 @@ package io.openpixee.java;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
-import io.codemodder.FileWeavingContext;
+import io.codemodder.CodemodChangeRecorder;
 import java.io.File;
 
 /**
@@ -12,7 +12,7 @@ import java.io.File;
 public interface VisitorFactory {
 
   /** Given some context, create a visitor for the given {@link CompilationUnit}. */
-  ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(File file, CompilationUnit cu);
+  ModifierVisitor<CodemodChangeRecorder> createJavaCodeVisitorFor(File file, CompilationUnit cu);
 
   String ruleId();
 }

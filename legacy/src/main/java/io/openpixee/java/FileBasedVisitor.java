@@ -1,7 +1,7 @@
 package io.openpixee.java;
 
 import io.codemodder.ChangedFile;
-import io.codemodder.FileWeavingContext;
+import io.codemodder.CodemodChangeRecorder;
 import io.codemodder.WeavingResult;
 import java.io.File;
 import java.util.Set;
@@ -20,7 +20,7 @@ public interface FileBasedVisitor {
   WeavingResult visitRepositoryFile(
       File repositoryRoot,
       File file,
-      FileWeavingContext weavingContext,
+      CodemodChangeRecorder weavingContext,
       Set<ChangedFile> changedJavaFiles);
 
   String ruleId();

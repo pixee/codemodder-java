@@ -1,10 +1,12 @@
 package io.codemodder;
 
-import static io.codemodder.CodemodInvoker.isValidCodemodId;
+import static io.codemodder.CodemodLoader.isValidCodemodId;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.github.javaparser.JavaParser;
+import io.codemodder.codetf.CodeTFReference;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,25 +16,42 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-final class CodemodInvokerTest {
+final class CodemodLoaderTest {
 
   @Codemod(
       id = "test_mod",
       author = "valid@valid.com",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class InvalidCodemodName implements Changer {}
+  static class InvalidCodemodName extends NoReportChanger {}
 
   @Codemod(
       id = "test_mod",
       author = " ",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class EmptyCodemodAuthor implements Changer {}
+  static class EmptyCodemodAuthor extends NoReportChanger {}
 
   @Codemod(
       id = "pixee:java/id",
       author = "valid@valid.com",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class ValidCodemod implements Changer {}
+  static class ValidCodemod extends NoReportChanger {}
+
+  private static class NoReportChanger implements Changer {
+    @Override
+    public String getSummary() {
+      return "summary";
+    }
+
+    @Override
+    public String getDescription() {
+      return "description";
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of();
+    }
+  }
 
   @Test
   void it_validates_codemod_ids() {
@@ -48,7 +67,7 @@ final class CodemodInvokerTest {
     assertThrows(
         UnsupportedOperationException.class,
         () -> {
-          new CodemodInvoker(List.of(ValidCodemod.class, ValidCodemod.class), tmpDir);
+          new CodemodLoader(List.of(ValidCodemod.class, ValidCodemod.class), tmpDir);
         });
   }
 
@@ -56,13 +75,15 @@ final class CodemodInvokerTest {
       id = "test:java/changes-file",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
       author = "test")
-  static class ChangesFile implements RawFileChanger {
+  static class ChangesFile extends NoReportChanger implements RawFileChanger {
     @Override
-    public void visitFile(final CodemodInvocationContext context) throws IOException {
+    public List<CodemodChange> visitFile(final CodemodInvocationContext context)
+        throws IOException {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nb";
       Files.write(path, contents.getBytes(StandardCharsets.UTF_8));
+      return null;
     }
   }
 
@@ -70,13 +91,15 @@ final class CodemodInvokerTest {
       id = "test:java/changes-file-again",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
       author = "test")
-  static class ChangesFileAgain implements RawFileChanger {
+  static class ChangesFileAgain extends NoReportChanger implements RawFileChanger {
     @Override
-    public void visitFile(final CodemodInvocationContext context) throws IOException {
+    public List<CodemodChange> visitFile(final CodemodInvocationContext context)
+        throws IOException {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nc\n";
       Files.write(path, contents.getBytes(StandardCharsets.UTF_8));
+      return null;
     }
   }
 
@@ -91,10 +114,19 @@ final class CodemodInvokerTest {
     Files.writeString(file, "a", StandardCharsets.UTF_8);
 
     List<Class<? extends Changer>> codemods = List.of(ChangesFile.class, ChangesFileAgain.class);
-    CodemodInvoker invoker = new CodemodInvoker(codemods, tmpDir);
-    FileWeavingContext context =
-        FileWeavingContext.createDefault(file.toFile(), IncludesExcludes.any());
-    invoker.executeFile(file, context);
+    CodemodLoader loader = new CodemodLoader(codemods, tmpDir);
+
+    for (CodemodIdPair codemodIdPair : loader.getCodemods()) {
+      CodemodExecutor executor =
+          new DefaultCodemodExecutor(
+              tmpDir,
+              IncludesExcludes.any(),
+              codemodIdPair,
+              List.of(),
+              new JavaParser(),
+              EncodingDetector.create());
+      executor.execute(List.of(file));
+    }
 
     String contents = Files.readString(file);
     assertThat(contents, equalTo("a\nb\nc\n"));

@@ -1,17 +1,18 @@
 package io.codemodder.codemods;
 
 import io.codemodder.Codemod;
+import io.codemodder.CodemodChange;
+import io.codemodder.CodemodChangeRecorder;
 import io.codemodder.CodemodInvocationContext;
-import io.codemodder.FileWeavingContext;
 import io.codemodder.RawFileChanger;
 import io.codemodder.ReviewGuidance;
-import io.codemodder.Weave;
 import io.codemodder.XPathStreamProcessChange;
 import io.codemodder.XPathStreamProcessor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -38,16 +39,17 @@ public final class VerbTamperingCodemod implements RawFileChanger {
   }
 
   @Override
-  public void visitFile(final CodemodInvocationContext context) throws IOException {
+  public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
     Path file = context.path();
     if (!file.getFileName().toString().equalsIgnoreCase("web.xml")) {
-      return;
+      return null;
     }
     try {
       processWebXml(context, file);
     } catch (SAXException | DocumentException | XMLStreamException e) {
       throw new IOException("Problem transforming web.xml", e);
     }
+    return null;
   }
 
   private void processWebXml(final CodemodInvocationContext context, final Path file)
@@ -64,9 +66,9 @@ public final class VerbTamperingCodemod implements RawFileChanger {
     Set<Integer> linesAffected = xmlChange.linesAffected();
 
     // add the weaves to the context
-    FileWeavingContext fileWeavingContext = context.changeRecorder();
+    CodemodChangeRecorder fileWeavingContext = context.changeRecorder();
     linesAffected.stream()
-        .map(line -> Weave.from(line, context.codemodId()))
+        .map(line -> CodemodChange.from(line, context.codemodId()))
         .forEach(fileWeavingContext::addWeave);
 
     // overwrite the previous web.xml with the new one

@@ -89,29 +89,47 @@ public interface CodemodTestMixin {
     Map<String, List<RuleSarif>> map = new SarifParser.Default().parseIntoMap(allSarifs, tmpDir);
 
     // run the codemod
-    CodemodInvoker invoker = new CodemodInvoker(List.of(codemod), tmpDir, map);
+    CodemodLoader loader = new CodemodLoader(List.of(codemod), tmpDir, map);
     CompilationUnit cu = parseJavaFile(pathToJavaFile);
 
-    FileWeavingContext context =
-        FileWeavingContext.createDefault(pathToJavaFile.toFile(), IncludesExcludes.any());
-    invoker.execute(pathToJavaFile, cu, context);
+    CodemodChangeRecorder context =
+        CodemodChangeRecorder.createDefault(pathToJavaFile.toFile(), IncludesExcludes.any());
+
+    List<CodemodIdPair> codemods = loader.getCodemods();
+    for (CodemodIdPair pair : codemods) {
+      CodemodExecutor executor =
+          CodemodExecutor.from(
+              tmpDir,
+              IncludesExcludes.any(),
+              pair,
+              List.of(),
+              new JavaParser(),
+              EncodingDetector.create());
+      executor.execute(List.of(pathToJavaFile));
+    }
 
     // make sure the file is transformed to the expected output
     String transformedJavaCode = LexicalPreservingPrinter.print(cu);
     assertThat(transformedJavaCode, equalTo(Files.readString(after)));
 
     // make sure the dependencies are added
-    List<Weave> weaves = context.weaves();
+    List<CodemodChange> weaves = context.weaves();
     List<DependencyGAV> dependenciesNeeded = weaves.get(0).getDependenciesNeeded();
     assertThat(dependenciesNeeded, hasItems(dependencies.toArray(new DependencyGAV[0])));
 
     // re-run the transformation again and make sure no changes are made
     Files.copy(after, pathToJavaFile, StandardCopyOption.REPLACE_EXISTING);
-    CodemodInvoker invokerTheSecond = new CodemodInvoker(List.of(codemod), tmpDir);
-    CompilationUnit rerunCu = parseJavaFile(pathToJavaFile);
-    FileWeavingContext rerunContext =
-        FileWeavingContext.createDefault(pathToJavaFile.toFile(), IncludesExcludes.any());
-    invokerTheSecond.execute(pathToJavaFile, rerunCu, rerunContext);
+    for (CodemodIdPair pair : codemods) {
+      CodemodExecutor executor =
+          CodemodExecutor.from(
+              tmpDir,
+              IncludesExcludes.any(),
+              pair,
+              List.of(),
+              new JavaParser(),
+              EncodingDetector.create());
+      executor.execute(List.of(pathToJavaFile));
+    }
 
     String transformedAgainJavaCode = Files.readString(pathToJavaFile);
     assertThat(transformedAgainJavaCode, equalTo(Files.readString(after)));

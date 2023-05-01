@@ -6,8 +6,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.contrastsecurity.sarif.Result;
 import io.codemodder.ChangedFile;
+import io.codemodder.CodemodChange;
 import io.codemodder.DependencyGAV;
-import io.codemodder.Weave;
 import io.openpixee.java.protections.WeavingTests;
 import java.io.IOException;
 import java.util.List;
@@ -23,17 +23,18 @@ final class SarifBasedJspScriptletXSSWeaverTest {
         new SarifBasedJspScriptletXSSVisitor(results, "reflected-xss");
     ChangedFile changedFile =
         WeavingTests.assertFileWeaveWorkedAndReweave("src/test/resources/jsps/sarif.jsp", weaver);
-    List<Weave> weaves = changedFile.weaves();
+    List<CodemodChange> weaves = changedFile.changes();
     assertThat(
         weaves,
         CoreMatchers.hasItems(
-            Weave.from(4, "contrast-scan:java/reflected-xss", DependencyGAV.OWASP_XSS_JAVA_ENCODER),
-            Weave.from(
+            CodemodChange.from(
+                4, "contrast-scan:java/reflected-xss", DependencyGAV.OWASP_XSS_JAVA_ENCODER),
+            CodemodChange.from(
                 5, "contrast-scan:java/reflected-xss", DependencyGAV.OWASP_XSS_JAVA_ENCODER)));
 
     // make sure we don't import the Java XSS dependency if it's an expression, because for those we
     // use built-in JSP functions
-    Weave jspExpressionWeave =
+    CodemodChange jspExpressionWeave =
         weaves.stream().filter(weave -> weave.lineNumber() == 12).findFirst().get();
     List<DependencyGAV> jspExpressionWeaveDependencies = jspExpressionWeave.getDependenciesNeeded();
     assertThat(jspExpressionWeaveDependencies.isEmpty(), is(true));
@@ -80,7 +81,8 @@ final class SarifBasedJspScriptletXSSWeaverTest {
     ChangedFile changedFile =
         WeavingTests.assertFileWeaveWorkedAndReweave(
             "src/test/resources/jsps/el_but_no_taglib.jsp", weaver);
-    List<Weave> weaves = changedFile.weaves();
-    assertThat(weaves, CoreMatchers.hasItems(Weave.from(3, "contrast-scan:java/stored-xss")));
+    List<CodemodChange> weaves = changedFile.changes();
+    assertThat(
+        weaves, CoreMatchers.hasItems(CodemodChange.from(3, "contrast-scan:java/stored-xss")));
   }
 }

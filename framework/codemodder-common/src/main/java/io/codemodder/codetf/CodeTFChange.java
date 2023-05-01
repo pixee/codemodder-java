@@ -2,26 +2,27 @@ package io.codemodder.codetf;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** Describes a "change" in a CCF report. */
+/** Describes a "change" in a report. */
 public final class CodeTFChange {
 
   private final int lineNumber;
-
-  private final String category;
 
   private final String description;
 
   private final Map<String, String> properties;
 
+  private final List<CodeTFPackageAction> dependencies;
+
   @JsonCreator
   public CodeTFChange(
       @JsonProperty("lineNumber") final int lineNumber,
       @JsonProperty("properties") final Map<String, String> properties,
-      @JsonProperty("category") final String category,
-      @JsonProperty("description") final String description) {
+      @JsonProperty("description") final String description,
+      @JsonProperty("dependencies") final List<CodeTFPackageAction> dependencies) {
 
     if (lineNumber < 1) {
       throw new IllegalArgumentException("line number must be positive");
@@ -29,7 +30,7 @@ public final class CodeTFChange {
 
     this.lineNumber = lineNumber;
     this.properties = CodeTFValidator.toImmutableCopyOrEmptyOnNull(properties);
-    this.category = CodeTFValidator.requireNonBlank(category);
+    this.dependencies = CodeTFValidator.toImmutableCopyOrEmptyOnNull(dependencies);
     this.description = description;
   }
 
@@ -41,12 +42,12 @@ public final class CodeTFChange {
     return description;
   }
 
-  public String getCategory() {
-    return category;
-  }
-
   public int getLineNumber() {
     return lineNumber;
+  }
+
+  public List<CodeTFPackageAction> getDependencies() {
+    return dependencies;
   }
 
   @Override
@@ -55,14 +56,13 @@ public final class CodeTFChange {
     if (o == null || getClass() != o.getClass()) return false;
     final CodeTFChange that = (CodeTFChange) o;
     return lineNumber == that.lineNumber
-        && Objects.equals(category, that.category)
         && Objects.equals(description, that.description)
         && Objects.equals(properties, that.properties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(lineNumber, category, description, properties);
+    return Objects.hash(lineNumber, description, properties);
   }
 
   @Override
@@ -70,9 +70,6 @@ public final class CodeTFChange {
     return "CodeTFChange{"
         + "lineNumber="
         + lineNumber
-        + ", category='"
-        + category
-        + '\''
         + ", description='"
         + description
         + '\''

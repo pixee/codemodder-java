@@ -31,14 +31,13 @@ final class JSPScriptletXSSCodemodTest {
       throws IOException {
     String dir = "src/test/resources/encode-jsp-scriptlet/" + jspDir;
     copyDir(Path.of(dir), tmpDir);
-    CodemodInvoker codemodInvoker =
-        new CodemodInvoker(List.of(JSPScriptletXSSCodemod.class), tmpDir);
+    CodemodLoader codemodInvoker = new CodemodLoader(List.of(JSPScriptletXSSCodemod.class), tmpDir);
 
     Path beforeJsp = tmpDir.resolve("test.jsp.before");
     Path jsp = tmpDir.resolve("test.jsp");
     Files.copy(beforeJsp, jsp);
-    FileWeavingContext context =
-        FileWeavingContext.createDefault(beforeJsp.toFile(), IncludesExcludes.any());
+    CodemodChangeRecorder context =
+        CodemodChangeRecorder.createDefault(beforeJsp.toFile(), IncludesExcludes.any());
     Optional<ChangedFile> changedFileOptional = codemodInvoker.executeFile(jsp, context);
 
     assertThat(changedFileOptional.isPresent(), is(expectChange));
@@ -48,8 +47,8 @@ final class JSPScriptletXSSCodemodTest {
       String modifiedFile = Files.readString(Path.of(changedFile.modifiedFile()));
 
       List<Integer> linesAffected =
-          changedFile.weaves().stream()
-              .map(Weave::lineNumber)
+          changedFile.changes().stream()
+              .map(CodemodChange::lineNumber)
               .collect(Collectors.toUnmodifiableList());
       assertThat(linesAffected, hasItems(expectedAffectedLines.toArray(new Integer[0])));
       String expectedAfterContents = Files.readString(tmpDir.resolve("test.jsp.after"));

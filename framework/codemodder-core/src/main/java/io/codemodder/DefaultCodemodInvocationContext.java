@@ -8,22 +8,22 @@ final class DefaultCodemodInvocationContext implements CodemodInvocationContext 
   private final CodeDirectory codeDirectory;
   private final Path path;
   private final String codemodId;
-  private final FileWeavingContext changeRecorder;
+  private final LineIncludesExcludes lineIncludesExcludes;
 
   DefaultCodemodInvocationContext(
       final CodeDirectory codeDirectory,
       final Path path,
       final String codemodId,
-      final FileWeavingContext changeRecorder) {
+      final LineIncludesExcludes lineIncludesExcludes) {
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
     this.path = Objects.requireNonNull(path);
     this.codemodId = Objects.requireNonNull(codemodId);
-    this.changeRecorder = Objects.requireNonNull(changeRecorder);
+    this.lineIncludesExcludes = Objects.requireNonNull(lineIncludesExcludes);
   }
 
   @Override
-  public FileWeavingContext changeRecorder() {
-    return changeRecorder;
+  public LineIncludesExcludes lineIncludesExcludes() {
+    return lineIncludesExcludes;
   }
 
   @Override

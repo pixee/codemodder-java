@@ -5,11 +5,8 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import io.codemodder.ChangedFile;
-import io.codemodder.CodemodInvoker;
-import io.codemodder.FileWeavingContext;
-import io.codemodder.IncludesExcludes;
-import io.codemodder.Weave;
+import io.codemodder.*;
+import io.codemodder.CodemodChange;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,10 +43,10 @@ final class VerbTamperingCodemodTest {
       throws IOException {
     String dir = "src/test/resources/verb-tampering/" + webXmlDir;
     copyDir(Path.of(dir), tmpDir);
-    CodemodInvoker codemodInvoker = new CodemodInvoker(List.of(VerbTamperingCodemod.class), tmpDir);
+    CodemodLoader codemodInvoker = new CodemodLoader(List.of(VerbTamperingCodemod.class), tmpDir);
     Path webxml = tmpDir.resolve("web.xml");
-    FileWeavingContext context =
-        FileWeavingContext.createDefault(webxml.toFile(), IncludesExcludes.any());
+    CodemodChangeRecorder context =
+        CodemodChangeRecorder.createDefault(webxml.toFile(), IncludesExcludes.any());
     Optional<ChangedFile> changedFileOptional = codemodInvoker.executeFile(webxml, context);
 
     assertThat(changedFileOptional.isPresent(), is(expectChange));
@@ -59,8 +56,8 @@ final class VerbTamperingCodemodTest {
       String modifiedFile = Files.readString(Path.of(changedFile.modifiedFile()));
 
       List<Integer> linesAffected =
-          changedFile.weaves().stream()
-              .map(Weave::lineNumber)
+          changedFile.changes().stream()
+              .map(CodemodChange::lineNumber)
               .collect(Collectors.toUnmodifiableList());
       assertThat(linesAffected, hasItems(expectedAffectedLines.toArray(new Integer[0])));
       assertThat(modifiedFile, equalTo(safeXmlAfterCodemod));

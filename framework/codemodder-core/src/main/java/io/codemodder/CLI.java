@@ -2,20 +2,17 @@ package io.codemodder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import io.codemodder.codetf.CodeTFReport;
 import io.codemodder.codetf.CodeTFReportGenerator;
+import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,7 +22,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.VisibleForTesting;
-import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -37,13 +33,14 @@ import picocli.CommandLine;
     description = "Run a codemodder codemod")
 final class CLI implements Callable<Integer> {
 
-  private final List<Class<? extends Changer>> codemods;
+  private final List<Class<? extends Changer>> codemodTypes;
   private final Clock clock;
   private final FileFinder fileFinder;
-  private final JavaParserFactory javaParserFactory;
   private final EncodingDetector encodingDetector;
+  private final JavaParserFactory javaParserFactory;
   private final SourceDirectoryLister sourceDirectoryLister;
   private final CodeTFReportGenerator reportGenerator;
+  private final String[] args;
 
   @CommandLine.Option(
       names = {"--output"},
@@ -116,42 +113,36 @@ final class CLI implements Callable<Integer> {
     DIFF
   }
 
-  CLI(final List<Class<? extends Changer>> codemods) {
+  CLI(final String[] args, final List<Class<? extends Changer>> codemodTypes) {
     this(
-        codemods,
+        args,
+        codemodTypes,
         Clock.systemUTC(),
         new DefaultFileFinder(),
-        new DefaultJavaParserFactory(),
         new DefaultEncodingDetector(),
+        new DefaultJavaParserFactory(),
         SourceDirectoryLister.createDefault(),
         CodeTFReportGenerator.createDefault());
   }
 
   CLI(
-      final List<Class<? extends Changer>> codemods,
+      final String[] args,
+      final List<Class<? extends Changer>> codemodTypes,
       final Clock clock,
       final FileFinder fileFinder,
-      final JavaParserFactory javaParserFactory,
       final EncodingDetector encodingDetector,
+      final JavaParserFactory javaParserFactory,
       final SourceDirectoryLister sourceDirectoryLister,
       final CodeTFReportGenerator reportGenerator) {
-    Objects.requireNonNull(codemods);
-    this.codemods = Collections.unmodifiableList(codemods);
+    Objects.requireNonNull(codemodTypes);
+    this.codemodTypes = Collections.unmodifiableList(codemodTypes);
     this.clock = Objects.requireNonNull(clock);
     this.fileFinder = Objects.requireNonNull(fileFinder);
-    this.javaParserFactory = Objects.requireNonNull(javaParserFactory);
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
+    this.javaParserFactory = Objects.requireNonNull(javaParserFactory);
     this.sourceDirectoryLister = Objects.requireNonNull(sourceDirectoryLister);
     this.reportGenerator = Objects.requireNonNull(reportGenerator);
-  }
-
-  @VisibleForTesting
-  static class DefaultEncodingDetector implements EncodingDetector {
-    @Override
-    public Optional<String> detect(final Path originalJavaFile) throws IOException {
-      String encoding = UniversalDetector.detectCharset(originalJavaFile);
-      return Optional.ofNullable(encoding);
-    }
+    this.args = Objects.requireNonNull(args);
   }
 
   @VisibleForTesting
@@ -196,8 +187,8 @@ final class CLI implements Callable<Integer> {
   public Integer call() throws IOException {
 
     if (listCodemods) {
-      for (Class<? extends Changer> codemod : codemods) {
-        Codemod annotation = codemod.getAnnotation(Codemod.class);
+      for (Class<? extends Changer> codemodType : codemodTypes) {
+        Codemod annotation = codemodType.getAnnotation(Codemod.class);
         log.info(annotation.id());
       }
       return SUCCESS;
@@ -222,6 +213,10 @@ final class CLI implements Callable<Integer> {
     if (!Files.isWritable(outputPath) && !Files.isWritable(outputPath.getParent())) {
       log.error("The output file (or its parent directory) is not writable");
       return ERROR_CANT_WRITE_OUTPUT_FILE;
+    }
+
+    if (dryRun) {
+      throw new UnsupportedOperationException("Dry run is not yet supported");
     }
 
     Instant start = clock.instant();
@@ -259,64 +254,33 @@ final class CLI implements Callable<Integer> {
       regulator = CodemodRegulator.of(DefaultRuleSetting.ENABLED, codemodExcludes);
     }
 
-    // create the invoker
-    CodemodInvoker invoker = new CodemodInvoker(codemods, regulator, projectPath);
+    // create the loader
+    CodemodLoader loader = new CodemodLoader(codemodTypes, regulator, projectPath);
+    List<CodemodIdPair> codemods = loader.getCodemods();
+
+    // create the project providers
+    List<ProjectProvider> projectProviders = loadProjectProviders();
+
+    // create the JavaParser instance
+    JavaParser javaParser = javaParserFactory.create(sourceDirectories);
+
+    List<CodeTFResult> results = new ArrayList<>();
 
     // run the codemods on the files
-    Set<ChangedFile> changedFiles = new HashSet<>();
-    Set<String> unscannableFiles = new HashSet<>();
-
-    // java files get fed to the codemodder apis that handle java compilation units, everything else
-    // gets sent to the codemodder apis that handle raw files
-    JavaParser javaParser = javaParserFactory.create(sourceDirectories);
-    for (Path filePath : filePaths) {
-      File file = filePath.toFile();
-      FileWeavingContext fileContext = FileWeavingContext.createDefault(file, includesExcludes);
-      Optional<ChangedFile> changedFile = Optional.empty();
-      try {
-        if (file.getName().toLowerCase().endsWith(".java")) {
-          changedFile = invokeOnJavaFile(invoker, javaParser, filePath, fileContext);
-        } else {
-          changedFile = invoker.executeFile(filePath, fileContext);
-        }
-      } catch (Exception e) {
-        log.error("Error processing file {}", file.getAbsolutePath());
-        unscannableFiles.add(file.getAbsolutePath());
+    for (CodemodIdPair codemod : codemods) {
+      CodemodExecutor codemodExecutor =
+          new DefaultCodemodExecutor(
+              projectPath,
+              includesExcludes,
+              codemod,
+              projectProviders,
+              javaParser,
+              encodingDetector);
+      CodeTFResult result = codemodExecutor.execute(filePaths);
+      if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {
+        results.add(result);
       }
-      changedFile.ifPresent(changedFiles::add);
     }
-
-    /*
-     * Now that all the codemods have had a chance to touch all the files, we can ask the project providers to apply
-     * any corrective changers to the project as a whole. This is useful for things like adding a dependency to the
-     * project's pom.xml file.
-     */
-    List<FileDependency> fileDependencies = new ArrayList<>();
-    for (ChangedFile file : changedFiles) {
-      Path path = Path.of(file.modifiedFile());
-      List<DependencyGAV> deps =
-          file.weaves().stream()
-              .map(Weave::getDependenciesNeeded)
-              .flatMap(Collection::stream)
-              .distinct()
-              .collect(Collectors.toList());
-      fileDependencies.add(FileDependency.create(path, deps));
-    }
-
-    List<ProjectProvider> projectProviders = loadProjectProviders();
-    for (ProjectProvider projectProvider : projectProviders) {
-      DependencyUpdateResult result =
-          projectProvider.updateDependencies(projectPath, changedFiles, fileDependencies);
-      unscannableFiles.addAll(
-          result.erroredFiles().stream()
-              .map(Path::toAbsolutePath)
-              .map(Objects::toString)
-              .collect(Collectors.toList()));
-      changedFiles = result.updatedChanges();
-      fileDependencies.removeAll(result.injectedDependencies());
-    }
-
-    WeavingResult results = WeavingResult.createDefault(changedFiles, unscannableFiles);
 
     Instant end = clock.instant();
     long elapsed = end.toEpochMilli() - start.toEpochMilli();
@@ -325,65 +289,18 @@ final class CLI implements Callable<Integer> {
     if (OutputFormat.CODETF.equals(outputFormat)) {
       CodeTFReport report =
           reportGenerator.createReport(
-              projectDirectory, pathIncludes, pathExcludes, results, elapsed);
+              projectDirectory.toPath(),
+              String.join(" ", args),
+              sarifs.stream().map(Path::of).collect(Collectors.toList()),
+              results,
+              elapsed);
       ObjectMapper mapper = new ObjectMapper();
       Files.write(outputPath, mapper.writeValueAsString(report).getBytes(StandardCharsets.UTF_8));
     } else if (OutputFormat.DIFF.equals(outputFormat)) {
       throw new UnsupportedOperationException("not supported yet");
     }
 
-    if (!dryRun) {
-      // write out the changed files
-      for (ChangedFile changedFile : results.changedFiles()) {
-        byte[] contents = Files.readAllBytes(Path.of(changedFile.modifiedFile()));
-        Files.write(Path.of(changedFile.originalFilePath()), contents);
-      }
-    } else {
-      log.info("Dry run, not writing any files");
-    }
-
-    int totalChanges =
-        changedFiles.stream().map(cf -> cf.weaves().size()).mapToInt(Integer::intValue).sum();
-    log.info(
-        "Scanned {} files, changing {} of them with {} individual changes",
-        filePaths.size(),
-        changedFiles.size(),
-        totalChanges);
-
     return SUCCESS;
-  }
-
-  private Optional<ChangedFile> invokeOnJavaFile(
-      final CodemodInvoker invoker,
-      final JavaParser javaParser,
-      final Path file,
-      final FileWeavingContext context)
-      throws IOException {
-    Optional<ChangedFile> changedFile = Optional.empty();
-    final InputStream in = Files.newInputStream(file);
-    final ParseResult<CompilationUnit> result = javaParser.parse(in);
-    if (!result.isSuccessful()) {
-      throw new RuntimeException("can't parse file");
-    }
-    final CompilationUnit cu = result.getResult().orElseThrow();
-
-    // send the compilation unit to the codemodder api
-    invoker.execute(file, cu, context);
-
-    // if the file was modified, write it out to a temp file and create a ChangedFile
-    if (context.madeWeaves()) {
-      final String encoding = encodingDetector.detect(file).orElse("UTF-8");
-      final String modified = (LexicalPreservingPrinter.print(cu));
-      Path modifiedFile = Files.createTempFile("modified", ".java");
-      Files.write(modifiedFile, modified.getBytes(encoding));
-      ChangedFile cf =
-          ChangedFile.createDefault(
-              file.toAbsolutePath().toString(),
-              modifiedFile.toAbsolutePath().toString(),
-              context.weaves());
-      changedFile = Optional.of(cf);
-    }
-    return changedFile;
   }
 
   private List<ProjectProvider> loadProjectProviders() {

@@ -5,10 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Top level CCF reporting object. This is the root object to be deserialized from a CCF input
- * stream.
- */
+/** Top level reporting object. This is the root object to be deserialized from an input stream. */
 public final class CodeTFReport {
 
   private final CodeTFRun run;

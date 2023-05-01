@@ -36,14 +36,12 @@ public abstract class RegexFileChanger implements RawFileChanger {
   }
 
   @Override
-  public void visitFile(final CodemodInvocationContext context) throws IOException {
+  public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
     if (!fileMatcher.test(context.path())) {
-      return;
+      return List.of();
     }
 
-    FileWeavingContext fileWeavingContext = context.changeRecorder();
-
-    final List<Weave> weaves = new ArrayList<>();
+    final List<CodemodChange> changes = new ArrayList<>();
     final String fileContents = Files.readString(context.path());
     final Matcher matcher = pattern.matcher(fileContents);
     StringBuilder rebuiltContents = null;
@@ -52,7 +50,7 @@ public abstract class RegexFileChanger implements RawFileChanger {
     while (matcher.find()) {
       int start = matcher.start();
       int startLine = LineNumbers.getLineNumberAt(fileContents, start);
-      if (!fileWeavingContext.isLineIncluded(startLine)) {
+      if (!context.lineIncludesExcludes().matches(startLine)) {
         continue;
       }
       if (rebuiltContents == null) {
@@ -61,7 +59,7 @@ public abstract class RegexFileChanger implements RawFileChanger {
       int end = matcher.end();
       String snippet = fileContents.substring(start, end);
       rebuiltContents.append(fileContents, lastEnd, start);
-      weaves.add(Weave.from(startLine, context.codemodId(), dependenciesRequired));
+      changes.add(CodemodChange.from(startLine, dependenciesRequired));
 
       final String replacement = getReplacementFor(snippet);
       rebuiltContents.append(replacement);
@@ -74,7 +72,7 @@ public abstract class RegexFileChanger implements RawFileChanger {
       }
     }
     if (lastEnd == 0) {
-      return;
+      return changes;
     }
 
     rebuiltContents.append(fileContents.substring(lastEnd));
@@ -103,12 +101,12 @@ public abstract class RegexFileChanger implements RawFileChanger {
       rebuiltContents.delete(rebuiltContents.length() - nl.length(), rebuiltContents.length());
     }
 
-    if (weaves.isEmpty()) {
-      return;
+    if (changes.isEmpty()) {
+      return changes;
     }
 
     Files.write(context.path(), rebuiltContents.toString().getBytes());
-    weaves.forEach(fileWeavingContext::addWeave);
+    return changes;
   }
 
   /**

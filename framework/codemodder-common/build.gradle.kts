@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.tuples)
     implementation(libs.java.security.toolkit)
     implementation(libs.slf4j.api)
+    implementation("commons-codec:commons-codec:1.15")
     api(libs.javaparser.core)
     api(libs.javaparser.symbolsolver.core)
     api(libs.javaparser.symbolsolver.logic)

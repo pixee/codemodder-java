@@ -14,7 +14,7 @@ public final class Runner {
    */
   public static void run(final List<Class<? extends Changer>> codemods, final String[] args) {
     CommandLine commandLine =
-        new CommandLine(new CLI(codemods)).setCaseInsensitiveEnumValuesAllowed(true);
+        new CommandLine(new CLI(args, codemods)).setCaseInsensitiveEnumValuesAllowed(true);
     int exitCode = commandLine.execute(args);
     System.exit(exitCode);
   }

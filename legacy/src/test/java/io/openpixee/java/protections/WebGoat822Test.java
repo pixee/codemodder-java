@@ -6,8 +6,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.codemodder.codetf.CodeTFChange;
+import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFReport;
-import io.codemodder.codetf.CodeTFResult;
 import io.openpixee.java.JavaFixitCli;
 import java.io.File;
 import java.io.FileReader;
@@ -36,7 +36,7 @@ final class WebGoat822Test extends GitRepositoryTest {
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
     assertThat(report.getRun().getFailedFiles().size(), is(0));
-    List<CodeTFResult> results = report.getResults();
+    List<CodeTFChangesetEntry> results = report.getResults();
     assertThat(results.size(), is(2));
 
     // we only inject into a couple files
@@ -129,7 +129,7 @@ final class WebGoat822Test extends GitRepositoryTest {
     // count the changes associated with missing-jwt-signature-check from codeql
     List<CodeTFChange> changes =
         report.getResults().stream()
-            .map(CodeTFResult::getChanges)
+            .map(CodeTFChangesetEntry::getChanges)
             .flatMap(List::stream)
             .filter(
                 change -> "codeql:java/missing-jwt-signature-check".equals(change.getCategory()))

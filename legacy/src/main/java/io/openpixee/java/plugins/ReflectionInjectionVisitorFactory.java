@@ -9,10 +9,10 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import io.codemodder.CodemodChange;
+import io.codemodder.CodemodChangeRecorder;
 import io.codemodder.DependencyGAV;
-import io.codemodder.FileWeavingContext;
 import io.codemodder.Sarif;
-import io.codemodder.Weave;
 import io.codemodder.ast.ASTTransforms;
 import io.github.pixee.security.Reflection;
 import io.openpixee.java.DoNothingVisitor;
@@ -49,7 +49,7 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
   }
 
   @Override
-  public ModifierVisitor<FileWeavingContext> createJavaCodeVisitorFor(
+  public ModifierVisitor<CodemodChangeRecorder> createJavaCodeVisitorFor(
       final File file, final CompilationUnit cu) {
     for (PhysicalLocation location : locations) {
       try {
@@ -69,7 +69,7 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
     return ID;
   }
 
-  private static class ReflectionInjectionVisitor extends ModifierVisitor<FileWeavingContext> {
+  private static class ReflectionInjectionVisitor extends ModifierVisitor<CodemodChangeRecorder> {
 
     private final NameExpr callbackClass;
     private final Set<Result> results;
@@ -82,7 +82,7 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
     }
 
     @Override
-    public Visitable visit(MethodCallExpr methodCallExpr, final FileWeavingContext context) {
+    public Visitable visit(MethodCallExpr methodCallExpr, final CodemodChangeRecorder context) {
       String methodName = methodCallExpr.getNameAsString();
       if ("forName".equals(methodName) && methodCallExpr.getArguments().size() == 1) {
         Expression expression = methodCallExpr.getArguments().get(0);
@@ -105,7 +105,7 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
                 safeCall.setScope(callbackClass);
                 safeCall.setArguments(methodCallExpr.getArguments());
                 context.addWeave(
-                    Weave.from(
+                    CodemodChange.from(
                         scopeRange.get().begin.line,
                         ID,
                         List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT)));
