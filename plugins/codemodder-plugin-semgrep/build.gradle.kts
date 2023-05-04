@@ -12,7 +12,6 @@ java {
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation("io.codemodder:codemodder-common")
     implementation("io.codemodder:codemodder-core")
 
     testImplementation(testlibs.bundles.junit.jupiter)

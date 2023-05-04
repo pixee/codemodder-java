@@ -1,13 +1,12 @@
 package io.codemodder.codetf;
 
-import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * This type is responsible for generating a {@link CodeTFReport} based on the domain objects
@@ -74,7 +73,7 @@ public interface CodeTFReportGenerator {
     /** Get a SHA-1 of the given file. */
     private String getSha1(final Path file) {
       try {
-        return sha1Hex(Files.newInputStream(file));
+        return DigestUtils.sha1Hex(Files.newInputStream(file));
       } catch (IOException e) {
         throw new UncheckedIOException("Failed to sha1 sarif file", e);
       }

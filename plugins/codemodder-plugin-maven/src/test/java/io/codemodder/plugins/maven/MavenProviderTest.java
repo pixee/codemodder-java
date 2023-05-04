@@ -26,10 +26,6 @@ final class MavenProviderTest {
   private PomFileUpdater pomFileUpdater;
   private PomFileFinder pomFileFinder;
   private Path projectDir;
-  private ChangedFile irrelevant;
-  private CodeTFChangesetEntry changedPom1;
-  private CodeTFChangesetEntry changedPom2;
-  private CodeTFChangesetEntry changedRootPom;
   private DependencyGAV marsDependency1;
   private DependencyGAV marsDependency2;
   private DependencyGAV venusDependency;

@@ -12,7 +12,6 @@ java {
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation("io.codemodder:codemodder-common")
     implementation("io.codemodder:codemodder-core")
     implementation("io.openpixee.maven:pom-operator:0.0.6") // TODO bring into monorepo
     {
