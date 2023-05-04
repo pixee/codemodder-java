@@ -1,4 +1,4 @@
-package io.openpixee.java.protections;
+package io.codemodder.javaparser;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;

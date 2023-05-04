@@ -88,9 +88,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> implements Ja
         if (!nodeType.isAssignableFrom(node.getClass())) {
           continue;
         }
-        CodemodChangeRecorder changeRecorder =
-            CodemodChangeRecorder.createDefault(context.lineIncludesExcludes());
-        if (changeRecorder.isLineIncluded(region.getStartLine())) {
+        if (context.lineIncludesExcludes().matches(region.getStartLine())) {
           if (node.getRange().isPresent()) {
             Range range = node.getRange().get();
             if (regionNodeMatcher.matches(region, range)) {

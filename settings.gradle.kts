@@ -17,5 +17,4 @@ plugins {
 
 includeBuild("codemodder-community-codemods")
 includeBuild("framework")
-includeBuild("legacy")
 includeBuild("plugins")
