@@ -2,7 +2,6 @@ package io.codemodder.codemods;
 
 import io.codemodder.Codemod;
 import io.codemodder.CodemodChange;
-import io.codemodder.CodemodChangeRecorder;
 import io.codemodder.CodemodInvocationContext;
 import io.codemodder.RawFileChanger;
 import io.codemodder.ReviewGuidance;
@@ -16,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -42,37 +42,35 @@ public final class VerbTamperingCodemod implements RawFileChanger {
   public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
     Path file = context.path();
     if (!file.getFileName().toString().equalsIgnoreCase("web.xml")) {
-      return null;
+      return List.of();
     }
     try {
-      processWebXml(context, file);
+      return processWebXml(context, file);
     } catch (SAXException | DocumentException | XMLStreamException e) {
       throw new IOException("Problem transforming web.xml", e);
     }
-    return null;
   }
 
-  private void processWebXml(final CodemodInvocationContext context, final Path file)
+  private List<CodemodChange> processWebXml(final CodemodInvocationContext context, final Path file)
       throws SAXException, IOException, DocumentException, XMLStreamException {
     Optional<XPathStreamProcessChange> change =
         processor.process(
             file, "//web-resource-collection/http-method", VerbTamperingCodemod::handle);
 
     if (change.isEmpty()) {
-      return;
+      return List.of();
     }
 
     XPathStreamProcessChange xmlChange = change.get();
     Set<Integer> linesAffected = xmlChange.linesAffected();
 
     // add the weaves to the context
-    CodemodChangeRecorder fileWeavingContext = context.changeRecorder();
-    linesAffected.stream()
-        .map(line -> CodemodChange.from(line, context.codemodId()))
-        .forEach(fileWeavingContext::addWeave);
+    List<CodemodChange> changes =
+        linesAffected.stream().map(CodemodChange::from).collect(Collectors.toList());
 
     // overwrite the previous web.xml with the new one
     Files.copy(xmlChange.transformedXml(), file, StandardCopyOption.REPLACE_EXISTING);
+    return changes;
   }
 
   /*

@@ -2,6 +2,8 @@ package io.codemodder;
 
 import static java.util.Collections.emptyMap;
 
+import com.github.difflib.DiffUtils;
+import com.github.difflib.UnifiedDiffUtils;
 import com.github.javaparser.JavaParser;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
@@ -10,6 +12,7 @@ import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.javaparser.JavaParserCodemodRunner;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -65,6 +68,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     }
 
     for (Path filePath : codemodTargetFiles) {
+
       // create the context necessary for the codemod to run
       LineIncludesExcludes lineIncludesExcludes =
           includesExcludes.getIncludesExcludesForFile(filePath.toFile());
@@ -72,6 +76,9 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
           new DefaultCodemodInvocationContext(
               codeDirectory, filePath, codemod.getId(), lineIncludesExcludes);
       try {
+        // capture the "before" for the diff, if needed
+        List<String> beforeFile = Files.readAllLines(filePath);
+
         // run the codemod on the file
         List<CodemodChange> codemodChanges = codemodRunner.run(context);
 
@@ -105,8 +112,18 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
           // make sure we add the file's entry first, then the dependency entries, so the causality
           // is clear
+          List<String> afterFile = Files.readAllLines(filePath);
+          List<String> patchDiff =
+              UnifiedDiffUtils.generateUnifiedDiff(
+                  filePath.getFileName().toString(),
+                  filePath.getFileName().toString(),
+                  beforeFile,
+                  DiffUtils.diff(beforeFile, afterFile),
+                  3);
+
+          String diff = String.join("\n", patchDiff);
           changeset.add(
-              new CodeTFChangesetEntry(getRelativePath(projectDir, filePath), "", changes));
+              new CodeTFChangesetEntry(getRelativePath(projectDir, filePath), diff, changes));
           changeset.addAll(dependencyChangesetEntries);
         }
       } catch (Exception e) {

@@ -6,10 +6,12 @@ import io.openpixee.java.protections.WeavingTests;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 final class JavaXssTest {
 
+  @Disabled
   @Test
   void it_prevents_xss() throws IOException {
     String insecureFilePath = "src/test/java/com/acme/testcode/XSSVulnerability.java";

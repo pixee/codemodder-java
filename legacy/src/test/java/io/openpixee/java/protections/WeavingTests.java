@@ -48,7 +48,7 @@ public abstract class WeavingTests {
     var testCodeDir = new File(vulnerableFile.getParent());
     var codemodInvoker = new CodemodLoader(List.of(), testCodeDir.toPath());
     var directory =
-        SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
+        SourceDirectory.createDefault(testCodeDir.toPath(), List.of(pathToVulnerableFile));
 
     var changedFile =
         scanAndAssertNoErrorsWithOneFileChanged(
@@ -61,11 +61,11 @@ public abstract class WeavingTests {
     expectedContents =
         expectedContents.replace("interface " + typeName + "Weaved", "interface " + typeName);
 
-    assertThat(new File(changedFile.modifiedFile()))
+    assertThat(changedFile.modifiedFile().toFile())
         .content()
         .isEqualToIgnoringWhitespace(expectedContents);
 
-    directory = SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToFixedFile));
+    directory = SourceDirectory.createDefault(testCodeDir.toPath(), List.of(pathToFixedFile));
     scanAndAssertNoErrorsWithNoFilesChanged(
         analyzer, directory, visitorFactories, codemodInvoker, includesExcludes);
 
@@ -118,7 +118,7 @@ public abstract class WeavingTests {
     var testCodeDir = new File(vulnerableFile.getParent());
     var codemodInvoker = new CodemodLoader(List.of(), testCodeDir.toPath());
     var directory =
-        SourceDirectory.createDefault(testCodeDir.getPath(), List.of(pathToVulnerableFile));
+        SourceDirectory.createDefault(testCodeDir.toPath(), List.of(pathToVulnerableFile));
 
     scanAndAssertNoErrorsWithNoFilesChanged(
         analyzer, directory, visitorFactories, codemodInvoker, includesExcludes);
@@ -178,9 +178,8 @@ public abstract class WeavingTests {
     var changedFiles = result.changedFiles();
     assertThat(changedFiles).hasSize(1);
     var changedFile = changedFiles.iterator().next();
-    assertThat(new File(changedFile.originalFilePath()).getAbsolutePath())
-        .isEqualTo(vulnerableFile.getAbsolutePath());
-    assertThat(new File(changedFile.modifiedFile())).hasSameTextualContentAs(fixedFile);
+    assertThat(changedFile.originalFilePath()).isEqualTo(vulnerableFile.getAbsolutePath());
+    assertThat(changedFile.modifiedFile()).hasSameTextualContentAs(fixedFile.toPath());
     return changedFile;
   }
 }

@@ -106,9 +106,7 @@ public final class ReflectionInjectionVisitorFactory implements VisitorFactory {
                 safeCall.setArguments(methodCallExpr.getArguments());
                 context.addWeave(
                     CodemodChange.from(
-                        scopeRange.get().begin.line,
-                        ID,
-                        List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT)));
+                        scopeRange.get().begin.line, List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT)));
                 return super.visit(safeCall, context);
               }
             }

@@ -8,16 +8,22 @@ import java.util.List;
 public interface Changer {
 
   /** The headline for this codemod's changes. */
-  String getSummary();
+  default String getSummary() {
+    return getClass().getName() + " - summary";
+  }
 
   /** A deep description of what this codemod's changes. */
-  String getDescription();
+  default String getDescription() {
+    return getClass().getName() + " - description";
+  }
 
   /**
    * A list of references for further reading on the issues this codemod addresses or other
    * supplementary information.
    */
-  List<CodeTFReference> getReferences();
+  default List<CodeTFReference> getReferences() {
+    return List.of();
+  }
 
   /** A description of an individual change made by this codemod. */
   default String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {

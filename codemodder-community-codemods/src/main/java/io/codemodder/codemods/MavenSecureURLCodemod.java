@@ -69,13 +69,7 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
     Set<Integer> linesAffected = xmlChange.linesAffected();
 
     List<CodemodChange> allWeaves =
-        linesAffected.stream()
-            .map(line -> CodemodChange.from(line, context.codemodId()))
-            .collect(Collectors.toList());
-
-    // add the weaves to the context
-    CodemodChangeRecorder fileWeavingContext = context.changeRecorder();
-    allWeaves.forEach(fileWeavingContext::addWeave);
+        linesAffected.stream().map(CodemodChange::from).collect(Collectors.toList());
 
     // overwrite the previous web.xml with the new one
     Files.copy(xmlChange.transformedXml(), file, StandardCopyOption.REPLACE_EXISTING);

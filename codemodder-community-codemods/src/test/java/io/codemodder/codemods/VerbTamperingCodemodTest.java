@@ -5,15 +5,17 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import com.github.javaparser.JavaParser;
 import io.codemodder.*;
-import io.codemodder.CodemodChange;
+import io.codemodder.codetf.CodeTFChange;
+import io.codemodder.codetf.CodeTFChangesetEntry;
+import io.codemodder.codetf.CodeTFResult;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,21 +45,26 @@ final class VerbTamperingCodemodTest {
       throws IOException {
     String dir = "src/test/resources/verb-tampering/" + webXmlDir;
     copyDir(Path.of(dir), tmpDir);
-    CodemodLoader codemodInvoker = new CodemodLoader(List.of(VerbTamperingCodemod.class), tmpDir);
+    CodemodLoader loader = new CodemodLoader(List.of(VerbTamperingCodemod.class), tmpDir);
     Path webxml = tmpDir.resolve("web.xml");
-    CodemodChangeRecorder context =
-        CodemodChangeRecorder.createDefault(webxml.toFile(), IncludesExcludes.any());
-    Optional<ChangedFile> changedFileOptional = codemodInvoker.executeFile(webxml, context);
-
-    assertThat(changedFileOptional.isPresent(), is(expectChange));
+    CodemodExecutor executor =
+        CodemodExecutor.from(
+            tmpDir,
+            IncludesExcludes.any(),
+            loader.getCodemods().get(0),
+            List.of(),
+            new JavaParser(),
+            EncodingDetector.create());
+    CodeTFResult result = executor.execute(List.of(webxml));
+    assertThat(result.getChangeset().isEmpty(), is(!expectChange));
 
     if (expectChange) {
-      ChangedFile changedFile = changedFileOptional.get();
-      String modifiedFile = Files.readString(Path.of(changedFile.modifiedFile()));
+      CodeTFChangesetEntry changedFile = result.getChangeset().get(0);
+      String modifiedFile = Files.readString(webxml);
 
       List<Integer> linesAffected =
-          changedFile.changes().stream()
-              .map(CodemodChange::lineNumber)
+          changedFile.getChanges().stream()
+              .map(CodeTFChange::getLineNumber)
               .collect(Collectors.toUnmodifiableList());
       assertThat(linesAffected, hasItems(expectedAffectedLines.toArray(new Integer[0])));
       assertThat(modifiedFile, equalTo(safeXmlAfterCodemod));

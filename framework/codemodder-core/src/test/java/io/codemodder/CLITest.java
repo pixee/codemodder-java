@@ -40,10 +40,10 @@ final class CLITest {
     sourceDirectories =
         List.of(
             SourceDirectory.createDefault(
-                tmpDir.resolve("module1/src/main/java").toAbsolutePath().toString(),
+                tmpDir.resolve("module1/src/main/java").toAbsolutePath(),
                 List.of(fooJavaFile.toAbsolutePath().toString())),
             SourceDirectory.createDefault(
-                tmpDir.resolve("module2/src/main/java").toAbsolutePath().toString(),
+                tmpDir.resolve("module2/src/main/java").toAbsolutePath(),
                 List.of(barJavaFile.toAbsolutePath().toString())));
   }
 
@@ -63,7 +63,7 @@ final class CLITest {
 
   @Test
   void javaparser_factory_works() throws IOException {
-    JavaParserFactory factory = new CLI.DefaultJavaParserFactory();
+    JavaParserFactory factory = JavaParserFactory.newFactory();
     JavaParser javaParser = factory.create(sourceDirectories);
     Optional<CompilationUnit> result = javaParser.parse(fooJavaFile).getResult();
     assertThat(result.isPresent()).isTrue();

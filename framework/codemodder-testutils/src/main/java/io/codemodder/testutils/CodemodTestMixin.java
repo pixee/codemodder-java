@@ -1,26 +1,17 @@
 package io.codemodder.testutils;
 
 import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.*;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseResult;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import io.codemodder.*;
+import io.codemodder.codetf.CodeTFChangesetEntry;
+import io.codemodder.codetf.CodeTFResult;
+import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -51,27 +42,11 @@ public interface CodemodTestMixin {
     verifyCodemod(codemod, tmpDir, testDir, dependencies);
   }
 
-  private CompilationUnit parseJavaFile(final Path javaFile) throws IOException {
-    JavaParser javaParser = new JavaParser();
-
-    final CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-    combinedTypeSolver.add(new ReflectionTypeSolver());
-    javaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
-
-    final ParseResult<CompilationUnit> result = javaParser.parse(Files.newInputStream(javaFile));
-    if (!result.isSuccessful()) {
-      throw new IllegalArgumentException("couldn't parse file: " + javaFile);
-    }
-    final CompilationUnit cu = result.getResult().orElseThrow();
-    LexicalPreservingPrinter.setup(cu);
-    return cu;
-  }
-
   private void verifyCodemod(
-      final Class<? extends Changer> codemod,
+      final Class<? extends Changer> codemodType,
       final Path tmpDir,
       final Path testResourceDir,
-      final List<DependencyGAV> dependencies)
+      final List<DependencyGAV> dependenciesExpected)
       throws IOException {
 
     // create a copy of the test file in the temp directory to serve as our "repository"
@@ -89,49 +64,41 @@ public interface CodemodTestMixin {
     Map<String, List<RuleSarif>> map = new SarifParser.Default().parseIntoMap(allSarifs, tmpDir);
 
     // run the codemod
-    CodemodLoader loader = new CodemodLoader(List.of(codemod), tmpDir, map);
-    CompilationUnit cu = parseJavaFile(pathToJavaFile);
-
-    CodemodChangeRecorder context =
-        CodemodChangeRecorder.createDefault(pathToJavaFile.toFile(), IncludesExcludes.any());
+    CodemodLoader loader = new CodemodLoader(List.of(codemodType), tmpDir, map);
 
     List<CodemodIdPair> codemods = loader.getCodemods();
-    for (CodemodIdPair pair : codemods) {
-      CodemodExecutor executor =
-          CodemodExecutor.from(
-              tmpDir,
-              IncludesExcludes.any(),
-              pair,
-              List.of(),
-              new JavaParser(),
-              EncodingDetector.create());
-      executor.execute(List.of(pathToJavaFile));
-    }
+    assertThat(codemods.size(), equalTo(1));
+    CodemodIdPair codemod = codemods.get(0);
+    JavaParserFactory factory = JavaParserFactory.newFactory();
+    SourceDirectory dir = SourceDirectory.createDefault(tmpDir, List.of(pathToJavaFile.toString()));
+    CodemodExecutor executor =
+        CodemodExecutor.from(
+            tmpDir,
+            IncludesExcludes.any(),
+            codemod,
+            List.of(),
+            factory.create(List.of(dir)),
+            EncodingDetector.create());
+    CodeTFResult result = executor.execute(List.of(pathToJavaFile));
+    List<CodeTFChangesetEntry> changeset = result.getChangeset();
 
     // make sure the file is transformed to the expected output
-    String transformedJavaCode = LexicalPreservingPrinter.print(cu);
-    assertThat(transformedJavaCode, equalTo(Files.readString(after)));
+    String expectedCode = Files.readString(after);
+    String transformedJavaCode = Files.readString(pathToJavaFile);
+    assertThat(transformedJavaCode, equalTo(expectedCode));
+    assertThat(changeset.size(), is(1));
+    CodeTFChangesetEntry entry = changeset.get(0);
+    assertThat(entry.getChanges().isEmpty(), is(false));
 
     // make sure the dependencies are added
-    List<CodemodChange> weaves = context.weaves();
-    List<DependencyGAV> dependenciesNeeded = weaves.get(0).getDependenciesNeeded();
-    assertThat(dependenciesNeeded, hasItems(dependencies.toArray(new DependencyGAV[0])));
+
+    assertThat(dependenciesExpected, hasItems(dependenciesExpected.toArray(new DependencyGAV[0])));
 
     // re-run the transformation again and make sure no changes are made
-    Files.copy(after, pathToJavaFile, StandardCopyOption.REPLACE_EXISTING);
-    for (CodemodIdPair pair : codemods) {
-      CodemodExecutor executor =
-          CodemodExecutor.from(
-              tmpDir,
-              IncludesExcludes.any(),
-              pair,
-              List.of(),
-              new JavaParser(),
-              EncodingDetector.create());
-      executor.execute(List.of(pathToJavaFile));
-    }
-
+    CodeTFResult result2 = executor.execute(List.of(pathToJavaFile));
+    List<CodeTFChangesetEntry> changeset2 = result2.getChangeset();
+    assertThat(changeset2.size(), is(0));
     String transformedAgainJavaCode = Files.readString(pathToJavaFile);
-    assertThat(transformedAgainJavaCode, equalTo(Files.readString(after)));
+    assertThat(transformedAgainJavaCode, equalTo(expectedCode));
   }
 }

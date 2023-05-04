@@ -116,8 +116,7 @@ final class JavaXssVisitorFactory implements VisitorFactory {
                 safeExpression.setArguments(NodeList.nodeList(argument));
                 methodCallExpr.setArguments(NodeList.nodeList(safeExpression));
                 context.addWeave(
-                    CodemodChange.from(
-                        startLine, toWeaveId(result), DependencyGAV.OWASP_XSS_JAVA_ENCODER));
+                    CodemodChange.from(startLine, DependencyGAV.OWASP_XSS_JAVA_ENCODER));
               } else {
                 LOG.debug(
                     "Ignoring XSS result due to parameter not being a String: {}",

@@ -53,8 +53,7 @@ public interface SourceDirectoryLister {
                 .collect(Collectors.toUnmodifiableList());
 
         sourceDirectories.add(
-            SourceDirectory.createDefault(
-                sourceDirectoryPath.toAbsolutePath().toString(), javaFilePaths));
+            SourceDirectory.createDefault(sourceDirectoryPath.toAbsolutePath(), javaFilePaths));
       }
       return Collections.unmodifiableList(sourceDirectories);
     }

@@ -7,6 +7,7 @@ import io.openpixee.java.FileBasedVisitor;
 import io.openpixee.java.JspLineWeave;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -189,7 +190,6 @@ public final class SarifBasedJspScriptletXSSVisitor implements FileBasedVisitor 
             weaves.add(
                 CodemodChange.from(
                     lineNumber,
-                    lineWeave.getRuleId(),
                     dependencyNeeded != null
                         ? List.of(dependencyNeeded)
                         : Collections.emptyList()));
@@ -210,7 +210,8 @@ public final class SarifBasedJspScriptletXSSVisitor implements FileBasedVisitor 
         File tmpFile = File.createTempFile("xss-rewrite", ".jsp");
         FileUtils.writeLines(tmpFile, rebuiltLines);
         ChangedFile changedFile =
-            ChangedFile.createDefault(file.getAbsolutePath(), tmpFile.getAbsolutePath(), weaves);
+            ChangedFile.createDefault(
+                Path.of(file.getAbsolutePath()), Path.of(tmpFile.getAbsolutePath()), weaves);
         return WeavingResult.createDefault(Set.of(changedFile), Collections.emptySet());
       }
 
