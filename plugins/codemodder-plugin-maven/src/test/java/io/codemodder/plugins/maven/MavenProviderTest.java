@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.util.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -150,8 +149,6 @@ final class MavenProviderTest {
     assertThat(result.injectedPackages()).isEmpty();
   }
 
-  @Disabled(
-      "Needs the pom-operator to be able to know when to skip when a dependency is already present")
   @Test
   void it_handles_when_already_present() throws IOException {
 

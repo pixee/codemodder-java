@@ -3,17 +3,31 @@ package io.codemodder.plugins.maven;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
-import io.codemodder.*;
+import io.codemodder.DependencyGAV;
+import io.codemodder.DependencyUpdateResult;
+import io.codemodder.ProjectProvider;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
-import io.openpixee.maven.operator.*;
+import io.openpixee.maven.operator.Dependency;
+import io.openpixee.maven.operator.POMOperator;
+import io.openpixee.maven.operator.ProjectModel;
+import io.openpixee.maven.operator.ProjectModelFactory;
+import io.openpixee.maven.operator.QueryType;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 /** Provides Maven dependency management functions to codemods. */
@@ -53,11 +67,10 @@ public final class MavenProvider implements ProjectProvider {
         return DependencyUpdateResult.create(
             dependencies, skippedDependencies, Set.of(entryRef.get()), Set.of());
       }
+      return DependencyUpdateResult.create(List.of(), skippedDependencies, Set.of(), Set.of());
     } catch (IOException e) {
       return DependencyUpdateResult.create(List.of(), List.of(), Set.of(), Set.of(targetPom));
     }
-
-    return DependencyUpdateResult.EMPTY_UPDATE;
   }
 
   @VisibleForTesting
@@ -103,38 +116,47 @@ public final class MavenProvider implements ProjectProvider {
       final List<DependencyGAV> skippedDependencies = new ArrayList<>();
       final List<DependencyGAV> failedDependencies = new ArrayList<>();
 
+      AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
+          new AtomicReference<>(getDependenciesFrom(pomPath));
+
       mappedDependencies.forEach(
           newDependency -> {
+            DependencyGAV newDependencyGAV =
+                DependencyGAV.createDefault(
+                    newDependency.getGroupId(),
+                    newDependency.getArtifactId(),
+                    newDependency.getVersion());
+
+            boolean foundIt =
+                foundDependenciesMapped.get().stream().anyMatch(it -> newDependencyGAV.equals(it));
+
+            if (foundIt) {
+              skippedDependencies.add(newDependencyGAV);
+
+              return;
+            }
+
             ProjectModel projectModel =
                 ProjectModelFactory.load(newPomFile.toFile())
                     .withDependency(newDependency)
-                    .withOverrideIfAlreadyExists(true)
                     .withSkipIfNewer(true)
                     .withUseProperties(true)
                     .build();
 
-            AbstractSimpleCommand command = CheckDependencyPresentKt.getCheckDependencyPresent();
-            boolean foundIt = command.execute(projectModel);
-            if (foundIt) {
-              skippedDependencies.add(
-                  DependencyGAV.createDefault(
-                      newDependency.getGroupId(),
-                      newDependency.getArtifactId(),
-                      newDependency.getVersion()));
-            }
             boolean result = POMOperator.modify(projectModel);
+
             if (result) {
               try {
                 Files.write(newPomFile, projectModel.getResultPomBytes());
               } catch (IOException e) {
                 throw new RuntimeException(e);
               }
+
+              // Dependencies got dirty and there's the slightly risk of introducing
+              // transitive ones we didn't expect - lets rebuild it
+              foundDependenciesMapped.set(getDependenciesFrom(newPomFile));
             } else {
-              failedDependencies.add(
-                  DependencyGAV.createDefault(
-                      newDependency.getGroupId(),
-                      newDependency.getArtifactId(),
-                      newDependency.getVersion()));
+              failedDependencies.add(newDependencyGAV);
             }
           });
 
@@ -157,6 +179,25 @@ public final class MavenProvider implements ProjectProvider {
       Files.copy(newPomFile, pomPath, StandardCopyOption.REPLACE_EXISTING);
 
       return new PomUpdateResult(Optional.of(entry), skippedDependencies);
+    }
+
+    @NotNull
+    private static Collection<DependencyGAV> getDependenciesFrom(Path newPomFile) {
+      ProjectModel originalProjectModel =
+          ProjectModelFactory.load(newPomFile.toFile()).withQueryType(QueryType.SAFE).build();
+
+      Collection<Dependency> foundDependencies = POMOperator.queryDependency(originalProjectModel);
+
+      Collection<DependencyGAV> foundDependenciesMapped =
+          foundDependencies.stream()
+              .map(
+                  dependency ->
+                      DependencyGAV.createDefault(
+                          dependency.getGroupId(),
+                          dependency.getArtifactId(),
+                          dependency.getVersion()))
+              .collect(Collectors.toList());
+      return foundDependenciesMapped;
     }
   }
 }
