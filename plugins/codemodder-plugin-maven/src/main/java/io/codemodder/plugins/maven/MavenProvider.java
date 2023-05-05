@@ -71,11 +71,10 @@ public final class MavenProvider implements ProjectProvider {
         return DependencyUpdateResult.create(
             dependencies, skippedDependencies, Set.of(entryRef.get()), Set.of());
       }
+      return DependencyUpdateResult.create(List.of(), skippedDependencies, Set.of(), Set.of());
     } catch (IOException e) {
       return DependencyUpdateResult.create(List.of(), List.of(), Set.of(), Set.of(targetPom));
     }
-
-    return DependencyUpdateResult.EMPTY_UPDATE;
   }
 
   @VisibleForTesting
