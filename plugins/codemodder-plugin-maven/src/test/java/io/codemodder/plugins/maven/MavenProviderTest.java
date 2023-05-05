@@ -150,8 +150,6 @@ final class MavenProviderTest {
     assertThat(result.injectedPackages()).isEmpty();
   }
 
-  @Disabled(
-      "Needs the pom-operator to be able to know when to skip when a dependency is already present")
   @Test
   void it_handles_when_already_present() throws IOException {
 
