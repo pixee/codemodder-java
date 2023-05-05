@@ -3,10 +3,16 @@ package io.codemodder.plugins.maven;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
-
+import io.codemodder.DependencyGAV;
+import io.codemodder.DependencyUpdateResult;
+import io.codemodder.ProjectProvider;
+import io.codemodder.codetf.CodeTFChange;
+import io.codemodder.codetf.CodeTFChangesetEntry;
+import io.openpixee.maven.operator.Dependency;
+import io.openpixee.maven.operator.POMOperator;
+import io.openpixee.maven.operator.ProjectModel;
+import io.openpixee.maven.operator.ProjectModelFactory;
+import io.openpixee.maven.operator.QueryType;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -19,22 +25,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 
-import io.codemodder.DependencyGAV;
-import io.codemodder.DependencyUpdateResult;
-import io.codemodder.ProjectProvider;
-import io.codemodder.codetf.CodeTFChange;
-import io.codemodder.codetf.CodeTFChangesetEntry;
-import io.openpixee.maven.operator.Dependency;
-import io.openpixee.maven.operator.POMOperator;
-import io.openpixee.maven.operator.ProjectModel;
-import io.openpixee.maven.operator.ProjectModelFactory;
-import io.openpixee.maven.operator.QueryType;
-
-/**
- * Provides Maven dependency management functions to codemods.
- */
+/** Provides Maven dependency management functions to codemods. */
 public final class MavenProvider implements ProjectProvider {
 
   private final PomFileFinder pomFileFinder;
@@ -120,16 +116,19 @@ public final class MavenProvider implements ProjectProvider {
       final List<DependencyGAV> skippedDependencies = new ArrayList<>();
       final List<DependencyGAV> failedDependencies = new ArrayList<>();
 
-      Collection<DependencyGAV> foundDependenciesMapped = getDependenciesFrom(pomPath);
+      AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
+          new AtomicReference<>(getDependenciesFrom(pomPath));
 
       mappedDependencies.forEach(
           newDependency -> {
-            DependencyGAV newDependencyGAV = DependencyGAV.createDefault(
-                newDependency.getGroupId(),
-                newDependency.getArtifactId(),
-                newDependency.getVersion());
+            DependencyGAV newDependencyGAV =
+                DependencyGAV.createDefault(
+                    newDependency.getGroupId(),
+                    newDependency.getArtifactId(),
+                    newDependency.getVersion());
 
-            boolean foundIt = foundDependenciesMapped.stream().anyMatch(it -> newDependencyGAV.equals(it));
+            boolean foundIt =
+                foundDependenciesMapped.get().stream().anyMatch(it -> newDependencyGAV.equals(it));
 
             if (foundIt) {
               skippedDependencies.add(newDependencyGAV);
@@ -152,9 +151,12 @@ public final class MavenProvider implements ProjectProvider {
               } catch (IOException e) {
                 throw new RuntimeException(e);
               }
+
+              // Dependencies got dirty and there's the slightly risk of introducing
+              // transitive ones we didn't expect - lets rebuild it
+              foundDependenciesMapped.set(getDependenciesFrom(newPomFile));
             } else {
-              failedDependencies.add(
-                  newDependencyGAV);
+              failedDependencies.add(newDependencyGAV);
             }
           });
 
@@ -182,18 +184,19 @@ public final class MavenProvider implements ProjectProvider {
     @NotNull
     private static Collection<DependencyGAV> getDependenciesFrom(Path newPomFile) {
       ProjectModel originalProjectModel =
-          ProjectModelFactory.load(newPomFile.toFile())
-              .withQueryType(QueryType.SAFE)
-              .build();
+          ProjectModelFactory.load(newPomFile.toFile()).withQueryType(QueryType.SAFE).build();
 
       Collection<Dependency> foundDependencies = POMOperator.queryDependency(originalProjectModel);
 
       Collection<DependencyGAV> foundDependenciesMapped =
-          foundDependencies.stream().
-              map(dependency -> DependencyGAV.createDefault(
-                  dependency.getGroupId(),
-                  dependency.getArtifactId(),
-                  dependency.getVersion())).collect(Collectors.toList());
+          foundDependencies.stream()
+              .map(
+                  dependency ->
+                      DependencyGAV.createDefault(
+                          dependency.getGroupId(),
+                          dependency.getArtifactId(),
+                          dependency.getVersion()))
+              .collect(Collectors.toList());
       return foundDependenciesMapped;
     }
   }
