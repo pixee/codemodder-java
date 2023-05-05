@@ -66,5 +66,17 @@ final class LexicalTest {
     assertThat(barMethodCallStmt.getRange().get().begin.line, equalTo(3));
     assertThat(LexicalPreservingPrinter.print(cu), equalTo(expected));
     assertThat(barMethodCallStmt.getRange().get().begin.line, equalTo(3));
+
+    /*
+     * This test confirms that even after re-serializing, the line numbers from the original elements are still intact. This is important because we snapshot diffs as we go and we want to make sure that serializing process doesn't clobber the original line number data.
+     */
+    LexicalPreservingPrinter.print(cu);
+    MethodCallExpr barCallExpression =
+        cu.findAll(MethodCallExpr.class).stream()
+            .filter(m -> m.getNameAsString().equals("bar"))
+            .findFirst()
+            .get();
+    int line = barCallExpression.getRange().get().begin.line;
+    assertThat(line, equalTo(3));
   }
 }

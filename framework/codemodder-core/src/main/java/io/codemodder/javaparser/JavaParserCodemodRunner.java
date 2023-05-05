@@ -1,12 +1,12 @@
 package io.codemodder.javaparser;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import io.codemodder.*;
+import io.codemodder.CodemodChange;
+import io.codemodder.CodemodInvocationContext;
+import io.codemodder.CodemodRunner;
+import io.codemodder.EncodingDetector;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,11 +22,11 @@ import java.util.Objects;
 public final class JavaParserCodemodRunner implements CodemodRunner {
 
   private final JavaParserChanger javaParserChanger;
-  private final JavaParser parser;
+  private final CachingJavaParser parser;
   private final EncodingDetector encodingDetector;
 
   public JavaParserCodemodRunner(
-      final JavaParser parser,
+      final CachingJavaParser parser,
       final JavaParserChanger javaParserChanger,
       final EncodingDetector encodingDetector) {
     this.parser = Objects.requireNonNull(parser);
@@ -35,9 +35,14 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
   }
 
   @Override
+  public boolean supports(final Path path) {
+    return path.getFileName().toString().toLowerCase().endsWith(".java");
+  }
+
+  @Override
   public List<CodemodChange> run(final CodemodInvocationContext context) throws IOException {
     Path file = context.path();
-    CompilationUnit cu = parseJavaFile(parser, file);
+    CompilationUnit cu = parser.parseJavaFile(file);
     LexicalPreservingPrinter.setup(cu);
     List<CodemodChange> changes = javaParserChanger.visit(context, cu);
     if (!changes.isEmpty()) {
@@ -47,16 +52,5 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
       Files.write(file, modified.getBytes(encoding), StandardOpenOption.TRUNCATE_EXISTING);
     }
     return changes;
-  }
-
-  private CompilationUnit parseJavaFile(final JavaParser javaParser, final Path file)
-      throws IOException {
-    try (InputStream in = Files.newInputStream(file)) {
-      final ParseResult<CompilationUnit> result = javaParser.parse(in);
-      if (!result.isSuccessful()) {
-        throw new RuntimeException("can't parse file");
-      }
-      return result.getResult().orElseThrow();
-    }
   }
 }

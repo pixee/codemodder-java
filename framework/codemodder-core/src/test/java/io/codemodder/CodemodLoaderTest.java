@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.javaparser.JavaParser;
 import io.codemodder.codetf.CodeTFReference;
+import io.codemodder.javaparser.CachingJavaParser;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -123,7 +124,7 @@ final class CodemodLoaderTest {
               IncludesExcludes.any(),
               codemodIdPair,
               List.of(),
-              new JavaParser(),
+              CachingJavaParser.from(new JavaParser()),
               EncodingDetector.create());
       executor.execute(List.of(file));
     }

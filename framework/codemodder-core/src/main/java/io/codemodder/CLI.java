@@ -5,6 +5,7 @@ import com.github.javaparser.JavaParser;
 import io.codemodder.codetf.CodeTFReport;
 import io.codemodder.codetf.CodeTFReportGenerator;
 import io.codemodder.codetf.CodeTFResult;
+import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
@@ -240,11 +241,16 @@ final class CLI implements Callable<Integer> {
     List<ProjectProvider> projectProviders = loadProjectProviders();
 
     // create the JavaParser instance
-    JavaParser javaParser = javaParserFactory.create(sourceDirectories);
 
     List<CodeTFResult> results = new ArrayList<>();
 
-    // run the codemods on the files
+    /*
+     * Run the codemods on the files. Note that we cache the compilation units so that we're always retaining
+     * the original concrete syntax information (e.g., line numbers) in JavaParser from the first access. This
+     * is what allows our codemods to act on SARIF-providing tools data accurately over multiple codemods.
+     */
+    JavaParser javaParser = javaParserFactory.create(sourceDirectories);
+    CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
     for (CodemodIdPair codemod : codemods) {
       CodemodExecutor codemodExecutor =
           new DefaultCodemodExecutor(
@@ -252,7 +258,7 @@ final class CLI implements Callable<Integer> {
               includesExcludes,
               codemod,
               projectProviders,
-              javaParser,
+              cachingJavaParser,
               encodingDetector);
       CodeTFResult result = codemodExecutor.execute(filePaths);
       if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {

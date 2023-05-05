@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 import com.github.javaparser.JavaParser;
 import io.codemodder.*;
+import io.codemodder.javaparser.CachingJavaParser;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,7 +52,7 @@ public interface RawFileCodemodTest {
               IncludesExcludes.any(),
               pair,
               List.of(),
-              new JavaParser(),
+              CachingJavaParser.from(new JavaParser()),
               EncodingDetector.create());
       executor.execute(List.of(tmpFilePath));
     }

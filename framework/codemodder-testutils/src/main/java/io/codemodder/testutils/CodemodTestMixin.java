@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.*;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFResult;
+import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +78,7 @@ public interface CodemodTestMixin {
             IncludesExcludes.any(),
             codemod,
             List.of(),
-            factory.create(List.of(dir)),
+            CachingJavaParser.from(factory.create(List.of(dir))),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(pathToJavaFile));
     List<CodeTFChangesetEntry> changeset = result.getChangeset();

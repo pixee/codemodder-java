@@ -4,11 +4,11 @@ import static java.util.Collections.emptyMap;
 
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
-import com.github.javaparser.JavaParser;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFPackageAction;
 import io.codemodder.codetf.CodeTFResult;
+import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.javaparser.JavaParserCodemodRunner;
 import java.io.IOException;
@@ -22,24 +22,24 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
   private final CodemodIdPair codemod;
   private final List<ProjectProvider> projectProviders;
-  private final JavaParser javaParser;
+  private final CachingJavaParser cachingJavaParser;
   private final Path projectDir;
   private final IncludesExcludes includesExcludes;
   private final EncodingDetector encodingDetector;
 
   DefaultCodemodExecutor(
-      Path projectDir,
-      IncludesExcludes includesExcludes,
-      CodemodIdPair codemod,
-      List<ProjectProvider> projectProviders,
-      JavaParser javaParser,
-      EncodingDetector encodingDetector) {
-    this.projectDir = projectDir;
-    this.includesExcludes = includesExcludes;
-    this.codemod = codemod;
-    this.projectProviders = projectProviders;
-    this.javaParser = javaParser;
-    this.encodingDetector = encodingDetector;
+      final Path projectDir,
+      final IncludesExcludes includesExcludes,
+      final CodemodIdPair codemod,
+      final List<ProjectProvider> projectProviders,
+      final CachingJavaParser cachingJavaParser,
+      final EncodingDetector encodingDetector) {
+    this.projectDir = Objects.requireNonNull(projectDir);
+    this.includesExcludes = Objects.requireNonNull(includesExcludes);
+    this.codemod = Objects.requireNonNull(codemod);
+    this.projectProviders = Objects.requireNonNull(projectProviders);
+    this.cachingJavaParser = Objects.requireNonNull(cachingJavaParser);
+    this.encodingDetector = Objects.requireNonNull(encodingDetector);
   }
 
   @Override
@@ -50,22 +50,25 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     Changer changer = codemod.getChanger();
 
     /*
-     *  Create the right CodemodRunner based on the type of Changer and filer the files to be processed by them.
+     *  Create the right CodemodRunner based on the type of Changer.
      */
     CodemodRunner codemodRunner;
-    List<Path> codemodTargetFiles;
     if (changer instanceof JavaParserChanger) {
-      codemodTargetFiles = filePaths.stream().filter(this::isJavaFile).collect(Collectors.toList());
       codemodRunner =
-          new JavaParserCodemodRunner(javaParser, (JavaParserChanger) changer, encodingDetector);
+          new JavaParserCodemodRunner(
+              cachingJavaParser, (JavaParserChanger) changer, encodingDetector);
     } else if (changer instanceof RawFileChanger) {
-      codemodTargetFiles =
-          filePaths.stream().filter(this::isNotJavaFile).collect(Collectors.toList());
       codemodRunner = new RawFileCodemodRunner((RawFileChanger) changer, encodingDetector);
     } else {
       throw new UnsupportedOperationException(
           "unsupported changer type: " + changer.getClass().getName());
     }
+
+    /*
+     * Filter the files to those that the CodemodRunner supports.
+     */
+    List<Path> codemodTargetFiles =
+        filePaths.stream().filter(codemodRunner::supports).collect(Collectors.toList());
 
     for (Path filePath : codemodTargetFiles) {
 

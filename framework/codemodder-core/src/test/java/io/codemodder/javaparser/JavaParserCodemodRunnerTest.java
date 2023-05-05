@@ -68,7 +68,9 @@ final class JavaParserCodemodRunnerTest {
     this.expectedCodemodChanges = List.of(change1, change2);
     this.runner =
         new JavaParserCodemodRunner(
-            new JavaParser(), updatesAllMethodNamesChanger, EncodingDetector.create());
+            CachingJavaParser.from(new JavaParser()),
+            updatesAllMethodNamesChanger,
+            EncodingDetector.create());
     this.tmpDir = tmpDir;
   }
 

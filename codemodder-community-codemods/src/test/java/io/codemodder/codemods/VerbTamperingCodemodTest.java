@@ -10,6 +10,7 @@ import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFResult;
+import io.codemodder.javaparser.CachingJavaParser;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,7 +54,7 @@ final class VerbTamperingCodemodTest {
             IncludesExcludes.any(),
             loader.getCodemods().get(0),
             List.of(),
-            new JavaParser(),
+            CachingJavaParser.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(webxml));
     assertThat(result.getChangeset().isEmpty(), is(!expectChange));

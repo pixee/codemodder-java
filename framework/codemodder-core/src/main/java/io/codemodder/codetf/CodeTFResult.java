@@ -19,13 +19,13 @@ public final class CodeTFResult {
 
   @JsonCreator
   public CodeTFResult(
-      @JsonProperty("codemod") final String codemodId,
-      @JsonProperty("summary") final String summary,
-      @JsonProperty("description") final String description,
-      @JsonProperty("failedFiles") final Set<String> failedFiles,
-      @JsonProperty("references") final List<CodeTFReference> references,
-      @JsonProperty("properties") final Map<String, String> properties,
-      @JsonProperty("changeset") final List<CodeTFChangesetEntry> changeset) {
+      @JsonProperty(value = "codemod", index = 1) final String codemodId,
+      @JsonProperty(value = "summary", index = 2) final String summary,
+      @JsonProperty(value = "description", index = 3) final String description,
+      @JsonProperty(value = "failedFiles", index = 4) final Set<String> failedFiles,
+      @JsonProperty(value = "references", index = 5) final List<CodeTFReference> references,
+      @JsonProperty(value = "properties", index = 6) final Map<String, String> properties,
+      @JsonProperty(value = "changeset", index = 7) final List<CodeTFChangesetEntry> changeset) {
     this.codemodId = CodeTFValidator.requireNonBlank(codemodId);
     this.summary = CodeTFValidator.requireNonBlank(summary);
     this.description = CodeTFValidator.requireNonBlank(description);

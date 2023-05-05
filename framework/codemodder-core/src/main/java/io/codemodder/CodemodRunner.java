@@ -1,6 +1,7 @@
 package io.codemodder;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +10,12 @@ import java.util.Optional;
  * changes.
  */
 public interface CodemodRunner {
+
+  /**
+   * The {@link java.util.function.Predicate} that determines if this runner supports the given
+   * file.
+   */
+  boolean supports(Path path);
 
   /**
    * Run the codemod on a single file.
