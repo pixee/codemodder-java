@@ -6,9 +6,7 @@ import com.github.difflib.patch.Patch;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
-import io.openpixee.maven.operator.POMOperator;
-import io.openpixee.maven.operator.ProjectModel;
-import io.openpixee.maven.operator.ProjectModelFactory;
+import io.openpixee.maven.operator.*;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -24,6 +22,7 @@ public final class MavenProvider implements ProjectProvider {
   private final PomFileFinder pomFileFinder;
   private final PomFileUpdater pomFileUpdater;
 
+  @SuppressWarnings("unused")
   public MavenProvider() {
     this(new DefaultPomFileFinder(), new DefaultPomFileUpdater());
   }
@@ -46,13 +45,16 @@ public final class MavenProvider implements ProjectProvider {
 
     Path targetPom = targetPomRef.get();
     try {
-      Optional<CodeTFChangesetEntry> entryRef =
+      PomUpdateResult pomUpdateResult =
           pomFileUpdater.updatePom(projectDir, targetPom, dependencies);
+      Optional<CodeTFChangesetEntry> entryRef = pomUpdateResult.getEntry();
+      List<DependencyGAV> skippedDependencies = pomUpdateResult.getSkippedDependencies();
       if (entryRef.isPresent()) {
-        return DependencyUpdateResult.create(dependencies, Set.of(entryRef.get()), Set.of());
+        return DependencyUpdateResult.create(
+            dependencies, skippedDependencies, Set.of(entryRef.get()), Set.of());
       }
     } catch (IOException e) {
-      return DependencyUpdateResult.create(List.of(), Set.of(), Set.of(targetPom));
+      return DependencyUpdateResult.create(List.of(), List.of(), Set.of(), Set.of(targetPom));
     }
 
     return DependencyUpdateResult.EMPTY_UPDATE;
@@ -77,7 +79,7 @@ public final class MavenProvider implements ProjectProvider {
   @VisibleForTesting
   static class DefaultPomFileUpdater implements PomFileUpdater {
     @Override
-    public Optional<CodeTFChangesetEntry> updatePom(
+    public PomUpdateResult updatePom(
         final Path projectDir, final Path pomPath, final List<DependencyGAV> dependencies)
         throws IOException {
       List<io.openpixee.maven.operator.Dependency> mappedDependencies =
@@ -98,6 +100,9 @@ public final class MavenProvider implements ProjectProvider {
       final Path newPomFile = Files.createTempFile("pom", ".xml");
       Files.copy(pomPath, newPomFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
+      final List<DependencyGAV> skippedDependencies = new ArrayList<>();
+      final List<DependencyGAV> failedDependencies = new ArrayList<>();
+
       mappedDependencies.forEach(
           newDependency -> {
             ProjectModel projectModel =
@@ -108,20 +113,34 @@ public final class MavenProvider implements ProjectProvider {
                     .withUseProperties(true)
                     .build();
 
+            AbstractSimpleCommand command = CheckDependencyPresentKt.getCheckDependencyPresent();
+            boolean foundIt = command.execute(projectModel);
+            if (foundIt) {
+              skippedDependencies.add(
+                  DependencyGAV.createDefault(
+                      newDependency.getGroupId(),
+                      newDependency.getArtifactId(),
+                      newDependency.getVersion()));
+            }
             boolean result = POMOperator.modify(projectModel);
-
             if (result) {
               try {
                 Files.write(newPomFile, projectModel.getResultPomBytes());
               } catch (IOException e) {
                 throw new RuntimeException(e);
               }
+            } else {
+              failedDependencies.add(
+                  DependencyGAV.createDefault(
+                      newDependency.getGroupId(),
+                      newDependency.getArtifactId(),
+                      newDependency.getVersion()));
             }
           });
 
       var finalPomContents = Files.readAllLines(newPomFile, Charset.defaultCharset());
       if (finalPomContents.equals(originalPomContents)) {
-        return Optional.empty();
+        return new PomUpdateResult(Optional.empty(), skippedDependencies);
       }
 
       Patch<String> patch = DiffUtils.diff(originalPomContents, finalPomContents);
@@ -137,7 +156,7 @@ public final class MavenProvider implements ProjectProvider {
       // overwrite existing pom
       Files.copy(newPomFile, pomPath, StandardCopyOption.REPLACE_EXISTING);
 
-      return Optional.of(entry);
+      return new PomUpdateResult(Optional.of(entry), skippedDependencies);
     }
   }
 }

@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 
 final class DefaultCodemodExecutor implements CodemodExecutor {
 
@@ -168,16 +169,54 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       final Path file, final List<DependencyGAV> dependencies) throws IOException {
     List<CodeTFPackageAction> pkgActions = new ArrayList<>();
     Set<Path> unscannableFiles = new HashSet<>();
+    List<DependencyGAV> skippedDependencies = new ArrayList<>();
     List<CodeTFChangesetEntry> pkgChanges = new ArrayList<>();
     for (ProjectProvider projectProvider : projectProviders) {
       DependencyUpdateResult result =
           projectProvider.updateDependencies(projectDir, file, dependencies);
       unscannableFiles.addAll(
           result.erroredFiles().stream().map(Path::toAbsolutePath).collect(Collectors.toList()));
-      dependencies.removeAll(result.injectedPackages());
       pkgChanges.addAll(result.packageChanges());
+      for (DependencyGAV dependency : result.injectedPackages()) {
+        String packageUrl = toPackageUrl(dependency);
+        pkgActions.add(
+            new CodeTFPackageAction(
+                CodeTFPackageAction.CodeTFPackageActionType.ADD,
+                CodeTFPackageAction.CodeTFPackageActionResult.COMPLETED,
+                packageUrl));
+      }
+      for (DependencyGAV dependency : result.skippedPackages()) {
+        String packageUrl = toPackageUrl(dependency);
+        skippedDependencies.add(dependency);
+        pkgActions.add(
+            new CodeTFPackageAction(
+                CodeTFPackageAction.CodeTFPackageActionType.ADD,
+                CodeTFPackageAction.CodeTFPackageActionResult.SKIPPED,
+                packageUrl));
+      }
+      dependencies.removeAll(new HashSet<>(result.injectedPackages()));
     }
+    dependencies.stream()
+        .filter(d -> !skippedDependencies.contains(d))
+        .forEach(
+            dep -> {
+              pkgActions.add(
+                  new CodeTFPackageAction(
+                      CodeTFPackageAction.CodeTFPackageActionType.ADD,
+                      CodeTFPackageAction.CodeTFPackageActionResult.FAILED,
+                      toPackageUrl(dep)));
+            });
     return CodemodPackageUpdateResult.from(pkgActions, pkgChanges, unscannableFiles);
+  }
+
+  @VisibleForTesting
+  static String toPackageUrl(DependencyGAV dependency) {
+    return "pkg:maven/"
+        + dependency.group()
+        + "/"
+        + dependency.artifact()
+        + "@"
+        + dependency.version();
   }
 
   /** Return the relative path name (e.g., src/test/foo) of a file within the project dir. */

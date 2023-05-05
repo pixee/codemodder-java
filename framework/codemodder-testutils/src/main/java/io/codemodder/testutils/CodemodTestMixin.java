@@ -62,7 +62,7 @@ public interface CodemodTestMixin {
         .iterator()
         .forEachRemaining(p -> allSarifs.add(p.toFile()));
 
-    Map<String, List<RuleSarif>> map = new SarifParser.Default().parseIntoMap(allSarifs, tmpDir);
+    Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
 
     // run the codemod
     CodemodLoader loader = new CodemodLoader(List.of(codemodType), tmpDir, map);

@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -119,7 +120,7 @@ final class MavenProviderTest {
     CodeTFChangesetEntry changesetEntry =
         new CodeTFChangesetEntry(marsJavaFile.toString(), "diff here", List.of());
     when(pomFileUpdater.updatePom(eq(projectDir), eq(module1Pom), any()))
-        .thenReturn(Optional.of(changesetEntry));
+        .thenReturn(new PomUpdateResult(Optional.of(changesetEntry), List.of()));
 
     MavenProvider provider = new MavenProvider(pomFileFinder, pomFileUpdater);
     DependencyUpdateResult result =
@@ -143,6 +144,45 @@ final class MavenProviderTest {
     DependencyUpdateResult result =
         provider.updateDependencies(projectDir, marsJavaFile, List.of(marsDependency1));
 
+    assertThat(result.skippedPackages()).isEmpty();
+    assertThat(result.packageChanges()).isEmpty();
+    assertThat(result.erroredFiles()).isEmpty();
+    assertThat(result.injectedPackages()).isEmpty();
+  }
+
+  @Disabled(
+      "Needs the pom-operator to be able to know when to skip when a dependency is already present")
+  @Test
+  void it_handles_when_already_present() throws IOException {
+
+    String pom;
+    pom = "<project>";
+    pom += "  <modelVersion>4.0.0</modelVersion>";
+    pom += "  <groupId>com.acme</groupId>";
+    pom += "  <artifactId>mavenproject1</artifactId>";
+    pom += "  <version>1.0-SNAPSHOT</version>";
+    pom += "  <packaging>jar</packaging>";
+    pom += "  <dependencies>";
+    pom += "    <dependency>";
+    pom += "      <groupId>org.apache</groupId>";
+    pom += "      <artifactId>kafka</artifactId>";
+    pom += "      <version>2.0</version>";
+    pom += "    </dependency>";
+    pom += "  </dependencies>";
+    pom += "</project>";
+
+    Files.writeString(module1Pom, pom);
+    when(pomFileFinder.findForFile(any(), any())).thenReturn(Optional.of(module1Pom));
+
+    // this module is already present
+    DependencyGAV alreadyPresent = DependencyGAV.createDefault("org.apache", "kafka", "2.0");
+    pomFileUpdater = new MavenProvider.DefaultPomFileUpdater();
+    MavenProvider provider = new MavenProvider(pomFileFinder, pomFileUpdater);
+    DependencyUpdateResult result =
+        provider.updateDependencies(projectDir, marsJavaFile, List.of(alreadyPresent));
+
+    List<DependencyGAV> skipped = result.skippedPackages();
+    assertThat(skipped).containsOnly(alreadyPresent);
     assertThat(result.packageChanges()).isEmpty();
     assertThat(result.erroredFiles()).isEmpty();
     assertThat(result.injectedPackages()).isEmpty();
@@ -161,6 +201,7 @@ final class MavenProviderTest {
             projectDir, marsJavaFile, List.of(venusDependency, jspDependency));
 
     // the failure we expected should be there
+    assertThat(result.skippedPackages()).isEmpty();
     assertThat(result.erroredFiles()).containsOnly(module1Pom);
     assertThat(result.injectedPackages()).isEmpty();
     assertThat(result.packageChanges()).isEmpty();
@@ -170,11 +211,11 @@ final class MavenProviderTest {
   void it_updates_poms_correctly() throws IOException {
     PomFileUpdater updater = new MavenProvider.DefaultPomFileUpdater();
     Files.write(module1Pom, simplePom.getBytes(StandardCharsets.UTF_8));
-    Optional<CodeTFChangesetEntry> changesetEntryRef =
+    PomUpdateResult pomUpdateResult =
         updater.updatePom(
             projectDir, module1Pom, List.of(marsDependency1, marsDependency2, venusDependency));
+    Optional<CodeTFChangesetEntry> changesetEntryRef = pomUpdateResult.getEntry();
     assertThat(changesetEntryRef).isPresent();
-
     CodeTFChangesetEntry changesetEntry = changesetEntryRef.get();
     assertThat(changesetEntry.getPath()).isEqualTo("module1/pom.xml");
     String updatedPomContents =

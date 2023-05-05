@@ -78,7 +78,7 @@ public interface RawFileCodemodTest {
             .collect(Collectors.toList());
 
     final Map<String, List<RuleSarif>> map =
-        new SarifParser.Default().parseIntoMap(allSarifFiles, tmpDir);
+        SarifParser.create().parseIntoMap(allSarifFiles, tmpDir);
 
     // run the codemod
     final CodemodLoader invoker = new CodemodLoader(List.of(codemod), tmpDir, map);
