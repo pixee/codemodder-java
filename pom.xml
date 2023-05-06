@@ -22,6 +22,8 @@
         <kotlin.version>1.7.10</kotlin.version>
         <slf4j.version>2.0.0</slf4j.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+        <versions.maven.resolver>1.9.2</versions.maven.resolver>
+        <versions.maven.core>3.8.6</versions.maven.core>
     </properties>
 
     <distributionManagement>
@@ -140,70 +142,72 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-embedder</artifactId>
-            <version>3.8.6</version>
+            <version>${versions.maven.core}</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.inject</groupId>
+                    <artifactId>guice</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-compat</artifactId>
-            <version>3.8.6</version>
+            <version>${versions.maven.core}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-api</artifactId>
-            <version>1.9.2</version>
-            <scope>provided</scope>
+            <version>${versions.maven.resolver}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-spi</artifactId>
-            <version>1.9.2</version>
-            <scope>provided</scope>
+            <version>${versions.maven.resolver}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-util</artifactId>
-            <version>1.9.2</version>
-            <scope>provided</scope>
+            <version>${versions.maven.resolver}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-impl</artifactId>
-            <version>1.9.2</version>
-            <scope>provided</scope>
+            <version>${versions.maven.resolver}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-transport-file</artifactId>
-            <version>1.9.2</version>
-            <scope>provided</scope>
+            <version>${versions.maven.resolver}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-transport-http</artifactId>
-            <version>1.9.2</version>
-            <scope>provided</scope>
+            <version>${versions.maven.resolver}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-connector-basic</artifactId>
-            <version>1.9.2</version>
-            <scope>provided</scope>
+            <version>${versions.maven.resolver}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-resolver-provider</artifactId>
-            <version>3.8.6</version>
-            <scope>provided</scope>
+            <version>${versions.maven.core}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-model-builder</artifactId>
-            <version>3.8.6</version>
-            <scope>provided</scope>
+            <version>${versions.maven.core}</version>
         </dependency>
         <dependency>
             <groupId>com.github.albfernandez</groupId>
