@@ -1,0 +1,6 @@
+{
+  "summary" : "Introduced protections against deserialization attacks",
+  "sourceControlLink" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/ObjectInputFilters.java",
+  "change" : "Hardened the deserialization call by introducing a filter that prevents known malicious gadgets from executing arbitrary code",
+  "references" : ["https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html", "https://portswigger.net/web-security/deserialization/exploiting"]
+}

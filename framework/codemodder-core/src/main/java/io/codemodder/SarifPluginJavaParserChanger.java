@@ -6,10 +6,13 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.google.common.annotations.VisibleForTesting;
+import io.codemodder.codetf.CodeTFReference;
 import io.codemodder.javaparser.JavaParserChanger;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Provides base functionality for making JavaParser-based changes based on results found by a sarif
@@ -21,10 +24,12 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> implements Ja
   private final Class<? extends Node> nodeType;
   private final RegionExtractor regionExtractor;
   private final RegionNodeMatcher regionNodeMatcher;
+  private CodemodReporterStrategy reporter;
 
   protected SarifPluginJavaParserChanger(
       final RuleSarif sarif, final Class<? extends Node> nodeType) {
     this(sarif, nodeType, RegionExtractor.FROM_FIRST_LOCATION, RegionNodeMatcher.EXACT_MATCH);
+    this.reporter = CodemodReporterStrategy.fromClasspath(this.getClass());
   }
 
   protected SarifPluginJavaParserChanger(
@@ -39,6 +44,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> implements Ja
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher) {
     this(sarif, nodeType, RegionExtractor.FROM_FIRST_LOCATION, regionNodeMatcher);
+    this.reporter = CodemodReporterStrategy.fromClasspath(this.getClass());
   }
 
   protected SarifPluginJavaParserChanger(
@@ -50,6 +56,20 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> implements Ja
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionExtractor = Objects.requireNonNull(regionExtractor);
     this.regionNodeMatcher = Objects.requireNonNull(regionNodeMatcher);
+    this.reporter = CodemodReporterStrategy.fromClasspath(this.getClass());
+  }
+
+  protected SarifPluginJavaParserChanger(
+      final RuleSarif sarif,
+      final Class<? extends Node> nodeType,
+      final RegionExtractor regionExtractor,
+      final RegionNodeMatcher regionNodeMatcher,
+      final CodemodReporterStrategy reporter) {
+    this.sarif = Objects.requireNonNull(sarif);
+    this.nodeType = Objects.requireNonNull(nodeType);
+    this.regionExtractor = Objects.requireNonNull(regionExtractor);
+    this.regionNodeMatcher = Objects.requireNonNull(regionNodeMatcher);
+    this.reporter = Objects.requireNonNull(reporter);
   }
 
   @Override
@@ -116,4 +136,26 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> implements Ja
    */
   public abstract boolean onResultFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Result result);
+
+  @Override
+  public String getSummary() {
+    return reporter.getSummary();
+  }
+
+  @Override
+  public String getDescription() {
+    return reporter.getDescription();
+  }
+
+  @Override
+  public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
+    return reporter.getChange(filePath, change);
+  }
+
+  @Override
+  public List<CodeTFReference> getReferences() {
+    return reporter.getReferences().stream()
+        .map(u -> new CodeTFReference(u, u))
+        .collect(Collectors.toList());
+  }
 }
