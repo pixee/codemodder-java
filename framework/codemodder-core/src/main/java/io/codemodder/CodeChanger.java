@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 /** The base of a codemod type. */
-public interface Changer {
+public interface CodeChanger {
 
   /** The headline for this codemod's changes. */
   default String getSummary() {

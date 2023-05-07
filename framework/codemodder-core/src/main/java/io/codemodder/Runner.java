@@ -12,7 +12,7 @@ public final class Runner {
    * @param codemods The codemods to run
    * @param args The arguments to pass to the codemod runner
    */
-  public static void run(final List<Class<? extends Changer>> codemods, final String[] args) {
+  public static void run(final List<Class<? extends CodeChanger>> codemods, final String[] args) {
     CommandLine commandLine =
         new CommandLine(new CLI(args, codemods)).setCaseInsensitiveEnumValuesAllowed(true);
     int exitCode = commandLine.execute(args);

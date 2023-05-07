@@ -27,7 +27,7 @@ public interface CodemodTestMixin {
       throw new IllegalArgumentException("CodemodTest must be annotated with @Metadata");
     }
 
-    Class<? extends Changer> codemod = metadata.codemodType();
+    Class<? extends CodeChanger> codemod = metadata.codemodType();
     Path testResourceDir = Path.of(metadata.testResourceDir());
 
     List<DependencyGAV> dependencies =
@@ -44,7 +44,7 @@ public interface CodemodTestMixin {
   }
 
   private void verifyCodemod(
-      final Class<? extends Changer> codemodType,
+      final Class<? extends CodeChanger> codemodType,
       final Path tmpDir,
       final Path testResourceDir,
       final List<DependencyGAV> dependenciesExpected)

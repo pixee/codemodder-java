@@ -37,7 +37,7 @@ final class CodemodLoaderTest {
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class ValidCodemod extends NoReportChanger {}
 
-  private static class NoReportChanger implements Changer {
+  private static class NoReportChanger implements CodeChanger {
     @Override
     public String getSummary() {
       return "summary";
@@ -114,7 +114,8 @@ final class CodemodLoaderTest {
     Path file = tmpDir.resolve("file.txt");
     Files.writeString(file, "a", StandardCharsets.UTF_8);
 
-    List<Class<? extends Changer>> codemods = List.of(ChangesFile.class, ChangesFileAgain.class);
+    List<Class<? extends CodeChanger>> codemods =
+        List.of(ChangesFile.class, ChangesFileAgain.class);
     CodemodLoader loader = new CodemodLoader(codemods, tmpDir);
 
     for (CodemodIdPair codemodIdPair : loader.getCodemods()) {

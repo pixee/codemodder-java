@@ -16,7 +16,7 @@ public final class CodemodLoader {
   private final List<CodemodIdPair> codemods;
 
   public CodemodLoader(
-      final List<Class<? extends Changer>> codemodTypes, final Path repositoryDir) {
+      final List<Class<? extends CodeChanger>> codemodTypes, final Path repositoryDir) {
     this(
         codemodTypes,
         CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
@@ -25,7 +25,7 @@ public final class CodemodLoader {
   }
 
   public CodemodLoader(
-      final List<Class<? extends Changer>> codemodTypes,
+      final List<Class<? extends CodeChanger>> codemodTypes,
       final Path repositoryDir,
       final Map<String, List<RuleSarif>> ruleSarifByTool) {
     this(
@@ -36,14 +36,14 @@ public final class CodemodLoader {
   }
 
   public CodemodLoader(
-      final List<Class<? extends Changer>> codemodTypes,
+      final List<Class<? extends CodeChanger>> codemodTypes,
       final CodemodRegulator codemodRegulator,
       final Path repositoryDir) {
     this(codemodTypes, codemodRegulator, repositoryDir, Map.of());
   }
 
   public CodemodLoader(
-      final List<Class<? extends Changer>> codemodTypes,
+      final List<Class<? extends CodeChanger>> codemodTypes,
       final CodemodRegulator codemodRegulator,
       final Path repositoryDir,
       final Map<String, List<RuleSarif>> ruleSarifByTool) {
@@ -77,17 +77,17 @@ public final class CodemodLoader {
     // validate and instantiate the codemods
     final Injector injector = Guice.createInjector(allModules);
     final Set<String> codemodIds = new HashSet<>();
-    for (final Class<? extends Changer> type : codemodTypes) {
+    for (final Class<? extends CodeChanger> type : codemodTypes) {
       final Codemod codemodAnnotation = type.getAnnotation(Codemod.class);
       validateRequiredFields(codemodAnnotation);
-      final Changer changer = injector.getInstance(type);
+      final CodeChanger codeChanger = injector.getInstance(type);
       final String codemodId = codemodAnnotation.id();
       if (codemodIds.contains(codemodId)) {
         throw new UnsupportedOperationException("multiple codemods under id: " + codemodId);
       }
       codemodIds.add(codemodId);
       if (codemodRegulator.isAllowed(codemodId)) {
-        codemods.add(new CodemodIdPair(codemodId, changer));
+        codemods.add(new CodemodIdPair(codemodId, codeChanger));
       }
     }
 

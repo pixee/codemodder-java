@@ -1,6 +1,6 @@
 package io.codemodder.codemods;
 
-import io.codemodder.Changer;
+import io.codemodder.CodeChanger;
 import io.codemodder.Runner;
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public final class DefaultCodemods {
 
   /** Get a list of all the codemods in our default set. */
-  public static List<Class<? extends Changer>> asList() {
+  public static List<Class<? extends CodeChanger>> asList() {
     return List.of(
         DisableAutomaticDirContextDeserializationCodemod.class,
         HardenJavaDeserializationCodemod.class,

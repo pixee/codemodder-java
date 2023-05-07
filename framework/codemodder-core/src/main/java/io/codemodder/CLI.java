@@ -29,7 +29,7 @@ import picocli.CommandLine;
     description = "Run a codemodder codemod")
 final class CLI implements Callable<Integer> {
 
-  private final List<Class<? extends Changer>> codemodTypes;
+  private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Clock clock;
   private final FileFinder fileFinder;
   private final EncodingDetector encodingDetector;
@@ -109,7 +109,7 @@ final class CLI implements Callable<Integer> {
     DIFF
   }
 
-  CLI(final String[] args, final List<Class<? extends Changer>> codemodTypes) {
+  CLI(final String[] args, final List<Class<? extends CodeChanger>> codemodTypes) {
     this(
         args,
         codemodTypes,
@@ -123,7 +123,7 @@ final class CLI implements Callable<Integer> {
 
   CLI(
       final String[] args,
-      final List<Class<? extends Changer>> codemodTypes,
+      final List<Class<? extends CodeChanger>> codemodTypes,
       final Clock clock,
       final FileFinder fileFinder,
       final EncodingDetector encodingDetector,
@@ -166,7 +166,7 @@ final class CLI implements Callable<Integer> {
   public Integer call() throws IOException {
 
     if (listCodemods) {
-      for (Class<? extends Changer> codemodType : codemodTypes) {
+      for (Class<? extends CodeChanger> codemodType : codemodTypes) {
         Codemod annotation = codemodType.getAnnotation(Codemod.class);
         log.info(annotation.id());
       }

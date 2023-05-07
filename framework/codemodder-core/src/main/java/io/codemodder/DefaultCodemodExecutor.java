@@ -48,21 +48,21 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     List<CodeTFChangesetEntry> changeset = new ArrayList<>();
     Set<Path> unscannableFiles = new HashSet<>();
     DefaultCodeDirectory codeDirectory = new DefaultCodeDirectory(projectDir);
-    Changer changer = codemod.getChanger();
+    CodeChanger codeChanger = codemod.getChanger();
 
     /*
-     *  Create the right CodemodRunner based on the type of Changer.
+     *  Create the right CodemodRunner based on the type of CodeChanger.
      */
     CodemodRunner codemodRunner;
-    if (changer instanceof JavaParserChanger) {
+    if (codeChanger instanceof JavaParserChanger) {
       codemodRunner =
           new JavaParserCodemodRunner(
-              cachingJavaParser, (JavaParserChanger) changer, encodingDetector);
-    } else if (changer instanceof RawFileChanger) {
-      codemodRunner = new RawFileCodemodRunner((RawFileChanger) changer, encodingDetector);
+              cachingJavaParser, (JavaParserChanger) codeChanger, encodingDetector);
+    } else if (codeChanger instanceof RawFileChanger) {
+      codemodRunner = new RawFileCodemodRunner((RawFileChanger) codeChanger, encodingDetector);
     } else {
       throw new UnsupportedOperationException(
-          "unsupported changer type: " + changer.getClass().getName());
+          "unsupported codeChanger type: " + codeChanger.getClass().getName());
     }
 
     /*
@@ -111,7 +111,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
                   .map(
                       change ->
                           translateCodemodChangetoCodeTFChange(
-                              changer, filePath, change, pkgActions))
+                              codeChanger, filePath, change, pkgActions))
                   .collect(Collectors.toList());
 
           // make sure we add the file's entry first, then the dependency entries, so the causality
@@ -136,26 +136,26 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     }
     return new CodeTFResult(
         codemod.getId(),
-        changer.getSummary(),
-        changer.getDescription(),
+        codeChanger.getSummary(),
+        codeChanger.getDescription(),
         unscannableFiles.stream()
             .map(file -> getRelativePath(projectDir, file))
             .collect(Collectors.toSet()),
-        changer.getReferences(),
+        codeChanger.getReferences(),
         emptyMap(),
         changeset);
   }
 
   @NotNull
   private static CodeTFChange translateCodemodChangetoCodeTFChange(
-      final Changer changer,
+      final CodeChanger codeChanger,
       final Path filePath,
       final CodemodChange change,
       final List<CodeTFPackageAction> pkgActions) {
     return new CodeTFChange(
         change.lineNumber(),
         emptyMap(),
-        changer.getIndividualChangeDescription(filePath, change),
+        codeChanger.getIndividualChangeDescription(filePath, change),
         pkgActions);
   }
 

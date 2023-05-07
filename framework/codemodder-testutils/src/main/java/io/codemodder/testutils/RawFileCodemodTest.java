@@ -25,7 +25,7 @@ public interface RawFileCodemodTest {
       throw new IllegalArgumentException("CodemodTest must be annotated with @Metadata");
     }
 
-    final Class<? extends Changer> codemod = metadata.codemodType();
+    final Class<? extends CodeChanger> codemod = metadata.codemodType();
     final Path testResourceDir = Path.of(metadata.testResourceDir());
 
     final Path testDir = Path.of("src/test/resources/" + testResourceDir);
@@ -68,7 +68,7 @@ public interface RawFileCodemodTest {
   }
 
   private void verifyCodemod(
-      final Class<? extends Changer> codemod, final Path tmpDir, final Path testResourceDir)
+      final Class<? extends CodeChanger> codemod, final Path tmpDir, final Path testResourceDir)
       throws IOException {
     // find all the sarif files
     final var allSarifFiles =
