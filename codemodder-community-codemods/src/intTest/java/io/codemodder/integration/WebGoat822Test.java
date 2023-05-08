@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
-final class WebGoat820Test extends GitRepositoryTest {
+final class WebGoat822Test extends GitRepositoryTest {
 
-  WebGoat820Test() {
+  WebGoat822Test() {
     super("https://github.com/WebGoat/WebGoat", "main", "e75cfbeb110e3d3a2ca3c8fee2754992d89c419d");
   }
 
@@ -84,7 +84,7 @@ final class WebGoat820Test extends GitRepositoryTest {
           "--output",
           outputFile.getPath(),
           "--sarif",
-          "src/test/resources/webgoat_v8.2.0_codeql.sarif",
+          "src/test/resources/webgoat_v8.2.2_codeql.sarif",
           "--dont-exit",
           repoDir.getPath()
         });
