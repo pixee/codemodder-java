@@ -169,7 +169,7 @@ public final class MavenProvider implements ProjectProvider {
       AbstractDelta<String> delta = patch.getDeltas().get(0);
       int position = 1 + delta.getSource().getPosition();
 
-      CodeTFChange change = new CodeTFChange(position, Collections.emptyMap(), "", List.of());
+      CodeTFChange change = new CodeTFChange(position, Collections.emptyMap(), "", List.of(), null);
       String diff = DiffUtils.diff(originalPomContents, finalPomContents).toString();
       CodeTFChangesetEntry entry =
           new CodeTFChangesetEntry(
@@ -188,16 +188,12 @@ public final class MavenProvider implements ProjectProvider {
 
       Collection<Dependency> foundDependencies = POMOperator.queryDependency(originalProjectModel);
 
-      Collection<DependencyGAV> foundDependenciesMapped =
-          foundDependencies.stream()
-              .map(
-                  dependency ->
-                      DependencyGAV.createDefault(
-                          dependency.getGroupId(),
-                          dependency.getArtifactId(),
-                          dependency.getVersion()))
-              .collect(Collectors.toList());
-      return foundDependenciesMapped;
+      return foundDependencies.stream()
+          .map(
+              dependency ->
+                  DependencyGAV.createDefault(
+                      dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()))
+          .collect(Collectors.toList());
     }
   }
 }

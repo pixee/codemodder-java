@@ -156,7 +156,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
         change.lineNumber(),
         emptyMap(),
         codeChanger.getIndividualChangeDescription(filePath, change),
-        pkgActions);
+        pkgActions,
+        codeChanger.getSourceControlUrl().orElse(null));
   }
 
   /**
@@ -222,13 +223,5 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
   /** Return the relative path name (e.g., src/test/foo) of a file within the project dir. */
   private String getRelativePath(final Path projectDir, final Path filePath) {
     return projectDir.relativize(filePath).toString();
-  }
-
-  private boolean isJavaFile(final Path filePath) {
-    return filePath.getFileName().toString().toLowerCase().endsWith(".java");
-  }
-
-  private boolean isNotJavaFile(final Path filePath) {
-    return !isJavaFile(filePath);
   }
 }

@@ -19,7 +19,7 @@ public interface CodemodReporterStrategy {
 
   String getDescription();
 
-  Optional<String> getSourceControlLink();
+  Optional<String> getSourceControlUrl();
 
   String getChange(Path path, CodemodChange change);
 
@@ -37,7 +37,7 @@ public interface CodemodReporterStrategy {
    *
    * {
    *     "summary": "A headline describing the changes provided by this codemod",
-   *     "sourceControlLink": "A URL linking to the source of the security control added",
+   *     "control": "A URL linking to the source of the security control added",
    *     "change": "A description of the change suitable for a particular instance of a change",
    *     "references": [
    *          "A URL for further reading",
@@ -84,7 +84,7 @@ public interface CodemodReporterStrategy {
             .map(JsonNode::asText)
             .collect(Collectors.toList());
     Optional<String> sourceControlLink =
-        Optional.ofNullable(parent.get("sourceControlLink")).map(JsonNode::asText);
+        Optional.ofNullable(parent.get("control")).map(JsonNode::asText);
 
     return new CodemodReporterStrategy() {
       @Override
@@ -98,7 +98,7 @@ public interface CodemodReporterStrategy {
       }
 
       @Override
-      public Optional<String> getSourceControlLink() {
+      public Optional<String> getSourceControlUrl() {
         return sourceControlLink;
       }
 

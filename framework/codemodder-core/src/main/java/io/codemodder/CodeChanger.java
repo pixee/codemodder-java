@@ -3,6 +3,7 @@ package io.codemodder;
 import io.codemodder.codetf.CodeTFReference;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 /** The base of a codemod type. */
 public interface CodeChanger {
@@ -15,6 +16,11 @@ public interface CodeChanger {
   /** A deep description of what this codemod's changes. */
   default String getDescription() {
     return getClass().getName() + " - description";
+  }
+
+  /** The URL of the source code of the security control API added in this change, if any. */
+  default Optional<String> getSourceControlUrl() {
+    return Optional.empty();
   }
 
   /**

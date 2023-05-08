@@ -56,7 +56,12 @@ final class SemgrepModuleTest {
                 pathToYaml = "/other_dir/explicit-yaml-path.yaml",
                 ruleId = "explicit-yaml-path")
             RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override
@@ -82,7 +87,12 @@ final class SemgrepModuleTest {
     MissingYamlPropertiesPath(
         @SemgrepScan(yaml = YAML_MISSING_STUFF, ruleId = "explicit-yaml-path")
             RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override
@@ -106,7 +116,12 @@ final class SemgrepModuleTest {
 
     @Inject
     UsesImplicitRule(@SemgrepScan(yaml = YAML_MISSING_STUFF) RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override
@@ -135,7 +150,12 @@ final class SemgrepModuleTest {
 
     @Inject
     UsesImplicitButHasMultipleRules(@SemgrepScan(yaml = YAML_MISSING_STUFF) RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override
