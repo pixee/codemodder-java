@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.github.difflib.DiffUtils;
@@ -19,10 +20,7 @@ import io.codemodder.javaparser.JavaParserChanger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -182,13 +180,21 @@ final class DefaultCodemodExecutorTest {
     CodeTFResult injectDependency1Result = report.getResults().get(0);
     List<CodeTFChangesetEntry> firstChangeset = injectDependency1Result.getChangeset();
     assertThat(firstChangeset).hasSize(2);
-    assertThat(injectDependency1Result.getCodemodId()).isEqualTo("codemodder:java/inject-dep-1");
+    assertThat(injectDependency1Result.getCodemod()).isEqualTo("codemodder:java/inject-dep-1");
     assertThat(injectDependency1Result.getFailedFiles()).isEmpty();
+    assertThat(injectDependency1Result.getSummary()).isEqualTo("injects-dependency-1-summary");
+    assertThat(injectDependency1Result.getDescription())
+        .isEqualTo("injects-dependency-1-description");
+    assertThat(injectDependency1Result.getReferences())
+        .isEqualTo(List.of(new CodeTFReference("https://dep1.com/", "https://dep1.com/")));
     CodeTFChangesetEntry javaFile2Entry = firstChangeset.get(0);
     assertThat(javaFile2Entry.getPath()).isEqualTo("Test2.java");
     assertThat(javaFile2Entry.getChanges()).hasSize(1);
-    List<CodeTFPackageAction> javaFile2PackageActions =
-        javaFile2Entry.getChanges().get(0).getDependencies();
+    CodeTFChange firstCodeChange = javaFile2Entry.getChanges().get(0);
+    assertThat(firstCodeChange.getLineNumber()).isEqualTo(2);
+    assertThat(firstCodeChange.getSourceControlUrl()).isNull();
+    assertThat(firstCodeChange.getDescription()).isEqualTo("injects-dependency-1-change");
+    List<CodeTFPackageAction> javaFile2PackageActions = firstCodeChange.getPackageActions();
     assertThat(javaFile2PackageActions.size()).isEqualTo(1);
     assertThat(javaFile2PackageActions.get(0).getAction())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionType.ADD);
@@ -196,7 +202,6 @@ final class DefaultCodemodExecutorTest {
         .isEqualTo("pkg:maven/org.spring/dep1@1.1.1");
     assertThat(javaFile2PackageActions.get(0).getResult())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionResult.COMPLETED);
-
     assertThat(javaFile2Entry.getDiff())
         .isEqualTo(
             "--- Test2.java\n"
@@ -221,8 +226,13 @@ final class DefaultCodemodExecutorTest {
     CodeTFResult injectDependency2Result = report.getResults().get(1);
     List<CodeTFChangesetEntry> secondChangeset = injectDependency2Result.getChangeset();
     assertThat(secondChangeset).hasSize(2);
-    assertThat(injectDependency2Result.getCodemodId()).isEqualTo("codemodder:java/inject-dep-2");
+    assertThat(injectDependency2Result.getCodemod()).isEqualTo("codemodder:java/inject-dep-2");
     assertThat(injectDependency2Result.getFailedFiles()).isEmpty();
+    assertThat(injectDependency2Result.getSummary()).isEqualTo("injects-dependency-2-summary");
+    assertThat(injectDependency2Result.getReferences())
+        .isEqualTo(List.of(new CodeTFReference("https://dep2.com/", "https://dep2.com/")));
+    assertThat(injectDependency2Result.getDescription())
+        .isEqualTo("injects-dependency-2-description");
     CodeTFChangesetEntry javaFile4Entry = secondChangeset.get(0);
     assertThat(javaFile4Entry.getPath()).isEqualTo("Test4.java");
     assertThat(javaFile4Entry.getChanges()).hasSize(1);
@@ -238,8 +248,9 @@ final class DefaultCodemodExecutorTest {
                 + "+  }\n"
                 + " }");
 
-    List<CodeTFPackageAction> javaFile4PackageActions =
-        javaFile4Entry.getChanges().get(0).getDependencies();
+    CodeTFChange secondCodeChange = javaFile4Entry.getChanges().get(0);
+    assertThat(secondCodeChange.getSourceControlUrl()).isEqualTo("https://dep2-control.com/src");
+    List<CodeTFPackageAction> javaFile4PackageActions = secondCodeChange.getPackageActions();
     assertThat(javaFile4PackageActions.size()).isEqualTo(1);
     assertThat(javaFile4PackageActions.get(0).getAction())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionType.ADD);
@@ -260,9 +271,13 @@ final class DefaultCodemodExecutorTest {
                 + "+pkg:maven/org.apache/dep2@2.2.2");
 
     // assert that the report can be serialized by jackson to json without error
-    ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
+    ObjectWriter writer =
+        new ObjectMapper()
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .writerWithDefaultPrettyPrinter();
     String codetf = writer.writeValueAsString(report);
     assertThat(codetf).isNotBlank();
+    System.out.println(codetf);
   }
 
   @Test
@@ -285,12 +300,13 @@ final class DefaultCodemodExecutorTest {
 
     // should have changed the java file, but not the deps.txt file
     assertThat(firstChangeset).hasSize(1);
-    assertThat(result.getCodemodId()).isEqualTo("codemodder:java/inject-dep-1");
+    assertThat(result.getCodemod()).isEqualTo("codemodder:java/inject-dep-1");
     assertThat(result.getFailedFiles()).isEmpty();
     CodeTFChangesetEntry javaFile2Entry = firstChangeset.get(0);
     assertThat(javaFile2Entry.getPath()).isEqualTo("Test2.java");
     assertThat(javaFile2Entry.getChanges()).hasSize(1);
-    List<CodeTFPackageAction> packageActions = javaFile2Entry.getChanges().get(0).getDependencies();
+    List<CodeTFPackageAction> packageActions =
+        javaFile2Entry.getChanges().get(0).getPackageActions();
 
     assertThat(packageActions.size()).isEqualTo(1);
     CodeTFPackageAction packageAction = packageActions.get(0);
@@ -334,12 +350,13 @@ final class DefaultCodemodExecutorTest {
 
     // should have changed the java file, but not the deps.txt file
     assertThat(firstChangeset).hasSize(1);
-    assertThat(result.getCodemodId()).isEqualTo("codemodder:java/inject-dep-1");
+    assertThat(result.getCodemod()).isEqualTo("codemodder:java/inject-dep-1");
     assertThat(result.getFailedFiles()).isEmpty();
     CodeTFChangesetEntry javaFile2Entry = firstChangeset.get(0);
     assertThat(javaFile2Entry.getPath()).isEqualTo("Test2.java");
     assertThat(javaFile2Entry.getChanges()).hasSize(1);
-    List<CodeTFPackageAction> packageActions = javaFile2Entry.getChanges().get(0).getDependencies();
+    List<CodeTFPackageAction> packageActions =
+        javaFile2Entry.getChanges().get(0).getPackageActions();
 
     assertThat(packageActions.size()).isEqualTo(1);
     CodeTFPackageAction packageAction = packageActions.get(0);
@@ -362,7 +379,7 @@ final class DefaultCodemodExecutorTest {
   }
 
   private static void hasBeforeAfterCodemodMetadata(final CodeTFResult result) {
-    assertThat(result.getCodemodId()).isEqualTo("codemodder:java/id");
+    assertThat(result.getCodemod()).isEqualTo("codemodder:java/id");
     assertThat(result.getDescription()).isEqualTo("before-after-description");
     assertThat(result.getSummary()).isEqualTo("before-after-summary");
   }
@@ -372,7 +389,7 @@ final class DefaultCodemodExecutorTest {
     assertThat(entry.getChanges()).hasSize(1);
     CodeTFChange change = entry.getChanges().get(0);
     assertThat(change.getLineNumber()).isEqualTo(2);
-    assertThat(change.getDependencies()).isEmpty();
+    assertThat(change.getPackageActions()).isEmpty();
     assertThat(change.getDescription()).isEqualTo("");
     assertThat(entry.getDiff())
         .isEqualTo(
@@ -390,7 +407,7 @@ final class DefaultCodemodExecutorTest {
     assertThat(entry.getChanges()).hasSize(1);
     CodeTFChange change = entry.getChanges().get(0);
     assertThat(change.getLineNumber()).isEqualTo(3);
-    assertThat(change.getDependencies()).isEmpty();
+    assertThat(change.getPackageActions()).isEmpty();
     assertThat(change.getDescription()).isEqualTo("");
     assertThat(entry.getDiff())
         .isEqualTo(
@@ -455,6 +472,21 @@ final class DefaultCodemodExecutorTest {
     public String getSummary() {
       return "injects-dependency-1-summary";
     }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of(new CodeTFReference("https://dep1.com/", "https://dep1.com/"));
+    }
+
+    @Override
+    public Optional<String> getSourceControlUrl() {
+      return Optional.empty();
+    }
+
+    @Override
+    public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
+      return "injects-dependency-1-change";
+    }
   }
 
   private static class InjectsDependency2 implements JavaParserChanger {
@@ -480,6 +512,21 @@ final class DefaultCodemodExecutorTest {
     @Override
     public String getSummary() {
       return "injects-dependency-2-summary";
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of(new CodeTFReference("https://dep2.com/", "https://dep2.com/"));
+    }
+
+    @Override
+    public Optional<String> getSourceControlUrl() {
+      return Optional.of("https://dep2-control.com/src");
+    }
+
+    @Override
+    public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
+      return "injects-dependency-2-change";
     }
   }
 

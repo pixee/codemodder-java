@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 /** Describes a "change" in a report. */
 public final class CodeTFChange {
@@ -18,14 +17,14 @@ public final class CodeTFChange {
 
   private final Map<String, String> properties;
 
-  private final List<CodeTFPackageAction> dependencies;
+  private final List<CodeTFPackageAction> packageActions;
 
   @JsonCreator
   public CodeTFChange(
       @JsonProperty("lineNumber") final int lineNumber,
       @JsonProperty("properties") final Map<String, String> properties,
       @JsonProperty("description") final String description,
-      @JsonProperty("dependencies") final List<CodeTFPackageAction> dependencies,
+      @JsonProperty("packageActions") final List<CodeTFPackageAction> packageActions,
       @JsonProperty("sourceControlUrl") final String sourceControlUrl) {
 
     if (lineNumber < 1) {
@@ -34,7 +33,7 @@ public final class CodeTFChange {
 
     this.lineNumber = lineNumber;
     this.properties = CodeTFValidator.toImmutableCopyOrEmptyOnNull(properties);
-    this.dependencies = CodeTFValidator.toImmutableCopyOrEmptyOnNull(dependencies);
+    this.packageActions = CodeTFValidator.toImmutableCopyOrEmptyOnNull(packageActions);
     this.sourceControlUrl = sourceControlUrl;
     this.description = description;
   }
@@ -51,12 +50,12 @@ public final class CodeTFChange {
     return lineNumber;
   }
 
-  public Optional<String> getSourceControlUrl() {
-    return Optional.ofNullable(sourceControlUrl);
+  public String getSourceControlUrl() {
+    return sourceControlUrl;
   }
 
-  public List<CodeTFPackageAction> getDependencies() {
-    return dependencies;
+  public List<CodeTFPackageAction> getPackageActions() {
+    return packageActions;
   }
 
   @Override

@@ -9,7 +9,7 @@ import java.util.Set;
 
 public final class CodeTFResult {
 
-  private final String codemodId;
+  private final String codemod;
   private final String summary;
   private final String description;
   private final Set<String> failedFiles;
@@ -19,14 +19,14 @@ public final class CodeTFResult {
 
   @JsonCreator
   public CodeTFResult(
-      @JsonProperty(value = "codemod", index = 1) final String codemodId,
+      @JsonProperty(value = "codemod", index = 1) final String codemod,
       @JsonProperty(value = "summary", index = 2) final String summary,
       @JsonProperty(value = "description", index = 3) final String description,
       @JsonProperty(value = "failedFiles", index = 4) final Set<String> failedFiles,
       @JsonProperty(value = "references", index = 5) final List<CodeTFReference> references,
       @JsonProperty(value = "properties", index = 6) final Map<String, String> properties,
       @JsonProperty(value = "changeset", index = 7) final List<CodeTFChangesetEntry> changeset) {
-    this.codemodId = CodeTFValidator.requireNonBlank(codemodId);
+    this.codemod = CodeTFValidator.requireNonBlank(codemod);
     this.summary = CodeTFValidator.requireNonBlank(summary);
     this.description = CodeTFValidator.requireNonBlank(description);
     this.failedFiles = CodeTFValidator.toImmutableCopyOrEmptyOnNull(failedFiles);
@@ -35,8 +35,8 @@ public final class CodeTFResult {
     this.changeset = Objects.requireNonNull(changeset);
   }
 
-  public String getCodemodId() {
-    return codemodId;
+  public String getCodemod() {
+    return codemod;
   }
 
   public String getSummary() {

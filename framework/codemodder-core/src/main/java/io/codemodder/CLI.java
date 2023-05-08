@@ -1,5 +1,6 @@
 package io.codemodder;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
 import io.codemodder.codetf.CodeTFReport;
@@ -279,6 +280,7 @@ final class CLI implements Callable<Integer> {
               results,
               elapsed);
       ObjectMapper mapper = new ObjectMapper();
+      mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
       Files.write(outputPath, mapper.writeValueAsString(report).getBytes(StandardCharsets.UTF_8));
     } else if (OutputFormat.DIFF.equals(outputFormat)) {
       throw new UnsupportedOperationException("not supported yet");
