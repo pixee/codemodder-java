@@ -5,7 +5,7 @@ A "seed" tells your pseudo-random number generator (PRNG) "where to start" in a 
 Our change replaces the constant with `System#currentTimeMillis()`.
 
 ```diff
-Random random = new Random();
--random.setSeed(123);
-+random.setSeed(System.currentTimeMillis());
+  Random random = new Random();
+- random.setSeed(123);
++ random.setSeed(System.currentTimeMillis());
 ```

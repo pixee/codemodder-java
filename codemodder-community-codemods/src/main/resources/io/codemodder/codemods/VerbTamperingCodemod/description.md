@@ -21,16 +21,16 @@ Unfortunately, the logic of the mechanism is surprising. Specifying method(s) me
 Our change is simple: any place we see `<http-method>` listed in a `<security-constraint>`, we remove it:
 
 ```diff
-<security-constraint>
-  <auth-constraint>
-    <role-name>admin</role-name>
-  </auth-constraint>
-  <web-resource-collection>
-    <url-pattern>/admin/*</url-pattern>
--    <http-method>GET</http-method>
--    <http-method>POST</http-method>
-  </web-resource-collection>
-</security-constraint>
+  <security-constraint>
+    <auth-constraint>
+      <role-name>admin</role-name>
+    </auth-constraint>
+    <web-resource-collection>
+      <url-pattern>/admin/*</url-pattern>
+-      <http-method>GET</http-method>
+-      <http-method>POST</http-method>
+    </web-resource-collection>
+  </security-constraint>
 ```
 
 Taking out all the `<http-method>` entries tells the server that this protection must be enforced for all methods, which is almost always the intent of the developer.

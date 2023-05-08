@@ -5,8 +5,8 @@ Unfortunately the method names in JWT parsing with the `io.jsonwebtoken.jjwt` li
 Changing out these methods is easy and our changes look something like this:
 
 ```diff
-JwtParser parser = Jwts.parser();
-JwtParser jwtParser = parser.setSigningKey(JWT_PASSWORD);
--Jwt<Header, Claims> jwt = jwtParser.parse(token);
-+Jwt<Header, Claims> jwt = jwtParser.parseClaimsJwt(token);
+  JwtParser parser = Jwts.parser();
+  JwtParser jwtParser = parser.setSigningKey(JWT_PASSWORD);
+- Jwt<Header, Claims> jwt = jwtParser.parse(token);
++ Jwt<Header, Claims> jwt = jwtParser.parseClaimsJwt(token);
 ```

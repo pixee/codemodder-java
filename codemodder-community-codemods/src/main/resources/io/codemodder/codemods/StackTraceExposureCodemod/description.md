@@ -5,10 +5,10 @@ Have you ever seen an error page and thought, "Wow, I certainly shouldn't be see
 Switching to a safe signature that doesn't leak anything is easy and the changes look something like this:
 
 ```diff
-try {
-  httpResponse.write(output);
-} catch (Exception e) {
--  response.sendError(401, e.getMessage());
-+  response.sendError(401);
-}
+  try {
+    httpResponse.write(output);
+  } catch (Exception e) {
+-   response.sendError(401, e.getMessage());
++   response.sendError(401);
+  }
 ```

@@ -5,10 +5,10 @@ Although end users uploading a file through the browser can't fully control the 
 Our change sanitizes the output of `FileItem#getName()`, stripping the value of null bytes and directory escape sequences, leaving a simple file name in the expected form. The code change is very simple and looks like this:
 
 ```diff
-+import io.github.pixee.security.Filenames;
-...
-MultipartFile uploadedFile = parseFile(request);
--String name = uploadedFile.getOriginalFilename(); // vulnerable
-+String name = Filenames.toSimpleFileName(uploadedFile.getOriginalFilename()); // safe
-writeFile(new File("my_upload_dir", name));
++ import io.github.pixee.security.Filenames;
+  ...
+  MultipartFile uploadedFile = parseFile(request);
+- String name = uploadedFile.getOriginalFilename(); // vulnerable
++ String name = Filenames.toSimpleFileName(uploadedFile.getOriginalFilename()); // safe
+  writeFile(new File("my_upload_dir", name));
 ```

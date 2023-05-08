@@ -5,12 +5,12 @@ Although end users uploading a file through the browser can't fully control the 
 Our change sanitizes the output of `FileItem#getName()`, stripping the value of null bytes and directory escape sequences, leaving a simple file name in the expected form. The code change is very simple and looks like this:
 
 ```diff
-+import io.github.pixee.security.Filenames;
-ServletFileUpload upload = new ServletFileUpload(factory);
-List<FileItem> items = upload.parseRequest(request);
-for (FileItem item : items) {
--  String name = item.getName();
-+  String name = Filenames.toSimpleFileName(item.getName());
-  writeFile(new File("my_upload_dir", name));
++ import io.github.pixee.security.Filenames;
+  ServletFileUpload upload = new ServletFileUpload(factory);
+  List<FileItem> items = upload.parseRequest(request);
+  for (FileItem item : items) {
+-   String name = item.getName();
++   String name = Filenames.toSimpleFileName(item.getName());
+    writeFile(new File("my_upload_dir", name));
 }
 ```

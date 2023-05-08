@@ -5,9 +5,9 @@ There is no way to call `readLine()` safely since it is, by its nature, a read t
 Fixing it is straightforward using an API which limits the amount of expected characters to some sane limit. This is what our changes look like:
 
 ```diff
-+import io.github.pixee.security.BoundedLineReader;
-...
-BufferedReader reader = getReader();
--String line = reader.readLine(); // unlimited read, can lead to DoS
-+String line = BoundedLineReader.readLine(reader, 5_000_000); // limited to 5MB
++ import io.github.pixee.security.BoundedLineReader;
+  ...
+  BufferedReader reader = getReader();
+- String line = reader.readLine(); // unlimited read, can lead to DoS
++ String line = BoundedLineReader.readLine(reader, 5_000_000); // limited to 5MB
 ```
