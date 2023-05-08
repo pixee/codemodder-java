@@ -51,6 +51,13 @@ final class CLI implements Callable<Integer> {
   private boolean dryRun;
 
   @CommandLine.Option(
+      names = {"--dont-exit"},
+      description = "dont exit the process after running the codemods",
+      hidden = true,
+      defaultValue = "false")
+  private boolean dontExit;
+
+  @CommandLine.Option(
       names = {"--verbose"},
       description = "print more to stdout",
       defaultValue = "false")
@@ -235,7 +242,11 @@ final class CLI implements Callable<Integer> {
     }
 
     // create the loader
-    CodemodLoader loader = new CodemodLoader(codemodTypes, regulator, projectPath);
+    List<Path> sarifFiles =
+        sarifs != null ? sarifs.stream().map(Path::of).collect(Collectors.toList()) : List.of();
+    Map<String, List<RuleSarif>> pathSarifMap =
+        SarifParser.create().parseIntoMap(sarifFiles, projectPath);
+    CodemodLoader loader = new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap);
     List<CodemodIdPair> codemods = loader.getCodemods();
 
     // create the project providers
@@ -276,7 +287,9 @@ final class CLI implements Callable<Integer> {
           reportGenerator.createReport(
               projectDirectory.toPath(),
               String.join(" ", args),
-              sarifs.stream().map(Path::of).collect(Collectors.toList()),
+              sarifs == null
+                  ? List.of()
+                  : sarifs.stream().map(Path::of).collect(Collectors.toList()),
               results,
               elapsed);
       ObjectMapper mapper = new ObjectMapper();
@@ -284,6 +297,11 @@ final class CLI implements Callable<Integer> {
       Files.write(outputPath, mapper.writeValueAsString(report).getBytes(StandardCharsets.UTF_8));
     } else if (OutputFormat.DIFF.equals(outputFormat)) {
       throw new UnsupportedOperationException("not supported yet");
+    }
+
+    // this is a special exit code that tells the caller to not exit
+    if (dontExit) {
+      return -1;
     }
 
     return SUCCESS;

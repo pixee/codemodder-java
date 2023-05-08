@@ -74,7 +74,6 @@ public interface RawFileCodemodTest {
     final var allSarifFiles =
         Files.list(testResourceDir)
             .filter(file -> file.getFileName().toString().endsWith(".sarif"))
-            .map(path -> path.toFile())
             .collect(Collectors.toList());
 
     final Map<String, List<RuleSarif>> map =

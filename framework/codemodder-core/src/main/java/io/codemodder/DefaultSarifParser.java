@@ -4,9 +4,8 @@ import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,10 +15,10 @@ import org.slf4j.LoggerFactory;
 
 final class DefaultSarifParser implements SarifParser {
 
-  private Optional<SarifSchema210> readSarifFile(final File sarifFile) {
+  private Optional<SarifSchema210> readSarifFile(final Path sarifFile) {
     try {
       return Optional.of(
-          new ObjectMapper().readValue(new FileReader(sarifFile), SarifSchema210.class));
+          new ObjectMapper().readValue(Files.newInputStream(sarifFile), SarifSchema210.class));
     } catch (final IOException e) {
       LOG.error("Problem deserializing SARIF file: {}", sarifFile, e);
       return Optional.empty();
@@ -87,7 +86,7 @@ final class DefaultSarifParser implements SarifParser {
    * map .
    */
   public Map<String, List<RuleSarif>> parseIntoMap(
-      final List<File> sarifFiles, final Path repositoryRoot) {
+      final List<Path> sarifFiles, final Path repositoryRoot) {
     final var map = new HashMap<String, List<RuleSarif>>();
     sarifFiles.stream()
         .flatMap(f -> readSarifFile(f).stream())

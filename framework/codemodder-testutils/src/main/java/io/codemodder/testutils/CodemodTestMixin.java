@@ -8,7 +8,6 @@ import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserFactory;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,10 +56,10 @@ public interface CodemodTestMixin {
     Files.copy(before, pathToJavaFile);
 
     // Check for any sarif files and build the RuleSarif map
-    List<File> allSarifs = new ArrayList<>();
+    List<Path> allSarifs = new ArrayList<>();
     Files.newDirectoryStream(testResourceDir, "*.sarif")
         .iterator()
-        .forEachRemaining(p -> allSarifs.add(p.toFile()));
+        .forEachRemaining(allSarifs::add);
 
     Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
 
@@ -92,11 +91,20 @@ public interface CodemodTestMixin {
     assertThat(entry.getChanges().isEmpty(), is(false));
 
     // make sure the dependencies are added
-
     assertThat(dependenciesExpected, hasItems(dependenciesExpected.toArray(new DependencyGAV[0])));
 
     // re-run the transformation again and make sure no changes are made
-    CodeTFResult result2 = executor.execute(List.of(pathToJavaFile));
+    CodemodLoader loader2 = new CodemodLoader(List.of(codemodType), tmpDir, map);
+    CodemodIdPair codemod2 = loader2.getCodemods().get(0);
+    CodemodExecutor executor2 =
+        CodemodExecutor.from(
+            tmpDir,
+            IncludesExcludes.any(),
+            codemod2,
+            List.of(),
+            CachingJavaParser.from(factory.create(List.of(dir))),
+            EncodingDetector.create());
+    CodeTFResult result2 = executor2.execute(List.of(pathToJavaFile));
     List<CodeTFChangesetEntry> changeset2 = result2.getChangeset();
     assertThat(changeset2.size(), is(0));
     String transformedAgainJavaCode = Files.readString(pathToJavaFile);

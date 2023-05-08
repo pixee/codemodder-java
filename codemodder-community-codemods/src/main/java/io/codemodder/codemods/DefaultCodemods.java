@@ -20,6 +20,7 @@ public final class DefaultCodemods {
         HardenXMLInputFactoryCodemod.class,
         HardenXStreamCodemod.class,
         HardenZipEntryPathsCodemod.class,
+        InsecureCookieCodemod.class,
         JDBCResourceLeakCodemod.class,
         JEXLInjectionCodemod.class,
         JSPScriptletXSSCodemod.class,

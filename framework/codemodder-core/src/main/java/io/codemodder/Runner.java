@@ -16,6 +16,11 @@ public final class Runner {
     CommandLine commandLine =
         new CommandLine(new CLI(args, codemods)).setCaseInsensitiveEnumValuesAllowed(true);
     int exitCode = commandLine.execute(args);
-    System.exit(exitCode);
+
+    // we honor a special exit code (-1) that tells us not to exit, this is useful for integration
+    // tests
+    if (exitCode != -1) {
+      System.exit(exitCode);
+    }
   }
 }

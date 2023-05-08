@@ -198,7 +198,7 @@ final class DefaultCodemodExecutorTest {
     assertThat(javaFile2PackageActions.size()).isEqualTo(1);
     assertThat(javaFile2PackageActions.get(0).getAction())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionType.ADD);
-    assertThat(javaFile2PackageActions.get(0).getPackageUrl())
+    assertThat(javaFile2PackageActions.get(0).getPackage())
         .isEqualTo("pkg:maven/org.spring/dep1@1.1.1");
     assertThat(javaFile2PackageActions.get(0).getResult())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionResult.COMPLETED);
@@ -254,7 +254,7 @@ final class DefaultCodemodExecutorTest {
     assertThat(javaFile4PackageActions.size()).isEqualTo(1);
     assertThat(javaFile4PackageActions.get(0).getAction())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionType.ADD);
-    assertThat(javaFile4PackageActions.get(0).getPackageUrl())
+    assertThat(javaFile4PackageActions.get(0).getPackage())
         .isEqualTo("pkg:maven/org.apache/dep2@2.2.2");
     assertThat(javaFile4PackageActions.get(0).getResult())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionResult.COMPLETED);
@@ -312,7 +312,7 @@ final class DefaultCodemodExecutorTest {
     CodeTFPackageAction packageAction = packageActions.get(0);
     assertThat(packageAction.getAction())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionType.ADD);
-    assertThat(packageAction.getPackageUrl()).isEqualTo("pkg:maven/org.spring/dep1@1.1.1");
+    assertThat(packageAction.getPackage()).isEqualTo("pkg:maven/org.spring/dep1@1.1.1");
     assertThat(packageAction.getResult())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionResult.FAILED);
     assertThat(javaFile2Entry.getDiff())
@@ -362,7 +362,7 @@ final class DefaultCodemodExecutorTest {
     CodeTFPackageAction packageAction = packageActions.get(0);
     assertThat(packageAction.getAction())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionType.ADD);
-    assertThat(packageAction.getPackageUrl()).isEqualTo("pkg:maven/org.spring/dep1@1.1.1");
+    assertThat(packageAction.getPackage()).isEqualTo("pkg:maven/org.spring/dep1@1.1.1");
     assertThat(packageAction.getResult())
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionResult.SKIPPED);
     assertThat(javaFile2Entry.getDiff())

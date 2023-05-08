@@ -31,7 +31,7 @@ public final class CodeTFPackageAction {
     this.action = Objects.requireNonNull(action);
   }
 
-  public String getPackageUrl() {
+  public String getPackage() {
     return packageUrl;
   }
 
