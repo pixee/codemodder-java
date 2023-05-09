@@ -79,4 +79,22 @@ final class LexicalTest {
     int line = barCallExpression.getRange().get().begin.line;
     assertThat(line, equalTo(3));
   }
+
+  @Test
+  void it_handles_preserving_carriage_returns() {
+    var withCarrigeReturns =
+        "class A {\r\n"
+            + "  void foo() {\r\n"
+            + "    if(true){\r\n"
+            + "        break;\r\n"
+            + "        ;\r\n"
+            + "      }\r\n"
+            + "  }\r\n"
+            + "}";
+
+    var cu = new JavaParser().parse(withCarrigeReturns).getResult().get();
+    LexicalPreservingPrinter.setup(cu);
+    String modified = LexicalPreservingPrinter.print(cu);
+    assertThat(modified, equalTo(withCarrigeReturns));
+  }
 }
