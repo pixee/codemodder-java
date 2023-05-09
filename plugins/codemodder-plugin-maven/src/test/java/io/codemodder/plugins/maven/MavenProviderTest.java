@@ -6,14 +6,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.codemodder.*;
+import io.codemodder.codetf.CodeTFChangesetEntry;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -24,21 +23,24 @@ import org.junit.jupiter.api.io.TempDir;
  */
 final class MavenProviderTest {
 
-  private PomFileUpdater pomUpdater;
-  private PomFileDependencyMapper dependencyMapper;
+  private PomFileUpdater pomFileUpdater;
+  private PomFileFinder pomFileFinder;
   private Path projectDir;
-  private ChangedFile irrelevant;
-  private ChangedFile changedPom1;
-  private ChangedFile changedPom2;
-  private ChangedFile changedRootPom;
-  private FileDependency marsDependency;
-  private FileDependency venusDependency;
-  private FileDependency jspDependency;
+  private DependencyGAV marsDependency1;
+  private DependencyGAV marsDependency2;
+  private DependencyGAV venusDependency;
+  private DependencyGAV jspDependency;
 
-  private Path module1Pom;
-  private Path module2Pom;
-  private Path module3Pom;
-  private Path rootPom;
+  private static Path module1Pom;
+  private static Path module2Pom;
+  private static Path module3Pom;
+  private static Path rootPom;
+  private static Path marsJavaFile;
+  private static Path venusJavaFile;
+  private static Path cloud9JavaFile;
+  private static Path irrelevantFile;
+  private static Path jspFile;
+  private static Path gerrardJavaFile;
 
   /**
    * Set up the mocks to test analyzing this simulated project with these files:
@@ -61,20 +63,20 @@ final class MavenProviderTest {
 
     this.projectDir = projectDir;
 
-    Path marsJavaFile = this.projectDir.resolve("module1/src/main/java/com/acme/Mars.java");
-    Path venusJavaFile = this.projectDir.resolve("module1/src/main/java/com/acme/Venus.java");
+    marsJavaFile = this.projectDir.resolve("module1/src/main/java/com/acme/Mars.java");
+    venusJavaFile = this.projectDir.resolve("module1/src/main/java/com/acme/Venus.java");
     module1Pom = this.projectDir.resolve("module1/pom.xml");
 
-    Path cloud9JavaFile = this.projectDir.resolve("module2/src/main/java/com/acme/Cloud9.java");
+    cloud9JavaFile = this.projectDir.resolve("module2/src/main/java/com/acme/Cloud9.java");
     module2Pom = this.projectDir.resolve("module2/pom.xml");
 
-    Path gerrardJavaFile = this.projectDir.resolve("module3/src/main/java/com/acme/Gerrard.java");
+    gerrardJavaFile = this.projectDir.resolve("module3/src/main/java/com/acme/Gerrard.java");
     module3Pom = this.projectDir.resolve("module3/pom.xml");
 
-    Path jspFile = this.projectDir.resolve("src/main/resources/webapp/WEB-INF/page.jsp");
+    jspFile = this.projectDir.resolve("src/main/resources/webapp/WEB-INF/page.jsp");
     rootPom = this.projectDir.resolve("pom.xml");
 
-    Path irrelevantFile = this.projectDir.resolve("irrelevant");
+    irrelevantFile = this.projectDir.resolve("irrelevant");
     Set<Path> files =
         Set.of(
             irrelevantFile,
@@ -98,183 +100,141 @@ final class MavenProviderTest {
         });
 
     // everybody gets a dependency except the file from module3
-    marsDependency =
-        FileDependency.create(
-            marsJavaFile,
-            List.of(
-                DependencyGAV.createDefault("com.acme.mars", "mars1", "1.0.1"),
-                DependencyGAV.createDefault("com.acme.mars", "mars2", "1.0.1")));
-    venusDependency =
-        FileDependency.create(
-            venusJavaFile,
-            List.of(DependencyGAV.createDefault("com.acme.venus", "venus", "1.0.2")));
-    jspDependency =
-        FileDependency.create(
-            jspFile, List.of(DependencyGAV.createDefault("com.acme.jsp", "jsp", "1.0.4")));
-    Map<Path, List<FileDependency>> moduleDependencyMap =
-        Map.of(
-            module1Pom, List.of(marsDependency),
-            module2Pom, List.of(venusDependency),
-            rootPom, List.of(jspDependency));
+    marsDependency1 = DependencyGAV.createDefault("com.acme.mars", "mars1", "1.0.1");
+    marsDependency2 = DependencyGAV.createDefault("com.acme.mars", "mars2", "1.0.1");
+    venusDependency = DependencyGAV.createDefault("com.acme.venus", "venus", "1.0.2");
+    jspDependency = DependencyGAV.createDefault("com.acme.jsp", "jsp", "1.0.4");
 
-    this.dependencyMapper = mock(PomFileDependencyMapper.class);
-    when(dependencyMapper.build(any(), any())).thenReturn(moduleDependencyMap);
+    this.pomFileFinder = mock(PomFileFinder.class);
+    when(pomFileFinder.findForFile(any(), eq(marsJavaFile))).thenReturn(Optional.of(module1Pom));
+    when(pomFileFinder.findForFile(any(), eq(venusJavaFile))).thenReturn(Optional.of(module2Pom));
+    when(pomFileFinder.findForFile(any(), eq(gerrardJavaFile))).thenReturn(Optional.of(module3Pom));
+    when(pomFileFinder.findForFile(any(), eq(jspFile))).thenReturn(Optional.of(rootPom));
 
-    changedPom1 = mock(ChangedFile.class);
-    when(changedPom1.originalFilePath()).thenReturn(module1Pom.toAbsolutePath().toString());
-    when(changedPom1.modifiedFile()).thenReturn("changed pom1");
-
-    changedPom2 = mock(ChangedFile.class);
-    when(changedPom2.originalFilePath()).thenReturn(module2Pom.toAbsolutePath().toString());
-    when(changedPom2.modifiedFile()).thenReturn("changed pom2");
-
-    changedRootPom = mock(ChangedFile.class);
-    when(changedRootPom.originalFilePath()).thenReturn(rootPom.toAbsolutePath().toString());
-    when(changedRootPom.modifiedFile()).thenReturn("changed pom4");
-
-    this.pomUpdater = mock(PomFileUpdater.class);
-    when(pomUpdater.updatePom(eq(module1Pom), any())).thenReturn(Optional.of(changedPom1));
-    when(pomUpdater.updatePom(eq(module2Pom), any())).thenReturn(Optional.of(changedPom2));
-    when(pomUpdater.updatePom(eq(rootPom), any())).thenReturn(Optional.of(changedRootPom));
-
-    this.irrelevant = mock(ChangedFile.class);
-    when(irrelevant.originalFilePath()).thenReturn(irrelevantFile.toAbsolutePath().toString());
-    when(irrelevant.modifiedFile()).thenReturn("irrelevant");
-    when(irrelevant.weaves()).thenReturn(List.of(Weave.from(5, "not-real-change")));
+    this.pomFileUpdater = mock(PomFileUpdater.class);
   }
 
   @Test
-  void it_updates_all_pom_files_correctly_when_no_issues() throws IOException {
-    MavenProvider provider = new MavenProvider(dependencyMapper, pomUpdater);
+  void it_returns_changeset_when_no_issues() throws IOException {
+    CodeTFChangesetEntry changesetEntry =
+        new CodeTFChangesetEntry(marsJavaFile.toString(), "diff here", List.of());
+    when(pomFileUpdater.updatePom(eq(projectDir), eq(module1Pom), any()))
+        .thenReturn(new PomUpdateResult(Optional.of(changesetEntry), List.of()));
+
+    MavenProvider provider = new MavenProvider(pomFileFinder, pomFileUpdater);
     DependencyUpdateResult result =
         provider.updateDependencies(
-            projectDir,
-            Set.of(irrelevant),
-            List.of(marsDependency, venusDependency, jspDependency));
+            projectDir, marsJavaFile, List.of(marsDependency1, marsDependency2));
 
     // no errors, success!
     assertThat(result.erroredFiles()).isEmpty();
 
     // we've updated all the poms, so we merge this with the pre-existing one change
-    assertThat(result.updatedChanges())
-        .containsOnly(irrelevant, changedPom1, changedPom2, changedRootPom);
+    assertThat(result.packageChanges()).containsOnly(changesetEntry);
 
     // we injected all the dependencies, total success!
-    assertThat(result.injectedDependencies())
-        .containsOnly(marsDependency, venusDependency, jspDependency);
+    assertThat(result.injectedPackages()).containsOnly(marsDependency1, marsDependency2);
   }
 
   @Test
-  void it_handles_pom_update_unnecessary() throws IOException {
-    MavenProvider provider = new MavenProvider(dependencyMapper, pomUpdater);
-
-    // introduce a failure
-    when(pomUpdater.updatePom(eq(module2Pom), any())).thenReturn(Optional.empty());
-
+  void it_returns_empty_when_no_pom() throws IOException {
+    when(pomFileFinder.findForFile(any(), any())).thenReturn(Optional.empty());
+    MavenProvider provider = new MavenProvider(pomFileFinder, pomFileUpdater);
     DependencyUpdateResult result =
-        provider.updateDependencies(
-            projectDir, Set.of(irrelevant), List.of(marsDependency, jspDependency));
+        provider.updateDependencies(projectDir, marsJavaFile, List.of(marsDependency1));
 
-    // no errors, success!
+    assertThat(result.skippedPackages()).isEmpty();
+    assertThat(result.packageChanges()).isEmpty();
     assertThat(result.erroredFiles()).isEmpty();
+    assertThat(result.injectedPackages()).isEmpty();
+  }
 
-    // we've updated all but the module2 pom, so we merge this with the pre-existing one change
-    assertThat(result.updatedChanges()).containsOnly(irrelevant, changedPom1, changedRootPom);
+  @Test
+  void it_handles_when_already_present() throws IOException {
 
-    // we injected all but one of the deps
-    assertThat(result.injectedDependencies()).containsOnly(marsDependency, jspDependency);
+    String pom;
+    pom = "<project>";
+    pom += "  <modelVersion>4.0.0</modelVersion>";
+    pom += "  <groupId>com.acme</groupId>";
+    pom += "  <artifactId>mavenproject1</artifactId>";
+    pom += "  <version>1.0-SNAPSHOT</version>";
+    pom += "  <packaging>jar</packaging>";
+    pom += "  <dependencies>";
+    pom += "    <dependency>";
+    pom += "      <groupId>org.apache</groupId>";
+    pom += "      <artifactId>kafka</artifactId>";
+    pom += "      <version>2.0</version>";
+    pom += "    </dependency>";
+    pom += "  </dependencies>";
+    pom += "</project>";
+
+    Files.writeString(module1Pom, pom);
+    when(pomFileFinder.findForFile(any(), any())).thenReturn(Optional.of(module1Pom));
+
+    // this module is already present
+    DependencyGAV alreadyPresent = DependencyGAV.createDefault("org.apache", "kafka", "2.0");
+    pomFileUpdater = new MavenProvider.DefaultPomFileUpdater();
+    MavenProvider provider = new MavenProvider(pomFileFinder, pomFileUpdater);
+    DependencyUpdateResult result =
+        provider.updateDependencies(projectDir, marsJavaFile, List.of(alreadyPresent));
+
+    List<DependencyGAV> skipped = result.skippedPackages();
+    assertThat(skipped).containsOnly(alreadyPresent);
+    assertThat(result.packageChanges()).isEmpty();
+    assertThat(result.erroredFiles()).isEmpty();
+    assertThat(result.injectedPackages()).isEmpty();
   }
 
   @Test
   void it_handles_pom_update_failure() throws IOException {
-    MavenProvider provider = new MavenProvider(dependencyMapper, pomUpdater);
+    MavenProvider provider = new MavenProvider(pomFileFinder, pomFileUpdater);
 
     // introduce a failure
-    when(pomUpdater.updatePom(eq(module1Pom), any()))
+    when(pomFileUpdater.updatePom(eq(projectDir), eq(module1Pom), any()))
         .thenThrow(new IOException("failed to update pom"));
 
     DependencyUpdateResult result =
         provider.updateDependencies(
-            projectDir, Set.of(irrelevant), List.of(venusDependency, jspDependency));
+            projectDir, marsJavaFile, List.of(venusDependency, jspDependency));
 
-    // no errors, success!
+    // the failure we expected should be there
+    assertThat(result.skippedPackages()).isEmpty();
     assertThat(result.erroredFiles()).containsOnly(module1Pom);
-
-    // we've updated all but the module1 pom, so we merge this with the pre-existing one change
-    assertThat(result.updatedChanges()).containsOnly(irrelevant, changedPom2, changedRootPom);
-
-    // we injected all but one of the deps
-    assertThat(result.injectedDependencies()).containsOnly(venusDependency, jspDependency);
-  }
-
-  @Test
-  void it_builds_correct_dependency_map() throws IOException {
-    PomFileDependencyMapper dependencyMapper = new MavenProvider.DefaultPomFileDependencyMapper();
-    Map<Path, List<FileDependency>> map =
-        dependencyMapper.build(projectDir, List.of(marsDependency, venusDependency, jspDependency));
-    assertThat(map).containsOnlyKeys(module1Pom, rootPom);
-    assertThat(map.get(module1Pom)).containsOnly(marsDependency, venusDependency);
-    assertThat(map.get(rootPom)).containsOnly(jspDependency);
-  }
-
-  /**
-   * This tests that we can update a pom file that has already been changed by another codemod
-   * previously.
-   */
-  @Test
-  void it_can_update_pom_after_existing_changes(final @TempDir Path tmpDir) throws IOException {
-
-    MavenProvider provider = new MavenProvider(dependencyMapper, pomUpdater);
-
-    // we record a change to the module1/pom.xml file, which started as an empty project, but has
-    // been
-    // changed into the simplePom value
-    Path tmpPomFile = tmpDir.resolve("pom.xml");
-    ChangedFile alreadyChangedPom1 = mock(ChangedFile.class);
-    when(alreadyChangedPom1.originalFilePath()).thenReturn(module1Pom.toAbsolutePath().toString());
-    when(alreadyChangedPom1.modifiedFile()).thenReturn(tmpPomFile.toAbsolutePath().toString());
-    String initialPomContents = "<?xml version=\"1.0\"?><project></project>";
-    Files.write(module1Pom, initialPomContents.getBytes(StandardCharsets.UTF_8));
-    Files.write(tmpPomFile, simplePom.getBytes(StandardCharsets.UTF_8));
-
-    // after updating, the old change record should be gone, and the new change record should have
-    // the contents of the
-    // simplePomAfterChanges. we should also have the old file backup restored
-    ChangedFile secondChangePom1 = mock(ChangedFile.class);
-    when(secondChangePom1.originalFilePath()).thenReturn(module1Pom.toAbsolutePath().toString());
-    Path module1PomAfterSecondChange = Files.createTempFile("pom", "xml");
-    Files.write(
-        module1PomAfterSecondChange, simplePomAfterChanges.getBytes(StandardCharsets.UTF_8));
-    when(secondChangePom1.modifiedFile())
-        .thenReturn(module1PomAfterSecondChange.toAbsolutePath().toString());
-
-    when(pomUpdater.updatePom(eq(module1Pom), any())).thenReturn(Optional.of(secondChangePom1));
-    when(pomUpdater.updatePom(eq(module2Pom), any())).thenReturn(Optional.empty());
-    when(pomUpdater.updatePom(eq(module3Pom), any())).thenReturn(Optional.empty());
-    when(pomUpdater.updatePom(eq(rootPom), any())).thenReturn(Optional.empty());
-    Set<ChangedFile> changes = Set.of(irrelevant, alreadyChangedPom1);
-
-    DependencyUpdateResult result =
-        provider.updateDependencies(projectDir, changes, List.of(marsDependency, venusDependency));
-
-    Set<ChangedFile> updatedChanges = result.updatedChanges();
-    assertThat(updatedChanges).containsOnly(irrelevant, secondChangePom1);
-
-    // confirm the file was successfully restored up
-    assertThat(Files.readString(module1Pom, StandardCharsets.UTF_8)).isEqualTo(initialPomContents);
+    assertThat(result.injectedPackages()).isEmpty();
+    assertThat(result.packageChanges()).isEmpty();
   }
 
   @Test
   void it_updates_poms_correctly() throws IOException {
     PomFileUpdater updater = new MavenProvider.DefaultPomFileUpdater();
     Files.write(module1Pom, simplePom.getBytes(StandardCharsets.UTF_8));
-    Optional<ChangedFile> result =
-        updater.updatePom(module1Pom, List.of(marsDependency, venusDependency));
-    assertThat(result).isPresent();
-    assertThat(result.get().originalFilePath()).isEqualTo(module1Pom.toAbsolutePath().toString());
-    String modifiedFile = result.get().modifiedFile();
-    String updatedPomContents = Files.readString(Path.of(modifiedFile), StandardCharsets.UTF_8);
+    PomUpdateResult pomUpdateResult =
+        updater.updatePom(
+            projectDir, module1Pom, List.of(marsDependency1, marsDependency2, venusDependency));
+    Optional<CodeTFChangesetEntry> changesetEntryRef = pomUpdateResult.getEntry();
+    assertThat(changesetEntryRef).isPresent();
+    CodeTFChangesetEntry changesetEntry = changesetEntryRef.get();
+    assertThat(changesetEntry.getPath()).isEqualTo("module1/pom.xml");
+    String updatedPomContents =
+        Files.readString(projectDir.resolve(changesetEntry.getPath()), StandardCharsets.UTF_8);
     assertThat(updatedPomContents).isEqualToIgnoringWhitespace(simplePomAfterChanges);
+  }
+
+  @Test
+  void it_finds_correct_poms() throws IOException {
+    PomFileFinder pomFinder = new MavenProvider.DefaultPomFileFinder();
+    for (Pair<Path, Optional<Path>> pair :
+        Arrays.asList(
+            Pair.of(marsJavaFile, Optional.of(module1Pom)),
+            Pair.of(venusJavaFile, Optional.of(module1Pom)),
+            Pair.of(cloud9JavaFile, Optional.of(module2Pom)),
+            Pair.of(gerrardJavaFile, Optional.of(module3Pom)),
+            Pair.of(jspFile, Optional.of(rootPom)),
+            Pair.of(irrelevantFile, Optional.of(rootPom)))) {
+      Optional<Path> pom = pomFinder.findForFile(this.projectDir, pair.getLeft());
+      assertThat(pom.isPresent()).isTrue();
+      assertThat(pom.get()).isEqualTo(pair.getRight().get());
+    }
   }
 
   private static final String simplePom =

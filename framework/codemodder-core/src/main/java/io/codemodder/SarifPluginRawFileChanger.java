@@ -14,12 +14,13 @@ public abstract class SarifPluginRawFileChanger implements RawFileChanger {
   }
 
   @Override
-  public void visitFile(final CodemodInvocationContext context) throws IOException {
+  public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
     List<Result> results = sarif.getResultsByPath(context.path());
     if (!results.isEmpty()) {
-      List<Weave> allChanges = onFileFound(context, results);
-      allChanges.stream().forEach(weave -> context.changeRecorder().addWeave(weave));
+      List<CodemodChange> allChanges = onFileFound(context, results);
+      return allChanges;
     }
+    return List.of();
   }
 
   /**
@@ -27,7 +28,8 @@ public abstract class SarifPluginRawFileChanger implements RawFileChanger {
    *
    * @param context the context of this files transformation
    * @param results the given SARIF results to act on
-   * @return a {@link List} of {@Link Weave}s representing changes in the file.
+   * @return a {@link List} of {@Link CodemodChange}s representing changes in the file.
    */
-  public abstract List<Weave> onFileFound(CodemodInvocationContext context, List<Result> results);
+  public abstract List<CodemodChange> onFileFound(
+      CodemodInvocationContext context, List<Result> results);
 }

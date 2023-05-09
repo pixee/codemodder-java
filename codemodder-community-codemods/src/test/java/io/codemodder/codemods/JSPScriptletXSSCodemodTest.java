@@ -3,14 +3,17 @@ package io.codemodder.codemods;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import com.github.javaparser.JavaParser;
 import io.codemodder.*;
+import io.codemodder.codetf.CodeTFChange;
+import io.codemodder.codetf.CodeTFResult;
+import io.codemodder.javaparser.CachingJavaParser;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,25 +34,29 @@ final class JSPScriptletXSSCodemodTest {
       throws IOException {
     String dir = "src/test/resources/encode-jsp-scriptlet/" + jspDir;
     copyDir(Path.of(dir), tmpDir);
-    CodemodInvoker codemodInvoker =
-        new CodemodInvoker(List.of(JSPScriptletXSSCodemod.class), tmpDir);
+    CodemodLoader codemodInvoker = new CodemodLoader(List.of(JSPScriptletXSSCodemod.class), tmpDir);
 
     Path beforeJsp = tmpDir.resolve("test.jsp.before");
     Path jsp = tmpDir.resolve("test.jsp");
     Files.copy(beforeJsp, jsp);
-    FileWeavingContext context =
-        FileWeavingContext.createDefault(beforeJsp.toFile(), IncludesExcludes.any());
-    Optional<ChangedFile> changedFileOptional = codemodInvoker.executeFile(jsp, context);
+    CodemodIdPair codemod = codemodInvoker.getCodemods().get(0);
+    CodemodExecutor executor =
+        CodemodExecutor.from(
+            tmpDir,
+            IncludesExcludes.any(),
+            codemod,
+            List.of(),
+            CachingJavaParser.from(new JavaParser()),
+            EncodingDetector.create());
+    CodeTFResult result = executor.execute(List.of(jsp));
 
-    assertThat(changedFileOptional.isPresent(), is(expectChange));
+    assertThat(result.getFailedFiles().isEmpty(), is(true));
 
     if (expectChange) {
-      ChangedFile changedFile = changedFileOptional.get();
-      String modifiedFile = Files.readString(Path.of(changedFile.modifiedFile()));
-
+      String modifiedFile = Files.readString(jsp);
       List<Integer> linesAffected =
-          changedFile.weaves().stream()
-              .map(Weave::lineNumber)
+          result.getChangeset().get(0).getChanges().stream()
+              .map(CodeTFChange::getLineNumber)
               .collect(Collectors.toUnmodifiableList());
       assertThat(linesAffected, hasItems(expectedAffectedLines.toArray(new Integer[0])));
       String expectedAfterContents = Files.readString(tmpDir.resolve("test.jsp.after"));

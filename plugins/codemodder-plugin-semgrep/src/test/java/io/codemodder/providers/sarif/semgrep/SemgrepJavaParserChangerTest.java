@@ -39,7 +39,12 @@ final class SemgrepJavaParserChangerTest {
                 pathToYaml = "/other_dir/explicit-yaml-path.yaml",
                 ruleId = "explicit-yaml-path")
             RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override
@@ -101,7 +106,12 @@ final class SemgrepJavaParserChangerTest {
     UsesInlineSemgrepCodemod(
         @SemgrepScan(yaml = FINDS_THAT_SEMGREP_YAML, ruleId = "inline-semgrep")
             RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override
@@ -128,7 +138,12 @@ final class SemgrepJavaParserChangerTest {
                 pathToYaml = "/other_dir/explicit-yaml-path.yaml",
                 ruleId = "explicit-yaml-path")
             RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override

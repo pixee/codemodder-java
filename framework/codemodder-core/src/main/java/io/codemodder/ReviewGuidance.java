@@ -1,6 +1,6 @@
 package io.codemodder;
 
-/** Represent's a codemod author's confidence that changes wll be safe and effective. */
+/** Represents a codemod author's confidence that changes wll be safe and effective. */
 public enum ReviewGuidance {
   MERGE_AFTER_REVIEW,
   MERGE_AFTER_CURSORY_REVIEW,

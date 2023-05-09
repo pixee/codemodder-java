@@ -1,6 +1,6 @@
 package io.codemodder.testutils;
 
-import io.codemodder.Changer;
+import io.codemodder.CodeChanger;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Metadata {
 
-  Class<? extends Changer> codemodType();
+  Class<? extends CodeChanger> codemodType();
 
   String testResourceDir();
 

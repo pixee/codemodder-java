@@ -1,0 +1,10 @@
+{
+  "summary" : "Sanitized user-provided file names in HTTP multipart uploads",
+  "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/Filenames.java",
+  "change": "Wrapped the file name with a sanitizer call that takes out path escaping characters",
+  "references" : [
+    "https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload",
+    "https://portswigger.net/web-security/file-upload",
+    "https://github.com/spring-projects/spring-framework/blob/c989470f94926ee5c7474bead278b00e9aaac787/spring-web/src/main/java/org/springframework/web/multipart/MultipartFile.java#L68"
+  ]
+}

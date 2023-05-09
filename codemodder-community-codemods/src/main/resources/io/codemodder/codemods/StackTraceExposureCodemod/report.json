@@ -1,0 +1,9 @@
+{
+  "summary" : "Prevent information leak of stack trace details to HTTP responses (CodeQL)",
+  "change": "Removed the argument which would end up exposed in the HTTP response and leak implementation details of our application to the user",
+  "references" : [
+    "https://codeql.github.com/codeql-query-help/java/java-stack-trace-exposure/",
+    "https://cwe.mitre.org/data/definitions/209.html",
+    "https://cwe.mitre.org/data/definitions/497.html"
+  ]
+}

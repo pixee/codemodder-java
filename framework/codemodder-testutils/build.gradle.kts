@@ -11,7 +11,6 @@ java {
 }
 
 dependencies {
-    api(project(":codemodder-common"))
     api(project(":codemodder-core"))
     api("io.codemodder:codemodder-plugin-semgrep")
     api("io.codemodder:codemodder-plugin-codeql")
