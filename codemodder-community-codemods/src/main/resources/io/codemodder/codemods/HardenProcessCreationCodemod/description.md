@@ -5,10 +5,10 @@ Left unchecked, `Runtime#exec()` can execute any arbitrary system command. If an
 Our change introduces a sandbox which protects the application:
 
 ```diff
-+import io.github.pixee.security.SystemCommand;
-...
--Process p = Runtime.getRuntime().exec(command);
-+Process p = SystemCommand.runCommand(Runtime.getRuntime(), command);
++ import io.github.pixee.security.SystemCommand;
+  ...
+- Process p = Runtime.getRuntime().exec(command);
++ Process p = SystemCommand.runCommand(Runtime.getRuntime(), command);
 ```
 
 The default restrictions applied are the following:

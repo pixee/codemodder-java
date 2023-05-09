@@ -13,16 +13,16 @@ Without this protection, attackers can cause your `XMLInputFactory` parser to re
 Yes, it's pretty insane that this is the default behavior. Our change hardens the factories created with the necessary security features to prevent your parser from resolving external entities.
 
 ```diff
-+import io.github.pixee.security.XMLInputFactorySecurity;
-...
--XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
-+XMLInputFactory xmlInputFactory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory());
++ import io.github.pixee.security.XMLInputFactorySecurity;
+  ...
+- XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
++ XMLInputFactory xmlInputFactory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory());
 ```
 
 You could take our protections one step further by changing our supplied code to prevent the user from supplying a `DOCTYPE`, which is more aggressive and more secure, but also more likely to affect existing code behavior:
 ```diff
-+import io.github.pixee.security.XMLInputFactorySecurity;
-+import io.github.pixee.security.XMLRestrictions;
-...
-XMLInputFactory xmlInputFactory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory(), XMLRestrictions.DISALLOW_DOCTYPE);
++ import io.github.pixee.security.XMLInputFactorySecurity;
++ import io.github.pixee.security.XMLRestrictions;
+  ...
+  XMLInputFactory xmlInputFactory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory(), XMLRestrictions.DISALLOW_DOCTYPE);
 ```

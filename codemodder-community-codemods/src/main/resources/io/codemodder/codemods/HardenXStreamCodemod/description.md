@@ -8,7 +8,7 @@ Our change hardens new instances of `XStream` so that they can't deserialize typ
 + import io.github.pixee.security.xstream.HardeningConverter;
   XStream xstream = new XStream();
 + xstream.registerConverter(new HardeningConverter());
-return (AcmeObject)xstream.fromXML(xml);
+  return (AcmeObject)xstream.fromXML(xml);
 ```
 
 Looking at the [history of exploits](https://x-stream.github.io/security.html#CVEs) shows that this change will either stop most exploits or raise the bar of exploitation. If you believe there should be more types added to the denylist, please [fill out a ticket](https://github.com/pixee/java-security-toolkit/issues/new) with your suggestions.

@@ -25,10 +25,10 @@ Reflecting on this code reveals a terrifying conclusion. If an attacker presents
 Attackers can repurpose the logic of selected types within the Java classpath (called "gadgets") and chain them together to achieve arbitrary remote code execution. There are a limited number of publicly known gadgets that can be used for attack, and our change simply inserts an [ObjectInputFilter](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/ObjectInputStream.html#setObjectInputFilter(java.io.ObjectInputFilter)) into the `ObjectInputStream` to prevent them from being used.
 
 ```diff
-+import io.github.pixee.security.ObjectInputFilters;
-ObjectInputStream ois = new ObjectInputStream(is);
-+ObjectInputFilters.enableObjectFilterIfUnprotected(ois);
-AcmeObject acme = (AcmeObject)ois.readObject();
++ import io.github.pixee.security.ObjectInputFilters;
+  ObjectInputStream ois = new ObjectInputStream(is);
++ ObjectInputFilters.enableObjectFilterIfUnprotected(ois);
+  AcmeObject acme = (AcmeObject)ois.readObject();
 ```
 
 This is a tough vulnerability class to understand, but it is deadly serious because it's the highest impact possible (remote code execution) and extremely likely (automated tooling can exploit.) It's best to remove deserialization but our protections will protect you from all known exploitation strategies.
