@@ -8,11 +8,11 @@ import io.codemodder.DependencyUpdateResult;
 import io.codemodder.ProjectProvider;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
-import io.openpixee.maven.operator.Dependency;
-import io.openpixee.maven.operator.POMOperator;
-import io.openpixee.maven.operator.ProjectModel;
-import io.openpixee.maven.operator.ProjectModelFactory;
-import io.openpixee.maven.operator.QueryType;
+import io.github.pixee.maven.operator.Dependency;
+import io.github.pixee.maven.operator.POMOperator;
+import io.github.pixee.maven.operator.ProjectModel;
+import io.github.pixee.maven.operator.ProjectModelFactory;
+import io.github.pixee.maven.operator.QueryType;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -95,11 +95,11 @@ public final class MavenProvider implements ProjectProvider {
     public PomUpdateResult updatePom(
         final Path projectDir, final Path pomPath, final List<DependencyGAV> dependencies)
         throws IOException {
-      List<io.openpixee.maven.operator.Dependency> mappedDependencies =
+      List<io.github.pixee.maven.operator.Dependency> mappedDependencies =
           dependencies.stream()
               .map(
                   dependencyGAV ->
-                      new io.openpixee.maven.operator.Dependency(
+                      new io.github.pixee.maven.operator.Dependency(
                           dependencyGAV.group(),
                           dependencyGAV.artifact(),
                           dependencyGAV.version(),
