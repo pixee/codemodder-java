@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/openpixee/pom-operator/workflows/Java%20CI/badge.svg)](https://github.com/openpixee/pom-operator/actions)
+[![Actions Status](https://github.com/pixee/pom-operator/workflows/Java%20CI/badge.svg)](https://github.com/pixee/pom-operator/actions)
 ![Coverage](.github/badges/jacoco.svg)
 
 # pom-operator
@@ -10,7 +10,7 @@ POM Operator is a library responsible for injecting dependencies into POM files 
 Use [Maven](https://maven.apache.org):
 
 ```
-$ git clone git@github.com:openpixee/pom-operator.git && cd pom-operator
+$ git clone git@github.com:pixee/pom-operator.git && cd pom-operator
 $ mvn clean install
 ```
 
@@ -21,10 +21,10 @@ There's a sample of usage from Java on the `java-sample` directory - of look und
 ```java
 import org.junit.Test;
 
-import io.openpixee.maven.operator.ProjectModel;
-import io.openpixee.maven.operator.Dependency;
-import io.openpixee.maven.operator.POMOperator;
-import io.openpixee.maven.operator.ProjectModelFactory;
+import io.github.pixee.maven.operator.ProjectModel;
+import io.github.pixee.maven.operator.Dependency;
+import io.github.pixee.maven.operator.POMOperator;
+import io.github.pixee.maven.operator.ProjectModelFactory;
 
 public class POMOperatorJavaTest {
   @Test
