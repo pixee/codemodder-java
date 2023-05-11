@@ -18,7 +18,7 @@ dependencies {
     api(libs.contrast.sarif)
     api(libs.java.security.toolkit)
     api(libs.commons.lang3)
-    api("commons-codec:commons-codec:1.15")
+    api("io.codemodder:codetf-java:2.0.0")
     api(libs.slf4j.api)
     api(libs.javaparser.core)
     api(libs.javaparser.symbolsolver.core)
