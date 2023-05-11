@@ -1,19 +1,33 @@
 package com.acme.testcode;
 
+import java.lang.StringBuilder;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.BiFunction;
 
 public final class Test {
 
   private Connection conn;
 
   public ResultSet doUserLookup_single_concat_single_quote(String input) throws SQLException {
-    String sql = "SELECT * FROM USERS WHERE USER = ?";
-    PreparedStatement stmt = conn.prepareStatement(sql);
-    stmt.setString(1, input);
-    return stmt.executeQuery();
+    ArrayList<StringBuilder> parameters = new ArrayList<StringBuilder>();
+    for (int i = 0; i < 1; i++) {
+        parameters.add(new StringBuilder());
+    }
+    BiFunction<Object, Integer, String> addAndReturnEmpty = ( expression,  position) -> {
+        parameters.get(position).append(expression + "");
+        return "";
+    };
+    String sql = "SELECT * FROM USERS WHERE USER = ?" + addAndReturnEmpty.apply(input, 0) + "";
+    Statement stmt = conn.createStatement();
+    stmt.close();
+    stmt = stmt.getConnection().prepareStatement(sql);
+    for (int i = 0; i < parameters.size(); i++) {
+        ((PreparedStatement) stmt).setString(i, parameters.get(i + 1).toString());
+    }
+    return ((PreparedStatement) stmt).execute();
   }
 }

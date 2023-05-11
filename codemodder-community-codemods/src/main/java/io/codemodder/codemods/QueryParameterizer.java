@@ -6,7 +6,6 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.ast.ASTs;
-import io.codemodder.ast.LocalVariableDeclaration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -19,36 +18,21 @@ final class QueryParameterizer {
 
   private final Expression root;
 
-  /** A list of all String declarations containing expressions from the query */
-  private final List<LocalVariableDeclaration> stringDeclarations;
-
-  private final List<Deque<Expression>> injections;
-
   QueryParameterizer(final Expression query) {
     this.root = query;
-    this.stringDeclarations = new ArrayList<>();
-    this.injections = checkAndGatherParameters();
   }
 
-  private List<Deque<Expression>> checkAndGatherParameters() {
+  List<Deque<Expression>> checkAndGatherParameters() {
     final var leaves = findLeaves(root).collect(Collectors.toCollection(ArrayDeque::new));
-    if (countInjections(leaves) >= 1) {
+    if (hasInjections(leaves) >= 1) {
       return gatherParameters(leaves);
     } else {
       return List.of();
     }
   }
 
-  Expression getRoot() {
+  public Expression getRoot() {
     return root;
-  }
-
-  List<LocalVariableDeclaration> getStringDeclarations() {
-    return stringDeclarations;
-  }
-
-  List<Deque<Expression>> getInjections() {
-    return injections;
   }
 
   /**
@@ -79,17 +63,111 @@ final class QueryParameterizer {
       final var maybeSourceLVD =
           ASTs.findEarliestLocalDeclarationOf(e, e.asNameExpr().getNameAsString())
               .filter(ASTs::isFinalOrNeverAssigned)
-              .filter(lvd -> ASTs.findAllReferences(lvd).size() == 1);
-      maybeSourceLVD.ifPresent(stringDeclarations::add);
-
-      return maybeSourceLVD
-          .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
-          .map(this::findLeaves)
-          .orElse(Stream.of(e));
+              .filter(lvd -> ASTs.findAllReferences(lvd).size() == 1)
+              .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer());
+      return maybeSourceLVD.map(this::findLeaves).orElse(Stream.of(e));
     }
     // Any other expression is a "leaf"
     return Stream.of(e);
   }
+
+  // TODO method calls/unary operators may have side effects and removing them may cause incorrect
+  // TODO try(Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery()
+  // TODO string variable with injection is no single use, abort?
+  // behavior
+
+  // Statement stmt = conn.createStatement();
+  // int totalBefore = id;
+  // String str = "user_" + (id++);
+  // stmt.executeQuery("SELECT * FROM USERS WHERE id='" + id++ + "' AND name='" + str + "'");
+
+  // solution: have the execute and creation be right next to each other
+
+  // String str = "user_" + (id++);
+  // int totalBefore = id;
+  // Statement stmt = conn.createStatement();
+  // stmt.executeQuery("SELECT * FROM USERS WHERE id='" + id++ + "' AND name='" + str + "'");
+
+  // String str = "user_" + (id++);
+  // String injection1Parameter = "user_" + (id++);
+  // int totalBefore = id;
+  // PreparedStatement stmt;
+  // stmt = conn.prepareStatement("SELECT * FROM USERS WHERE id=? AND name='" + str + "'");
+  // stmt.execute();
+
+  // solution: add conn.prepareStatement only right before, and "cache" middle expressions
+  // only delete "static" part of query.
+
+  // Since expressions are evaluated left-to-right, a middle composed of multiple expressions will
+  // always be a String type in the end
+  // making PreparedStatement stmt; may result in problems (e.g. stmt.getConnection())
+
+  // solution:
+  // PreparedStatement stmt = conn.createStatement();
+  // ...
+  // String query = ...;
+  // stmt.close();
+  // stmt = conn.prepareStatement(query);
+  // stmt.setString(0, parameter0);
+  // <executeQueryStmt>
+
+  // Allowed executeQuery stmts returnStmt, ExpressionStmt(AssignExpr,VariableDeclarationExprInit,
+  // methodCallExpr), TryStmt -> VariableDeclarationExpr -> ...
+  // maybe scope of single methodCallExpr in if?
+  // Problems:
+  // (1) How to maintain execution of injected expressions?
+
+  // String query = "SELECT * FROM" + table + " WHERE name=' " + outside + "'";
+  // String query = "SELECT * FROM USERS" + table + " WHERE name=?";
+  // String parameter0 = outside + "";
+
+  // Variable Access (NameExpr) are left alone
+  // For every injection pattern: <head> + <before> + <middle> + <after> + <tail>
+  // String str = <head> + <beforeafter>
+  // String parameterX = ...
+  // String tail = str + <tail>
+
+  // solution:
+  // foo(...){
+  // List<String> parameters<ID> = new ArrayList<>(Collections.nCopies(<totalInjection#>,""));
+  // ...
+  // PreparedStatement stmt = conn.createStatement();
+  // ...
+  // String query<ID> = "..." + parameters.set(<combinedMiddle>, <injection#>) + "...";
+  // stmt.close();
+  // stmt = conn.prepareStatement(query);
+  // for(int i<ID> =0; i<parameters<ID>.size(); i<ID>++) stmt.setString(parameters<ID>.get(i),i);
+  // <executeQueryStmt>
+  // ...}
+
+  // problem: what if the middle begins in one string and ends in another?
+  // String head = "...'" + "user_";
+  // String tail = id + "'...";
+  // stmt.executeQuery(head + tail);
+
+  // List<List<String>> parameters<ID> = new ArrayList<>(Collections.nCopies)
+
+  // problem: how to convert parameters.add(s) to ""
+
+  // BiFunction<Integer,String,String> evaluateAndGather = s -> {parameters.set(parameters.get(i)
+  // + s); return "";};
+
+  // String str = "something";
+  // String query = "...'" + out + str + "'...";
+  // Expression combinedMiddle = null;
+  // for (var expr : middle) {
+  //  collapse(expr);
+  //  if (combinedMiddle == null) {
+  //    combinedMiddle = expr;
+  //  } else {
+  //    combinedMiddle = new BinaryExpr(combinedMiddle, expr, Operator.PLUS);
+  //  }
+  //  allString = allString && expr instanceof StringLiteralExpr;
+  // }
+  // if (!allString) {
+  //  combinedMiddle = new BinaryExpr(combinedMiddle, new StringLiteralExpr(""), Operator.PLUS);
+  // }
+  // return Optional.of(combinedMiddle);
 
   /** Looks for the injection patterns and gather all expressions for each injection. */
   private List<Deque<Expression>> gatherParameters(final Deque<Expression> query) {
@@ -124,7 +202,7 @@ final class QueryParameterizer {
    * Checks if the deque containing the leaves of a query expression has any valid injection pattern
    * and no dangling quotes.
    */
-  private int countInjections(final Deque<Expression> query) {
+  int hasInjections(final Deque<Expression> query) {
     int count = 0;
     final var iterator = query.iterator();
     Expression start = null;
@@ -185,11 +263,7 @@ final class QueryParameterizer {
             "java.time.OffsetTime",
             "java.time.OffsetDateTime",
             "java.net.URL");
-    for (final var t : blacklist) {
-      if (type.describe().equals(t)) {
-        return false;
-      }
-    }
+    for (final var t : blacklist) if (type.describe().equals(t)) return false;
     return true;
   }
 
