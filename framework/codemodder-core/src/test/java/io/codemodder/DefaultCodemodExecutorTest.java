@@ -35,21 +35,29 @@ final class DefaultCodemodExecutorTest {
   private Path javaFile2;
   private Path javaFile3;
   private Path javaFile4;
+  private EncodingDetector encodingDetector;
+  private CachingJavaParser cachingJavaParser;
+  private IncludesExcludes includesEverything;
+  private BeforeToAfterChanger beforeToAfterChanger;
+  private CodemodIdPair beforeAfterCodemod;
 
   @BeforeEach
   void setup(final @TempDir Path tmpDir) throws IOException {
     this.repoDir = tmpDir;
-    JavaParserChanger beforeToAfterChanger = new BeforeToAfterChanger();
-    CodemodIdPair beforeAfterCodemod =
-        new CodemodIdPair("codemodder:java/id", beforeToAfterChanger);
+    beforeToAfterChanger = new BeforeToAfterChanger();
+    beforeAfterCodemod = new CodemodIdPair("codemodder:java/id", beforeToAfterChanger);
+    cachingJavaParser = CachingJavaParser.from(new JavaParser());
+    encodingDetector = EncodingDetector.create();
+    includesEverything = IncludesExcludes.any();
     executor =
         new DefaultCodemodExecutor(
             repoDir,
-            IncludesExcludes.any(),
+            includesEverything,
             beforeAfterCodemod,
             List.of(),
-            CachingJavaParser.from(new JavaParser()),
-            EncodingDetector.create());
+            List.of(),
+            cachingJavaParser,
+            encodingDetector);
 
     javaFile1 = repoDir.resolve("Test1.java");
     Files.write(javaFile1, List.of("class Test1 {", "  void before() {}", "}"));
@@ -141,6 +149,59 @@ final class DefaultCodemodExecutorTest {
   }
 
   @Test
+  void it_allows_codetf_customization() {
+
+    CodeTFProvider addsPrefixProvider =
+        new CodeTFProvider() {
+          @Override
+          public CodeTFResult onResultCreated(final CodeTFResult result) {
+            return CodeTFResult.basedOn(result)
+                .withSummary("hi, " + result.getSummary())
+                .withDescription("hi, " + result.getDescription())
+                .withAdditionalReferences(List.of(new CodeTFReference("https://hi/", "hi")))
+                .build();
+          }
+
+          @Override
+          public CodeTFChange onChangeCreated(
+              final Path path, final String codemod, final CodeTFChange change) {
+            return CodeTFChange.basedOn(change)
+                .withDescription("hi " + path.toString())
+                .withAdditionalProperties(Map.of("hi", codemod))
+                .build();
+          }
+        };
+
+    executor =
+        new DefaultCodemodExecutor(
+            repoDir,
+            includesEverything,
+            beforeAfterCodemod,
+            List.of(),
+            List.of(addsPrefixProvider),
+            cachingJavaParser,
+            encodingDetector);
+
+    CodeTFResult result = executor.execute(List.of(javaFile1));
+
+    // confirm the result was updated by the provider
+    assertThat(result.getSummary()).isEqualTo("hi, before-after-summary");
+    assertThat(result.getDescription()).isEqualTo("hi, before-after-description");
+    assertThat(result.getReferences()).hasSize(2);
+    assertThat(result.getReferences().get(1).getDescription()).isEqualTo("hi");
+    assertThat(result.getReferences().get(1).getUrl()).isEqualTo("https://hi/");
+
+    // confirm the change was updated by the provider
+    List<CodeTFChangesetEntry> changeset = result.getChangeset();
+    assertThat(changeset.size()).isEqualTo(1);
+    CodeTFChangesetEntry entry = changeset.get(0);
+    assertThat(entry.getChanges().get(0).getDescription()).isEqualTo("hi " + javaFile1.toString());
+    assertThat(entry.getChanges().get(0).getProperties()).hasSize(1);
+    assertThat(entry.getChanges().get(0).getProperties())
+        .hasFieldOrPropertyWithValue("hi", beforeAfterCodemod.getId());
+  }
+
+  @Test
   void it_generates_all_files_codemod_codetf() {
     CodeTFResult result = executor.execute(List.of(javaFile1, javaFile2, javaFile3));
     assertThat(result).satisfies(DefaultCodemodExecutorTest::hasBeforeAfterCodemodMetadata);
@@ -163,9 +224,10 @@ final class DefaultCodemodExecutorTest {
       executor =
           new DefaultCodemodExecutor(
               repoDir,
-              IncludesExcludes.any(),
+              includesEverything,
               codemod,
               List.of(depsProvider),
+              List.of(),
               CachingJavaParser.from(new JavaParser()),
               EncodingDetector.create());
       CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
@@ -290,9 +352,10 @@ final class DefaultCodemodExecutorTest {
     executor =
         new DefaultCodemodExecutor(
             repoDir,
-            IncludesExcludes.any(),
+            includesEverything,
             codemod,
             List.of(badProvider),
+            List.of(),
             CachingJavaParser.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
@@ -340,9 +403,10 @@ final class DefaultCodemodExecutorTest {
     executor =
         new DefaultCodemodExecutor(
             repoDir,
-            IncludesExcludes.any(),
+            includesEverything,
             codemod,
             List.of(skippingProvider),
+            List.of(),
             CachingJavaParser.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(javaFile2));
@@ -445,6 +509,12 @@ final class DefaultCodemodExecutorTest {
     @Override
     public String getSummary() {
       return "before-after-summary";
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of(
+          new CodeTFReference("https://before-after-reference", "before-after-reference"));
     }
   }
 

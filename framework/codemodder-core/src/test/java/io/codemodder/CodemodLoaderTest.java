@@ -125,6 +125,7 @@ final class CodemodLoaderTest {
               IncludesExcludes.any(),
               codemodIdPair,
               List.of(),
+              List.of(),
               CachingJavaParser.from(new JavaParser()),
               EncodingDetector.create());
       executor.execute(List.of(file));
