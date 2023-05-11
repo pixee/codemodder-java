@@ -4,10 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
-import io.openpixee.jdbcparameterizer.SQLParameterizer;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Codemod(
     id = "pixee:java/sql-parameterizer",
@@ -15,23 +12,20 @@ import java.util.stream.Collectors;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SQLParameterizerCodemod implements JavaParserChanger {
 
-  private List<Weave> onNodeFound(
-      CodemodInvocationContext context, MethodCallExpr methodCallExpr, CompilationUnit cu) {
-    var fixer = new SQLParameterizer(cu);
-    var maybeChanges = fixer.parameterizeStatement(methodCallExpr, methodCallExpr.getArgument(0));
-    if (maybeChanges.isLeft()) {
-      return maybeChanges.getLeft().stream()
-          .map(c -> Weave.from(c.getLine(), context.codemodId()))
-          .collect(Collectors.toList());
+  private Optional<Weave> onNodeFound(
+      final CodemodInvocationContext context,
+      final MethodCallExpr methodCallExpr,
+      final CompilationUnit cu) {
+    if (new SQLParameterizer().checkAndFix(methodCallExpr)) {
+      return Optional.of(Weave.from(methodCallExpr.getBegin().get().line, context.codemodId()));
     } else {
-      return Collections.emptyList();
+      return Optional.empty();
     }
   }
 
   @Override
   public void visit(final CodemodInvocationContext context, final CompilationUnit cu) {
     cu.findAll(MethodCallExpr.class).stream()
-        .filter(mce -> SQLParameterizer.isParameterizationCandidate(mce))
         .flatMap(mce -> onNodeFound(context, mce, cu).stream())
         .forEach(w -> context.changeRecorder().addWeave(w));
   }
