@@ -8,6 +8,7 @@ import java.util.List;
 /** A type responsible for executing a codemod on a set of files. */
 public interface CodemodExecutor {
 
+  /** Execute the codemod on the given file paths. */
   CodeTFResult execute(List<Path> filePaths);
 
   static CodemodExecutor from(
@@ -15,9 +16,16 @@ public interface CodemodExecutor {
       final IncludesExcludes includesExcludes,
       final CodemodIdPair codemod,
       final List<ProjectProvider> projectProviders,
+      final List<CodeTFProvider> codetfProviders,
       final CachingJavaParser javaParser,
       final EncodingDetector encodingDetector) {
     return new DefaultCodemodExecutor(
-        projectDir, includesExcludes, codemod, projectProviders, javaParser, encodingDetector);
+        projectDir,
+        includesExcludes,
+        codemod,
+        projectProviders,
+        codetfProviders,
+        javaParser,
+        encodingDetector);
   }
 }

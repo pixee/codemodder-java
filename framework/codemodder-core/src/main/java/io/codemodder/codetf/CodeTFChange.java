@@ -2,6 +2,7 @@ package io.codemodder.codetf;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -87,5 +88,48 @@ public final class CodeTFChange {
         + ", properties="
         + properties
         + '}';
+  }
+
+  /** Create a new {@link CodeTFChange} builder based on an existing instance. */
+  public static Builder basedOn(final CodeTFChange change) {
+    return new Builder(change);
+  }
+
+  /** Builder for {@link CodeTFChange} which was based on an existing instance. */
+  public static class Builder {
+    private final CodeTFChange originalChange;
+    private String updatedDescription;
+    private Map<String, String> updatedProperties;
+
+    private Builder(final CodeTFChange change) {
+      this.originalChange = Objects.requireNonNull(change);
+      this.updatedProperties = new HashMap<>(change.getProperties());
+    }
+
+    /** Update the {@link CodeTFChange} with the given description. */
+    public Builder withDescription(final String description) {
+      Objects.requireNonNull(description);
+      this.updatedDescription = description;
+      return this;
+    }
+
+    /** Update the {@link CodeTFChange} with additional properties. */
+    public Builder withAdditionalProperties(final Map<String, String> newProperties) {
+      Objects.requireNonNull(newProperties);
+      if (this.updatedProperties == null) {
+        this.updatedProperties = new HashMap<>(originalChange.properties);
+      }
+      this.updatedProperties.putAll(newProperties);
+      return this;
+    }
+
+    public CodeTFChange build() {
+      return new CodeTFChange(
+          originalChange.getLineNumber(),
+          updatedProperties != null ? updatedProperties : originalChange.getProperties(),
+          updatedDescription != null ? updatedDescription : originalChange.getDescription(),
+          originalChange.getPackageActions(),
+          originalChange.getSourceControlUrl());
+    }
   }
 }

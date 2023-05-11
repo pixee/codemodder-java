@@ -2,11 +2,9 @@ package io.codemodder.codetf;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
+/** Describes the "result" section of a CodeTF document. */
 public final class CodeTFResult {
 
   private final String codemod;
@@ -61,5 +59,57 @@ public final class CodeTFResult {
 
   public List<CodeTFChangesetEntry> getChangeset() {
     return changeset;
+  }
+
+  /** Create a new CodeTFResult builder based on an existing instance. */
+  public static Builder basedOn(final CodeTFResult result) {
+    return new Builder(result);
+  }
+
+  /** Builder for CodeTFResult which was based on an existing instance. */
+  public static class Builder {
+    private final CodeTFResult originalResult;
+    private String updatedSummary;
+    private String updatedDescription;
+    private List<CodeTFReference> updatedReferences;
+
+    private Builder(final CodeTFResult result) {
+      this.originalResult = Objects.requireNonNull(result);
+    }
+
+    /** Update the CodeTFResult with the given summary. */
+    public Builder withSummary(final String summary) {
+      Objects.requireNonNull(summary);
+      this.updatedSummary = summary;
+      return this;
+    }
+
+    /** Update the CodeTFResult with the given description. */
+    public Builder withDescription(final String description) {
+      Objects.requireNonNull(description);
+      this.updatedDescription = description;
+      return this;
+    }
+
+    /** Update the CodeTFResult with additional references. */
+    public Builder withAdditionalReferences(final List<CodeTFReference> references) {
+      Objects.requireNonNull(references);
+      if (updatedReferences == null) {
+        updatedReferences = new ArrayList<>(originalResult.references);
+      }
+      updatedReferences.addAll(references);
+      return this;
+    }
+
+    public CodeTFResult build() {
+      return new CodeTFResult(
+          originalResult.getCodemod(),
+          updatedSummary != null ? updatedSummary : originalResult.getSummary(),
+          updatedDescription != null ? updatedDescription : originalResult.getDescription(),
+          originalResult.getFailedFiles(),
+          updatedReferences != null ? updatedReferences : originalResult.getReferences(),
+          originalResult.getProperties(),
+          originalResult.getChangeset());
+    }
   }
 }

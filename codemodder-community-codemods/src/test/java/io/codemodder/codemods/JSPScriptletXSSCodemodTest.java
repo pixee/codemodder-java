@@ -46,6 +46,7 @@ final class JSPScriptletXSSCodemodTest {
             IncludesExcludes.any(),
             codemod,
             List.of(),
+            List.of(),
             CachingJavaParser.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(jsp));

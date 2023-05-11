@@ -23,6 +23,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
   private final CodemodIdPair codemod;
   private final List<ProjectProvider> projectProviders;
+  private final List<CodeTFProvider> codetfProviders;
   private final CachingJavaParser cachingJavaParser;
   private final Path projectDir;
   private final IncludesExcludes includesExcludes;
@@ -33,11 +34,13 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       final IncludesExcludes includesExcludes,
       final CodemodIdPair codemod,
       final List<ProjectProvider> projectProviders,
+      final List<CodeTFProvider> codetfProviders,
       final CachingJavaParser cachingJavaParser,
       final EncodingDetector encodingDetector) {
     this.projectDir = Objects.requireNonNull(projectDir);
     this.includesExcludes = Objects.requireNonNull(includesExcludes);
     this.codemod = Objects.requireNonNull(codemod);
+    this.codetfProviders = Objects.requireNonNull(codetfProviders);
     this.projectProviders = Objects.requireNonNull(projectProviders);
     this.cachingJavaParser = Objects.requireNonNull(cachingJavaParser);
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
@@ -134,30 +137,43 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
         unscannableFiles.add(filePath);
       }
     }
-    return new CodeTFResult(
-        codemod.getId(),
-        codeChanger.getSummary(),
-        codeChanger.getDescription(),
-        unscannableFiles.stream()
-            .map(file -> getRelativePath(projectDir, file))
-            .collect(Collectors.toSet()),
-        codeChanger.getReferences(),
-        emptyMap(),
-        changeset);
+
+    CodeTFResult result =
+        new CodeTFResult(
+            codemod.getId(),
+            codeChanger.getSummary(),
+            codeChanger.getDescription(),
+            unscannableFiles.stream()
+                .map(file -> getRelativePath(projectDir, file))
+                .collect(Collectors.toSet()),
+            codeChanger.getReferences(),
+            emptyMap(),
+            changeset);
+
+    for (CodeTFProvider provider : codetfProviders) {
+      result = provider.onResultCreated(result);
+    }
+    return result;
   }
 
   @NotNull
-  private static CodeTFChange translateCodemodChangetoCodeTFChange(
+  private CodeTFChange translateCodemodChangetoCodeTFChange(
       final CodeChanger codeChanger,
       final Path filePath,
-      final CodemodChange change,
+      final CodemodChange codemodChange,
       final List<CodeTFPackageAction> pkgActions) {
-    return new CodeTFChange(
-        change.lineNumber(),
-        emptyMap(),
-        codeChanger.getIndividualChangeDescription(filePath, change),
-        pkgActions,
-        codeChanger.getSourceControlUrl().orElse(null));
+    CodeTFChange change =
+        new CodeTFChange(
+            codemodChange.lineNumber(),
+            emptyMap(),
+            codeChanger.getIndividualChangeDescription(filePath, codemodChange),
+            pkgActions,
+            codeChanger.getSourceControlUrl().orElse(null));
+
+    for (CodeTFProvider provider : codetfProviders) {
+      change = provider.onChangeCreated(filePath, codemod.getId(), change);
+    }
+    return change;
   }
 
   /**

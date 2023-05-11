@@ -251,6 +251,7 @@ final class CLI implements Callable<Integer> {
 
     // create the project providers
     List<ProjectProvider> projectProviders = loadProjectProviders();
+    List<CodeTFProvider> codeTFProviders = loadCodeTFProviders();
 
     // create the JavaParser instance
 
@@ -270,6 +271,7 @@ final class CLI implements Callable<Integer> {
               includesExcludes,
               codemod,
               projectProviders,
+              codeTFProviders,
               cachingJavaParser,
               encodingDetector);
       CodeTFResult result = codemodExecutor.execute(filePaths);
@@ -305,6 +307,15 @@ final class CLI implements Callable<Integer> {
     }
 
     return SUCCESS;
+  }
+
+  private List<CodeTFProvider> loadCodeTFProviders() {
+    List<CodeTFProvider> codeTFProviders = new ArrayList<>();
+    ServiceLoader<CodeTFProvider> loader = ServiceLoader.load(CodeTFProvider.class);
+    for (CodeTFProvider provider : loader) {
+      codeTFProviders.add(provider);
+    }
+    return codeTFProviders;
   }
 
   private List<ProjectProvider> loadProjectProviders() {

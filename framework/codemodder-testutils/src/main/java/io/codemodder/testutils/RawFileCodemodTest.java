@@ -52,6 +52,7 @@ public interface RawFileCodemodTest {
               IncludesExcludes.any(),
               pair,
               List.of(),
+              List.of(),
               CachingJavaParser.from(new JavaParser()),
               EncodingDetector.create());
       executor.execute(List.of(tmpFilePath));

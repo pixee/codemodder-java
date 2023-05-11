@@ -77,6 +77,7 @@ public interface CodemodTestMixin {
             IncludesExcludes.any(),
             codemod,
             List.of(),
+            List.of(),
             CachingJavaParser.from(factory.create(List.of(dir))),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(pathToJavaFile));
@@ -101,6 +102,7 @@ public interface CodemodTestMixin {
             tmpDir,
             IncludesExcludes.any(),
             codemod2,
+            List.of(),
             List.of(),
             CachingJavaParser.from(factory.create(List.of(dir))),
             EncodingDetector.create());
