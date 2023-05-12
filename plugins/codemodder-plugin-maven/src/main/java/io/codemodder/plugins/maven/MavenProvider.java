@@ -170,15 +170,14 @@ public final class MavenProvider implements ProjectProvider {
       AbstractDelta<String> delta = patch.getDeltas().get(0);
       int position = 1 + delta.getSource().getPosition();
 
+      String relativePomPath = projectDir.relativize(pomPath).toString();
       CodeTFChange change = new CodeTFChange(position, Collections.emptyMap(), "", List.of(), null);
       List<String> patchDiff =
           UnifiedDiffUtils.generateUnifiedDiff(
-              pomPath.toString(), pomPath.toString(), originalPomContents, patch, 3);
+              relativePomPath, relativePomPath, originalPomContents, patch, 3);
 
       String diff = String.join("\n", patchDiff);
-      CodeTFChangesetEntry entry =
-          new CodeTFChangesetEntry(
-              projectDir.relativize(pomPath).toString(), diff, List.of(change));
+      CodeTFChangesetEntry entry = new CodeTFChangesetEntry(relativePomPath, diff, List.of(change));
 
       // overwrite existing pom
       Files.copy(newPomFile, pomPath, StandardCopyOption.REPLACE_EXISTING);
