@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.apache.commons.io.IOUtils;
 
 /** A type responsible for reporting codemod changes. */
 public interface CodemodReporterStrategy {
@@ -63,14 +65,19 @@ public interface CodemodReporterStrategy {
     Objects.requireNonNull(codemodType);
 
     // create the expected paths to the files
-    String description = "/" + codemodType.getName().replace('.', '/') + "/description.md";
+    String descriptionResource = "/" + codemodType.getName().replace('.', '/') + "/description.md";
     String reportJson = "/" + codemodType.getName().replace('.', '/') + "/report.json";
 
     // load the reporting text
     ObjectMapper mapper = new ObjectMapper();
     final JsonNode parent;
+    final String description;
     try {
       parent = mapper.readTree(codemodType.getResourceAsStream(reportJson));
+      description =
+          IOUtils.toString(
+              Objects.requireNonNull(codemodType.getResourceAsStream(descriptionResource)),
+              StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
