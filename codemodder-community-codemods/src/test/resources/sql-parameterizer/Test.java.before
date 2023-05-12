@@ -9,9 +9,15 @@ public final class Test {
 
   private Connection conn;
 
-  public ResultSet doUserLookup_single_concat_single_quote(String input) throws SQLException {
+  public ResultSet indirectStatement(String input) throws SQLException {
     String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
     Statement stmt = conn.createStatement();
     return stmt.executeQuery(sql);
+  }
+
+  public ResultSet directStatement(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    var rs = conn.createStatement().executeQuery(sql);
+    return rs;
   }
 }

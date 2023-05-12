@@ -127,7 +127,7 @@ final class SQLParameterizer {
         executeCall
             .getScope()
             .flatMap(this::isConnectionCreateStatement)
-            .filter(scope -> scope.getScope().filter(Expression::isNameExpr).isPresent())
+            // .filter(scope -> scope.getScope().filter(Expression::isNameExpr).isPresent())
             .map(Either::left);
 
     // Is a NameExpr that is initialized with <conn>.createStatement
@@ -162,11 +162,6 @@ final class SQLParameterizer {
     // if the only uses is being scope of a method calls, then we can change it
     // This is stronger than it needs to be
     return allNameExpr.allMatch(ne -> ASTs.isScopeInMethodCall(ne).isPresent());
-  }
-
-  /** Returns true if the expression originates outside of method. */
-  private boolean isTainted(final Expression expr) {
-    return false;
   }
 
   /**
@@ -294,12 +289,12 @@ final class SQLParameterizer {
     return List.of(StaticJavaParser.parseStatement(parameterInitialization), parameterDecl);
   }
 
-  private Statement buildForSetParameters(final String stmtName) {
+  private Statement buildForSetParameters(final Expression scope) {
     // for(int i = 0; i<parameters.size(); i++){ stmt.setString(i, parameters.get(i+1).toString())}
     final var parameterSetStatement =
         String.format(
-            "((PreparedStatement) %3$s).setString(%1$s ,%2$s.get(%1$s + 1).toString())",
-            "i" + generateId(), parameterVectorName + generateId(), stmtName);
+            "%3$s.setString(%1$s ,%2$s.get(%1$s + 1).toString())",
+            "i" + generateId(), parameterVectorName + generateId(), scope);
     final var forParameters =
         String.format(
             "for(int %1$s=0; %1$s< %2$s.size(); %1$s++)",
@@ -324,7 +319,54 @@ final class SQLParameterizer {
       final MethodCallExpr stmtCreation,
       final List<Deque<Expression>> injections,
       final Expression root,
-      final MethodCallExpr executeCall) {}
+      final MethodCallExpr executeCall) {
+
+    final var cu = executeCall.findCompilationUnit().get();
+    final var stmtName = preparedStatementName + generateId();
+
+    // (1)
+    final var methodBody =
+        ASTs.findMethodBodyFrom(executeCall).flatMap(MethodDeclaration::getBody).get();
+    ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), buildLambda());
+    buildAndInitializeVector(injections.size())
+        .forEach(s -> ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), s));
+
+    ASTTransforms.addImportIfMissing(cu, "java.util.ArrayList");
+    ASTTransforms.addImportIfMissing(cu, "java.util.BiFunction");
+    ASTTransforms.addImportIfMissing(cu, "java.lang.StringBuilder");
+
+    // (2)
+    fixInjections(injections);
+
+    // (3)
+    final var executeStmt = ASTs.findParentStatementFrom(executeCall).get();
+    // stmt = stmt.getConnection().prepareStatement()
+    final var arguments = new NodeList<>(root);
+    stmtCreation.getArguments().stream()
+        .flatMap(init -> init.asMethodCallExpr().getArguments().stream())
+        .forEach(arguments::add);
+    // prepareStatement()
+    var prepareStatementCall =
+        new MethodCallExpr(stmtCreation.getScope().get(), "prepareStatement", arguments);
+    final var createPreparedStatement =
+        new ExpressionStmt(
+            new VariableDeclarationExpr(
+                new VariableDeclarator(
+                    StaticJavaParser.parseType("PreparedStatement"),
+                    stmtName,
+                    prepareStatementCall)));
+    ASTTransforms.addStatementBeforeStatement(executeStmt, createPreparedStatement);
+    ASTTransforms.addImportIfMissing(cu, "java.sql.PreparedStatement");
+
+    // (4)
+    ASTTransforms.addStatementBeforeStatement(
+        executeStmt, buildForSetParameters(new NameExpr(stmtName)));
+
+    // (5)
+    executeCall.setName("execute");
+    executeCall.setScope(new NameExpr(stmtName));
+    executeCall.setArguments(new NodeList<>());
+  }
 
   /**
    * The fix consists of the following:
@@ -345,11 +387,9 @@ final class SQLParameterizer {
       final Expression root,
       final MethodCallExpr executeCall) {
     final var cu = executeCall.findCompilationUnit().get();
-    // TODO what about try stmts? check if executeCall is the only call
     // TODO three cases (a) direct call, (b) indirect call, (c) indirect call with try declaration
+    // TODO remove fors if there is a single expression injection
 
-    // TODO for (a) conn creation object may only be a NameExpr, otherwise side effects
-    // e.g. (new Connection(...)).createStatement();
     final var stmtName = stmtCreation.getName();
 
     // (1)
@@ -388,9 +428,15 @@ final class SQLParameterizer {
                     arguments),
                 AssignExpr.Operator.ASSIGN));
     ASTTransforms.addStatementBeforeStatement(executeStmt, createPreparedStatement);
+    ASTTransforms.addImportIfMissing(cu, "java.sql.PreparedStatement");
 
     // (4)
-    ASTTransforms.addStatementBeforeStatement(executeStmt, buildForSetParameters(stmtName));
+    ASTTransforms.addStatementBeforeStatement(
+        executeStmt,
+        buildForSetParameters(
+            new EnclosedExpr(
+                new CastExpr(
+                    StaticJavaParser.parseType("PreparedStatement"), new NameExpr(stmtName)))));
 
     // (5)
     executeCall.setName("execute");
@@ -410,7 +456,7 @@ final class SQLParameterizer {
     if (isParameterizationCandidate(methodCallExpr)
         && validateExecuteCall(methodCallExpr).isPresent()) {
       // Now find the stmt creation expression, if any
-      final var stmtObject = findAndValidateStatementCreation(methodCallExpr);
+      final var stmtObject = findStatementCreationExpr(methodCallExpr);
       // Now look for injections
       final var injections =
           new QueryParameterizer(methodCallExpr.getArgument(0)).checkAndGatherParameters();
