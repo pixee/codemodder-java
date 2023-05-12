@@ -1,6 +1,7 @@
 package io.codemodder.plugins.maven;
 
 import com.github.difflib.DiffUtils;
+import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
 import io.codemodder.DependencyGAV;
@@ -170,7 +171,11 @@ public final class MavenProvider implements ProjectProvider {
       int position = 1 + delta.getSource().getPosition();
 
       CodeTFChange change = new CodeTFChange(position, Collections.emptyMap(), "", List.of(), null);
-      String diff = DiffUtils.diff(originalPomContents, finalPomContents).toString();
+      List<String> patchDiff =
+          UnifiedDiffUtils.generateUnifiedDiff(
+              pomPath.toString(), pomPath.toString(), originalPomContents, patch, 3);
+
+      String diff = String.join("\n", patchDiff);
       CodeTFChangesetEntry entry =
           new CodeTFChangesetEntry(
               projectDir.relativize(pomPath).toString(), diff, List.of(change));
