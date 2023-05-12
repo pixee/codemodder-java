@@ -2,6 +2,7 @@ package com.acme.testcode;
 
 import java.lang.StringBuilder;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -12,7 +13,7 @@ public final class Test {
 
   private Connection conn;
 
-  public ResultSet doUserLookup_single_concat_single_quote(String input) throws SQLException {
+  public ResultSet indirectStatement(String input) throws SQLException {
     ArrayList<StringBuilder> parameters = new ArrayList<StringBuilder>();
     for (int i = 0; i < 1; i++) {
         parameters.add(new StringBuilder());
@@ -29,5 +30,23 @@ public final class Test {
         ((PreparedStatement) stmt).setString(i, parameters.get(i + 1).toString());
     }
     return ((PreparedStatement) stmt).execute();
+  }
+
+  public ResultSet directStatement(String input) throws SQLException {
+    ArrayList<StringBuilder> parameters = new ArrayList<StringBuilder>();
+    for (int i = 0; i < 1; i++) {
+        parameters.add(new StringBuilder());
+    }
+    BiFunction<Object, Integer, String> addAndReturnEmpty = ( expression,  position) -> {
+        parameters.get(position).append(expression + "");
+        return "";
+    };
+    String sql = "SELECT * FROM USERS WHERE USER = ?" + addAndReturnEmpty.apply(input, 0) + "";
+    PreparedStatement preparedStatement = conn.prepareStatement(sql);
+    for (int i = 0; i < parameters.size(); i++) {
+        preparedStatement.setString(i, parameters.get(i + 1).toString());
+    }
+    var rs = preparedStatement.execute();
+    return rs;
   }
 }
