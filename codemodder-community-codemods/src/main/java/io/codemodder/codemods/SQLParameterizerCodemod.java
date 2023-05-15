@@ -16,7 +16,7 @@ public final class SQLParameterizerCodemod implements JavaParserChanger {
       final CodemodInvocationContext context,
       final MethodCallExpr methodCallExpr,
       final CompilationUnit cu) {
-    if (new SQLParameterizer().checkAndFix(methodCallExpr)) {
+    if (new SQLParameterizer(methodCallExpr).checkAndFix()) {
       return Optional.of(Weave.from(methodCallExpr.getBegin().get().line, context.codemodId()));
     } else {
       return Optional.empty();
