@@ -40,11 +40,11 @@ final class SQLParameterizer {
   public static final String parameterVectorName = "parameters";
   public static final String preparedStatementName = "preparedStatement";
 
-  final MethodCallExpr executeCall;
+  private final MethodCallExpr executeCall;
 
-  CompilationUnit compilationUnit;
+  private CompilationUnit compilationUnit;
 
-  BlockStmt methodBody;
+  private BlockStmt methodBody;
 
   SQLParameterizer(final MethodCallExpr methodCallExpr) {
     this.executeCall = Objects.requireNonNull(methodCallExpr);
