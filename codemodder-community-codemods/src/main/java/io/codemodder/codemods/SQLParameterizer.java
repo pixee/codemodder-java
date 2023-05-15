@@ -1,6 +1,7 @@
 package io.codemodder.codemods;
 
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -26,8 +27,10 @@ import com.github.javaparser.resolution.UnsolvedSymbolException;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
+import io.codemodder.ast.TryResourceDeclaration;
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -36,6 +39,18 @@ final class SQLParameterizer {
   public static final String lambdaName = "addAndReturnEmpty";
   public static final String parameterVectorName = "parameters";
   public static final String preparedStatementName = "preparedStatement";
+
+  final MethodCallExpr executeCall;
+
+  CompilationUnit compilationUnit;
+
+  BlockStmt methodBody;
+
+  SQLParameterizer(final MethodCallExpr methodCallExpr) {
+    this.executeCall = Objects.requireNonNull(methodCallExpr);
+    this.compilationUnit = null;
+    this.methodBody = null;
+  }
 
   /**
    * Checks if the {@link MethodCallExpr} is of one of the execute calls of {@link
@@ -63,7 +78,6 @@ final class SQLParameterizer {
           n ->
               n.getArguments().getFirst().map(e -> !(e instanceof StringLiteralExpr)).orElse(false);
 
-      // java/sql/Statement.executeQuery(Ljava/lang/String;)Ljava/sql/ResultSet;:0 ...
       final Predicate<MethodCallExpr> rule1 =
           isExecute.and(hasScopeSQLStatement.and(isFirstArgumentNotSLE));
       return rule1.test(methodCallExpr);
@@ -94,7 +108,7 @@ final class SQLParameterizer {
       methodCall = maybeCall.orElse(methodCall);
     }
     // We require the call to be the first evaluated expression of its statement.
-    // For that, we look into a few common patterns
+    // We're not sure how to do it yet, so we use a whitelist of common patterns
     // var rs = stmt.executeQuery()
     final Predicate<MethodCallExpr> isLocalInitExpr =
         call ->
@@ -108,7 +122,26 @@ final class SQLParameterizer {
     // stmt.executeQuery()
     final Predicate<MethodCallExpr> isCall =
         call -> call.getParentNode().filter(p -> p instanceof ExpressionStmt).isPresent();
-    if (isLocalInitExpr.or(isAssigned).or(isReturned).or(isCall).test(executeCall)) {
+    // TODO test this
+    // try(ResultSet rs = conn.createStatement().executeQuery())
+    final Predicate<MethodCallExpr> isFirstTryResource =
+        call ->
+            ASTs.isInitExpr(executeCall)
+                .flatMap(ASTs::isResource)
+                .flatMap(
+                    pair ->
+                        pair.getValue0()
+                            .getResources()
+                            .getFirst()
+                            .filter(r -> r == pair.getValue1()))
+                .isPresent();
+
+    if (isLocalInitExpr
+        .or(isAssigned)
+        .or(isReturned)
+        .or(isCall)
+        .or(isFirstTryResource)
+        .test(executeCall)) {
       return Optional.of(executeCall);
     } else {
       return Optional.empty();
@@ -147,6 +180,16 @@ final class SQLParameterizer {
     return maybeImmediate.or(() -> maybeLVD);
   }
 
+  private Optional<Either<MethodCallExpr, LocalVariableDeclaration>> validateStatementCreationExpr(
+      Either<MethodCallExpr, LocalVariableDeclaration> stmtObject) {
+    if (stmtObject.isRight()
+        && stmtObject.getRight() instanceof TryResourceDeclaration
+        && !validateTryResource((TryResourceDeclaration) stmtObject.getRight(), executeCall)) {
+      return Optional.empty();
+    }
+    return Optional.of(stmtObject);
+  }
+
   /** Checks if a local declaration can change types to a subtype. */
   private boolean canChangeTypes(final LocalVariableDeclaration localDeclaration) {
     final var allNameExpr =
@@ -168,37 +211,49 @@ final class SQLParameterizer {
    * The Statement object must be able to change types and have the form <conn>.createStatement(),
    * where <conn> is an expression with Connection.
    */
-  private Optional<Either<MethodCallExpr, LocalVariableDeclaration>>
-      findAndValidateStatementCreation(final MethodCallExpr executeCall) {
-    final var maybeExprOrVar = findStatementCreationExpr(executeCall);
-    // If it is an immediate expression, all is good, otherwise, the local declaration must hold:
-    // (1) Can change types to a subtype
-    // If type is already PreparedStatement it's unlikely to be fixable (unlikely to appear,
-    // unsupported)
-    return maybeExprOrVar.filter(
-        either ->
-            either.isLeft()
-                || either.isRight() && either.mapRight(this::canChangeTypes).getRight());
-    // .filter(
-    //    either ->
-    //        either.isRight()
-    //            && either.mapRight(lvd -> ASTs.isFinalOrNeverAssigned(lvd)).getRight());
-  }
-
-  private void fixStmtCreationExpr(final MethodCallExpr stmtCreationExpr) {
-    stmtCreationExpr.setName("prepareStatement");
-    stmtCreationExpr.setArguments(new NodeList<>());
-  }
-
-  private void fixStatementDeclaration(final LocalVariableDeclaration stmtDeclaration) {
-    if (stmtDeclaration.getVariableDeclarationExpr().getVariables().size() == 1) {
-      final var vd = stmtDeclaration.getVariableDeclarator();
-      vd.setType("PreparedStatement");
-      ASTTransforms.addImportIfMissing(
-          vd.findCompilationUnit().get(), "java.sql.PreparedStatement");
-      // vd.getInitializer().ifPresent(init -> fixStmtCreationExpr(init.asMethodCallExpr()));
+  private boolean validateTryResource(
+      final TryResourceDeclaration stmtObject, final MethodCallExpr executeCall) {
+    // We first look if we can change the resource type to PreparedStatement
+    if (!canChangeTypes(stmtObject)) {
+      return false;
     }
-    // TODO if multiple declarations, split before
+    // Essentially, we want the resource and call to be "next" to each other
+    // (1) stmt resource is last and executeCall statement is the first on the try block
+    var maybeLastResource =
+        stmtObject
+            .getStatement()
+            .getResources()
+            .getLast()
+            .filter(last -> last == stmtObject.getVariableDeclarationExpr());
+    if (maybeLastResource.isPresent()
+        && stmtObject
+            .getStatement()
+            .getTryBlock()
+            .getStatements()
+            .getFirst()
+            .filter(
+                first ->
+                    ASTs.findParentStatementFrom(executeCall).filter(s -> s == first).isPresent())
+            .isPresent()) {
+      return true;
+    }
+    // (2) executeCall is an init expression of another resource next to stmtObject
+    var maybeInit =
+        ASTs.isInitExpr(executeCall)
+            .flatMap(LocalVariableDeclaration::fromVariableDeclarator)
+            .map(lvd -> lvd instanceof TryResourceDeclaration ? (TryResourceDeclaration) lvd : null)
+            .filter(trd -> trd.getStatement() == stmtObject.getStatement());
+    if (maybeInit.isPresent()) {
+      int stmtObjectIndex =
+          stmtObject.getStatement().getResources().indexOf(stmtObject.getVariableDeclarationExpr());
+      int executeIndex =
+          stmtObject
+              .getStatement()
+              .getResources()
+              .indexOf(maybeInit.get().getVariableDeclarationExpr());
+      return Math.abs(executeIndex - stmtObjectIndex) == 1;
+    }
+    return false;
   }
 
   private ExpressionStmt buildLambda() {
@@ -240,7 +295,19 @@ final class SQLParameterizer {
   }
 
   private String generateId() {
-    return "";
+    return executeCall
+        .getRange()
+        .map(
+            range ->
+                "l"
+                    + range.begin.line
+                    + "c"
+                    + range.begin.column
+                    + "l"
+                    + range.end.line
+                    + "c"
+                    + range.end.column)
+        .orElse("");
   }
 
   private void fixInjections(final List<Deque<Expression>> injections) {
@@ -302,6 +369,16 @@ final class SQLParameterizer {
     return StaticJavaParser.parseStatement(forParameters + "{\n" + parameterSetStatement + ";\n}");
   }
 
+  private void createLambdaAndParameterVector(final int vectorSize) {
+    ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), buildLambda());
+    buildAndInitializeVector(vectorSize)
+            .forEach(s -> ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), s));
+
+    ASTTransforms.addImportIfMissing(this.compilationUnit, "java.util.ArrayList");
+    ASTTransforms.addImportIfMissing(this.compilationUnit, "java.util.BiFunction");
+    ASTTransforms.addImportIfMissing(this.compilationUnit, "java.lang.StringBuilder");
+  }
+
   /**
    * The fix consists of the following:
    *
@@ -321,19 +398,10 @@ final class SQLParameterizer {
       final Expression root,
       final MethodCallExpr executeCall) {
 
-    final var cu = executeCall.findCompilationUnit().get();
     final var stmtName = preparedStatementName + generateId();
 
     // (1)
-    final var methodBody =
-        ASTs.findMethodBodyFrom(executeCall).flatMap(MethodDeclaration::getBody).get();
-    ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), buildLambda());
-    buildAndInitializeVector(injections.size())
-        .forEach(s -> ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), s));
-
-    ASTTransforms.addImportIfMissing(cu, "java.util.ArrayList");
-    ASTTransforms.addImportIfMissing(cu, "java.util.BiFunction");
-    ASTTransforms.addImportIfMissing(cu, "java.lang.StringBuilder");
+    createLambdaAndParameterVector(injections.size());
 
     // (2)
     fixInjections(injections);
@@ -356,7 +424,7 @@ final class SQLParameterizer {
                     stmtName,
                     prepareStatementCall)));
     ASTTransforms.addStatementBeforeStatement(executeStmt, createPreparedStatement);
-    ASTTransforms.addImportIfMissing(cu, "java.sql.PreparedStatement");
+    ASTTransforms.addImportIfMissing(this.compilationUnit, "java.sql.PreparedStatement");
 
     // (4)
     ASTTransforms.addStatementBeforeStatement(
@@ -373,7 +441,76 @@ final class SQLParameterizer {
    *
    * <p>(1) Create the parameter vector and lambda at method start;
    *
-   * <p>(2) Replace injectable expressions lambda call;
+   * <p>(2) Replace injectable expressions with lambda call;
+   *
+   * <p>(3) Change Statement type to PreparedStatement and createStatement() to prepareStatement();
+   *
+   * <p>(3.b) If the execute call is the following resource, break the try into two statements;
+   *
+   * <p>(4) Create a for including parameters in the parameter vector;
+   *
+   * <p>(5) Change executeCall() to execute().
+   */
+  private void fix(
+      final TryResourceDeclaration stmtCreation,
+      final List<Deque<Expression>> injections,
+      final Expression root,
+      final MethodCallExpr executeCall) {
+    final var stmtName = stmtCreation.getName();
+    // (1)
+    createLambdaAndParameterVector(injections.size());
+
+    // (2)
+    fixInjections(injections);
+
+    // (3)
+    stmtCreation.getVariableDeclarator().setType(StaticJavaParser.parseType("PreparedStatement"));
+    final var arguments = new NodeList<>(root);
+    stmtCreation.getVariableDeclarator().getInitializer().stream()
+        .flatMap(init -> init.asMethodCallExpr().getArguments().stream())
+        .forEach(arguments::add);
+    stmtCreation
+        .getVariableDeclarator()
+        .getInitializer()
+        .ifPresent(expr -> expr.asMethodCallExpr().setName("prepareStatement"));
+    stmtCreation
+        .getVariableDeclarator()
+        .getInitializer()
+        .ifPresent(expr -> expr.asMethodCallExpr().setArguments(arguments));
+    // (3.b)
+    var executeStmt = ASTs.findParentStatementFrom(executeCall).get();
+    if (executeStmt == stmtCreation.getStatement()) {
+      int stmtObjectIndex =
+          stmtCreation
+              .getStatement()
+              .getResources()
+              .indexOf(stmtCreation.getVariableDeclarationExpr());
+
+      executeStmt =
+          ASTTransforms.splitResources(stmtCreation.getStatement(), stmtObjectIndex)
+              .getTryBlock()
+              .getStatement(0);
+    }
+
+    // (4)
+    ASTTransforms.addStatementBeforeStatement(
+        executeStmt, buildForSetParameters(new NameExpr(stmtName)));
+
+    // (5)
+    executeCall.setName("execute");
+    executeCall.setScope(
+        new EnclosedExpr(
+            (new CastExpr(
+                StaticJavaParser.parseType("PreparedStatement"), executeCall.getScope().get()))));
+    executeCall.setArguments(new NodeList<>());
+  }
+
+  /**
+   * The fix consists of the following:
+   *
+   * <p>(1) Create the parameter vector and lambda at method start;
+   *
+   * <p>(2) Replace injectable expressions with lambda call;
    *
    * <p>(3) create a new PreparedStatement right before call;
    *
@@ -386,22 +523,12 @@ final class SQLParameterizer {
       final List<Deque<Expression>> injections,
       final Expression root,
       final MethodCallExpr executeCall) {
-    final var cu = executeCall.findCompilationUnit().get();
-    // TODO three cases (a) direct call, (b) indirect call, (c) indirect call with try declaration
     // TODO remove fors if there is a single expression injection
 
     final var stmtName = stmtCreation.getName();
 
     // (1)
-    final var methodBody =
-        ASTs.findMethodBodyFrom(executeCall).flatMap(MethodDeclaration::getBody).get();
-    ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), buildLambda());
-    buildAndInitializeVector(injections.size())
-        .forEach(s -> ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), s));
-
-    ASTTransforms.addImportIfMissing(cu, "java.util.ArrayList");
-    ASTTransforms.addImportIfMissing(cu, "java.util.BiFunction");
-    ASTTransforms.addImportIfMissing(cu, "java.lang.StringBuilder");
+    createLambdaAndParameterVector(injections.size());
 
     // (2)
     fixInjections(injections);
@@ -428,7 +555,7 @@ final class SQLParameterizer {
                     arguments),
                 AssignExpr.Operator.ASSIGN));
     ASTTransforms.addStatementBeforeStatement(executeStmt, createPreparedStatement);
-    ASTTransforms.addImportIfMissing(cu, "java.sql.PreparedStatement");
+    ASTTransforms.addImportIfMissing(this.compilationUnit, "java.sql.PreparedStatement");
 
     // (4)
     ASTTransforms.addStatementBeforeStatement(
@@ -447,29 +574,44 @@ final class SQLParameterizer {
     executeCall.setArguments(new NodeList<>());
   }
 
-  public boolean isVulnerableCall(final MethodCallExpr executeCall) {
-    return false;
-  }
+  public boolean checkAndFix() {
 
-  public boolean checkAndFix(final MethodCallExpr methodCallExpr) {
+    var maybeMethodBody = ASTs.findMethodBodyFrom(executeCall).flatMap(MethodDeclaration::getBody);
+    if(executeCall.findCompilationUnit().isPresent() && maybeMethodBody.isPresent()){
+      this.compilationUnit = executeCall.findCompilationUnit().get();
+      this.methodBody = maybeMethodBody.get();
+    }
+    else{
+      return false;
+    }
     // validate the call itself first
-    if (isParameterizationCandidate(methodCallExpr)
-        && validateExecuteCall(methodCallExpr).isPresent()) {
-      // Now find the stmt creation expression, if any
-      final var stmtObject = findStatementCreationExpr(methodCallExpr);
-      // Now look for injections
-      final var injections =
-          new QueryParameterizer(methodCallExpr.getArgument(0)).checkAndGatherParameters();
-      if (injections.isEmpty()) {
-        return false;
+    if (isParameterizationCandidate(executeCall) && validateExecuteCall(executeCall).isPresent()) {
+      // Now find the stmt creation expression, if any and validate it
+      final var stmtObject =
+          findStatementCreationExpr(executeCall).flatMap(this::validateStatementCreationExpr);
+      if (stmtObject.isPresent()) {
+        // Now look for injections
+        final var injections =
+            new QueryParameterizer(executeCall.getArgument(0)).checkAndGatherParameters();
+        if (injections.isEmpty()) {
+          return false;
+        }
+        if (stmtObject.get().isLeft()) {
+          fix(stmtObject.get().getLeft(), injections, executeCall.getArgument(0), executeCall);
+        } else {
+          if (stmtObject.get().getRight() instanceof TryResourceDeclaration) {
+            fix(
+                (TryResourceDeclaration) stmtObject.get().getRight(),
+                injections,
+                executeCall.getArgument(0),
+                executeCall);
+
+          } else {
+            fix(stmtObject.get().getRight(), injections, executeCall.getArgument(0), executeCall);
+          }
+        }
+        return true;
       }
-      // Finally apply fix
-      stmtObject.ifPresent(
-          e ->
-              e.ifPresentOrElse(
-                  call -> fix(call, injections, methodCallExpr.getArgument(0), methodCallExpr),
-                  lvd -> fix(lvd, injections, methodCallExpr.getArgument(0), methodCallExpr)));
-      return stmtObject.isPresent();
     }
     return false;
   }

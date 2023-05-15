@@ -20,4 +20,11 @@ public final class Test {
     var rs = conn.createStatement().executeQuery(sql);
     return rs;
   }
+
+  public ResultSet tryResource(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    try(Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
+      return rs;
+    }
+  }
 }

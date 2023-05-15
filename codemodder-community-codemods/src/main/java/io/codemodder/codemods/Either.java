@@ -66,8 +66,7 @@ class Either<L, R> {
   }
 
   public static <L, R> Either<L, R> fromOptional(Optional<L> maybe, R orElse) {
-    if (maybe.isPresent()) return Either.left(maybe.get());
-    else return Either.right(orElse);
+    return maybe.<Either<L, R>>map(Either::left).orElseGet(() -> Either.right(orElse));
   }
 
   public Either<L, R> filter(Predicate<L> pred, R orElse) {
@@ -77,7 +76,7 @@ class Either<L, R> {
     } else return this;
   }
 
-  public void ifPresentOrElse(Consumer<? super L> leftAction, Consumer<? super R> rightAction) {
+  public void ifLeftOrElse(Consumer<? super L> leftAction, Consumer<? super R> rightAction) {
     if (isLeft()) {
       leftAction.accept(getLeft());
     } else {
