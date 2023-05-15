@@ -372,7 +372,7 @@ final class SQLParameterizer {
   private void createLambdaAndParameterVector(final int vectorSize) {
     ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), buildLambda());
     buildAndInitializeVector(vectorSize)
-            .forEach(s -> ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), s));
+        .forEach(s -> ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), s));
 
     ASTTransforms.addImportIfMissing(this.compilationUnit, "java.util.ArrayList");
     ASTTransforms.addImportIfMissing(this.compilationUnit, "java.util.BiFunction");
@@ -577,11 +577,10 @@ final class SQLParameterizer {
   public boolean checkAndFix() {
 
     var maybeMethodBody = ASTs.findMethodBodyFrom(executeCall).flatMap(MethodDeclaration::getBody);
-    if(executeCall.findCompilationUnit().isPresent() && maybeMethodBody.isPresent()){
+    if (executeCall.findCompilationUnit().isPresent() && maybeMethodBody.isPresent()) {
       this.compilationUnit = executeCall.findCompilationUnit().get();
       this.methodBody = maybeMethodBody.get();
-    }
-    else{
+    } else {
       return false;
     }
     // validate the call itself first

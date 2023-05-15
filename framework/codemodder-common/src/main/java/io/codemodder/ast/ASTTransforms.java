@@ -27,7 +27,9 @@ public final class ASTTransforms {
   }
 
   private static boolean addInOrdrerIfNeeded(
-      final String className, final NodeList<ImportDeclaration> imports, final ImportDeclaration newImport) {
+      final String className,
+      final NodeList<ImportDeclaration> imports,
+      final ImportDeclaration newImport) {
     if (imports.contains(newImport)) {
       return true;
     }
@@ -133,7 +135,9 @@ public final class ASTTransforms {
    * its scope, then wrap the declaration into as a resource of a try stmt.
    */
   public static TryStmt wrapIntoResource(
-      final ExpressionStmt stmt, final VariableDeclarationExpr vdecl, final LocalVariableScope scope) {
+      final ExpressionStmt stmt,
+      final VariableDeclarationExpr vdecl,
+      final LocalVariableScope scope) {
     final var wrapper = new TryStmt();
     wrapper.getResources().add(vdecl);
 
