@@ -24,6 +24,7 @@ import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.UnknownType;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
+import io.codemodder.Either;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
@@ -36,9 +37,9 @@ import java.util.function.Predicate;
 
 final class SQLParameterizer {
 
-  public static final String lambdaName = "addAndReturnEmpty";
-  public static final String parameterVectorName = "parameters";
-  public static final String preparedStatementName = "preparedStatement";
+  private static final String lambdaName = "addAndReturnEmpty";
+  private static final String parameterVectorName = "parameters";
+  private static final String preparedStatementName = "preparedStatement";
 
   private final MethodCallExpr executeCall;
 
