@@ -24,14 +24,14 @@ final class QueryParameterizer {
 
   List<Deque<Expression>> checkAndGatherParameters() {
     final var leaves = findLeaves(root).collect(Collectors.toCollection(ArrayDeque::new));
-    if (hasInjections(leaves) >= 1) {
+    if (countInjections(leaves) >= 1) {
       return gatherParameters(leaves);
     } else {
       return List.of();
     }
   }
 
-  public Expression getRoot() {
+  Expression getRoot() {
     return root;
   }
 
@@ -104,7 +104,7 @@ final class QueryParameterizer {
    * Checks if the deque containing the leaves of a query expression has any valid injection pattern
    * and no dangling quotes.
    */
-  int hasInjections(final Deque<Expression> query) {
+  int countInjections(final Deque<Expression> query) {
     int count = 0;
     final var iterator = query.iterator();
     Expression start = null;
@@ -165,7 +165,11 @@ final class QueryParameterizer {
             "java.time.OffsetTime",
             "java.time.OffsetDateTime",
             "java.net.URL");
-    for (final var t : blacklist) if (type.describe().equals(t)) return false;
+    for (final var t : blacklist) {
+      if (type.describe().equals(t)) {
+        return false;
+      }
+    }
     return true;
   }
 
