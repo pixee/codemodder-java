@@ -21,6 +21,14 @@ public final class Test {
     return rs;
   }
 
+  public ResultSet nameConflict(String input) throws SQLException {
+    int i = 0;
+    int parameters = 1;
+    String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    var rs = conn.createStatement().executeQuery(sql);
+    return rs;
+  }
+
   public ResultSet tryResource(String input) throws SQLException {
     String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
     try(Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){

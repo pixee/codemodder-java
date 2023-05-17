@@ -2,6 +2,7 @@ package io.codemodder.codemods;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -16,6 +17,7 @@ import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -37,9 +39,9 @@ import java.util.function.Predicate;
 
 final class SQLParameterizer {
 
-  private static final String lambdaName = "addAndReturnEmpty";
-  private static final String parameterVectorName = "parameters";
-  private static final String preparedStatementName = "preparedStatement";
+  private static final String lambdaNamePrefix = "addAndReturnEmpty";
+  private static final String parameterVectorNamePrefix = "parameters";
+  private static final String preparedStatementNamePrefix = "preparedStatement";
 
   private final MethodCallExpr executeCall;
 
@@ -257,9 +259,9 @@ final class SQLParameterizer {
     return false;
   }
 
-  private ExpressionStmt buildLambda() {
-    final var stringParameter = "expression" + generateId();
-    final var intParameter = "position" + generateId();
+  private ExpressionStmt buildLambda(final String parameterVectorName, final String lambdaName) {
+    final var stringParameter = generateNameWithSuffixFor("expression", methodBody);
+    final var intParameter = generateNameWithSuffixFor("position", methodBody);
     final NodeList<Parameter> parameters = new NodeList<>();
     parameters.add(new Parameter(new UnknownType(), stringParameter));
     parameters.add(new Parameter(new UnknownType(), intParameter));
@@ -289,29 +291,32 @@ final class SQLParameterizer {
 
     final var lambdaDecl =
         new VariableDeclarator(
-            StaticJavaParser.parseType("BiFunction<Object,Integer,String>"),
-            lambdaName + generateId(),
-            lambda);
+            StaticJavaParser.parseType("BiFunction<Object,Integer,String>"), lambdaName, lambda);
     return new ExpressionStmt(new VariableDeclarationExpr(lambdaDecl));
   }
 
-  private String generateId() {
-    return executeCall
-        .getRange()
-        .map(
-            range ->
-                "l"
-                    + range.begin.line
-                    + "c"
-                    + range.begin.column
-                    + "l"
-                    + range.end.line
-                    + "c"
-                    + range.end.column)
-        .orElse("");
+  private String generateNameWithSuffix(String name, Node start) {
+    var allRef = start.findAll(SimpleName.class, n -> n.asString().equals(name));
+    int count = 0;
+    while (!allRef.isEmpty()) {
+      count++;
+      String nameWithSuffix = name + count;
+      allRef = start.findAll(SimpleName.class, n -> n.asString().equals(nameWithSuffix));
+    }
+    return count == 0 ? name : name + count;
   }
 
-  private void fixInjections(final List<Deque<Expression>> injections) {
+  private String generateNameWithSuffixFor(String name, Node start) {
+    var maybeDecl = ASTs.findNonCallableSimpleNameSource(start, name);
+    int count = 0;
+    while (maybeDecl.isPresent()) {
+      count++;
+      maybeDecl = ASTs.findNonCallableSimpleNameSource(start, name + count);
+    }
+    return count == 0 ? name : name + count;
+  }
+
+  private void fixInjections(final List<Deque<Expression>> injections, final String lambdaName) {
     int count = 0;
     for (final var injection : injections) {
       // TODO collapse here when size == 1
@@ -329,20 +334,20 @@ final class SQLParameterizer {
         final var newExpr = new MethodCallExpr();
         expr.replace(newExpr);
         newExpr.setName("apply");
-        newExpr.setScope(new NameExpr(lambdaName + generateId()));
+        newExpr.setScope(new NameExpr(lambdaName));
         newExpr.setArguments(new NodeList<>(expr, new IntegerLiteralExpr(String.valueOf(count))));
       }
       count++;
     }
   }
 
-  private List<Statement> buildAndInitializeVector(final int nInjections) {
+  private List<Statement> buildAndInitializeVector(
+      final int nInjections, final String parameterVectorName, final String forInitName) {
     final var parameterVectorType = StaticJavaParser.parseType("ArrayList<StringBuilder>");
-
     final var parameterInitialization =
-        String.format("for(int %1$s=0; %1$s < %2$s; %1$s++)", "i" + generateId(), nInjections)
+        String.format("for(int %1$s=0; %1$s < %2$s; %1$s++)", forInitName, nInjections)
             + "{\n"
-            + String.format("%1$s.add(new StringBuilder())", parameterVectorName + generateId())
+            + String.format("%1$s.add(new StringBuilder())", parameterVectorName)
             + ";\n}";
     final var parameterVectorCreation =
         new ObjectCreationExpr(
@@ -351,28 +356,31 @@ final class SQLParameterizer {
         new ExpressionStmt(
             new VariableDeclarationExpr(
                 new VariableDeclarator(
-                    parameterVectorType,
-                    parameterVectorName + generateId(),
-                    parameterVectorCreation)));
+                    parameterVectorType, parameterVectorName, parameterVectorCreation)));
     return List.of(StaticJavaParser.parseStatement(parameterInitialization), parameterDecl);
   }
 
-  private Statement buildForSetParameters(final Expression scope) {
+  private Statement buildForSetParameters(
+      final Expression scope, final String parameterVectorName, final String forInitName) {
     // for(int i = 0; i<parameters.size(); i++){ stmt.setString(i, parameters.get(i+1).toString())}
     final var parameterSetStatement =
         String.format(
             "%3$s.setString(%1$s ,%2$s.get(%1$s + 1).toString())",
-            "i" + generateId(), parameterVectorName + generateId(), scope);
+            forInitName, parameterVectorName, scope);
     final var forParameters =
         String.format(
-            "for(int %1$s=0; %1$s< %2$s.size(); %1$s++)",
-            "i" + generateId(), parameterVectorName + generateId());
+            "for(int %1$s=0; %1$s< %2$s.size(); %1$s++)", forInitName, parameterVectorName);
     return StaticJavaParser.parseStatement(forParameters + "{\n" + parameterSetStatement + ";\n}");
   }
 
-  private void createLambdaAndParameterVector(final int vectorSize) {
-    ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), buildLambda());
-    buildAndInitializeVector(vectorSize)
+  private void createLambdaAndParameterVector(
+      final int vectorSize,
+      final String parameterVectorName,
+      final String lambdaName,
+      final String forInitName) {
+    ASTTransforms.addStatementBeforeStatement(
+        methodBody.getStatement(0), buildLambda(parameterVectorName, lambdaName));
+    buildAndInitializeVector(vectorSize, parameterVectorName, forInitName)
         .forEach(s -> ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), s));
 
     ASTTransforms.addImportIfMissing(this.compilationUnit, "java.util.ArrayList");
@@ -399,13 +407,19 @@ final class SQLParameterizer {
       final Expression root,
       final MethodCallExpr executeCall) {
 
-    final var stmtName = preparedStatementName + generateId();
+    final String stmtName = generateNameWithSuffix(preparedStatementNamePrefix, executeCall);
+    final String parameterVectorName =
+        generateNameWithSuffix(parameterVectorNamePrefix, methodBody);
+    final String lambdaName = generateNameWithSuffix(lambdaNamePrefix, methodBody);
+    final String parameterForInitName = generateNameWithSuffixFor("i", methodBody);
+    final String setForInitName = generateNameWithSuffixFor("i", executeCall);
 
     // (1)
-    createLambdaAndParameterVector(injections.size());
+    createLambdaAndParameterVector(
+        injections.size(), parameterVectorName, lambdaName, parameterForInitName);
 
     // (2)
-    fixInjections(injections);
+    fixInjections(injections, lambdaName);
 
     // (3)
     final var executeStmt = ASTs.findParentStatementFrom(executeCall).get();
@@ -429,7 +443,8 @@ final class SQLParameterizer {
 
     // (4)
     ASTTransforms.addStatementBeforeStatement(
-        executeStmt, buildForSetParameters(new NameExpr(stmtName)));
+        executeStmt,
+        buildForSetParameters(new NameExpr(stmtName), parameterVectorName, setForInitName));
 
     // (5)
     executeCall.setName("execute");
@@ -457,12 +472,18 @@ final class SQLParameterizer {
       final List<Deque<Expression>> injections,
       final Expression root,
       final MethodCallExpr executeCall) {
-    final var stmtName = stmtCreation.getName();
+    final String stmtName = stmtCreation.getName();
+    final String parameterVectorName =
+        generateNameWithSuffix(parameterVectorNamePrefix, executeCall);
+    final String lambdaName = generateNameWithSuffix(lambdaNamePrefix, methodBody);
+    final String parameterForInitName = generateNameWithSuffixFor("i", methodBody);
+    final String setForInitName = generateNameWithSuffixFor("i", executeCall);
     // (1)
-    createLambdaAndParameterVector(injections.size());
+    createLambdaAndParameterVector(
+        injections.size(), parameterVectorName, lambdaName, parameterForInitName);
 
     // (2)
-    fixInjections(injections);
+    fixInjections(injections, lambdaName);
 
     // (3)
     stmtCreation.getVariableDeclarator().setType(StaticJavaParser.parseType("PreparedStatement"));
@@ -495,7 +516,8 @@ final class SQLParameterizer {
 
     // (4)
     ASTTransforms.addStatementBeforeStatement(
-        executeStmt, buildForSetParameters(new NameExpr(stmtName)));
+        executeStmt,
+        buildForSetParameters(new NameExpr(stmtName), parameterVectorName, setForInitName));
 
     // (5)
     executeCall.setName("execute");
@@ -527,12 +549,18 @@ final class SQLParameterizer {
     // TODO remove fors if there is a single expression injection
 
     final var stmtName = stmtCreation.getName();
+    final String parameterVectorName =
+        generateNameWithSuffix(parameterVectorNamePrefix, executeCall);
+    final String lambdaName = generateNameWithSuffix(lambdaNamePrefix, methodBody);
+    final String parameterForInitName = generateNameWithSuffixFor("i", methodBody);
+    final String setForInitName = generateNameWithSuffixFor("i", executeCall);
 
     // (1)
-    createLambdaAndParameterVector(injections.size());
+    createLambdaAndParameterVector(
+        injections.size(), parameterVectorName, lambdaName, parameterForInitName);
 
     // (2)
-    fixInjections(injections);
+    fixInjections(injections, lambdaName);
 
     // (3)
     final var executeStmt = ASTs.findParentStatementFrom(executeCall).get();
@@ -564,7 +592,9 @@ final class SQLParameterizer {
         buildForSetParameters(
             new EnclosedExpr(
                 new CastExpr(
-                    StaticJavaParser.parseType("PreparedStatement"), new NameExpr(stmtName)))));
+                    StaticJavaParser.parseType("PreparedStatement"), new NameExpr(stmtName))),
+            parameterVectorName,
+            setForInitName));
 
     // (5)
     executeCall.setName("execute");

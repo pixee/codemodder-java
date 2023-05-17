@@ -6,6 +6,7 @@ import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.Optional;
 
+/** Fixes SQL injections in the java JDBC api. */
 @Codemod(
     id = "pixee:java/sql-parameterizer",
     author = "andre.silva@pixee.ai",
