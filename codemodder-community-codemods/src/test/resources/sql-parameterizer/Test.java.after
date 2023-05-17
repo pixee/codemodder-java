@@ -14,55 +14,75 @@ public final class Test {
   private Connection conn;
 
   public ResultSet indirectStatement(String input) throws SQLException {
-    ArrayList<StringBuilder> parametersl15c12l15c33 = new ArrayList<StringBuilder>();
-    for (int il15c12l15c33 = 0; il15c12l15c33 < 1; il15c12l15c33++) {
-        parametersl15c12l15c33.add(new StringBuilder());
+    ArrayList<StringBuilder> parameters = new ArrayList<StringBuilder>();
+    for (int i = 0; i < 1; i++) {
+        parameters.add(new StringBuilder());
     }
-    BiFunction<Object, Integer, String> addAndReturnEmptyl15c12l15c33 = ( expressionl15c12l15c33,  positionl15c12l15c33) -> {
-        parameters.get(positionl15c12l15c33).append(expressionl15c12l15c33 + "");
+    BiFunction<Object, Integer, String> addAndReturnEmpty = ( expression,  position) -> {
+        parameters.get(position).append(expression + "");
         return "";
     };
-    String sql = "SELECT * FROM USERS WHERE USER = ?" + addAndReturnEmptyl15c12l15c33.apply(input, 0) + "";
+    String sql = "SELECT * FROM USERS WHERE USER = ?" + addAndReturnEmpty.apply(input, 0) + "";
     Statement stmt = conn.createStatement();
     stmt.close();
     stmt = stmt.getConnection().prepareStatement(sql);
-    for (int il15c12l15c33 = 0; il15c12l15c33 < parametersl15c12l15c33.size(); il15c12l15c33++) {
-        ((PreparedStatement) stmt).setString(il15c12l15c33, parametersl15c12l15c33.get(il15c12l15c33 + 1).toString());
+    for (int i = 0; i < parameters.size(); i++) {
+        ((PreparedStatement) stmt).setString(i, parameters.get(i + 1).toString());
     }
     return ((PreparedStatement) stmt).execute();
   }
 
   public ResultSet directStatement(String input) throws SQLException {
-    ArrayList<StringBuilder> parametersl20c14l20c53 = new ArrayList<StringBuilder>();
-    for (int il20c14l20c53 = 0; il20c14l20c53 < 1; il20c14l20c53++) {
-        parametersl20c14l20c53.add(new StringBuilder());
+    ArrayList<StringBuilder> parameters = new ArrayList<StringBuilder>();
+    for (int i = 0; i < 1; i++) {
+        parameters.add(new StringBuilder());
     }
-    BiFunction<Object, Integer, String> addAndReturnEmptyl20c14l20c53 = ( expressionl20c14l20c53,  positionl20c14l20c53) -> {
-        parameters.get(positionl20c14l20c53).append(expressionl20c14l20c53 + "");
+    BiFunction<Object, Integer, String> addAndReturnEmpty = ( expression,  position) -> {
+        parameters.get(position).append(expression + "");
         return "";
     };
-    String sql = "SELECT * FROM USERS WHERE USER = ?" + addAndReturnEmptyl20c14l20c53.apply(input, 0) + "";
-    PreparedStatement preparedStatementl20c14l20c53 = conn.prepareStatement(sql);
-    for (int il20c14l20c53 = 0; il20c14l20c53 < parametersl20c14l20c53.size(); il20c14l20c53++) {
-        preparedStatementl20c14l20c53.setString(il20c14l20c53, parametersl20c14l20c53.get(il20c14l20c53 + 1).toString());
+    String sql = "SELECT * FROM USERS WHERE USER = ?" + addAndReturnEmpty.apply(input, 0) + "";
+    PreparedStatement preparedStatement = conn.prepareStatement(sql);
+    for (int i = 0; i < parameters.size(); i++) {
+        preparedStatement.setString(i, parameters.get(i + 1).toString());
     }
-    var rs = preparedStatementl20c14l20c53.execute();
+    var rs = preparedStatement.execute();
+    return rs;
+  }
+
+  public ResultSet nameConflict(String input) throws SQLException {
+    ArrayList<StringBuilder> parameters1 = new ArrayList<StringBuilder>();
+    for (int i = 0; i < 1; i++) {
+        parameters1.add(new StringBuilder());
+    }
+    BiFunction<Object, Integer, String> addAndReturnEmpty = ( expression,  position) -> {
+        parameters1.get(position).append(expression + "");
+        return "";
+    };
+    int i = 0;
+    int parameters = 1;
+    String sql = "SELECT * FROM USERS WHERE USER = ?" + addAndReturnEmpty.apply(input, 0) + "";
+    PreparedStatement preparedStatement = conn.prepareStatement(sql);
+    for (int i1 = 0; i1 < parameters1.size(); i1++) {
+        preparedStatement.setString(i1, parameters1.get(i1 + 1).toString());
+    }
+    var rs = preparedStatement.execute();
     return rs;
   }
 
   public ResultSet tryResource(String input) throws SQLException {
-    ArrayList<StringBuilder> parametersl26c65l26c86 = new ArrayList<StringBuilder>();
-    for (int il26c65l26c86 = 0; il26c65l26c86 < 1; il26c65l26c86++) {
-        parametersl26c65l26c86.add(new StringBuilder());
+    ArrayList<StringBuilder> parameters = new ArrayList<StringBuilder>();
+    for (int i = 0; i < 1; i++) {
+        parameters.add(new StringBuilder());
     }
-    BiFunction<Object, Integer, String> addAndReturnEmptyl26c65l26c86 = ( expressionl26c65l26c86,  positionl26c65l26c86) -> {
-        parameters.get(positionl26c65l26c86).append(expressionl26c65l26c86 + "");
+    BiFunction<Object, Integer, String> addAndReturnEmpty = ( expression,  position) -> {
+        parameters.get(position).append(expression + "");
         return "";
     };
-    String sql = "SELECT * FROM USERS WHERE USER = ?" + addAndReturnEmptyl26c65l26c86.apply(input, 0) + "";
+    String sql = "SELECT * FROM USERS WHERE USER = ?" + addAndReturnEmpty.apply(input, 0) + "";
     try(PreparedStatement stmt = conn.prepareStatement(sql) ){
-        for (int il26c65l26c86 = 0; il26c65l26c86 < parametersl26c65l26c86.size(); il26c65l26c86++) {
-            stmt.setString(il26c65l26c86, parametersl26c65l26c86.get(il26c65l26c86 + 1).toString());
+        for (int i = 0; i < parameters.size(); i++) {
+            stmt.setString(i, parameters.get(i + 1).toString());
         }
         try (ResultSet rs = ((PreparedStatement) stmt).execute()) {
       return rs;
