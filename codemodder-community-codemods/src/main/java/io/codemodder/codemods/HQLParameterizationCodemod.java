@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.javatuples.Pair;
 
+/** Parameterize possible injections for Hibernate queries. */
 @Codemod(
     id = "pixee:java/hql-parameterizer",
     author = "andre.silva@pixee.ai",
@@ -33,22 +34,13 @@ public final class HQLParameterizationCodemod implements JavaParserChanger {
       final MethodCallExpr methodCallExpr,
       final CompilationUnit cu) {
     if (isQueryCreation(methodCallExpr)) {
-      var queryParameterizer = new QueryParameterizer(methodCallExpr.getArgument(0));
+      final var queryParameterizer = new QueryParameterizer(methodCallExpr.getArgument(0));
       if (!queryParameterizer.getInjections().isEmpty()) {
         fix(methodCallExpr, queryParameterizer);
         return Optional.of(CodemodChange.from(methodCallExpr.getRange().get().begin.line));
       }
     }
     return Optional.empty();
-  }
-
-  public void removeMe(final MethodCallExpr methodCallExpr) {
-    if (isQueryCreation(methodCallExpr)) {
-      var queryParameterizer = new QueryParameterizer(methodCallExpr.getArgument(0));
-      if (!queryParameterizer.getInjections().isEmpty()) {
-        fix(methodCallExpr, queryParameterizer);
-      }
-    }
   }
 
   @Override
@@ -61,14 +53,14 @@ public final class HQLParameterizationCodemod implements JavaParserChanger {
 
   private static final String queryParameterNamePrefix = ":injParameter";
 
-  private boolean isQueryCreation(MethodCallExpr methodCallExpr) {
-    Predicate<MethodCallExpr> isQueryCall =
+  private boolean isQueryCreation(final MethodCallExpr methodCallExpr) {
+    final Predicate<MethodCallExpr> isQueryCall =
         mce ->
             mce.getNameAsString().equals("createQuery")
                 || mce.getNameAsString().equals("createNativeQuery");
     // TODO Removed for now as it's failing to properly resolve Session type here, look for
     // solutions
-    Predicate<MethodCallExpr> isQueryFactory =
+    final Predicate<MethodCallExpr> isQueryFactory =
         mce ->
             mce.getScope()
                 .filter(s -> s.calculateResolvedType().describe().equals("org.hibernate.Session"))
@@ -109,7 +101,7 @@ public final class HQLParameterizationCodemod implements JavaParserChanger {
 
   private Pair<List<Expression>, Expression> fixInjections(
       final List<Deque<Expression>> injections, Expression root) {
-    List<Expression> combinedExpressions = new ArrayList<>();
+    final List<Expression> combinedExpressions = new ArrayList<>();
     int count = 0;
     for (final var injection : injections) {
       final var start = injection.removeFirst();
@@ -126,7 +118,7 @@ public final class HQLParameterizationCodemod implements JavaParserChanger {
       } else {
         end.asStringLiteralExpr().setValue(newEnd);
       }
-      var pair = combineExpressions(injection, root);
+      final var pair = combineExpressions(injection, root);
       combinedExpressions.add(pair.getValue0());
       root = pair.getValue1();
       count++;
@@ -136,24 +128,24 @@ public final class HQLParameterizationCodemod implements JavaParserChanger {
 
   private Pair<Expression, Expression> combineExpressions(
       final Deque<Expression> injectionExpressions, Expression root) {
-    var it = injectionExpressions.iterator();
+    final var it = injectionExpressions.iterator();
     Expression combined = it.next();
     boolean atLeastOneString = false;
     try {
       atLeastOneString = combined.calculateResolvedType().describe().equals("java.lang.String");
-    } catch (Exception e) {
+    } catch (final Exception ignored) {
     }
     root = collapse(combined, root);
 
     while (it.hasNext()) {
-      var expr = it.next();
+      final var expr = it.next();
       try {
         if (!atLeastOneString
             && expr.calculateResolvedType().describe().equals("java.lang.String")) {
 
           atLeastOneString = true;
         }
-      } catch (Exception e) {
+      } catch (final Exception ignored) {
       }
       root = collapse(expr, root);
       combined = new BinaryExpr(combined, expr, Operator.PLUS);
@@ -165,16 +157,16 @@ public final class HQLParameterizationCodemod implements JavaParserChanger {
 
   private void fix(final MethodCallExpr queryCall, final QueryParameterizer queryParameterizer) {
 
-    var injections = queryParameterizer.getInjections();
+    final var injections = queryParameterizer.getInjections();
     var root = queryParameterizer.getRoot();
-    var pair = fixInjections(injections, root);
+    final var pair = fixInjections(injections, root);
     root = pair.getValue1();
-    var combinedExpressions = pair.getValue0();
+    final var combinedExpressions = pair.getValue0();
 
     // query.setParameter() for each injection
     var call = queryCall;
     for (int i = 0; i < combinedExpressions.size(); i++) {
-      var newCall = new MethodCallExpr();
+      final var newCall = new MethodCallExpr();
       call.replace(newCall);
       newCall.setScope(call);
       newCall.setName("setParameter");
@@ -186,9 +178,9 @@ public final class HQLParameterizationCodemod implements JavaParserChanger {
 
     // Deleting some expressions may result in some String declarations with no initializer
     // We delete those.
-    for (var lvd : queryParameterizer.getStringDeclarations()) {
+    for (final var lvd : queryParameterizer.getStringDeclarations()) {
       if (lvd.getVariableDeclarator().getInitializer().isEmpty()) {
-        for (var ref : ASTs.findAllReferences(lvd)) {
+        for (final var ref : ASTs.findAllReferences(lvd)) {
           root = collapse(ref, root);
         }
         lvd.getVariableDeclarationExpr().removeForced();
