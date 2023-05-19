@@ -1,0 +1,29 @@
+package com.acme.testcode;
+
+import org.hibernate.query.Query;
+import org.hibernate.Session;
+
+public final class Test {
+
+    private Session session;
+
+    void direct(String tainted) {
+      Query<User> hqlQuery = session.createQuery("select p from Person p where p.name like :injParameter0").setParameter(":injParameter0", tainted);
+    }
+
+    void indirect(String tainted) {
+      String query = "select p from Person p where p.name like :injParameter0";
+      Query<User> hqlQuery = session.createQuery(query).setParameter(":injParameter0", tainted);
+    }
+
+    void indirectMultiple(String tainted, String tainted2) {
+      String query = "select p from Person p where p.name like :injParameter0" + " and p.surname like :injParameter1";
+      Query<User> hqlQuery = session.createQuery(query).setParameter(":injParameter0", tainted).setParameter(":injParameter1", tainted2);
+    }
+
+    void indirectMultipeString(String tainted, String tainted2) {
+      String second = " and p.surname like :injParameter1";
+      String first = "select p from Person p where p.name like :injParameter0" + second;
+      Query<User> hqlQuery = session.createQuery(first).setParameter(":injParameter0", tainted).setParameter(":injParameter1", tainted2);
+    }
+}
