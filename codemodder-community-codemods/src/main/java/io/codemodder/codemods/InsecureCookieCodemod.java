@@ -42,7 +42,7 @@ public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCa
         methodCallExpr
             .getParentNode()
             .map(p -> p instanceof Statement ? (Statement) p : null)
-            .filter(stmt -> stmt.isExpressionStmt());
+            .filter(Statement::isExpressionStmt);
 
     // We want to avoid things like: response.addCookie(new Cookie(...)), so we restrict ourselves
     final Optional<Expression> maybeCookieExpression =

@@ -12,12 +12,12 @@ java {
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation("io.codemodder:codemodder-common")
     implementation("io.codemodder:codemodder-core")
-    implementation("io.openpixee.maven:pom-operator:0.0.6") // TODO bring into monorepo
+    implementation("io.github.pixee.maven:pom-operator:0.0.8") // TODO bring into monorepo
     {
         exclude(group = "com.google.inject", module = "guice")
     }
+    implementation("com.google.inject:guice:5.1.0")
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)

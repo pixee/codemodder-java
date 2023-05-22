@@ -15,4 +15,8 @@ public interface JavaParserFactory {
    * @return a JavaParser instance based on the given source directories
    */
   JavaParser create(List<SourceDirectory> sourceDirectories) throws IOException;
+
+  static JavaParserFactory newFactory() {
+    return new DefaultJavaParserFactory();
+  }
 }

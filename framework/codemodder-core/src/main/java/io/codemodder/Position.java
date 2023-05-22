@@ -4,8 +4,8 @@ import java.util.Objects;
 
 /** Represents a position in a source file. */
 public final class Position {
-  private int line;
-  private int column;
+  private final int line;
+  private final int column;
 
   public Position(int line, int column) {
     this.line = line;

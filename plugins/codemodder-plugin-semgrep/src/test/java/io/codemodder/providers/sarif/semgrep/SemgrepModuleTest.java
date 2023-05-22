@@ -35,7 +35,7 @@ final class SemgrepModuleTest {
       author = "pixee",
       id = "pixee-test:java/implicit-yaml",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class UsesImplicitYamlPath implements Changer {
+  static class UsesImplicitYamlPath implements CodeChanger {
     private final RuleSarif ruleSarif;
 
     @Inject
@@ -56,7 +56,12 @@ final class SemgrepModuleTest {
                 pathToYaml = "/other_dir/explicit-yaml-path.yaml",
                 ruleId = "explicit-yaml-path")
             RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override
@@ -82,7 +87,12 @@ final class SemgrepModuleTest {
     MissingYamlPropertiesPath(
         @SemgrepScan(yaml = YAML_MISSING_STUFF, ruleId = "explicit-yaml-path")
             RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override
@@ -106,7 +116,12 @@ final class SemgrepModuleTest {
 
     @Inject
     UsesImplicitRule(@SemgrepScan(yaml = YAML_MISSING_STUFF) RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override
@@ -135,7 +150,12 @@ final class SemgrepModuleTest {
 
     @Inject
     UsesImplicitButHasMultipleRules(@SemgrepScan(yaml = YAML_MISSING_STUFF) RuleSarif ruleSarif) {
-      super(ruleSarif, ObjectCreationExpr.class);
+      super(
+          ruleSarif,
+          ObjectCreationExpr.class,
+          RegionExtractor.FROM_FIRST_LOCATION,
+          RegionNodeMatcher.EXACT_MATCH,
+          new UselessReporter());
     }
 
     @Override
@@ -152,7 +172,7 @@ final class SemgrepModuleTest {
       author = "pixee",
       id = "pixee-test:java/incorrect-binding-type",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class BindsToIncorrectObject implements Changer {
+  static class BindsToIncorrectObject implements CodeChanger {
     @Inject
     BindsToIncorrectObject(
         @SemgrepScan(ruleId = "incorrect-binding-type") HashMap<Object, Object> nonSarifObject) {}
@@ -184,7 +204,7 @@ final class SemgrepModuleTest {
   @ParameterizedTest
   @MethodSource("codemodsThatLookForNewStuffInstances")
   void it_works_with_explicit_yaml_path(
-      final Class<? extends Changer> codemod, @TempDir Path tmpDir) throws IOException {
+      final Class<? extends CodeChanger> codemod, @TempDir Path tmpDir) throws IOException {
     String javaCode = "class Foo { \n\n  Object a = new Stuff(); \n }";
     Path javaFile = Files.createTempFile(tmpDir, "HasStuff", ".java");
     Files.write(

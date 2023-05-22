@@ -1,26 +1,17 @@
 package io.codemodder.testutils;
 
 import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.*;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseResult;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import io.codemodder.*;
-import java.io.File;
+import io.codemodder.codetf.CodeTFChangesetEntry;
+import io.codemodder.codetf.CodeTFResult;
+import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaParserFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -35,7 +26,7 @@ public interface CodemodTestMixin {
       throw new IllegalArgumentException("CodemodTest must be annotated with @Metadata");
     }
 
-    Class<? extends Changer> codemod = metadata.codemodType();
+    Class<? extends CodeChanger> codemod = metadata.codemodType();
     Path testResourceDir = Path.of(metadata.testResourceDir());
 
     List<DependencyGAV> dependencies =
@@ -51,27 +42,11 @@ public interface CodemodTestMixin {
     verifyCodemod(codemod, tmpDir, testDir, dependencies);
   }
 
-  private CompilationUnit parseJavaFile(final Path javaFile) throws IOException {
-    JavaParser javaParser = new JavaParser();
-
-    final CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-    combinedTypeSolver.add(new ReflectionTypeSolver());
-    javaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
-
-    final ParseResult<CompilationUnit> result = javaParser.parse(Files.newInputStream(javaFile));
-    if (!result.isSuccessful()) {
-      throw new IllegalArgumentException("couldn't parse file: " + javaFile);
-    }
-    final CompilationUnit cu = result.getResult().orElseThrow();
-    LexicalPreservingPrinter.setup(cu);
-    return cu;
-  }
-
   private void verifyCodemod(
-      final Class<? extends Changer> codemod,
+      final Class<? extends CodeChanger> codemodType,
       final Path tmpDir,
       final Path testResourceDir,
-      final List<DependencyGAV> dependencies)
+      final List<DependencyGAV> dependenciesExpected)
       throws IOException {
 
     // create a copy of the test file in the temp directory to serve as our "repository"
@@ -81,39 +56,60 @@ public interface CodemodTestMixin {
     Files.copy(before, pathToJavaFile);
 
     // Check for any sarif files and build the RuleSarif map
-    List<File> allSarifs = new ArrayList<>();
+    List<Path> allSarifs = new ArrayList<>();
     Files.newDirectoryStream(testResourceDir, "*.sarif")
         .iterator()
-        .forEachRemaining(p -> allSarifs.add(p.toFile()));
+        .forEachRemaining(allSarifs::add);
 
-    Map<String, List<RuleSarif>> map = new SarifParser.Default().parseIntoMap(allSarifs, tmpDir);
+    Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
 
     // run the codemod
-    CodemodInvoker invoker = new CodemodInvoker(List.of(codemod), tmpDir, map);
-    CompilationUnit cu = parseJavaFile(pathToJavaFile);
+    CodemodLoader loader = new CodemodLoader(List.of(codemodType), tmpDir, map);
 
-    FileWeavingContext context =
-        FileWeavingContext.createDefault(pathToJavaFile.toFile(), IncludesExcludes.any());
-    invoker.execute(pathToJavaFile, cu, context);
+    List<CodemodIdPair> codemods = loader.getCodemods();
+    assertThat(codemods.size(), equalTo(1));
+    CodemodIdPair codemod = codemods.get(0);
+    JavaParserFactory factory = JavaParserFactory.newFactory();
+    SourceDirectory dir = SourceDirectory.createDefault(tmpDir, List.of(pathToJavaFile.toString()));
+    CodemodExecutor executor =
+        CodemodExecutor.from(
+            tmpDir,
+            IncludesExcludes.any(),
+            codemod,
+            List.of(),
+            List.of(),
+            CachingJavaParser.from(factory.create(List.of(dir))),
+            EncodingDetector.create());
+    CodeTFResult result = executor.execute(List.of(pathToJavaFile));
+    List<CodeTFChangesetEntry> changeset = result.getChangeset();
 
     // make sure the file is transformed to the expected output
-    String transformedJavaCode = LexicalPreservingPrinter.print(cu);
-    assertThat(transformedJavaCode, equalTo(Files.readString(after)));
+    String expectedCode = Files.readString(after);
+    String transformedJavaCode = Files.readString(pathToJavaFile);
+    assertThat(transformedJavaCode, equalTo(expectedCode));
+    assertThat(changeset.size(), is(1));
+    CodeTFChangesetEntry entry = changeset.get(0);
+    assertThat(entry.getChanges().isEmpty(), is(false));
 
     // make sure the dependencies are added
-    List<Weave> weaves = context.weaves();
-    List<DependencyGAV> dependenciesNeeded = weaves.get(0).getDependenciesNeeded();
-    assertThat(dependenciesNeeded, hasItems(dependencies.toArray(new DependencyGAV[0])));
+    assertThat(dependenciesExpected, hasItems(dependenciesExpected.toArray(new DependencyGAV[0])));
 
     // re-run the transformation again and make sure no changes are made
-    Files.copy(after, pathToJavaFile, StandardCopyOption.REPLACE_EXISTING);
-    CodemodInvoker invokerTheSecond = new CodemodInvoker(List.of(codemod), tmpDir);
-    CompilationUnit rerunCu = parseJavaFile(pathToJavaFile);
-    FileWeavingContext rerunContext =
-        FileWeavingContext.createDefault(pathToJavaFile.toFile(), IncludesExcludes.any());
-    invokerTheSecond.execute(pathToJavaFile, rerunCu, rerunContext);
-
+    CodemodLoader loader2 = new CodemodLoader(List.of(codemodType), tmpDir, map);
+    CodemodIdPair codemod2 = loader2.getCodemods().get(0);
+    CodemodExecutor executor2 =
+        CodemodExecutor.from(
+            tmpDir,
+            IncludesExcludes.any(),
+            codemod2,
+            List.of(),
+            List.of(),
+            CachingJavaParser.from(factory.create(List.of(dir))),
+            EncodingDetector.create());
+    CodeTFResult result2 = executor2.execute(List.of(pathToJavaFile));
+    List<CodeTFChangesetEntry> changeset2 = result2.getChangeset();
+    assertThat(changeset2.size(), is(0));
     String transformedAgainJavaCode = Files.readString(pathToJavaFile);
-    assertThat(transformedAgainJavaCode, equalTo(Files.readString(after)));
+    assertThat(transformedAgainJavaCode, equalTo(expectedCode));
   }
 }

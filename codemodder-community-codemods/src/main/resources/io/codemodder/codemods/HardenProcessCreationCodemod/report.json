@@ -1,0 +1,9 @@
+{
+  "summary" : "Introduced protections against system command injection",
+  "change" : "Hardened this system call to make it resistant to injected commands and commands that target sensitive files",
+  "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/SystemCommand.java",
+  "references": [
+    "https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html",
+    "https://wiki.sei.cmu.edu/confluence/display/java/IDS07-J.+Sanitize+untrusted+data+passed+to+the+Runtime.exec%28%29+method"
+  ]
+}

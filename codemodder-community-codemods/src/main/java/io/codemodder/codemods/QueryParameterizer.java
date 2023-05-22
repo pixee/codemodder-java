@@ -6,6 +6,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.ast.ASTs;
+import io.codemodder.ast.LocalVariableDeclaration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -18,11 +19,18 @@ final class QueryParameterizer {
 
   private final Expression root;
 
+  /** A list of all String declarations containing expressions from the query */
+  private final List<LocalVariableDeclaration> stringDeclarations;
+
+  private final List<Deque<Expression>> injections;
+
   QueryParameterizer(final Expression query) {
     this.root = query;
+    this.stringDeclarations = new ArrayList<>();
+    this.injections = checkAndGatherParameters();
   }
 
-  List<Deque<Expression>> checkAndGatherParameters() {
+  private List<Deque<Expression>> checkAndGatherParameters() {
     final var leaves = findLeaves(root).collect(Collectors.toCollection(ArrayDeque::new));
     if (countInjections(leaves) >= 1) {
       return gatherParameters(leaves);
@@ -33,6 +41,14 @@ final class QueryParameterizer {
 
   Expression getRoot() {
     return root;
+  }
+
+  List<LocalVariableDeclaration> getStringDeclarations() {
+    return stringDeclarations;
+  }
+
+  List<Deque<Expression>> getInjections() {
+    return injections;
   }
 
   /**
@@ -63,9 +79,13 @@ final class QueryParameterizer {
       final var maybeSourceLVD =
           ASTs.findEarliestLocalDeclarationOf(e, e.asNameExpr().getNameAsString())
               .filter(ASTs::isFinalOrNeverAssigned)
-              .filter(lvd -> ASTs.findAllReferences(lvd).size() == 1)
-              .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer());
-      return maybeSourceLVD.map(this::findLeaves).orElse(Stream.of(e));
+              .filter(lvd -> ASTs.findAllReferences(lvd).size() == 1);
+      maybeSourceLVD.ifPresent(stringDeclarations::add);
+
+      return maybeSourceLVD
+          .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
+          .map(this::findLeaves)
+          .orElse(Stream.of(e));
     }
     // Any other expression is a "leaf"
     return Stream.of(e);
@@ -104,7 +124,7 @@ final class QueryParameterizer {
    * Checks if the deque containing the leaves of a query expression has any valid injection pattern
    * and no dangling quotes.
    */
-  int countInjections(final Deque<Expression> query) {
+  private int countInjections(final Deque<Expression> query) {
     int count = 0;
     final var iterator = query.iterator();
     Expression start = null;

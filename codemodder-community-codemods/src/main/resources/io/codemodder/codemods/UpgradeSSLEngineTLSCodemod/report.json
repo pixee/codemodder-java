@@ -1,0 +1,8 @@
+{
+  "summary" : "Upgraded SSLEngine#setEnabledProtocols() TLS versions to match current best practices",
+  "change": "Removed the ability to communicate over anything except TLS 1.2 as no others are safe",
+  "references" : [
+    "https://datatracker.ietf.org/doc/rfc8996/",
+    "https://www.digicert.com/blog/depreciating-tls-1-0-and-1-1"
+  ]
+}

@@ -3,12 +3,9 @@ package io.codemodder.testutils;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import io.codemodder.Changer;
-import io.codemodder.CodemodInvoker;
-import io.codemodder.FileWeavingContext;
-import io.codemodder.IncludesExcludes;
-import io.codemodder.RuleSarif;
-import io.codemodder.SarifParser;
+import com.github.javaparser.JavaParser;
+import io.codemodder.*;
+import io.codemodder.javaparser.CachingJavaParser;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +25,7 @@ public interface RawFileCodemodTest {
       throw new IllegalArgumentException("CodemodTest must be annotated with @Metadata");
     }
 
-    final Class<? extends Changer> codemod = metadata.codemodType();
+    final Class<? extends CodeChanger> codemod = metadata.codemodType();
     final Path testResourceDir = Path.of(metadata.testResourceDir());
 
     final Path testDir = Path.of("src/test/resources/" + testResourceDir);
@@ -37,7 +34,7 @@ public interface RawFileCodemodTest {
 
   /** Verify a single test case composed of a .before and .after file. */
   private void verifySingleCase(
-      final CodemodInvoker codemodInvoker,
+      final CodemodLoader loader,
       final Path tmpDir,
       final Path filePathBefore,
       final Path filePathAfter)
@@ -47,14 +44,21 @@ public interface RawFileCodemodTest {
 
     final var tmpFilePath = tmpDir.resolve(tmpFileName);
     Files.copy(filePathBefore, tmpFilePath);
-    final FileWeavingContext context =
-        FileWeavingContext.createDefault(tmpFilePath.toFile(), IncludesExcludes.any());
-    final var maybeModifiedFilePath =
-        codemodInvoker.executeFile(tmpFilePath, context).map(cf -> cf.modifiedFile()).map(Path::of);
-    if (maybeModifiedFilePath.isEmpty()) {
-      throw new IllegalArgumentException("Problem transforming file: " + tmpFileName);
+
+    for (CodemodIdPair pair : loader.getCodemods()) {
+      CodemodExecutor executor =
+          CodemodExecutor.from(
+              tmpDir,
+              IncludesExcludes.any(),
+              pair,
+              List.of(),
+              List.of(),
+              CachingJavaParser.from(new JavaParser()),
+              EncodingDetector.create());
+      executor.execute(List.of(tmpFilePath));
     }
-    final var modifiedFile = Files.readString(maybeModifiedFilePath.get());
+
+    final var modifiedFile = Files.readString(tmpFilePath);
     assertThat(modifiedFile, equalTo(Files.readString(filePathAfter)));
   }
 
@@ -65,20 +69,19 @@ public interface RawFileCodemodTest {
   }
 
   private void verifyCodemod(
-      final Class<? extends Changer> codemod, final Path tmpDir, final Path testResourceDir)
+      final Class<? extends CodeChanger> codemod, final Path tmpDir, final Path testResourceDir)
       throws IOException {
     // find all the sarif files
     final var allSarifFiles =
         Files.list(testResourceDir)
             .filter(file -> file.getFileName().toString().endsWith(".sarif"))
-            .map(path -> path.toFile())
             .collect(Collectors.toList());
 
     final Map<String, List<RuleSarif>> map =
-        new SarifParser.Default().parseIntoMap(allSarifFiles, tmpDir);
+        SarifParser.create().parseIntoMap(allSarifFiles, tmpDir);
 
     // run the codemod
-    final CodemodInvoker invoker = new CodemodInvoker(List.of(codemod), tmpDir, map);
+    final CodemodLoader invoker = new CodemodLoader(List.of(codemod), tmpDir, map);
 
     // grab all the .before and .after files in the dir
     final var allBeforeFiles =

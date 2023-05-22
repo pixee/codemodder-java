@@ -2,7 +2,7 @@ package io.codemodder.providers.sarif.semgrep;
 
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.google.inject.AbstractModule;
-import io.codemodder.Changer;
+import io.codemodder.CodeChanger;
 import io.codemodder.RuleSarif;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,10 +25,10 @@ import org.jetbrains.annotations.VisibleForTesting;
 /** Responsible for binding Semgrep-related things. */
 final class SemgrepModule extends AbstractModule {
 
-  private final List<Class<? extends Changer>> codemodTypes;
+  private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;
 
-  SemgrepModule(final Path codeDirectory, final List<Class<? extends Changer>> codemodTypes) {
+  SemgrepModule(final Path codeDirectory, final List<Class<? extends CodeChanger>> codemodTypes) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
   }
@@ -46,7 +46,7 @@ final class SemgrepModule extends AbstractModule {
     // find all @SemgrepScan annotations in their parameters and batch them up for running
     List<Pair<String, SemgrepScan>> toBind = new ArrayList<>();
 
-    for (Class<? extends Changer> codemodType : codemodTypes) {
+    for (Class<? extends CodeChanger> codemodType : codemodTypes) {
       // find all constructors that are marked with @Inject
       Constructor<?>[] constructors = codemodType.getDeclaredConstructors();
       List<Constructor<?>> injectableConstructors =

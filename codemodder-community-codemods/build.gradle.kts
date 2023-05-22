@@ -1,7 +1,18 @@
 plugins {
     id("io.codemodder.root")
     id("io.codemodder.java-library")
+    id("io.codemodder.runner")
+    id("io.codemodder.container-publish")
     id("io.codemodder.maven-publish")
+}
+
+application {
+    mainClass.set("io.codemodder.codemods.DefaultCodemods")
+}
+
+jib.to.image = "218200003247.dkr.ecr.us-east-1.amazonaws.com/pixee/codemodder-java:${project.version}"
+tasks.publish {
+    dependsOn(tasks.jib)
 }
 
 java {
@@ -26,9 +37,30 @@ dependencies {
     testImplementation(testlibs.mockito)
     testImplementation("io.codemodder:codemodder-testutils")
     testRuntimeOnly(testlibs.junit.jupiter.engine)
+    testImplementation(testlibs.jgit)
 }
 
-task("run", JavaExec::class) {
-    main = "io.codemodder.codemods.DefaultCodemods"
-    classpath = sourceSets["main"].runtimeClasspath
+sourceSets {
+    create("intTest") {
+        compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+        runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+    }
 }
+
+val intTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+val intTestRuntimeOnly: Configuration by configurations.getting {
+    extendsFrom(configurations.testRuntimeOnly.get())
+}
+
+val integrationTest = task<Test>("intTest") {
+    description = "Runs integration tests."
+    group = "verification"
+
+    testClassesDirs = sourceSets["intTest"].output.classesDirs
+    classpath = sourceSets["intTest"].runtimeClasspath
+    shouldRunAfter("test")
+}
+
+tasks.check { dependsOn(integrationTest) }

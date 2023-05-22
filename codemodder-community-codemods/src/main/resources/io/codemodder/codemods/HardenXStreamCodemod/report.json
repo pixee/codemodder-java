@@ -1,0 +1,10 @@
+{
+  "summary" : "Hardened XStream with a converter to prevent exploitation",
+  "change": "Added an XStream [Converter](https://x-stream.github.io/converter-tutorial.html) which prevents common exploits",
+  "references" : [
+    "https://x-stream.github.io/security.html",
+    "http://diniscruz.blogspot.com/2013/12/xstream-remote-code-execution-exploit.html",
+    "https://www.contrastsecurity.com/security-influencers/serialization-must-die-act-2-xstream",
+    "https://x-stream.github.io/CVE-2013-7285.html"
+  ]
+}

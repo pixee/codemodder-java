@@ -12,10 +12,15 @@ public final class Runner {
    * @param codemods The codemods to run
    * @param args The arguments to pass to the codemod runner
    */
-  public static void run(final List<Class<? extends Changer>> codemods, final String[] args) {
+  public static void run(final List<Class<? extends CodeChanger>> codemods, final String[] args) {
     CommandLine commandLine =
-        new CommandLine(new CLI(codemods)).setCaseInsensitiveEnumValuesAllowed(true);
+        new CommandLine(new CLI(args, codemods)).setCaseInsensitiveEnumValuesAllowed(true);
     int exitCode = commandLine.execute(args);
-    System.exit(exitCode);
+
+    // we honor a special exit code (-1) that tells us not to exit, this is useful for integration
+    // tests
+    if (exitCode != -1) {
+      System.exit(exitCode);
+    }
   }
 }

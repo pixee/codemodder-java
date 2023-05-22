@@ -17,5 +17,5 @@ public interface CodemodProvider {
    * @return a set of modules that perform dependency injection
    */
   Set<AbstractModule> getModules(
-      Path repository, List<Class<? extends Changer>> codemodTypes, List<RuleSarif> sarifs);
+      Path repository, List<Class<? extends CodeChanger>> codemodTypes, List<RuleSarif> sarifs);
 }
