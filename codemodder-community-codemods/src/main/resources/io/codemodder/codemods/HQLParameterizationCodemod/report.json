@@ -1,0 +1,8 @@
+{
+  "summary" : "Refactored to use parameterized HQL APIs",
+  "change": "Parameterized HQL usage to prevent any bugs or vulnerabilities",
+  "references" : [
+    "https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html#using-java-with-hibernate",
+    "https://cwe.mitre.org/data/definitions/564.html"
+  ]
+}
