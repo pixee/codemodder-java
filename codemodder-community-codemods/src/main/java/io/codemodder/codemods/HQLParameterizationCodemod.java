@@ -51,7 +51,7 @@ public final class HQLParameterizationCodemod implements JavaParserChanger {
         .collect(Collectors.toList());
   }
 
-  private static final String queryParameterNamePrefix = ":injParameter";
+  private static final String queryParameterNamePrefix = ":parameter";
 
   private boolean isQueryCreation(final MethodCallExpr methodCallExpr) {
     final Predicate<MethodCallExpr> isQueryCall =
