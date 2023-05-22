@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/** Codemod for parameterization of SQL injections */
+/** Codemod for parameterization of SQL statements. */
 @Codemod(
     id = "pixee:java/sql-parameterizer",
     author = "andre.silva@pixee.ai",
