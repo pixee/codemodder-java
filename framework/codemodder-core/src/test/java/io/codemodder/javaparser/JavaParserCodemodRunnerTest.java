@@ -23,50 +23,55 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 final class JavaParserCodemodRunnerTest {
+  class TestJavaParserChanger extends JavaParserChanger {
+    TestJavaParserChanger() {
+      super(new EmptyReporter());
+    }
+
+    @Override
+    public List<CodemodChange> visit(CodemodInvocationContext context, CompilationUnit cu) {
+      LexicalPreservingPrinter.setup(cu);
+      final List<CodemodChange> codemodChanges = new ArrayList<>();
+      cu.findAll(MethodCallExpr.class).stream()
+          .forEach(
+              mce -> {
+                mce.setName("newMethodName");
+                codemodChanges.add(
+                    CodemodChange.from(
+                        mce.getBegin().get().line, DependencyGAV.JAVA_SECURITY_TOOLKIT));
+              });
+      return codemodChanges;
+    }
+
+    @Override
+    public String getSummary() {
+      return "my summary";
+    }
+
+    @Override
+    public String getDescription() {
+      return "my description";
+    }
+
+    @Override
+    public Optional<String> getSourceControlUrl() {
+      return Optional.empty();
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of(new CodeTFReference("my reference", "my reference description"));
+    }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
+      return null;
+    }
+  }
+  ;
 
   /** A {@link JavaParserChanger} that updates all method names to "newMethodName". */
-  private final JavaParserChanger updatesAllMethodNamesChanger =
-      new JavaParserChanger() {
-        @Override
-        public List<CodemodChange> visit(CodemodInvocationContext context, CompilationUnit cu) {
-          LexicalPreservingPrinter.setup(cu);
-          final List<CodemodChange> codemodChanges = new ArrayList<>();
-          cu.findAll(MethodCallExpr.class).stream()
-              .forEach(
-                  mce -> {
-                    mce.setName("newMethodName");
-                    codemodChanges.add(
-                        CodemodChange.from(
-                            mce.getBegin().get().line, DependencyGAV.JAVA_SECURITY_TOOLKIT));
-                  });
-          return codemodChanges;
-        }
-
-        @Override
-        public String getSummary() {
-          return "my summary";
-        }
-
-        @Override
-        public String getDescription() {
-          return "my description";
-        }
-
-        @Override
-        public Optional<String> getSourceControlUrl() {
-          return Optional.empty();
-        }
-
-        @Override
-        public List<CodeTFReference> getReferences() {
-          return List.of(new CodeTFReference("my reference", "my reference description"));
-        }
-
-        @Override
-        public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
-          return null;
-        }
-      };
+  private final JavaParserChanger updatesAllMethodNamesChanger = new TestJavaParserChanger();
 
   private JavaParserCodemodRunner runner;
   private Path tmpDir;

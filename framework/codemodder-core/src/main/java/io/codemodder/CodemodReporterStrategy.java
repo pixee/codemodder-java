@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -73,16 +72,14 @@ public interface CodemodReporterStrategy {
     final JsonNode parent;
     final String description;
     try {
-      var resource = codemodType.getResourceAsStream(reportJson);
-      if (resource == null) {
-        return new EmptyReporter();
+      var jsonResource = codemodType.getResourceAsStream(reportJson);
+      var mdResource = codemodType.getResourceAsStream(descriptionResource);
+      if (jsonResource == null || mdResource == null) {
+        throw new IllegalArgumentException(
+            "Could not find report.json or description.md for: " + codemodType);
       }
-
-      parent = mapper.readTree(resource);
-      description =
-          IOUtils.toString(
-              Objects.requireNonNull(codemodType.getResourceAsStream(descriptionResource)),
-              StandardCharsets.UTF_8);
+      parent = mapper.readTree(jsonResource);
+      description = IOUtils.toString(mdResource);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
@@ -124,32 +121,5 @@ public interface CodemodReporterStrategy {
         return references;
       }
     };
-  }
-
-  final class EmptyReporter implements CodemodReporterStrategy {
-    @Override
-    public String getSummary() {
-      return "";
-    }
-
-    @Override
-    public String getDescription() {
-      return "";
-    }
-
-    @Override
-    public Optional<String> getSourceControlUrl() {
-      return Optional.empty();
-    }
-
-    @Override
-    public String getChange(Path path, CodemodChange change) {
-      return "";
-    }
-
-    @Override
-    public List<String> getReferences() {
-      return List.of();
-    }
   }
 }

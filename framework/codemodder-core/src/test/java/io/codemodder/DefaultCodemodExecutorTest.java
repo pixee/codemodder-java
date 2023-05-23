@@ -487,6 +487,10 @@ final class DefaultCodemodExecutorTest {
 
   /** Changes all method calls to methods named "before" to "after". */
   private static class BeforeToAfterChanger extends JavaParserChanger {
+    BeforeToAfterChanger() {
+      super(new EmptyReporter());
+    }
+
     @Override
     public List<CodemodChange> visit(
         final CodemodInvocationContext context, final CompilationUnit cu) {
@@ -524,6 +528,11 @@ final class DefaultCodemodExecutorTest {
   }
 
   private static class InjectsDependency1 extends JavaParserChanger {
+
+    InjectsDependency1() {
+      super(new EmptyReporter());
+    }
+
     @Override
     public List<CodemodChange> visit(CodemodInvocationContext context, CompilationUnit cu) {
       List<CodemodChange> changes = new ArrayList<>();
@@ -565,6 +574,11 @@ final class DefaultCodemodExecutorTest {
   }
 
   private static class InjectsDependency2 extends JavaParserChanger {
+
+    InjectsDependency2() {
+      super(new EmptyReporter());
+    }
+
     @Override
     public List<CodemodChange> visit(CodemodInvocationContext context, CompilationUnit cu) {
       List<CodemodChange> changes = new ArrayList<>();

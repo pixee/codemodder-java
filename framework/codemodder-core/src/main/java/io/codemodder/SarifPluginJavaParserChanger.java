@@ -58,11 +58,11 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
       final RegionExtractor regionExtractor,
       final RegionNodeMatcher regionNodeMatcher,
       final CodemodReporterStrategy reporter) {
+    super(reporter);
     this.sarif = Objects.requireNonNull(sarif);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionExtractor = Objects.requireNonNull(regionExtractor);
     this.regionNodeMatcher = Objects.requireNonNull(regionNodeMatcher);
-    this.reporter = Objects.requireNonNull(reporter);
   }
 
   public final List<CodemodChange> visit(

@@ -82,13 +82,17 @@ final class CodemodLoaderTest {
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
       author = "test")
   static class ChangesFile extends RawFileChanger {
+    ChangesFile() {
+      super(new EmptyReporter());
+    }
+
     public List<CodemodChange> visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nb";
       Files.write(path, contents.getBytes(StandardCharsets.UTF_8));
-      return null;
+      return List.of();
     }
 
     @Override
@@ -118,13 +122,17 @@ final class CodemodLoaderTest {
       author = "test")
   static class ChangesFileAgain extends RawFileChanger {
 
+    ChangesFileAgain() {
+      super(new EmptyReporter());
+    }
+
     public List<CodemodChange> visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nc\n";
       Files.write(path, contents.getBytes(StandardCharsets.UTF_8));
-      return null;
+      return List.of();
     }
 
     @Override
