@@ -15,6 +15,10 @@ public abstract class RawFileChanger implements CodeChanger {
     this.reporter = CodemodReporterStrategy.fromClasspath(this.getClass());
   }
 
+  public RawFileChanger(final CodemodReporterStrategy reporter) {
+    this.reporter = reporter;
+  }
+
   /**
    * Visit a file. It is up to the subtype to make sure the file is something to be changed and
    * perform all the changing.

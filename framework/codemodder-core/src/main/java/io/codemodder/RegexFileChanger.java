@@ -35,6 +35,19 @@ public abstract class RegexFileChanger extends RawFileChanger {
     this.dependenciesRequired = dependenciesRequired;
   }
 
+  protected RegexFileChanger(
+      final Predicate<Path> fileMatcher,
+      final Pattern pattern,
+      final boolean removeEmptyLeftoverLines,
+      final List<DependencyGAV> dependenciesRequired,
+      final CodemodReporterStrategy reporter) {
+    super(reporter);
+    this.fileMatcher = Objects.requireNonNull(fileMatcher, "fileMatcher");
+    this.pattern = Objects.requireNonNull(pattern, "pattern");
+    this.removeEmptyLeftoverLines = removeEmptyLeftoverLines;
+    this.dependenciesRequired = dependenciesRequired;
+  }
+
   @Override
   public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
     if (!fileMatcher.test(context.path())) {

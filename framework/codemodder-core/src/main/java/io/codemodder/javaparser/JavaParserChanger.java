@@ -16,7 +16,7 @@ public abstract class JavaParserChanger implements CodeChanger {
     this.reporter = CodemodReporterStrategy.fromClasspath(this.getClass());
   }
 
-  public JavaParserChanger(CodemodReporterStrategy reporter) {
+  public JavaParserChanger(final CodemodReporterStrategy reporter) {
     this.reporter = reporter;
   }
 
