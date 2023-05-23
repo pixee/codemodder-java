@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
-public class EmptyReporter implements CodemodReporterStrategy {
+public final class EmptyReporter implements CodemodReporterStrategy {
   @Override
   public String getSummary() {
     return "";

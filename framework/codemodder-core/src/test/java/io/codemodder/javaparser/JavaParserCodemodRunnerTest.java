@@ -23,7 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 final class JavaParserCodemodRunnerTest {
-  class TestJavaParserChanger extends JavaParserChanger {
+
+  final class TestJavaParserChanger extends JavaParserChanger {
     TestJavaParserChanger() {
       super(new EmptyReporter());
     }
