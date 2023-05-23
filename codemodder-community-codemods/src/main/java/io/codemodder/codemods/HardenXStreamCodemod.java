@@ -13,6 +13,7 @@ import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** Adds gadget filtering logic to XStream deserialization. */
@@ -59,4 +60,9 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
 
   private static final DependencyGAV JAVA_SECURITY_TOOLKIT_XSTREAM =
       DependencyGAV.createDefault("io.github.pixee", "java-security-toolkit-xstream", "1.0.2");
+
+  @Override
+  public Optional<String> getSourceControlUrl() {
+    return Optional.of("https://github.com/pixee/java-security-toolkit-xstream");
+  }
 }

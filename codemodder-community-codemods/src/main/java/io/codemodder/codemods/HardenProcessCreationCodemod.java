@@ -12,6 +12,7 @@ import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.SystemCommand;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** Harden new process creation. */
@@ -51,5 +52,10 @@ public final class HardenProcessCreationCodemod
   @Override
   public List<DependencyGAV> dependenciesRequired() {
     return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+  }
+
+  @Override
+  public Optional<String> getSourceControlUrl() {
+    return Optional.of("https://github.com/pixee/java-security-toolkit");
   }
 }

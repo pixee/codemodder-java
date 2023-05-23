@@ -27,7 +27,7 @@ import org.javatuples.Pair;
     id = "pixee:java/hql-parameterizer",
     author = "andre.silva@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-public final class HQLParameterizationCodemod implements JavaParserChanger {
+public final class HQLParameterizationCodemod extends JavaParserChanger {
 
   private Optional<CodemodChange> onNodeFound(
       final CodemodInvocationContext context,
@@ -43,7 +43,6 @@ public final class HQLParameterizationCodemod implements JavaParserChanger {
     return Optional.empty();
   }
 
-  @Override
   public List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     return cu.findAll(MethodCallExpr.class).stream()

@@ -73,7 +73,12 @@ public interface CodemodReporterStrategy {
     final JsonNode parent;
     final String description;
     try {
-      parent = mapper.readTree(codemodType.getResourceAsStream(reportJson));
+      var resource = codemodType.getResourceAsStream(reportJson);
+      if (resource == null) {
+        return new EmptyReporter();
+      }
+
+      parent = mapper.readTree(resource);
       description =
           IOUtils.toString(
               Objects.requireNonNull(codemodType.getResourceAsStream(descriptionResource)),
@@ -119,5 +124,32 @@ public interface CodemodReporterStrategy {
         return references;
       }
     };
+  }
+
+  final class EmptyReporter implements CodemodReporterStrategy {
+    @Override
+    public String getSummary() {
+      return "";
+    }
+
+    @Override
+    public String getDescription() {
+      return "";
+    }
+
+    @Override
+    public Optional<String> getSourceControlUrl() {
+      return Optional.empty();
+    }
+
+    @Override
+    public String getChange(Path path, CodemodChange change) {
+      return "";
+    }
+
+    @Override
+    public List<String> getReferences() {
+      return List.of();
+    }
   }
 }

@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
  * This type does the heavy lifting for many protections that can work in a simple
  * "search-and-replace" pattern for non-Java code.
  */
-public abstract class RegexFileChanger implements RawFileChanger {
+public abstract class RegexFileChanger extends RawFileChanger {
 
   private final Predicate<Path> fileMatcher;
   private final Pattern pattern;

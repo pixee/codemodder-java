@@ -52,6 +52,11 @@ final class CodemodLoaderTest {
     public List<CodeTFReference> getReferences() {
       return List.of();
     }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
+      return null;
+    }
   }
 
   @Test
@@ -76,8 +81,7 @@ final class CodemodLoaderTest {
       id = "test:java/changes-file",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
       author = "test")
-  static class ChangesFile extends NoReportChanger implements RawFileChanger {
-    @Override
+  static class ChangesFile extends RawFileChanger {
     public List<CodemodChange> visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
@@ -86,20 +90,60 @@ final class CodemodLoaderTest {
       Files.write(path, contents.getBytes(StandardCharsets.UTF_8));
       return null;
     }
+
+    @Override
+    public String getSummary() {
+      return "summary";
+    }
+
+    @Override
+    public String getDescription() {
+      return "description";
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of();
+    }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
+      return null;
+    }
   }
 
   @Codemod(
       id = "test:java/changes-file-again",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
       author = "test")
-  static class ChangesFileAgain extends NoReportChanger implements RawFileChanger {
-    @Override
+  static class ChangesFileAgain extends RawFileChanger {
+
     public List<CodemodChange> visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nc\n";
       Files.write(path, contents.getBytes(StandardCharsets.UTF_8));
+      return null;
+    }
+
+    @Override
+    public String getSummary() {
+      return "summary";
+    }
+
+    @Override
+    public String getDescription() {
+      return "description";
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of();
+    }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
     }
   }

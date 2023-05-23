@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -52,8 +53,18 @@ final class JavaParserCodemodRunnerTest {
         }
 
         @Override
+        public Optional<String> getSourceControlUrl() {
+          return Optional.empty();
+        }
+
+        @Override
         public List<CodeTFReference> getReferences() {
           return List.of(new CodeTFReference("my reference", "my reference description"));
+        }
+
+        @Override
+        public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
+          return null;
         }
       };
 

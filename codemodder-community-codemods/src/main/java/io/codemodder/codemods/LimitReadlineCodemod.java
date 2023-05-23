@@ -13,6 +13,7 @@ import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.BoundedLineReader;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** Turns hardcoded seeds for PRNGs to be more random. */
@@ -47,6 +48,11 @@ public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<Met
   @Override
   public List<DependencyGAV> dependenciesRequired() {
     return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+  }
+
+  @Override
+  public Optional<String> getSourceControlUrl() {
+    return Optional.of("https://github.com/pixee/java-security-toolkit");
   }
 
   private static final int defaultLineMaximum = 1_000_000; // 1 MB

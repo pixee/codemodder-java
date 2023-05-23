@@ -3,14 +3,21 @@ package io.codemodder;
 import com.contrastsecurity.sarif.Result;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /** A {@link RawFileChanger} bundled with a {@link RuleSarif}. */
-public abstract class SarifPluginRawFileChanger implements RawFileChanger {
+public abstract class SarifPluginRawFileChanger extends RawFileChanger {
 
   private final RuleSarif sarif;
 
   protected SarifPluginRawFileChanger(final RuleSarif sarif) {
     this.sarif = sarif;
+  }
+
+  protected SarifPluginRawFileChanger(
+      final RuleSarif sarif, final CodemodReporterStrategy reporter) {
+    this.sarif = sarif;
+    this.reporter = Objects.requireNonNull(reporter);
   }
 
   @Override

@@ -486,7 +486,7 @@ final class DefaultCodemodExecutorTest {
   }
 
   /** Changes all method calls to methods named "before" to "after". */
-  private static class BeforeToAfterChanger implements JavaParserChanger {
+  private static class BeforeToAfterChanger extends JavaParserChanger {
     @Override
     public List<CodemodChange> visit(
         final CodemodInvocationContext context, final CompilationUnit cu) {
@@ -516,9 +516,14 @@ final class DefaultCodemodExecutorTest {
       return List.of(
           new CodeTFReference("https://before-after-reference", "before-after-reference"));
     }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
+      return "";
+    }
   }
 
-  private static class InjectsDependency1 implements JavaParserChanger {
+  private static class InjectsDependency1 extends JavaParserChanger {
     @Override
     public List<CodemodChange> visit(CodemodInvocationContext context, CompilationUnit cu) {
       List<CodemodChange> changes = new ArrayList<>();
@@ -559,7 +564,7 @@ final class DefaultCodemodExecutorTest {
     }
   }
 
-  private static class InjectsDependency2 implements JavaParserChanger {
+  private static class InjectsDependency2 extends JavaParserChanger {
     @Override
     public List<CodemodChange> visit(CodemodInvocationContext context, CompilationUnit cu) {
       List<CodemodChange> changes = new ArrayList<>();

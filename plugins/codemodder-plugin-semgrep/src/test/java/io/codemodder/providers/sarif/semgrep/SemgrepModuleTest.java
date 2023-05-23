@@ -13,6 +13,7 @@ import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.codemodder.*;
+import io.codemodder.codetf.CodeTFReference;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -41,6 +42,26 @@ final class SemgrepModuleTest {
     @Inject
     UsesImplicitYamlPath(@SemgrepScan(ruleId = "implicit-yaml-path") RuleSarif ruleSarif) {
       this.ruleSarif = ruleSarif;
+    }
+
+    @Override
+    public String getSummary() {
+      return null;
+    }
+
+    @Override
+    public String getDescription() {
+      return null;
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return null;
+    }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
+      return null;
     }
   }
 
@@ -176,6 +197,26 @@ final class SemgrepModuleTest {
     @Inject
     BindsToIncorrectObject(
         @SemgrepScan(ruleId = "incorrect-binding-type") HashMap<Object, Object> nonSarifObject) {}
+
+    @Override
+    public String getSummary() {
+      return null;
+    }
+
+    @Override
+    public String getDescription() {
+      return null;
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return null;
+    }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
+      return null;
+    }
   }
 
   @Test

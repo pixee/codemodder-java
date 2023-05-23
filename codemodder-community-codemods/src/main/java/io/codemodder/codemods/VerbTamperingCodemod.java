@@ -1,12 +1,7 @@
 package io.codemodder.codemods;
 
-import io.codemodder.Codemod;
-import io.codemodder.CodemodChange;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.RawFileChanger;
-import io.codemodder.ReviewGuidance;
-import io.codemodder.XPathStreamProcessChange;
-import io.codemodder.XPathStreamProcessor;
+import io.codemodder.*;
+import io.codemodder.codetf.CodeTFReference;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +24,7 @@ import org.xml.sax.SAXException;
     id = "pixee:java/fix-verb-tampering",
     author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class VerbTamperingCodemod implements RawFileChanger {
+public final class VerbTamperingCodemod extends RawFileChanger {
 
   private final XPathStreamProcessor processor;
 
@@ -91,5 +86,27 @@ public final class VerbTamperingCodemod implements RawFileChanger {
     if (!endHttpMethodTag.isEndElement()) {
       throw new IllegalStateException("was expecting end element");
     }
+  }
+
+  @Override
+  public String getSummary() {
+    return reporter.getSummary();
+  }
+
+  @Override
+  public String getDescription() {
+    return reporter.getDescription();
+  }
+
+  @Override
+  public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
+    return reporter.getChange(filePath, change);
+  }
+
+  @Override
+  public List<CodeTFReference> getReferences() {
+    return reporter.getReferences().stream()
+        .map(u -> new CodeTFReference(u, u))
+        .collect(Collectors.toList());
   }
 }
