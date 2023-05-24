@@ -252,12 +252,12 @@ final class SQLParameterizer {
     String actualName = preparedStatementNamePrefix;
     var maybeName = ASTs.findNonCallableSimpleNameSource(start, actualName);
     // Try for statement
-    if(maybeName.isPresent()){
-	    actualName = preparedStatementNamePrefixAlternative;
-    	    maybeName = ASTs.findNonCallableSimpleNameSource(start, actualName);
-	    if(maybeName.isPresent()){
-		    actualName = preparedStatementNamePrefix;
-	    }
+    if (maybeName.isPresent()) {
+      actualName = preparedStatementNamePrefixAlternative;
+      maybeName = ASTs.findNonCallableSimpleNameSource(start, actualName);
+      if (maybeName.isPresent()) {
+        actualName = preparedStatementNamePrefix;
+      }
     }
     int count = 0;
     String nameWithSuffix = actualName;
