@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -49,8 +50,18 @@ final class CodemodLoaderTest {
     }
 
     @Override
+    public Optional<String> getSourceControlUrl() {
+      return Optional.empty();
+    }
+
+    @Override
     public List<CodeTFReference> getReferences() {
       return List.of();
+    }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
+      return null;
     }
   }
 
@@ -76,14 +87,37 @@ final class CodemodLoaderTest {
       id = "test:java/changes-file",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
       author = "test")
-  static class ChangesFile extends NoReportChanger implements RawFileChanger {
-    @Override
+  static class ChangesFile extends RawFileChanger {
+    ChangesFile() {
+      super(new EmptyReporter());
+    }
+
     public List<CodemodChange> visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nb";
       Files.write(path, contents.getBytes(StandardCharsets.UTF_8));
+      return List.of();
+    }
+
+    @Override
+    public String getSummary() {
+      return "summary";
+    }
+
+    @Override
+    public String getDescription() {
+      return "description";
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of();
+    }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
     }
   }
@@ -92,14 +126,38 @@ final class CodemodLoaderTest {
       id = "test:java/changes-file-again",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
       author = "test")
-  static class ChangesFileAgain extends NoReportChanger implements RawFileChanger {
-    @Override
+  static class ChangesFileAgain extends RawFileChanger {
+
+    ChangesFileAgain() {
+      super(new EmptyReporter());
+    }
+
     public List<CodemodChange> visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nc\n";
       Files.write(path, contents.getBytes(StandardCharsets.UTF_8));
+      return List.of();
+    }
+
+    @Override
+    public String getSummary() {
+      return "summary";
+    }
+
+    @Override
+    public String getDescription() {
+      return "description";
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of();
+    }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
     }
   }

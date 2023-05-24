@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
  * This type does the heavy lifting for many protections that can work in a simple
  * "search-and-replace" pattern for non-Java code.
  */
-public abstract class RegexFileChanger implements RawFileChanger {
+public abstract class RegexFileChanger extends RawFileChanger {
 
   private final Predicate<Path> fileMatcher;
   private final Pattern pattern;
@@ -29,6 +29,19 @@ public abstract class RegexFileChanger implements RawFileChanger {
       final Pattern pattern,
       final boolean removeEmptyLeftoverLines,
       final List<DependencyGAV> dependenciesRequired) {
+    this.fileMatcher = Objects.requireNonNull(fileMatcher, "fileMatcher");
+    this.pattern = Objects.requireNonNull(pattern, "pattern");
+    this.removeEmptyLeftoverLines = removeEmptyLeftoverLines;
+    this.dependenciesRequired = dependenciesRequired;
+  }
+
+  protected RegexFileChanger(
+      final Predicate<Path> fileMatcher,
+      final Pattern pattern,
+      final boolean removeEmptyLeftoverLines,
+      final List<DependencyGAV> dependenciesRequired,
+      final CodemodReporterStrategy reporter) {
+    super(reporter);
     this.fileMatcher = Objects.requireNonNull(fileMatcher, "fileMatcher");
     this.pattern = Objects.requireNonNull(pattern, "pattern");
     this.removeEmptyLeftoverLines = removeEmptyLeftoverLines;

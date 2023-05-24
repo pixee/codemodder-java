@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
     id = "pixee:java/sql-parameterizer",
     author = "andre.silva@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class SQLParameterizerCodemod implements JavaParserChanger {
+public final class SQLParameterizerCodemod extends JavaParserChanger {
 
   private List<CodemodChange> onNodeFound(MethodCallExpr methodCallExpr, CompilationUnit cu) {
     var fixer = new SQLParameterizer(cu);
@@ -29,7 +29,6 @@ public final class SQLParameterizerCodemod implements JavaParserChanger {
     }
   }
 
-  @Override
   public List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     final List<CodemodChange> changes = new ArrayList<>();

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -73,11 +72,14 @@ public interface CodemodReporterStrategy {
     final JsonNode parent;
     final String description;
     try {
-      parent = mapper.readTree(codemodType.getResourceAsStream(reportJson));
-      description =
-          IOUtils.toString(
-              Objects.requireNonNull(codemodType.getResourceAsStream(descriptionResource)),
-              StandardCharsets.UTF_8);
+      var jsonResource = codemodType.getResourceAsStream(reportJson);
+      var mdResource = codemodType.getResourceAsStream(descriptionResource);
+      if (jsonResource == null || mdResource == null) {
+        throw new IllegalArgumentException(
+            "Could not find report.json or description.md for: " + codemodType);
+      }
+      parent = mapper.readTree(jsonResource);
+      description = IOUtils.toString(mdResource);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
