@@ -113,6 +113,16 @@ public class Either<L, R> {
     }
   }
 
+  /** Returns the result of the {@link Function}s {@code leftFunction} or {@code rightFunction}. */
+  public <A> A ifLeftOrElseGet(
+      Function<? super L, A> leftFunction, Function<? super R, A> rightFunction) {
+    if (isLeft()) {
+      return leftFunction.apply(getLeft());
+    } else {
+      return rightFunction.apply(getRight());
+    }
+  }
+
   @Override
   public String toString() {
     return "Either[" + (this.isLeft() ? this.leftValue : this.rightValue) + "]";
