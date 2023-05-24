@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.javatuples.Pair;
 
 /** Contains most of the logic for the SQLParameterizerCodemod. */
@@ -382,6 +383,49 @@ final class SQLParameterizer {
             mce -> generateNameWithSuffix(preparedStatementNamePrefix, mce), lvd -> lvd.getName());
 
     // (1)
+    final var pair =
+        fixInjections(queryParameterizer.getInjections(), queryParameterizer.getRoot());
+    newRoot = pair.getValue1();
+    final var combinedExpressions = pair.getValue0();
+
+    var topStatement = executeStmt;
+    for (int i = combinedExpressions.size() - 1; i >= 0; i--) {
+      final var expr = combinedExpressions.get(i);
+      final var setStmt =
+          new ExpressionStmt(
+              new MethodCallExpr(
+                  new NameExpr(stmtName),
+                  "setString",
+                  new NodeList<>(new IntegerLiteralExpr(String.valueOf(i + 1)), expr)));
+      ASTTransforms.addStatementBeforeStatement(topStatement, setStmt);
+      topStatement = setStmt;
+    }
+
+    ASTTransforms.addImportIfMissing(compilationUnit, "java.sql.PreparedStatement");
+
+    // Deleting some expressions may result in some String declarations with no initializer
+    // We delete those.
+    var allEmptyLVD =
+        queryParameterizer.getStringDeclarations().stream()
+            .filter(lvd -> lvd.getVariableDeclarator().getInitializer().isEmpty())
+            .collect(Collectors.toSet());
+    var newEmptyLVDs = allEmptyLVD;
+    while (!newEmptyLVDs.isEmpty()) {
+      for (var lvd : newEmptyLVDs) {
+        for (final var ref : ASTs.findAllReferences(lvd)) {
+          newRoot = collapse(ref, newRoot);
+        }
+        lvd.getVariableDeclarationExpr().removeForced();
+      }
+      newEmptyLVDs =
+          queryParameterizer.getStringDeclarations().stream()
+              .filter(lvd -> lvd.getVariableDeclarator().getInitializer().isEmpty())
+              .collect(Collectors.toSet());
+      newEmptyLVDs.removeAll(allEmptyLVD);
+      allEmptyLVD.addAll(newEmptyLVDs);
+    }
+
+    // (2)
     final var args =
         stmtCreation.ifLeftOrElseGet(
             mce -> mce.getArguments(),
@@ -393,7 +437,7 @@ final class SQLParameterizer {
                     .getArguments());
     args.addFirst(newRoot);
 
-    // (1.a)
+    // (2.a)
     if (stmtCreation.isLeft()) {
       final var pstmtCreationStmt =
           new ExpressionStmt(
@@ -403,9 +447,9 @@ final class SQLParameterizer {
                       stmtName,
                       new MethodCallExpr(
                           stmtCreation.getLeft().getScope().get(), "prepareStatement", args))));
-      ASTTransforms.addStatementBeforeStatement(executeStmt, pstmtCreationStmt);
+      ASTTransforms.addStatementBeforeStatement(topStatement, pstmtCreationStmt);
 
-      // (1.b)
+      // (2.b)
     } else {
       stmtCreation
           .getRight()
@@ -423,40 +467,10 @@ final class SQLParameterizer {
           .ifPresent(expr -> expr.asMethodCallExpr().setArguments(args));
     }
 
-    // (2)
-    final var pair =
-        fixInjections(queryParameterizer.getInjections(), queryParameterizer.getRoot());
-    newRoot = pair.getValue1();
-    final var combinedExpressions = pair.getValue0();
-
-    for (int i = 0; i < combinedExpressions.size(); i++) {
-      final var expr = combinedExpressions.get(i);
-      final var setStmt =
-          new ExpressionStmt(
-              new MethodCallExpr(
-                  new NameExpr(stmtName),
-                  "setString",
-                  new NodeList<>(new IntegerLiteralExpr(String.valueOf(i + 1)), expr)));
-      ASTTransforms.addStatementBeforeStatement(executeStmt, setStmt);
-    }
-
-    ASTTransforms.addImportIfMissing(compilationUnit, "java.sql.PreparedStatement");
-
     // (3)
     executeCall.setName("execute");
     executeCall.setScope(new NameExpr(stmtName));
     executeCall.setArguments(new NodeList<>());
-
-    // Deleting some expressions may result in some String declarations with no initializer
-    // We delete those.
-    for (final var lvd : queryParameterizer.getStringDeclarations()) {
-      if (lvd.getVariableDeclarator().getInitializer().isEmpty()) {
-        for (final var ref : ASTs.findAllReferences(lvd)) {
-          newRoot = collapse(ref, newRoot);
-        }
-        lvd.getVariableDeclarationExpr().removeForced();
-      }
-    }
   }
 
   /**
