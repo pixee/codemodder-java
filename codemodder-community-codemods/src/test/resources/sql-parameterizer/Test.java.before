@@ -22,8 +22,7 @@ public final class Test {
   }
 
   public ResultSet nameConflict(String input) throws SQLException {
-    int i = 0;
-    int parameters = 1;
+    int preparedStatement = 0;
     String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
     var rs = conn.createStatement().executeQuery(sql);
     return rs;

@@ -4,62 +4,50 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.BinaryExpr;
-import com.github.javaparser.ast.expr.CastExpr;
+import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
-import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.ReturnStmt;
-import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.type.UnknownType;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import io.codemodder.Either;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
 import io.codemodder.ast.TryResourceDeclaration;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
+import org.javatuples.Pair;
 
+/** Contains most of the logic for the SQLParameterizerCodemod. */
 final class SQLParameterizer {
 
-  private static final String lambdaNamePrefix = "addAndReturnEmpty";
-  private static final String parameterVectorNamePrefix = "parameters";
   private static final String preparedStatementNamePrefix = "preparedStatement";
 
   private final MethodCallExpr executeCall;
 
   private CompilationUnit compilationUnit;
 
-  private BlockStmt methodBody;
-
   SQLParameterizer(final MethodCallExpr methodCallExpr) {
     this.executeCall = Objects.requireNonNull(methodCallExpr);
     this.compilationUnit = null;
-    this.methodBody = null;
   }
 
   /**
    * Checks if the {@link MethodCallExpr} is of one of the execute calls of {@link
    * java.sql.Statement} whose argument is not a {@link String} literal.
    */
-  public static boolean isParameterizationCandidate(final MethodCallExpr methodCallExpr) {
+  static boolean isParameterizationCandidate(final MethodCallExpr methodCallExpr) {
     // Maybe make this configurable? see:
     // https://github.com/find-sec-bugs/find-sec-bugs/wiki/Injection-detection
     try {
@@ -184,7 +172,10 @@ final class SQLParameterizer {
   }
 
   private Optional<Either<MethodCallExpr, LocalVariableDeclaration>> validateStatementCreationExpr(
-      Either<MethodCallExpr, LocalVariableDeclaration> stmtObject) {
+      final Either<MethodCallExpr, LocalVariableDeclaration> stmtObject) {
+    if (stmtObject.isRight() && !canChangeTypes(stmtObject.getRight())) {
+      return Optional.empty();
+    }
     if (stmtObject.isRight()
         && stmtObject.getRight() instanceof TryResourceDeclaration
         && !validateTryResource((TryResourceDeclaration) stmtObject.getRight(), executeCall)) {
@@ -216,13 +207,9 @@ final class SQLParameterizer {
    */
   private boolean validateTryResource(
       final TryResourceDeclaration stmtObject, final MethodCallExpr executeCall) {
-    // We first look if we can change the resource type to PreparedStatement
-    if (!canChangeTypes(stmtObject)) {
-      return false;
-    }
     // Essentially, we want the resource and call to be "next" to each other
     // (1) stmt resource is last and executeCall statement is the first on the try block
-    var maybeLastResource =
+    final var maybeLastResource =
         stmtObject
             .getStatement()
             .getResources()
@@ -241,15 +228,15 @@ final class SQLParameterizer {
       return true;
     }
     // (2) executeCall is an init expression of another resource next to stmtObject
-    var maybeInit =
+    final var maybeInit =
         ASTs.isInitExpr(executeCall)
             .flatMap(LocalVariableDeclaration::fromVariableDeclarator)
             .map(lvd -> lvd instanceof TryResourceDeclaration ? (TryResourceDeclaration) lvd : null)
             .filter(trd -> trd.getStatement() == stmtObject.getStatement());
     if (maybeInit.isPresent()) {
-      int stmtObjectIndex =
+      final int stmtObjectIndex =
           stmtObject.getStatement().getResources().indexOf(stmtObject.getVariableDeclarationExpr());
-      int executeIndex =
+      final int executeIndex =
           stmtObject
               .getStatement()
               .getResources()
@@ -259,67 +246,51 @@ final class SQLParameterizer {
     return false;
   }
 
-  private ExpressionStmt buildLambda(final String parameterVectorName, final String lambdaName) {
-    final var stringParameter = generateNameWithSuffixFor("expression", methodBody);
-    final var intParameter = generateNameWithSuffixFor("position", methodBody);
-    final NodeList<Parameter> parameters = new NodeList<>();
-    parameters.add(new Parameter(new UnknownType(), stringParameter));
-    parameters.add(new Parameter(new UnknownType(), intParameter));
-    final var body = new BlockStmt();
-    final var lambda = new LambdaExpr(parameters, body);
-
-    // parameter.get(position)
-    final var parGet =
-        new MethodCallExpr(
-            new NameExpr(parameterVectorName), "get", new NodeList<>(new NameExpr(intParameter)));
-    // parameters.get(position).append(s + "")
-    final var concat =
-        new MethodCallExpr(
-            parGet,
-            "append",
-            new NodeList<>(
-                new BinaryExpr(
-                    new NameExpr(stringParameter),
-                    new StringLiteralExpr(""),
-                    BinaryExpr.Operator.PLUS)));
-    body.addStatement(new ExpressionStmt(concat));
-
-    // return "";
-    body.addStatement(new ReturnStmt(new StringLiteralExpr("")));
-
-    lambda.setBody(body);
-
-    final var lambdaDecl =
-        new VariableDeclarator(
-            StaticJavaParser.parseType("BiFunction<Object,Integer,String>"), lambdaName, lambda);
-    return new ExpressionStmt(new VariableDeclarationExpr(lambdaDecl));
-  }
-
-  private String generateNameWithSuffix(String name, Node start) {
-    var allRef = start.findAll(SimpleName.class, n -> n.asString().equals(name));
+  private String generateNameWithSuffix(final String name, final Node start) {
+    var maybeName = ASTs.findNonCallableSimpleNameSource(start, name);
     int count = 0;
-    while (!allRef.isEmpty()) {
+    String nameWithSuffix = name;
+    while (maybeName.isPresent()) {
       count++;
-      String nameWithSuffix = name + count;
-      allRef = start.findAll(SimpleName.class, n -> n.asString().equals(nameWithSuffix));
+      nameWithSuffix = name + count;
+      maybeName = ASTs.findNonCallableSimpleNameSource(start, nameWithSuffix);
     }
-    return count == 0 ? name : name + count;
+    return count == 0 ? name : nameWithSuffix;
   }
 
-  private String generateNameWithSuffixFor(String name, Node start) {
-    var maybeDecl = ASTs.findNonCallableSimpleNameSource(start, name);
-    int count = 0;
-    while (maybeDecl.isPresent()) {
-      count++;
-      maybeDecl = ASTs.findNonCallableSimpleNameSource(start, name + count);
+  /** Removes an expression from an expression subtree. */
+  private Expression collapse(final Expression e, final Expression root) {
+    final var p = e.getParentNode().get();
+    if (p instanceof BinaryExpr) {
+      if (e.equals(((BinaryExpr) p).getLeft())) {
+        final var child = ((BinaryExpr) p).getRight();
+        if (p.equals(root)) {
+          return child;
+        } else {
+          p.replace(child);
+          return root;
+        }
+      }
+      if (e.equals(((BinaryExpr) p).getRight())) {
+        final var child = ((BinaryExpr) p).getLeft();
+        if (p.equals(root)) {
+          return child;
+        } else {
+          p.replace(child);
+          return root;
+        }
+      }
+    } else if (p instanceof EnclosedExpr) {
+      return collapse((Expression) p, root);
     }
-    return count == 0 ? name : name + count;
+    e.remove();
+    return root;
   }
 
-  private void fixInjections(final List<Deque<Expression>> injections, final String lambdaName) {
-    int count = 0;
+  private Pair<List<Expression>, Expression> fixInjections(
+      final List<Deque<Expression>> injections, Expression root) {
+    final List<Expression> combinedExpressions = new ArrayList<>();
     for (final var injection : injections) {
-      // TODO collapse here when size == 1
       final var start = injection.removeFirst();
       final var startString = start.asStringLiteralExpr().getValue();
       final var builder = new StringBuilder(startString);
@@ -328,289 +299,174 @@ final class SQLParameterizer {
 
       final var end = injection.removeLast();
       final var newEnd = end.asStringLiteralExpr().getValue().substring(1);
-      end.asStringLiteralExpr().setValue(newEnd);
-
-      for (final var expr : injection) {
-        final var newExpr = new MethodCallExpr();
-        expr.replace(newExpr);
-        newExpr.setName("apply");
-        newExpr.setScope(new NameExpr(lambdaName));
-        newExpr.setArguments(new NodeList<>(expr, new IntegerLiteralExpr(String.valueOf(count))));
+      if (newEnd.equals("")) {
+        root = collapse(end, root);
+      } else {
+        end.asStringLiteralExpr().setValue(newEnd);
       }
-      count++;
+      final var pair = combineExpressions(injection, root);
+      combinedExpressions.add(pair.getValue0());
+      root = pair.getValue1();
     }
+    return new Pair<>(combinedExpressions, root);
   }
 
-  private List<Statement> buildAndInitializeVector(
-      final int nInjections, final String parameterVectorName, final String forInitName) {
-    final var parameterVectorType = StaticJavaParser.parseType("ArrayList<StringBuilder>");
-    final var parameterInitialization =
-        String.format("for(int %1$s=0; %1$s < %2$s; %1$s++)", forInitName, nInjections)
-            + "{\n"
-            + String.format("%1$s.add(new StringBuilder())", parameterVectorName)
-            + ";\n}";
-    final var parameterVectorCreation =
-        new ObjectCreationExpr(
-            null, parameterVectorType.asClassOrInterfaceType(), new NodeList<>());
-    final var parameterDecl =
-        new ExpressionStmt(
-            new VariableDeclarationExpr(
-                new VariableDeclarator(
-                    parameterVectorType, parameterVectorName, parameterVectorCreation)));
-    return List.of(StaticJavaParser.parseStatement(parameterInitialization), parameterDecl);
-  }
+  private Pair<Expression, Expression> combineExpressions(
+      final Deque<Expression> injectionExpressions, Expression root) {
+    final var it = injectionExpressions.iterator();
+    Expression combined = it.next();
+    boolean atLeastOneString = false;
+    try {
+      atLeastOneString = combined.calculateResolvedType().describe().equals("java.lang.String");
+    } catch (final Exception ignored) {
+    }
+    root = collapse(combined, root);
 
-  private Statement buildForSetParameters(
-      final Expression scope, final String parameterVectorName, final String forInitName) {
-    // for(int i = 0; i<parameters.size(); i++){ stmt.setString(i, parameters.get(i+1).toString())}
-    final var parameterSetStatement =
-        String.format(
-            "%3$s.setString(%1$s ,%2$s.get(%1$s + 1).toString())",
-            forInitName, parameterVectorName, scope);
-    final var forParameters =
-        String.format(
-            "for(int %1$s=0; %1$s< %2$s.size(); %1$s++)", forInitName, parameterVectorName);
-    return StaticJavaParser.parseStatement(forParameters + "{\n" + parameterSetStatement + ";\n}");
-  }
+    while (it.hasNext()) {
+      final var expr = it.next();
+      try {
+        if (!atLeastOneString
+            && expr.calculateResolvedType().describe().equals("java.lang.String")) {
 
-  private void createLambdaAndParameterVector(
-      final int vectorSize,
-      final String parameterVectorName,
-      final String lambdaName,
-      final String forInitName) {
-    ASTTransforms.addStatementBeforeStatement(
-        methodBody.getStatement(0), buildLambda(parameterVectorName, lambdaName));
-    buildAndInitializeVector(vectorSize, parameterVectorName, forInitName)
-        .forEach(s -> ASTTransforms.addStatementBeforeStatement(methodBody.getStatement(0), s));
-
-    ASTTransforms.addImportIfMissing(this.compilationUnit, "java.util.ArrayList");
-    ASTTransforms.addImportIfMissing(this.compilationUnit, "java.util.BiFunction");
-    ASTTransforms.addImportIfMissing(this.compilationUnit, "java.lang.StringBuilder");
+          atLeastOneString = true;
+        }
+      } catch (final Exception ignored) {
+      }
+      root = collapse(expr, root);
+      combined = new BinaryExpr(combined, expr, Operator.PLUS);
+    }
+    if (atLeastOneString) return new Pair<>(combined, root);
+    else
+      return new Pair<>(new BinaryExpr(combined, new StringLiteralExpr(""), Operator.PLUS), root);
   }
 
   /**
    * The fix consists of the following:
    *
-   * <p>(1) Create the parameter vector and lambda at method start;
+   * <p>(0) If the execute call is the following resource, break the try into two statements;
    *
-   * <p>(2) Replace injectable expressions lambda call;
+   * <p>(1.a) Create a new PreparedStatement pstmt object;
    *
-   * <p>(3) Create a new PreparedStatement object right before call;
+   * <p>(1.b) Change Statement type to PreparedStatement and createStatement to prepareStatement;
    *
-   * <p>(4) Create a for including parameters in the parameter vector;
+   * <p>(2) Add a setString for every injection parameter;
    *
-   * <p>(5) Change executeCall() to execute().
+   * <p>(3) Change <stmtCreation>.execute*() to pstmt.execute().
    */
   private void fix(
-      final MethodCallExpr stmtCreation,
-      final List<Deque<Expression>> injections,
-      final Expression root,
+      final Either<MethodCallExpr, LocalVariableDeclaration> stmtCreation,
+      final QueryParameterizer queryParameterizer,
       final MethodCallExpr executeCall) {
 
-    final String stmtName = generateNameWithSuffix(preparedStatementNamePrefix, executeCall);
-    final String parameterVectorName =
-        generateNameWithSuffix(parameterVectorNamePrefix, methodBody);
-    final String lambdaName = generateNameWithSuffix(lambdaNamePrefix, methodBody);
-    final String parameterForInitName = generateNameWithSuffixFor("i", methodBody);
-    final String setForInitName = generateNameWithSuffixFor("i", executeCall);
-
-    // (1)
-    createLambdaAndParameterVector(
-        injections.size(), parameterVectorName, lambdaName, parameterForInitName);
-
-    // (2)
-    fixInjections(injections, lambdaName);
-
-    // (3)
-    final var executeStmt = ASTs.findParentStatementFrom(executeCall).get();
-    // stmt = stmt.getConnection().prepareStatement()
-    final var arguments = new NodeList<>(root);
-    stmtCreation.getArguments().stream()
-        .flatMap(init -> init.asMethodCallExpr().getArguments().stream())
-        .forEach(arguments::add);
-    // prepareStatement()
-    var prepareStatementCall =
-        new MethodCallExpr(stmtCreation.getScope().get(), "prepareStatement", arguments);
-    final var createPreparedStatement =
-        new ExpressionStmt(
-            new VariableDeclarationExpr(
-                new VariableDeclarator(
-                    StaticJavaParser.parseType("PreparedStatement"),
-                    stmtName,
-                    prepareStatementCall)));
-    ASTTransforms.addStatementBeforeStatement(executeStmt, createPreparedStatement);
-    ASTTransforms.addImportIfMissing(this.compilationUnit, "java.sql.PreparedStatement");
-
-    // (4)
-    ASTTransforms.addStatementBeforeStatement(
-        executeStmt,
-        buildForSetParameters(new NameExpr(stmtName), parameterVectorName, setForInitName));
-
-    // (5)
-    executeCall.setName("execute");
-    executeCall.setScope(new NameExpr(stmtName));
-    executeCall.setArguments(new NodeList<>());
-  }
-
-  /**
-   * The fix consists of the following:
-   *
-   * <p>(1) Create the parameter vector and lambda at method start;
-   *
-   * <p>(2) Replace injectable expressions with lambda call;
-   *
-   * <p>(3) Change Statement type to PreparedStatement and createStatement() to prepareStatement();
-   *
-   * <p>(3.b) If the execute call is the following resource, break the try into two statements;
-   *
-   * <p>(4) Create a for including parameters in the parameter vector;
-   *
-   * <p>(5) Change executeCall() to execute().
-   */
-  private void fix(
-      final TryResourceDeclaration stmtCreation,
-      final List<Deque<Expression>> injections,
-      final Expression root,
-      final MethodCallExpr executeCall) {
-    final String stmtName = stmtCreation.getName();
-    final String parameterVectorName =
-        generateNameWithSuffix(parameterVectorNamePrefix, executeCall);
-    final String lambdaName = generateNameWithSuffix(lambdaNamePrefix, methodBody);
-    final String parameterForInitName = generateNameWithSuffixFor("i", methodBody);
-    final String setForInitName = generateNameWithSuffixFor("i", executeCall);
-    // (1)
-    createLambdaAndParameterVector(
-        injections.size(), parameterVectorName, lambdaName, parameterForInitName);
-
-    // (2)
-    fixInjections(injections, lambdaName);
-
-    // (3)
-    stmtCreation.getVariableDeclarator().setType(StaticJavaParser.parseType("PreparedStatement"));
-    final var arguments = new NodeList<>(root);
-    stmtCreation.getVariableDeclarator().getInitializer().stream()
-        .flatMap(init -> init.asMethodCallExpr().getArguments().stream())
-        .forEach(arguments::add);
-    stmtCreation
-        .getVariableDeclarator()
-        .getInitializer()
-        .ifPresent(expr -> expr.asMethodCallExpr().setName("prepareStatement"));
-    stmtCreation
-        .getVariableDeclarator()
-        .getInitializer()
-        .ifPresent(expr -> expr.asMethodCallExpr().setArguments(arguments));
-    // (3.b)
+    var newRoot = queryParameterizer.getRoot();
     var executeStmt = ASTs.findParentStatementFrom(executeCall).get();
-    if (executeStmt == stmtCreation.getStatement()) {
-      int stmtObjectIndex =
+    // (0)
+    if (stmtCreation.isRight() && executeStmt == stmtCreation.getRight().getStatement()) {
+      final int stmtObjectIndex =
           stmtCreation
+              .getRight()
               .getStatement()
+              .asTryStmt()
               .getResources()
-              .indexOf(stmtCreation.getVariableDeclarationExpr());
+              .indexOf(stmtCreation.getRight().getVariableDeclarationExpr());
 
       executeStmt =
-          ASTTransforms.splitResources(stmtCreation.getStatement(), stmtObjectIndex)
+          ASTTransforms.splitResources(
+                  stmtCreation.getRight().getStatement().asTryStmt(), stmtObjectIndex)
               .getTryBlock()
               .getStatement(0);
     }
 
-    // (4)
-    ASTTransforms.addStatementBeforeStatement(
-        executeStmt,
-        buildForSetParameters(new NameExpr(stmtName), parameterVectorName, setForInitName));
+    final String stmtName =
+        stmtCreation.ifLeftOrElseGet(
+            mce -> generateNameWithSuffix(preparedStatementNamePrefix, mce), lvd -> lvd.getName());
 
-    // (5)
+    // (1)
+    final var args =
+        stmtCreation.ifLeftOrElseGet(
+            mce -> mce.getArguments(),
+            lvd ->
+                lvd.getVariableDeclarator()
+                    .getInitializer()
+                    .get()
+                    .asMethodCallExpr()
+                    .getArguments());
+    args.addFirst(newRoot);
+
+    // (1.a)
+    if (stmtCreation.isLeft()) {
+      final var pstmtCreationStmt =
+          new ExpressionStmt(
+              new VariableDeclarationExpr(
+                  new VariableDeclarator(
+                      StaticJavaParser.parseType("PreparedStatement"),
+                      stmtName,
+                      new MethodCallExpr(
+                          stmtCreation.getLeft().getScope().get(), "prepareStatement", args))));
+      ASTTransforms.addStatementBeforeStatement(executeStmt, pstmtCreationStmt);
+
+      // (1.b)
+    } else {
+      stmtCreation
+          .getRight()
+          .getVariableDeclarator()
+          .setType(StaticJavaParser.parseType("PreparedStatement"));
+      stmtCreation
+          .getRight()
+          .getVariableDeclarator()
+          .getInitializer()
+          .ifPresent(expr -> expr.asMethodCallExpr().setName("prepareStatement"));
+      stmtCreation
+          .getRight()
+          .getVariableDeclarator()
+          .getInitializer()
+          .ifPresent(expr -> expr.asMethodCallExpr().setArguments(args));
+    }
+
+    // (2)
+    final var pair =
+        fixInjections(queryParameterizer.getInjections(), queryParameterizer.getRoot());
+    newRoot = pair.getValue1();
+    final var combinedExpressions = pair.getValue0();
+
+    for (int i = 0; i < combinedExpressions.size(); i++) {
+      final var expr = combinedExpressions.get(i);
+      final var setStmt =
+          new ExpressionStmt(
+              new MethodCallExpr(
+                  new NameExpr(stmtName),
+                  "setString",
+                  new NodeList<>(new IntegerLiteralExpr(String.valueOf(i + 1)), expr)));
+      ASTTransforms.addStatementBeforeStatement(executeStmt, setStmt);
+    }
+
+    ASTTransforms.addImportIfMissing(compilationUnit, "java.sql.PreparedStatement");
+
+    // (3)
     executeCall.setName("execute");
-    executeCall.setScope(
-        new EnclosedExpr(
-            (new CastExpr(
-                StaticJavaParser.parseType("PreparedStatement"), executeCall.getScope().get()))));
+    executeCall.setScope(new NameExpr(stmtName));
     executeCall.setArguments(new NodeList<>());
+
+    // Deleting some expressions may result in some String declarations with no initializer
+    // We delete those.
+    for (final var lvd : queryParameterizer.getStringDeclarations()) {
+      if (lvd.getVariableDeclarator().getInitializer().isEmpty()) {
+        for (final var ref : ASTs.findAllReferences(lvd)) {
+          newRoot = collapse(ref, newRoot);
+        }
+        lvd.getVariableDeclarationExpr().removeForced();
+      }
+    }
   }
 
   /**
-   * The fix consists of the following:
-   *
-   * <p>(1) Create the parameter vector and lambda at method start;
-   *
-   * <p>(2) Replace injectable expressions with lambda call;
-   *
-   * <p>(3) create a new PreparedStatement right before call;
-   *
-   * <p>(4) Create a for including parameters in the parameter vector;
-   *
-   * <p>(5) Change executeCall() to execute().
+   * Checks if {@code methodCall} is a query call that needs to be fixed and fixes if that's the
+   * case.
    */
-  private void fix(
-      final LocalVariableDeclaration stmtCreation,
-      final List<Deque<Expression>> injections,
-      final Expression root,
-      final MethodCallExpr executeCall) {
-    // TODO remove fors if there is a single expression injection
+  boolean checkAndFix() {
 
-    final var stmtName = stmtCreation.getName();
-    final String parameterVectorName =
-        generateNameWithSuffix(parameterVectorNamePrefix, executeCall);
-    final String lambdaName = generateNameWithSuffix(lambdaNamePrefix, methodBody);
-    final String parameterForInitName = generateNameWithSuffixFor("i", methodBody);
-    final String setForInitName = generateNameWithSuffixFor("i", executeCall);
-
-    // (1)
-    createLambdaAndParameterVector(
-        injections.size(), parameterVectorName, lambdaName, parameterForInitName);
-
-    // (2)
-    fixInjections(injections, lambdaName);
-
-    // (3)
-    final var executeStmt = ASTs.findParentStatementFrom(executeCall).get();
-    // stmt.close()
-    ASTTransforms.addStatementBeforeStatement(
-        executeStmt,
-        new ExpressionStmt(new MethodCallExpr(new NameExpr(stmtCreation.getName()), "close")));
-
-    // stmt = stmt.getConnection().prepareStatement()
-    final var arguments = new NodeList<>(root);
-    stmtCreation.getVariableDeclarator().getInitializer().stream()
-        .flatMap(init -> init.asMethodCallExpr().getArguments().stream())
-        .forEach(arguments::add);
-    final var createPreparedStatement =
-        new ExpressionStmt(
-            new AssignExpr(
-                new NameExpr(stmtName),
-                new MethodCallExpr(
-                    new MethodCallExpr(new NameExpr(stmtName), "getConnection"),
-                    "prepareStatement",
-                    arguments),
-                AssignExpr.Operator.ASSIGN));
-    ASTTransforms.addStatementBeforeStatement(executeStmt, createPreparedStatement);
-    ASTTransforms.addImportIfMissing(this.compilationUnit, "java.sql.PreparedStatement");
-
-    // (4)
-    ASTTransforms.addStatementBeforeStatement(
-        executeStmt,
-        buildForSetParameters(
-            new EnclosedExpr(
-                new CastExpr(
-                    StaticJavaParser.parseType("PreparedStatement"), new NameExpr(stmtName))),
-            parameterVectorName,
-            setForInitName));
-
-    // (5)
-    executeCall.setName("execute");
-    executeCall.setScope(
-        new EnclosedExpr(
-            (new CastExpr(
-                StaticJavaParser.parseType("PreparedStatement"), executeCall.getScope().get()))));
-    executeCall.setArguments(new NodeList<>());
-  }
-
-  public boolean checkAndFix() {
-
-    var maybeMethodBody = ASTs.findMethodBodyFrom(executeCall).flatMap(MethodDeclaration::getBody);
-    if (executeCall.findCompilationUnit().isPresent() && maybeMethodBody.isPresent()) {
+    if (executeCall.findCompilationUnit().isPresent()) {
       this.compilationUnit = executeCall.findCompilationUnit().get();
-      this.methodBody = maybeMethodBody.get();
     } else {
       return false;
     }
@@ -621,25 +477,21 @@ final class SQLParameterizer {
           findStatementCreationExpr(executeCall).flatMap(this::validateStatementCreationExpr);
       if (stmtObject.isPresent()) {
         // Now look for injections
-        final var injections =
-            new QueryParameterizer(executeCall.getArgument(0)).checkAndGatherParameters();
-        if (injections.isEmpty()) {
+        final var queryp = new QueryParameterizer(executeCall.getArgument(0));
+        // If any of the strings used in the query is declared after the stmt object, reject
+        final var queryInScope =
+            stmtObject
+                .get()
+                .ifLeftOrElseGet(
+                    mcd -> false,
+                    stmtLVD ->
+                        queryp.getStringDeclarations().stream()
+                            .anyMatch(lvd -> stmtLVD.getScope().inScope(lvd.getStatement())));
+
+        if (queryp.getInjections().isEmpty() || queryInScope) {
           return false;
         }
-        if (stmtObject.get().isLeft()) {
-          fix(stmtObject.get().getLeft(), injections, executeCall.getArgument(0), executeCall);
-        } else {
-          if (stmtObject.get().getRight() instanceof TryResourceDeclaration) {
-            fix(
-                (TryResourceDeclaration) stmtObject.get().getRight(),
-                injections,
-                executeCall.getArgument(0),
-                executeCall);
-
-          } else {
-            fix(stmtObject.get().getRight(), injections, executeCall.getArgument(0), executeCall);
-          }
-        }
+        fix(stmtObject.get(), queryp, executeCall);
         return true;
       }
     }
