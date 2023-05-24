@@ -10,7 +10,6 @@ import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.Newlines;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 
 @Codemod(
@@ -38,10 +37,5 @@ public final class SanitizeHttpHeaderCodemod extends SarifPluginJavaParserChange
   @Override
   public List<DependencyGAV> dependenciesRequired() {
     return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
-  }
-
-  @Override
-  public Optional<String> getSourceControlUrl() {
-    return Optional.of("https://github.com/pixee/java-security-toolkit");
   }
 }

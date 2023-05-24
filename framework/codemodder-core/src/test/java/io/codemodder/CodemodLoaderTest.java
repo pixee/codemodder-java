@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -46,6 +47,11 @@ final class CodemodLoaderTest {
     @Override
     public String getDescription() {
       return "description";
+    }
+
+    @Override
+    public Optional<String> getSourceControlUrl() {
+      return Optional.empty();
     }
 
     @Override

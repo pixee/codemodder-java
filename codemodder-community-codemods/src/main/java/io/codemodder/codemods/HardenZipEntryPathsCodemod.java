@@ -9,7 +9,6 @@ import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.ZipSecurity;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 
 /** Adds path escaping detection to {@link java.util.zip.ZipInputStream}. */
@@ -46,10 +45,5 @@ public final class HardenZipEntryPathsCodemod
   @Override
   public List<DependencyGAV> dependenciesRequired() {
     return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
-  }
-
-  @Override
-  public Optional<String> getSourceControlUrl() {
-    return Optional.of("https://github.com/pixee/java-security-toolkit");
   }
 }

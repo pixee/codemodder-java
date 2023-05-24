@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
+/** A reporter with empty strings for testing purposes. */
 public final class EmptyReporter implements CodemodReporterStrategy {
   @Override
   public String getSummary() {

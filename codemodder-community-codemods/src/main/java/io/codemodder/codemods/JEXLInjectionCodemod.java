@@ -56,11 +56,6 @@ public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expressio
     return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 
-  @Override
-  public Optional<String> getSourceControlUrl() {
-    return Optional.of("https://github.com/pixee/java-security-toolkit");
-  }
-
   /**
    * Detects if a {@link Expression} that is the scope of a {@link
    * JexlExpression#evaluate(org.apache.commons.jexl3.JexlContext)} can be sandboxed and tries to

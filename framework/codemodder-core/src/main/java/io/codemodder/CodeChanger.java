@@ -15,9 +15,7 @@ public interface CodeChanger {
   String getDescription();
 
   /** The URL of the source code of the security control API added in this change, if any. */
-  default Optional<String> getSourceControlUrl() {
-    return Optional.empty();
-  }
+  Optional<String> getSourceControlUrl();
 
   /**
    * A list of references for further reading on the issues this codemod addresses or other
