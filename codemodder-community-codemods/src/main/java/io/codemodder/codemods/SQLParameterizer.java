@@ -33,7 +33,8 @@ import org.javatuples.Pair;
 /** Contains most of the logic for the SQLParameterizerCodemod. */
 final class SQLParameterizer {
 
-  private static final String preparedStatementNamePrefix = "preparedStatement";
+  private static final String preparedStatementNamePrefix = "stmt";
+  private static final String preparedStatementNamePrefixAlternative = "statement";
 
   private final MethodCallExpr executeCall;
 
@@ -248,15 +249,24 @@ final class SQLParameterizer {
   }
 
   private String generateNameWithSuffix(final String name, final Node start) {
-    var maybeName = ASTs.findNonCallableSimpleNameSource(start, name);
+    String actualName = preparedStatementNamePrefix;
+    var maybeName = ASTs.findNonCallableSimpleNameSource(start, actualName);
+    // Try for statement
+    if(maybeName.isPresent()){
+	    actualName = preparedStatementNamePrefixAlternative;
+    	    maybeName = ASTs.findNonCallableSimpleNameSource(start, actualName);
+	    if(maybeName.isPresent()){
+		    actualName = preparedStatementNamePrefix;
+	    }
+    }
     int count = 0;
-    String nameWithSuffix = name;
+    String nameWithSuffix = actualName;
     while (maybeName.isPresent()) {
       count++;
-      nameWithSuffix = name + count;
+      nameWithSuffix = actualName + count;
       maybeName = ASTs.findNonCallableSimpleNameSource(start, nameWithSuffix);
     }
-    return count == 0 ? name : nameWithSuffix;
+    return count == 0 ? actualName : nameWithSuffix;
   }
 
   /** Removes an expression from an expression subtree. */

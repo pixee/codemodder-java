@@ -22,9 +22,17 @@ public final class Test {
   }
 
   public ResultSet nameConflict(String input) throws SQLException {
-    int preparedStatement = 0;
+    int stmt = 0;
     String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
-    var rs = conn.createStatement().executeQuery(sql);
+    ResultSet rs = conn.createStatement().executeQuery(sql);
+    return rs;
+  }
+
+  public ResultSet doubleNameConflict(String input) throws SQLException {
+    int stmt = 0;
+    int statement = 0;
+    String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    ResultSet rs = conn.createStatement().executeQuery(sql);
     return rs;
   }
 

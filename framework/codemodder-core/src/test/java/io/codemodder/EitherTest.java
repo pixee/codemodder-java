@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-public class EitherTest {
+final class EitherTest {
 
   @Test
   void it_excludes_the_other_value() {

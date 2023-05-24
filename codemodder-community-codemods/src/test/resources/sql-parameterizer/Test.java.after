@@ -19,18 +19,28 @@ public final class Test {
 
   public ResultSet directStatement(String input) throws SQLException {
     String sql = "SELECT * FROM USERS WHERE USER = ?";
-    PreparedStatement preparedStatement = conn.prepareStatement(sql);
-    preparedStatement.setString(1, input);
-    var rs = preparedStatement.execute();
+    PreparedStatement stmt = conn.prepareStatement(sql);
+    stmt.setString(1, input);
+    var rs = stmt.execute();
     return rs;
   }
 
   public ResultSet nameConflict(String input) throws SQLException {
-    int preparedStatement = 0;
+    int stmt = 0;
     String sql = "SELECT * FROM USERS WHERE USER = ?";
-    PreparedStatement preparedStatement1 = conn.prepareStatement(sql);
-    preparedStatement1.setString(1, input);
-    var rs = preparedStatement1.execute();
+    PreparedStatement statement = conn.prepareStatement(sql);
+    statement.setString(1, input);
+    ResultSet rs = statement.execute();
+    return rs;
+  }
+
+  public ResultSet doubleNameConflict(String input) throws SQLException {
+    int stmt = 0;
+    int statement = 0;
+    String sql = "SELECT * FROM USERS WHERE USER = ?";
+    PreparedStatement stmt1 = conn.prepareStatement(sql);
+    stmt1.setString(1, input);
+    ResultSet rs = stmt1.execute();
     return rs;
   }
 
