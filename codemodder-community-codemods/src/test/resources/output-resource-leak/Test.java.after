@@ -1,0 +1,5 @@
+package com.acme.testcode.resourceleak;
+
+public class Test {
+
+}

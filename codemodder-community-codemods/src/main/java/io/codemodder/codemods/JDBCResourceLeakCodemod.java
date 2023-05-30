@@ -20,7 +20,7 @@ import javax.inject.Inject;
     id = "codeql:java/database-resource-leak",
     author = "andre.silva@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
+public final class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public JDBCResourceLeakCodemod(
