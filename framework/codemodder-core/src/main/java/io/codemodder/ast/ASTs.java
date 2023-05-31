@@ -647,7 +647,7 @@ public final class ASTs {
   /**
    * Returns a {@link List} containing all the referenced of {@code localDeclaration} in its scope.
    */
-  public static List<NameExpr> findAllReferences(LocalVariableDeclaration localDeclaration) {
+  public static List<NameExpr> findAllReferences(final LocalVariableDeclaration localDeclaration) {
     return localDeclaration.getScope().stream()
         .flatMap(
             n ->
@@ -656,6 +656,11 @@ public final class ASTs {
                         NameExpr.class,
                         ne -> ne.getNameAsString().equals(localDeclaration.getName()))
                     .stream())
+        .filter(
+            ne ->
+                findNonCallableSimpleNameSource(ne.getName())
+                    .filter(n -> n == localDeclaration.getVariableDeclarator())
+                    .isPresent())
         .collect(Collectors.toList());
   }
 

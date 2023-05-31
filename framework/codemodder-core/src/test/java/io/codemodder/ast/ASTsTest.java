@@ -584,6 +584,29 @@ final class ASTsTest {
         is(true));
   }
 
+  @Test
+  void it_finds_all_correct_references() {
+    var code =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    int i = 0;\n"
+            + "    class local{\n"
+            + "      void bar(){\n"
+            + "        int i = 1;\n"
+            + "        int a = i;\n"
+            + "      }\n"
+            + "    }\n"
+            + "    int b = i;\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var lvd =
+        LocalVariableDeclaration.fromVariableDeclarator(cu.findAll(VariableDeclarator.class).get(0))
+            .get();
+    assertThat(ASTs.findAllReferences(lvd).size(), is(1));
+  }
+
   void assertEqualsIgnoreSpace(String string, String expected) {
     var stream = Stream.of(string.split("\n"));
     var expStream = Stream.of(expected.split("\n"));
