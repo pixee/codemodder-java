@@ -62,7 +62,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
           new JavaParserCodemodRunner(
               cachingJavaParser, (JavaParserChanger) codeChanger, encodingDetector);
     } else if (codeChanger instanceof RawFileChanger) {
-      codemodRunner = new RawFileCodemodRunner((RawFileChanger) codeChanger, encodingDetector);
+      codemodRunner = new RawFileCodemodRunner((RawFileChanger) codeChanger);
     } else {
       throw new UnsupportedOperationException(
           "unsupported codeChanger type: " + codeChanger.getClass().getName());

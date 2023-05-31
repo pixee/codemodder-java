@@ -25,6 +25,9 @@ dependencies {
     api(libs.javaparser.symbolsolver.logic)
     api(libs.javaparser.symbolsolver.model)
     api(libs.javadiff)
+    api("com.theokanning.openai-gpt3-java:api:0.12.0")
+    api("com.theokanning.openai-gpt3-java:service:0.12.0")
+    api("com.theokanning.openai-gpt3-java:client:0.12.0")
 
     implementation(libs.tuples)
     implementation(libs.logback.classic)
