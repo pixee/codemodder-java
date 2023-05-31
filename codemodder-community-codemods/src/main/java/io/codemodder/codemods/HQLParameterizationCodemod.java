@@ -177,14 +177,26 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
 
     // Deleting some expressions may result in some String declarations with no initializer
     // We delete those.
-    for (final var lvd : queryParameterizer.getStringDeclarations()) {
-      if (lvd.getVariableDeclarator().getInitializer().isEmpty()) {
+    var allEmptyLVD =
+        queryParameterizer.getStringDeclarations().stream()
+            .filter(lvd -> lvd.getVariableDeclarator().getInitializer().isEmpty())
+            .collect(Collectors.toSet());
+    var newEmptyLVDs = allEmptyLVD;
+    while (!newEmptyLVDs.isEmpty()) {
+      for (var lvd : newEmptyLVDs) {
         for (final var ref : ASTs.findAllReferences(lvd)) {
           root = collapse(ref, root);
         }
         lvd.getVariableDeclarationExpr().removeForced();
       }
+      newEmptyLVDs =
+          queryParameterizer.getStringDeclarations().stream()
+              .filter(lvd -> lvd.getVariableDeclarator().getInitializer().isEmpty())
+              .collect(Collectors.toSet());
+      newEmptyLVDs.removeAll(allEmptyLVD);
+      allEmptyLVD.addAll(newEmptyLVDs);
     }
+
     queryCall.setArgument(0, root);
   }
 }

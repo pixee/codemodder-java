@@ -9,9 +9,37 @@ public final class Test {
 
   private Connection conn;
 
-  public ResultSet doUserLookup_single_concat_single_quote(String input) throws SQLException {
+  public ResultSet indirectStatement(String input) throws SQLException {
     String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
     Statement stmt = conn.createStatement();
     return stmt.executeQuery(sql);
+  }
+
+  public ResultSet directStatement(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    var rs = conn.createStatement().executeQuery(sql);
+    return rs;
+  }
+
+  public ResultSet nameConflict(String input) throws SQLException {
+    int stmt = 0;
+    String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    ResultSet rs = conn.createStatement().executeQuery(sql);
+    return rs;
+  }
+
+  public ResultSet doubleNameConflict(String input) throws SQLException {
+    int stmt = 0;
+    int statement = 0;
+    String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    ResultSet rs = conn.createStatement().executeQuery(sql);
+    return rs;
+  }
+
+  public ResultSet tryResource(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    try(Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
+      return rs;
+    }
   }
 }

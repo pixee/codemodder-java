@@ -29,7 +29,7 @@ dependencies {
 
     implementation(libs.dom4j)
     implementation(libs.commons.jexl)
-    implementation("io.openpixee:java-jdbc-parameterizer:0.0.8") // TODO bring into monorepo
+    implementation(libs.tuples)
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)

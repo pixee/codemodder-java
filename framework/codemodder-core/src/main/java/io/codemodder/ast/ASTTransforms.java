@@ -18,8 +18,8 @@ import com.github.javaparser.ast.stmt.TryStmt;
 public final class ASTTransforms {
   /** Add an import in alphabetical order. */
   public static void addImportIfMissing(final CompilationUnit cu, final String className) {
-    NodeList<ImportDeclaration> imports = cu.getImports();
-    ImportDeclaration newImport = new ImportDeclaration(className, false, false);
+    final NodeList<ImportDeclaration> imports = cu.getImports();
+    final ImportDeclaration newImport = new ImportDeclaration(className, false, false);
     if (addInOrdrerIfNeeded(className, imports, newImport)) {
       return;
     }
@@ -27,12 +27,14 @@ public final class ASTTransforms {
   }
 
   private static boolean addInOrdrerIfNeeded(
-      String className, NodeList<ImportDeclaration> imports, ImportDeclaration newImport) {
+      final String className,
+      final NodeList<ImportDeclaration> imports,
+      final ImportDeclaration newImport) {
     if (imports.contains(newImport)) {
       return true;
     }
     for (int i = 0; i < imports.size(); i++) {
-      ImportDeclaration existingImport = imports.get(i);
+      final ImportDeclaration existingImport = imports.get(i);
 
       if (existingImport.getNameAsString().compareTo(className) > 0) {
         // Workaround for a bug caused by adding imports at the top
@@ -56,8 +58,8 @@ public final class ASTTransforms {
   }
 
   public static void addStaticImportIfMissing(final CompilationUnit cu, final String method) {
-    NodeList<ImportDeclaration> imports = cu.getImports();
-    ImportDeclaration newMethodImport = new ImportDeclaration(method, true, false);
+    final NodeList<ImportDeclaration> imports = cu.getImports();
+    final ImportDeclaration newMethodImport = new ImportDeclaration(method, true, false);
     if (addInOrdrerIfNeeded(method, imports, newMethodImport)) {
       return;
     }
@@ -76,14 +78,14 @@ public final class ASTTransforms {
     // NodeWithBody: ForStmt, ForEachStmt, DoStmt, WhileStmt
     // IfStmt, LabeledStmt
     // LambdaExpr (mostly due to JavaParser's grammar)
-    var parent = existingStatement.getParentNode().get();
+    final var parent = existingStatement.getParentNode().get();
     // In those cases we need to create a BlockStmt for
     // the existing and newly added Statement
     if (parent instanceof NodeWithBody
         || parent instanceof IfStmt
         || parent instanceof LabeledStmt
         || parent instanceof LambdaExpr) {
-      var newBody = new BlockStmt();
+      final var newBody = new BlockStmt();
       existingStatement.replace(newBody);
       newBody.addStatement(newStatement);
       newBody.addStatement(existingStatement);
@@ -92,7 +94,7 @@ public final class ASTTransforms {
       // in a:
       // NodeWithBody, MethodDeclaration, NodeWithBlockStmt, SwitchStmt(?)
       // No way (or reason) to add a Statement before those, maybe throw an Error?
-      var block = (BlockStmt) parent;
+      final var block = (BlockStmt) parent;
       // Workaround for a bug on LexicalPreservingPrinter (see
       // https://github.com/javaparser/javaparser/issues/3746)
       if (existingStatement.equals(block.getStatement(0))) {
@@ -111,18 +113,18 @@ public final class ASTTransforms {
    */
   public static void addStatementAfterStatement(
       final Statement existingStatement, final Statement newStatement) {
-    var parent = existingStatement.getParentNode().get();
+    final var parent = existingStatement.getParentNode().get();
     // See comments in addStatementBeforeStatement
     if (parent instanceof NodeWithBody
         || parent instanceof IfStmt
         || parent instanceof LabeledStmt
         || parent instanceof LambdaExpr) {
-      var newBody = new BlockStmt();
+      final var newBody = new BlockStmt();
       existingStatement.replace(newBody);
       newBody.addStatement(existingStatement);
       newBody.addStatement(newStatement);
     } else {
-      var block = (BlockStmt) parent;
+      final var block = (BlockStmt) parent;
       block.getStatements().addAfter(newStatement, existingStatement);
     }
   }
@@ -133,11 +135,13 @@ public final class ASTTransforms {
    * its scope, then wrap the declaration into as a resource of a try stmt.
    */
   public static TryStmt wrapIntoResource(
-      ExpressionStmt stmt, VariableDeclarationExpr vdecl, LocalVariableScope scope) {
-    var wrapper = new TryStmt();
+      final ExpressionStmt stmt,
+      final VariableDeclarationExpr vdecl,
+      final LocalVariableScope scope) {
+    final var wrapper = new TryStmt();
     wrapper.getResources().add(vdecl);
 
-    var block = new BlockStmt();
+    final var block = new BlockStmt();
     scope
         .getStatements()
         .forEach(
@@ -153,16 +157,16 @@ public final class ASTTransforms {
   }
 
   /** Given a {@link TryStmt} split its resources into two nested {@link TryStmt}s. */
-  public static TryStmt splitResources(TryStmt stmt, int index) {
-    var resources = stmt.getResources();
-    var head = new NodeList<Expression>();
-    var tail = new NodeList<Expression>();
+  public static TryStmt splitResources(final TryStmt stmt, final int index) {
+    final var resources = stmt.getResources();
+    final var head = new NodeList<Expression>();
+    final var tail = new NodeList<Expression>();
     for (int i = 0; i <= index; i++) head.add(resources.get(i));
     for (int i = index + 1; i < resources.size(); i++) tail.add(resources.get(i));
 
     stmt.setResources(head);
 
-    var innerTry = new TryStmt();
+    final var innerTry = new TryStmt();
     innerTry.setResources(tail);
     innerTry.setTryBlock(stmt.getTryBlock());
     stmt.setTryBlock(new BlockStmt(new NodeList<>(innerTry)));
@@ -174,8 +178,8 @@ public final class ASTTransforms {
    * Given a {@link TryStmt} without any finally and catch clauses, and that is the first statement
    * of a try with resources block, merge the two try statements into one.
    */
-  public static TryStmt combineResources(TryStmt innerTry) {
-    var outerTry = (TryStmt) innerTry.getParentNode().flatMap(Node::getParentNode).get();
+  public static TryStmt combineResources(final TryStmt innerTry) {
+    final var outerTry = (TryStmt) innerTry.getParentNode().flatMap(Node::getParentNode).get();
     innerTry.getResources().forEach(outerTry.getResources()::add);
     outerTry.getTryBlock().getStatements().stream()
         .skip(1)
