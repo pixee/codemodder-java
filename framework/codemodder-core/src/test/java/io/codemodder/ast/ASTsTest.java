@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -466,7 +467,7 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(1);
     var local_vd = cu.findAll(VariableDeclarator.class).get(1);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+        ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getName().asString())
             .get()
             .getVariableDeclarator()
             .equals(local_vd),
@@ -489,7 +490,7 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(1);
     var local_vd = cu.findAll(VariableDeclarator.class).get(1);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+        ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getName().asString())
             .get()
             .getVariableDeclarator()
             .equals(local_vd),
@@ -511,7 +512,8 @@ final class ASTsTest {
     var cu = new JavaParser().parse(code).getResult().get();
     var ne = cu.findAll(NameExpr.class).get(0);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString()).isEmpty(), is(true));
+        ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getName().asString()).isEmpty(),
+        is(true));
   }
 
   @Test
@@ -530,7 +532,7 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(0);
     var local_vd = cu.findAll(VariableDeclarator.class).get(1);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+        ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getName().asString())
             .get()
             .getVariableDeclarator()
             .equals(local_vd),
@@ -553,7 +555,7 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(0);
     var local_vd = cu.findAll(VariableDeclarator.class).get(1);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+        ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getName().asString())
             .get()
             .getVariableDeclarator()
             .equals(local_vd),
@@ -577,7 +579,7 @@ final class ASTsTest {
     var ne = cu.findAll(NameExpr.class).get(1);
     var local_vd = cu.findAll(VariableDeclarator.class).get(2);
     assertThat(
-        ASTs.findEarliestLocalDeclarationOf(ne, ne.getName().asString())
+        ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getName().asString())
             .get()
             .getVariableDeclarator()
             .equals(local_vd),
@@ -605,6 +607,71 @@ final class ASTsTest {
         LocalVariableDeclaration.fromVariableDeclarator(cu.findAll(VariableDeclarator.class).get(0))
             .get();
     assertThat(ASTs.findAllReferences(lvd).size(), is(1));
+  }
+
+  @Test
+  void it_calculates_scope_of_method_parameter() {
+    var code =
+        "class A {\n"
+            + "\n"
+            + "  void foo(int p) {\n"
+            + "    int a = 1;\n"
+            + "    int b = 2;\n"
+            + "    int c = 3;\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var parameter = cu.findAll(Parameter.class).get(0);
+    assertThat(new ParameterDeclaration(parameter).getScope().getStatements().size(), is(3));
+  }
+
+  @Test
+  void it_calculates_scope_of_constructor_parameter() {
+    var code =
+        "class A {\n"
+            + "\n"
+            + "  void A(int p) {\n"
+            + "    int a = 1;\n"
+            + "    int b = 2;\n"
+            + "    int c = 3;\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var parameter = cu.findAll(Parameter.class).get(0);
+    assertThat(new ParameterDeclaration(parameter).getScope().getStatements().size(), is(3));
+  }
+
+  @Test
+  void it_calculates_scope_of_catch_parameter() {
+    var code =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    try{\n"
+            + "    }catch(Exception e){\n"
+            + "      int a = 1;\n"
+            + "      int b = 2;\n"
+            + "      int c = 3;\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var parameter = cu.findAll(Parameter.class).get(0);
+    assertThat(new ParameterDeclaration(parameter).getScope().getStatements().size(), is(3));
+  }
+
+  @Test
+  void it_calculates_scope_of_lambda_parameter() {
+    var code =
+        "class A {\n"
+            + "\n"
+            + "  void foo() {\n"
+            + "    Predicate<Integer> bar = i -> true;\n"
+            + "  }\n"
+            + "}";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var parameter = cu.findAll(Parameter.class).get(0);
+    assertThat(new ParameterDeclaration(parameter).getScope().getStatements().size(), is(1));
   }
 
   void assertEqualsIgnoreSpace(String string, String expected) {

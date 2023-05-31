@@ -29,7 +29,7 @@ public final class ForEachDeclaration extends LocalVariableDeclaration {
   }
 
   @Override
-  protected LocalVariableScope findScope() {
-    return LocalVariableScope.fromForEachDeclaration(stmt);
+  protected LocalScope findScope() {
+    return LocalScope.fromForEachDeclaration(stmt);
   }
 }

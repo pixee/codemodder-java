@@ -66,7 +66,7 @@ final class JDBCResourceLeakFixer {
         }
         if (mceScope.isNameExpr()) {
           final var maybeLVD =
-              ASTs.findEarliestLocalDeclarationOf(
+              ASTs.findEarliestLocalVariableDeclarationOf(
                   mceScope, mceScope.asNameExpr().getNameAsString());
 
           if (maybeLVD.filter(lvd -> escapesRootScope(lvd, n -> true)).isPresent()) {
@@ -131,7 +131,7 @@ final class JDBCResourceLeakFixer {
     for (final var ae : allAE) {
       if (ae.getTarget().isNameExpr()) {
         final var ne = ae.getTarget().asNameExpr();
-        final var maybeLVD = ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString());
+        final var maybeLVD = ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getNameAsString());
         maybeLVD.ifPresentOrElse(
             lvd -> {
               if (!memory.contains(lvd.getVariableDeclarator())) allLVD.add(lvd);
@@ -164,7 +164,7 @@ final class JDBCResourceLeakFixer {
     final var maybeInit = ASTs.isInitExpr(expr);
     if (maybeInit.isPresent()) {
       final var vd = maybeInit.get();
-      var maybeLVD = ASTs.findEarliestLocalDeclarationOf(expr, vd.getNameAsString());
+      var maybeLVD = ASTs.findEarliestLocalVariableDeclarationOf(expr, vd.getNameAsString());
       if (maybeLVD.isPresent()) {
         return combine(
             new Pair<>(new ArrayList<>(List.of(maybeLVD.get())), new ArrayList<>()),
@@ -178,7 +178,7 @@ final class JDBCResourceLeakFixer {
       final var ae = maybeAE.get();
       if (ae.getTarget().isNameExpr()) {
         final var maybeLVD =
-            ASTs.findEarliestLocalDeclarationOf(
+            ASTs.findEarliestLocalVariableDeclarationOf(
                 ae.getTarget(), ae.getTarget().asNameExpr().getNameAsString());
         if (maybeLVD.isPresent()) {
           return combine(
@@ -308,7 +308,7 @@ final class JDBCResourceLeakFixer {
     }
     return ASTs.isAssigned(expr)
         .map(ae -> ae.getTarget().isNameExpr() ? ae.getTarget().asNameExpr() : null)
-        .flatMap(ne -> ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()));
+        .flatMap(ne -> ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getNameAsString()));
   }
 
   /**

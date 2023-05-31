@@ -2,10 +2,15 @@ package io.codemodder.ast;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.CatchClause;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
@@ -16,33 +21,34 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * Contains the expressions and statements that span the scope of a local variable declaration. See
- * <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.3">Java Language
+ * Contains the expressions and statements that span the scope of a local declaration. See <a
+ * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.3">Java Language
  * Specification - Section 6.3 </a> for how the scope of local declarations is defined. The
  * nodelists are ordered and the nodes in {@code expressions} happens before the ones in {@code
  * statements}.
  */
-public final class LocalVariableScope {
+public final class LocalScope {
 
   NodeList<Expression> expressions;
   NodeList<Statement> statements;
 
-  private LocalVariableScope(NodeList<Expression> expressions, NodeList<Statement> statements) {
+  private LocalScope(NodeList<Expression> expressions, NodeList<Statement> statements) {
     this.expressions = expressions;
     this.statements = statements;
   }
 
-  public static LocalVariableScope fromTryResource(TryStmt stmt, VariableDeclarator vd) {
+  /** Calculates the scope of a local declaration in a {@link TryStmt}. */
+  public static LocalScope fromTryResource(TryStmt stmt, VariableDeclarator vd) {
     var vde = (VariableDeclarationExpr) vd.getParentNode().get();
     var resources = stmt.getResources();
     var expressions = new NodeList<Expression>();
     expressions.setParentNode(stmt);
     resources.stream().skip(resources.indexOf(vde) + 1).forEach(expressions::add);
-    return new LocalVariableScope(expressions, stmt.getTryBlock().getStatements());
+    return new LocalScope(expressions, stmt.getTryBlock().getStatements());
   }
 
-  public static LocalVariableScope fromLocalDeclaration(
-      ExpressionStmt stmt, VariableDeclarator vd) {
+  /** Calculates the scope of a local declaration in a {@link ExpressionStmt}. */
+  public static LocalScope fromLocalDeclaration(ExpressionStmt stmt, VariableDeclarator vd) {
     var expressions = new NodeList<Expression>();
     // We expect a VariableDeclarationExpr in the stmt, it may contain multiple declarations
     var vde = (VariableDeclarationExpr) vd.getParentNode().get();
@@ -61,10 +67,11 @@ public final class LocalVariableScope {
     block.getStatements().stream()
         .skip(block.getStatements().indexOf(stmt) + 1)
         .forEach(statements::add);
-    return new LocalVariableScope(expressions, statements);
+    return new LocalScope(expressions, statements);
   }
 
-  public static LocalVariableScope fromForEachDeclaration(ForEachStmt stmt) {
+  /** Calculates the scope of a local declaration in a {@link ForEachStmt}. */
+  public static LocalScope fromForEachDeclaration(ForEachStmt stmt) {
     var expressions = new NodeList<Expression>();
     expressions.setParentNode(stmt);
     var body = stmt.getBody();
@@ -75,10 +82,11 @@ public final class LocalVariableScope {
       statements = new NodeList<>();
       statements.setParentNode(stmt);
     }
-    return new LocalVariableScope(expressions, statements);
+    return new LocalScope(expressions, statements);
   }
 
-  public static LocalVariableScope fromForDeclaration(ForStmt stmt, VariableDeclarator vd) {
+  /** Calculates the scope of a local declaration in a {@link ForStmt}. */
+  public static LocalScope fromForDeclaration(ForStmt stmt, VariableDeclarator vd) {
     var expressions = new NodeList<Expression>();
     var vde = (VariableDeclarationExpr) stmt.getInitialization().get(0);
     // finds vd in for init and adds any initialization for
@@ -101,7 +109,32 @@ public final class LocalVariableScope {
       statements = new NodeList<>();
       statements.setParentNode(stmt);
     }
-    return new LocalVariableScope(expressions, statements);
+    return new LocalScope(expressions, statements);
+  }
+
+  /** Calculates the scope of a local declaration in a {@link Parameter}. */
+  public static LocalScope fromParameter(Parameter parameter) {
+    // Always possible
+    var parent = parameter.getParentNode().get();
+    NodeList<Statement> statements = new NodeList<>();
+    var expressions = new NodeList<Expression>();
+    if (parent instanceof LambdaExpr) {
+      var allStatements = Stream.of(((LambdaExpr) parent).getBody());
+      allStatements
+          .flatMap(s -> s.isBlockStmt() ? s.asBlockStmt().getStatements().stream() : Stream.of(s))
+          .forEach(statements::add);
+    }
+    if (parent instanceof MethodDeclaration) {
+      var maybeBody = ((MethodDeclaration) parent).getBody();
+      statements = maybeBody.map(bs -> bs.getStatements()).orElse(statements);
+    }
+    if (parent instanceof CatchClause) {
+      statements = ((CatchClause) parent).getBody().getStatements();
+    }
+    if (parent instanceof ConstructorDeclaration) {
+      statements = ((ConstructorDeclaration) parent).getBody().getStatements();
+    }
+    return new LocalScope(expressions, statements);
   }
 
   public NodeList<Expression> getExpressions() {
@@ -118,7 +151,7 @@ public final class LocalVariableScope {
 
   /** Returns true if and only if {@code n} is contained in {@code scope} */
   public boolean inScope(Node n) {
-    // Always true for LocalVariableScope
+    // Always true for LocalScope
     var scopeStatementsRoot = statements.getParentNode().get();
     if (n.equals(scopeStatementsRoot) || scopeStatementsRoot.isAncestorOf(n)) return true;
     for (var e : expressions) if (n.equals(e) || e.isAncestorOf(n)) return true;

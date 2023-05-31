@@ -30,7 +30,7 @@ public final class TryResourceDeclaration extends LocalVariableDeclaration {
   }
 
   @Override
-  protected LocalVariableScope findScope() {
-    return LocalVariableScope.fromTryResource(stmt, vd);
+  protected LocalScope findScope() {
+    return LocalScope.fromTryResource(stmt, vd);
   }
 }
