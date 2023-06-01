@@ -65,7 +65,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     this.regionNodeMatcher = Objects.requireNonNull(regionNodeMatcher);
   }
 
-  public final List<CodemodChange> visit(
+  public List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     List<Result> results = sarif.getResultsByPath(context.path());
 
