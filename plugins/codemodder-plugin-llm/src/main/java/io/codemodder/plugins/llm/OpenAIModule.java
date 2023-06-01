@@ -8,7 +8,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
-public class OpenAIModule extends AbstractModule {
+/** Provides the OpenAI service to the codemodder plugin. */
+public final class OpenAIModule extends AbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;
