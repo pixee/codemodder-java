@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,8 +137,8 @@ public abstract class OpenAIGPT35TurboCodeChanger extends RawFileChanger {
 
   /**
    * Return true if this file is too big. Now, "too big" could depend on factors specific to the
-   * codemod. If the the fine-tuning needs are limited, you could allocate more room for the file
-   * (on the way out and on the the way back in.)
+   * codemod. If the fine-tuning needs are limited, you could allocate more room for the file (on
+   * the way out and on the way back in.)
    *
    * <p>If we assume 1,250 tokens needed for fine-tuning, this allows 2,750 tokens for the final
    * prompt + the response. Tokens in code are roughly 1:3 to characters from our experiments. Given
@@ -177,15 +178,18 @@ public abstract class OpenAIGPT35TurboCodeChanger extends RawFileChanger {
       return List.of();
     }
 
-    Set<Integer> linesOfInterest = findLinesOfInterest(context);
-    if (linesOfInterest.isEmpty()) {
-      LOG.debug("Ignoring {} due to pre-screening revealing no lines of interest", context.path());
+    final String lines;
+    try (var stream = findLinesOfInterest(context)) {
+      // TODO consider combining sequential lines into ranges to reduce the size of the prompt
+      lines = stream.mapToObj(String::valueOf).collect(Collectors.joining(","));
+    }
+    if (lines.isEmpty()) {
       return List.of();
     }
 
-    String code = Files.readString(context.path());
-    String lines = linesOfInterest.stream().map(String::valueOf).collect(Collectors.joining(","));
     String codemodSpecificPrompt = getUserPrompt();
+    String code = Files.readString(context.path());
+
     String prompt =
         String.format(
             "%s. Please only consider lines %s. Ignore anything not on those lines. Unless I previously said otherwise, please don't insert any comments into the new code. \n\n```\n%s\n```",
@@ -256,7 +260,7 @@ public abstract class OpenAIGPT35TurboCodeChanger extends RawFileChanger {
    * <p>There is another purpose of returning an accurate set of lines here -- these lines will be
    * used to generate the change report.
    */
-  protected abstract Set<Integer> findLinesOfInterest(CodemodInvocationContext context)
+  protected abstract IntStream findLinesOfInterest(CodemodInvocationContext context)
       throws IOException;
 
   private static final Logger LOG = LoggerFactory.getLogger(OpenAIGPT35TurboCodeChanger.class);
