@@ -3,10 +3,11 @@ package io.codemodder.codemods;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.theokanning.openai.service.OpenAiService;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodInvocationContext;
 import io.codemodder.ReviewGuidance;
-import io.codemodder.llm.OpenAIGPT35TurboCodeChanger;
+import io.codemodder.plugins.llm.OpenAIGPT35TurboCodeChanger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.inject.Inject;
 
 /** A cross-language codemod that removes any sensitive data being logged. */
 @Codemod(
@@ -25,6 +27,11 @@ public final class SensitiveDataLoggingCodemod extends OpenAIGPT35TurboCodeChang
   @VisibleForTesting
   static final Pattern loggingCallPattern =
       Pattern.compile("log(ger)?.(info|warn|error|fatal)", Pattern.CASE_INSENSITIVE);
+
+  @Inject
+  public SensitiveDataLoggingCodemod(final OpenAiService openAIService) {
+    super(openAIService);
+  }
 
   @Override
   protected Set<Integer> findLinesOfInterest(final CodemodInvocationContext context)

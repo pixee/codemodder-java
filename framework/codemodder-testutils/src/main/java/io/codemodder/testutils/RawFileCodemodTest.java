@@ -57,7 +57,6 @@ public interface RawFileCodemodTest {
               EncodingDetector.create());
       executor.execute(List.of(tmpFilePath));
     }
-
     final var modifiedFile = Files.readString(tmpFilePath);
     assertThat(modifiedFile, equalTo(Files.readString(filePathAfter)));
   }

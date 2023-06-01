@@ -1,4 +1,4 @@
-package io.codemodder.llm;
+package io.codemodder.plugins.llm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
@@ -13,14 +13,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.jetbrains.annotations.ApiStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A ready-to-extend type for writing an OpenAI-based codemod based on gpt-3.5-turbo. The type
@@ -41,39 +41,23 @@ import org.jetbrains.annotations.ApiStatus;
 public abstract class OpenAIGPT35TurboCodeChanger extends RawFileChanger {
 
   private final ObjectMapper mapper;
-  private final Provider<OpenAiService> openAIServiceProvider;
+  private final OpenAiService openAIService;
   protected final ChatMessageParser chatMessageParser;
   private final List<ChatMessage> training;
 
-  public OpenAIGPT35TurboCodeChanger() {
-    this(
-        () -> {
-          String apiKey = System.getenv("CODEMODDER_OPENAI_API_KEY");
-          if (apiKey == null) {
-            throw new IllegalArgumentException(
-                "CODEMODDER_OPENAI_API_KEY environment variable must be set");
-          }
-          return new OpenAiService(apiKey, Duration.ofSeconds(60));
-        });
-  }
-
-  public OpenAIGPT35TurboCodeChanger(final Provider<OpenAiService> apiKeyProvider) {
-    this.openAIServiceProvider = Objects.requireNonNull(apiKeyProvider);
+  protected OpenAIGPT35TurboCodeChanger(final OpenAiService openAIService) {
+    this.openAIService = Objects.requireNonNull(openAIService);
     this.chatMessageParser = ChatMessageParser.createDefault();
     this.mapper = new ObjectMapper();
 
-    String resourcePath =
-        "/"
-            + OpenAIGPT35TurboCodeChanger.class.getPackageName().replace('.', '/')
-            + "/global_prompt.md";
-    InputStream trainingPrompt =
-        Objects.requireNonNull(getClass().getResourceAsStream(resourcePath));
-
-    try {
+    String resourcePath = "/global_prompt.md";
+    try (InputStream trainingPrompt =
+        Objects.requireNonNull(getClass().getResourceAsStream(resourcePath))) {
       String globalPromptText = new String(trainingPrompt.readAllBytes());
+      LOG.debug("Loaded global prompt from: {}", globalPromptText);
       this.training = chatMessageParser.fromText(globalPromptText);
     } catch (IOException e) {
-      throw new UncheckedIOException(e);
+      throw new UncheckedIOException("Unable to load global prompt", e);
     }
   }
 
@@ -145,15 +129,61 @@ public abstract class OpenAIGPT35TurboCodeChanger extends RawFileChanger {
     return this.chatMessageParser.fromClasspathResource(resourcePath);
   }
 
+  /** Return true if this type of file is supported. If false, the codemod will not be run. */
+  protected boolean isFileTypeSupported(final CodemodInvocationContext context) {
+    return true;
+  }
+
+  /**
+   * Return true if this file is too big. Now, "too big" could depend on factors specific to the
+   * codemod. If the the fine-tuning needs are limited, you could allocate more room for the file
+   * (on the way out and on the the way back in.)
+   *
+   * <p>If we assume 1,250 tokens needed for fine-tuning, this allows 2,750 tokens for the final
+   * prompt + the response. Tokens in code are roughly 1:3 to characters from our experiments. Given
+   * that it could appear twice, it seems like a reasonable maximum that allows some buffer would be
+   * 3750 characters / 1250 tokens. This is all a bit arbitrary, so that's why we've left it all
+   * controllable by codemod authors. At the time of writing, there are multiple files in this very
+   * repository that are 3x this size, so this is not some theoretical thing -- but a real and
+   * unfortunate barrier.
+   *
+   * <p>If fine-tuning is expensive, consider only sending a fully-formed methods to the assistant
+   * in the final prompt. This will not work for all examples, but it will work for many. It also
+   * makes re-integrating just the method a little bit harder instead of replacing the full code,
+   * but that is the trade-off to get more tokens.
+   *
+   * <p>It's also possible that you may want to wait to develop LLM-assisted codemods until API
+   * access is granted to GPT-4 which supports 32k token support.
+   *
+   * <p>For more information and tooling to estimate tokens size, <a
+   * href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-themOpenAI">offers
+   * a help page</a>.
+   */
+  protected int getMaximumFileSize() {
+    return 3750;
+  }
+
   @Override
   public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
+
+    if (!isFileTypeSupported(context)) {
+      LOG.trace("Ignoring {}, unsupported", context.path());
+      return List.of();
+    }
+
+    long fileSize = Files.size(context.path());
+    if (fileSize > getMaximumFileSize()) {
+      LOG.debug("Ignoring {} due to size {}", context.path(), fileSize);
+      return List.of();
+    }
+
     Set<Integer> linesOfInterest = findLinesOfInterest(context);
     if (linesOfInterest.isEmpty()) {
+      LOG.debug("Ignoring {} due to pre-screening revealing no lines of interest", context.path());
       return List.of();
     }
 
     String code = Files.readString(context.path());
-    OpenAiService service = openAIServiceProvider.get();
     String lines = linesOfInterest.stream().map(String::valueOf).collect(Collectors.joining(","));
     String codemodSpecificPrompt = getUserPrompt();
     String prompt =
@@ -162,7 +192,9 @@ public abstract class OpenAIGPT35TurboCodeChanger extends RawFileChanger {
             codemodSpecificPrompt, lines, code);
     ChatMessage ask = new ChatMessage("user", prompt);
     List<ChatMessage> allMessages = new ArrayList<>(training);
-    allMessages.addAll(getFineTuning());
+    List<ChatMessage> fineTuning = getFineTuning();
+    LOG.debug("Loaded fine-tunings: {}", fineTuning.size());
+    allMessages.addAll(fineTuning);
     allMessages.add(ask);
 
     ChatCompletionRequest chat =
@@ -171,7 +203,8 @@ public abstract class OpenAIGPT35TurboCodeChanger extends RawFileChanger {
             .model("gpt-3.5-turbo")
             .messages(allMessages)
             .build();
-    ChatCompletionResult chatCompletion = service.createChatCompletion(chat);
+
+    ChatCompletionResult chatCompletion = openAIService.createChatCompletion(chat);
     List<ChatCompletionChoice> choices = chatCompletion.getChoices();
     ChatCompletionChoice chatCompletionChoice = choices.get(0);
     String responseText = chatCompletionChoice.getMessage().getContent();
@@ -225,4 +258,6 @@ public abstract class OpenAIGPT35TurboCodeChanger extends RawFileChanger {
    */
   protected abstract Set<Integer> findLinesOfInterest(CodemodInvocationContext context)
       throws IOException;
+
+  private static final Logger LOG = LoggerFactory.getLogger(OpenAIGPT35TurboCodeChanger.class);
 }

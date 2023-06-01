@@ -1,4 +1,4 @@
-package io.codemodder.llm;
+package io.codemodder.plugins.llm;
 
 import com.theokanning.openai.completion.chat.ChatMessage;
 import java.io.IOException;
@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.io.IOUtils;
 
 /**
  * This type is responsible for loading "training" data in our ChatTXT format. This is a simple
@@ -51,10 +50,11 @@ public interface ChatMessageParser {
    * ChatMessageParser#fromText(String)} on its contents.
    */
   default List<ChatMessage> fromClasspathResource(final String resourcePath) throws IOException {
-    InputStream resourceAsStream = getClass().getResourceAsStream(resourcePath);
-    String chatTxt =
-        IOUtils.toString(Objects.requireNonNull(resourceAsStream), StandardCharsets.UTF_8);
-    return fromText(chatTxt);
+    try (InputStream resourceAsStream =
+        Objects.requireNonNull(getClass().getResourceAsStream(resourcePath))) {
+      String chatTxt = new String(resourceAsStream.readAllBytes(), StandardCharsets.UTF_8);
+      return fromText(chatTxt);
+    }
   }
 
   static ChatMessageParser createDefault() {

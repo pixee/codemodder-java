@@ -1,4 +1,4 @@
-package io.codemodder.llm;
+package io.codemodder.plugins.llm;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
