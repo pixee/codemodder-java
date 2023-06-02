@@ -16,6 +16,6 @@ public final class OpenAIProvider implements CodemodProvider {
       final Path codeDirectory,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
-    return Set.of(new OpenAIModule(codeDirectory, codemodTypes));
+    return Set.of(new OpenAIModule());
   }
 }
