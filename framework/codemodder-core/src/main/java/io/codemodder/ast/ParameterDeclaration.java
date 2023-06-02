@@ -29,4 +29,9 @@ public class ParameterDeclaration implements LocalDeclaration {
   public Parameter getDeclaration() {
     return parameter;
   }
+
+  @Override
+  public String toString() {
+    return parameter.toString();
+  }
 }

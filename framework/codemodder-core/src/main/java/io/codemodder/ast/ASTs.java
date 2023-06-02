@@ -726,6 +726,14 @@ public final class ASTs {
    * Staring from the {@link Node} {@code start}, checks if there exists a local variable
    * declaration whose name is {@code name}.
    */
+  public static Optional<LocalDeclaration> findEarliestLocalDeclarationOf(final SimpleName name) {
+    return NameResolver.findLocalDeclarationOf(name, name.asString());
+  }
+
+  /**
+   * Staring from the {@link Node} {@code start}, checks if there exists a local variable
+   * declaration whose name is {@code name}.
+   */
   public static Optional<LocalDeclaration> findEarliestLocalDeclarationOf(
       final Node start, final String name) {
     return NameResolver.findLocalDeclarationOf(start, name);
