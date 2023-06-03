@@ -47,4 +47,9 @@ public class Cls
         ObjectInputStream ois3, ois4 = new ObjectInputStream(getIs());
         ObjectInputFilters.enableObjectFilterIfUnprotected(ois4);
     }
+
+    private void doesAnonymous() {
+      Acme acme = createSafeObjectInputStream(getIs()).readObject();
+      LOG.info(createSafeObjectInputStream(getIs()).readObject());
+    }
 }

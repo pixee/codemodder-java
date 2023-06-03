@@ -116,6 +116,10 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
    * LOG.info("Deserialized object: {}", new ObjectInputStream(httpServletRequest.getInputStream()).readObject());
    * }</pre>
    */
+  @Codemod(
+      id = "pixee:java/harden-java-deserialization-anonymous",
+      author = "arshan@pixee.ai",
+      reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
   private static class AnonymousDeserializationShapeChanger
       extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
