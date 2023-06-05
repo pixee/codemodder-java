@@ -51,8 +51,8 @@ final class JDBCResourceLeakFixer {
    * <p>A resource R is dependent of another resource S if closing S will also close R. The
    * following suffices to check if a resource R can be closed. (*) A resource R can be closed if no
    * dependent resource S exists s.t.: (i) S is not closed within R's scope, and (ii) S escapes R's
-   * scope. Currently, we cannot test (*), as it requires some dataflow analysis, instead we test for
-   * (+): S is assigned to a variable that escapes.
+   * scope. Currently, we cannot test (*), as it requires some dataflow analysis, instead we test
+   * for (+): S is assigned to a variable that escapes.
    */
   public static boolean isFixable(final MethodCallExpr mce) {
     // For ResultSet objects, still need to check if the generating *Statement object does

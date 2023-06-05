@@ -470,10 +470,11 @@ public final class ASTs {
   }
 
   /**
-   * Test for this pattern: {@link ObjectCreationExpr} -&gt; {@link Expression} ({@code expr}), where
-   * {@code expr} is an argument.
+   * Test for this pattern: {@link ObjectCreationExpr} -&gt; {@link Expression} ({@code expr}),
+   * where {@code expr} is an argument.
    */
-  public static Optional<ObjectCreationExpr> isArgumentOfObjectCreationExpression(final Expression expr) {
+  public static Optional<ObjectCreationExpr> isArgumentOfObjectCreationExpression(
+      final Expression expr) {
     return expr.getParentNode()
         .map(p -> p instanceof ObjectCreationExpr ? (ObjectCreationExpr) p : null)
         .filter(oce -> oce.getArguments().stream().anyMatch(arg -> arg == expr));
