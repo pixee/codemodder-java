@@ -469,6 +469,16 @@ public final class ASTs {
         .filter(mce -> mce.getArguments().stream().anyMatch(arg -> arg == expr));
   }
 
+  /**
+   * Test for this pattern: {@link ObjectCreationExpr} -&gt; {@link Expression} ({@code expr}), where
+   * {@code expr} is an argument.
+   */
+  public static Optional<ObjectCreationExpr> isArgumentOfObjectCreationExpression(final Expression expr) {
+    return expr.getParentNode()
+        .map(p -> p instanceof ObjectCreationExpr ? (ObjectCreationExpr) p : null)
+        .filter(oce -> oce.getArguments().stream().anyMatch(arg -> arg == expr));
+  }
+
   /** Checks if {@code vd} is a local declaration. */
   public static boolean isLocalVariableDeclarator(final VariableDeclarator vd) {
     final var maybeParent = vd.getParentNode();

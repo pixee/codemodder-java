@@ -1,12 +1,16 @@
 package io.codemodder.codemods;
 
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.resolution.UnsolvedSymbolException;
 import io.codemodder.Either;
 import io.codemodder.ast.*;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -32,14 +36,220 @@ final class ResourceLeakFixer {
    * Combines {@code isFixable} and {@code tryToFix}.
    */
   public static Optional<Integer> checkAndFix(final Expression expr) {
+    if (isFixable(expr)) {
+      if (expr instanceof ObjectCreationExpr) {
+        tryToFix(expr.asObjectCreationExpr());
+      }
+      if (expr instanceof MethodCallExpr) {
+        tryToFix(expr.asMethodCallExpr());
+      }
+    }
     return Optional.empty();
   }
 
-  /** Checks if the created object implements the {@link java.io.AutoCloseable} interface. */
+  /**
+   * Detects if a {@link MethodCallExpr} of a leaking JDBC resource type detected by CodeQL is
+   * fixable. The following can be assumed.
+   *
+   * <p>(1) No close() is called within its scope.
+   *
+   * <p>(2) There does not exist a "root" expression that is closed. (e.g. new BufferedReader(r), r
+   * is the root, stmt.executeQuery(...), stmt is the root).
+   *
+   * <p>(3) It does not escape the contained method's scope. That is, it is not assigned to a field
+   * or returned.
+   *
+   * <p>A resource R is dependent of another resource S if closing S will also close R. The
+   * following suffices to check if a resource R can be closed. (*) A resource R can be closed if no
+   * dependent resource S exists s.t.: (i) S is not closed within R's scope, and (ii) S escapes R's
+   * scope Currently, we cannot test (*), as it requires some dataflow analysis, instead we test for
+   * (+): S is assigned to a variable that escapes.
+   */
+  public static boolean isFixable(final Expression expr) {
+    // For ResultSet objects, still need to check if the generating *Statement object does
+    // not escape due to the getResultSet() method.
+    try {
+      if (expr instanceof MethodCallExpr) {
+        var mce = expr.asMethodCallExpr();
+        if (mce.calculateResolvedType().describe().equals("java.sql.ResultSet")) {
+          // should always exist and is a *Statement object
+          final var mceScope = mce.getScope().get();
+          if (mceScope.isFieldAccessExpr()) {
+            return false;
+          }
+          if (mceScope.isNameExpr()) {
+            final var maybeLVD =
+                ASTs.findEarliestLocalVariableDeclarationOf(
+                    mceScope, mceScope.asNameExpr().getNameAsString());
+
+            if (maybeLVD.filter(lvd -> escapesRootScope(lvd, n -> true)).isPresent()) {
+              return false;
+            }
+          }
+        }
+      }
+    } catch (final UnsolvedSymbolException e) {
+      LOG.error("Problem resolving type of : {}", expr, e);
+      return false;
+    }
+
+    final var maybeLVD = immediatelyFlowsIntoLocalVariable(expr);
+    final var allDependent = findDependentResources(expr);
+    if (maybeLVD.isPresent()) {
+      final var scope = maybeLVD.get().getScope();
+      final Predicate<Node> isInScope = scope::inScope;
+      return allDependent.stream().noneMatch(e -> escapesRootScope(e, isInScope));
+    } else {
+      final Predicate<Node> isInScope = n -> true;
+      return allDependent.stream().noneMatch(e -> escapesRootScope(e, isInScope));
+    }
+  }
+
+  public static Optional<Integer> tryToFix(final ObjectCreationExpr creationExpr) {
+    final int originalLine = creationExpr.getRange().get().begin.line;
+    final var stack = findInnerExpressions(creationExpr);
+    int count = 0;
+    final var maybeLVD =
+        ASTs.isInitExpr(creationExpr)
+            .flatMap(LocalVariableDeclaration::fromVariableDeclarator)
+            .map(
+                lvd ->
+                    lvd instanceof ExpressionStmtVariableDeclaration
+                        ? (ExpressionStmtVariableDeclaration) lvd
+                        : null)
+            .filter(lvd -> ASTs.isFinalOrNeverAssigned(lvd));
+    if (maybeLVD.isPresent()) {
+      var tryStmt =
+          ASTTransforms.wrapIntoResource(
+              maybeLVD.get().getStatement(),
+              maybeLVD.get().getVariableDeclarationExpr(),
+              maybeLVD.get().getScope());
+      var cu = creationExpr.findCompilationUnit().get();
+      for (var resource : stack) {
+        var name = count == 0 ? rootPrefix : rootPrefix + count;
+        var type = resource.calculateResolvedType().describe();
+        resource.replace(new NameExpr(name));
+
+        var declaration =
+            new VariableDeclarator(
+                StaticJavaParser.parseType(type.substring(type.lastIndexOf('.') + 1)),
+                name,
+                resource);
+        tryStmt.getResources().addFirst(new VariableDeclarationExpr(declaration));
+        ASTTransforms.addImportIfMissing(cu, type);
+        return Optional.of(originalLine);
+      }
+    }
+    return Optional.empty();
+  }
+
+  /** Tries to fix the leak of {@code expr} and returns its line if it does. */
+  public static Optional<Integer> tryToFix(final MethodCallExpr mce) {
+    final int originalLine = mce.getRange().get().begin.line;
+
+    // Is LocalDeclarationStmt and Never Assigned -> Wrap as a try resource
+    List<Expression> resources = new ArrayList<>();
+    Expression root = findRootExpression(mce, resources);
+    final var maybeLVD =
+        ASTs.isInitExpr(root)
+            .flatMap(LocalVariableDeclaration::fromVariableDeclarator)
+            .map(
+                lvd ->
+                    lvd instanceof ExpressionStmtVariableDeclaration
+                        ? (ExpressionStmtVariableDeclaration) lvd
+                        : null)
+            .filter(lvd -> ASTs.isFinalOrNeverAssigned(lvd));
+    if (maybeLVD.isPresent()) {
+      var lvd = maybeLVD.get();
+      // create a new variable for each gathered resource and wrap everything in a try
+      var tryStmt =
+          ASTTransforms.wrapIntoResource(
+              lvd.getStatement(), lvd.getVariableDeclarationExpr(), lvd.getScope());
+      // TODO check availability here
+      int count = 0;
+      var cu = mce.findCompilationUnit().get();
+      for (var resource : resources) {
+        var name = count == 0 ? rootPrefix : rootPrefix + count;
+        var type = resource.calculateResolvedType().describe();
+
+        resource.replace(new NameExpr(name));
+
+        var declaration =
+            new VariableDeclarator(
+                StaticJavaParser.parseType(type.substring(type.lastIndexOf('.') + 1)),
+                name,
+                resource);
+        tryStmt.getResources().addFirst(new VariableDeclarationExpr(declaration));
+        ASTTransforms.addImportIfMissing(cu, type);
+      }
+      return Optional.of(originalLine);
+      // TODO if vde is multiple declarations, extract the relevant vd and wrap it
+    }
+    // other cases here...
+    return Optional.empty();
+  }
+
+  private static Deque<Expression> findInnerExpressions(final ObjectCreationExpr creationExpr) {
+    var stack = new ArrayDeque<Expression>();
+    var maybeExpr =
+        creationExpr.getArguments().stream()
+            .filter(expr -> expr.isObjectCreationExpr() && isAutoCloseableType(expr))
+            .findFirst()
+            .map(expr -> expr.asObjectCreationExpr());
+    while (maybeExpr.isPresent()) {
+      stack.push(maybeExpr.get());
+      maybeExpr =
+          maybeExpr.get().getArguments().stream()
+              .filter(expr -> expr.isObjectCreationExpr() && isAutoCloseableType(expr))
+              .findFirst()
+              .map(expr -> expr.asObjectCreationExpr());
+    }
+    return stack;
+  }
+
+  private static Expression findRootExpression(
+      final Expression expr, final List<Expression> resources) {
+    // if a resource can be closed, so can all its dependent resources
+
+    // e.g <expr>.executeQuery(query);
+    var maybeCall = ASTs.isScopeInMethodCall(expr).filter(mce -> isJDBCResourceInit(mce));
+    if (maybeCall.isPresent()) {
+      resources.add(expr);
+      return findRootExpression(maybeCall.get(), resources);
+    }
+    // e.g. <expr> = new BufferedReader(...)
+    // var maybeCreation = ASTs.isArgumentOfObjectCreationExpression(expr).filter(oce ->
+    // isAutoCloseableType(oce));
+    // if (maybeCreation.isPresent()) {
+    //  resources.add(expr);
+    //  return findRootExpression(maybeCreation.get(), resources);
+    // }
+
+    // new BufferedReader(new
+    // BufferedReader(conn.getStatement().executeQuery(query).getNCharacterStream()))
+    return expr;
+  }
+
+  /**
+   * Checks if {@code expr} is immediately assigned to a local variable {@code v} through an
+   * assignment or initializer.
+   */
+  private static Optional<LocalVariableDeclaration> immediatelyFlowsIntoLocalVariable(
+      final Expression expr) {
+    final var maybeInit = ASTs.isInitExpr(expr).filter(ASTs::isLocalVariableDeclarator);
+    if (maybeInit.isPresent()) {
+      return maybeInit.flatMap(LocalVariableDeclaration::fromVariableDeclarator);
+    }
+    return ASTs.isAssigned(expr)
+        .map(ae -> ae.getTarget().isNameExpr() ? ae.getTarget().asNameExpr() : null)
+        .flatMap(ne -> ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getNameAsString()));
+  }
+
+  /** Checks if the created object implements the {@link java.lang.AutoCloseable} interface. */
   private static boolean isAutoCloseableType(final Expression expr) {
     return expr.calculateResolvedType().isReferenceType()
         && expr.calculateResolvedType().asReferenceType().getAllAncestors().stream()
-            .anyMatch(t -> t.describe().equals("java.io.AutoCloseable"));
+            .anyMatch(t -> t.describe().equals("java.lang.AutoCloseable"));
   }
 
   private static Either<LocalDeclaration, Node> isLocalDeclaration(Node n) {
@@ -225,15 +435,23 @@ final class ResourceLeakFixer {
       return allDependent;
     }
 
-    // immediately passed as a constructor argument for a closeable resource
-    // the wrapping closeable resource is considered dependent
-    final var maybeOCE =
-        ASTs.isConstructorArgument(expr).filter(ResourceLeakFixer::isAutoCloseableType);
-    if (maybeOCE.isPresent()) {
-      allDependent.add(maybeOCE.get());
-      allDependent.addAll(findDirectlyDependentResources(maybeOCE.get()));
-      return allDependent;
+    // e.g. <expr> = new BufferedReader(<newExpr>)
+    // newExpr is considered dependent
+    if (expr instanceof ObjectCreationExpr) {
+      expr.asObjectCreationExpr().getArguments().stream()
+          .filter(arg -> isAutoCloseableType(arg))
+          .forEach(allDependent::add);
     }
+
+    // TODO reconsider this
+    //// immediately passed as a constructor argument for a closeable resource
+    // final var maybeOCE =
+    //    ASTs.isConstructorArgument(expr).filter(ResourceLeakFixer::isAutoCloseableType);
+    // if (maybeOCE.isPresent()) {
+    //  allDependent.add(maybeOCE.get());
+    //  allDependent.addAll(findDirectlyDependentResources(maybeOCE.get()));
+    //  return allDependent;
+    // }
 
     var allFlown = flowsInto(expr).stream().filter(e -> e.isLeft()).map(e -> e.getLeft());
 
@@ -247,5 +465,61 @@ final class ResourceLeakFixer {
     return findDirectlyDependentResources(expr).stream()
         .flatMap(res -> Stream.concat(Stream.of(res), findDependentResources(res).stream()))
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Checks if an object created/accessed by {@code expr} escapes the scope of its encompassing
+   * method immediately, that is, without being assigned. It escapes if it is assigned to a field,
+   * returned, or is the argument of a method call.
+   */
+  private static boolean immediatelyEscapesMethodScope(final Expression expr) {
+    // Returned or argument of a MethodCallExpr
+    if (ASTs.isReturnExpr(expr).isPresent() || ASTs.isArgumentOfMethodCall(expr).isPresent()) {
+      return true;
+    }
+
+    // is the init expression of a field
+    if (ASTs.isInitExpr(expr).flatMap(ASTs::isVariableOfField).isPresent()) return true;
+
+    return false;
+  }
+
+  /**
+   * Returns true if a {@link LocalDeclaration ld} of a resource is not closed. It may return true
+   * if {@code ld} is closed.
+   */
+  private static boolean notClosed(final LocalDeclaration ld) {
+    // if close is never called
+    return !ld.findAllMethodCalls().anyMatch(mce -> mce.getNameAsString().equals("close"))
+        &&
+        // is not a try resource
+        ld instanceof LocalVariableDeclaration
+        && ASTs.isResource(((LocalVariableDeclaration) ld).getVariableDeclarator()).isEmpty();
+  }
+
+  /** Returns true if {@code ld} is returned or is an argument of a method call. */
+  private static boolean escapesRootScope(
+      final LocalDeclaration ld, final Predicate<Node> isInScope) {
+    if (!isInScope.test(ld.getDeclaration())) return true;
+    return ld.findAllReferences()
+        .anyMatch(
+            ne -> ASTs.isReturnExpr(ne).isPresent() || ASTs.isArgumentOfMethodCall(ne).isPresent());
+  }
+
+  private static boolean escapesRootScope(final Expression expr, final Predicate<Node> isInScope) {
+    if (immediatelyEscapesMethodScope(expr)) return true;
+    // find all the variables it flows into
+    final var allVariables = flowsInto(expr);
+
+    // flows into anything that is not a local variable or parameter
+    if (allVariables.stream().anyMatch(e -> e.isRight())) {
+      return true;
+    }
+
+    // If any of the assigned variables is not closed and escapes
+    return allVariables.stream()
+        .filter(e -> e.isLeft())
+        .map(e -> e.getLeft())
+        .anyMatch(ld -> notClosed(ld) && escapesRootScope(ld, isInScope));
   }
 }
