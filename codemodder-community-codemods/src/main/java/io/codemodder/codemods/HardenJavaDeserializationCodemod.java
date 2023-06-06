@@ -68,6 +68,11 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
               ObjectInputFilters.class.getName(), "createSafeObjectInputStream", true);
       return true;
     }
+
+    @Override
+    public List<DependencyGAV> dependenciesRequired() {
+      return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+    }
   }
 
   private static final class VariableDeclarationDeserializationShapeChanger
