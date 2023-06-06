@@ -31,18 +31,56 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
 
   @Inject
   public HardenJavaDeserializationCodemod(
-      VariableDeclarationDeserializationShapeChanger varDeclChanger,
-      AnonymousDeserializationShapeChanger anonymousChanger) {
+      final VariableDeclarationDeserializationShapeChanger varDeclChanger,
+      final AnonymousDeserializationShapeChanger anonymousChanger) {
     super(varDeclChanger, anonymousChanger);
   }
 
-  private static class VariableDeclarationDeserializationShapeChanger
+  /**
+   * This variant is used in situations where the deserialization is done with an unnamed stack
+   * variable.
+   *
+   * <pre>{@code
+   * LOG.info("Deserialized object: {}", new ObjectInputStream(httpServletRequest.getInputStream()).readObject());
+   * }</pre>
+   */
+  private static class AnonymousDeserializationShapeChanger
+      extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
+
+    @Inject
+    public AnonymousDeserializationShapeChanger(
+        @SemgrepScan(ruleId = "harden-java-deserialization-anonymous") final RuleSarif sarif) {
+      super(
+          sarif,
+          ObjectCreationExpr.class,
+          RegionNodeMatcher.MATCHES_START,
+          CodemodReporterStrategy.empty());
+    }
+
+    @Override
+    public boolean onResultFound(
+        final CodemodInvocationContext context,
+        final CompilationUnit cu,
+        final ObjectCreationExpr objectCreationExpr,
+        final Result result) {
+      replace(objectCreationExpr)
+          .withStaticMethodWithSameArguments(
+              ObjectInputFilters.class.getName(), "createSafeObjectInputStream", true);
+      return true;
+    }
+  }
+
+  private static final class VariableDeclarationDeserializationShapeChanger
       extends SarifPluginJavaParserChanger<VariableDeclarator> {
 
     @Inject
     public VariableDeclarationDeserializationShapeChanger(
         @SemgrepScan(ruleId = "harden-java-deserialization") final RuleSarif sarif) {
-      super(sarif, VariableDeclarator.class, RegionNodeMatcher.MATCHES_START);
+      super(
+          sarif,
+          VariableDeclarator.class,
+          RegionNodeMatcher.MATCHES_START,
+          CodemodReporterStrategy.empty());
     }
 
     @Override
@@ -91,8 +129,8 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
 
     /**
      * Generates an expression to invoke {@link
-     * io.github.pixee.security.ObjectInputFilters#enableObjectFilterIfUnprotected(ObjectInputStream)}
-     * on the original scope (the {@link ObjectInputStream}).
+     * ObjectInputFilters#enableObjectFilterIfUnprotected(ObjectInputStream)} on the original scope
+     * (the {@link ObjectInputStream}).
      */
     private Statement generateFilterHardeningStatement(final Expression originalScope) {
       // this statement is the callback to our hardening code
@@ -105,40 +143,6 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
     @Override
     public List<DependencyGAV> dependenciesRequired() {
       return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
-    }
-  }
-
-  /**
-   * This variant is used in situations where the deserialization is done with an unnamed stack
-   * variable.
-   *
-   * <pre>{@code
-   * LOG.info("Deserialized object: {}", new ObjectInputStream(httpServletRequest.getInputStream()).readObject());
-   * }</pre>
-   */
-  @Codemod(
-      id = "pixee:java/harden-java-deserialization-anonymous",
-      author = "arshan@pixee.ai",
-      reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-  private static class AnonymousDeserializationShapeChanger
-      extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
-
-    @Inject
-    public AnonymousDeserializationShapeChanger(
-        @SemgrepScan(ruleId = "harden-java-deserialization-anonymous") final RuleSarif sarif) {
-      super(sarif, MethodCallExpr.class, RegionNodeMatcher.MATCHES_START);
-    }
-
-    @Override
-    public boolean onResultFound(
-        final CodemodInvocationContext context,
-        final CompilationUnit cu,
-        final ObjectCreationExpr objectCreationExpr,
-        final Result result) {
-      replace(objectCreationExpr)
-          .withStaticMethodWithSameArguments(
-              ObjectInputFilters.class.getName(), "createSafeObjectInputStream", true);
-      return true;
     }
   }
 }

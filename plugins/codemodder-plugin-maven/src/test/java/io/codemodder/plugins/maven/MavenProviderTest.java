@@ -207,7 +207,7 @@ final class MavenProviderTest {
   @Test
   void it_updates_poms_correctly() throws IOException {
     PomFileUpdater updater = new MavenProvider.DefaultPomFileUpdater();
-    Files.write(module1Pom, simplePom.getBytes(StandardCharsets.UTF_8));
+    Files.writeString(module1Pom, simplePom);
     PomUpdateResult pomUpdateResult =
         updater.updatePom(
             projectDir, module1Pom, List.of(marsDependency1, marsDependency2, venusDependency));
