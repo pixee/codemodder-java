@@ -1,0 +1,32 @@
+package com.acme.testcode;
+
+public class Test {
+
+  public Auth login(final String securityToken) {
+    String user = serviceReq.getUser();
+    String pass = serviceReq.getPassword();
+    return auth.login(user, pass);
+  }
+
+  public Auth withUpperLogger(final String securityToken) {
+      String user = serviceReq.getUser();
+      String pass = serviceReq.getPassword();
+      return auth.login(user, pass);
+    }
+
+  public void hasMultipleNearby(final String securityToken) {
+    log.info("entering the multipleNearby");
+    authService.connect(a, b);
+    log.info("exiting the multipleNearby");
+  }
+
+  public void wontActuallyGoIn(final String securityToken) {
+    log.debug("The security token is: " + securityToken);
+  }
+
+  public void usesButDoesntInclude(final String securityToken) {
+      log.info("Local auth settings for " + predictSettings(securityToken));
+      log.info("Remote auth settings for " + fetchSettings(securityToken));
+  }
+
+}

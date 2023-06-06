@@ -153,8 +153,8 @@ public final class LocalScope {
   public boolean inScope(Node n) {
     // Always true for LocalScope
     var scopeStatementsRoot = statements.getParentNode().get();
-    if (n.equals(scopeStatementsRoot) || scopeStatementsRoot.isAncestorOf(n)) return true;
     for (var e : expressions) if (n.equals(e) || e.isAncestorOf(n)) return true;
+    for (var s : statements) if (n.equals(s) || s.isAncestorOf(n)) return true;
     return false;
   }
 }
