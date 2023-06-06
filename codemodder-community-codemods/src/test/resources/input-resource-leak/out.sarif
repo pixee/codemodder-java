@@ -6,26 +6,42 @@
       "driver" : {
         "name" : "CodeQL",
         "organization" : "GitHub",
-        "semanticVersion" : "2.11.6",
-        "rules" : [ {
-          "id" : "java/database-resource-leak",
-          "name" : "java/database-resource-leak",
+        "semanticVersion" : "2.13.1",
+        "notifications" : [ {
+          "id" : "java/baseline/expected-extracted-files",
+          "name" : "java/baseline/expected-extracted-files",
           "shortDescription" : {
-            "text" : "Potential database resource leak"
+            "text" : "Expected extracted files"
           },
           "fullDescription" : {
-            "text" : "A database resource that is opened but not closed may cause a resource leak."
+            "text" : "Files appearing in the source archive that are expected to be extracted."
+          },
+          "defaultConfiguration" : {
+            "enabled" : true
+          },
+          "properties" : {
+            "tags" : [ "expected-extracted-files", "telemetry" ]
+          }
+        } ],
+        "rules" : [ {
+          "id" : "java/input-resource-leak",
+          "name" : "java/input-resource-leak",
+          "shortDescription" : {
+            "text" : "Potential input resource leak"
+          },
+          "fullDescription" : {
+            "text" : "A resource that is opened for reading but not closed may cause a resource leak."
           },
           "defaultConfiguration" : {
             "enabled" : true,
             "level" : "warning"
           },
           "properties" : {
-            "tags" : [ "correctness", "resources", "external/cwe/cwe-404", "external/cwe/cwe-772" ],
-            "description" : "A database resource that is opened but not closed may cause a resource leak.",
-            "id" : "java/database-resource-leak",
+            "tags" : [ "efficiency", "correctness", "resources", "external/cwe/cwe-404", "external/cwe/cwe-772" ],
+            "description" : "A resource that is opened for reading but not closed may cause a resource\n              leak.",
+            "id" : "java/input-resource-leak",
             "kind" : "problem",
-            "name" : "Potential database resource leak",
+            "name" : "Potential input resource leak",
             "precision" : "high",
             "problem.severity" : "warning"
           }
@@ -61,6 +77,33 @@
         } ]
       } ]
     },
+    "invocations" : [ {
+      "toolExecutionNotifications" : [ {
+        "locations" : [ {
+          "physicalLocation" : {
+            "artifactLocation" : {
+              "uri" : "Test.java",
+              "uriBaseId" : "%SRCROOT%",
+              "index" : 0
+            }
+          }
+        } ],
+        "message" : {
+          "text" : ""
+        },
+        "level" : "none",
+        "descriptor" : {
+          "id" : "java/baseline/expected-extracted-files",
+          "index" : 0
+        },
+        "properties" : {
+          "formattedMessage" : {
+            "text" : ""
+          }
+        }
+      } ],
+      "executionSuccessful" : true
+    } ],
     "artifacts" : [ {
       "location" : {
         "uri" : "Test.java",
@@ -69,14 +112,42 @@
       }
     } ],
     "results" : [ {
-      "ruleId" : "java/database-resource-leak",
+      "ruleId" : "java/input-resource-leak",
       "ruleIndex" : 0,
       "rule" : {
-        "id" : "java/database-resource-leak",
+        "id" : "java/input-resource-leak",
         "index" : 0
       },
       "message" : {
-        "text" : "This Statement is not always closed on method exit."
+        "text" : "This FileReader is not always closed on method exit."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 11,
+            "startColumn" : 21,
+            "endColumn" : 52
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "93a36fe89de986a9:1",
+        "primaryLocationStartColumnFingerprint" : "16"
+      }
+    }, {
+      "ruleId" : "java/input-resource-leak",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/input-resource-leak",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This FileReader is not always closed on method exit."
       },
       "locations" : [ {
         "physicalLocation" : {
@@ -87,24 +158,24 @@
           },
           "region" : {
             "startLine" : 15,
-            "startColumn" : 16,
-            "endColumn" : 38
+            "startColumn" : 63,
+            "endColumn" : 91
           }
         }
       } ],
       "partialFingerprints" : {
-        "primaryLocationLineHash" : "b86f1eea8c6d5759:1",
-        "primaryLocationStartColumnFingerprint" : "11"
+        "primaryLocationLineHash" : "cb86425a3ffa04b0:1",
+        "primaryLocationStartColumnFingerprint" : "58"
       }
     }, {
-      "ruleId" : "java/database-resource-leak",
+      "ruleId" : "java/input-resource-leak",
       "ruleIndex" : 0,
       "rule" : {
-        "id" : "java/database-resource-leak",
+        "id" : "java/input-resource-leak",
         "index" : 0
       },
       "message" : {
-        "text" : "This Statement is not always closed on method exit."
+        "text" : "This BufferedReader is not always closed on method exit."
       },
       "locations" : [ {
         "physicalLocation" : {
@@ -114,239 +185,15 @@
             "index" : 0
           },
           "region" : {
-            "startLine" : 23,
-            "startColumn" : 18,
-            "endColumn" : 40
+            "startLine" : 19,
+            "startColumn" : 25,
+            "endColumn" : 63
           }
         }
       } ],
       "partialFingerprints" : {
-        "primaryLocationLineHash" : "eb3de318917b8ab1:1",
-        "primaryLocationStartColumnFingerprint" : "11"
-      }
-    }, {
-      "ruleId" : "java/database-resource-leak",
-      "ruleIndex" : 0,
-      "rule" : {
-        "id" : "java/database-resource-leak",
-        "index" : 0
-      },
-      "message" : {
-        "text" : "This ResultSet is not always closed on method exit."
-      },
-      "locations" : [ {
-        "physicalLocation" : {
-          "artifactLocation" : {
-            "uri" : "Test.java",
-            "uriBaseId" : "%SRCROOT%",
-            "index" : 0
-          },
-          "region" : {
-            "startLine" : 24,
-            "startColumn" : 12,
-            "endColumn" : 36
-          }
-        }
-      } ],
-      "partialFingerprints" : {
-        "primaryLocationLineHash" : "11702cf56b4339ba:1",
-        "primaryLocationStartColumnFingerprint" : "5"
-      }
-    }, {
-      "ruleId" : "java/database-resource-leak",
-      "ruleIndex" : 0,
-      "rule" : {
-        "id" : "java/database-resource-leak",
-        "index" : 0
-      },
-      "message" : {
-        "text" : "This Statement is not always closed on method exit."
-      },
-      "locations" : [ {
-        "physicalLocation" : {
-          "artifactLocation" : {
-            "uri" : "Test.java",
-            "uriBaseId" : "%SRCROOT%",
-            "index" : 0
-          },
-          "region" : {
-            "startLine" : 31,
-            "startColumn" : 16,
-            "endColumn" : 38
-          }
-        }
-      } ],
-      "partialFingerprints" : {
-        "primaryLocationLineHash" : "64202e4fe582f96b:1",
-        "primaryLocationStartColumnFingerprint" : "11"
-      }
-    }, {
-      "ruleId" : "java/database-resource-leak",
-      "ruleIndex" : 0,
-      "rule" : {
-        "id" : "java/database-resource-leak",
-        "index" : 0
-      },
-      "message" : {
-        "text" : "This Statement is not always closed on method exit."
-      },
-      "locations" : [ {
-        "physicalLocation" : {
-          "artifactLocation" : {
-            "uri" : "Test.java",
-            "uriBaseId" : "%SRCROOT%",
-            "index" : 0
-          },
-          "region" : {
-            "startLine" : 42,
-            "startColumn" : 16,
-            "endColumn" : 38
-          }
-        }
-      } ],
-      "partialFingerprints" : {
-        "primaryLocationLineHash" : "43ff5c5de868c9cb:1",
-        "primaryLocationStartColumnFingerprint" : "11"
-      }
-    }, {
-      "ruleId" : "java/database-resource-leak",
-      "ruleIndex" : 0,
-      "rule" : {
-        "id" : "java/database-resource-leak",
-        "index" : 0
-      },
-      "message" : {
-        "text" : "This ResultSet is not always closed on method exit."
-      },
-      "locations" : [ {
-        "physicalLocation" : {
-          "artifactLocation" : {
-            "uri" : "Test.java",
-            "uriBaseId" : "%SRCROOT%",
-            "index" : 0
-          },
-          "region" : {
-            "startLine" : 49,
-            "startColumn" : 20,
-            "endColumn" : 44
-          }
-        }
-      } ],
-      "partialFingerprints" : {
-        "primaryLocationLineHash" : "fd137a65b8925c8c:1",
-        "primaryLocationStartColumnFingerprint" : "15"
-      }
-    }, {
-      "ruleId" : "java/database-resource-leak",
-      "ruleIndex" : 0,
-      "rule" : {
-        "id" : "java/database-resource-leak",
-        "index" : 0
-      },
-      "message" : {
-        "text" : "This Statement is not always closed on method exit."
-      },
-      "locations" : [ {
-        "physicalLocation" : {
-          "artifactLocation" : {
-            "uri" : "Test.java",
-            "uriBaseId" : "%SRCROOT%",
-            "index" : 0
-          },
-          "region" : {
-            "startLine" : 60,
-            "startColumn" : 22,
-            "endColumn" : 44
-          }
-        }
-      } ],
-      "partialFingerprints" : {
-        "primaryLocationLineHash" : "424cffbce3f292ec:1",
-        "primaryLocationStartColumnFingerprint" : "17"
-      }
-    }, {
-      "ruleId" : "java/database-resource-leak",
-      "ruleIndex" : 0,
-      "rule" : {
-        "id" : "java/database-resource-leak",
-        "index" : 0
-      },
-      "message" : {
-        "text" : "This ResultSet is not always closed on method exit."
-      },
-      "locations" : [ {
-        "physicalLocation" : {
-          "artifactLocation" : {
-            "uri" : "Test.java",
-            "uriBaseId" : "%SRCROOT%",
-            "index" : 0
-          },
-          "region" : {
-            "startLine" : 61,
-            "startColumn" : 20,
-            "endColumn" : 44
-          }
-        }
-      } ],
-      "partialFingerprints" : {
-        "primaryLocationLineHash" : "753181bef4655ab2:1",
-        "primaryLocationStartColumnFingerprint" : "15"
-      }
-    }, {
-      "ruleId" : "java/database-resource-leak",
-      "ruleIndex" : 0,
-      "rule" : {
-        "id" : "java/database-resource-leak",
-        "index" : 0
-      },
-      "message" : {
-        "text" : "This Statement is not always closed on method exit."
-      },
-      "locations" : [ {
-        "physicalLocation" : {
-          "artifactLocation" : {
-            "uri" : "Test.java",
-            "uriBaseId" : "%SRCROOT%",
-            "index" : 0
-          },
-          "region" : {
-            "startLine" : 65,
-            "startColumn" : 22,
-            "endColumn" : 44
-          }
-        }
-      } ],
-      "partialFingerprints" : {
-        "primaryLocationLineHash" : "bb021d582b5694dd:1",
-        "primaryLocationStartColumnFingerprint" : "17"
-      }
-    }, {
-      "ruleId" : "java/database-resource-leak",
-      "ruleIndex" : 0,
-      "rule" : {
-        "id" : "java/database-resource-leak",
-        "index" : 0
-      },
-      "message" : {
-        "text" : "This ResultSet is not always closed on method exit."
-      },
-      "locations" : [ {
-        "physicalLocation" : {
-          "artifactLocation" : {
-            "uri" : "Test.java",
-            "uriBaseId" : "%SRCROOT%",
-            "index" : 0
-          },
-          "region" : {
-            "startLine" : 66,
-            "startColumn" : 10,
-            "endColumn" : 34
-          }
-        }
-      } ],
-      "partialFingerprints" : {
-        "primaryLocationLineHash" : "88bd0b7202dcf0ec:1",
-        "primaryLocationStartColumnFingerprint" : "5"
+        "primaryLocationLineHash" : "5684fd117f9124e6:1",
+        "primaryLocationStartColumnFingerprint" : "20"
       }
     } ],
     "columnKind" : "utf16CodeUnits",

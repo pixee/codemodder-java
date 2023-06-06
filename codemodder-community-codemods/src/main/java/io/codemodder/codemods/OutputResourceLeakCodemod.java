@@ -18,7 +18,7 @@ import javax.inject.Inject;
 public final class OutputResourceLeakCodemod extends SarifPluginJavaParserChanger<Expression> {
 
   @Inject
-  public OutputResourceLeakCodemod(@CodeQLScan(ruleId = "") final RuleSarif sarif) {
+  public OutputResourceLeakCodemod(@CodeQLScan(ruleId = "java/output-resource-leak") final RuleSarif sarif) {
     super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
   }
 
