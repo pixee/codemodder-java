@@ -274,9 +274,10 @@ final class ResourceLeakFixer {
 
   private static Either<LocalDeclaration, Node> isLocalDeclaration(Node n) {
     if (n instanceof VariableDeclarator) {
-      var maybe =
-              LocalVariableDeclaration.fromVariableDeclarator((VariableDeclarator) n);
-      return maybe.<Either<LocalDeclaration, Node>>map(Either::left).orElseGet(() -> Either.right(n));
+      var maybe = LocalVariableDeclaration.fromVariableDeclarator((VariableDeclarator) n);
+      return maybe
+          .<Either<LocalDeclaration, Node>>map(Either::left)
+          .orElseGet(() -> Either.right(n));
     }
     if (n instanceof Parameter) {
       return Either.left(new ParameterDeclaration((Parameter) n));
@@ -509,7 +510,7 @@ final class ResourceLeakFixer {
     }
     memory.add(expr);
     return findDirectlyDependentResources(expr).stream()
-            .filter(res -> !memory.contains(res))
+        .filter(res -> !memory.contains(res))
         .flatMap(
             res -> Stream.concat(Stream.of(res), findDependentResourcesImpl(res, memory).stream()))
         .collect(Collectors.toList());

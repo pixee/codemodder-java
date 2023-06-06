@@ -24,13 +24,13 @@
           }
         } ],
         "rules" : [ {
-          "id" : "java/input-resource-leak",
-          "name" : "java/input-resource-leak",
+          "id" : "java/output-resource-leak",
+          "name" : "java/output-resource-leak",
           "shortDescription" : {
-            "text" : "Potential input resource leak"
+            "text" : "Potential output resource leak"
           },
           "fullDescription" : {
-            "text" : "A resource that is opened for reading but not closed may cause a resource leak."
+            "text" : "A resource that is opened for writing but not closed may cause a resource leak."
           },
           "defaultConfiguration" : {
             "enabled" : true,
@@ -38,10 +38,10 @@
           },
           "properties" : {
             "tags" : [ "efficiency", "correctness", "resources", "external/cwe/cwe-404", "external/cwe/cwe-772" ],
-            "description" : "A resource that is opened for reading but not closed may cause a resource\n              leak.",
-            "id" : "java/input-resource-leak",
+            "description" : "A resource that is opened for writing but not closed may cause a resource\n              leak.",
+            "id" : "java/output-resource-leak",
             "kind" : "problem",
-            "name" : "Potential input resource leak",
+            "name" : "Potential output resource leak",
             "precision" : "high",
             "problem.severity" : "warning"
           }
@@ -101,29 +101,6 @@
             "text" : ""
           }
         }
-      }, {
-        "locations" : [ {
-          "physicalLocation" : {
-            "artifactLocation" : {
-              "uri" : "src/test/java/com/mycompany/app/AppTest.java",
-              "uriBaseId" : "%SRCROOT%",
-              "index" : 1
-            }
-          }
-        } ],
-        "message" : {
-          "text" : ""
-        },
-        "level" : "none",
-        "descriptor" : {
-          "id" : "java/baseline/expected-extracted-files",
-          "index" : 0
-        },
-        "properties" : {
-          "formattedMessage" : {
-            "text" : ""
-          }
-        }
       } ],
       "executionSuccessful" : true
     } ],
@@ -133,22 +110,16 @@
         "uriBaseId" : "%SRCROOT%",
         "index" : 0
       }
-    }, {
-      "location" : {
-        "uri" : "src/test/java/com/mycompany/app/AppTest.java",
-        "uriBaseId" : "%SRCROOT%",
-        "index" : 1
-      }
     } ],
     "results" : [ {
-      "ruleId" : "java/input-resource-leak",
+      "ruleId" : "java/output-resource-leak",
       "ruleIndex" : 0,
       "rule" : {
-        "id" : "java/input-resource-leak",
+        "id" : "java/output-resource-leak",
         "index" : 0
       },
       "message" : {
-        "text" : "This FileReader is not always closed on method exit."
+        "text" : "This FileWriter is not always closed on method exit."
       },
       "locations" : [ {
         "physicalLocation" : {
@@ -158,15 +129,71 @@
             "index" : 0
           },
           "region" : {
-            "startLine" : 17,
+            "startLine" : 11,
+            "startColumn" : 21,
+            "endColumn" : 52
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "f81bf6887ca04605:1",
+        "primaryLocationStartColumnFingerprint" : "16"
+      }
+    }, {
+      "ruleId" : "java/output-resource-leak",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/output-resource-leak",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This FileWriter is not always closed on method exit."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 15,
             "startColumn" : 63,
             "endColumn" : 91
           }
         }
       } ],
       "partialFingerprints" : {
-        "primaryLocationLineHash" : "cb86426feba7a458:1",
+        "primaryLocationLineHash" : "25096324ed4da34e:1",
         "primaryLocationStartColumnFingerprint" : "58"
+      }
+    }, {
+      "ruleId" : "java/output-resource-leak",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/output-resource-leak",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This BufferedWriter is not always closed on method exit."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 19,
+            "startColumn" : 25,
+            "endColumn" : 63
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "47f9cffb8fd5b3d4:1",
+        "primaryLocationStartColumnFingerprint" : "20"
       }
     } ],
     "columnKind" : "utf16CodeUnits",
