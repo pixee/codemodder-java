@@ -38,10 +38,10 @@ final class ResourceLeakFixer {
   public static Optional<Integer> checkAndFix(final Expression expr) {
     if (isFixable(expr)) {
       if (expr instanceof ObjectCreationExpr) {
-        tryToFix(expr.asObjectCreationExpr());
+        return tryToFix(expr.asObjectCreationExpr());
       }
       if (expr instanceof MethodCallExpr) {
-        tryToFix(expr.asMethodCallExpr());
+        return tryToFix(expr.asMethodCallExpr());
       }
     }
     return Optional.empty();
@@ -316,19 +316,20 @@ final class ResourceLeakFixer {
    */
   private static List<Either<LocalDeclaration, Node>> flowsInto(final Expression expr) {
     // is immediately assigned as an init expr
-    final Optional<Either<LocalDeclaration, Node>> maybeExpr =
+    Optional<Either<LocalDeclaration, Node>> maybeExpr =
         ASTs.isInitExpr(expr)
             .flatMap(vd -> LocalVariableDeclaration.fromVariableDeclarator(vd))
             .map(lvd -> Either.left(lvd));
 
     // is immediately assigned
-    maybeExpr.or(
-        () ->
-            ASTs.isAssigned(expr)
-                .filter(ae -> ae.getTarget().isNameExpr())
-                .map(ae -> ae.getTarget().asNameExpr())
-                .flatMap(ne -> ASTs.findNonCallableSimpleNameSource(ne.getName()))
-                .map(ResourceLeakFixer::isLocalDeclaration));
+    maybeExpr =
+        maybeExpr.or(
+            () ->
+                ASTs.isAssigned(expr)
+                    .filter(ae -> ae.getTarget().isNameExpr())
+                    .map(ae -> ae.getTarget().asNameExpr())
+                    .flatMap(ne -> ASTs.findNonCallableSimpleNameSource(ne.getName()))
+                    .map(ResourceLeakFixer::isLocalDeclaration));
     return maybeExpr
         .map(e -> e.ifLeftOrElseGet(ld -> flowsInto(ld), n -> List.of(e)))
         .orElse(List.of());

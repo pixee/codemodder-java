@@ -34,6 +34,6 @@ public final class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
       final Result result) {
-    return JDBCResourceLeakFixer.checkAndFix(methodCallExpr).isPresent();
+    return ResourceLeakFixer.checkAndFix(methodCallExpr).isPresent();
   }
 }
