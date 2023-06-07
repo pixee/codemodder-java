@@ -29,7 +29,7 @@ final class DefaultCallReplacer implements JavaParserTransformer.CallReplacer {
   @Override
   public boolean withStaticMethodWithSameArguments(
       final String className, final String methodName, final boolean isStaticImport) {
-    Optional<CompilationUnit> cu = call.findAncestor(CompilationUnit.class);
+    Optional<CompilationUnit> cu = call.findCompilationUnit();
     if (cu.isEmpty()) {
       return false;
     }
