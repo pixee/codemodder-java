@@ -52,8 +52,8 @@ final class ResourceLeakFixer {
   }
 
   /**
-   * Detects if a {@link MethodCallExpr} of a leaking JDBC resource type detected by CodeQL is
-   * fixable. The following can be assumed.
+   * Detects if a {@link Expression} detected by CodeQL that creates a leaking resource is fixable.
+   * The following can be assumed.
    *
    * <p>(1) No close() is called within its scope.
    *

@@ -2,6 +2,10 @@ package io.codemodder.ast;
 
 import com.github.javaparser.ast.body.Parameter;
 
+/**
+ * Represents the declaration of a parameter in a method, constructor, lambda expression, and catch
+ * clause.
+ */
 public class ParameterDeclaration implements LocalDeclaration {
 
   private Parameter parameter;
