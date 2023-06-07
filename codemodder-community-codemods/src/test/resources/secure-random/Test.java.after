@@ -1,0 +1,12 @@
+package com.acme.testcode;
+import java.security.SecureRandom;
+
+
+public final class Test {
+
+  private Random r = new SecureRandom();
+
+  void doStuff() {
+    new SecureRandom().nextInt();
+  }
+}

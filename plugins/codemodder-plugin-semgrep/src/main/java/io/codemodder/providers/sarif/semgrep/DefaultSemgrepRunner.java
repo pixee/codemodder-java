@@ -4,7 +4,6 @@ import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
      */
     Path tmpDir = Files.createTempDirectory("codemodder-semgrep");
     Path semgrepIgnoreFile = Files.createFile(tmpDir.resolve(".semgrepignore"));
-    Files.write(semgrepIgnoreFile, OUR_SEMGREPIGNORE_CONTENTS.getBytes(StandardCharsets.UTF_8));
+    Files.writeString(semgrepIgnoreFile, OUR_SEMGREPIGNORE_CONTENTS);
 
     LOG.debug("Will execute Semgrep from this directory: {}", dumpInfo(tmpDir));
     LOG.debug("Semgrep ignore file is located at: {}", dumpInfo(semgrepIgnoreFile));

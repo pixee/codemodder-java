@@ -8,7 +8,6 @@ import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -25,7 +24,7 @@ final class SemgrepRunnerTest {
     // create vulnerable code in a new temporary repository dir
     Path javaFile = Files.createTempFile(repositoryDir, "WeakRandom", ".java");
     String insecureRandomJavaClass = "class Foo { Random rnd = new Random(); }";
-    Files.write(javaFile, insecureRandomJavaClass.getBytes(StandardCharsets.UTF_8));
+    Files.writeString(javaFile, insecureRandomJavaClass);
 
     Path ruleFile = Files.createTempFile(repositoryDir, "example", ".yaml");
     InputStream resourceAsStream =

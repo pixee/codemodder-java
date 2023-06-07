@@ -1,10 +1,12 @@
 package io.codemodder.testutils;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.empty;
 
 import com.github.javaparser.JavaParser;
 import io.codemodder.*;
+import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.CachingJavaParser;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -45,18 +47,29 @@ public interface RawFileCodemodTest {
     final var tmpFilePath = tmpDir.resolve(tmpFileName);
     Files.copy(filePathBefore, tmpFilePath);
 
-    for (CodemodIdPair pair : loader.getCodemods()) {
-      CodemodExecutor executor =
-          CodemodExecutor.from(
-              tmpDir,
-              IncludesExcludes.any(),
-              pair,
-              List.of(),
-              List.of(),
-              CachingJavaParser.from(new JavaParser()),
-              EncodingDetector.create());
-      executor.execute(List.of(tmpFilePath));
-    }
+    List<CodemodIdPair> codemods = loader.getCodemods();
+    assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));
+
+    CodemodIdPair pair = codemods.get(0);
+    CodemodExecutor executor =
+        CodemodExecutor.from(
+            tmpDir,
+            IncludesExcludes.any(),
+            pair,
+            List.of(),
+            List.of(),
+            CachingJavaParser.from(new JavaParser()),
+            EncodingDetector.create());
+    CodeTFResult result = executor.execute(List.of(tmpFilePath));
+
+    // let them know if anything failed outright
+    assertThat("Some files failed to scan", result.getFailedFiles().size(), equalTo(0));
+
+    // make sure that some of the basics are being reported
+    assertThat(result.getSummary(), is(not(blankOrNullString())));
+    assertThat(result.getDescription(), is(not(blankOrNullString())));
+    assertThat(result.getReferences(), is(not(empty())));
+
     final var modifiedFile = Files.readString(tmpFilePath);
     assertThat(modifiedFile, equalTo(Files.readString(filePathAfter)));
   }

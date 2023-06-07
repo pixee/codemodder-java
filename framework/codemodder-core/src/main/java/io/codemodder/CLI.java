@@ -10,7 +10,6 @@ import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -296,7 +295,7 @@ final class CLI implements Callable<Integer> {
               elapsed);
       ObjectMapper mapper = new ObjectMapper();
       mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-      Files.write(outputPath, mapper.writeValueAsString(report).getBytes(StandardCharsets.UTF_8));
+      Files.writeString(outputPath, mapper.writeValueAsString(report));
     } else if (OutputFormat.DIFF.equals(outputFormat)) {
       throw new UnsupportedOperationException("not supported yet");
     }

@@ -1,6 +1,7 @@
 package deserialize;
 
 import io.github.pixee.security.ObjectInputFilters;
+import static io.github.pixee.security.ObjectInputFilters.createSafeObjectInputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
@@ -46,5 +47,10 @@ public class Cls
         ObjectInputFilters.enableObjectFilterIfUnprotected(ois1);
         ObjectInputStream ois3, ois4 = new ObjectInputStream(getIs());
         ObjectInputFilters.enableObjectFilterIfUnprotected(ois4);
+    }
+
+    private void doesAnonymous() {
+      Acme acme = createSafeObjectInputStream(getIs()).readObject();
+      LOG.info(createSafeObjectInputStream(getIs()).readObject());
     }
 }

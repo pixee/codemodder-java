@@ -2,9 +2,7 @@ package io.codemodder.javaparser;
 
 import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.expr.ArrayCreationExpr;
-import com.github.javaparser.ast.expr.ArrayInitializerExpr;
-import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
 /** A utility for making it easy to transform JavaParser ASTs. */
@@ -15,6 +13,14 @@ public abstract class JavaParserTransformer {
   /** Useful for wrapping an expression with a surrounding method call. */
   public static ExpressionWrapper wrap(Expression expression) {
     return new DefaultExpressionWrapper(expression);
+  }
+
+  /**
+   * Useful for replacing an expression (method call or object creation) with a surrounding method
+   * call.
+   */
+  public static CallReplacer replace(Expression expression) {
+    return new DefaultCallReplacer(expression);
   }
 
   /** Creates a new array creation expression. */
@@ -36,5 +42,19 @@ public abstract class JavaParserTransformer {
      * @return true if the transformation was successful, false otherwise
      */
     boolean withStaticMethod(String className, String methodName, boolean isStaticImport);
+  }
+
+  public interface CallReplacer {
+    /**
+     * Performs the actual transformation of replacing the given expression a static method call
+     * with the same arguments..
+     *
+     * @param className the class name of the static method
+     * @param methodName the method name
+     * @param isStaticImport whether or not the static method is imported
+     * @return true if the transformation was successful, false otherwise
+     */
+    boolean withStaticMethodWithSameArguments(
+        String className, String methodName, boolean isStaticImport);
   }
 }
