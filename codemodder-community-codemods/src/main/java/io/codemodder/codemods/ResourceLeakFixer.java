@@ -415,7 +415,7 @@ final class ResourceLeakFixer {
     return Stream.concat(
             Stream.of(Either.<LocalDeclaration, Node>left(ld)),
             Stream.concat(fromAssignments, fromInit))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private static List<Expression> findDirectlyDependentResources(final LocalDeclaration ld) {
@@ -435,6 +435,18 @@ final class ResourceLeakFixer {
             .filter(wrapsLD);
 
     return Stream.concat(jdbcResources, oceResources).collect(Collectors.toList());
+  }
+
+  public static Optional<Expression> findResourceInit(final NameExpr name) {
+    var maybeResourceInit =
+        ASTs.findEarliestLocalVariableDeclarationOf(name, name.getNameAsString())
+            .filter(ASTs::isFinalOrNeverAssigned)
+            .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer());
+    if (maybeResourceInit.isPresent() && maybeResourceInit.get() instanceof NameExpr ne) {
+      return findResourceInit(ne);
+    } else {
+      return maybeResourceInit.filter(ResourceLeakFixer::isResourceInit);
+    }
   }
 
   /**
@@ -460,18 +472,9 @@ final class ResourceLeakFixer {
               .filter(ResourceLeakFixer::isAutoCloseableType)
               .findFirst();
       // try to find the source of a NameExpr
-      // TODO this should go recursively
-      // TODO parameter case
+      // TODO It may be the case that NameExpr references a parameter here, not supported currently
       var maybeResourceInit =
-          maybeArg
-              .filter(Expression::isNameExpr)
-              .flatMap(
-                  e ->
-                      ASTs.findEarliestLocalVariableDeclarationOf(
-                          e, e.asNameExpr().getNameAsString()))
-              .filter(ASTs::isFinalOrNeverAssigned)
-              .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
-              .filter(ResourceLeakFixer::isResourceInit);
+          maybeArg.filter(Expression::isNameExpr).flatMap(e -> findResourceInit(e.asNameExpr()));
       if (maybeResourceInit.isPresent()) {
         maybeResourceInit.ifPresent(allDependent::add);
       } else {
@@ -513,7 +516,7 @@ final class ResourceLeakFixer {
         .filter(res -> !memory.contains(res))
         .flatMap(
             res -> Stream.concat(Stream.of(res), findDependentResourcesImpl(res, memory).stream()))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   /**
@@ -524,7 +527,6 @@ final class ResourceLeakFixer {
   private static boolean immediatelyEscapesMethodScope(final Expression expr) {
     // anything that is not a resource creation escapes
     // e.g. field access, nameexpr of parameter, method calls, etc.
-    // TODO how about parameters that are closed?
     if (!isResourceInit(expr)) {
       return true;
     }
