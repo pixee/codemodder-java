@@ -52,13 +52,16 @@ jobs:
           role-session-name: github
           aws-region: ${{ env.AWS_REGION }}
 
-      - uses: gradle/gradle-build-action@v2
-        with:
-          arguments: -q setVersion -PnewVersion=${{ inputs.version }}
+      - name: Install ECR Credential Helper
+        run: sudo apt install amazon-ecr-credential-helper
 
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: build publish
+          arguments: --quiet setVersion -PnewVersion=${{ inputs.version }}
+
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: --console=plain --quiet build publish
 
       # share version bump
       - run: |

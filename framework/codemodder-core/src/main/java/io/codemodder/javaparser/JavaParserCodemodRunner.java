@@ -48,7 +48,7 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
       String encodingName = encodingDetector.detect(file).orElse("UTF-8");
       Charset encoding = Charset.forName(encodingName);
       String modified = (LexicalPreservingPrinter.print(cu));
-      Files.write(file, modified.getBytes(encoding), StandardOpenOption.TRUNCATE_EXISTING);
+      Files.writeString(file, modified, encoding, StandardOpenOption.TRUNCATE_EXISTING);
     }
     return changes;
   }

@@ -83,6 +83,9 @@ public interface CodemodTestMixin {
     CodeTFResult result = executor.execute(List.of(pathToJavaFile));
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
 
+    // let them know if anything failed outright
+    assertThat(result.getFailedFiles().size(), equalTo(0));
+
     // make sure the file is transformed to the expected output
     String expectedCode = Files.readString(after);
     String transformedJavaCode = Files.readString(pathToJavaFile);
@@ -90,6 +93,11 @@ public interface CodemodTestMixin {
     assertThat(changeset.size(), is(1));
     CodeTFChangesetEntry entry = changeset.get(0);
     assertThat(entry.getChanges().isEmpty(), is(false));
+
+    // make sure that some of the basics are being reported
+    assertThat(result.getSummary(), is(not(blankOrNullString())));
+    assertThat(result.getDescription(), is(not(blankOrNullString())));
+    assertThat(result.getReferences(), is(not(empty())));
 
     // make sure the dependencies are added
     assertThat(dependenciesExpected, hasItems(dependenciesExpected.toArray(new DependencyGAV[0])));

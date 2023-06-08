@@ -41,4 +41,9 @@ public class Cls
         ObjectInputStream ois1 = new ObjectInputStream(getIs()), ois2;
         ObjectInputStream ois3, ois4 = new ObjectInputStream(getIs());
     }
+
+    private void doesAnonymous() {
+      Acme acme = new ObjectInputStream(getIs()).readObject();
+      LOG.info(new ObjectInputStream(getIs()).readObject());
+    }
 }

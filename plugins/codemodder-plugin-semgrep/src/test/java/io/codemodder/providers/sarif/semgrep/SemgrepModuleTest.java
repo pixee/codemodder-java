@@ -9,17 +9,14 @@ import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFReference;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -30,7 +27,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-/** Tests binding and running while binding. */
+/**
+ * Tests binding and running while binding.
+ *
+ * <p>It's worth noting that to test the failing cases testing invalid codemod definitions, we have
+ * to move the invalid codemods to their own package. This is because we do package-based classpath
+ * scanning to find codemods, and if we find one that is invalid, it breaks everything.
+ */
 final class SemgrepModuleTest {
 
   @Codemod(
@@ -88,7 +91,7 @@ final class SemgrepModuleTest {
           ObjectCreationExpr.class,
           RegionExtractor.FROM_FIRST_LOCATION,
           RegionNodeMatcher.EXACT_MATCH,
-          new UselessReporter());
+          CodemodReporterStrategy.empty());
     }
 
     @Override
@@ -108,7 +111,11 @@ final class SemgrepModuleTest {
   static class MissingYamlPropertiesPath extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
     private static final String YAML_MISSING_STUFF =
-        "rules:\n" + "  - id: explicit-yaml-path\n" + "    pattern: new Stuff()\n";
+        """
+            rules:
+              - id: explicit-yaml-path
+                pattern: new Stuff()
+            """;
 
     @Inject
     MissingYamlPropertiesPath(
@@ -119,7 +126,7 @@ final class SemgrepModuleTest {
           ObjectCreationExpr.class,
           RegionExtractor.FROM_FIRST_LOCATION,
           RegionNodeMatcher.EXACT_MATCH,
-          new UselessReporter());
+          CodemodReporterStrategy.empty());
     }
 
     @Override
@@ -139,7 +146,11 @@ final class SemgrepModuleTest {
   static class UsesImplicitRule extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
     private static final String YAML_MISSING_STUFF =
-        "rules:\n" + "  - id: explicit-yaml-path\n" + "    pattern: new Stuff()\n";
+        """
+            rules:
+              - id: explicit-yaml-path
+                pattern: new Stuff()
+            """;
 
     @Inject
     UsesImplicitRule(@SemgrepScan(yaml = YAML_MISSING_STUFF) RuleSarif ruleSarif) {
@@ -148,7 +159,7 @@ final class SemgrepModuleTest {
           ObjectCreationExpr.class,
           RegionExtractor.FROM_FIRST_LOCATION,
           RegionNodeMatcher.EXACT_MATCH,
-          new UselessReporter());
+          CodemodReporterStrategy.empty());
     }
 
     @Override
@@ -159,90 +170,13 @@ final class SemgrepModuleTest {
         final Result result) {
       return true;
     }
-  }
-
-  @Codemod(
-      author = "pixee",
-      id = "pixee-test:java/uses-implicit-rule",
-      reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class UsesImplicitButHasMultipleRules
-      extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
-
-    private static final String YAML_MISSING_STUFF =
-        "rules:\n"
-            + "  - id: explicit-yaml-path\n"
-            + "    pattern: new Stuff()\n"
-            + "  - id: explicit-yaml-path-also\n"
-            + "    pattern: new Bar()\n";
-
-    @Inject
-    UsesImplicitButHasMultipleRules(@SemgrepScan(yaml = YAML_MISSING_STUFF) RuleSarif ruleSarif) {
-      super(
-          ruleSarif,
-          ObjectCreationExpr.class,
-          RegionExtractor.FROM_FIRST_LOCATION,
-          RegionNodeMatcher.EXACT_MATCH,
-          new UselessReporter());
-    }
-
-    @Override
-    public boolean onResultFound(
-        final CodemodInvocationContext context,
-        final CompilationUnit cu,
-        final ObjectCreationExpr node,
-        final Result result) {
-      return true;
-    }
-  }
-
-  @Codemod(
-      author = "pixee",
-      id = "pixee-test:java/incorrect-binding-type",
-      reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class BindsToIncorrectObject implements CodeChanger {
-    @Inject
-    BindsToIncorrectObject(
-        @SemgrepScan(ruleId = "incorrect-binding-type") HashMap<Object, Object> nonSarifObject) {}
-
-    @Override
-    public String getSummary() {
-      return null;
-    }
-
-    @Override
-    public String getDescription() {
-      return null;
-    }
-
-    @Override
-    public Optional<String> getSourceControlUrl() {
-      return Optional.empty();
-    }
-
-    @Override
-    public List<CodeTFReference> getReferences() {
-      return null;
-    }
-
-    @Override
-    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
-      return null;
-    }
-  }
-
-  @Test
-  void it_fails_when_injecting_nonsarif_type(@TempDir Path tmpDir) {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new SemgrepModule(tmpDir, List.of(BindsToIncorrectObject.class)).configure());
   }
 
   @Test
   void it_works_with_implicit_yaml_path(@TempDir Path tmpDir) throws IOException {
     String javaCode = "class Foo { \n Object a = new Thing(); \n }";
     Path javaFile = Files.createTempFile(tmpDir, "HasThing", ".java");
-    Files.write(
-        javaFile, javaCode.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING);
+    Files.writeString(javaFile, javaCode, StandardOpenOption.TRUNCATE_EXISTING);
     SemgrepModule module = new SemgrepModule(tmpDir, List.of(UsesImplicitYamlPath.class));
     Injector injector = Guice.createInjector(module);
     UsesImplicitYamlPath instance = injector.getInstance(UsesImplicitYamlPath.class);
@@ -259,8 +193,7 @@ final class SemgrepModuleTest {
       final Class<? extends CodeChanger> codemod, @TempDir Path tmpDir) throws IOException {
     String javaCode = "class Foo { \n\n  Object a = new Stuff(); \n }";
     Path javaFile = Files.createTempFile(tmpDir, "HasStuff", ".java");
-    Files.write(
-        javaFile, javaCode.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING);
+    Files.writeString(javaFile, javaCode, StandardOpenOption.TRUNCATE_EXISTING);
 
     SemgrepModule module = new SemgrepModule(tmpDir, List.of(codemod));
     Injector injector = Guice.createInjector(module);
@@ -269,18 +202,6 @@ final class SemgrepModuleTest {
     RuleSarif ruleSarif = instance.sarif;
     assertThat(ruleSarif, is(notNullValue()));
     assertThat(ruleSarif.getRegionsFromResultsByRule(javaFile).size(), is(1));
-  }
-
-  @Test
-  void it_fails_when_implicit_rule_but_multiple_specified(@TempDir Path tmpDir) throws IOException {
-    String javaCode = "class Foo { \n\n  Object a = new Stuff(); \n }";
-    Path javaFile = Files.createTempFile(tmpDir, "HasStuff", ".java");
-    Files.write(
-        javaFile, javaCode.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING);
-
-    SemgrepModule module =
-        new SemgrepModule(tmpDir, List.of(UsesImplicitButHasMultipleRules.class));
-    assertThrows(CreationException.class, () -> Guice.createInjector(module));
   }
 
   @Test

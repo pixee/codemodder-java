@@ -122,4 +122,33 @@ public interface CodemodReporterStrategy {
       }
     };
   }
+
+  static CodemodReporterStrategy empty() {
+    return new CodemodReporterStrategy() {
+      @Override
+      public String getSummary() {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public String getDescription() {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public Optional<String> getSourceControlUrl() {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public String getChange(Path path, CodemodChange change) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public List<String> getReferences() {
+        throw new UnsupportedOperationException();
+      }
+    };
+  }
 }
