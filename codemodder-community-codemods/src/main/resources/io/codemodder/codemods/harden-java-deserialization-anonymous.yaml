@@ -1,0 +1,7 @@
+rules:
+  - id: harden-java-deserialization-anonymous
+    pattern: new ObjectInputStream(...).readObject()
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING

@@ -97,7 +97,7 @@ final class CodemodLoaderTest {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nb";
-      Files.write(path, contents.getBytes(StandardCharsets.UTF_8));
+      Files.writeString(path, contents);
       return List.of();
     }
 
@@ -137,7 +137,7 @@ final class CodemodLoaderTest {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nc\n";
-      Files.write(path, contents.getBytes(StandardCharsets.UTF_8));
+      Files.writeString(path, contents);
       return List.of();
     }
 

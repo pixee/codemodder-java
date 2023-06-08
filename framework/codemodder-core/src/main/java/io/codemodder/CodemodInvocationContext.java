@@ -30,6 +30,6 @@ public interface CodemodInvocationContext {
    */
   default Stream<Line> lines() throws IOException {
     return Streams.mapWithIndex(
-        Files.lines(path()), (content, line) -> new DefaultLine((int) line, content));
+        Files.lines(path()), (content, line) -> new DefaultLine((int) line + 1, content));
   }
 }
