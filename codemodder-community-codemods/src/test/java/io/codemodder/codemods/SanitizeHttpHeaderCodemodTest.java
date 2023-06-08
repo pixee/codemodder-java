@@ -6,5 +6,5 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = SanitizeHttpHeaderCodemod.class,
     testResourceDir = "strip-http-header-newlines",
-    dependencies = "io.github.pixee:java-security-toolkit:1.0.2")
+    dependencies = "io.github.pixee:java-security-toolkit:1.0.3")
 final class SanitizeHttpHeaderCodemodTest implements CodemodTestMixin {}

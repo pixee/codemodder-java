@@ -7,4 +7,4 @@ import io.codemodder.testutils.Metadata;
     codemodType = JEXLInjectionCodemod.class,
     testResourceDir = "jexl-expression-injection",
     dependencies = {})
-public class JEXLInjectionCodemodTest implements CodemodTestMixin {}
+final class JEXLInjectionCodemodTest implements CodemodTestMixin {}
