@@ -30,7 +30,7 @@ public final class ForInitDeclaration extends LocalVariableDeclaration {
   }
 
   @Override
-  protected LocalVariableScope findScope() {
-    return LocalVariableScope.fromForDeclaration(stmt, vd);
+  protected LocalScope findScope() {
+    return LocalScope.fromForDeclaration(stmt, vd);
   }
 }

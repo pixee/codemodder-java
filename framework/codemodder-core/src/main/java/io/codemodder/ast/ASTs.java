@@ -469,6 +469,17 @@ public final class ASTs {
         .filter(mce -> mce.getArguments().stream().anyMatch(arg -> arg == expr));
   }
 
+  /**
+   * Test for this pattern: {@link ObjectCreationExpr} -&gt; {@link Expression} ({@code expr}),
+   * where {@code expr} is an argument.
+   */
+  public static Optional<ObjectCreationExpr> isArgumentOfObjectCreationExpression(
+      final Expression expr) {
+    return expr.getParentNode()
+        .map(p -> p instanceof ObjectCreationExpr ? (ObjectCreationExpr) p : null)
+        .filter(oce -> oce.getArguments().stream().anyMatch(arg -> arg == expr));
+  }
+
   /** Checks if {@code vd} is a local declaration. */
   public static boolean isLocalVariableDeclarator(final VariableDeclarator vd) {
     final var maybeParent = vd.getParentNode();
@@ -579,7 +590,7 @@ public final class ASTs {
    * Specification - Section 4.12.14</a> for the definitions of final variables.
    */
   public static boolean isFinalOrNeverAssigned(
-      final VariableDeclarator vd, final LocalVariableScope scope) {
+      final VariableDeclarator vd, final LocalScope scope) {
     // Assumes vde contains a declarator with name
     final var vde = (VariableDeclarationExpr) vd.getParentNode().get();
     // has final modifier
@@ -647,7 +658,7 @@ public final class ASTs {
   /**
    * Returns a {@link List} containing all the referenced of {@code localDeclaration} in its scope.
    */
-  public static List<NameExpr> findAllReferences(LocalVariableDeclaration localDeclaration) {
+  public static List<NameExpr> findAllReferences(final LocalVariableDeclaration localDeclaration) {
     return localDeclaration.getScope().stream()
         .flatMap(
             n ->
@@ -656,6 +667,11 @@ public final class ASTs {
                         NameExpr.class,
                         ne -> ne.getNameAsString().equals(localDeclaration.getName()))
                     .stream())
+        .filter(
+            ne ->
+                findNonCallableSimpleNameSource(ne.getName())
+                    .filter(n -> n == localDeclaration.getVariableDeclarator())
+                    .isPresent())
         .collect(Collectors.toList());
   }
 
@@ -709,10 +725,27 @@ public final class ASTs {
   }
 
   /**
-   * Staring from the {@link Node} {@code start}, checks if there exists a local declaration whose
-   * name is {@code name}.
+   * Staring from the {@link Node} {@code start}, checks if there exists a local variable
+   * declaration whose name is {@code name}.
    */
-  public static Optional<LocalVariableDeclaration> findEarliestLocalDeclarationOf(
+  public static Optional<LocalVariableDeclaration> findEarliestLocalVariableDeclarationOf(
+      final Node start, final String name) {
+    return NameResolver.findLocalVariableDeclarationOf(start, name);
+  }
+
+  /**
+   * Staring from the {@link Node} {@code start}, checks if there exists a local variable
+   * declaration whose name is {@code name}.
+   */
+  public static Optional<LocalDeclaration> findEarliestLocalDeclarationOf(final SimpleName name) {
+    return NameResolver.findLocalDeclarationOf(name, name.asString());
+  }
+
+  /**
+   * Staring from the {@link Node} {@code start}, checks if there exists a local variable
+   * declaration whose name is {@code name}.
+   */
+  public static Optional<LocalDeclaration> findEarliestLocalDeclarationOf(
       final Node start, final String name) {
     return NameResolver.findLocalDeclarationOf(start, name);
   }

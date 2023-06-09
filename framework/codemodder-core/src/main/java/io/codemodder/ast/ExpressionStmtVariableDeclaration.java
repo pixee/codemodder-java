@@ -30,7 +30,7 @@ public final class ExpressionStmtVariableDeclaration extends LocalVariableDeclar
   }
 
   @Override
-  protected LocalVariableScope findScope() {
-    return LocalVariableScope.fromLocalDeclaration(stmt, vd);
+  protected LocalScope findScope() {
+    return LocalScope.fromLocalDeclaration(stmt, vd);
   }
 }

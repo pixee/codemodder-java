@@ -138,7 +138,7 @@ public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expressio
     // is a variable, track its definition
     if (expr instanceof NameExpr) {
       final var maybeLVD =
-          ASTs.findEarliestLocalDeclarationOf(
+          ASTs.findEarliestLocalVariableDeclarationOf(
               expr.asNameExpr(), expr.asNameExpr().getNameAsString());
       return maybeLVD
           .filter(ASTs::isFinalOrNeverAssigned)
@@ -165,7 +165,7 @@ public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expressio
     // is a variable, track its definition
     if (scope instanceof NameExpr) {
       final var maybeLVD =
-          ASTs.findEarliestLocalDeclarationOf(
+          ASTs.findEarliestLocalVariableDeclarationOf(
               scope.asNameExpr(), scope.asNameExpr().getNameAsString());
       return maybeLVD
           .filter(ASTs::isFinalOrNeverAssigned)

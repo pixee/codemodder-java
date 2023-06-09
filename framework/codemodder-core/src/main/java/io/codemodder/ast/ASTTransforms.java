@@ -135,9 +135,7 @@ public final class ASTTransforms {
    * its scope, then wrap the declaration into as a resource of a try stmt.
    */
   public static TryStmt wrapIntoResource(
-      final ExpressionStmt stmt,
-      final VariableDeclarationExpr vdecl,
-      final LocalVariableScope scope) {
+      final ExpressionStmt stmt, final VariableDeclarationExpr vdecl, final LocalScope scope) {
     final var wrapper = new TryStmt();
     wrapper.getResources().add(vdecl);
 

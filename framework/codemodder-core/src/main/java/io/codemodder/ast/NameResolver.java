@@ -113,7 +113,41 @@ final class NameResolver {
     return (ClassOrInterfaceDeclaration) current;
   }
 
-  static Optional<LocalVariableDeclaration> findLocalDeclarationOf(
+  static Optional<LocalDeclaration> findLocalDeclarationOf(final Node start, final String name) {
+    final var maybeSource = resolveSimpleName(start, name);
+
+    if (maybeSource.isPresent()) {
+      final var source = maybeSource.get();
+      if (source instanceof Parameter) {
+        return Optional.of(new ParameterDeclaration((Parameter) source));
+      }
+      if (source instanceof VariableDeclarator) {
+        final var vd = (VariableDeclarator) source;
+        return ASTs.isVariableOfLocalDeclarationStmt(vd)
+            .map(
+                t ->
+                    (LocalDeclaration)
+                        new ExpressionStmtVariableDeclaration(
+                            t.getValue0(), t.getValue1(), t.getValue2()))
+            .or(
+                () ->
+                    ASTs.isResource(vd)
+                        .map(p -> new TryResourceDeclaration(p.getValue0(), p.getValue1(), vd)))
+            .or(
+                () ->
+                    ASTs.isForInitVariable(vd)
+                        .map(p -> new ForInitDeclaration(p.getValue0(), p.getValue1(), vd)))
+            .or(
+                () ->
+                    ASTs.isForEachVariable(vd)
+                        .map(p -> new ForEachDeclaration(p.getValue0(), p.getValue1(), vd)));
+      }
+    }
+
+    return Optional.empty();
+  }
+
+  static Optional<LocalVariableDeclaration> findLocalVariableDeclarationOf(
       final Node start, final String name) {
     final var maybeSource =
         resolveSimpleName(start, name)

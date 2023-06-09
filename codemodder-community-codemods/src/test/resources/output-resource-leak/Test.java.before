@@ -1,0 +1,23 @@
+package com.acme.testcode.resourceleak;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+
+public class Test {
+
+  public void simple() throws IOException {
+    FileWriter fr = new FileWriter("~/secrets.txt");
+  }
+
+  public void nestedWriters() throws IOException {
+    BufferedWriter br = new BufferedWriter(new BufferedWriter(new FileWriter("~/test.txt")));
+  }
+
+  public Writer noFixReturned() throws IOException {
+    BufferedWriter br = new BufferedWriter(new FileWriter(""));
+    BufferedWriter br2 = new BufferedWriter(br);
+    return br2;
+  }
+}

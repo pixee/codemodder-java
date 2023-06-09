@@ -161,7 +161,7 @@ final class SQLParameterizer {
         executeCall
             .getScope()
             .map(expr -> expr instanceof NameExpr ? expr.asNameExpr() : null)
-            .flatMap(ne -> ASTs.findEarliestLocalDeclarationOf(ne, ne.getNameAsString()))
+            .flatMap(ne -> ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getNameAsString()))
             .filter(
                 lvd ->
                     lvd.getVariableDeclarator()

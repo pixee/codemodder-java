@@ -15,19 +15,25 @@ import java.util.Optional;
  * <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.1">Java Language
  * Specification - Section 6.1</a> for all the possible ways a local variable can be declarared.
  */
-public abstract class LocalVariableDeclaration {
+public abstract class LocalVariableDeclaration implements LocalDeclaration {
 
   protected VariableDeclarationExpr vde;
   protected VariableDeclarator vd;
-  protected LocalVariableScope scope;
+  protected LocalScope scope;
 
   /** Returns the name of the local variable in this declaration as a {@link String}. */
+  @Override
   public String getName() {
     return vd.getNameAsString();
   }
 
-  /** Returns the {@link LocalVariableScope} of the local variable in this declaration. */
-  public LocalVariableScope getScope() {
+  @Override
+  public VariableDeclarator getDeclaration() {
+    return vd;
+  }
+
+  /** Returns the {@link LocalScope} of the local variable in this declaration. */
+  public LocalScope getScope() {
     if (scope == null) scope = findScope();
     return scope;
   }
@@ -45,7 +51,7 @@ public abstract class LocalVariableDeclaration {
   /** Returns the {@link Statement} {@link Node} that holds this local declaration. */
   public abstract Statement getStatement();
 
-  protected abstract LocalVariableScope findScope();
+  protected abstract LocalScope findScope();
 
   @Override
   public String toString() {

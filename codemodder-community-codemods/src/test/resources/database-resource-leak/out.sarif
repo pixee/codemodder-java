@@ -6,7 +6,23 @@
       "driver" : {
         "name" : "CodeQL",
         "organization" : "GitHub",
-        "semanticVersion" : "2.11.6",
+        "semanticVersion" : "2.13.1",
+        "notifications" : [ {
+          "id" : "java/baseline/expected-extracted-files",
+          "name" : "java/baseline/expected-extracted-files",
+          "shortDescription" : {
+            "text" : "Expected extracted files"
+          },
+          "fullDescription" : {
+            "text" : "Files appearing in the source archive that are expected to be extracted."
+          },
+          "defaultConfiguration" : {
+            "enabled" : true
+          },
+          "properties" : {
+            "tags" : [ "expected-extracted-files", "telemetry" ]
+          }
+        } ],
         "rules" : [ {
           "id" : "java/database-resource-leak",
           "name" : "java/database-resource-leak",
@@ -61,11 +77,67 @@
         } ]
       } ]
     },
+    "invocations" : [ {
+      "toolExecutionNotifications" : [ {
+        "locations" : [ {
+          "physicalLocation" : {
+            "artifactLocation" : {
+              "uri" : "Test.java",
+              "uriBaseId" : "%SRCROOT%",
+              "index" : 0
+            }
+          }
+        } ],
+        "message" : {
+          "text" : ""
+        },
+        "level" : "none",
+        "descriptor" : {
+          "id" : "java/baseline/expected-extracted-files",
+          "index" : 0
+        },
+        "properties" : {
+          "formattedMessage" : {
+            "text" : ""
+          }
+        }
+      }, {
+        "locations" : [ {
+          "physicalLocation" : {
+            "artifactLocation" : {
+              "uri" : "src/test/java/com/mycompany/app/AppTest.java",
+              "uriBaseId" : "%SRCROOT%",
+              "index" : 1
+            }
+          }
+        } ],
+        "message" : {
+          "text" : ""
+        },
+        "level" : "none",
+        "descriptor" : {
+          "id" : "java/baseline/expected-extracted-files",
+          "index" : 0
+        },
+        "properties" : {
+          "formattedMessage" : {
+            "text" : ""
+          }
+        }
+      } ],
+      "executionSuccessful" : true
+    } ],
     "artifacts" : [ {
       "location" : {
         "uri" : "Test.java",
         "uriBaseId" : "%SRCROOT%",
         "index" : 0
+      }
+    }, {
+      "location" : {
+        "uri" : "src/test/java/com/mycompany/app/AppTest.java",
+        "uriBaseId" : "%SRCROOT%",
+        "index" : 1
       }
     } ],
     "results" : [ {
@@ -289,36 +361,8 @@
         }
       } ],
       "partialFingerprints" : {
-        "primaryLocationLineHash" : "753181bef4655ab2:1",
+        "primaryLocationLineHash" : "1f96f304d254f3bd:1",
         "primaryLocationStartColumnFingerprint" : "15"
-      }
-    }, {
-      "ruleId" : "java/database-resource-leak",
-      "ruleIndex" : 0,
-      "rule" : {
-        "id" : "java/database-resource-leak",
-        "index" : 0
-      },
-      "message" : {
-        "text" : "This Statement is not always closed on method exit."
-      },
-      "locations" : [ {
-        "physicalLocation" : {
-          "artifactLocation" : {
-            "uri" : "Test.java",
-            "uriBaseId" : "%SRCROOT%",
-            "index" : 0
-          },
-          "region" : {
-            "startLine" : 65,
-            "startColumn" : 22,
-            "endColumn" : 44
-          }
-        }
-      } ],
-      "partialFingerprints" : {
-        "primaryLocationLineHash" : "bb021d582b5694dd:1",
-        "primaryLocationStartColumnFingerprint" : "17"
       }
     }, {
       "ruleId" : "java/database-resource-leak",
@@ -339,14 +383,98 @@
           },
           "region" : {
             "startLine" : 66,
-            "startColumn" : 10,
+            "startColumn" : 14,
+            "endColumn" : 38
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "90e45cda9612246:1",
+        "primaryLocationStartColumnFingerprint" : "9"
+      }
+    }, {
+      "ruleId" : "java/database-resource-leak",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/database-resource-leak",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This Statement is not always closed on method exit."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 65,
+            "startColumn" : 12,
             "endColumn" : 34
           }
         }
       } ],
       "partialFingerprints" : {
-        "primaryLocationLineHash" : "88bd0b7202dcf0ec:1",
-        "primaryLocationStartColumnFingerprint" : "5"
+        "primaryLocationLineHash" : "fb780afd6107ac3:1",
+        "primaryLocationStartColumnFingerprint" : "7"
+      }
+    }, {
+      "ruleId" : "java/database-resource-leak",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/database-resource-leak",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This ResultSet is not always closed on method exit."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 71,
+            "startColumn" : 18,
+            "endColumn" : 60
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "fbb4343c33ef8d74:1",
+        "primaryLocationStartColumnFingerprint" : "13"
+      }
+    }, {
+      "ruleId" : "java/database-resource-leak",
+      "ruleIndex" : 0,
+      "rule" : {
+        "id" : "java/database-resource-leak",
+        "index" : 0
+      },
+      "message" : {
+        "text" : "This Statement is not always closed on method exit."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "Test.java",
+            "uriBaseId" : "%SRCROOT%",
+            "index" : 0
+          },
+          "region" : {
+            "startLine" : 71,
+            "startColumn" : 18,
+            "endColumn" : 40
+          }
+        }
+      } ],
+      "partialFingerprints" : {
+        "primaryLocationLineHash" : "fbb4343c33ef8d74:1",
+        "primaryLocationStartColumnFingerprint" : "13"
       }
     } ],
     "columnKind" : "utf16CodeUnits",
