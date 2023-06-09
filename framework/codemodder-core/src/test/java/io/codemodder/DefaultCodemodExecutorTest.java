@@ -214,6 +214,21 @@ final class DefaultCodemodExecutorTest {
   }
 
   @Test
+  void it_reports_failed_files() throws IOException {
+    // make the java1 file not parseable so we can confirm errors reported correctly
+    Files.writeString(javaFile1, "this is not java code");
+    CodeTFResult result = executor.execute(List.of(javaFile1, javaFile2, javaFile3));
+    assertThat(result).satisfies(DefaultCodemodExecutorTest::hasBeforeAfterCodemodMetadata);
+
+    // should have 2 entries for both javaFile1 and javaFile3
+    List<CodeTFChangesetEntry> changeset = result.getChangeset();
+    assertThat(result.getFailedFiles()).hasSize(1);
+    assertThat(result.getFailedFiles()).contains("Test1.java");
+    assertThat(changeset.size()).isEqualTo(1);
+    assertThat(changeset.get(0)).satisfies(DefaultCodemodExecutorTest::isJavaFile3ChangedCorrectly);
+  }
+
+  @Test
   void it_handles_cumulative_file_and_dependency_changes() throws IOException {
     List<CodemodIdPair> codemods = new ArrayList<>();
     codemods.add(new CodemodIdPair("codemodder:java/inject-dep-1", new InjectsDependency1()));

@@ -238,6 +238,10 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
   /** Return the relative path name (e.g., src/test/foo) of a file within the project dir. */
   private String getRelativePath(final Path projectDir, final Path filePath) {
-    return projectDir.relativize(filePath).toString();
+    String path = projectDir.relativize(filePath).toString();
+    if (path.startsWith("/")) {
+      path = path.substring(1);
+    }
+    return path;
   }
 }
