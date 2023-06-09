@@ -129,7 +129,7 @@ public final class MavenProvider implements ProjectProvider {
                     newDependency.getVersion());
 
             boolean foundIt =
-                foundDependenciesMapped.get().stream().anyMatch(it -> newDependencyGAV.equals(it));
+                foundDependenciesMapped.get().stream().anyMatch(newDependencyGAV::equals);
 
             if (foundIt) {
               skippedDependencies.add(newDependencyGAV);
@@ -153,8 +153,8 @@ public final class MavenProvider implements ProjectProvider {
                 throw new RuntimeException(e);
               }
 
-              // Dependencies got dirty and there's the slightly risk of introducing
-              // transitive ones we didn't expect - lets rebuild it
+              // Dependencies got dirty and there's the slight risk of introducing
+              // transitive ones we didn't expect - let's rebuild it
               foundDependenciesMapped.set(getDependenciesFrom(newPomFile));
             } else {
               failedDependencies.add(newDependencyGAV);

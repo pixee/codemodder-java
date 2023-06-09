@@ -92,13 +92,14 @@ public class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expressio
                     new ObjectCreationExpr(
                         null, sandboxType, new NodeList<>(new BooleanLiteralExpr(true))))));
 
-    // for(String cls : io.github.pixee.security.UnwantedTypes.all())
+    // for(String cls : io.github.pixee.security.UnwantedTypes.dangerousClassNameTokens())
     // 	sandbox.block(cls);
     final var sandboxFor =
         new ForEachStmt(
             new VariableDeclarationExpr(
                 new VariableDeclarator(StaticJavaParser.parseType("String"), "cls")),
-            new MethodCallExpr(new NameExpr("UnwantedTypes"), "all"),
+            new MethodCallExpr(
+                new NameExpr(UnwantedTypes.class.getSimpleName()), "dangerousClassNameTokens"),
             new BlockStmt(
                 new NodeList<>(
                     new ExpressionStmt(
