@@ -27,10 +27,12 @@ final class SemgrepModule extends AbstractModule {
 
   private final List<Class<? extends Changer>> codemodTypes;
   private final Path codeDirectory;
+  private final SemgrepRunner semgrepRunner;
 
   SemgrepModule(final Path codeDirectory, final List<Class<? extends Changer>> codemodTypes) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
+    this.semgrepRunner = SemgrepRunner.createDefault();
   }
 
   @Override
@@ -160,7 +162,7 @@ final class SemgrepModule extends AbstractModule {
     // actually run the SARIF only once
     SarifSchema210 sarif;
     try {
-      sarif = new DefaultSemgrepRunner().run(yamlPathsToRun, codeDirectory);
+      sarif = semgrepRunner.run(yamlPathsToRun, codeDirectory);
     } catch (IOException e) {
       throw new IllegalArgumentException("Semgrep execution failed", e);
     }

@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 /** Responsible for running semgrep */
-interface SemgrepRunner {
+public interface SemgrepRunner {
 
   /**
    * Execute semgrep.
@@ -16,4 +16,9 @@ interface SemgrepRunner {
    * @return the resulting SARIF
    */
   SarifSchema210 run(List<Path> yamls, Path codeDir) throws IOException;
+
+  /** */
+  static SemgrepRunner createDefault() {
+    return new DefaultSemgrepRunner();
+  }
 }
