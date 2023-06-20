@@ -6,5 +6,5 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = HardenZipEntryPathsCodemod.class,
     testResourceDir = "harden-zip-entry-paths",
-    dependencies = "io.github.pixee:java-security-toolkit:1.0.3")
+    dependencies = "io.github.pixee:java-security-toolkit:1.0.4")
 final class HardenZipEntryPathsCodemodTest implements CodemodTestMixin {}

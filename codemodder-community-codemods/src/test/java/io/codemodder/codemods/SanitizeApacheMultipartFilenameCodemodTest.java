@@ -6,5 +6,5 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = SanitizeApacheMultipartFilenameCodemod.class,
     testResourceDir = "sanitize-apache-multipart-filename",
-    dependencies = "io.github.pixee:java-security-toolkit:1.0.3")
+    dependencies = "io.github.pixee:java-security-toolkit:1.0.4")
 final class SanitizeApacheMultipartFilenameCodemodTest implements CodemodTestMixin {}
