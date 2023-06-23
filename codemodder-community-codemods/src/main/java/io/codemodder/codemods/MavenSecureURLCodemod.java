@@ -98,6 +98,4 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
       xmlEventWriter.add(nextEvent);
     }
   }
-
-  private static final Logger LOG = LoggerFactory.getLogger(MavenSecureURLCodemod.class);
 }

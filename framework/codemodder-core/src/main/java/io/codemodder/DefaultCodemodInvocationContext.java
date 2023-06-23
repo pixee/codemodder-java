@@ -2,6 +2,7 @@ package io.codemodder;
 
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 
 final class DefaultCodemodInvocationContext implements CodemodInvocationContext {
 
@@ -39,5 +40,15 @@ final class DefaultCodemodInvocationContext implements CodemodInvocationContext 
   @Override
   public String codemodId() {
     return codemodId;
+  }
+
+  @Override
+  public Optional<String> stringParameter(final String key, final int line) {
+    return Optional.empty();
+  }
+
+  @Override
+  public String stringParameter(final String key, final int line, final String defaultValue) {
+    return defaultValue;
   }
 }
