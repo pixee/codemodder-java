@@ -35,7 +35,8 @@ public interface CodemodInvocationContext {
   }
 
   /**
-   * Get a string parameter associated with the given codemod, the file path and line being analyzed.
+   * Get a string parameter associated with the given codemod, the file path and line being
+   * analyzed.
    *
    * @param key the key of the parameter
    * @param defaultValue the default value to use if the parameter was not specified
@@ -44,11 +45,13 @@ public interface CodemodInvocationContext {
   String stringParameter(String key, int line, String defaultValue);
 
   /**
-   * Get a string parameter associated with the given codemod, the file path and line being analyzed.
+   * Get a string parameter associated with the given codemod, the file path and line being
+   * analyzed.
    *
    * @param key the key of the parameter
    * @param line the line number being analyzed
-   * @return the value of the parameter, or {@link Optional#empty()} if the parameter was not specified
+   * @return the value of the parameter, or {@link Optional#empty()} if the parameter was not
+   *     specified
    */
   Optional<String> stringParameter(String key, int line);
 }
