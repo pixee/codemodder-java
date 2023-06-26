@@ -690,7 +690,7 @@ public final class ASTs {
 
   /**
    * Tries to find the declaration that originates a {@link SimpleName} use that is a Simple
-   * Expression Name, Simple Type Name, or Type Parameter within the AST. See <a
+   * Expression Name, Simple Type Name, or Type CodemodParameter within the AST. See <a
    * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.6.1">Java Language
    * Specification - 6.5.6.1 Simple Expression Names </a> and <a
    * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.5.1">Java Language
@@ -708,7 +708,7 @@ public final class ASTs {
   /**
    * Tries to find a declaration of {@code name} that is in scope at the given {@link Node} {@code
    * start} within the AST. It assumes {@code name } is either a Simple Expression name, Simple Type
-   * Name or Type Parameter. See <a
+   * Name or Type CodemodParameter. See <a
    * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.6.1">Java Language
    * Specification - 6.5.6.1 Simple Expression Names </a> and <a
    * href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.5.5.1">Java Language

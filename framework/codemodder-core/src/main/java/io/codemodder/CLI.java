@@ -1,6 +1,7 @@
 package io.codemodder;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
 import io.codemodder.codetf.CodeTFReport;
@@ -10,6 +11,7 @@ import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -91,6 +93,11 @@ final class CLI implements Callable<Integer> {
       description = "comma-separated set of codemod IDs to include",
       split = ",")
   private List<String> codemodIncludes;
+
+  @CommandLine.Option(
+      names = {"--parameter"},
+      description = "a codemod parameter")
+  private List<String> codemodParameters;
 
   @CommandLine.Option(
       names = {"--codemod-exclude"},
@@ -245,14 +252,14 @@ final class CLI implements Callable<Integer> {
         sarifs != null ? sarifs.stream().map(Path::of).collect(Collectors.toList()) : List.of();
     Map<String, List<RuleSarif>> pathSarifMap =
         SarifParser.create().parseIntoMap(sarifFiles, projectPath);
-    CodemodLoader loader = new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap);
+    List<ParameterArgument> codemodParameters = createFromParameterStrings(this.codemodParameters);
+    CodemodLoader loader =
+        new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap, codemodParameters);
     List<CodemodIdPair> codemods = loader.getCodemods();
 
     // create the project providers
     List<ProjectProvider> projectProviders = loadProjectProviders();
     List<CodeTFProvider> codeTFProviders = loadCodeTFProviders();
-
-    // create the JavaParser instance
 
     List<CodeTFResult> results = new ArrayList<>();
 
@@ -324,6 +331,27 @@ final class CLI implements Callable<Integer> {
       projectProviders.add(projectProvider);
     }
     return projectProviders;
+  }
+
+  /**
+   * Translate the codemod parameters delivered as CLI arguments in the form of JSON into their POJO
+   * forms.
+   */
+  private List<ParameterArgument> createFromParameterStrings(final List<String> parameterStrings) {
+    final ObjectMapper mapper = new ObjectMapper();
+    if (parameterStrings == null || parameterStrings.isEmpty()) {
+      return List.of();
+    }
+    return parameterStrings.stream()
+        .map(
+            parameterString -> {
+              try {
+                return mapper.readValue(parameterString, ParameterArgument.class);
+              } catch (JsonProcessingException e) {
+                throw new UncheckedIOException("Invalid JSON format for parameter argument", e);
+              }
+            })
+        .collect(Collectors.toUnmodifiableList());
   }
 
   private static final int SUCCESS = 0;

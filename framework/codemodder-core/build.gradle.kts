@@ -18,6 +18,7 @@ dependencies {
     api(libs.contrast.sarif)
     api(libs.java.security.toolkit)
     api(libs.commons.lang3)
+
     api("io.codemodder:codetf-java:2.0.0")
     api(libs.slf4j.api)
     api(libs.javaparser.core)
@@ -25,6 +26,7 @@ dependencies {
     api(libs.javaparser.symbolsolver.logic)
     api(libs.javaparser.symbolsolver.model)
     api(libs.javadiff)
+    api("io.github.classgraph:classgraph:4.8.160")
     api("com.theokanning.openai-gpt3-java:api:0.12.0")
     api("com.theokanning.openai-gpt3-java:service:0.12.0")
     api("com.theokanning.openai-gpt3-java:client:0.12.0")

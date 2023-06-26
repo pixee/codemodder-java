@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +21,20 @@ import org.slf4j.LoggerFactory;
 public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
 
   private final Duration safeDuration;
+  private final Parameter timeout;
 
-  public SpringAbsoluteCookieTimeoutCodemod() {
-    this.safeDuration = Duration.ofHours(30);
+  @Inject
+  public SpringAbsoluteCookieTimeoutCodemod(
+      final @CodemodParameter(
+              name = "timeout",
+              description = "Absolute timeout value for Spring session cookies",
+              defaultValue = "8h",
+              validationPattern = "\\d+[smhd]") Parameter timeout) {
+    this.timeout = timeout;
+    String defaultValue = timeout.getDefaultValue();
+    String count = defaultValue.substring(0, defaultValue.length() - 1);
+    String units = defaultValue.substring(defaultValue.length() - 1);
+    this.safeDuration = parseExistingValueFromLine(count, units);
   }
 
   @Override
@@ -38,11 +50,11 @@ public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
     LineIncludesExcludes lineIncludesExcludes = context.lineIncludesExcludes();
     List<String> lines = Files.readAllLines(path);
     boolean mustAdd = true;
-    for (int i = 1; i < lines.size() + 1; i++) {
-      if (!lineIncludesExcludes.matches(i)) {
+    for (int currentLine = 1; currentLine < lines.size() + 1; currentLine++) {
+      if (!lineIncludesExcludes.matches(currentLine)) {
         continue;
       }
-      String line = lines.get(i - 1).trim();
+      String line = lines.get(currentLine - 1).trim();
       Matcher matcher = timeoutPattern.matcher(line);
       if (matcher.matches()) {
         try {
@@ -51,9 +63,9 @@ public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
             mustAdd = false;
             continue;
           }
-          String parameter = context.stringParameter("timeout", i, "8h").trim();
-          changes.add(CodemodChange.from(i));
-          lines.set(i - 1, "server.servlet.session.timeout=" + parameter);
+          String parameter = timeout.getValue(path, currentLine);
+          changes.add(CodemodChange.from(currentLine));
+          lines.set(currentLine - 1, "server.servlet.session.timeout=" + parameter);
           mustAdd = false;
         } catch (Exception e) {
           LOG.error("Problem parsing session timeout value from line: `{}`", line);
@@ -62,7 +74,7 @@ public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
     }
 
     if (mustAdd) {
-      String parameter = context.stringParameter("timeout", lines.size(), "8h").trim();
+      String parameter = timeout.getValue(path, lines.size());
       changes.add(CodemodChange.from(lines.size()));
       List<String> newLines = new ArrayList<>(lines);
       newLines.add("server.servlet.session.timeout=" + parameter);
