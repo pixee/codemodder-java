@@ -111,7 +111,7 @@ final class ParameterModule extends AbstractModule {
     @Override
     public String getValue(final Path path, final int currentLine) {
       String file = parameterArgument.file();
-      String line = parameterArgument.line();
+      Integer line = parameterArgument.line();
       if (file == null && line == null) {
         // this is a default value for the whole run, so we return that
         return parameterArgument.value();
@@ -121,7 +121,7 @@ final class ParameterModule extends AbstractModule {
         return declaration.defaultValue();
       } else {
         // only return the value if the line isn't specified by the arg or it matches
-        if (line == null || line.isEmpty() || Integer.parseInt(line) == currentLine) {
+        if (line == null || line == currentLine) {
           return parameterArgument.value();
         }
       }
