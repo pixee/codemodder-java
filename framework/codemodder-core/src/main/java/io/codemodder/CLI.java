@@ -1,7 +1,6 @@
 package io.codemodder;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
 import io.codemodder.codetf.CodeTFReport;
@@ -11,7 +10,6 @@ import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -334,23 +332,15 @@ final class CLI implements Callable<Integer> {
   }
 
   /**
-   * Translate the codemod parameters delivered as CLI arguments in the form of JSON into their POJO
-   * forms.
+   * Translate the codemod parameters delivered as CLI arguments in the form of LDAP-style
+   * name=value pairs into their POJO form.
    */
   private List<ParameterArgument> createFromParameterStrings(final List<String> parameterStrings) {
-    final ObjectMapper mapper = new ObjectMapper();
     if (parameterStrings == null || parameterStrings.isEmpty()) {
       return List.of();
     }
     return parameterStrings.stream()
-        .map(
-            parameterString -> {
-              try {
-                return mapper.readValue(parameterString, ParameterArgument.class);
-              } catch (JsonProcessingException e) {
-                throw new UncheckedIOException("Invalid JSON format for parameter argument", e);
-              }
-            })
+        .map(ParameterArgument::fromNameValuePairs)
         .collect(Collectors.toUnmodifiableList());
   }
 

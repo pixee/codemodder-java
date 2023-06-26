@@ -41,7 +41,7 @@ final class ParameterModule extends AbstractModule {
           param.getDeclaringExecutable().getDeclaringClass().getAnnotation(Codemod.class);
       ParameterArgument parameterArgument =
           parameterArguments.stream()
-              .filter(p -> p.getCodemodId().equals(codemod.id()))
+              .filter(p -> p.codemodId().equals(codemod.id()))
               .findFirst()
               .orElse(null);
 
@@ -102,12 +102,11 @@ final class ParameterModule extends AbstractModule {
 
     @Override
     public String getValue(final Path path, final int currentLine) {
-
-      String file = parameterArgument.getFile();
-      String line = parameterArgument.getLine();
+      String file = parameterArgument.file();
+      String line = parameterArgument.line();
       if (file == null && line == null) {
         // this is a default value for the whole run, so we return that
-        return parameterArgument.getValue();
+        return parameterArgument.value();
       }
       if (!file.equals(path.toString())) {
         // the parameter doesn't cover this file, so we return the default value
@@ -115,7 +114,7 @@ final class ParameterModule extends AbstractModule {
       } else {
         // only return the value if the line isn't specified by the arg or it matches
         if (line == null || line.isEmpty() || Integer.parseInt(line) == currentLine) {
-          return parameterArgument.getValue();
+          return parameterArgument.value();
         }
       }
       // if our parameter doesn't match, we return the default value
@@ -129,8 +128,8 @@ final class ParameterModule extends AbstractModule {
 
     @Override
     public String getDefaultValue() {
-      if (parameterArgument.getFile() == null && parameterArgument.getLine() == null) {
-        return parameterArgument.getValue();
+      if (parameterArgument.file() == null && parameterArgument.line() == null) {
+        return parameterArgument.value();
       }
       return declaration.defaultValue();
     }

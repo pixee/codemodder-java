@@ -5,8 +5,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
 import io.codemodder.codetf.CodeTFReference;
 import io.codemodder.javaparser.CachingJavaParser;
@@ -216,7 +214,7 @@ final class CodemodLoaderTest {
   }
 
   @Test
-  void it_uses_default_parameters(@TempDir final Path tmpDir) throws JsonProcessingException {
+  void it_uses_default_parameters(@TempDir final Path tmpDir) {
     List<Class<? extends CodeChanger>> codemods = List.of(ParameterizedCodemod.class);
 
     // first, we run without any parameters and ensure we get the right stuff
@@ -230,20 +228,10 @@ final class CodemodLoaderTest {
           changer.parameter.getDescription(), equalTo("a description of my number parameter"));
     }
 
-    // we need a mapper to read the JSON arguments
-    ObjectMapper mapper = new ObjectMapper();
-
     // next, we run with a parameter without file info and see that it had the intended effects
     {
-      String paramJson =
-          """
-              {
-                "codemod": "pixee:java/id",
-                "name" : "my-param-number",
-                "value" : "456"
-              }
-              """;
-      ParameterArgument param = mapper.readValue(paramJson, ParameterArgument.class);
+      String paramArg = "codemod=pixee:java/id,name=my-param-number,value=456";
+      ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
       CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
@@ -257,16 +245,9 @@ final class CodemodLoaderTest {
     Path bar = Path.of("src/main/java/Bar.java");
     Path foo = Path.of("src/main/java/Foo.java");
     {
-      String paramJson =
-          """
-              {
-                "codemod": "pixee:java/id",
-                "name" : "my-param-number",
-                "value" : "456",
-                "file" : "src/main/java/Foo.java"
-              }
-              """;
-      ParameterArgument param = mapper.readValue(paramJson, ParameterArgument.class);
+      String paramArg =
+          "codemod=pixee:java/id,name=my-param-number,value=456,file=src/main/java/Foo.java";
+      ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
       CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
@@ -284,17 +265,9 @@ final class CodemodLoaderTest {
     // finally, we run with a parameter with file and line info and see that it had the intended
     // effects
     {
-      String paramJson =
-          """
-              {
-                "codemod": "pixee:java/id",
-                "name" : "my-param-number",
-                "value" : "456",
-                "file" : "src/main/java/Foo.java",
-                "line": "5"
-              }
-              """;
-      ParameterArgument param = mapper.readValue(paramJson, ParameterArgument.class);
+      String paramArg =
+          "codemod=pixee:java/id,name=my-param-number,value=456,file=src/main/java/Foo.java,line=5";
+      ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
       CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
