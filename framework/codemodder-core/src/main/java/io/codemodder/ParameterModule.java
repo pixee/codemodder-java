@@ -70,6 +70,10 @@ final class ParameterModule extends AbstractModule {
     }
   }
 
+  /**
+   * This is the {@link Parameter} implementation for when no value is provided for a given
+   * parameter.
+   */
   private record NoValueProvidedParameter(CodemodParameter declaration) implements Parameter {
 
     private NoValueProvidedParameter {
@@ -92,6 +96,10 @@ final class ParameterModule extends AbstractModule {
     }
   }
 
+  /**
+   * This is the {@link Parameter} implementation for when a value is provided for a given
+   * parameter.
+   */
   private record GivenParameter(CodemodParameter declaration, ParameterArgument parameterArgument)
       implements Parameter {
 
@@ -108,7 +116,7 @@ final class ParameterModule extends AbstractModule {
         // this is a default value for the whole run, so we return that
         return parameterArgument.value();
       }
-      if (!file.equals(path.toString())) {
+      if (file == null || !file.equals(path.toString())) {
         // the parameter doesn't cover this file, so we return the default value
         return declaration.defaultValue();
       } else {
