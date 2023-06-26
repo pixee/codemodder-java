@@ -36,6 +36,18 @@ public final class CodemodLoader {
   public CodemodLoader(
       final List<Class<? extends CodeChanger>> codemodTypes,
       final Path repositoryDir,
+      final List<ParameterArgument> parameterArguments) {
+    this(
+        codemodTypes,
+        CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+        repositoryDir,
+        Map.of(),
+        parameterArguments);
+  }
+
+  public CodemodLoader(
+      final List<Class<? extends CodeChanger>> codemodTypes,
+      final Path repositoryDir,
       final Map<String, List<RuleSarif>> ruleSarifByTool) {
     this(
         codemodTypes,

@@ -104,26 +104,35 @@ final class ParameterModule extends AbstractModule {
     public String getValue(final Path path, final int currentLine) {
 
       String file = parameterArgument.getFile();
-      if (file == null || file.isEmpty() || !file.equals(path.toString())) {
-        return declaration.defaultValue();
+      String line = parameterArgument.getLine();
+      if (file == null && line == null) {
+        // this is a default value for the whole run, so we return that
+        return parameterArgument.getValue();
       }
-      if (path.toString().equals(file)) {
-        String line = parameterArgument.getLine();
+      if (!file.equals(path.toString())) {
+        // the parameter doesn't cover this file, so we return the default value
+        return declaration.defaultValue();
+      } else {
+        // only return the value if the line isn't specified by the arg or it matches
         if (line == null || line.isEmpty() || Integer.parseInt(line) == currentLine) {
           return parameterArgument.getValue();
         }
       }
+      // if our parameter doesn't match, we return the default value
       return declaration.defaultValue();
     }
 
     @Override
     public String getDescription() {
-      return null;
+      return declaration.description();
     }
 
     @Override
     public String getDefaultValue() {
-      return null;
+      if (parameterArgument.getFile() == null && parameterArgument.getLine() == null) {
+        return parameterArgument.getValue();
+      }
+      return declaration.defaultValue();
     }
   }
 }

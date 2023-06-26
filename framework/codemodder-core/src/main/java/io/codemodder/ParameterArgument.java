@@ -3,7 +3,7 @@ package io.codemodder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 class ParameterArgument {
-  @JsonProperty("codemod")
+  @JsonProperty(value = "codemod", required = true)
   private String codemodId;
 
   @JsonProperty("file")
@@ -12,10 +12,10 @@ class ParameterArgument {
   @JsonProperty("line")
   private String line;
 
-  @JsonProperty("name")
+  @JsonProperty(value = "name", required = true)
   private String name;
 
-  @JsonProperty("value")
+  @JsonProperty(value = "value", required = true)
   private String value;
 
   public String getCodemodId() {
