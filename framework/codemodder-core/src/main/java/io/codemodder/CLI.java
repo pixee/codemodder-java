@@ -93,6 +93,11 @@ final class CLI implements Callable<Integer> {
   private List<String> codemodIncludes;
 
   @CommandLine.Option(
+      names = {"--parameter"},
+      description = "a codemod parameter")
+  private List<String> codemodParameters;
+
+  @CommandLine.Option(
       names = {"--codemod-exclude"},
       description = "comma-separated set of codemod IDs to exclude",
       split = ",")
@@ -245,14 +250,14 @@ final class CLI implements Callable<Integer> {
         sarifs != null ? sarifs.stream().map(Path::of).collect(Collectors.toList()) : List.of();
     Map<String, List<RuleSarif>> pathSarifMap =
         SarifParser.create().parseIntoMap(sarifFiles, projectPath);
-    CodemodLoader loader = new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap);
+    List<ParameterArgument> codemodParameters = createFromParameterStrings(this.codemodParameters);
+    CodemodLoader loader =
+        new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap, codemodParameters);
     List<CodemodIdPair> codemods = loader.getCodemods();
 
     // create the project providers
     List<ProjectProvider> projectProviders = loadProjectProviders();
     List<CodeTFProvider> codeTFProviders = loadCodeTFProviders();
-
-    // create the JavaParser instance
 
     List<CodeTFResult> results = new ArrayList<>();
 
@@ -324,6 +329,19 @@ final class CLI implements Callable<Integer> {
       projectProviders.add(projectProvider);
     }
     return projectProviders;
+  }
+
+  /**
+   * Translate the codemod parameters delivered as CLI arguments in the form of LDAP-style
+   * name=value pairs into their POJO form.
+   */
+  private List<ParameterArgument> createFromParameterStrings(final List<String> parameterStrings) {
+    if (parameterStrings == null || parameterStrings.isEmpty()) {
+      return List.of();
+    }
+    return parameterStrings.stream()
+        .map(ParameterArgument::fromNameValuePairs)
+        .collect(Collectors.toUnmodifiableList());
   }
 
   private static final int SUCCESS = 0;

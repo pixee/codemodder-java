@@ -31,19 +31,27 @@ public interface RawFileCodemodTest {
     final Path testResourceDir = Path.of(metadata.testResourceDir());
 
     final Path testDir = Path.of("src/test/resources/" + testResourceDir);
-    verifyCodemod(codemod, tmpDir, testDir);
+    verifyCodemod(codemod, metadata, tmpDir, testDir);
   }
 
   /** Verify a single test case composed of a .before and .after file. */
   private void verifySingleCase(
       final CodemodLoader loader,
       final Path tmpDir,
+      final Metadata metadata,
       final Path filePathBefore,
       final Path filePathAfter)
       throws IOException {
 
-    final String tmpFileName = trimExtension(filePathBefore);
-
+    String tmpFileName = trimExtension(filePathBefore);
+    final String renameFile = metadata.renameTestFile();
+    if (!renameFile.isBlank()) {
+      Path parent = tmpDir.resolve(renameFile).getParent();
+      if (!Files.exists(parent)) {
+        Files.createDirectories(parent);
+      }
+      tmpFileName = renameFile;
+    }
     final var tmpFilePath = tmpDir.resolve(tmpFileName);
     Files.copy(filePathBefore, tmpFilePath);
 
@@ -72,6 +80,7 @@ public interface RawFileCodemodTest {
 
     final var modifiedFile = Files.readString(tmpFilePath);
     assertThat(modifiedFile, equalTo(Files.readString(filePathAfter)));
+    Files.deleteIfExists(tmpFilePath);
   }
 
   private static String trimExtension(final Path path) {
@@ -81,7 +90,10 @@ public interface RawFileCodemodTest {
   }
 
   private void verifyCodemod(
-      final Class<? extends CodeChanger> codemod, final Path tmpDir, final Path testResourceDir)
+      final Class<? extends CodeChanger> codemod,
+      final Metadata metadata,
+      final Path tmpDir,
+      final Path testResourceDir)
       throws IOException {
     // find all the sarif files
     final var allSarifFiles =
@@ -105,9 +117,9 @@ public interface RawFileCodemodTest {
             .filter(file -> file.getFileName().toString().endsWith(".after"))
             .collect(Collectors.toMap(f -> trimExtension(f), f -> f));
 
-    for (final var beforeFile : allBeforeFiles) {
+    for (var beforeFile : allBeforeFiles) {
       final var afterFile = afterFilesMap.get(trimExtension(beforeFile));
-      verifySingleCase(invoker, tmpDir, beforeFile, afterFile);
+      verifySingleCase(invoker, tmpDir, metadata, beforeFile, afterFile);
     }
   }
 }

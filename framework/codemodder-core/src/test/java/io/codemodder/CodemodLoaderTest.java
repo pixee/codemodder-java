@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import javax.inject.Inject;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -191,5 +192,95 @@ final class CodemodLoaderTest {
 
     String contents = Files.readString(file);
     assertThat(contents, equalTo("a\nb\nc\n"));
+  }
+
+  @Codemod(
+      id = "pixee:java/id",
+      author = "valid@valid.com",
+      reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
+  static class ParameterizedCodemod extends NoReportChanger {
+    private final Parameter parameter;
+
+    @Inject
+    public ParameterizedCodemod(
+        @CodemodParameter(
+                name = "my-param-number",
+                description = "a description of my number parameter",
+                defaultValue = "123",
+                validationPattern = "\\d+")
+            final Parameter parameter) {
+      this.parameter = parameter;
+    }
+  }
+
+  @Test
+  void it_uses_default_parameters(@TempDir final Path tmpDir) {
+    List<Class<? extends CodeChanger>> codemods = List.of(ParameterizedCodemod.class);
+
+    // first, we run without any parameters and ensure we get the right stuff
+    {
+      CodemodLoader loader = new CodemodLoader(codemods, tmpDir);
+      CodemodIdPair pair = loader.getCodemods().get(0);
+      ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
+      assertThat(changer.parameter.getDefaultValue(), equalTo("123"));
+      assertThat(changer.parameter.getValue(null, 5), equalTo("123"));
+      assertThat(
+          changer.parameter.getDescription(), equalTo("a description of my number parameter"));
+    }
+
+    // next, we run with a parameter without file info and see that it had the intended effects
+    {
+      String paramArg = "codemod=pixee:java/id,name=my-param-number,value=456";
+      ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
+      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
+      CodemodIdPair pair = loader.getCodemods().get(0);
+      ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
+      assertThat(changer.parameter.getDefaultValue(), equalTo("456"));
+      assertThat(changer.parameter.getValue(null, 5), equalTo("456"));
+      assertThat(
+          changer.parameter.getDescription(), equalTo("a description of my number parameter"));
+    }
+
+    // next, we run with a parameter with file info and see that it had the intended effects
+    Path bar = Path.of("src/main/java/Bar.java");
+    Path foo = Path.of("src/main/java/Foo.java");
+    {
+      String paramArg =
+          "codemod=pixee:java/id,name=my-param-number,value=456,file=src/main/java/Foo.java";
+      ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
+      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
+      CodemodIdPair pair = loader.getCodemods().get(0);
+      ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
+
+      // our parameter is file-scoped, so its not the default value
+      assertThat(changer.parameter.getDefaultValue(), equalTo("123"));
+      // for some random file, we should return the original default value
+      assertThat(changer.parameter.getValue(bar, 5), equalTo("123"));
+      // for the file we specified, we should return the value we specified
+      assertThat(changer.parameter.getValue(foo, 5), equalTo("456"));
+      assertThat(
+          changer.parameter.getDescription(), equalTo("a description of my number parameter"));
+    }
+
+    // finally, we run with a parameter with file and line info and see that it had the intended
+    // effects
+    {
+      String paramArg =
+          "codemod=pixee:java/id,name=my-param-number,value=456,file=src/main/java/Foo.java,line=5";
+      ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
+      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
+      CodemodIdPair pair = loader.getCodemods().get(0);
+      ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
+
+      // our parameter is file-scoped, so its not the default value
+      assertThat(changer.parameter.getDefaultValue(), equalTo("123"));
+      // for some random file, we should return the original default value
+      assertThat(changer.parameter.getValue(bar, 5), equalTo("123"));
+      // for the file we specified, we should return the value we specified only on line 5
+      assertThat(changer.parameter.getValue(foo, 5), equalTo("456"));
+      assertThat(changer.parameter.getValue(foo, 6), equalTo("123"));
+      assertThat(
+          changer.parameter.getDescription(), equalTo("a description of my number parameter"));
+    }
   }
 }

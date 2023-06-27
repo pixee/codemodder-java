@@ -1,12 +1,20 @@
 package io.codemodder;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfoList;
+import io.github.classgraph.ScanResult;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Parameter;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import javax.inject.Inject;
 import org.codehaus.plexus.util.StringUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -21,7 +29,20 @@ public final class CodemodLoader {
         codemodTypes,
         CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
         repositoryDir,
-        Map.of());
+        Map.of(),
+        List.of());
+  }
+
+  public CodemodLoader(
+      final List<Class<? extends CodeChanger>> codemodTypes,
+      final Path repositoryDir,
+      final List<ParameterArgument> parameterArguments) {
+    this(
+        codemodTypes,
+        CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+        repositoryDir,
+        Map.of(),
+        parameterArguments);
   }
 
   public CodemodLoader(
@@ -32,32 +53,53 @@ public final class CodemodLoader {
         codemodTypes,
         CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
         repositoryDir,
-        ruleSarifByTool);
-  }
-
-  public CodemodLoader(
-      final List<Class<? extends CodeChanger>> codemodTypes,
-      final CodemodRegulator codemodRegulator,
-      final Path repositoryDir) {
-    this(codemodTypes, codemodRegulator, repositoryDir, Map.of());
+        ruleSarifByTool,
+        List.of());
   }
 
   public CodemodLoader(
       final List<Class<? extends CodeChanger>> codemodTypes,
       final CodemodRegulator codemodRegulator,
       final Path repositoryDir,
-      final Map<String, List<RuleSarif>> ruleSarifByTool) {
+      final Map<String, List<RuleSarif>> ruleSarifByTool,
+      final List<ParameterArgument> codemodParameters) {
 
     // get all the providers ready for dependency injection & codemod instantiation
     final List<CodemodProvider> providers =
         ServiceLoader.load(CodemodProvider.class).stream()
             .map(ServiceLoader.Provider::get)
-            .collect(Collectors.toUnmodifiableList());
+            .collect(toUnmodifiableList());
     final Set<AbstractModule> allModules = new HashSet<>();
 
-    // add default module
+    // get all the injectable parameters
+    Set<String> packagesScanned = new HashSet<>();
+    List<Parameter> injectableParameters = new ArrayList<>();
+    for (Class<? extends CodeChanger> codemodType : codemodTypes) {
+      String packageName = codemodType.getPackageName();
+      if (!packagesScanned.contains(packageName)) {
+        ScanResult scan =
+            new ClassGraph().enableAllInfo().acceptPackagesNonRecursive(packageName).scan();
+        ClassInfoList classesWithMethodAnnotation =
+            scan.getClassesWithMethodAnnotation(Inject.class);
+        List<Class<?>> injectableClasses = classesWithMethodAnnotation.loadClasses();
+        List<java.lang.reflect.Parameter> targetedParams =
+            injectableClasses.stream()
+                .map(Class::getDeclaredConstructors)
+                .flatMap(Arrays::stream)
+                .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
+                .map(Executable::getParameters)
+                .flatMap(Arrays::stream)
+                .filter(param -> param.getAnnotations().length > 0)
+                .collect(toList());
+        injectableParameters.addAll(targetedParams);
+        packagesScanned.add(packageName);
+      }
+    }
+
+    // add default modules
     allModules.add(new CodeDirectoryModule(repositoryDir));
     allModules.add(new XPathStreamProcessorModule());
+    allModules.add(new ParameterModule(codemodParameters, injectableParameters));
 
     // add all provider modules
     for (final CodemodProvider provider : providers) {
@@ -65,7 +107,7 @@ public final class CodemodLoader {
       final var allWantedSarifs =
           wantsSarif.stream()
               .flatMap(toolName -> ruleSarifByTool.getOrDefault(toolName, List.of()).stream())
-              .collect(Collectors.toUnmodifiableList());
+              .collect(toUnmodifiableList());
       final Set<AbstractModule> modules =
           provider.getModules(repositoryDir, codemodTypes, allWantedSarifs);
       allModules.addAll(modules);

@@ -1,0 +1,5 @@
+{
+  "summary" : "Reduced absolute session timeout",
+  "change" : "Reduced absolute session timeout to a reasonable timeframe",
+  "references" : ["https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#absolute-timeout", "http://projects.webappsec.org/w/page/13246944/Insufficient%20Session%20Expiration", "https://cwe.mitre.org/data/definitions/613.html"]
+}
