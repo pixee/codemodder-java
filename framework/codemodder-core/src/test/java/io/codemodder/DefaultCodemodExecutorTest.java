@@ -129,7 +129,8 @@ final class DefaultCodemodExecutorTest {
               Collections.emptyMap(),
               "updated deps",
               List.of(packageAddResult),
-              null);
+              null,
+              List.of());
       CodeTFChangesetEntry entry = new CodeTFChangesetEntry("deps.txt", diff, List.of(change));
       Set<CodeTFChangesetEntry> changes = Set.of(entry);
       return DependencyUpdateResult.create(

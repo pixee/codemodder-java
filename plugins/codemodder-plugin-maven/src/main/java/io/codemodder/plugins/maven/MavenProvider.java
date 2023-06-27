@@ -171,7 +171,8 @@ public final class MavenProvider implements ProjectProvider {
       int position = 1 + delta.getSource().getPosition();
 
       String relativePomPath = projectDir.relativize(pomPath).toString();
-      CodeTFChange change = new CodeTFChange(position, Collections.emptyMap(), "", List.of(), null);
+      CodeTFChange change =
+          new CodeTFChange(position, Collections.emptyMap(), "", List.of(), null, List.of());
       List<String> patchDiff =
           UnifiedDiffUtils.generateUnifiedDiff(
               relativePomPath, relativePomPath, originalPomContents, patch, 3);

@@ -1,5 +1,7 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.CodemodParameter.*;
+
 import io.codemodder.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,6 +16,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This codemod will set the absolute timeout for Spring session cookies in application.properties
+ * if it's missing or too high.
+ */
 @Codemod(
     id = "pixee:java/spring-absolute-cookie-timeout",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
@@ -26,8 +32,12 @@ public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
   @Inject
   public SpringAbsoluteCookieTimeoutCodemod(
       final @CodemodParameter(
+              question =
+                  "How long should the absolute timeout (not idle timeout!) be for Spring session cookies (enter 10m for 10 minutes, 8h for 8 hours, 2d for 2 days, etc.)?",
               name = "timeout",
-              description = "Absolute timeout value for Spring session cookies",
+              type = ParameterType.STRING,
+              label =
+                  "the max-age for Spring session cookies to be set via the server.servlet.session.timeout field",
               defaultValue = "8h",
               validationPattern = "\\d+[smhd]") Parameter timeout) {
     this.timeout = timeout;
@@ -64,7 +74,7 @@ public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
             continue;
           }
           String parameter = timeout.getValue(path, currentLine);
-          changes.add(CodemodChange.from(currentLine));
+          changes.add(CodemodChange.from(currentLine, timeout, parameter));
           lines.set(currentLine - 1, "server.servlet.session.timeout=" + parameter);
           mustAdd = false;
         } catch (Exception e) {
@@ -75,7 +85,7 @@ public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
 
     if (mustAdd) {
       String parameter = timeout.getValue(path, lines.size());
-      changes.add(CodemodChange.from(lines.size()));
+      changes.add(CodemodChange.from(lines.size(), timeout, parameter));
       List<String> newLines = new ArrayList<>(lines);
       newLines.add("server.servlet.session.timeout=" + parameter);
       lines = newLines;

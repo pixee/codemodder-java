@@ -168,7 +168,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             emptyMap(),
             codeChanger.getIndividualChangeDescription(filePath, codemodChange),
             pkgActions,
-            codeChanger.getSourceControlUrl().orElse(null));
+            codeChanger.getSourceControlUrl().orElse(null),
+            codemodChange.getParameters());
 
     for (CodeTFProvider provider : codetfProviders) {
       change = provider.onChangeCreated(filePath, codemod.getId(), change);
