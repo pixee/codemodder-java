@@ -81,13 +81,28 @@ final class ParameterModule extends AbstractModule {
     }
 
     @Override
+    public String getQuestion() {
+      return declaration.question();
+    }
+
+    @Override
+    public String getType() {
+      return declaration.type().name().toLowerCase();
+    }
+
+    @Override
+    public String getName() {
+      return declaration.name();
+    }
+
+    @Override
     public String getValue(final Path path, final int currentLine) {
       return declaration.defaultValue();
     }
 
     @Override
-    public String getDescription() {
-      return declaration.description();
+    public String getLabel() {
+      return declaration.label();
     }
 
     @Override
@@ -106,6 +121,21 @@ final class ParameterModule extends AbstractModule {
     private GivenParameter {
       Objects.requireNonNull(declaration);
       Objects.requireNonNull(parameterArgument);
+    }
+
+    @Override
+    public String getQuestion() {
+      return declaration.question();
+    }
+
+    @Override
+    public String getType() {
+      return declaration.type().name().toLowerCase();
+    }
+
+    @Override
+    public String getName() {
+      return declaration.name();
     }
 
     @Override
@@ -130,8 +160,8 @@ final class ParameterModule extends AbstractModule {
     }
 
     @Override
-    public String getDescription() {
-      return declaration.description();
+    public String getLabel() {
+      return declaration.label();
     }
 
     @Override

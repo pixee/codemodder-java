@@ -6,12 +6,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.javaparser.JavaParser;
-import io.codemodder.codetf.CodeTFReference;
+import io.codemodder.codetf.*;
 import io.codemodder.javaparser.CachingJavaParser;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -195,26 +196,60 @@ final class CodemodLoaderTest {
   }
 
   @Codemod(
-      id = "pixee:java/id",
+      id = "pixee:java/parameterized",
       author = "valid@valid.com",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class ParameterizedCodemod extends NoReportChanger {
+  static class ParameterizedCodemod extends RawFileChanger {
     private final Parameter parameter;
 
     @Inject
     public ParameterizedCodemod(
         @CodemodParameter(
+                question = "What do you want the number to be?",
                 name = "my-param-number",
-                description = "a description of my number parameter",
+                label = "adds a number to the end of a file",
                 defaultValue = "123",
                 validationPattern = "\\d+")
             final Parameter parameter) {
+      super(new EmptyReporter());
       this.parameter = parameter;
+    }
+
+    @Override
+    public List<CodemodChange> visitFile(final CodemodInvocationContext context)
+        throws IOException {
+      Path path = context.path();
+      List<String> existingLines = Files.readAllLines(path);
+      List<String> contents = new ArrayList<>(existingLines);
+      String value = parameter.getValue(path, existingLines.size());
+      contents.add(value);
+      Files.write(path, contents, StandardCharsets.UTF_8);
+      return List.of(CodemodChange.from(existingLines.size(), parameter, value));
+    }
+
+    @Override
+    public String getSummary() {
+      return "summary";
+    }
+
+    @Override
+    public String getDescription() {
+      return "description";
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of();
+    }
+
+    @Override
+    public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
+      return null;
     }
   }
 
   @Test
-  void it_uses_default_parameters(@TempDir final Path tmpDir) {
+  void it_uses_and_reports_parameters(@TempDir final Path tmpDir) throws IOException {
     List<Class<? extends CodeChanger>> codemods = List.of(ParameterizedCodemod.class);
 
     // first, we run without any parameters and ensure we get the right stuff
@@ -224,21 +259,19 @@ final class CodemodLoaderTest {
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
       assertThat(changer.parameter.getDefaultValue(), equalTo("123"));
       assertThat(changer.parameter.getValue(null, 5), equalTo("123"));
-      assertThat(
-          changer.parameter.getDescription(), equalTo("a description of my number parameter"));
+      assertThat(changer.parameter.getLabel(), equalTo("adds a number to the end of a file"));
     }
 
     // next, we run with a parameter without file info and see that it had the intended effects
     {
-      String paramArg = "codemod=pixee:java/id,name=my-param-number,value=456";
+      String paramArg = "codemod=pixee:java/parameterized,name=my-param-number,value=456";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
       CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
       assertThat(changer.parameter.getDefaultValue(), equalTo("456"));
       assertThat(changer.parameter.getValue(null, 5), equalTo("456"));
-      assertThat(
-          changer.parameter.getDescription(), equalTo("a description of my number parameter"));
+      assertThat(changer.parameter.getLabel(), equalTo("adds a number to the end of a file"));
     }
 
     // next, we run with a parameter with file info and see that it had the intended effects
@@ -246,7 +279,7 @@ final class CodemodLoaderTest {
     Path foo = Path.of("src/main/java/Foo.java");
     {
       String paramArg =
-          "codemod=pixee:java/id,name=my-param-number,value=456,file=src/main/java/Foo.java";
+          "codemod=pixee:java/parameterized,name=my-param-number,value=456,file=src/main/java/Foo.java";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
       CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
@@ -258,15 +291,14 @@ final class CodemodLoaderTest {
       assertThat(changer.parameter.getValue(bar, 5), equalTo("123"));
       // for the file we specified, we should return the value we specified
       assertThat(changer.parameter.getValue(foo, 5), equalTo("456"));
-      assertThat(
-          changer.parameter.getDescription(), equalTo("a description of my number parameter"));
+      assertThat(changer.parameter.getLabel(), equalTo("adds a number to the end of a file"));
     }
 
     // finally, we run with a parameter with file and line info and see that it had the intended
     // effects
     {
       String paramArg =
-          "codemod=pixee:java/id,name=my-param-number,value=456,file=src/main/java/Foo.java,line=5";
+          "codemod=pixee:java/parameterized,name=my-param-number,value=456,file=src/main/java/Foo.java,line=5";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
       CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
@@ -279,8 +311,33 @@ final class CodemodLoaderTest {
       // for the file we specified, we should return the value we specified only on line 5
       assertThat(changer.parameter.getValue(foo, 5), equalTo("456"));
       assertThat(changer.parameter.getValue(foo, 6), equalTo("123"));
-      assertThat(
-          changer.parameter.getDescription(), equalTo("a description of my number parameter"));
+      assertThat(changer.parameter.getLabel(), equalTo("adds a number to the end of a file"));
+
+      // we run the codemod an make sure the generated codetf has the right parameter
+      CodemodExecutor executor =
+          new DefaultCodemodExecutor(
+              tmpDir,
+              IncludesExcludes.any(),
+              pair,
+              List.of(),
+              List.of(),
+              CachingJavaParser.from(new JavaParser()),
+              EncodingDetector.create());
+      Path p = tmpDir.resolve("foo.txt");
+      Files.writeString(p, "1\n2\n3");
+      CodeTFResult result = executor.execute(List.of(p));
+      CodeTFChangesetEntry entry = result.getChangeset().get(0);
+      assertThat(result.getCodemod(), equalTo("pixee:java/parameterized"));
+      assertThat(entry.getPath(), equalTo("foo.txt"));
+      assertThat(entry.getChanges().size(), equalTo(1));
+      CodeTFChange change = entry.getChanges().get(0);
+      assertThat(change.getParameters().size(), equalTo(1));
+      CodeTFParameter parameter = change.getParameters().get(0);
+      assertThat(parameter.getName(), equalTo("my-param-number"));
+      assertThat(parameter.getType(), equalTo("string"));
+      assertThat(parameter.getLabel(), equalTo("adds a number to the end of a file"));
+      assertThat(parameter.getDefaultValue(), equalTo("123"));
+      assertThat(parameter.getQuestion(), equalTo("What do you want the number to be?"));
     }
   }
 }
