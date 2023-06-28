@@ -29,7 +29,7 @@ import kotlin.io.path.toPath
  * TODO: Support Profiles / Environment Variables
  * Support Third Party / User-Supplied Repositories (right now it only supports central)
  */
-class QueryByResolver : io.github.pixee.maven.operator.AbstractSimpleQueryCommand() {
+class QueryByResolver : AbstractQueryCommand() {
     private val localRepo = LocalRepository(
         File(
             System.getProperty("user.home"),
@@ -55,7 +55,7 @@ class QueryByResolver : io.github.pixee.maven.operator.AbstractSimpleQueryComman
     }
 
     @Suppress("DEPRECATION")
-    override fun execute(c: ProjectModel): Boolean {
+    override fun execute(pm: ProjectModel): Boolean {
         /*
          * Aether's components implement org.eclipse.aether.spi.locator.Service to ease manual wiring and using the
          * prepopulated DefaultServiceLocator, we only need to register the repository connector and transporter
@@ -106,11 +106,11 @@ class QueryByResolver : io.github.pixee.maven.operator.AbstractSimpleQueryComman
         val repositoryManager = DefaultRemoteRepositoryManager()
 
         val modelBuildingRequest = DefaultModelBuildingRequest().apply {
-            val pomFile = c.pomPath!!.toURI().toPath().toFile()
+            val pomFile = pm.pomFile.pomPath!!.toURI().toPath().toFile()
 
-            this.activeProfileIds = c.activeProfiles.filterNot { it.startsWith("!") }.toList()
+            this.activeProfileIds = pm.activeProfiles.filterNot { it.startsWith("!") }.toList()
             this.inactiveProfileIds =
-                c.activeProfiles.filter { it.startsWith("!") }.map { it.substring(1) }.toList()
+                pm.activeProfiles.filter { it.startsWith("!") }.map { it.substring(1) }.toList()
 
             this.userProperties = System.getProperties()
             this.systemProperties = System.getProperties()

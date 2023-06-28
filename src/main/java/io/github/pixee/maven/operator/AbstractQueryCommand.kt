@@ -15,7 +15,7 @@ import java.util.*
  * relying on dependency:tree mojo outputting into a text file - which might be cached.
  *
  */
-abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
+abstract class AbstractQueryCommand : AbstractCommand() {
     /**
      * Generates a temporary file path used to store the output of the <pre>dependency:tree</pre> mojo
      *
@@ -34,9 +34,9 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
     /**
      * Given a POM URI, returns a File Object
      *
-     * @param c ProjectModel
+     * @param d POMDocument
      */
-    protected fun getPomFilePath(c: io.github.pixee.maven.operator.ProjectModel): File = Paths.get(c.pomPath!!.toURI()).toFile()
+    protected fun getPomFilePath(d: POMDocument): File = Paths.get(d.pomPath!!.toURI()).toFile()
 
     /**
      * Abstract Method to extract dependencies
@@ -45,20 +45,20 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
      * @param pomFilePath Input Pom Path
      * @param c Project Model
      */
-    abstract fun extractDependencyTree(outputPath: File, pomFilePath: File, c: io.github.pixee.maven.operator.ProjectModel)
+    abstract fun extractDependencyTree(outputPath: File, pomFilePath: File, c: ProjectModel)
 
     /**
      * Internal Holder Variable
      *
      * Todo: OF COURSE IT BREAKS THE PROTOCOL
      */
-    internal var result: Collection<io.github.pixee.maven.operator.Dependency>? = null
+    internal var result: Collection<Dependency>? = null
 
     /**
      * We declare the main logic here - details are made in the child classes for now
      */
-    override fun execute(c: io.github.pixee.maven.operator.ProjectModel): Boolean {
-        val pomFilePath = getPomFilePath(c)
+    override fun execute(pm: ProjectModel): Boolean {
+        val pomFilePath = getPomFilePath(pm.pomFile)
 
         val outputPath = getOutputPath(pomFilePath)
 
@@ -67,8 +67,8 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
         }
 
         try {
-            extractDependencyTree(outputPath, pomFilePath, c)
-        } catch (e: io.github.pixee.maven.operator.InvalidContextException) {
+            extractDependencyTree(outputPath, pomFilePath, pm)
+        } catch (e: InvalidContextException) {
             return false
         }
 
@@ -98,7 +98,7 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
     }.associate { (line, elements) ->
         val (groupId, artifactId, packaging, version, scope) = elements
 
-        line to io.github.pixee.maven.operator.Dependency(
+        line to Dependency(
             groupId = groupId,
             artifactId = artifactId,
             version = version,
@@ -110,7 +110,7 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
     protected fun buildInvocationRequest(
         outputPath: File,
         pomFilePath: File,
-        c: io.github.pixee.maven.operator.ProjectModel
+        c: ProjectModel
     ): InvocationRequest {
         val props = Properties(System.getProperties()).apply {
             //System.getProperties().forEach { t, u -> setProperty(t as String, u as String) }
@@ -132,7 +132,7 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
 
             properties = props
 
-            goals = listOf(io.github.pixee.maven.operator.AbstractSimpleQueryCommand.Companion.DEPENDENCY_TREE_MOJO_REFERENCE)
+            goals = listOf(DEPENDENCY_TREE_MOJO_REFERENCE)
         }
 
         return request
@@ -163,7 +163,7 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
             val inferredHome = File(SystemUtils.getUserHome(), ".m2")
 
             if (!(inferredHome.exists() && inferredHome.isDirectory)) {
-                io.github.pixee.maven.operator.AbstractSimpleQueryCommand.Companion.LOGGER.warn(
+                LOGGER.warn(
                     "Inferred User Home - which does not exist or not a directory: {}",
                     inferredHome
                 )
@@ -193,8 +193,8 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
         const val DEPENDENCY_TREE_MOJO_REFERENCE =
             "org.apache.maven.plugins:maven-dependency-plugin:3.3.0:tree"
 
-        val LOGGER: Logger = LoggerFactory.getLogger(io.github.pixee.maven.operator.AbstractSimpleQueryCommand::class.java)
+        val LOGGER: Logger = LoggerFactory.getLogger(AbstractQueryCommand::class.java)
     }
 
-    override fun postProcess(c: io.github.pixee.maven.operator.ProjectModel): Boolean = false
+    override fun postProcess(c: ProjectModel): Boolean = false
 }

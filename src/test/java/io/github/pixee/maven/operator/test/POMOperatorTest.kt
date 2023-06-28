@@ -12,6 +12,7 @@ import org.junit.Test
 import org.xmlunit.diff.ComparisonType
 import java.io.File
 import java.nio.charset.Charset
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -20,7 +21,7 @@ import kotlin.test.assertTrue
 class POMOperatorTest : AbstractTestBase() {
     @Test(expected = DocumentException::class)
     fun testWithBrokenPom() {
-        val context = gwt(
+        gwt(
             "broken-pom",
             ProjectModelFactory.load(
                 POMOperatorTest::class.java.getResource("broken-pom.xml")!!,
@@ -49,11 +50,13 @@ class POMOperatorTest : AbstractTestBase() {
                 .build()
 
             if (POMOperator.modify(projectModel)) {
-                val resultPomAsXml = String(projectModel.resultPomBytes)
+                assertTrue(projectModel.pomFile.dirty, "Original POM File is Dirty")
+
+                val resultPomAsXml = String(projectModel.pomFile.resultPomBytes)
 
                 LOGGER.debug("resultPomAsXml: {}", resultPomAsXml)
 
-                testPom.writeBytes(projectModel.resultPomBytes)
+                testPom.writeBytes(projectModel.pomFile.resultPomBytes)
             } else {
                 throw IllegalStateException("Code that shouldn't be reached out at all")
             }
@@ -92,11 +95,13 @@ class POMOperatorTest : AbstractTestBase() {
             ).withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"))
         )
 
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
+        assertTrue(context.pomFile.dirty, "Original POM File is Dirty")
+
+        val diff = getXmlDifferences(context.pomFile.pomDocument, context.pomFile.resultPom)
 
         assertThat("Document has differences", diff.hasDifferences())
 
-        val textDiff = getTextDifferences(context.pomDocument, context.resultPom)
+        val textDiff = getTextDifferences(context.pomFile.pomDocument, context.pomFile.resultPom)
 
         LOGGER.debug("textDiff: {}", textDiff)
 
@@ -122,7 +127,9 @@ class POMOperatorTest : AbstractTestBase() {
             ).withDependency(dependencyToUpgradeOnCaseThree).withSkipIfNewer(false)
         )
 
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
+        val diff = getXmlDifferences(context.pomFile.pomDocument, context.pomFile.resultPom)
+
+        assertTrue(context.pomFile.dirty, "Original POM File is Dirty")
 
         assertThat("Document has differences", diff.hasDifferences())
         assertThat("Document has a single difference", diff.differences.toList().size == 1)
@@ -147,9 +154,11 @@ class POMOperatorTest : AbstractTestBase() {
             ).withDependency(dependencyToUpgrade).withSkipIfNewer(true)
         )
 
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
+        val diff = getXmlDifferences(context.pomFile.pomDocument, context.pomFile.resultPom)
 
         assertThat("Document has no differences", !diff.hasDifferences())
+
+        assertFalse(context.pomFile.dirty, "Original POM File is not Dirty")
     }
 
     @Test
@@ -189,9 +198,11 @@ class POMOperatorTest : AbstractTestBase() {
             ).withDependency(dependencyToUpgrade)
         )
 
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
+        val diff = getXmlDifferences(context.pomFile.pomDocument, context.pomFile.resultPom)
 
         assertThat("Document has differences", diff.hasDifferences())
+
+        assertTrue(context.pomFile.dirty, "Original POM File is Dirty")
 
         val effectivePom = context.getEffectivePom()
 
@@ -214,7 +225,9 @@ class POMOperatorTest : AbstractTestBase() {
             ).withDependency(dependencyToUpgrade).withUseProperties(true)
         )
 
-        val resultPomAsString = String(context.resultPomBytes)
+        assertTrue(context.pomFile.dirty, "Original POM File is Dirty")
+
+        val resultPomAsString = String(context.pomFile.resultPomBytes)
 
         assertTrue(
             resultPomAsString.contains("<project\n"),
@@ -251,7 +264,9 @@ class POMOperatorTest : AbstractTestBase() {
             ).withDependency(dependencyToUpgrade).withUseProperties(true)
         )
 
-        val resultPomAsString = String(context.resultPomBytes)
+        assertTrue(context.pomFile.dirty, "Original POM File is Dirty")
+
+        val resultPomAsString = String(context.pomFile.resultPomBytes)
 
         assertTrue(
             resultPomAsString.contains("<email></email>"),
@@ -283,10 +298,12 @@ class POMOperatorTest : AbstractTestBase() {
             ).withDependency(dependencyToUpgrade).withUseProperties(true).withSkipIfNewer(true)
         )
 
-        LOGGER.debug("original pom: {}", context.pomDocument.asXML())
-        LOGGER.debug("resulting pom: {}", context.resultPom.asXML())
+        LOGGER.debug("original pom: {}", context.pomFile.pomDocument.asXML())
+        LOGGER.debug("resulting pom: {}", context.pomFile.resultPom.asXML())
 
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
+        assertTrue(context.pomFile.dirty, "Original POM File is Dirty")
+
+        val diff = getXmlDifferences(context.pomFile.pomDocument, context.pomFile.resultPom)
 
         assertThat("Document has differences", diff.hasDifferences())
 
@@ -386,10 +403,12 @@ class POMOperatorTest : AbstractTestBase() {
 
         POMOperator.modify(context)
 
-        LOGGER.debug("original pom: {}", context.pomDocument.asXML())
-        LOGGER.debug("resulting pom: {}", context.resultPom.asXML())
+        assertTrue(context.pomFile.dirty, "Original POM File is Dirty")
 
-        val diff = getXmlDifferences(context.pomDocument, context.resultPom)
+        LOGGER.debug("original pom: {}", context.pomFile.pomDocument.asXML())
+        LOGGER.debug("resulting pom: {}", context.pomFile.resultPom.asXML())
+
+        val diff = getXmlDifferences(context.pomFile.pomDocument, context.pomFile.resultPom)
 
         assertThat("Document has differences", diff.hasDifferences())
 
@@ -414,7 +433,9 @@ class POMOperatorTest : AbstractTestBase() {
 
         POMOperator.modify(context)
 
-        val resultPom = context.resultPomBytes.toString(Charset.defaultCharset())
+        val resultPom = context.pomFile.resultPomBytes.toString(Charset.defaultCharset())
+
+        assertTrue(context.pomFile.dirty, "Original POM File is Dirty")
 
         // aldrin: uncomment this to check out formatting - useful for the next section
         // println(StringEscapeUtils.escapeJava(resultPom))

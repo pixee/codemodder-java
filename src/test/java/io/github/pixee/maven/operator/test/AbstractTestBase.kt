@@ -18,6 +18,10 @@ import java.net.URLDecoder
 open class AbstractTestBase {
     protected val LOGGER: Logger = LoggerFactory.getLogger(POMOperatorTest::class.java)
 
+    fun getResource(name: String) = this.javaClass.getResource(name)!!
+
+    fun getResourceAsFile(name: String): File = File(getResource(name).toURI())
+
     /**
      * Implements a Given-When-Then idiom
      *
@@ -54,7 +58,7 @@ open class AbstractTestBase {
 
             assertFalse(
                 "Expected and outcome have differences",
-                getXmlDifferences(context.resultPom, outcome).hasDifferences()
+                getXmlDifferences(context.pomFile.resultPom, outcome).hasDifferences()
             )
         } else {
             val resultFilePath = "src/test/resources/" + this.javaClass.`package`.name.replace(
@@ -70,7 +74,7 @@ open class AbstractTestBase {
 
             LOGGER.warn("File $resultFilePath not found - writing results instead and ignorning assertions at all")
 
-            File(resultFilePath).writeBytes(context.resultPomBytes)
+            File(resultFilePath).writeBytes(context.pomFile.resultPomBytes)
         }
 
         return context

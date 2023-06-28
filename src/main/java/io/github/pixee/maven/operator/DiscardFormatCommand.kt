@@ -6,26 +6,36 @@ import org.xmlunit.builder.Input
 /**
  * Command Class to Short-Circuit/Discard Processing when no pom changes were made
  */
-class DiscardFormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
-    override fun postProcess(c: ProjectModel): Boolean {
-        val originalDoc = Input.fromString(String(c.originalPom)).build()
-        val modifiedDoc = Input.fromString(c.resultPom.asXML()).build()
+class DiscardFormatCommand : AbstractCommand() {
+    override fun postProcess(pm: ProjectModel): Boolean {
+        var mustSkip = false
 
-        val diff = DiffBuilder.compare(originalDoc).withTest(modifiedDoc)
-            .ignoreWhitespace()
-            .ignoreComments()
-            .ignoreElementContentWhitespace()
-            .checkForSimilar()
-            .build()
+        for (pomFile in pm.allPomFiles) {
+            val originalDoc = Input.fromString(String(pomFile.originalPom)).build()
+            val modifiedDoc = Input.fromString(pomFile.resultPom.asXML()).build()
 
-        val hasDifferences = diff.hasDifferences()
+            val diff = DiffBuilder.compare(originalDoc).withTest(modifiedDoc)
+                .ignoreWhitespace()
+                .ignoreComments()
+                .ignoreElementContentWhitespace()
+                .checkForSimilar()
+                .build()
 
-        if (! (c.modifiedByCommand || hasDifferences)) {
-            c.resultPomBytes = c.originalPom
+            val hasDifferences = diff.hasDifferences()
 
-            return true
+            if (!(pm.modifiedByCommand || hasDifferences)) {
+                pomFile.resultPomBytes = pomFile.originalPom
+
+                mustSkip = true
+            }
         }
 
-        return super.postProcess(c)
+        /**
+         * Triggers early abandonment
+         */
+        if (mustSkip)
+            return true
+
+        return super.postProcess(pm)
     }
 }

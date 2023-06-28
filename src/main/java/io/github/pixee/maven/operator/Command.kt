@@ -7,10 +7,10 @@ interface Command {
     /**
      * Given a context, performs an operation
      *
-     * @param c Context (Project Model) to use
+     * @param pm Context (Project Model) to use
      * @return true if the execution was successful *AND* the chain must end
      */
-    fun execute(c: ProjectModel): Boolean
+    fun execute(pm: ProjectModel): Boolean
 
     /**
      * Post Processing, implementing a Filter Pattern

@@ -26,17 +26,7 @@ data class MatchData(
  * which are the only ones which are tricky to format (due to element and its attributes being freeform - thus formatting lost when serializing the DOM
  * and the PI being completely optional for the POM Document)
  */
-class FormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
-    /**
-     * Preamble Contents are stored here
-     */
-    private var preamble: String = ""
-
-    /**
-     * Afterword - if needed
-     */
-    private var suffix: String = ""
-
+class FormatCommand : AbstractCommand() {
     /**
      * StAX InputFactory
      */
@@ -47,17 +37,31 @@ class FormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
      */
     private val outputFactory = XMLOutputFactory.newInstance()
 
-    override fun execute(c: ProjectModel): Boolean {
-        parseXmlAndCharset(c)
+    override fun execute(pm: ProjectModel): Boolean {
+        for (pomFile in pm.allPomFiles) {
+            parseXmlAndCharset(pomFile)
 
-        parseLineEndings(c)
+            pomFile.endl = parseLineEndings(pomFile)
+            pomFile.indent = guessIndent(pomFile)
+        }
 
-        c.endl = parseLineEndings(c)
-        c.indent = guessIndent(c)
-
-        return super.execute(c)
+        return super.execute(pm)
     }
 
+    /**
+     * This one is quite fun yet important. Let me explain:
+     *
+     * The DOM doesn't track records if empty elements are either `<element>` or `<element/>`. Therefore we need to scan all ocurrences of
+     * singleton elements.
+     *
+     * Therefore we use a bitSet to keep track of each element and offset, scanning it forward
+     * when serializing we pick backwards and rewrite tags accordingly
+     *
+     * @param doc Raw Document Bytes
+     * @see RE_EMPTY_ELEMENT
+     * @return bitSet of
+     *
+     */
     private fun elementBitSet(doc: ByteArray): BitSet {
         val result = BitSet()
         val eventReader = inputFactory.createXMLEventReader(doc.inputStream())
@@ -84,8 +88,17 @@ class FormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
         return result
     }
 
-    private fun findSingleElementMatchesFrom(pomDocument: String) =
-        RE_EMPTY_ELEMENT.findAll(pomDocument).map {
+    /**
+     * Returns a reverse-ordered list of all the single element matches from the pom document
+     * raw string
+     *
+     * this is important so we can mix and match offsets and apply formatting accordingly
+     *
+     * @param xmlDocumentString Rendered POM Document Contents (string-formatted)
+     * @return map of (index, matchData object) reverse ordered
+     */
+    private fun findSingleElementMatchesFrom(xmlDocumentString: String) =
+        RE_EMPTY_ELEMENT.findAll(xmlDocumentString).map {
             it.range.first to MatchData(
                 range = it.range,
                 content = it.value,
@@ -97,11 +110,11 @@ class FormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
      * Guesses the indent character (spaces / tabs) and length from the original document
      * formatting settings
      *
-     * @param c (project model) where it takes its input pom
+     * @param pomFile (project model) where it takes its input pom
      * @return indent string
      */
-    private fun guessIndent(c: ProjectModel): String {
-        val eventReader = inputFactory.createXMLEventReader(c.originalPom.inputStream())
+    private fun guessIndent(pomFile: POMDocument): String {
+        val eventReader = inputFactory.createXMLEventReader(pomFile.originalPom.inputStream())
 
         val freqMap: MutableMap<Int, Int> = mutableMapOf()
         val charFreqMap: MutableMap<Char, Int> = mutableMapOf()
@@ -165,19 +178,19 @@ class FormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
         return indentString
     }
 
-    private fun parseLineEndings(c: ProjectModel): String {
-        val str = String(c.originalPom.inputStream().readBytes(), c.charset)
+    private fun parseLineEndings(pomFile: POMDocument): String {
+        val str = String(pomFile.originalPom.inputStream().readBytes(), pomFile.charset)
 
         return LINE_ENDINGS.associateWith { str.split(it).size }
             .maxBy { it.value }
             .key
     }
 
-    private fun parseXmlAndCharset(c: ProjectModel) {
+    private fun parseXmlAndCharset(pomFile: POMDocument) {
         /**
          * Performs a StAX Parsing to Grab the first element
          */
-        val eventReader = inputFactory.createXMLEventReader(c.originalPom.inputStream())
+        val eventReader = inputFactory.createXMLEventReader(pomFile.originalPom.inputStream())
 
         var charset: Charset? = null
 
@@ -200,7 +213,8 @@ class FormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
 
                 val offset = endElementEvent.location.characterOffset
 
-                preamble = c.originalPom.toString(c.charset).substring(0, offset)
+                pomFile.preamble =
+                    pomFile.originalPom.toString(pomFile.charset).substring(0, offset)
 
                 break
             }
@@ -210,34 +224,56 @@ class FormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
         }
 
         if (null == charset) {
-            val detectedCharsetName = UniversalDetector.detectCharset(c.originalPom.inputStream())
+            val detectedCharsetName =
+                UniversalDetector.detectCharset(pomFile.originalPom.inputStream())
 
             charset = Charset.forName(detectedCharsetName)
         }
 
-        c.charset = charset!!
+        pomFile.charset = charset!!
 
-        val lastLine = String(c.originalPom, c.charset)
+        val lastLine = String(pomFile.originalPom, pomFile.charset)
 
         val lastLineTrimmed = lastLine.trimEnd()
 
-        this.suffix = lastLine.substring(lastLineTrimmed.length)
-
+        pomFile.suffix = lastLine.substring(lastLineTrimmed.length)
     }
 
     /**
      * When doing the opposite, render the XML using the optionally supplied encoding (defaults to UTF8 obviously)
      * but apply the original formatting as well
      */
-    override fun postProcess(c: ProjectModel): Boolean {
-        var xmlRepresentation = c.resultPom.asXML().toString()
+    override fun postProcess(pm: ProjectModel): Boolean {
+        for (pomFile in pm.allPomFiles) {
+            /**
+             * Serializes it back
+             */
+            val content = serializePomFile(pomFile)
 
-        val originalElementMap = elementBitSet(c.originalPom)
+            pomFile.resultPomBytes = content
+        }
+
+        return super.postProcess(pm)
+    }
+
+    /**
+     * Serialize a POM Document
+     *
+     * @param pom pom document
+     * @return bytes for the pom document
+     */
+    private fun serializePomFile(pom: POMDocument): ByteArray {
+        // Generate a String representation. We'll need to patch it up and apply back
+        // differences we recored previously on the pom (see the pom member variables)
+        var xmlRepresentation = pom.resultPom.asXML().toString()
+
+        val originalElementMap = elementBitSet(pom.originalPom)
         val targetElementMap = elementBitSet(xmlRepresentation.toByteArray())
 
         // Let's find out the original empty elements from the original pom and store into a stack
         val elementsToReplace: MutableList<MatchData> = ArrayList<MatchData>().apply {
-            val matches = findSingleElementMatchesFrom(c.originalPom.toString(c.charset)).values
+            val matches =
+                findSingleElementMatchesFrom(pom.originalPom.toString(pom.charset)).values
 
             val filteredMatches = matches.filter { originalElementMap[it.range.first] }
 
@@ -262,7 +298,7 @@ class FormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
          */
         val inputFactory = XMLInputFactory.newInstance()
         val eventReader = inputFactory.createXMLEventReader(
-            xmlRepresentation.toByteArray(c.charset).inputStream()
+            xmlRepresentation.toByteArray(pom.charset).inputStream()
         )
 
         while (true) {
@@ -277,7 +313,7 @@ class FormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
                 val offset = endElementEvent.location.characterOffset
 
                 xmlRepresentation =
-                    this.preamble + xmlRepresentation.substring(offset) + this.suffix
+                    pom.preamble + xmlRepresentation.substring(offset) + pom.suffix
 
                 break
             }
@@ -290,11 +326,11 @@ class FormatCommand : io.github.pixee.maven.operator.AbstractSimpleCommand() {
         }
 
         /**
-         * Serializes it back
+         * Serializes it back from (string to ByteArray)
          */
-        c.resultPomBytes = xmlRepresentation.toByteArray(c.charset)
+        val serializedContent = xmlRepresentation.toByteArray(pom.charset)
 
-        return super.postProcess(c)
+        return serializedContent
     }
 
     companion object {

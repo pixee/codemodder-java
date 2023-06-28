@@ -1,20 +1,15 @@
 package io.github.pixee.maven.operator
 
-import org.apache.commons.io.IOUtils
-import org.dom4j.Document
-import org.dom4j.io.SAXReader
 import java.io.File
 import java.io.InputStream
 import java.net.URL
-import java.nio.charset.Charset
 
 /**
  * Builder Object for ProjectModel instances
  */
 class ProjectModelFactory private constructor(
-    private val originalPom: ByteArray,
-    private var pomPath: URL?,
-    private var pomDocument: Document,
+    private var pomFile: POMDocument,
+    private var parentPomFiles: List<POMDocument> = listOf(),
     private var dependency: Dependency? = null,
     private var skipIfNewer: Boolean = false,
     private var useProperties: Boolean = false,
@@ -24,11 +19,22 @@ class ProjectModelFactory private constructor(
 ) {
     /**
      * Fluent Setter
-     * @param pomPath pomPath
+     *
+     * @param pomFile POM File
      */
-    fun withPomPath(pomPath: URL): ProjectModelFactory = this.apply {
-        this.pomPath = pomPath
+    fun withPomFile(pomFile: POMDocument): ProjectModelFactory = this.apply {
+        this.pomFile = pomFile
     }
+
+    /**
+     * Fluent Setter
+     *
+     * @param parentPomFiles Parent POM Files
+     */
+    fun withParentPomFiles(parentPomFiles: Collection<POMDocument?>): ProjectModelFactory =
+        this.apply {
+            this.parentPomFiles = listOf(*parentPomFiles.filterNotNull().toTypedArray())
+        }
 
     /**
      * Fluent Setter
@@ -81,29 +87,26 @@ class ProjectModelFactory private constructor(
      */
     fun build(): ProjectModel {
         return ProjectModel(
-            originalPom = originalPom,
-            pomPath = pomPath,
-            pomDocument = pomDocument,
+            pomFile = pomFile,
+            parentPomFiles = parentPomFiles,
             dependency = dependency,
             skipIfNewer = skipIfNewer,
             useProperties = useProperties,
             activeProfiles = activeProfiles,
             overrideIfAlreadyExists = overrideIfAlreadyExists,
-            queryType = queryType,
-            charset = Charset.defaultCharset(),
-            endl = "",
-            indent = "",
+            queryType = queryType
         )
     }
 
+    /**
+     * Mostly Delegates to POMDocumentFactory
+     */
     companion object {
         @JvmStatic
         fun load(`is`: InputStream): ProjectModelFactory {
-            val originalPom: ByteArray = IOUtils.toByteArray(`is`)
+            val pomDocument = POMDocumentFactory.load(`is`)
 
-            val pomDocument = SAXReader().read(originalPom.inputStream())!!
-
-            return ProjectModelFactory(pomPath = null, pomDocument = pomDocument, originalPom = originalPom)
+            return ProjectModelFactory(pomFile = pomDocument)
         }
 
         @JvmStatic
@@ -112,13 +115,15 @@ class ProjectModelFactory private constructor(
 
         @JvmStatic
         fun load(url: URL): ProjectModelFactory {
-            val originalPom: ByteArray = IOUtils.toByteArray(url.openStream())
+            val pomFile = POMDocumentFactory.load(url)
 
-            val saxReader = SAXReader()
-
-            val pomDocument = saxReader.read(originalPom.inputStream())
-
-            return ProjectModelFactory(pomPath = url, pomDocument = pomDocument, originalPom = originalPom)
+            return ProjectModelFactory(pomFile = pomFile)
         }
+
+        @JvmStatic
+        internal fun loadFor(
+            pomFile: POMDocument,
+            parentPomFiles: Collection<POMDocument>,
+        ) = ProjectModelFactory(pomFile = pomFile, parentPomFiles = parentPomFiles.toList())
     }
 }

@@ -3,11 +3,11 @@ package io.github.pixee.maven.operator
 import io.github.pixee.maven.operator.Util.buildLookupExpressionForDependencyManagement
 
 
-val SimpleDependencyManagement = object : io.github.pixee.maven.operator.AbstractSimpleCommand() {
-    override fun execute(c: ProjectModel): Boolean {
+val SimpleDependencyManagement = object : AbstractCommand() {
+    override fun execute(pm: ProjectModel): Boolean {
         val lookupExpression =
-            buildLookupExpressionForDependencyManagement(c.dependency!!)
+            buildLookupExpressionForDependencyManagement(pm.dependency!!)
 
-        return handleDependency(c, lookupExpression)
+        return handleDependency(pm, lookupExpression)
     }
 }

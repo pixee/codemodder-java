@@ -4,7 +4,7 @@ import org.apache.maven.shared.invoker.DefaultInvoker
 import org.apache.maven.shared.invoker.InvocationRequest
 import java.io.File
 
-class QueryByInvoker : io.github.pixee.maven.operator.AbstractSimpleQueryCommand() {
+class QueryByInvoker : AbstractQueryCommand() {
 
     override fun extractDependencyTree(
         outputPath: File,
@@ -13,7 +13,8 @@ class QueryByInvoker : io.github.pixee.maven.operator.AbstractSimpleQueryCommand
     ) {
         val invoker = DefaultInvoker()
 
-        val invocationRequest: InvocationRequest = buildInvocationRequest(outputPath, pomFilePath, c)
+        val invocationRequest: InvocationRequest =
+            buildInvocationRequest(outputPath, pomFilePath, c)
 
         val invocationResult = invoker.execute(invocationRequest)
 

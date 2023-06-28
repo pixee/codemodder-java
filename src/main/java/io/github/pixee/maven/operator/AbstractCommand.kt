@@ -8,12 +8,14 @@ import org.dom4j.Element
 /**
  * Base implementation of Command - used by SimpleDependency and SimpleInsert
  */
-abstract class AbstractSimpleCommand : io.github.pixee.maven.operator.Command {
+abstract class AbstractCommand : Command {
     /**
      * Given a POM, locate its coordinates for a given dependency based on lookupExpression and figures out the upgrade
+     *
+     * TODO review this
      */
-    protected fun handleDependency(c: io.github.pixee.maven.operator.ProjectModel, lookupExpression: String): Boolean {
-        val dependencyNodes = c.resultPom.selectXPathNodes(lookupExpression)
+    protected fun handleDependency(pm: ProjectModel, lookupExpression: String): Boolean {
+        val dependencyNodes = pm.pomFile.resultPom.selectXPathNodes(lookupExpression)
 
         if (1 == dependencyNodes.size) {
             val versionNodes = dependencyNodes[0].selectXPathNodes("./m:version")
@@ -23,12 +25,12 @@ abstract class AbstractSimpleCommand : io.github.pixee.maven.operator.Command {
 
                 var mustUpgrade = true
 
-                if (c.skipIfNewer) {
-                    mustUpgrade = findOutIfUpgradeIsNeeded(c, versionNode)
+                if (pm.skipIfNewer) {
+                    mustUpgrade = findOutIfUpgradeIsNeeded(pm, versionNode)
                 }
 
                 if (mustUpgrade) {
-                    upgradeVersionNode(c, versionNode)
+                    upgradeVersionNode(pm, versionNode, pm.pomFile)
                 }
 
                 return true
@@ -38,7 +40,7 @@ abstract class AbstractSimpleCommand : io.github.pixee.maven.operator.Command {
         return false
     }
 
-    override fun execute(c: io.github.pixee.maven.operator.ProjectModel): Boolean = false
+    override fun execute(pm: ProjectModel): Boolean = false
 
-    override fun postProcess(c: io.github.pixee.maven.operator.ProjectModel): Boolean = false
+    override fun postProcess(c: ProjectModel): Boolean = false
 }

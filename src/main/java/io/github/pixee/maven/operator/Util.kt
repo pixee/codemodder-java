@@ -13,7 +13,7 @@ import org.dom4j.tree.DefaultText
 import org.jaxen.SimpleNamespaceContext
 import org.jaxen.XPath
 import org.jaxen.dom4j.Dom4jXPath
-import java.io.*
+import java.io.File
 
 
 /**
@@ -24,18 +24,18 @@ object Util {
      * Extension Method that easily allows to add an element inside another while
      * retaining formatting
      *
-     * @param c ProjectModel / Context
+     * @param d ProjectModel / Context
      * @param name new element ("tag") name
      * @return created element inside `this` object, already indented after and (optionally) before
      */
-    fun Element.addIndentedElement(c: ProjectModel, name: String): Element {
+    fun Element.addIndentedElement(d: POMDocument, name: String): Element {
         val contentList = this.content()
 
         val indentLevel = findIndentLevel(this)
 
-        val prefix = c.endl + StringUtils.repeat(c.indent, 1 + indentLevel)
+        val prefix = d.endl + StringUtils.repeat(d.indent, 1 + indentLevel)
 
-        val suffix = c.endl + StringUtils.repeat(c.indent, indentLevel)
+        val suffix = d.endl + StringUtils.repeat(d.indent, indentLevel)
 
         if (contentList.isNotEmpty() && contentList.last() is Text) {
             val lastElement = contentList.last() as Text
@@ -51,6 +51,8 @@ object Util {
 
         contentList.add(DefaultText(suffix))
 
+        d.dirty = true
+
         return newElement
     }
 
@@ -59,7 +61,7 @@ object Util {
      *
      * @return indent level
      */
-    internal fun findIndentLevel(startingNode: Element): Int {
+    private fun findIndentLevel(startingNode: Element): Int {
         var level = 0
 
         var node = startingNode
@@ -80,21 +82,21 @@ object Util {
     /**
      * Upserts a given property
      */
-    private fun upgradeProperty(c: ProjectModel, propertyName: String) {
-        if (null == c.resultPom.rootElement.element("properties")) {
-            c.resultPom.rootElement.addIndentedElement(c, "properties")
+    private fun upgradeProperty(c: ProjectModel, d: POMDocument, propertyName: String) {
+        if (null == d.resultPom.rootElement.element("properties")) {
+            d.resultPom.rootElement.addIndentedElement(d, "properties")
         }
 
-        val parentPropertyElement = c.resultPom.rootElement.element("properties")
+        val parentPropertyElement = d.resultPom.rootElement.element("properties")
 
         if (null == parentPropertyElement.element(propertyName)) {
-            parentPropertyElement.addIndentedElement(c, propertyName)
+            parentPropertyElement.addIndentedElement(d, propertyName)
         } else {
             if (!c.overrideIfAlreadyExists) {
                 val propertyReferenceRE = Regex.fromLiteral("\${$propertyName}")
 
                 val numberOfAllCurrentMatches =
-                    propertyReferenceRE.findAll(c.pomDocument.asXML()).toList().size
+                    propertyReferenceRE.findAll(d.resultPom.asXML()).toList().size
 
                 if (numberOfAllCurrentMatches > 1) {
                     throw IllegalStateException("Property $propertyName is already defined - and used more than once.")
@@ -104,7 +106,11 @@ object Util {
 
         val propertyElement = parentPropertyElement.element(propertyName)
 
-        propertyElement.text = c.dependency!!.version
+        if (!(propertyElement.text ?: "").trim().equals(c.dependency!!.version)) {
+            propertyElement.text = c.dependency!!.version
+
+            d.dirty = true
+        }
     }
 
     /**
@@ -156,16 +162,23 @@ object Util {
     /**
      * Given a Version Node, upgrades a resulting POM
      */
-    internal fun upgradeVersionNode(c: ProjectModel, versionNode: Element) {
+    internal fun upgradeVersionNode(
+        c: ProjectModel,
+        versionNode: Element,
+        pomDocumentHoldingProperty: POMDocument
+    ) {
         if (c.useProperties) {
             val propertyName = propertyName(c, versionNode)
 
             // define property
-            upgradeProperty(c, propertyName)
+            upgradeProperty(c, pomDocumentHoldingProperty, propertyName)
 
             versionNode.text = escapedPropertyName(propertyName)
         } else {
-            versionNode.text = c.dependency!!.version
+            if (!(versionNode.text ?: "").trim().equals(c.dependency!!.version)) {
+                pomDocumentHoldingProperty.dirty = true
+                versionNode.text = c.dependency!!.version
+            }
         }
     }
 
@@ -254,7 +267,7 @@ object Util {
         val result = possiblePaths.findLast(isCliCallable)
 
         if (null == result) {
-            io.github.pixee.maven.operator.AbstractSimpleQueryCommand.LOGGER.warn(
+            AbstractQueryCommand.LOGGER.warn(
                 "Unable to find mvn executable (execs: {}, path: {})",
                 nativeExecutables.joinToString("/"),
                 pathContentString

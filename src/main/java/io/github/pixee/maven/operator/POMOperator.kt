@@ -21,7 +21,7 @@ object POMOperator {
     @JvmStatic
     fun queryDependency(
         projectModel: ProjectModel
-    ) = POMOperator.queryDependency(projectModel, emptyList())
+    ) = queryDependency(projectModel, emptyList())
 
     /**
      * Internal Use (package-wide) - Query for all the artifacts mentioned on a POM
@@ -43,7 +43,7 @@ object POMOperator {
 
         chain.execute(projectModel)
 
-        val lastCommand = chain.commandList.filterIsInstance<io.github.pixee.maven.operator.AbstractSimpleQueryCommand>()
+        val lastCommand = chain.commandList.filterIsInstance<AbstractQueryCommand>()
             .lastOrNull { it.result != null }
             ?: return emptyList()
 
