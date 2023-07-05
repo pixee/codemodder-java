@@ -12,8 +12,6 @@ java {
 
 dependencies {
     api(project(":codemodder-core"))
-    api("io.codemodder:codemodder-plugin-semgrep")
-    api("io.codemodder:codemodder-plugin-codeql")
 
     implementation(testlibs.bundles.junit.jupiter)
     implementation(testlibs.bundles.hamcrest)
