@@ -95,7 +95,7 @@ public final class SemgrepModule extends AbstractModule {
                 if (!"".equals(yamlPath)) {
                   classpathYamlPath = yamlPath;
                 }
-                Optional<Path> path = saveClasspathResourceToTemp(classpathYamlPath);
+                Optional<Path> path = saveClasspathResourceToTemp(codemodType, classpathYamlPath);
                 if (path.isPresent()) {
                   foundYaml = true;
                   yamlPathToWrite = path.get();
@@ -217,8 +217,9 @@ public final class SemgrepModule extends AbstractModule {
    * Turn the yaml resource in the classpath into a file accessible via {@link Path}. Forgive the
    * exception re-throwing but this is being used from a lambda and this shouldn't fail ever anyway.
    */
-  private Optional<Path> saveClasspathResourceToTemp(final String yamlClasspathResourcePath) {
-    InputStream ruleInputStream = getClass().getResourceAsStream(yamlClasspathResourcePath);
+  private Optional<Path> saveClasspathResourceToTemp(
+      final Class<?> codemodType, final String yamlClasspathResourcePath) {
+    InputStream ruleInputStream = codemodType.getResourceAsStream(yamlClasspathResourcePath);
     if (ruleInputStream == null) {
       return Optional.empty();
     }
