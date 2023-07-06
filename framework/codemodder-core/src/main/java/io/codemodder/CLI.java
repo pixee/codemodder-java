@@ -3,6 +3,7 @@ package io.codemodder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
+import com.google.common.base.Stopwatch;
 import io.codemodder.codetf.CodeTFReport;
 import io.codemodder.codetf.CodeTFReportGenerator;
 import io.codemodder.codetf.CodeTFResult;
@@ -13,10 +14,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,19 +198,32 @@ final class CLI implements Callable<Integer> {
       return ERROR_CANT_READ_PROJECT_DIRECTORY;
     }
 
-    Path projectPath = projectDirectory.toPath();
-    if (!Files.isDirectory(projectPath) || !Files.isReadable(projectPath)) {
-      log.error("The project directory is not a readable directory");
-      return ERROR_CANT_READ_PROJECT_DIRECTORY;
-    }
     Path outputPath = output.toPath();
     if (!Files.isWritable(outputPath) && !Files.isWritable(outputPath.getParent())) {
       log.error("The output file (or its parent directory) is not writable");
       return ERROR_CANT_WRITE_OUTPUT_FILE;
     }
 
+    Path projectPath = projectDirectory.toPath();
+    if (!Files.isDirectory(projectPath) || !Files.isReadable(projectPath)) {
+      log.error("The project directory is not a readable directory");
+      return ERROR_CANT_READ_PROJECT_DIRECTORY;
+    }
+
     if (dryRun) {
-      throw new UnsupportedOperationException("Dry run is not yet supported");
+      // create a temp dir and copy all the contents into it -- this may be slow for big repos on
+      // cloud i/o
+      Path copiedProjectDirectory = Files.createTempDirectory("codemodder-project");
+      Stopwatch watch = Stopwatch.createStarted();
+      log.info("Copying project directory for dry run..: {}", copiedProjectDirectory);
+      FileUtils.copyDirectory(projectDirectory, copiedProjectDirectory.toFile());
+      watch.stop();
+      Duration elapsed = watch.elapsed();
+      log.info("Copy took: {}", elapsed);
+
+      // now that we've copied it, reassign the project directory to that place
+      projectDirectory = copiedProjectDirectory.toFile();
+      projectPath = copiedProjectDirectory;
     }
 
     Instant start = clock.instant();
@@ -303,6 +319,12 @@ final class CLI implements Callable<Integer> {
       Files.writeString(outputPath, mapper.writeValueAsString(report));
     } else if (OutputFormat.DIFF.equals(outputFormat)) {
       throw new UnsupportedOperationException("not supported yet");
+    }
+
+    if (dryRun) {
+      // delete the temp directory
+      log.info("Cleaning temp directory");
+      FileUtils.deleteDirectory(projectDirectory);
     }
 
     // this is a special exit code that tells the caller to not exit
