@@ -32,19 +32,19 @@ final class AddMissingI18nCodemodTest {
   void setup(final @TempDir Path tempDir) throws IOException {
     Files.copy(
         Paths.get("src/test/resources/missing-i18n/whatever_bg.properties"),
-        tempDir,
+        tempDir.resolve("whatever_bg.properties"),
         StandardCopyOption.REPLACE_EXISTING);
     Files.copy(
         Paths.get("src/test/resources/missing-i18n/whatever_en_US.properties"),
-        tempDir,
+        tempDir.resolve("whatever_en_US.properties"),
         StandardCopyOption.REPLACE_EXISTING);
     Files.copy(
         Paths.get("src/test/resources/missing-i18n/whatever_es_MX.properties"),
-        tempDir,
+        tempDir.resolve("whatever_es_MX.properties"),
         StandardCopyOption.REPLACE_EXISTING);
     Files.copy(
         Paths.get("src/test/resources/missing-i18n/foo.jsp"),
-        tempDir,
+        tempDir.resolve("foo.jsp"),
         StandardCopyOption.REPLACE_EXISTING);
     repoRoot = tempDir;
   }
