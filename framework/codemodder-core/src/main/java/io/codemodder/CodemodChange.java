@@ -3,6 +3,8 @@ package io.codemodder;
 import io.codemodder.codetf.CodeTFParameter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import javax.annotation.Nullable;
 
 /** Represents a change made to the code. */
 public final class CodemodChange {
@@ -13,12 +15,26 @@ public final class CodemodChange {
   /** Represents the dependencies required by the new code we introduced in this weave. */
   private final List<DependencyGAV> dependenciesNeeded;
 
+  /**
+   * Represents the parameters that were used to generate the new code we introduced in this weave.
+   */
   private final List<CodeTFParameter> parameters;
+
+  /** Represents a description for this change to be used instead of the standard static text. */
+  private @Nullable final String description;
 
   private CodemodChange(final int lineNumber, final List<DependencyGAV> dependenciesNeeded) {
     this.lineNumber = lineNumber;
     this.dependenciesNeeded = Objects.requireNonNull(dependenciesNeeded, "dependenciesNeeded");
     this.parameters = List.of();
+    this.description = null;
+  }
+
+  private CodemodChange(final int lineNumber, final String description) {
+    this.lineNumber = lineNumber;
+    this.dependenciesNeeded = List.of();
+    this.parameters = List.of();
+    this.description = Objects.requireNonNull(description);
   }
 
   private CodemodChange(final int lineNumber, final Parameter parameter, final String valueUsed) {
@@ -32,6 +48,7 @@ public final class CodemodChange {
             parameter.getLabel(),
             valueUsed);
     this.parameters = List.of(codeTFParameter);
+    this.description = null;
   }
 
   @Override
@@ -60,8 +77,20 @@ public final class CodemodChange {
     return parameters;
   }
 
+  /**
+   * A list of the dependencies that are required to be added to the project in order to support
+   * this change.
+   */
   public List<DependencyGAV> getDependenciesNeeded() {
     return dependenciesNeeded;
+  }
+
+  /**
+   * A description of the change that is being made. If not provided, the default description will
+   * be used.
+   */
+  public Optional<String> getDescription() {
+    return Optional.ofNullable(description);
   }
 
   /** Builds a weave. */
@@ -90,6 +119,10 @@ public final class CodemodChange {
     return new CodemodChange(line, parameter, valueUsed);
   }
 
+  public static CodemodChange from(final int line, final String description) {
+    return new CodemodChange(line, description);
+  }
+
   @Override
   public String toString() {
     return "CodemodChange{"
@@ -97,6 +130,10 @@ public final class CodemodChange {
         + lineNumber
         + ", dependenciesNeeded="
         + dependenciesNeeded
+        + ", parameters="
+        + parameters
+        + ", description="
+        + description
         + '}';
   }
 }
