@@ -54,12 +54,19 @@ public final class MavenProvider implements ProjectProvider {
 
   private final POMModifier pomModifier;
 
-  public MavenProvider(POMModifier pomModifier) {
+  private final PomFileFinder pomFileFinder;
+
+  public MavenProvider(POMModifier pomModifier, PomFileFinder pomFileFinder) {
     this.pomModifier = pomModifier;
+    this.pomFileFinder = pomFileFinder;
+  }
+
+  MavenProvider(POMModifier pomModifier) {
+    this(pomModifier, new DefaultPomFileFinder());
   }
 
   public MavenProvider() {
-    this(new DefaultPOMModifier());
+    this(new DefaultPOMModifier(), new DefaultPomFileFinder());
   }
 
   @VisibleForTesting
@@ -82,7 +89,21 @@ public final class MavenProvider implements ProjectProvider {
   public DependencyUpdateResult updateDependencies(
       final Path projectDir, final Path file, final List<DependencyGAV> dependencies)
       throws IOException {
-    Optional<Path> maybePomFile = new DefaultPomFileFinder().findForFile(projectDir, file);
+    try {
+      return updateDependenciesInternal(projectDir, file, dependencies);
+    } catch (Exception e) {
+      if (e instanceof IOException) {
+        throw (IOException) e;
+      }
+
+      throw new IOException(e);
+    }
+  }
+
+  @NotNull
+  private DependencyUpdateResult updateDependenciesInternal(
+      Path projectDir, Path file, List<DependencyGAV> dependencies) throws IOException {
+    Optional<Path> maybePomFile = pomFileFinder.findForFile(projectDir, file);
 
     if (maybePomFile.isEmpty()) {
       return DependencyUpdateResult.EMPTY_UPDATE;
@@ -93,11 +114,11 @@ public final class MavenProvider implements ProjectProvider {
     Set<CodeTFChangesetEntry> changesets = new LinkedHashSet<>();
     Set<Path> failedFiles = new LinkedHashSet<>();
 
-    List<io.github.pixee.maven.operator.Dependency> mappedDependencies =
+    List<Dependency> mappedDependencies =
         dependencies.stream()
             .map(
                 dependencyGAV ->
-                    new io.github.pixee.maven.operator.Dependency(
+                    new Dependency(
                         dependencyGAV.group(),
                         dependencyGAV.artifact(),
                         dependencyGAV.version(),
@@ -108,6 +129,8 @@ public final class MavenProvider implements ProjectProvider {
 
     final List<DependencyGAV> skippedDependencies = new ArrayList<>();
     final List<DependencyGAV> failedDependencies = new ArrayList<>();
+    final List<DependencyGAV> injectedDependencies = new ArrayList<>();
+    final Set<Path> erroredFiles = new LinkedHashSet<>();
 
     AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
         new AtomicReference<>(getDependenciesFrom(pomFile));
@@ -158,7 +181,13 @@ public final class MavenProvider implements ProjectProvider {
 
                   changesets.add(entry);
 
-                  pomModifier.modify(path, aPomFile.getResultPomBytes());
+                  try {
+                    pomModifier.modify(path, aPomFile.getResultPomBytes());
+                  } catch (IOException exc) {
+                    erroredFiles.add(path);
+                  }
+
+                  injectedDependencies.add(newDependencyGAV);
                 } catch (Exception e) {
                   // TODO Log
                   failedFiles.add(path);
@@ -170,7 +199,8 @@ public final class MavenProvider implements ProjectProvider {
           }
         });
 
-    return DependencyUpdateResult.create(dependencies, skippedDependencies, changesets, Set.of());
+    return DependencyUpdateResult.create(
+        injectedDependencies, skippedDependencies, changesets, erroredFiles);
   }
 
   private boolean validPomFileName(Path path) {
