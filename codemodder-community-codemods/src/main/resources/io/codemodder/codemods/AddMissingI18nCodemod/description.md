@@ -4,7 +4,7 @@ Primarily, missing keys lead to missing translations and blank strings in UIs, w
 
 Our changes look something like this:
 
-```properties
+```diff
   login.title=Login
   login.username=Username
 + login.password=Password
