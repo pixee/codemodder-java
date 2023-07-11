@@ -27,10 +27,12 @@ dependencies {
     implementation("io.codemodder:codemodder-plugin-codeql")
     implementation("io.codemodder:codemodder-plugin-maven")
     implementation("io.codemodder:codemodder-plugin-llm")
+    implementation("io.codemodder:codemodder-plugin-aws")
 
     implementation(libs.dom4j)
     implementation(libs.commons.jexl)
     implementation(libs.tuples)
+    implementation("com.github.albfernandez:juniversalchardet:2.4.0")
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)

@@ -162,11 +162,15 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       final Path filePath,
       final CodemodChange codemodChange,
       final List<CodeTFPackageAction> pkgActions) {
+    Optional<String> customizedChangeDescription = codemodChange.getDescription();
+    String changeDescription =
+        customizedChangeDescription.orElse(
+            codeChanger.getIndividualChangeDescription(filePath, codemodChange));
     CodeTFChange change =
         new CodeTFChange(
             codemodChange.lineNumber(),
             emptyMap(),
-            codeChanger.getIndividualChangeDescription(filePath, codemodChange),
+            changeDescription,
             pkgActions,
             codeChanger.getSourceControlUrl().orElse(null),
             codemodChange.getParameters());
