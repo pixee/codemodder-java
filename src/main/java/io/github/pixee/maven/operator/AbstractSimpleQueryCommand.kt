@@ -116,8 +116,10 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
             //System.getProperties().forEach { t, u -> setProperty(t as String, u as String) }
             setProperty("outputFile", outputPath.absolutePath)
 
+            val localRepositoryPath = getLocalRepositoryPath(c).absolutePath
+
             if (null != c.repositoryPath) {
-                setProperty("maven.repo.local", c.repositoryPath.absolutePath)
+                setProperty("maven.repo.local", localRepositoryPath)
             }
         }
 
