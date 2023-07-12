@@ -1,17 +1,19 @@
 package io.github.pixee.maven.operator.test
 
 import io.github.pixee.maven.operator.*
+import junit.framework.TestCase.*
 import org.junit.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import kotlin.test.assertTrue
+import java.io.File
+import java.nio.file.Files
 
 class POMOperatorQueryTest {
     private val LOGGER: Logger = LoggerFactory.getLogger(POMOperatorTest::class.java)
 
     @Test
     fun testBasicQuery() {
-        QueryType.values().filterNot { it == QueryType.NONE } .forEach { queryType ->
+        QueryType.values().filterNot { it == QueryType.NONE }.forEach { queryType ->
             val context =
                 ProjectModelFactory
                     .load(this.javaClass.getResource("pom-1.xml")!!)
@@ -22,7 +24,7 @@ class POMOperatorQueryTest {
 
             LOGGER.debug("Dependencies found: {}", dependencies)
 
-            assertTrue(dependencies.isNotEmpty(), "Dependencies are not empty")
+            assertTrue("Dependencies are not empty", dependencies.isNotEmpty())
         }
     }
 
@@ -36,7 +38,7 @@ class POMOperatorQueryTest {
 
         val dependencies = POMOperator.queryDependency(context)
 
-        assertTrue(dependencies.isEmpty(), "Dependencies are empty")
+        assertTrue("Dependencies are empty", dependencies.isEmpty())
     }
 
     @Test(expected = IllegalStateException::class)
@@ -49,7 +51,7 @@ class POMOperatorQueryTest {
 
         val dependencies = POMOperator.queryDependency(context)
 
-        assertTrue(dependencies.isEmpty(), "Dependencies are empty")
+        assertTrue("Dependencies are empty", dependencies.isEmpty())
     }
 
     @Test
@@ -58,7 +60,8 @@ class POMOperatorQueryTest {
             Chain.AVAILABLE_QUERY_COMMANDS.forEach {
                 val commandClassName = "io.github.pixee.maven.operator.${it.second}"
 
-                val commandListOverride = listOf(Class.forName(commandClassName).newInstance() as Command)
+                val commandListOverride =
+                    listOf(Class.forName(commandClassName).newInstance() as Command)
 
                 val context =
                     ProjectModelFactory
@@ -66,10 +69,49 @@ class POMOperatorQueryTest {
                         .withQueryType(QueryType.UNSAFE)
                         .build()
 
-                val dependencies = POMOperator.queryDependency(context, commandList = commandListOverride)
+                val dependencies =
+                    POMOperator.queryDependency(context, commandList = commandListOverride)
 
-                assertTrue(dependencies.isNotEmpty(), "Dependencies are not empty")
+                assertTrue("Dependencies are not empty", dependencies.isNotEmpty())
             }
+        }
+    }
+
+
+    @Test
+    fun testTemporaryDirectory() {
+        QueryType.values().filterNot { it == QueryType.NONE }.forEach { queryType ->
+            val tempDirectory = File("/tmp/mvn-repo-" + System.currentTimeMillis() + ".dir")
+
+            LOGGER.info("Using queryType: $queryType at $tempDirectory")
+
+            assertFalse("Temp Directory does not exist initially", tempDirectory.exists())
+            assertEquals(
+                "There must be no files",
+                tempDirectory.list()?.filter { File(it).isDirectory }?.size ?: 0,
+                0,
+            )
+
+            val context =
+                ProjectModelFactory
+                    .load(this.javaClass.getResource("pom-1.xml")!!)
+                    .withQueryType(queryType)
+                    .withRepositoryPath(tempDirectory)
+                    .build()
+
+            val dependencies = POMOperator.queryDependency(context)
+
+            LOGGER.debug("Dependencies found: {}", dependencies)
+
+            assertTrue("Dependencies are not empty", dependencies.isNotEmpty())
+
+            assertTrue("Temp Directory ends up existing", tempDirectory.exists())
+            assertTrue("Temp Directory is a directory", tempDirectory.isDirectory)
+            assertEquals(
+                "There must be files",
+                tempDirectory.list().filter { File(it).isDirectory }.size,
+                0
+            )
         }
     }
 }

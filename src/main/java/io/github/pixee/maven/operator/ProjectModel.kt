@@ -5,6 +5,7 @@ import org.dom4j.Document
 import org.dom4j.Element
 import java.net.URL
 import java.nio.charset.Charset
+import java.io.File
 
 /**
  * ProjectModel represents the input parameters for the chain
@@ -25,6 +26,8 @@ class ProjectModel internal constructor(
     var charset: Charset,
     var endl: String,
     var indent: String,
+
+    val repositoryPath: File? = null,
 ) {
     internal var modifiedByCommand = false
 

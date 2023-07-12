@@ -29,16 +29,17 @@ import kotlin.io.path.toPath
  * TODO: Support Profiles / Environment Variables
  * Support Third Party / User-Supplied Repositories (right now it only supports central)
  */
-class QueryByResolver : io.github.pixee.maven.operator.AbstractSimpleQueryCommand() {
-    private val localRepo = LocalRepository(
-        File(
-            System.getProperty("user.home"),
-            ".m2/repository"
-        ).absolutePath
-    ) // "target/local-repo")
+class QueryByResolver : AbstractSimpleQueryCommand() {
+    private fun getLocalRepository(pm: ProjectModel): LocalRepository {
+        val localRepositoryPath: File = getLocalRepositoryPath(pm)
 
-    private fun newRepositorySystemSession(system: RepositorySystem): DefaultRepositorySystemSession? {
+        return LocalRepository(localRepositoryPath.absolutePath)
+    }
+
+    private fun newRepositorySystemSession(pm: ProjectModel, system: RepositorySystem): DefaultRepositorySystemSession? {
         val session = MavenRepositorySystemUtils.newSession()
+
+        val localRepo = getLocalRepository(pm)
 
         session.localRepositoryManager = system.newLocalRepositoryManager(session, localRepo)
 
@@ -99,7 +100,7 @@ class QueryByResolver : io.github.pixee.maven.operator.AbstractSimpleQueryComman
         val repositorySystem =
             locator.getService(org.eclipse.aether.RepositorySystem::class.java)
 
-        val session = newRepositorySystemSession(repositorySystem)
+        val session = newRepositorySystemSession(c, repositorySystem)
 
         val modelBuilder = DefaultModelBuilderFactory().newInstance()
 

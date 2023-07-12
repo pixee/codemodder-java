@@ -36,7 +36,7 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
      *
      * @param c ProjectModel
      */
-    protected fun getPomFilePath(c: io.github.pixee.maven.operator.ProjectModel): File = Paths.get(c.pomPath!!.toURI()).toFile()
+    protected fun getPomFilePath(c: ProjectModel): File = Paths.get(c.pomPath!!.toURI()).toFile()
 
     /**
      * Abstract Method to extract dependencies
@@ -45,7 +45,7 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
      * @param pomFilePath Input Pom Path
      * @param c Project Model
      */
-    abstract fun extractDependencyTree(outputPath: File, pomFilePath: File, c: io.github.pixee.maven.operator.ProjectModel)
+    abstract fun extractDependencyTree(outputPath: File, pomFilePath: File, c: ProjectModel)
 
     /**
      * Internal Holder Variable
@@ -57,7 +57,7 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
     /**
      * We declare the main logic here - details are made in the child classes for now
      */
-    override fun execute(c: io.github.pixee.maven.operator.ProjectModel): Boolean {
+    override fun execute(c: ProjectModel): Boolean {
         val pomFilePath = getPomFilePath(c)
 
         val outputPath = getOutputPath(pomFilePath)
@@ -110,11 +110,15 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
     protected fun buildInvocationRequest(
         outputPath: File,
         pomFilePath: File,
-        c: io.github.pixee.maven.operator.ProjectModel
+        c: ProjectModel
     ): InvocationRequest {
         val props = Properties(System.getProperties()).apply {
             //System.getProperties().forEach { t, u -> setProperty(t as String, u as String) }
             setProperty("outputFile", outputPath.absolutePath)
+
+            if (null != c.repositoryPath) {
+                setProperty("maven.repo.local", c.repositoryPath.absolutePath)
+            }
         }
 
         val request: InvocationRequest = DefaultInvocationRequest().apply {
@@ -196,5 +200,5 @@ abstract class AbstractSimpleQueryCommand : io.github.pixee.maven.operator.Abstr
         val LOGGER: Logger = LoggerFactory.getLogger(io.github.pixee.maven.operator.AbstractSimpleQueryCommand::class.java)
     }
 
-    override fun postProcess(c: io.github.pixee.maven.operator.ProjectModel): Boolean = false
+    override fun postProcess(c: ProjectModel): Boolean = false
 }
