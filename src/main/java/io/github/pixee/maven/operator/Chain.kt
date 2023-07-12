@@ -88,7 +88,7 @@ class Chain(vararg commands: Command) {
          * returns a pre-configured chain with the defaults for Querying
          */
         fun createForQuery(queryType: QueryType = QueryType.SAFE): Chain {
-            val commands: List<Command> = AVAILABLE_QUERY_COMMANDS
+            val filteredCommands: List<Command> = AVAILABLE_QUERY_COMMANDS
                 .filter { it.first == queryType }.mapNotNull {
                     val commandClassName = "io.github.pixee.maven.operator.${it.second}"
 
@@ -102,6 +102,8 @@ class Chain(vararg commands: Command) {
                     }
                 }
                 .toList()
+
+            val commands : List<Command> = listOf(CHECK_PARENT_DIR_COMMAND) + filteredCommands
 
             if (commands.isEmpty())
                 throw IllegalStateException("Unable to load any available strategy for ${queryType.name}")

@@ -2,6 +2,7 @@ package io.github.pixee.maven.operator
 
 import io.github.pixee.maven.operator.Util.selectXPathNodes
 import org.dom4j.Element
+import java.io.File
 
 /**
  * ProjectModel represents the input parameters for the chain
@@ -19,6 +20,8 @@ class ProjectModel internal constructor(
     val activeProfiles: Set<String>,
     val overrideIfAlreadyExists: Boolean,
     val queryType: QueryType = QueryType.NONE,
+
+    val repositoryPath: File? = null,
 ) {
     internal var modifiedByCommand = false
 

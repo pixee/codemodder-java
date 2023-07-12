@@ -57,6 +57,7 @@ abstract class AbstractQueryCommand : AbstractCommand() {
     /**
      * We declare the main logic here - details are made in the child classes for now
      */
+
     override fun execute(pm: ProjectModel): Boolean {
         val pomFilePath = getPomFilePath(pm.pomFile)
 
@@ -115,6 +116,12 @@ abstract class AbstractQueryCommand : AbstractCommand() {
         val props = Properties(System.getProperties()).apply {
             //System.getProperties().forEach { t, u -> setProperty(t as String, u as String) }
             setProperty("outputFile", outputPath.absolutePath)
+
+            val localRepositoryPath = getLocalRepositoryPath(c).absolutePath
+
+            if (null != c.repositoryPath) {
+                setProperty("maven.repo.local", localRepositoryPath)
+            }
         }
 
         val request: InvocationRequest = DefaultInvocationRequest().apply {

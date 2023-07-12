@@ -30,15 +30,16 @@ import kotlin.io.path.toPath
  * Support Third Party / User-Supplied Repositories (right now it only supports central)
  */
 class QueryByResolver : AbstractQueryCommand() {
-    private val localRepo = LocalRepository(
-        File(
-            System.getProperty("user.home"),
-            ".m2/repository"
-        ).absolutePath
-    ) // "target/local-repo")
+    private fun getLocalRepository(pm: ProjectModel): LocalRepository {
+        val localRepositoryPath: File = getLocalRepositoryPath(pm)
 
-    private fun newRepositorySystemSession(system: RepositorySystem): DefaultRepositorySystemSession? {
+        return LocalRepository(localRepositoryPath.absolutePath)
+    }
+
+    private fun newRepositorySystemSession(pm: ProjectModel, system: RepositorySystem): DefaultRepositorySystemSession? {
         val session = MavenRepositorySystemUtils.newSession()
+
+        val localRepo = getLocalRepository(pm)
 
         session.localRepositoryManager = system.newLocalRepositoryManager(session, localRepo)
 
@@ -99,7 +100,7 @@ class QueryByResolver : AbstractQueryCommand() {
         val repositorySystem =
             locator.getService(org.eclipse.aether.RepositorySystem::class.java)
 
-        val session = newRepositorySystemSession(repositorySystem)
+        val session = newRepositorySystemSession(pm, repositorySystem)
 
         val modelBuilder = DefaultModelBuilderFactory().newInstance()
 

@@ -16,6 +16,7 @@ class ProjectModelFactory private constructor(
     private var activeProfiles: Set<String> = emptySet(),
     private var overrideIfAlreadyExists: Boolean = false,
     private var queryType: QueryType = QueryType.NONE,
+    private var repositoryPath: File? = null,
 ) {
     /**
      * Fluent Setter
@@ -84,6 +85,15 @@ class ProjectModelFactory private constructor(
 
     /**
      * Fluent Setter
+     *
+     * @param repositoryPath Repository Path
+     */
+    fun withRepositoryPath(repositoryPath: File?) = this.apply {
+        this.repositoryPath = repositoryPath
+    }
+
+    /**
+     * Fluent Setter
      */
     fun build(): ProjectModel {
         return ProjectModel(
@@ -94,7 +104,8 @@ class ProjectModelFactory private constructor(
             useProperties = useProperties,
             activeProfiles = activeProfiles,
             overrideIfAlreadyExists = overrideIfAlreadyExists,
-            queryType = queryType
+            queryType = queryType,
+            repositoryPath = repositoryPath,
         )
     }
 
