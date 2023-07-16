@@ -9,14 +9,12 @@ import java.io.File
 /**
  * Base implementation of Command - used by SimpleDependency and SimpleInsert
  */
-abstract class AbstractCommand : Command {
+abstract class AbstractSimpleCommand : io.github.pixee.maven.operator.Command {
     /**
      * Given a POM, locate its coordinates for a given dependency based on lookupExpression and figures out the upgrade
-     *
-     * TODO review this
      */
-    protected fun handleDependency(pm: ProjectModel, lookupExpression: String): Boolean {
-        val dependencyNodes = pm.pomFile.resultPom.selectXPathNodes(lookupExpression)
+    protected fun handleDependency(c: io.github.pixee.maven.operator.ProjectModel, lookupExpression: String): Boolean {
+        val dependencyNodes = c.pomFile.resultPom.selectXPathNodes(lookupExpression)
 
         if (1 == dependencyNodes.size) {
             val versionNodes = dependencyNodes[0].selectXPathNodes("./m:version")
@@ -26,12 +24,12 @@ abstract class AbstractCommand : Command {
 
                 var mustUpgrade = true
 
-                if (pm.skipIfNewer) {
-                    mustUpgrade = findOutIfUpgradeIsNeeded(pm, versionNode)
+                if (c.skipIfNewer) {
+                    mustUpgrade = findOutIfUpgradeIsNeeded(c, versionNode)
                 }
 
                 if (mustUpgrade) {
-                    upgradeVersionNode(pm, versionNode, pm.pomFile)
+                    upgradeVersionNode(c, versionNode, c.pomFile)
                 }
 
                 return true
@@ -41,21 +39,22 @@ abstract class AbstractCommand : Command {
         return false
     }
 
-    override fun execute(pm: ProjectModel): Boolean = false
+    override fun execute(c: io.github.pixee.maven.operator.ProjectModel): Boolean = false
 
-    override fun postProcess(c: ProjectModel): Boolean = false
-
+    override fun postProcess(c: io.github.pixee.maven.operator.ProjectModel): Boolean = false
     protected fun getLocalRepositoryPath(pm: ProjectModel): File {
-        val localRepositoryPath: File = when {
-            pm.repositoryPath != null -> pm.repositoryPath
-            System.getenv("M2_REPO") != null -> File(System.getenv("M2_REPO"))
-            System.getProperty("maven.repo.local") != null -> File(System.getProperty("maven.repo.local"))
-            else -> File(
+        val localRepositoryPath: File = if (pm.repositoryPath != null) {
+            pm.repositoryPath
+        } else if (System.getenv("M2_REPO") != null) {
+            File(System.getenv("M2_REPO"))
+        } else if (System.getProperty("maven.repo.local") != null) {
+            File(System.getProperty("maven.repo.local"))
+        } else {
+            File(
                 System.getProperty("user.home"),
                 ".m2/repository"
             )
         }
-
         return localRepositoryPath
     }
 }

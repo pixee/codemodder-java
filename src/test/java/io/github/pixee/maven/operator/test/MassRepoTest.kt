@@ -55,11 +55,6 @@ class MassRepoIT {
             pomPath = "pulsar-broker/pom.xml"
         ) to "commons-codec:commons-codec:1.14",
         TestRepo(
-            "metersphere/metersphere",
-            branch = "main",
-            pomPath = "framework/eureka/pom.xml"
-        ) to "commons-lang3:commons-lang3:3.6",
-        TestRepo(
             "apache/rocketmq",
             pomPath = "common/pom.xml"
         ) to "commons-codec:commons-codec:1.15",

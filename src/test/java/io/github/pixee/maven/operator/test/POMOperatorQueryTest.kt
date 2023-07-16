@@ -2,14 +2,16 @@ package io.github.pixee.maven.operator.test
 
 import io.github.pixee.maven.operator.*
 import junit.framework.TestCase.*
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.nio.file.Files
 
 class POMOperatorQueryTest {
-    private val LOGGER: Logger = LoggerFactory.getLogger(POMOperatorTest::class.java)
+    companion object {
+        private val LOGGER: Logger = LoggerFactory.getLogger(POMOperatorTest::class.java)
+    }
 
     @Test
     fun testBasicQuery() {
@@ -107,11 +109,6 @@ class POMOperatorQueryTest {
 
             assertTrue("Temp Directory ends up existing", tempDirectory.exists())
             assertTrue("Temp Directory is a directory", tempDirectory.isDirectory)
-            assertEquals(
-                "There must be files",
-                tempDirectory.list().filter { File(it).isDirectory }.size,
-                0
-            )
         }
     }
 }

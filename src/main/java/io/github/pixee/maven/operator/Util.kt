@@ -13,6 +13,8 @@ import org.dom4j.tree.DefaultText
 import org.jaxen.SimpleNamespaceContext
 import org.jaxen.XPath
 import org.jaxen.dom4j.Dom4jXPath
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
 
 
@@ -20,6 +22,8 @@ import java.io.File
  * Common Utilities
  */
 object Util {
+    private val LOGGER: Logger = LoggerFactory.getLogger(Util::class.java)
+
     /**
      * Extension Method that easily allows to add an element inside another while
      * retaining formatting
@@ -267,7 +271,7 @@ object Util {
         val result = possiblePaths.findLast(isCliCallable)
 
         if (null == result) {
-            AbstractQueryCommand.LOGGER.warn(
+            LOGGER.warn(
                 "Unable to find mvn executable (execs: {}, path: {})",
                 nativeExecutables.joinToString("/"),
                 pathContentString
