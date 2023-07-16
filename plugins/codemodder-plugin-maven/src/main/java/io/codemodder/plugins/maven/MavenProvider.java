@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,13 +40,12 @@ import org.jetbrains.annotations.VisibleForTesting;
 /** Provides Maven dependency management functions to codemods. */
 public final class MavenProvider implements ProjectProvider {
   public interface POMModifier {
-    boolean modify(Path path, byte[] contents) throws IOException;
+    boolean modify(final Path path, final byte[] contents) throws IOException;
   }
 
-  @VisibleForTesting
   public static class DefaultPOMModifier implements POMModifier {
     @Override
-    public boolean modify(Path path, byte[] contents) throws IOException {
+    public boolean modify(final Path path, final byte[] contents) throws IOException {
       Files.write(path, contents);
 
       return false;
@@ -56,12 +56,15 @@ public final class MavenProvider implements ProjectProvider {
 
   private final PomFileFinder pomFileFinder;
 
-  public MavenProvider(POMModifier pomModifier, PomFileFinder pomFileFinder) {
+  public MavenProvider(final POMModifier pomModifier, final PomFileFinder pomFileFinder) {
+    Objects.requireNonNull(pomModifier);
+    Objects.requireNonNull(pomFileFinder);
+
     this.pomModifier = pomModifier;
     this.pomFileFinder = pomFileFinder;
   }
 
-  MavenProvider(POMModifier pomModifier) {
+  MavenProvider(final POMModifier pomModifier) {
     this(pomModifier, new DefaultPomFileFinder());
   }
 
@@ -179,15 +182,15 @@ public final class MavenProvider implements ProjectProvider {
                 try {
                   CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile);
 
-                  changesets.add(entry);
-
                   try {
                     pomModifier.modify(path, aPomFile.getResultPomBytes());
+
+                    injectedDependencies.add(newDependencyGAV);
+
+                    changesets.add(entry);
                   } catch (IOException exc) {
                     erroredFiles.add(path);
                   }
-
-                  injectedDependencies.add(newDependencyGAV);
                 } catch (Exception e) {
                   // TODO Log
                   failedFiles.add(path);

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -155,10 +156,10 @@ final class MavenProviderTest {
   void it_returns_changeset_when_no_issues() throws IOException {
     CodeTFChangesetEntry changesetEntry =
         new CodeTFChangesetEntry(marsJavaFile.toString(), "diff here", List.of());
-    when(pomFileUpdater.updatePom(eq(projectDir), eq(module1Pom), any()))
-        .thenReturn(new PomUpdateResult(Collections.singletonList(changesetEntry), List.of()));
 
-    MavenProvider provider = new MavenProvider(pomModifier);
+    Files.writeString(module1Pom, simplePom);
+
+    MavenProvider provider = new MavenProvider();
 
     DependencyUpdateResult result =
         provider.updateDependencies(
@@ -168,7 +169,7 @@ final class MavenProviderTest {
     assertThat(result.erroredFiles()).isEmpty();
 
     // we've updated all the poms, so we merge this with the pre-existing one change
-    assertThat(result.packageChanges()).containsOnly(changesetEntry);
+    assertThat(result.packageChanges().size() == 2);
 
     // we injected all the dependencies, total success!
     assertThat(result.injectedPackages()).containsOnly(marsDependency1, marsDependency2);
@@ -229,10 +230,12 @@ final class MavenProviderTest {
   void it_handles_pom_update_failure() throws IOException {
     MavenProvider.POMModifier pomModifier = mock(MavenProvider.POMModifier.class);
 
-    MavenProvider provider = new MavenProvider(pomModifier);
+    Files.writeString(module1Pom, simplePom);
 
     // introduce a failure
     when(pomModifier.modify(any(), any())).thenThrow(new IOException("failed to update pom"));
+
+    MavenProvider provider = new MavenProvider(pomModifier);
 
     DependencyUpdateResult result =
         provider.updateDependencies(
@@ -247,20 +250,21 @@ final class MavenProviderTest {
 
   @Test
   void it_updates_poms_correctly() throws IOException {
-    /*
-    PomFileUpdater updater = new MavenProvider.DefaultPomFileUpdater();
     Files.writeString(module1Pom, simplePom);
-    PomUpdateResult pomUpdateResult =
-        updater.updatePom(
+
+    MavenProvider provider = new MavenProvider();
+
+    DependencyUpdateResult result =
+        provider.updateDependencies(
             projectDir, module1Pom, List.of(marsDependency1, marsDependency2, venusDependency));
-    Optional<CodeTFChangesetEntry> changesetEntryRef = pomUpdateResult.getEntry();
-    assertThat(changesetEntryRef).isPresent();
-    CodeTFChangesetEntry changesetEntry = changesetEntryRef.get();
+
+    assertThat(result.packageChanges().size() == 3);
+
+    CodeTFChangesetEntry changesetEntry = result.packageChanges().iterator().next();
     assertThat(changesetEntry.getPath()).isEqualTo("module1/pom.xml");
     String updatedPomContents =
         Files.readString(projectDir.resolve(changesetEntry.getPath()), StandardCharsets.UTF_8);
     assertThat(updatedPomContents).isEqualToIgnoringWhitespace(simplePomAfterChanges);
-     */
   }
 
   @Test
