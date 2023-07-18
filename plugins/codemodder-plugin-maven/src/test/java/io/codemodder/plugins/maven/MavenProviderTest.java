@@ -2,6 +2,7 @@ package io.codemodder.plugins.maven;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,15 +42,13 @@ final class MavenProviderTest {
     }
   }
 
-  private static class TestPomModifier implements MavenProvider.POMModifier {
+  private static class TestPomModifier implements MavenProvider.PomModifier {
 
     private final List<PomModification> modifications = new ArrayList<>();
 
     @Override
-    public boolean modify(Path path, byte[] contents) throws IOException {
+    public void modify(Path path, byte[] contents) throws IOException {
       this.modifications.add(new PomModification(path, contents));
-
-      return false;
     }
 
     public List<PomModification> getModifications() {
@@ -228,12 +227,13 @@ final class MavenProviderTest {
 
   @Test
   void it_handles_pom_update_failure() throws IOException {
-    MavenProvider.POMModifier pomModifier = mock(MavenProvider.POMModifier.class);
+    MavenProvider.PomModifier pomModifier = mock(MavenProvider.PomModifier.class);
 
     Files.writeString(module1Pom, simplePom);
 
     // introduce a failure
-    when(pomModifier.modify(any(), any())).thenThrow(new IOException("failed to update pom"));
+    // when(pomModifier.modify(any(), any())).thenThrow(new IOException("failed to update pom"));
+    doThrow(new IOException("failed to update pom")).when(pomModifier).modify(any(), any());
 
     MavenProvider provider = new MavenProvider(pomModifier);
 

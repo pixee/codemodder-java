@@ -18,6 +18,7 @@ import io.github.pixee.maven.operator.ProjectModelFactory;
 import io.github.pixee.maven.operator.QueryType;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -39,24 +40,42 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 /** Provides Maven dependency management functions to codemods. */
 public final class MavenProvider implements ProjectProvider {
-  public interface POMModifier {
-    boolean modify(final Path path, final byte[] contents) throws IOException;
-  }
+  /** Represents a failure when doing a dependency update */
+  static class DependencyUpdateException extends RuntimeException {
+    public DependencyUpdateException(String message) {
+      super(message);
+    }
 
-  public static class DefaultPOMModifier implements POMModifier {
-    @Override
-    public boolean modify(final Path path, final byte[] contents) throws IOException {
-      Files.write(path, contents);
-
-      return false;
+    public DependencyUpdateException(String message, Throwable cause) {
+      super(message, cause);
     }
   }
 
-  private final POMModifier pomModifier;
+  /** Internal Interface for Handling File Content Handling */
+  interface PomModifier {
+    /**
+     * Modifies a POM writing back its contents
+     *
+     * @param path where to write
+     * @param contents contents to write
+     * @throws IOException failure when writing
+     */
+    void modify(final Path path, final byte[] contents) throws IOException;
+  }
+
+  /** Default Implementation of Pom Modifier Interface */
+  static class DefaultPomModifier implements PomModifier {
+    @Override
+    public void modify(final Path path, final byte[] contents) throws IOException {
+      Files.write(path, contents);
+    }
+  }
+
+  private final PomModifier pomModifier;
 
   private final PomFileFinder pomFileFinder;
 
-  public MavenProvider(final POMModifier pomModifier, final PomFileFinder pomFileFinder) {
+  MavenProvider(final PomModifier pomModifier, final PomFileFinder pomFileFinder) {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
 
@@ -64,12 +83,12 @@ public final class MavenProvider implements ProjectProvider {
     this.pomFileFinder = pomFileFinder;
   }
 
-  MavenProvider(final POMModifier pomModifier) {
+  MavenProvider(final PomModifier pomModifier) {
     this(pomModifier, new DefaultPomFileFinder());
   }
 
   public MavenProvider() {
-    this(new DefaultPOMModifier(), new DefaultPomFileFinder());
+    this(new DefaultPomModifier(), new DefaultPomFileFinder());
   }
 
   @VisibleForTesting
@@ -95,11 +114,7 @@ public final class MavenProvider implements ProjectProvider {
     try {
       return updateDependenciesInternal(projectDir, file, dependencies);
     } catch (Exception e) {
-      if (e instanceof IOException) {
-        throw (IOException) e;
-      }
-
-      throw new IOException(e);
+      throw new DependencyUpdateException("Failure when updating dependencies", e);
     }
   }
 
@@ -115,7 +130,6 @@ public final class MavenProvider implements ProjectProvider {
     Path pomFile = maybePomFile.get();
 
     Set<CodeTFChangesetEntry> changesets = new LinkedHashSet<>();
-    Set<Path> failedFiles = new LinkedHashSet<>();
 
     List<Dependency> mappedDependencies =
         dependencies.stream()
@@ -171,9 +185,7 @@ public final class MavenProvider implements ProjectProvider {
               try {
                 uri = aPomFile.getPomPath().toURI();
               } catch (URISyntaxException ex) {
-                // TODO Log
-
-                throw new RuntimeException(ex);
+                throw new DependencyUpdateException("Failure parsing URL: " + aPomFile, ex);
               }
 
               Path path = Path.of(uri);
@@ -182,18 +194,13 @@ public final class MavenProvider implements ProjectProvider {
                 try {
                   CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile);
 
-                  try {
-                    pomModifier.modify(path, aPomFile.getResultPomBytes());
+                  pomModifier.modify(path, aPomFile.getResultPomBytes());
 
-                    injectedDependencies.add(newDependencyGAV);
+                  injectedDependencies.add(newDependencyGAV);
 
-                    changesets.add(entry);
-                  } catch (IOException exc) {
-                    erroredFiles.add(path);
-                  }
-                } catch (Exception e) {
-                  // TODO Log
-                  failedFiles.add(path);
+                  changesets.add(entry);
+                } catch (IOException | UncheckedIOException exc) {
+                  erroredFiles.add(path);
                 }
               }
             }
@@ -206,14 +213,7 @@ public final class MavenProvider implements ProjectProvider {
         injectedDependencies, skippedDependencies, changesets, erroredFiles);
   }
 
-  private boolean validPomFileName(Path path) {
-    Path fileName = path.getFileName();
-
-    return fileName.startsWith("pom") && fileName.endsWith(".xml");
-  }
-
-  private CodeTFChangesetEntry getChanges(Path projectDir, POMDocument pomDocument)
-      throws URISyntaxException {
+  private CodeTFChangesetEntry getChanges(Path projectDir, POMDocument pomDocument) {
     List<String> originalPomContents =
         Arrays.asList(
             new String(pomDocument.getResultPomBytes(), pomDocument.getCharset())
@@ -228,7 +228,13 @@ public final class MavenProvider implements ProjectProvider {
     AbstractDelta<String> delta = patch.getDeltas().get(0);
     int position = 1 + delta.getSource().getPosition();
 
-    Path pomDocumentPath = new File(pomDocument.getPomPath().toURI()).toPath();
+    Path pomDocumentPath;
+
+    try {
+      pomDocumentPath = new File(pomDocument.getPomPath().toURI()).toPath();
+    } catch (URISyntaxException e) {
+      throw new DependencyUpdateException("Failure on URI for " + pomDocument.getPomPath(), e);
+    }
 
     String relativePomPath = projectDir.relativize(pomDocumentPath).toString();
 
