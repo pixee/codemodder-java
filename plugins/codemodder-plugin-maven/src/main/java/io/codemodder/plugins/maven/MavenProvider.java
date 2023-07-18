@@ -10,68 +10,81 @@ import io.codemodder.ProjectProvider;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.github.pixee.maven.operator.Dependency;
+import io.github.pixee.maven.operator.POMDocument;
 import io.github.pixee.maven.operator.POMOperator;
+import io.github.pixee.maven.operator.POMScanner;
 import io.github.pixee.maven.operator.ProjectModel;
 import io.github.pixee.maven.operator.ProjectModelFactory;
 import io.github.pixee.maven.operator.QueryType;
+import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.UncheckedIOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 /** Provides Maven dependency management functions to codemods. */
 public final class MavenProvider implements ProjectProvider {
+  /** Represents a failure when doing a dependency update */
+  static class DependencyUpdateException extends RuntimeException {
+    private DependencyUpdateException(String message, Throwable cause) {
+      super(message, cause);
+    }
+  }
+
+  /** Internal Interface for Handling File Content Handling */
+  interface PomModifier {
+    /**
+     * Modifies a POM writing back its contents
+     *
+     * @param path where to write
+     * @param contents contents to write
+     * @throws IOException failure when writing
+     */
+    void modify(final Path path, final byte[] contents) throws IOException;
+  }
+
+  /** Default Implementation of Pom Modifier Interface */
+  static class DefaultPomModifier implements PomModifier {
+    @Override
+    public void modify(final Path path, final byte[] contents) throws IOException {
+      Files.write(path, contents);
+    }
+  }
+
+  private final PomModifier pomModifier;
 
   private final PomFileFinder pomFileFinder;
-  private final PomFileUpdater pomFileUpdater;
 
-  @SuppressWarnings("unused")
+  MavenProvider(final PomModifier pomModifier, final PomFileFinder pomFileFinder) {
+    Objects.requireNonNull(pomModifier);
+    Objects.requireNonNull(pomFileFinder);
+
+    this.pomModifier = pomModifier;
+    this.pomFileFinder = pomFileFinder;
+  }
+
+  MavenProvider(final PomModifier pomModifier) {
+    this(pomModifier, new DefaultPomFileFinder());
+  }
+
   public MavenProvider() {
-    this(new DefaultPomFileFinder(), new DefaultPomFileUpdater());
-  }
-
-  MavenProvider(final PomFileFinder pomFileFinder, final PomFileUpdater pomFileUpdater) {
-    this.pomFileFinder = Objects.requireNonNull(pomFileFinder);
-    this.pomFileUpdater = Objects.requireNonNull(pomFileUpdater);
-  }
-
-  @Override
-  public DependencyUpdateResult updateDependencies(
-      final Path projectDir, final Path file, final List<DependencyGAV> dependencies)
-      throws IOException {
-
-    // find the map pom.xml path of the pom we need to update
-    Optional<Path> targetPomRef = pomFileFinder.findForFile(projectDir, file);
-    if (targetPomRef.isEmpty()) {
-      return DependencyUpdateResult.EMPTY_UPDATE;
-    }
-
-    Path targetPom = targetPomRef.get();
-    try {
-      PomUpdateResult pomUpdateResult =
-          pomFileUpdater.updatePom(projectDir, targetPom, dependencies);
-      Optional<CodeTFChangesetEntry> entryRef = pomUpdateResult.getEntry();
-      List<DependencyGAV> skippedDependencies = pomUpdateResult.getSkippedDependencies();
-      if (entryRef.isPresent()) {
-        return DependencyUpdateResult.create(
-            dependencies, skippedDependencies, Set.of(entryRef.get()), Set.of());
-      }
-      return DependencyUpdateResult.create(List.of(), skippedDependencies, Set.of(), Set.of());
-    } catch (IOException e) {
-      return DependencyUpdateResult.create(List.of(), List.of(), Set.of(), Set.of(targetPom));
-    }
+    this(new DefaultPomModifier(), new DefaultPomFileFinder());
   }
 
   @VisibleForTesting
@@ -90,115 +103,162 @@ public final class MavenProvider implements ProjectProvider {
     }
   }
 
-  @VisibleForTesting
-  static class DefaultPomFileUpdater implements PomFileUpdater {
-    @Override
-    public PomUpdateResult updatePom(
-        final Path projectDir, final Path pomPath, final List<DependencyGAV> dependencies)
-        throws IOException {
-      List<io.github.pixee.maven.operator.Dependency> mappedDependencies =
-          dependencies.stream()
-              .map(
-                  dependencyGAV ->
-                      new io.github.pixee.maven.operator.Dependency(
-                          dependencyGAV.group(),
-                          dependencyGAV.artifact(),
-                          dependencyGAV.version(),
-                          null,
-                          null,
-                          null))
-              .collect(Collectors.toList());
+  @Override
+  public DependencyUpdateResult updateDependencies(
+      final Path projectDir, final Path file, final List<DependencyGAV> dependencies)
+      throws IOException {
+    try {
+      return updateDependenciesInternal(projectDir, file, dependencies);
+    } catch (Exception e) {
+      throw new DependencyUpdateException("Failure when updating dependencies", e);
+    }
+  }
 
-      var originalPomContents = Files.readAllLines(pomPath, Charset.defaultCharset());
+  @NotNull
+  private DependencyUpdateResult updateDependenciesInternal(
+      Path projectDir, Path file, List<DependencyGAV> dependencies) throws IOException {
+    Optional<Path> maybePomFile = pomFileFinder.findForFile(projectDir, file);
 
-      final Path newPomFile = Files.createTempFile("pom", ".xml");
-      Files.copy(pomPath, newPomFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+    if (maybePomFile.isEmpty()) {
+      return DependencyUpdateResult.EMPTY_UPDATE;
+    }
 
-      final List<DependencyGAV> skippedDependencies = new ArrayList<>();
-      final List<DependencyGAV> failedDependencies = new ArrayList<>();
+    Path pomFile = maybePomFile.get();
 
-      AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
-          new AtomicReference<>(getDependenciesFrom(pomPath));
+    Set<CodeTFChangesetEntry> changesets = new LinkedHashSet<>();
 
-      mappedDependencies.forEach(
-          newDependency -> {
-            DependencyGAV newDependencyGAV =
-                DependencyGAV.createDefault(
-                    newDependency.getGroupId(),
-                    newDependency.getArtifactId(),
-                    newDependency.getVersion());
+    List<Dependency> mappedDependencies =
+        dependencies.stream()
+            .map(
+                dependencyGAV ->
+                    new Dependency(
+                        dependencyGAV.group(),
+                        dependencyGAV.artifact(),
+                        dependencyGAV.version(),
+                        null,
+                        null,
+                        null))
+            .toList();
 
-            boolean foundIt =
-                foundDependenciesMapped.get().stream().anyMatch(newDependencyGAV::equals);
+    final List<DependencyGAV> skippedDependencies = new ArrayList<>();
+    final List<DependencyGAV> failedDependencies = new ArrayList<>();
+    final List<DependencyGAV> injectedDependencies = new ArrayList<>();
+    final Set<Path> erroredFiles = new LinkedHashSet<>();
 
-            if (foundIt) {
-              skippedDependencies.add(newDependencyGAV);
+    AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
+        new AtomicReference<>(getDependenciesFrom(pomFile));
 
-              return;
-            }
+    mappedDependencies.forEach(
+        newDependency -> {
+          DependencyGAV newDependencyGAV =
+              DependencyGAV.createDefault(
+                  newDependency.getGroupId(),
+                  newDependency.getArtifactId(),
+                  newDependency.getVersion());
 
-            ProjectModel projectModel =
-                ProjectModelFactory.load(newPomFile.toFile())
-                    .withDependency(newDependency)
-                    .withSkipIfNewer(true)
-                    .withUseProperties(true)
-                    .build();
+          boolean foundIt =
+              foundDependenciesMapped.get().stream().anyMatch(newDependencyGAV::equals);
 
-            boolean result = POMOperator.modify(projectModel);
+          if (foundIt) {
+            skippedDependencies.add(newDependencyGAV);
 
-            if (result) {
+            return;
+          }
+
+          ProjectModel projectModel =
+              POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
+                  .withDependency(newDependency)
+                  .withSkipIfNewer(true)
+                  .withUseProperties(true)
+                  .build();
+
+          boolean result = POMOperator.modify(projectModel);
+
+          if (result) {
+            for (POMDocument aPomFile : projectModel.getAllPomFiles()) {
+              URI uri;
+
               try {
-                Files.write(newPomFile, projectModel.getResultPomBytes());
-              } catch (IOException e) {
-                throw new RuntimeException(e);
+                uri = aPomFile.getPomPath().toURI();
+              } catch (URISyntaxException ex) {
+                throw new DependencyUpdateException("Failure parsing URL: " + aPomFile, ex);
               }
 
-              // Dependencies got dirty and there's the slight risk of introducing
-              // transitive ones we didn't expect - let's rebuild it
-              foundDependenciesMapped.set(getDependenciesFrom(newPomFile));
-            } else {
-              failedDependencies.add(newDependencyGAV);
+              Path path = Path.of(uri);
+
+              if (aPomFile.getDirty()) {
+                try {
+                  CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile);
+
+                  pomModifier.modify(path, aPomFile.getResultPomBytes());
+
+                  injectedDependencies.add(newDependencyGAV);
+
+                  changesets.add(entry);
+                } catch (IOException | UncheckedIOException exc) {
+                  erroredFiles.add(path);
+                }
+              }
             }
-          });
 
-      var finalPomContents = Files.readAllLines(newPomFile, Charset.defaultCharset());
-      if (finalPomContents.equals(originalPomContents)) {
-        return new PomUpdateResult(Optional.empty(), skippedDependencies);
-      }
+            foundDependenciesMapped.set(getDependenciesFrom(pomFile));
+          }
+        });
 
-      Patch<String> patch = DiffUtils.diff(originalPomContents, finalPomContents);
-      AbstractDelta<String> delta = patch.getDeltas().get(0);
-      int position = 1 + delta.getSource().getPosition();
+    return DependencyUpdateResult.create(
+        injectedDependencies, skippedDependencies, changesets, erroredFiles);
+  }
 
-      String relativePomPath = projectDir.relativize(pomPath).toString();
-      CodeTFChange change =
-          new CodeTFChange(position, Collections.emptyMap(), "", List.of(), null, List.of());
-      List<String> patchDiff =
-          UnifiedDiffUtils.generateUnifiedDiff(
-              relativePomPath, relativePomPath, originalPomContents, patch, 3);
+  private List<String> getLinesFrom(POMDocument doc, byte[] byteArray) {
+    return Arrays.asList(
+        new String(byteArray, doc.getCharset()).split(Pattern.quote(doc.getEndl())));
+  }
 
-      String diff = String.join("\n", patchDiff);
-      CodeTFChangesetEntry entry = new CodeTFChangesetEntry(relativePomPath, diff, List.of(change));
+  private CodeTFChangesetEntry getChanges(Path projectDir, POMDocument pomDocument) {
+    List<String> originalPomContents = getLinesFrom(pomDocument, pomDocument.getResultPomBytes());
+    List<String> finalPomContents = getLinesFrom(pomDocument, pomDocument.getOriginalPom());
 
-      // overwrite existing pom
-      Files.copy(newPomFile, pomPath, StandardCopyOption.REPLACE_EXISTING);
+    Patch<String> patch = DiffUtils.diff(originalPomContents, finalPomContents);
 
-      return new PomUpdateResult(Optional.of(entry), skippedDependencies);
+    AbstractDelta<String> delta = patch.getDeltas().get(0);
+    int position = 1 + delta.getSource().getPosition();
+
+    Path pomDocumentPath;
+
+    try {
+      pomDocumentPath = new File(pomDocument.getPomPath().toURI()).toPath();
+    } catch (URISyntaxException e) {
+      throw new DependencyUpdateException("Failure on URI for " + pomDocument.getPomPath(), e);
     }
 
-    @NotNull
-    private static Collection<DependencyGAV> getDependenciesFrom(Path newPomFile) {
-      ProjectModel originalProjectModel =
-          ProjectModelFactory.load(newPomFile.toFile()).withQueryType(QueryType.SAFE).build();
+    String relativePomPath = projectDir.relativize(pomDocumentPath).toString();
 
-      Collection<Dependency> foundDependencies = POMOperator.queryDependency(originalProjectModel);
+    CodeTFChange change =
+        new CodeTFChange(position, Collections.emptyMap(), "", List.of(), null, List.of());
 
-      return foundDependencies.stream()
-          .map(
-              dependency ->
-                  DependencyGAV.createDefault(
-                      dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()))
-          .collect(Collectors.toList());
-    }
+    List<String> patchDiff =
+        UnifiedDiffUtils.generateUnifiedDiff(
+            relativePomPath, relativePomPath, originalPomContents, patch, 3);
+
+    String diff = String.join(pomDocument.getEndl(), patchDiff);
+
+    CodeTFChangesetEntry entry = new CodeTFChangesetEntry(relativePomPath, diff, List.of(change));
+
+    return entry;
+  }
+
+  @NotNull
+  private static Collection<DependencyGAV> getDependenciesFrom(Path pomFile) {
+    ProjectModel originalProjectModel =
+        ProjectModelFactory.load(pomFile.toFile()).withQueryType(QueryType.SAFE).build();
+
+    Collection<Dependency> foundDependencies = POMOperator.queryDependency(originalProjectModel);
+
+    return foundDependencies.stream()
+        .map(
+            dependency ->
+                DependencyGAV.createDefault(
+                    dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()))
+        .collect(Collectors.toList());
   }
 }

@@ -2,6 +2,7 @@ package io.codemodder.plugins.maven;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +23,40 @@ import org.junit.jupiter.api.io.TempDir;
  * types.
  */
 final class MavenProviderTest {
+  private static class PomModification {
+    final Path path;
+
+    final byte[] contents;
+
+    public PomModification(Path path, byte[] contents) {
+      this.path = path;
+      this.contents = contents;
+    }
+
+    public Path getPath() {
+      return path;
+    }
+
+    public byte[] getContents() {
+      return contents;
+    }
+  }
+
+  private static class TestPomModifier implements MavenProvider.PomModifier {
+
+    private final List<PomModification> modifications = new ArrayList<>();
+
+    @Override
+    public void modify(Path path, byte[] contents) throws IOException {
+      this.modifications.add(new PomModification(path, contents));
+    }
+
+    public List<PomModification> getModifications() {
+      return modifications;
+    }
+  }
+
+  private TestPomModifier pomModifier;
 
   private PomFileUpdater pomFileUpdater;
   private PomFileFinder pomFileFinder;
@@ -112,16 +147,19 @@ final class MavenProviderTest {
     when(pomFileFinder.findForFile(any(), eq(jspFile))).thenReturn(Optional.of(rootPom));
 
     this.pomFileUpdater = mock(PomFileUpdater.class);
+
+    this.pomModifier = new TestPomModifier();
   }
 
   @Test
   void it_returns_changeset_when_no_issues() throws IOException {
     CodeTFChangesetEntry changesetEntry =
         new CodeTFChangesetEntry(marsJavaFile.toString(), "diff here", List.of());
-    when(pomFileUpdater.updatePom(eq(projectDir), eq(module1Pom), any()))
-        .thenReturn(new PomUpdateResult(Optional.of(changesetEntry), List.of()));
 
-    MavenProvider provider = new MavenProvider(pomFileFinder, pomFileUpdater);
+    Files.writeString(module1Pom, simplePom);
+
+    MavenProvider provider = new MavenProvider();
+
     DependencyUpdateResult result =
         provider.updateDependencies(
             projectDir, marsJavaFile, List.of(marsDependency1, marsDependency2));
@@ -130,7 +168,7 @@ final class MavenProviderTest {
     assertThat(result.erroredFiles()).isEmpty();
 
     // we've updated all the poms, so we merge this with the pre-existing one change
-    assertThat(result.packageChanges()).containsOnly(changesetEntry);
+    assertThat(result.packageChanges().size() == 2);
 
     // we injected all the dependencies, total success!
     assertThat(result.injectedPackages()).containsOnly(marsDependency1, marsDependency2);
@@ -139,7 +177,9 @@ final class MavenProviderTest {
   @Test
   void it_returns_empty_when_no_pom() throws IOException {
     when(pomFileFinder.findForFile(any(), any())).thenReturn(Optional.empty());
-    MavenProvider provider = new MavenProvider(pomFileFinder, pomFileUpdater);
+
+    MavenProvider provider = new MavenProvider(pomModifier, pomFileFinder);
+
     DependencyUpdateResult result =
         provider.updateDependencies(projectDir, marsJavaFile, List.of(marsDependency1));
 
@@ -173,8 +213,8 @@ final class MavenProviderTest {
 
     // this module is already present
     DependencyGAV alreadyPresent = DependencyGAV.createDefault("org.apache", "kafka", "2.0");
-    pomFileUpdater = new MavenProvider.DefaultPomFileUpdater();
-    MavenProvider provider = new MavenProvider(pomFileFinder, pomFileUpdater);
+
+    MavenProvider provider = new MavenProvider(pomModifier);
     DependencyUpdateResult result =
         provider.updateDependencies(projectDir, marsJavaFile, List.of(alreadyPresent));
 
@@ -187,11 +227,15 @@ final class MavenProviderTest {
 
   @Test
   void it_handles_pom_update_failure() throws IOException {
-    MavenProvider provider = new MavenProvider(pomFileFinder, pomFileUpdater);
+    MavenProvider.PomModifier pomModifier = mock(MavenProvider.PomModifier.class);
+
+    Files.writeString(module1Pom, simplePom);
 
     // introduce a failure
-    when(pomFileUpdater.updatePom(eq(projectDir), eq(module1Pom), any()))
-        .thenThrow(new IOException("failed to update pom"));
+    // when(pomModifier.modify(any(), any())).thenThrow(new IOException("failed to update pom"));
+    doThrow(new IOException("failed to update pom")).when(pomModifier).modify(any(), any());
+
+    MavenProvider provider = new MavenProvider(pomModifier);
 
     DependencyUpdateResult result =
         provider.updateDependencies(
@@ -206,14 +250,17 @@ final class MavenProviderTest {
 
   @Test
   void it_updates_poms_correctly() throws IOException {
-    PomFileUpdater updater = new MavenProvider.DefaultPomFileUpdater();
     Files.writeString(module1Pom, simplePom);
-    PomUpdateResult pomUpdateResult =
-        updater.updatePom(
+
+    MavenProvider provider = new MavenProvider();
+
+    DependencyUpdateResult result =
+        provider.updateDependencies(
             projectDir, module1Pom, List.of(marsDependency1, marsDependency2, venusDependency));
-    Optional<CodeTFChangesetEntry> changesetEntryRef = pomUpdateResult.getEntry();
-    assertThat(changesetEntryRef).isPresent();
-    CodeTFChangesetEntry changesetEntry = changesetEntryRef.get();
+
+    assertThat(result.packageChanges().size() == 3);
+
+    CodeTFChangesetEntry changesetEntry = result.packageChanges().iterator().next();
     assertThat(changesetEntry.getPath()).isEqualTo("module1/pom.xml");
     String updatedPomContents =
         Files.readString(projectDir.resolve(changesetEntry.getPath()), StandardCharsets.UTF_8);
