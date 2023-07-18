@@ -27,11 +27,11 @@ dependencies {
     implementation("io.codemodder:codemodder-plugin-codeql")
     implementation("io.codemodder:codemodder-plugin-maven")
     implementation("io.codemodder:codemodder-plugin-llm")
+    implementation("io.codemodder:codemodder-plugin-aws")
     implementation(libs.juniversalchardet)
     implementation(libs.dom4j)
     implementation(libs.commons.jexl)
     implementation(libs.tuples)
-
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
     testImplementation(testlibs.assertj)
