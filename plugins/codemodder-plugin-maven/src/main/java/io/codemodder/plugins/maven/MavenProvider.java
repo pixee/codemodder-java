@@ -40,14 +40,15 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 /** Provides Maven dependency management functions to codemods. */
 public final class MavenProvider implements ProjectProvider {
-  /** Represents a failure when doing a dependency update */
+
+  /** Represents a failure when doing a dependency update. */
   static class DependencyUpdateException extends RuntimeException {
     private DependencyUpdateException(String message, Throwable cause) {
       super(message, cause);
     }
   }
 
-  /** Internal Interface for Handling File Content Handling */
+  /** A seam for handling writing poms to disk. */
   interface PomModifier {
     /**
      * Modifies a POM writing back its contents
@@ -68,13 +69,11 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   private final PomModifier pomModifier;
-
   private final PomFileFinder pomFileFinder;
 
   MavenProvider(final PomModifier pomModifier, final PomFileFinder pomFileFinder) {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
-
     this.pomModifier = pomModifier;
     this.pomFileFinder = pomFileFinder;
   }
@@ -105,8 +104,7 @@ public final class MavenProvider implements ProjectProvider {
 
   @Override
   public DependencyUpdateResult updateDependencies(
-      final Path projectDir, final Path file, final List<DependencyGAV> dependencies)
-      throws IOException {
+      final Path projectDir, final Path file, final List<DependencyGAV> dependencies) {
     try {
       return updateDependenciesInternal(projectDir, file, dependencies);
     } catch (Exception e) {
@@ -116,7 +114,8 @@ public final class MavenProvider implements ProjectProvider {
 
   @NotNull
   private DependencyUpdateResult updateDependenciesInternal(
-      Path projectDir, Path file, List<DependencyGAV> dependencies) throws IOException {
+      final Path projectDir, final Path file, final List<DependencyGAV> dependencies)
+      throws IOException {
     Optional<Path> maybePomFile = pomFileFinder.findForFile(projectDir, file);
 
     if (maybePomFile.isEmpty()) {
@@ -124,7 +123,6 @@ public final class MavenProvider implements ProjectProvider {
     }
 
     Path pomFile = maybePomFile.get();
-
     Set<CodeTFChangesetEntry> changesets = new LinkedHashSet<>();
 
     List<Dependency> mappedDependencies =
@@ -141,7 +139,6 @@ public final class MavenProvider implements ProjectProvider {
             .toList();
 
     final List<DependencyGAV> skippedDependencies = new ArrayList<>();
-    final List<DependencyGAV> failedDependencies = new ArrayList<>();
     final List<DependencyGAV> injectedDependencies = new ArrayList<>();
     final Set<Path> erroredFiles = new LinkedHashSet<>();
 
@@ -189,11 +186,8 @@ public final class MavenProvider implements ProjectProvider {
               if (aPomFile.getDirty()) {
                 try {
                   CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile);
-
                   pomModifier.modify(path, aPomFile.getResultPomBytes());
-
                   injectedDependencies.add(newDependencyGAV);
-
                   changesets.add(entry);
                 } catch (IOException | UncheckedIOException exc) {
                   erroredFiles.add(path);
@@ -209,14 +203,14 @@ public final class MavenProvider implements ProjectProvider {
         injectedDependencies, skippedDependencies, changesets, erroredFiles);
   }
 
-  private List<String> getLinesFrom(POMDocument doc, byte[] byteArray) {
+  private List<String> getLinesFrom(final POMDocument doc, final byte[] byteArray) {
     return Arrays.asList(
         new String(byteArray, doc.getCharset()).split(Pattern.quote(doc.getEndl())));
   }
 
-  private CodeTFChangesetEntry getChanges(Path projectDir, POMDocument pomDocument) {
-    List<String> originalPomContents = getLinesFrom(pomDocument, pomDocument.getResultPomBytes());
-    List<String> finalPomContents = getLinesFrom(pomDocument, pomDocument.getOriginalPom());
+  private CodeTFChangesetEntry getChanges(final Path projectDir, final POMDocument pomDocument) {
+    List<String> originalPomContents = getLinesFrom(pomDocument, pomDocument.getOriginalPom());
+    List<String> finalPomContents = getLinesFrom(pomDocument, pomDocument.getResultPomBytes());
 
     Patch<String> patch = DiffUtils.diff(originalPomContents, finalPomContents);
 
@@ -242,13 +236,11 @@ public final class MavenProvider implements ProjectProvider {
 
     String diff = String.join(pomDocument.getEndl(), patchDiff);
 
-    CodeTFChangesetEntry entry = new CodeTFChangesetEntry(relativePomPath, diff, List.of(change));
-
-    return entry;
+    return new CodeTFChangesetEntry(relativePomPath, diff, List.of(change));
   }
 
   @NotNull
-  private static Collection<DependencyGAV> getDependenciesFrom(Path pomFile) {
+  private static Collection<DependencyGAV> getDependenciesFrom(final Path pomFile) {
     ProjectModel originalProjectModel =
         ProjectModelFactory.load(pomFile.toFile()).withQueryType(QueryType.SAFE).build();
 
