@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.mozilla.universalchardet.UniversalDetector;
 
 /** Provides Maven dependency management functions to codemods. */
 public final class MavenProvider implements ProjectProvider {
@@ -109,7 +110,12 @@ public final class MavenProvider implements ProjectProvider {
                           null))
               .collect(Collectors.toList());
 
-      var originalPomContents = Files.readAllLines(pomPath, Charset.defaultCharset());
+      String charsetDetected = UniversalDetector.detectCharset(pomPath);
+      if (charsetDetected == null) {
+        charsetDetected = "UTF-8";
+      }
+      Charset charset = Charset.forName(charsetDetected);
+      var originalPomContents = Files.readAllLines(pomPath, charset);
 
       final Path newPomFile = Files.createTempFile("pom", ".xml");
       Files.copy(pomPath, newPomFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
@@ -120,6 +126,7 @@ public final class MavenProvider implements ProjectProvider {
       AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
           new AtomicReference<>(getDependenciesFrom(pomPath));
 
+      final AtomicReference<String> detectedEndline = new AtomicReference<>(null);
       mappedDependencies.forEach(
           newDependency -> {
             DependencyGAV newDependencyGAV =
@@ -143,6 +150,7 @@ public final class MavenProvider implements ProjectProvider {
                     .withSkipIfNewer(true)
                     .withUseProperties(true)
                     .build();
+            detectedEndline.set(projectModel.getEndl());
 
             boolean result = POMOperator.modify(projectModel);
 
@@ -161,7 +169,7 @@ public final class MavenProvider implements ProjectProvider {
             }
           });
 
-      var finalPomContents = Files.readAllLines(newPomFile, Charset.defaultCharset());
+      var finalPomContents = Files.readAllLines(newPomFile, charset);
       if (finalPomContents.equals(originalPomContents)) {
         return new PomUpdateResult(Optional.empty(), skippedDependencies);
       }
@@ -177,7 +185,11 @@ public final class MavenProvider implements ProjectProvider {
           UnifiedDiffUtils.generateUnifiedDiff(
               relativePomPath, relativePomPath, originalPomContents, patch, 3);
 
-      String diff = String.join("\n", patchDiff);
+      String endline = detectedEndline.get();
+      if (endline == null || endline.isEmpty()) {
+        endline = "\n";
+      }
+      String diff = String.join(endline, patchDiff);
       CodeTFChangesetEntry entry = new CodeTFChangesetEntry(relativePomPath, diff, List.of(change));
 
       // overwrite existing pom
