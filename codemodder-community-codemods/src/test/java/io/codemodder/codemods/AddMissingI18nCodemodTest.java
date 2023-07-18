@@ -243,8 +243,8 @@ final class AddMissingI18nCodemodTest {
 
   /** If we can't connect to AWS, skip the test. */
   private static boolean awsAvailable() {
-    TranslateClient client = TranslateClient.builder().build();
     try {
+      TranslateClient client = TranslateClient.builder().build();
       ListLanguagesResponse response = client.listLanguages(ListLanguagesRequest.builder().build());
       return !response.languages().isEmpty();
     } catch (Exception e) {
