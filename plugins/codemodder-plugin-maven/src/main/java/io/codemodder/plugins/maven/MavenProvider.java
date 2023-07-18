@@ -215,8 +215,8 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   private CodeTFChangesetEntry getChanges(Path projectDir, POMDocument pomDocument) {
-    List<String> originalPomContents = getLinesFrom(pomDocument, pomDocument.getResultPomBytes());
-    List<String> finalPomContents = getLinesFrom(pomDocument, pomDocument.getOriginalPom());
+    List<String> originalPomContents = getLinesFrom(pomDocument, pomDocument.getOriginalPom());
+    List<String> finalPomContents = getLinesFrom(pomDocument, pomDocument.getResultPomBytes());
 
     Patch<String> patch = DiffUtils.diff(originalPomContents, finalPomContents);
 
