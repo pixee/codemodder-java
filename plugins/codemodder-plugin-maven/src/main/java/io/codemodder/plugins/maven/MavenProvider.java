@@ -42,11 +42,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 public final class MavenProvider implements ProjectProvider {
   /** Represents a failure when doing a dependency update */
   static class DependencyUpdateException extends RuntimeException {
-    public DependencyUpdateException(String message) {
-      super(message);
-    }
-
-    public DependencyUpdateException(String message, Throwable cause) {
+    private DependencyUpdateException(String message, Throwable cause) {
       super(message, cause);
     }
   }
