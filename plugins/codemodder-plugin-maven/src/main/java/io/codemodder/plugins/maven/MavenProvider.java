@@ -213,15 +213,14 @@ public final class MavenProvider implements ProjectProvider {
         injectedDependencies, skippedDependencies, changesets, erroredFiles);
   }
 
+  private List<String> getLinesFrom(POMDocument doc, byte[] byteArray) {
+    return Arrays.asList(
+        new String(byteArray, doc.getCharset()).split(Pattern.quote(doc.getEndl())));
+  }
+
   private CodeTFChangesetEntry getChanges(Path projectDir, POMDocument pomDocument) {
-    List<String> originalPomContents =
-        Arrays.asList(
-            new String(pomDocument.getResultPomBytes(), pomDocument.getCharset())
-                .split(Pattern.quote(pomDocument.getEndl())));
-    List<String> finalPomContents =
-        Arrays.asList(
-            new String(pomDocument.getOriginalPom(), pomDocument.getCharset())
-                .split(Pattern.quote(pomDocument.getEndl())));
+    List<String> originalPomContents = getLinesFrom(pomDocument, pomDocument.getResultPomBytes());
+    List<String> finalPomContents = getLinesFrom(pomDocument, pomDocument.getOriginalPom());
 
     Patch<String> patch = DiffUtils.diff(originalPomContents, finalPomContents);
 
