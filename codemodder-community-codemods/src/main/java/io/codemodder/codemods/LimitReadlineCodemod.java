@@ -13,6 +13,7 @@ import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.BoundedLineReader;
 import java.util.List;
+import java.util.Objects;
 import javax.inject.Inject;
 
 /** Turns hardcoded seeds for PRNGs to be more random. */
@@ -22,9 +23,22 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
+  private final Parameter limit;
+
   @Inject
-  public LimitReadlineCodemod(@SemgrepScan(ruleId = "limit-readline") final RuleSarif sarif) {
+  public LimitReadlineCodemod(
+      @SemgrepScan(ruleId = "limit-readline") final RuleSarif sarif,
+      @CodemodParameter(
+              question =
+                  "What is the maximum number of characters that should be allowed to be read from the reader?",
+              name = "limit",
+              type = CodemodParameter.ParameterType.NUMBER,
+              label = "a positive integer",
+              defaultValue = "1000000", // representing roughly 1MB
+              validationPattern = "\\d+")
+          final Parameter limit) {
     super(sarif, MethodCallExpr.class);
+    this.limit = Objects.requireNonNull(limit);
   }
 
   @Override
@@ -37,8 +51,10 @@ public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<Met
     Expression readerScope = readLineCall.getScope().get();
     MethodCallExpr safeExpression =
         new MethodCallExpr(new NameExpr(BoundedLineReader.class.getSimpleName()), "readLine");
+    int line = readLineCall.getRange().get().begin.line;
+    String stringLimitValue = limit.getValue(context.path(), line);
     safeExpression.setArguments(
-        NodeList.nodeList(readerScope, new IntegerLiteralExpr(String.valueOf(defaultLineMaximum))));
+        NodeList.nodeList(readerScope, new IntegerLiteralExpr(stringLimitValue)));
     ASTTransforms.addImportIfMissing(cu, BoundedLineReader.class);
     readLineParent.replace(readLineCall, safeExpression);
     return true;
@@ -48,6 +64,4 @@ public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<Met
   public List<DependencyGAV> dependenciesRequired() {
     return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
-
-  private static final int defaultLineMaximum = 1_000_000; // 1 MB
 }
