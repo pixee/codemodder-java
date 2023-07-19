@@ -74,6 +74,7 @@ public final class CodemodLoader {
     for (Class<? extends CodeChanger> codemodType : codemodTypes) {
       String packageName = codemodType.getPackageName();
       if (!packagesScanned.contains(packageName)) {
+        packagesScanned.add(packageName);
         final ClassInfoList classesWithMethodAnnotation;
         try (ScanResult scan =
             new ClassGraph()
@@ -82,19 +83,18 @@ public final class CodemodLoader {
                 .removeTemporaryFilesAfterScan()
                 .scan()) {
           classesWithMethodAnnotation = scan.getClassesWithMethodAnnotation(Inject.class);
+          List<Class<?>> injectableClasses = classesWithMethodAnnotation.loadClasses();
+          List<java.lang.reflect.Parameter> targetedParams =
+              injectableClasses.stream()
+                  .map(Class::getDeclaredConstructors)
+                  .flatMap(Arrays::stream)
+                  .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
+                  .map(Executable::getParameters)
+                  .flatMap(Arrays::stream)
+                  .filter(param -> param.getAnnotations().length > 0)
+                  .toList();
+          injectableParameters.addAll(targetedParams);
         }
-        List<Class<?>> injectableClasses = classesWithMethodAnnotation.loadClasses();
-        List<java.lang.reflect.Parameter> targetedParams =
-            injectableClasses.stream()
-                .map(Class::getDeclaredConstructors)
-                .flatMap(Arrays::stream)
-                .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
-                .map(Executable::getParameters)
-                .flatMap(Arrays::stream)
-                .filter(param -> param.getAnnotations().length > 0)
-                .toList();
-        injectableParameters.addAll(targetedParams);
-        packagesScanned.add(packageName);
       }
     }
 
