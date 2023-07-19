@@ -13,8 +13,7 @@ public final class Sarif {
 
   /**
    * This method returns the last data flow location in the first code flow's first thread flow.
-   * This assumes that the the SARIF tool models their data flow in this way. This appears true for
-   * now.
+   * This assumes that the SARIF tool models their data flow in this way. This appears true for now.
    *
    * @param result the SARIF result
    * @return the last data flow location in the first code flow's first thread flow

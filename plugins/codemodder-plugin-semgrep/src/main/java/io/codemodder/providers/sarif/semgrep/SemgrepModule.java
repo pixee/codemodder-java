@@ -188,6 +188,15 @@ public final class SemgrepModule extends AbstractModule {
       SemgrepRuleSarif semgrepSarif = new SemgrepRuleSarif(bindingPair.getLeft(), sarif);
       bind(RuleSarif.class).annotatedWith(sarifAnnotation).toInstance(semgrepSarif);
     }
+
+    // clean up all the temporary files
+    for (Path yamlFile : yamlPathsToRun) {
+      try {
+        Files.delete(yamlFile);
+      } catch (IOException e) {
+        LOG.warn("Failed to delete temporary file: {}", yamlFile, e);
+      }
+    }
   }
 
   @VisibleForTesting
