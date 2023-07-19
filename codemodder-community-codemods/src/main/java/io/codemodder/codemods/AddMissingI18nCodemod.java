@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.codemodder.*;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -308,50 +309,55 @@ public final class AddMissingI18nCodemod extends RawFileChanger {
     // loop through all files in projectDir recursively, ignoring binary file formats, and check if
     // the keys are referenced
     Path projectDir = context.codeDirectory().asPath();
-    List<MissingKey> missingAndUsedKeys = new ArrayList<>();
-    List<Path> allPaths =
-        Files.walk(projectDir)
+    try (var paths = Files.walk(projectDir)) {
+      try {
+        return paths
             .filter(p -> !siblings.contains(p))
             .filter(p -> !context.path().equals(p))
             .filter(Files::isRegularFile)
             .filter(p -> !isObviouslyBinaryFile(p))
+            .map(
+                path -> {
+                  List<String> lines;
+                  try {
+                    final String charset = UniversalDetector.detectCharset(path);
+                    lines = Files.readString(path, Charset.forName(charset)).lines().toList();
+                  } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                  }
+                  for (String line : lines) {
+                    for (PossiblyMissingKey key : ourMissingOrEmptyKeys) {
+                      if (line.contains(key.key)) {
+                        return Optional.of(
+                            new MissingKey(
+                                key.languageCode,
+                                key.key,
+                                key.definitionReferences,
+                                List.of(new UsageReference(path.toString(), line))));
+                      }
+                    }
+                  }
+                  return Optional.<MissingKey>empty();
+                })
+            .flatMap(Optional::stream)
             .toList();
-
-    for (Path path : allPaths) {
-      try {
-        String charset = UniversalDetector.detectCharset(path);
-        List<String> lines = Files.readString(path, Charset.forName(charset)).lines().toList();
-        for (String line : lines) {
-          for (PossiblyMissingKey key : ourMissingOrEmptyKeys) {
-            if (line.contains(key.key)) {
-              MissingKey missingKey =
-                  new MissingKey(
-                      key.languageCode,
-                      key.key,
-                      key.definitionReferences,
-                      List.of(new UsageReference(path.toString(), line)));
-              missingAndUsedKeys.add(missingKey);
-              break;
-            }
-          }
-        }
-      } catch (Exception e) {
-        LOG.debug("Failed to read file {}", path, e);
+      } catch (UncheckedIOException e) {
+        // unwrap stream's unchecked IOException
+        throw e.getCause();
       }
     }
-    return List.copyOf(missingAndUsedKeys);
   }
 
   private List<Path> getSiblings(final Path path, final String prefix) throws IOException {
     Path parent = path.getParent();
-    List<Path> siblings = new ArrayList<>();
-    Files.list(parent)
-        .filter(Files::isRegularFile)
-        .filter(Files::isReadable)
-        .filter(p -> p.getFileName().toString().startsWith(prefix))
-        .filter(p -> !p.equals(path))
-        .forEach(siblings::add);
-    return List.copyOf(siblings);
+    try (var paths = Files.list(parent)) {
+      return paths
+          .filter(Files::isRegularFile)
+          .filter(Files::isReadable)
+          .filter(p -> p.getFileName().toString().startsWith(prefix))
+          .filter(p -> !p.equals(path))
+          .toList();
+    }
   }
 
   /**
