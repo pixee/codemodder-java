@@ -9,6 +9,8 @@ import io.codemodder.codetf.CodeTFReport;
 import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -46,6 +48,23 @@ final class CLITest {
             SourceDirectory.createDefault(
                 tmpDir.resolve("module2/src/main/java").toAbsolutePath(),
                 List.of(barJavaFile.toAbsolutePath().toString())));
+  }
+
+  /**
+   * Runs the CLI with arguments that we know will cause it to fail, and asserts that the exit code
+   * denotes failure and an error message is captured in the alternative stderr stream.
+   */
+  @Test
+  void it_captures_console_output() {
+    final var args = new String[] {"--bogus"};
+    final var stdoutWriter = new StringWriter();
+    final var stderrWriter = new StringWriter();
+    try (var stdout = new PrintWriter(stdoutWriter);
+        var stderr = new PrintWriter(stderrWriter)) {
+      final var code = Runner.run(List.of(Cloud9Changer.class), args, stdout, stderr);
+      assertThat(code).isEqualTo(2);
+    }
+    assertThat(stderrWriter.toString()).startsWith("Unknown option: '--bogus'");
   }
 
   @Test
