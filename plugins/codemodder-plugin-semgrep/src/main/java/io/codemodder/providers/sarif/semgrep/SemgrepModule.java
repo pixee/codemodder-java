@@ -1,7 +1,5 @@
 package io.codemodder.providers.sarif.semgrep;
 
-import static java.util.stream.Collectors.*;
-
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
@@ -58,21 +56,27 @@ public final class SemgrepModule extends AbstractModule {
 
       String packageName = codemodType.getPackageName();
       if (!packagesScanned.contains(packageName)) {
-        ScanResult scan =
-            new ClassGraph().enableAllInfo().acceptPackagesNonRecursive(packageName).scan();
-        ClassInfoList classesWithMethodAnnotation =
-            scan.getClassesWithMethodAnnotation(Inject.class);
-        List<Class<?>> injectableClasses = classesWithMethodAnnotation.loadClasses();
+        final List<Parameter> targetedParams;
+        try (ScanResult scan =
+            new ClassGraph()
+                .enableAllInfo()
+                .acceptPackagesNonRecursive(packageName)
+                .removeTemporaryFilesAfterScan()
+                .scan()) {
+          ClassInfoList classesWithMethodAnnotation =
+              scan.getClassesWithMethodAnnotation(Inject.class);
+          List<Class<?>> injectableClasses = classesWithMethodAnnotation.loadClasses();
 
-        List<Parameter> targetedParams =
-            injectableClasses.stream()
-                .map(Class::getDeclaredConstructors)
-                .flatMap(Arrays::stream)
-                .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
-                .map(Executable::getParameters)
-                .flatMap(Arrays::stream)
-                .filter(param -> param.isAnnotationPresent(SemgrepScan.class))
-                .collect(toList());
+          targetedParams =
+              injectableClasses.stream()
+                  .map(Class::getDeclaredConstructors)
+                  .flatMap(Arrays::stream)
+                  .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
+                  .map(Executable::getParameters)
+                  .flatMap(Arrays::stream)
+                  .filter(param -> param.isAnnotationPresent(SemgrepScan.class))
+                  .toList();
+        }
 
         targetedParams.forEach(
             param -> {
@@ -183,6 +187,15 @@ public final class SemgrepModule extends AbstractModule {
       SemgrepScan sarifAnnotation = bindingPair.getRight();
       SemgrepRuleSarif semgrepSarif = new SemgrepRuleSarif(bindingPair.getLeft(), sarif);
       bind(RuleSarif.class).annotatedWith(sarifAnnotation).toInstance(semgrepSarif);
+    }
+
+    // clean up all the temporary files
+    for (Path yamlFile : yamlPathsToRun) {
+      try {
+        Files.delete(yamlFile);
+      } catch (IOException e) {
+        LOG.warn("Failed to delete temporary file: {}", yamlFile, e);
+      }
     }
   }
 
