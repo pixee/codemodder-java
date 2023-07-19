@@ -1,8 +1,5 @@
 package io.codemodder;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toUnmodifiableList;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -68,7 +65,7 @@ public final class CodemodLoader {
     final List<CodemodProvider> providers =
         ServiceLoader.load(CodemodProvider.class).stream()
             .map(ServiceLoader.Provider::get)
-            .collect(toUnmodifiableList());
+            .toList();
     final Set<AbstractModule> allModules = new HashSet<>();
 
     // get all the injectable parameters
@@ -77,22 +74,27 @@ public final class CodemodLoader {
     for (Class<? extends CodeChanger> codemodType : codemodTypes) {
       String packageName = codemodType.getPackageName();
       if (!packagesScanned.contains(packageName)) {
-        ScanResult scan =
-            new ClassGraph().enableAllInfo().acceptPackagesNonRecursive(packageName).scan();
-        ClassInfoList classesWithMethodAnnotation =
-            scan.getClassesWithMethodAnnotation(Inject.class);
-        List<Class<?>> injectableClasses = classesWithMethodAnnotation.loadClasses();
-        List<java.lang.reflect.Parameter> targetedParams =
-            injectableClasses.stream()
-                .map(Class::getDeclaredConstructors)
-                .flatMap(Arrays::stream)
-                .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
-                .map(Executable::getParameters)
-                .flatMap(Arrays::stream)
-                .filter(param -> param.getAnnotations().length > 0)
-                .collect(toList());
-        injectableParameters.addAll(targetedParams);
         packagesScanned.add(packageName);
+        final ClassInfoList classesWithMethodAnnotation;
+        try (ScanResult scan =
+            new ClassGraph()
+                .enableAllInfo()
+                .acceptPackagesNonRecursive(packageName)
+                .removeTemporaryFilesAfterScan()
+                .scan()) {
+          classesWithMethodAnnotation = scan.getClassesWithMethodAnnotation(Inject.class);
+          List<Class<?>> injectableClasses = classesWithMethodAnnotation.loadClasses();
+          List<java.lang.reflect.Parameter> targetedParams =
+              injectableClasses.stream()
+                  .map(Class::getDeclaredConstructors)
+                  .flatMap(Arrays::stream)
+                  .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
+                  .map(Executable::getParameters)
+                  .flatMap(Arrays::stream)
+                  .filter(param -> param.getAnnotations().length > 0)
+                  .toList();
+          injectableParameters.addAll(targetedParams);
+        }
       }
     }
 
@@ -107,7 +109,7 @@ public final class CodemodLoader {
       final var allWantedSarifs =
           wantsSarif.stream()
               .flatMap(toolName -> ruleSarifByTool.getOrDefault(toolName, List.of()).stream())
-              .collect(toUnmodifiableList());
+              .toList();
       final Set<AbstractModule> modules =
           provider.getModules(repositoryDir, codemodTypes, allWantedSarifs);
       allModules.addAll(modules);

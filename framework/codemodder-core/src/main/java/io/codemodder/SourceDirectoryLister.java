@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -44,14 +43,16 @@ public interface SourceDirectoryLister {
         throws IOException {
       List<SourceDirectory> sourceDirectories = new ArrayList<>();
       for (final Path sourceDirectoryPath : sourceDirectoryPaths) {
-        List<String> javaFilePaths =
-            Files.walk(sourceDirectoryPath)
-                .filter(Files::isRegularFile)
-                .map(path -> path.toAbsolutePath().toString())
-                .filter(path -> path.toLowerCase().endsWith(".java"))
-                .filter(path -> !path.toLowerCase().contains(testDirToken))
-                .collect(Collectors.toUnmodifiableList());
-
+        List<String> javaFilePaths;
+        try (var paths = Files.walk(sourceDirectoryPath)) {
+          javaFilePaths =
+              paths
+                  .filter(Files::isRegularFile)
+                  .map(path -> path.toAbsolutePath().toString())
+                  .filter(path -> path.toLowerCase().endsWith(".java"))
+                  .filter(path -> !path.toLowerCase().contains(testDirToken))
+                  .toList();
+        }
         sourceDirectories.add(
             SourceDirectory.createDefault(sourceDirectoryPath.toAbsolutePath(), javaFilePaths));
       }
@@ -62,17 +63,19 @@ public interface SourceDirectoryLister {
     private List<Path> getSourceDirectoryPathsWithSuffix(
         final File directory, final String pathSuffixDesired) throws IOException {
       final String canonicalPathSuffixDesired = pathSuffixDesired.toLowerCase();
-      return Files.walk(directory.toPath())
-          .filter(Files::isDirectory)
-          .filter(SourceDirectoryLister::isNotHiddenDirectory)
-          .filter(dir -> !dir.getFileName().startsWith("."))
-          .filter(
-              dir ->
-                  dir.toAbsolutePath()
-                      .toString()
-                      .toLowerCase()
-                      .endsWith(canonicalPathSuffixDesired))
-          .collect(Collectors.toUnmodifiableList());
+      try (var paths = Files.walk(directory.toPath())) {
+        return paths
+            .filter(Files::isDirectory)
+            .filter(SourceDirectoryLister::isNotHiddenDirectory)
+            .filter(dir -> !dir.getFileName().startsWith("."))
+            .filter(
+                dir ->
+                    dir.toAbsolutePath()
+                        .toString()
+                        .toLowerCase()
+                        .endsWith(canonicalPathSuffixDesired))
+            .toList();
+      }
     }
 
     private static final String testDirToken =
