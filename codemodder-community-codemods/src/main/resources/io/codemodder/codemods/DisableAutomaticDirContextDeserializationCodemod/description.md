@@ -1,34 +1,13 @@
-This change hardens Java deserialization operations against attack. Even a simple operation like an object deserialization is an opportunity to yield control of your system to an attacker. In fact, without specific, non-default protections, any object deserialization call can lead to arbitrary code execution. The JavaDoc [now even says](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/ObjectInputFilter.html):
+This change patches the LDAP interaction code to harden against a remote code execution vulnerability.
 
-> Deserialization of untrusted data is inherently dangerous and should be avoided.
+Using Java's deserialization APIs on untrusted data [is dangerous](https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html) because side effects from a type's reconstitution logic can be chained together to execute arbitrary code. This very serious and very common [bug class](https://github.com/GrrrDog/Java-Deserialization-Cheat-Sheet) has resulted in some high profile vulnerabilities, including the [log4shell vulnerability](https://en.wikipedia.org/wiki/Log4Shell) that rocked the development and security world (and is [_still_ present in organizations](https://www.wired.com/story/log4j-log4shell-one-year-later/), by the way.)
 
-Let's discuss the attack. In Java, types can customize how they should be deserialized by specifying a `readObject()` method like this real example from an [old version of Spring](https://github.com/spring-projects/spring-framework/blob/4.0.x/spring-core/src/main/java/org/springframework/core/SerializableTypeWrapper.java#L404):
+Now, back to the change. The `DirContext#search(SearchControls)` API is used to send LDAP queries. If the `SearchControls` has the `retobj` set to `true`, the API will try to deserialize a piece of the response from the LDAP server with Java's deserialization API. This means that if the LDAP server could influenced to return malicious data (or is outright controlled by an attacker) then they could [execute arbitrary on the API client's JVM](https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf).
 
-```java
-static class MethodInvokeTypeProvider implements TypeProvider {
-    private final TypeProvider provider;
-    private final String methodName;
-
-    private void readObject(ObjectInputStream inputStream) {
-        inputStream.defaultReadObject();
-        Method method = ReflectionUtils.findMethod(
-                this.provider.getType().getClass(),
-                this.methodName
-        );
-        this.result = ReflectionUtils.invokeMethod(method,this.provider.getType());
-    }
-}
-```
-
-Reflecting on this code reveals a terrifying conclusion. If an attacker presents this object to be deserialized by your app, the runtime will take a class and a method name from the attacker and then call them. Note that an attacker can provide any serliazed type -- it doesn't have to be the one you're expecting, and it will still deserialize.
-
-Attackers can repurpose the logic of selected types within the Java classpath (called "gadgets") and chain them together to achieve arbitrary remote code execution. There are a limited number of publicly known gadgets that can be used for attack, and our change simply inserts an [ObjectInputFilter](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/ObjectInputStream.html#setObjectInputFilter(java.io.ObjectInputFilter)) into the `ObjectInputStream` to prevent them from being used.
+Our changes look like this:
 
 ```diff
-+ import io.github.pixee.security.ObjectInputFilters;
-  ObjectInputStream ois = new ObjectInputStream(is);
-+ ObjectInputFilters.enableObjectFilterIfUnprotected(ois);
-  AcmeObject acme = (AcmeObject)ois.readObject();
+  DirContext ctx = new InitialDirContext();
+- var results = ctx.search("query", "filter", new SearchControls(0, 0, 0, null, true, false));
++ var results = ctx.search("query", "filter", new SearchControls(0, 0, 0, null, false, false));
 ```
-
-This is a tough vulnerability class to understand, but it is deadly serious because it's the highest impact possible (remote code execution) and extremely likely (automated tooling can exploit.) It's best to remove deserialization but our protections will protect you from all known exploitation strategies.
