@@ -25,7 +25,6 @@ import org.javatuples.Pair;
 /** Parameterize possible injections for Hibernate queries. */
 @Codemod(
     id = "pixee:java/hql-parameterizer",
-    author = "andre.silva@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class HQLParameterizationCodemod extends JavaParserChanger {
 

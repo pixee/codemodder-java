@@ -13,7 +13,6 @@ import javax.inject.Inject;
 /** Fixes issues reported under the id "java/stack-trace-exposure" */
 @Codemod(
     id = "codeql:java/stack-trace-exposure",
-    author = "andre.silva@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expression> {
 

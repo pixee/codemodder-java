@@ -25,7 +25,6 @@ import javax.inject.Inject;
 /** Adds gadget filtering logic to {@link java.io.ObjectInputStream}. */
 @Codemod(
     id = "pixee:java/harden-java-deserialization",
-    author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenJavaDeserializationCodemod extends CompositeJavaParserChanger {
 

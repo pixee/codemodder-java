@@ -164,10 +164,7 @@ final class JavaParserCodemodRunnerTest {
     assertThat(Files.readString(javaFile), is(updatedCode));
   }
 
-  @Codemod(
-      author = "me",
-      reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
-      id = "pixee-test:java/my-composite")
+  @Codemod(reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW, id = "pixee-test:java/my-composite")
   private static class RunsBothCodemod extends CompositeJavaParserChanger {
     @Inject
     public RunsBothCodemod(

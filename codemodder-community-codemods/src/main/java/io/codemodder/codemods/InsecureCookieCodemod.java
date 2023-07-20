@@ -20,10 +20,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 /** Fixes issues reported under the id "java/insecure-cookie". */
-@Codemod(
-    id = "codeql:java/insecure-cookie",
-    author = "andre.silva@pixee.ai",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+@Codemod(id = "codeql:java/insecure-cookie", reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject

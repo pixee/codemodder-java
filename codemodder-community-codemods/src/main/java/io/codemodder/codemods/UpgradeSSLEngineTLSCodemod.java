@@ -18,7 +18,6 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/upgrade-sslengine-tls",
-    author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class UpgradeSSLEngineTLSCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 

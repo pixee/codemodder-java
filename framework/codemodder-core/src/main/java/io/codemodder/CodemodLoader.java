@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
-import org.codehaus.plexus.util.StringUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 
 /** This type is responsible for loading codemods and the surrounding subsystem. */
@@ -149,11 +148,6 @@ public final class CodemodLoader {
   }
 
   private static void validateRequiredFields(final Codemod codemodAnnotation) {
-    final String author = codemodAnnotation.author();
-    if (StringUtils.isBlank(author)) {
-      throw new IllegalArgumentException("must have an author");
-    }
-
     final String id = codemodAnnotation.id();
     if (!isValidCodemodId(id)) {
       throw new IllegalArgumentException("must have valid codemod id");

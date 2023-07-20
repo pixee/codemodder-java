@@ -12,7 +12,6 @@ import javax.inject.Inject;
  * rule is the one to use.
  */
 @Codemod(
-    author = "pixee",
     id = "pixee-test:java/uses-implicit-rule",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public class UsesImplicitButHasMultipleRules

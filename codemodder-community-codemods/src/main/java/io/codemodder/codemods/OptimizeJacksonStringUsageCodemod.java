@@ -18,7 +18,6 @@ import javax.inject.Inject;
 
 @Codemod(
     id = "pixee:java/optimize-jackson-string-usage",
-    author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class OptimizeJacksonStringUsageCodemod
     extends SarifPluginJavaParserChanger<ExpressionStmt> {

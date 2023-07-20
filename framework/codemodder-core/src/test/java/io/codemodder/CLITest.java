@@ -127,10 +127,7 @@ final class CLITest {
   }
 
   /** This codemod just replaces Java file contents with the word "cloud9" */
-  @Codemod(
-      author = "skadoodle",
-      id = "org:java/cloud9",
-      reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
+  @Codemod(id = "org:java/cloud9", reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
   private static class Cloud9Changer extends RawFileChanger {
     private Cloud9Changer() {
       super(UselessReportStrategy.INSTANCE);

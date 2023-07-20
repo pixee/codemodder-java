@@ -37,7 +37,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 final class SemgrepModuleTest {
 
   @Codemod(
-      author = "pixee",
       id = "pixee-test:java/implicit-yaml",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class UsesImplicitYamlPath implements CodeChanger {
@@ -75,7 +74,6 @@ final class SemgrepModuleTest {
   }
 
   @Codemod(
-      author = "pixee",
       id = "pixee-test:java/explicit-yaml-test",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class UsesExplicitYamlPath extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
@@ -105,7 +103,6 @@ final class SemgrepModuleTest {
   }
 
   @Codemod(
-      author = "pixee",
       id = "pixee-test:java/missing-properties-test",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class MissingYamlPropertiesPath extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
@@ -140,7 +137,6 @@ final class SemgrepModuleTest {
   }
 
   @Codemod(
-      author = "pixee",
       id = "pixee-test:java/uses-implicit-rule",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class UsesImplicitRule extends SarifPluginJavaParserChanger<ObjectCreationExpr> {

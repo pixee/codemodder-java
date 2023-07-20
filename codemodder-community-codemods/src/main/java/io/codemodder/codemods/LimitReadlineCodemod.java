@@ -17,10 +17,7 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 /** Turns hardcoded seeds for PRNGs to be more random. */
-@Codemod(
-    id = "pixee:java/limit-readline",
-    author = "arshan@pixee.ai",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+@Codemod(id = "pixee:java/limit-readline", reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   private final Parameter limit;
