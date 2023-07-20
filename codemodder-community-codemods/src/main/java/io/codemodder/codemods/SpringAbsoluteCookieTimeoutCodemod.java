@@ -22,8 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 @Codemod(
     id = "pixee:java/spring-absolute-cookie-timeout",
-    reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
-    author = "arshan@pixee.ai")
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
 
   private final Duration safeDuration;

@@ -15,7 +15,6 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/upgrade-sslcontext-tls",
-    author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class UpgradeSSLContextTLSCodemod
     extends SarifPluginJavaParserChanger<MethodCallExpr> {

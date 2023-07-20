@@ -14,7 +14,6 @@ import javax.inject.Inject;
 
 @Codemod(
     id = "pixee:java/strip-http-header-newlines",
-    author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SanitizeHttpHeaderCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 

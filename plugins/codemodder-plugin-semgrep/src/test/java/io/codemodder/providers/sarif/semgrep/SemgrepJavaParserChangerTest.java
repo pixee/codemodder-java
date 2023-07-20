@@ -53,7 +53,6 @@ final class SemgrepJavaParserChangerTest {
   }
 
   @Codemod(
-      author = "pixee",
       id = "pixee-test:java/uses-inline-semgrep",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class UsesInlineSemgrepCodemod extends SarifPluginJavaParserChanger<ObjectCreationExpr> {

@@ -18,7 +18,6 @@ import javax.inject.Inject;
 /** A cross-language codemod that removes any sensitive data being logged. */
 @Codemod(
     id = "pixee:java/sensitive-data-logging",
-    author = "arshan@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SensitiveDataLoggingCodemod extends OpenAIGPT35TurboCodeChanger {
 

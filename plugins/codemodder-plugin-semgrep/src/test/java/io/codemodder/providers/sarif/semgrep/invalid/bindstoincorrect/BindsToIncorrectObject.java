@@ -14,7 +14,6 @@ import javax.inject.Inject;
 
 /** An invalid codemod that binds SARIF to a non-SARIF object. */
 @Codemod(
-    author = "pixee",
     id = "pixee-test:java/incorrect-binding-type",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class BindsToIncorrectObject implements CodeChanger {

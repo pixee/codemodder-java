@@ -27,13 +27,6 @@ public @interface Codemod {
   String id();
 
   /**
-   * The codemod author, hopefully "email", "First Last (email)", or "Team Name (email)".
-   *
-   * @return the author of the codemod
-   */
-  String author();
-
-  /**
    * The review guidance for the changes introduced by this codemod
    *
    * @return review guidance

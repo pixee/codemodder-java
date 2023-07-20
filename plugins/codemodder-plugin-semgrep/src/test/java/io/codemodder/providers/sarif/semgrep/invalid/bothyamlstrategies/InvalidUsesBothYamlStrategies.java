@@ -12,7 +12,6 @@ import javax.inject.Inject;
  * not clear which one should be used.
  */
 @Codemod(
-    author = "pixee",
     id = "pixee-test:java/both-yaml",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class InvalidUsesBothYamlStrategies

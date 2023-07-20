@@ -13,7 +13,6 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "codeql:java/input-resource-leak",
-    author = "andre.silva@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class InputResourceLeakCodemod extends SarifPluginJavaParserChanger<Expression> {
 
