@@ -73,7 +73,8 @@ public final class MavenProvider implements ProjectProvider {
   private final PomModifier pomModifier;
   private final PomFileFinder pomFileFinder;
 
-  MavenProvider(final PomModifier pomModifier, final PomFileFinder pomFileFinder, boolean offline) {
+  MavenProvider(
+      final PomModifier pomModifier, final PomFileFinder pomFileFinder, final boolean offline) {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
     this.pomModifier = pomModifier;
@@ -243,7 +244,7 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   @NotNull
-  private Collection<DependencyGAV> getDependenciesFrom(Path pomFile) {
+  private final Collection<DependencyGAV> getDependenciesFrom(Path pomFile) {
     if (this.offline) {
       return Collections.emptyList();
     }
