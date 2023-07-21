@@ -68,7 +68,7 @@ public final class MavenProvider implements ProjectProvider {
     }
   }
 
-  private final Boolean offline;
+  private final boolean offline;
 
   private final PomModifier pomModifier;
   private final PomFileFinder pomFileFinder;
