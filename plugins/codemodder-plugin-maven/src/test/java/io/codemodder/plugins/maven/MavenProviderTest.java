@@ -158,7 +158,11 @@ final class MavenProviderTest {
 
     Files.writeString(module1Pom, simplePom);
 
-    MavenProvider provider = new MavenProvider();
+    MavenProvider provider =
+        new MavenProvider(
+            new MavenProvider.DefaultPomModifier(),
+            new MavenProvider.DefaultPomFileFinder(),
+            false);
 
     DependencyUpdateResult result =
         provider.updateDependencies(
@@ -178,7 +182,7 @@ final class MavenProviderTest {
   void it_returns_empty_when_no_pom() throws IOException {
     when(pomFileFinder.findForFile(any(), any())).thenReturn(Optional.empty());
 
-    MavenProvider provider = new MavenProvider(pomModifier, pomFileFinder);
+    MavenProvider provider = new MavenProvider(pomModifier, pomFileFinder, false);
 
     DependencyUpdateResult result =
         provider.updateDependencies(projectDir, marsJavaFile, List.of(marsDependency1));

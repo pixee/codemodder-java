@@ -68,22 +68,25 @@ public final class MavenProvider implements ProjectProvider {
     }
   }
 
+  private final Boolean offline;
+
   private final PomModifier pomModifier;
   private final PomFileFinder pomFileFinder;
 
-  MavenProvider(final PomModifier pomModifier, final PomFileFinder pomFileFinder) {
+  MavenProvider(final PomModifier pomModifier, final PomFileFinder pomFileFinder, boolean offline) {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
     this.pomModifier = pomModifier;
     this.pomFileFinder = pomFileFinder;
+    this.offline = offline;
   }
 
   MavenProvider(final PomModifier pomModifier) {
-    this(pomModifier, new DefaultPomFileFinder());
+    this(pomModifier, new DefaultPomFileFinder(), false);
   }
 
   public MavenProvider() {
-    this(new DefaultPomModifier(), new DefaultPomFileFinder());
+    this(new DefaultPomModifier(), new DefaultPomFileFinder(), true);
   }
 
   @VisibleForTesting
@@ -240,7 +243,11 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   @NotNull
-  private static Collection<DependencyGAV> getDependenciesFrom(final Path pomFile) {
+  private Collection<DependencyGAV> getDependenciesFrom(Path pomFile) {
+    if (this.offline) {
+      return Collections.emptyList();
+    }
+
     ProjectModel originalProjectModel =
         ProjectModelFactory.load(pomFile.toFile()).withQueryType(QueryType.SAFE).build();
 
