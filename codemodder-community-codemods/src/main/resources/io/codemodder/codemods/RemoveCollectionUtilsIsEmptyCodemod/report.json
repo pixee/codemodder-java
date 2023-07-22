@@ -1,0 +1,7 @@
+{
+  "summary" : "Removed dependency on commons-collections4",
+  "change" : "Removed call not worth introducing risk for",
+  "references" : [
+    "https://commons.apache.org/proper/commons-collections/security-reports.html"
+  ]
+}

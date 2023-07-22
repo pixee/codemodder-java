@@ -71,6 +71,19 @@ public final class ASTExpectations {
       return new VariableDeclarationExprExpectation(vde);
     }
 
+    /**
+     * Return an expectation that asserts the node is an {@link ExpressionStmt} with a {@link
+     * MethodCallExpr} for its expression.
+     */
+    public MethodCallExprExpectation toBeMethodCallStatement() {
+      Optional<MethodCallExpr> vde =
+          nodeRef
+              .map(n -> n instanceof ExpressionStmt ? (ExpressionStmt) n : null)
+              .map(ExpressionStmt::getExpression)
+              .map(expr -> expr.isMethodCallExpr() ? expr.asMethodCallExpr() : null);
+      return new MethodCallExprExpectation(vde);
+    }
+
     @Override
     public Optional<Node> result() {
       return nodeRef;
@@ -110,6 +123,21 @@ public final class ASTExpectations {
     @Override
     public Optional<VariableDeclarationExpr> result() {
       return varDefExprRef;
+    }
+  }
+
+  /** A type for querying and filtering method calls. */
+  public static class MethodCallExprExpectation implements ASTExpectationProducer<MethodCallExpr> {
+
+    private final Optional<MethodCallExpr> methodCallRef;
+
+    public MethodCallExprExpectation(final Optional<MethodCallExpr> expr) {
+      this.methodCallRef = expr;
+    }
+
+    @Override
+    public Optional<MethodCallExpr> result() {
+      return methodCallRef;
     }
   }
 

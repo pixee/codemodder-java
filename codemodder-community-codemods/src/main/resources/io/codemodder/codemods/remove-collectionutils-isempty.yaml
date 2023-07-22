@@ -1,0 +1,11 @@
+rules:
+  - id: remove-collectionutils-isempty
+
+    patterns:
+      - pattern: CollectionUtils.isEmpty($X)
+      - pattern-not: CollectionUtils.isEmpty($Y())
+      - pattern-not: CollectionUtils.isEmpty(new $Y())
+    message: Insecure PRNG
+    languages:
+      - java
+    severity: WARNING

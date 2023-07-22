@@ -1,0 +1,22 @@
+package com.acme.testcode;
+
+import org.apache.commons.collections4.CollectionUtils;
+
+public final class Test {
+
+  private boolean isEmpty1 = CollectionUtils.isEmpty(new ArrayList<>());
+  private boolean isEmpty2 = CollectionUtils.isEmpty(OtherType.OTHER_COLLECTION);
+  private List<String> strCollection = null;
+
+  void withVar(Collection<?> collection) {
+    var empty = CollectionUtils.isEmpty(collection);
+  }
+
+  boolean inReturn() {
+    return CollectionUtils.isEmpty(strCollection);
+  }
+
+  boolean inReturnWithMethod() {
+    return CollectionUtils.isEmpty(call());
+  }
+}
