@@ -171,6 +171,7 @@ public final class MavenProvider implements ProjectProvider {
                   .withDependency(newDependency)
                   .withSkipIfNewer(true)
                   .withUseProperties(true)
+                  .withOffline(this.offline)
                   .build();
 
           boolean result = POMOperator.modify(projectModel);
@@ -245,10 +246,6 @@ public final class MavenProvider implements ProjectProvider {
 
   @NotNull
   private final Collection<DependencyGAV> getDependenciesFrom(Path pomFile) {
-    if (this.offline) {
-      return Collections.emptyList();
-    }
-
     ProjectModel originalProjectModel =
         ProjectModelFactory.load(pomFile.toFile()).withQueryType(QueryType.SAFE).build();
 
