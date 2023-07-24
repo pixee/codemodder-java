@@ -21,7 +21,7 @@ object POMScanner {
         val relativePathElement =
             pomFile.pomDocument.rootElement.element("parent")?.element("relativePath")
 
-        if (relativePathElement != null) {
+        if (relativePathElement != null && relativePathElement.textTrim.isNotEmpty()) {
             pomFileQueue.add(relativePathElement)
         }
 
@@ -49,6 +49,10 @@ object POMScanner {
 
         while (pomFileQueue.isNotEmpty()) {
             val relativePathElement = pomFileQueue.poll()
+
+            if (relativePathElement.textTrim.isEmpty()) {
+                break
+            }
 
             val relativePath = fixPomRelativePath(relativePathElement.text)
 

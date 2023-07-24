@@ -22,6 +22,8 @@ class ProjectModel internal constructor(
     val queryType: QueryType = QueryType.NONE,
 
     val repositoryPath: File? = null,
+
+    val offline: Boolean = false,
 ) {
     internal var modifiedByCommand = false
 

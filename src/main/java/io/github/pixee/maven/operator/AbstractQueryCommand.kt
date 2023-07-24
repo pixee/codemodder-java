@@ -134,6 +134,8 @@ abstract class AbstractQueryCommand : AbstractCommand() {
             profiles = c.activeProfiles.toList()
             isDebug = true
 
+            isOffline = c.offline
+
             properties = props
 
             goals = listOf(DEPENDENCY_TREE_MOJO_REFERENCE)

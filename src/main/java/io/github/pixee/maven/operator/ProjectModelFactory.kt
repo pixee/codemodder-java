@@ -17,6 +17,7 @@ class ProjectModelFactory private constructor(
     private var overrideIfAlreadyExists: Boolean = false,
     private var queryType: QueryType = QueryType.NONE,
     private var repositoryPath: File? = null,
+    private var offline: Boolean = false,
 ) {
     /**
      * Fluent Setter
@@ -94,6 +95,15 @@ class ProjectModelFactory private constructor(
 
     /**
      * Fluent Setter
+     *
+     * @param offline Offline
+     */
+    fun withOffline(offline: Boolean) = this.apply {
+        this.offline = offline
+    }
+
+    /**
+     * Fluent Setter
      */
     fun build(): ProjectModel {
         return ProjectModel(
@@ -106,6 +116,7 @@ class ProjectModelFactory private constructor(
             overrideIfAlreadyExists = overrideIfAlreadyExists,
             queryType = queryType,
             repositoryPath = repositoryPath,
+            offline = offline,
         )
     }
 

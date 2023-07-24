@@ -62,7 +62,7 @@ class POMScannerTest: AbstractTestBase() {
 
     @Test
     fun testInvalidRelativePaths() {
-        for (index in 1..4) {
+        for (index in 1..3) {
             val pomFile = getResourceAsFile("sample-child-with-broken-path-${index}.xml")
 
             try {
@@ -70,6 +70,27 @@ class POMScannerTest: AbstractTestBase() {
 
                 fail("Unreachable code")
             } catch (e: Exception) {
+                LOGGER.info("Exception thrown: ", e)
+
+                if (e is InvalidPathException) {
+                    continue
+                }
+
+                throw e
+            }
+        }
+    }
+
+    @Test
+    fun testWithRelativePathEmpty() {
+        for (index in 3..4) {
+            val pomFile = getResourceAsFile("pom-multiple-pom-parent-level-${index}.xml")
+
+            try {
+                val pmf = POMScanner.scanFrom(pomFile, currentDirectory)
+
+                assertTrue(pmf.build().parentPomFiles.isNotEmpty())
+            } catch (e: InvalidPathException) {
                 LOGGER.info("Exception thrown: ", e)
 
                 if (e is InvalidPathException) {

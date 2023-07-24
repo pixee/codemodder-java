@@ -95,12 +95,18 @@ class QueryByResolver : AbstractQueryCommand() {
             RemoteRepository.Builder("central", "default", "https://repo.maven.apache.org/maven2/")
                 .build()
 
-        val remoteRepositories = listOf(remoteRepository)
+        val remoteRepositories : List<RemoteRepository> =
+            if (pm.offline) {
+                emptyList()
+            } else {
+                listOf(remoteRepository)
+            }
 
         val repositorySystem =
             locator.getService(org.eclipse.aether.RepositorySystem::class.java)
 
-        val session = newRepositorySystemSession(pm, repositorySystem)
+        val session = newRepositorySystemSession(pm, repositorySystem)!!
+            .setOffline(pm.offline)
 
         val modelBuilder = DefaultModelBuilderFactory().newInstance()
 

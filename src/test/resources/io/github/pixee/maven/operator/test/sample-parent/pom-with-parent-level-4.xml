@@ -7,10 +7,12 @@
 
     <parent>
         <groupId>br.com.ingenieux</groupId>
-        <artifactId>sample-parent</artifactId>
+        <artifactId>super-pom</artifactId>
         <version>1</version>
         <relativePath />
     </parent>
 
-    <artifactId>sample-child-with-relativepath</artifactId>
+    <artifactId>org-pom</artifactId>
+
+    <packaging>pom</packaging>
 </project>
