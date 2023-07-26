@@ -6,5 +6,5 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = HardenJavaDeserializationCodemod.class,
     testResourceDir = "harden-java-deserialization",
-    dependencies = "io.github.pixee:java-security-toolkit:1.0.4")
+    dependencies = "io.github.pixee:java-security-toolkit:1.0.6")
 final class HardenJavaDeserializationCodemodTest implements CodemodTestMixin {}

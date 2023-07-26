@@ -5,16 +5,18 @@ final class Test {
     public boolean fine1 = "foo".equals("bar");
     private boolean fine2 = "foo".equals(bar);
     static boolean change1 = bar.equals("foo");
-    final boolean change2 = getBar().equals("foo");
+    final boolean change2 = getBar().equalsIgnoreCase("foo");
 
-   void foo() {
+   void foo(String foo) {
        boolean change1 = foo.equals("bar");
        if(foo.equals("bar")) { // should change
            System.out.println("foo");
-       } else if(foo.equals("bar")) { // change
+       } else if(foo.compareTo("bar")) { // change
            System.out.println("foo");
        } else if("foo".equals(bar)) { // should be fine
            System.out.println("foo");
        }
    }
+
+   private String getBar() { return null; }
 }
