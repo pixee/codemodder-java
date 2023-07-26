@@ -1,0 +1,8 @@
+{
+  "summary" : "Switch order of literals to prevent NullPointerException",
+  "change": "Switch order of literals to prevent NullPointerException",
+  "references" : [
+
+    "https://rules.sonarsource.com/java/RSPEC-1132/"
+  ]
+}

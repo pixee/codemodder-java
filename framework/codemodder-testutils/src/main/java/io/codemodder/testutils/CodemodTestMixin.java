@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -36,7 +35,7 @@ public interface CodemodTestMixin {
                   String[] tokens = dependency.split(":");
                   return DependencyGAV.createDefault(tokens[0], tokens[1], tokens[2]);
                 })
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
 
     Path testDir = Path.of("src/test/resources/" + testResourceDir);
     verifyCodemod(codemod, tmpDir, testDir, dependencies);
