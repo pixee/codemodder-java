@@ -37,6 +37,13 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
   protected SarifPluginJavaParserChanger(
       final RuleSarif sarif,
       final Class<? extends Node> nodeType,
+      final CodemodReporterStrategy codemodReporterStrategy) {
+    this(sarif, nodeType, RegionNodeMatcher.EXACT_MATCH, codemodReporterStrategy);
+  }
+
+  protected SarifPluginJavaParserChanger(
+      final RuleSarif sarif,
+      final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher) {
     this(sarif, nodeType, RegionExtractor.FROM_FIRST_LOCATION, regionNodeMatcher);
   }

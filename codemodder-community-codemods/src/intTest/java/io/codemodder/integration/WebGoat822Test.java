@@ -88,7 +88,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             .map(CodeTFResult::getChangeset)
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
-    assertThat(fileChanges.size(), is(23));
+    assertThat(fileChanges.size(), is(48));
 
     // we only inject into a couple files
     verifyStandardCodemodResults(fileChanges);
@@ -123,7 +123,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             .map(CodeTFResult::getChangeset)
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
-    assertThat(fileChanges.size(), is(28));
+    assertThat(fileChanges.size(), is(53));
 
     verifyStandardCodemodResults(fileChanges);
 
@@ -131,7 +131,7 @@ final class WebGoat822Test extends GitRepositoryTest {
     List<CodeTFResult> jwtResults =
         report.getResults().stream()
             .filter(result -> "codeql:java/missing-jwt-signature-check".equals(result.getCodemod()))
-            .collect(Collectors.toList());
+            .toList();
     assertThat(jwtResults.size(), equalTo(1));
 
     // this file is also only changed by including the codeql results
@@ -173,7 +173,7 @@ final class WebGoat822Test extends GitRepositoryTest {
         report.getResults().stream()
             .map(CodeTFResult::getFailedFiles)
             .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+            .toList();
     assertThat(failedFiles.size(), is(0));
   }
 }

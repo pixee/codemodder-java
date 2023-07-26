@@ -1,0 +1,22 @@
+package com.acme.testcode;
+
+final class Test {
+
+    public boolean fine1 = "foo".equals("bar");
+    private boolean fine2 = "foo".equals(bar);
+    static boolean change1 = "foo".equals(bar);
+    final boolean change2 = "foo".equalsIgnoreCase(getBar());
+
+   void foo(String foo) {
+       boolean change1 = "bar".equals(foo);
+       if("bar".equals(foo)) { // should change
+           System.out.println("foo");
+       } else if("bar".compareTo(foo)) { // change
+           System.out.println("foo");
+       } else if("foo".equals(bar)) { // should be fine
+           System.out.println("foo");
+       }
+   }
+
+   private String getBar() { return null; }
+}
