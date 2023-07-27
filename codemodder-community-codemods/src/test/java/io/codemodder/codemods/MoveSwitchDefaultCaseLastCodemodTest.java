@@ -75,5 +75,4 @@ final class MoveSwitchDefaultCaseLastCodemodTest implements CodemodTestMixin {
     String actualCode = LexicalPreservingPrinter.print(cu);
     assertThat(actualCode).isEqualTo(expectedCode);
   }
-
 }
