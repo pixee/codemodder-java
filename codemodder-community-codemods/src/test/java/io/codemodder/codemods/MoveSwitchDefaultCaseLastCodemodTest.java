@@ -76,20 +76,4 @@ final class MoveSwitchDefaultCaseLastCodemodTest implements CodemodTestMixin {
     assertThat(actualCode).isEqualTo(expectedCode);
   }
 
-  @Test
-  void how_case() {
-    int i = 0;
-    boolean access = true;
-    switch (i) {
-      default:
-        access = false;
-      case 1:
-        access = true;
-        break;
-      case 2:
-        access = false;
-        break;
-    }
-    System.out.println(access);
-  }
 }
