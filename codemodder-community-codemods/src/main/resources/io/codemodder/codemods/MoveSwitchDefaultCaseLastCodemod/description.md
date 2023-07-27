@@ -2,7 +2,7 @@ This change moves the `default` case of `switch` statements to the end to match 
 
 If code is hard to read, it is by definition hard to reason about during review and during coding in that area later. Not being able to quickly and effectively reason about code will lead to bugs, including security vulnerabilities. 
 
-The `default` case is usually last. Being further up may cause confusion about how the code will flow as is shown in the example below, which will unfortunately :
+The `default` case is usually last. Being further up may cause confusion about how the code will flow as is shown in the example below, which will perhaps unexpected grant access when there shouldn't be:
 
 ```java
   switch (accessLevel) {
@@ -16,9 +16,8 @@ The `default` case is usually last. Being further up may cause confusion about h
      break;
   }
 ```
-In the case above, the 
 
-Our changes look something like this:
+To avoid any confusion about how the code flows, we move the `default` case to the end. Our changes look something like this:
 
 ```diff
   switch (accessLevel) {
