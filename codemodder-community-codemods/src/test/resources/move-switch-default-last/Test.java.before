@@ -1,0 +1,20 @@
+package com.acme.testcode;
+
+final class Test {
+
+   void foo(String foo) {
+       System.out.println("foo");
+       switch(foo) {
+           case "foo":
+             System.out.println("foo");
+             break;
+           default:
+             System.out.println("default");
+           case "bar":
+             System.out.println("bar");
+             break;
+       }
+       System.out.println("bar");
+   }
+
+}
