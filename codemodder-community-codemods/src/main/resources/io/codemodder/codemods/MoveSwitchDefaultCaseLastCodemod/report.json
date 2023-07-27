@@ -1,0 +1,9 @@
+{
+  "summary" : "Moved default case in switch to last entry",
+  "change": "Moved default case to last to make the code more readable",
+  "references" : [
+    "https://cwe.mitre.org/data/definitions/670.html",
+    "https://pmd.github.io/pmd/pmd_rules_java_bestpractices.html#defaultlabelnotlastinswitchstmt",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch"
+  ]
+}
