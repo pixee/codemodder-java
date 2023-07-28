@@ -18,7 +18,7 @@ jib {
     }
     to {
         image = "218200003247.dkr.ecr.us-east-1.amazonaws.com/pixee/codemodder-java"
-        tags = setOf(de.epitschke.gradle.fileversioning.FileVersioningPlugin.getVersionFromFile())
+        tags = setOf(de.epitschke.gradle.fileversioning.FileVersioningPlugin.getVersionFromFile(), "latest")
     }
 }
 
