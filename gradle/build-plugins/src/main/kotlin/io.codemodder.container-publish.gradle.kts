@@ -3,4 +3,4 @@ plugins {
     id("com.google.cloud.tools.jib")
 }
 
-jib.from.image = "iulspop/special-base-image"
+jib.from.image = "218200003247.dkr.ecr.us-east-1.amazonaws.com/pixee/codemodder-java:base-image"
