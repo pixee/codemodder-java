@@ -1,0 +1,7 @@
+{
+  "summary" : "Use empty for Collection#toArray([])",
+  "change": "Use empty for Collection#toArray([])",
+  "references" : [
+    "https://docs.pmd-code.org/latest/pmd_rules_java_performance.html#optimizabletoarraycall"
+  ]
+}

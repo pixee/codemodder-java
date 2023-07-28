@@ -1,0 +1,40 @@
+package com.acme.testcode;
+
+import javax.net.ssl.SSLParameters;
+
+final class SSLParametersSetProtocolsVulnerability {
+
+  private static final String[] ONLY_TLSV1 = new String[] {"TLSv1"};
+  private static final String[] ONLY_TLSV12 = new String[] {"TLSv1.2"};
+  private static final String INSECURE_VER = "TLSv1";
+
+  public void unsafeParameters(SSLParameters parameters) {
+    // ruleid: upgrade-sslparameters-tls
+    parameters.setProtocols(new String[] {"TLSv1"});
+  }
+
+  public void unsafeParametersMultiple(SSLParameters parameters) {
+    // ruleid: upgrade-sslparameters-tls
+    parameters.setProtocols(new String[]{"TLSv1", "TLSv1.1"});
+  }
+
+  public void unsafeParametersMultiple(SSLParameters parameters) {
+    // ruleid: upgrade-sslparameters-tls
+    parameters.setProtocols(new String[]{INSECURE_VER});
+  }
+
+  // TODO: make this work
+  public void unsafeParametersFromConstant(SSLParameters parameters) {
+    // ruleid: upgrade-sslparameters-tls
+    parameters.setProtocols(ONLY_TLSV1);
+  }
+
+  public void safeParameters(SSLParameters parameters) {
+    parameters.setProtocols(new String[] {"TLSv1.2"});
+  }
+
+  public void safeParametersFromConstant(SSLParameters parameters) {
+    parameters.setProtocols(ONLY_TLSV12);
+  }
+
+}
