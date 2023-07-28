@@ -6,6 +6,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.pmd.PmdScan;
+import java.util.Set;
 import javax.inject.Inject;
 
 /**
@@ -32,10 +33,18 @@ public final class SwitchLiteralFirstComparisonsCodemod
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
       final Result result) {
+    // some of the methods that this rule applies to are not flippable, like compareTo() would
+    // change the logic after
+    if (!flippableComparisonMethods.contains(methodCallExpr.getNameAsString())) {
+      return false;
+    }
     Expression leftSide = methodCallExpr.getScope().get();
     Expression rightSide = methodCallExpr.getArgument(0);
     methodCallExpr.setScope(rightSide);
     methodCallExpr.setArgument(0, leftSide);
     return true;
   }
+
+  private static final Set<String> flippableComparisonMethods =
+      Set.of("equals", "equalsIgnoreCase", "contentEquals");
 }
