@@ -2,34 +2,36 @@ package io.codemodder.providers.sarif.semgrep;
 
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.google.inject.AbstractModule;
-import io.codemodder.Changer;
+import io.codemodder.CodeChanger;
 import io.codemodder.RuleSarif;
+import io.github.classgraph.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import javax.inject.Inject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Responsible for binding Semgrep-related things. */
-final class SemgrepModule extends AbstractModule {
+public final class SemgrepModule extends AbstractModule {
 
-  private final List<Class<? extends Changer>> codemodTypes;
+  private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;
   private final SemgrepRunner semgrepRunner;
 
-  SemgrepModule(final Path codeDirectory, final List<Class<? extends Changer>> codemodTypes) {
+  public SemgrepModule(
+      final Path codeDirectory, final List<Class<? extends CodeChanger>> codemodTypes) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
     this.semgrepRunner = SemgrepRunner.createDefault();
@@ -48,81 +50,97 @@ final class SemgrepModule extends AbstractModule {
     // find all @SemgrepScan annotations in their parameters and batch them up for running
     List<Pair<String, SemgrepScan>> toBind = new ArrayList<>();
 
-    for (Class<? extends Changer> codemodType : codemodTypes) {
-      // find all constructors that are marked with @Inject
-      Constructor<?>[] constructors = codemodType.getDeclaredConstructors();
-      List<Constructor<?>> injectableConstructors =
-          Arrays.stream(constructors)
-              .filter(constructor -> constructor.getAnnotation(javax.inject.Inject.class) != null)
-              .collect(Collectors.toUnmodifiableList());
+    Set<String> packagesScanned = new HashSet<>();
 
-      List<Parameter> parameters =
-          injectableConstructors.stream()
-              .flatMap(constructor -> Stream.of(constructor.getParameters()))
-              .filter(parameter -> parameter.getAnnotation(SemgrepScan.class) != null)
-              .collect(Collectors.toUnmodifiableList());
+    for (Class<? extends CodeChanger> codemodType : codemodTypes) {
 
-      parameters.forEach(
-          parameter -> {
-            SemgrepScan semgrepScanAnnotation = parameter.getAnnotation(SemgrepScan.class);
-            if (!RuleSarif.class.equals(parameter.getType())) {
-              throw new IllegalArgumentException(
-                  "Can only inject semgrep results into "
-                      + RuleSarif.class.getSimpleName()
-                      + " types: "
-                      + codemodType.getName());
-            }
-            String yamlPath = semgrepScanAnnotation.pathToYaml();
-            String declaredRuleId = semgrepScanAnnotation.ruleId();
-            Path yamlPathToWrite = null;
-            boolean foundYaml = false;
-            if (!declaredRuleId.isEmpty()) {
-              String classpathYamlPath =
-                  "/"
-                      + codemodType.getPackageName().replace(".", "/")
-                      + "/"
-                      + declaredRuleId
-                      + ".yaml";
+      String packageName = codemodType.getPackageName();
+      if (!packagesScanned.contains(packageName)) {
+        final List<Parameter> targetedParams;
+        try (ScanResult scan =
+            new ClassGraph()
+                .enableAllInfo()
+                .acceptPackagesNonRecursive(packageName)
+                .removeTemporaryFilesAfterScan()
+                .scan()) {
+          ClassInfoList classesWithMethodAnnotation =
+              scan.getClassesWithMethodAnnotation(Inject.class);
+          List<Class<?>> injectableClasses = classesWithMethodAnnotation.loadClasses();
 
-              if (!"".equals(yamlPath)) {
-                classpathYamlPath = yamlPath;
-              }
-              Optional<Path> path = saveClasspathResourceToTemp(classpathYamlPath);
-              if (path.isPresent()) {
-                foundYaml = true;
-                yamlPathToWrite = path.get();
-              }
-            }
-            String inlineYaml = semgrepScanAnnotation.yaml();
-            if (!"".equals(inlineYaml)) {
-              if (foundYaml) {
+          targetedParams =
+              injectableClasses.stream()
+                  .map(Class::getDeclaredConstructors)
+                  .flatMap(Arrays::stream)
+                  .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
+                  .map(Executable::getParameters)
+                  .flatMap(Arrays::stream)
+                  .filter(param -> param.isAnnotationPresent(SemgrepScan.class))
+                  .toList();
+        }
+
+        targetedParams.forEach(
+            param -> {
+              if (!RuleSarif.class.equals(param.getType())) {
                 throw new IllegalArgumentException(
-                    "Cannot specify both inline yaml and yaml file path: " + codemodType.getName());
+                    "can't use @SemgrepScan on anything except RuleSarif (see "
+                        + param.getDeclaringExecutable().getDeclaringClass().getName()
+                        + ")");
               }
-              foundYaml = true;
-              yamlPathToWrite = saveStringToTemp(inlineYaml);
-            }
 
-            if (!foundYaml) {
-              throw new IllegalArgumentException(
-                  "no semgrep yaml found for: " + codemodType.getName());
-            }
+              SemgrepScan semgrepScan = param.getAnnotation(SemgrepScan.class);
+              String yamlPath = semgrepScan.pathToYaml();
+              String declaredRuleId = semgrepScan.ruleId();
+              Path yamlPathToWrite = null;
+              boolean foundYaml = false;
+              if (!declaredRuleId.isEmpty()) {
+                String classpathYamlPath =
+                    "/" + packageName.replace(".", "/") + "/" + declaredRuleId + ".yaml";
 
-            try {
-              if (StringUtils.isEmpty(declaredRuleId)) {
-                String rawYaml = Files.readString(yamlPathToWrite);
-                declaredRuleId = detectSingleRuleFromYaml(rawYaml);
+                if (!"".equals(yamlPath)) {
+                  classpathYamlPath = yamlPath;
+                }
+                Optional<Path> path = saveClasspathResourceToTemp(codemodType, classpathYamlPath);
+                if (path.isPresent()) {
+                  foundYaml = true;
+                  yamlPathToWrite = path.get();
+                }
               }
-            } catch (IOException e) {
-              throw new UncheckedIOException(
-                  "Problem inspecting yaml: " + codemodType.getName(), e);
-            }
+              String inlineYaml = semgrepScan.yaml();
+              if (!"".equals(inlineYaml)) {
+                if (foundYaml) {
+                  throw new IllegalArgumentException(
+                      "Cannot specify both inline yaml and yaml file path: "
+                          + codemodType.getName());
+                }
+                foundYaml = true;
+                yamlPathToWrite = saveStringToTemp(inlineYaml);
+              }
 
-            yamlPathsToRun.add(yamlPathToWrite);
+              if (!foundYaml) {
+                throw new IllegalArgumentException(
+                    "no semgrep yaml found for: " + codemodType.getName());
+              }
 
-            Pair<String, SemgrepScan> rulePair = Pair.of(declaredRuleId, semgrepScanAnnotation);
-            toBind.add(rulePair);
-          });
+              try {
+                if (StringUtils.isEmpty(declaredRuleId)) {
+                  String rawYaml = Files.readString(yamlPathToWrite);
+                  declaredRuleId = detectSingleRuleFromYaml(rawYaml);
+                }
+              } catch (IOException e) {
+                throw new UncheckedIOException(
+                    "Problem inspecting yaml: " + codemodType.getName(), e);
+              }
+
+              yamlPathsToRun.add(yamlPathToWrite);
+
+              Pair<String, SemgrepScan> rulePair = Pair.of(declaredRuleId, semgrepScan);
+
+              toBind.add(rulePair);
+            });
+
+        LOG.debug("Finished scanning codemod package: {}", packageName);
+        packagesScanned.add(packageName);
+      }
     }
 
     if (toBind.isEmpty()) {
@@ -149,10 +167,7 @@ final class SemgrepModule extends AbstractModule {
           yamlAsString += "\n    languages:\n      - java\n";
         }
         if (changed) {
-          Files.write(
-              yamlPath,
-              yamlAsString.getBytes(StandardCharsets.UTF_8),
-              StandardOpenOption.TRUNCATE_EXISTING);
+          Files.writeString(yamlPath, yamlAsString, StandardOpenOption.TRUNCATE_EXISTING);
         }
       } catch (IOException e) {
         throw new UncheckedIOException("Problem fixing up yaml", e);
@@ -172,6 +187,15 @@ final class SemgrepModule extends AbstractModule {
       SemgrepScan sarifAnnotation = bindingPair.getRight();
       SemgrepRuleSarif semgrepSarif = new SemgrepRuleSarif(bindingPair.getLeft(), sarif);
       bind(RuleSarif.class).annotatedWith(sarifAnnotation).toInstance(semgrepSarif);
+    }
+
+    // clean up all the temporary files
+    for (Path yamlFile : yamlPathsToRun) {
+      try {
+        Files.delete(yamlFile);
+      } catch (IOException e) {
+        LOG.warn("Failed to delete temporary file: {}", yamlFile, e);
+      }
     }
   }
 
@@ -195,7 +219,7 @@ final class SemgrepModule extends AbstractModule {
   private Path saveStringToTemp(final String yamlAsString) {
     try {
       Path file = Files.createTempFile("semgrep", ".yaml");
-      Files.write(file, yamlAsString.getBytes(StandardCharsets.UTF_8));
+      Files.writeString(file, yamlAsString);
       return file;
     } catch (IOException e) {
       throw new UncheckedIOException("Problem saving yaml string to temp", e);
@@ -206,8 +230,9 @@ final class SemgrepModule extends AbstractModule {
    * Turn the yaml resource in the classpath into a file accessible via {@link Path}. Forgive the
    * exception re-throwing but this is being used from a lambda and this shouldn't fail ever anyway.
    */
-  private Optional<Path> saveClasspathResourceToTemp(final String yamlClasspathResourcePath) {
-    InputStream ruleInputStream = getClass().getResourceAsStream(yamlClasspathResourcePath);
+  private Optional<Path> saveClasspathResourceToTemp(
+      final Class<?> codemodType, final String yamlClasspathResourcePath) {
+    InputStream ruleInputStream = codemodType.getResourceAsStream(yamlClasspathResourcePath);
     if (ruleInputStream == null) {
       return Optional.empty();
     }
@@ -223,4 +248,6 @@ final class SemgrepModule extends AbstractModule {
       IOUtils.closeQuietly(ruleInputStream);
     }
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(SemgrepModule.class);
 }

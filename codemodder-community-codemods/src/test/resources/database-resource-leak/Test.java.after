@@ -63,9 +63,15 @@ public class Test {
     }
   }
 
-  public void assignedToParameter(String query, ResultSet rs) throws SQLException {
-    try (Statement stmt = conn.createStatement()) {
-        rs = stmt.executeQuery(query);
+  public void assignedToParameter(String query, Statement stmt) throws SQLException {
+    stmt = conn.createStatement();
+    try (var rs = stmt.executeQuery(query)) {
+        stmt.close();
+    }
+  }
+
+  public void multipleResourcesInOneLine(String query, ResultSet rs) throws SQLException {
+    try (var stream = conn.createStatement().executeQuery(query)) {
     }
   }
 }

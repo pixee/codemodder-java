@@ -1,0 +1,27 @@
+package com.acme.testcode.resourceleak;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+
+public class Test {
+
+  public void simple() throws IOException {
+    try (FileReader fr = new FileReader("~/secrets.txt")) {
+    }
+  }
+
+  public void nestedReaders() throws IOException {
+    try (FileReader resource1 = new FileReader("~/test.txt");
+    BufferedReader resource = new BufferedReader(resource1);
+    BufferedReader br = new BufferedReader(resource)) {
+    }
+  }
+
+  public Reader noFixReturned() throws IOException {
+    BufferedReader br = new BufferedReader(new FileReader(""));
+    BufferedReader br2 = new BufferedReader(br);
+    return br2;
+  }
+}

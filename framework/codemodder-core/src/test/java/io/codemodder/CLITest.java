@@ -2,10 +2,15 @@ package io.codemodder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import io.codemodder.codetf.CodeTFReport;
+import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -14,14 +19,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/** Test aspects of {@link CLI}. */
 final class CLITest {
 
   private Path workingRepoDir;
-
   private Path fooJavaFile;
-
   private Path barJavaFile;
-
   private List<SourceDirectory> sourceDirectories;
 
   @BeforeEach
@@ -40,11 +43,73 @@ final class CLITest {
     sourceDirectories =
         List.of(
             SourceDirectory.createDefault(
-                tmpDir.resolve("module1/src/main/java").toAbsolutePath().toString(),
+                tmpDir.resolve("module1/src/main/java").toAbsolutePath(),
                 List.of(fooJavaFile.toAbsolutePath().toString())),
             SourceDirectory.createDefault(
-                tmpDir.resolve("module2/src/main/java").toAbsolutePath().toString(),
+                tmpDir.resolve("module2/src/main/java").toAbsolutePath(),
                 List.of(barJavaFile.toAbsolutePath().toString())));
+  }
+
+  /**
+   * Runs the CLI with arguments that we know will cause it to fail, and asserts that the exit code
+   * denotes failure and an error message is captured in the alternative stderr stream.
+   */
+  @Test
+  void it_captures_console_output() {
+    final var args = new String[] {"--bogus"};
+    final var stdoutWriter = new StringWriter();
+    final var stderrWriter = new StringWriter();
+    try (var stdout = new PrintWriter(stdoutWriter);
+        var stderr = new PrintWriter(stderrWriter)) {
+      final var code = Runner.run(List.of(Cloud9Changer.class), args, stdout, stderr);
+      assertThat(code).isEqualTo(2);
+    }
+    assertThat(stderrWriter.toString()).startsWith("Unknown option: '--bogus'");
+  }
+
+  @Test
+  void dry_run_works() throws IOException {
+
+    Path normalCodetf = Files.createTempFile("normal", ".codetf");
+    Path dryRunCodetf = Files.createTempFile("dryrun", ".codetf");
+
+    // call with dry-run and confirm it doesn't change
+    {
+      String[] args =
+          new String[] {
+            "--dont-exit",
+            "--dry-run",
+            "--output",
+            dryRunCodetf.toString(),
+            workingRepoDir.toString()
+          };
+      Runner.run(List.of(Cloud9Changer.class), args);
+      assertThat(Files.readString(fooJavaFile)).doesNotContain("cloud9");
+    }
+
+    // call without dry-run and confirm it changes as expected
+    {
+      String[] args =
+          new String[] {
+            "--dont-exit", "--output", normalCodetf.toString(), workingRepoDir.toString()
+          };
+      Runner.run(List.of(Cloud9Changer.class), args);
+      assertThat(Files.readString(fooJavaFile)).contains("cloud9");
+    }
+
+    // deeply inspect the codetf and assert that they're the same
+    ObjectMapper mapper = new ObjectMapper();
+    CodeTFReport normalCodeTFReport = mapper.readValue(normalCodetf.toFile(), CodeTFReport.class);
+    CodeTFReport dryRunCodeTFReport = mapper.readValue(dryRunCodetf.toFile(), CodeTFReport.class);
+
+    List<CodeTFResult> normalCodeTFResults = normalCodeTFReport.getResults();
+    List<CodeTFResult> dryRunCodeTFResults = dryRunCodeTFReport.getResults();
+
+    // we just compare the results because the "run" section is non-deterministic (has elapsed time
+    // etc)
+    String normalJson = mapper.writeValueAsString(normalCodeTFResults);
+    String dryRunJson = mapper.writeValueAsString(dryRunCodeTFResults);
+    assertThat(normalJson).isEqualTo(dryRunJson);
   }
 
   @Test
@@ -61,9 +126,28 @@ final class CLITest {
     assertThat(files).containsExactly(fooJavaFile);
   }
 
+  /** This codemod just replaces Java file contents with the word "cloud9" */
+  @Codemod(id = "org:java/cloud9", reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
+  private static class Cloud9Changer extends RawFileChanger {
+    private Cloud9Changer() {
+      super(UselessReportStrategy.INSTANCE);
+    }
+
+    @Override
+    public List<CodemodChange> visitFile(final CodemodInvocationContext context)
+        throws IOException {
+      Path path = context.path();
+      if (path.toString().endsWith(".java")) {
+        Files.writeString(path, "cloud9");
+        return List.of(CodemodChange.from(1));
+      }
+      return List.of();
+    }
+  }
+
   @Test
   void javaparser_factory_works() throws IOException {
-    JavaParserFactory factory = new CLI.DefaultJavaParserFactory();
+    JavaParserFactory factory = JavaParserFactory.newFactory();
     JavaParser javaParser = factory.create(sourceDirectories);
     Optional<CompilationUnit> result = javaParser.parse(fooJavaFile).getResult();
     assertThat(result.isPresent()).isTrue();

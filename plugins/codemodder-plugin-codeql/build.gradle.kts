@@ -6,21 +6,12 @@ plugins {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
-}
-
-publishing {
-    publications {
-        named<MavenPublication>("maven") {
-            artifactId = "codemodder-provider-sarif-codeql"
-        }
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation("io.codemodder:codemodder-common")
     implementation("io.codemodder:codemodder-core")
 
     testImplementation(testlibs.bundles.junit.jupiter)

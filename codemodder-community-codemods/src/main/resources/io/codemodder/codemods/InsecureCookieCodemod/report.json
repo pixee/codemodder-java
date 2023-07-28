@@ -1,0 +1,10 @@
+{
+  "summary" : "Added secure flag to HTTP cookies (CodeQL)",
+  "change": "Added a call to `setSecure()` to make sure the cookie is only transferred over HTTPS traffic",
+  "references" : [
+    "https://codeql.github.com/codeql-query-help/java/java-insecure-cookie/",
+    "https://owasp.org/www-community/controls/SecureCookieAttribute",
+    "https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies",
+    "https://cwe.mitre.org/data/definitions/614.html"
+  ]
+}

@@ -1,0 +1,10 @@
+package com.acme.testcode;
+
+public final class Test {
+
+  private Random r = new Random();
+
+  void doStuff() {
+    new Random().nextInt();
+  }
+}

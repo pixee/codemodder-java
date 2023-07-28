@@ -18,9 +18,8 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "codeql:java/database-resource-leak",
-    author = "andre.silva@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
+public final class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public JDBCResourceLeakCodemod(
@@ -34,6 +33,6 @@ public class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<Method
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
       final Result result) {
-    return JDBCResourceLeakFixer.checkAndFix(methodCallExpr).isPresent();
+    return ResourceLeakFixer.checkAndFix(methodCallExpr).isPresent();
   }
 }

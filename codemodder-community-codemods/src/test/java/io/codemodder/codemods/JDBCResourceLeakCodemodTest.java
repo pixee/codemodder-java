@@ -7,4 +7,4 @@ import io.codemodder.testutils.Metadata;
     codemodType = JDBCResourceLeakCodemod.class,
     testResourceDir = "database-resource-leak",
     dependencies = {})
-public class JDBCResourceLeakCodemodTest implements CodemodTestMixin {}
+final class JDBCResourceLeakCodemodTest implements CodemodTestMixin {}

@@ -17,7 +17,6 @@ public interface SemgrepRunner {
    */
   SarifSchema210 run(List<Path> yamls, Path codeDir) throws IOException;
 
-  /** */
   static SemgrepRunner createDefault() {
     return new DefaultSemgrepRunner();
   }

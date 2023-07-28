@@ -10,10 +10,47 @@ public final class Test {
 
   private Connection conn;
 
-  public ResultSet doUserLookup_single_concat_single_quote(String input) throws SQLException {
+  public ResultSet indirectStatement(String input) throws SQLException {
     String sql = "SELECT * FROM USERS WHERE USER = ?";
     PreparedStatement stmt = conn.prepareStatement(sql);
     stmt.setString(1, input);
-    return stmt.executeQuery();
+    return stmt.execute();
+  }
+
+  public ResultSet directStatement(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = ?";
+    PreparedStatement stmt = conn.prepareStatement(sql);
+    stmt.setString(1, input);
+    var rs = stmt.execute();
+    return rs;
+  }
+
+  public ResultSet nameConflict(String input) throws SQLException {
+    int stmt = 0;
+    String sql = "SELECT * FROM USERS WHERE USER = ?";
+    PreparedStatement statement = conn.prepareStatement(sql);
+    statement.setString(1, input);
+    ResultSet rs = statement.execute();
+    return rs;
+  }
+
+  public ResultSet doubleNameConflict(String input) throws SQLException {
+    int stmt = 0;
+    int statement = 0;
+    String sql = "SELECT * FROM USERS WHERE USER = ?";
+    PreparedStatement stmt1 = conn.prepareStatement(sql);
+    stmt1.setString(1, input);
+    ResultSet rs = stmt1.execute();
+    return rs;
+  }
+
+  public ResultSet tryResource(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = ?";
+    try(PreparedStatement stmt = conn.prepareStatement(sql) ){
+        stmt.setString(1, input);
+        try (ResultSet rs = stmt.execute()) {
+      return rs;
+    }
+    }
   }
 }

@@ -1,7 +1,7 @@
 package io.codemodder.providers.sarif.codeql;
 
 import com.google.inject.AbstractModule;
-import io.codemodder.Changer;
+import io.codemodder.CodeChanger;
 import io.codemodder.CodemodProvider;
 import io.codemodder.RuleSarif;
 import io.codemodder.WantsSarif;
@@ -16,7 +16,7 @@ public final class CodeQLProvider implements CodemodProvider {
   @Override
   public Set<AbstractModule> getModules(
       final Path repository,
-      final List<Class<? extends Changer>> codemodTypes,
+      final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
     return Set.of(new CodeQLModule(codemodTypes, sarifs));
   }

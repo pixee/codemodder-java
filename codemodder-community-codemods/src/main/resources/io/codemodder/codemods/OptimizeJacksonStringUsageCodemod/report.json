@@ -1,0 +1,5 @@
+{
+  "summary" : "Optimized out unnecessary JSON deserialization step",
+  "change" : "Removed the stream-to-string deserialization step",
+  "references" : ["https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html", "https://portswigger.net/web-security/deserialization/exploiting"]
+}

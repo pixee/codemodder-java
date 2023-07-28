@@ -1,0 +1,9 @@
+{
+  "summary" : "Failure to use HTTPS or SFTP URL in Maven artifact upload/download (CodeQL)",
+  "change" : "Replaced insecure HTTP URL with HTTPS URL to prevent man-in-the-middle attacks",
+  "references" : [
+    "https://codeql.github.com/codeql-query-help/java/java-maven-non-https-url",
+    "https://cwe.mitre.org/data/definitions/494.html",
+    "https://en.wikipedia.org/wiki/Man-in-the-middle_attack"
+  ]
+}

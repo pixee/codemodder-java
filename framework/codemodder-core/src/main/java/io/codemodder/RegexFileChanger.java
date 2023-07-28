@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
  * This type does the heavy lifting for many protections that can work in a simple
  * "search-and-replace" pattern for non-Java code.
  */
-public abstract class RegexFileChanger implements RawFileChanger {
+public abstract class RegexFileChanger extends RawFileChanger {
 
   private final Predicate<Path> fileMatcher;
   private final Pattern pattern;
@@ -35,15 +35,26 @@ public abstract class RegexFileChanger implements RawFileChanger {
     this.dependenciesRequired = dependenciesRequired;
   }
 
+  protected RegexFileChanger(
+      final Predicate<Path> fileMatcher,
+      final Pattern pattern,
+      final boolean removeEmptyLeftoverLines,
+      final List<DependencyGAV> dependenciesRequired,
+      final CodemodReporterStrategy reporter) {
+    super(reporter);
+    this.fileMatcher = Objects.requireNonNull(fileMatcher, "fileMatcher");
+    this.pattern = Objects.requireNonNull(pattern, "pattern");
+    this.removeEmptyLeftoverLines = removeEmptyLeftoverLines;
+    this.dependenciesRequired = dependenciesRequired;
+  }
+
   @Override
-  public void visitFile(final CodemodInvocationContext context) throws IOException {
+  public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
     if (!fileMatcher.test(context.path())) {
-      return;
+      return List.of();
     }
 
-    FileWeavingContext fileWeavingContext = context.changeRecorder();
-
-    final List<Weave> weaves = new ArrayList<>();
+    final List<CodemodChange> changes = new ArrayList<>();
     final String fileContents = Files.readString(context.path());
     final Matcher matcher = pattern.matcher(fileContents);
     StringBuilder rebuiltContents = null;
@@ -52,7 +63,7 @@ public abstract class RegexFileChanger implements RawFileChanger {
     while (matcher.find()) {
       int start = matcher.start();
       int startLine = LineNumbers.getLineNumberAt(fileContents, start);
-      if (!fileWeavingContext.isLineIncluded(startLine)) {
+      if (!context.lineIncludesExcludes().matches(startLine)) {
         continue;
       }
       if (rebuiltContents == null) {
@@ -61,7 +72,7 @@ public abstract class RegexFileChanger implements RawFileChanger {
       int end = matcher.end();
       String snippet = fileContents.substring(start, end);
       rebuiltContents.append(fileContents, lastEnd, start);
-      weaves.add(Weave.from(startLine, context.codemodId(), dependenciesRequired));
+      changes.add(CodemodChange.from(startLine, dependenciesRequired));
 
       final String replacement = getReplacementFor(snippet);
       rebuiltContents.append(replacement);
@@ -74,7 +85,7 @@ public abstract class RegexFileChanger implements RawFileChanger {
       }
     }
     if (lastEnd == 0) {
-      return;
+      return changes;
     }
 
     rebuiltContents.append(fileContents.substring(lastEnd));
@@ -103,12 +114,12 @@ public abstract class RegexFileChanger implements RawFileChanger {
       rebuiltContents.delete(rebuiltContents.length() - nl.length(), rebuiltContents.length());
     }
 
-    if (weaves.isEmpty()) {
-      return;
+    if (changes.isEmpty()) {
+      return changes;
     }
 
     Files.write(context.path(), rebuiltContents.toString().getBytes());
-    weaves.forEach(fileWeavingContext::addWeave);
+    return changes;
   }
 
   /**

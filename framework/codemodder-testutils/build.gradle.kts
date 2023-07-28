@@ -6,15 +6,12 @@ plugins {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
 dependencies {
-    api(project(":codemodder-common"))
     api(project(":codemodder-core"))
-    api("io.codemodder:codemodder-plugin-semgrep")
-    api("io.codemodder:codemodder-plugin-codeql")
 
     implementation(testlibs.bundles.junit.jupiter)
     implementation(testlibs.bundles.hamcrest)

@@ -20,10 +20,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 /** Fixes issues reported under the id "java/insecure-cookie". */
-@Codemod(
-    id = "codeql:java/insecure-cookie",
-    author = "andre.silva@pixee.ai",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+@Codemod(id = "codeql:java/insecure-cookie", reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
@@ -42,7 +39,7 @@ public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCa
         methodCallExpr
             .getParentNode()
             .map(p -> p instanceof Statement ? (Statement) p : null)
-            .filter(stmt -> stmt.isExpressionStmt());
+            .filter(Statement::isExpressionStmt);
 
     // We want to avoid things like: response.addCookie(new Cookie(...)), so we restrict ourselves
     final Optional<Expression> maybeCookieExpression =

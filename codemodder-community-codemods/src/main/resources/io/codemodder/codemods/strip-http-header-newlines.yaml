@@ -3,6 +3,8 @@ rules:
     patterns:
       - pattern: (HttpServletResponse $RESPONSE).setHeader($NAME, $VALUE)
       - pattern-not: (HttpServletResponse $RESPONSE).setHeader($NAME, "...")
+      - pattern-not: (HttpServletResponse $RESPONSE).setHeader($NAME, Newlines.stripAll($X))
+      - pattern-not: (HttpServletResponse $RESPONSE).setHeader($NAME, stripAll($X))
       - pattern-not-inside: |
           class $CLASS {
             ...

@@ -19,14 +19,11 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import org.dom4j.DocumentException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /** Fixes issues reported under the id "java/maven/non-https-url". */
 @Codemod(
     id = "codeql:java/maven/non-https-url",
-    author = "andre.silva@pixee.ai",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
 
@@ -41,7 +38,7 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
   }
 
   @Override
-  public List<Weave> onFileFound(
+  public List<CodemodChange> onFileFound(
       final CodemodInvocationContext context, final List<Result> results) {
     try {
       return processXml(context, context.path());
@@ -51,7 +48,7 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
     }
   }
 
-  private List<Weave> processXml(final CodemodInvocationContext context, final Path file)
+  private List<CodemodChange> processXml(final CodemodInvocationContext context, final Path file)
       throws SAXException, IOException, DocumentException, XMLStreamException {
     Optional<XPathStreamProcessChange> change =
         processor.process(
@@ -68,14 +65,8 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
     XPathStreamProcessChange xmlChange = change.get();
     Set<Integer> linesAffected = xmlChange.linesAffected();
 
-    List<Weave> allWeaves =
-        linesAffected.stream()
-            .map(line -> Weave.from(line, context.codemodId()))
-            .collect(Collectors.toList());
-
-    // add the weaves to the context
-    FileWeavingContext fileWeavingContext = context.changeRecorder();
-    allWeaves.forEach(fileWeavingContext::addWeave);
+    List<CodemodChange> allWeaves =
+        linesAffected.stream().map(CodemodChange::from).collect(Collectors.toList());
 
     // overwrite the previous web.xml with the new one
     Files.copy(xmlChange.transformedXml(), file, StandardCopyOption.REPLACE_EXISTING);
@@ -104,6 +95,4 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
       xmlEventWriter.add(nextEvent);
     }
   }
-
-  private static final Logger LOG = LoggerFactory.getLogger(MavenSecureURLCodemod.class);
 }

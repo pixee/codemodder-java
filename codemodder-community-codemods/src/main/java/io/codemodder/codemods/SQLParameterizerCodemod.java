@@ -4,35 +4,29 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
-import io.openpixee.jdbcparameterizer.SQLParameterizer;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Codemod(
-    id = "pixee:java/sql-parameterizer",
-    author = "andre.silva@pixee.ai",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class SQLParameterizerCodemod implements JavaParserChanger {
+/** Parameterizes SQL statements in the java JDBC api. */
+@Codemod(id = "pixee:java/sql-parameterizer", reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+public final class SQLParameterizerCodemod extends JavaParserChanger {
 
-  private List<Weave> onNodeFound(
-      CodemodInvocationContext context, MethodCallExpr methodCallExpr, CompilationUnit cu) {
-    var fixer = new SQLParameterizer(cu);
-    var maybeChanges = fixer.parameterizeStatement(methodCallExpr, methodCallExpr.getArgument(0));
-    if (maybeChanges.isLeft()) {
-      return maybeChanges.getLeft().stream()
-          .map(c -> Weave.from(c.getLine(), context.codemodId()))
-          .collect(Collectors.toList());
+  private Optional<CodemodChange> onNodeFound(
+      final CodemodInvocationContext context,
+      final MethodCallExpr methodCallExpr,
+      final CompilationUnit cu) {
+    if (new SQLParameterizer(methodCallExpr).checkAndFix()) {
+      return Optional.of(CodemodChange.from(methodCallExpr.getBegin().get().line));
     } else {
-      return Collections.emptyList();
+      return Optional.empty();
     }
   }
 
-  @Override
-  public void visit(final CodemodInvocationContext context, final CompilationUnit cu) {
-    cu.findAll(MethodCallExpr.class).stream()
-        .filter(mce -> SQLParameterizer.isParameterizationCandidate(mce))
+  public List<CodemodChange> visit(
+      final CodemodInvocationContext context, final CompilationUnit cu) {
+    return cu.findAll(MethodCallExpr.class).stream()
         .flatMap(mce -> onNodeFound(context, mce, cu).stream())
-        .forEach(w -> context.changeRecorder().addWeave(w));
+        .collect(Collectors.toList());
   }
 }

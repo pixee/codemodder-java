@@ -1,0 +1,12 @@
+{
+  "summary" : "Sandboxed URL creation to prevent SSRF attacks",
+  "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/Urls.java",
+  "change": "Wrapped the URL creation with a method that forces the caller to pick allowed protocols and domains that this URL can reach",
+  "references": [
+    "https://www.hacksplaining.com/prevention/ssrf",
+    "https://portswigger.net/web-security/ssrf",
+    "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html",
+    "https://www.rapid7.com/blog/post/2021/11/23/owasp-top-10-deep-dive-defending-against-server-side-request-forgery/",
+    "https://blog.assetnote.io/2021/01/13/blind-ssrf-chains/"
+  ]
+}

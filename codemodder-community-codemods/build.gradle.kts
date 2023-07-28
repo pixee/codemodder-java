@@ -28,7 +28,7 @@ tasks.publish {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
@@ -37,15 +37,43 @@ dependencies {
     implementation("io.codemodder:codemodder-plugin-semgrep")
     implementation("io.codemodder:codemodder-plugin-codeql")
     implementation("io.codemodder:codemodder-plugin-maven")
-
+    implementation("io.codemodder:codemodder-plugin-llm")
+    implementation("io.codemodder:codemodder-plugin-aws")
+    implementation("io.codemodder:codemodder-plugin-pmd")
+    implementation(libs.juniversalchardet)
     implementation(libs.dom4j)
     implementation(libs.commons.jexl)
-    implementation("io.openpixee:java-jdbc-parameterizer:0.0.8") // TODO bring into monorepo
-
+    implementation(libs.tuples)
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
     testImplementation(testlibs.assertj)
     testImplementation(testlibs.mockito)
     testImplementation("io.codemodder:codemodder-testutils")
     testRuntimeOnly(testlibs.junit.jupiter.engine)
+    testImplementation(testlibs.jgit)
 }
+
+sourceSets {
+    create("intTest") {
+        compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+        runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+    }
+}
+
+val intTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+val intTestRuntimeOnly: Configuration by configurations.getting {
+    extendsFrom(configurations.testRuntimeOnly.get())
+}
+
+val integrationTest = task<Test>("intTest") {
+    description = "Runs integration tests."
+    group = "verification"
+
+    testClassesDirs = sourceSets["intTest"].output.classesDirs
+    classpath = sourceSets["intTest"].runtimeClasspath
+    shouldRunAfter("test")
+}
+
+tasks.check { dependsOn(integrationTest) }
