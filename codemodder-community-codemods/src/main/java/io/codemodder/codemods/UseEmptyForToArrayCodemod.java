@@ -1,7 +1,9 @@
 package io.codemodder.codemods;
 
 import com.contrastsecurity.sarif.Result;
+import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.Type;
 import io.codemodder.*;
@@ -33,10 +35,10 @@ public final class UseEmptyForToArrayCodemod extends SarifPluginJavaParserChange
       final Result result) {
     ArrayCreationExpr toArrayArg = toArrayCall.getArgument(0).asArrayCreationExpr();
     Type elementType = toArrayArg.getElementType();
-    if (!toArrayArg.getInitializer().isPresent()) {
-      return false;
-    }
-    ArrayInitializerExpr array = toArrayArg.getInitializer().get();
+    ArrayCreationLevel arrayCreationLevel = new ArrayCreationLevel(0);
+    ArrayCreationExpr newEmptyArray =
+        new ArrayCreationExpr(elementType, NodeList.nodeList(arrayCreationLevel), null);
+    toArrayCall.setArgument(0, newEmptyArray);
     return true;
   }
 }
