@@ -11,7 +11,7 @@ final class Test {
        boolean change1 = "bar".equals(foo);
        if("bar".equals(foo)) { // should change
            System.out.println("foo");
-       } else if("bar".compareTo(foo)) { // change
+       } else if(foo.compareTo("bar") > 0) { // shouldn't change, can't mess with compareTo
            System.out.println("foo");
        } else if("foo".equals(bar)) { // should be fine
            System.out.println("foo");
