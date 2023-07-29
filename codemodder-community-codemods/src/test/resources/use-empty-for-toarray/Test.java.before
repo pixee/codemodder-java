@@ -1,0 +1,29 @@
+package com.acme.testcode;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import com.acme.testcode.Acme;
+
+class Test {
+     void foo(
+       Collection<?> unknownType,
+       List<Integer> ints,
+       Set<String> strs,
+       ArrayList<Acme> acmes
+       ) {
+
+       int[] dontChange1 =  ints.toArray(new int[0]);
+       int[] dontChange2 =  ints.toArray(EMPTY_ARRAY);
+       Object[] dontChange3 = unknownType.toArray(new Object[0]);
+
+       String[] change1 = strs.toArray(new String[strs.size()]);
+       Object[] change2 = unknownType.toArray(new Object[unknownType.size()]);
+       String[] change3 = strs.toArray(new String[4]);
+
+       Acme[] cantChange1 = acmes.toArray(OtherType.UNKNOWN_FIELD); // pmd doesn't cite this
+       int[] cantChange2 = ints.toArray(new int[ints.size()]); // pmd doesn't cite this
+     }
+
+   private static final int[] EMPTY_ARRAY = new int[0];
+}
