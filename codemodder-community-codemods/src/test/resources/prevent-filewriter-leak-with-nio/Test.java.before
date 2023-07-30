@@ -1,0 +1,25 @@
+package acme;
+
+import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
+public class Test
+{
+    private Response response;
+    void foo(File f) {
+        // ruleid: prevent-filewriter-leak-with-nio
+        Writer change1 = new BufferedWriter(new FileWriter(f));
+        // ruleid: prevent-filewriter-leak-with-nio
+        Writer change2 = new BufferedWriter(new FileWriter(f));
+
+        // ok: prevent-filewriter-leak-with-nio
+        Writer dontChange1 = new BufferedWriter(w);
+        // ok: prevent-filewriter-leak-with-nio
+        Writer dontChange2 = new BufferedWriter(w, 256);
+        // ok: prevent-filewriter-leak-with-nio
+        Writer dontChange3 = new BufferedWriter(response.getWriter(), 256);
+        // ok: prevent-filewriter-leak-with-nio
+        Writer dontChange3 = Files.newBufferedWriter(f.toPath());
+    }
+}

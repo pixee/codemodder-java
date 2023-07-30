@@ -1,0 +1,7 @@
+{
+  "summary" : "Files.newBufferedWriter()",
+  "change" : "Does the thing",
+  "references" : [
+    "CWE for leaking file descriptors"
+  ]
+}

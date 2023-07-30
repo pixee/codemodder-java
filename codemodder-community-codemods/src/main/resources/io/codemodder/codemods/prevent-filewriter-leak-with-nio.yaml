@@ -1,0 +1,7 @@
+rules:
+  - id: prevent-filewriter-leak-with-nio
+    pattern: new BufferedWriter(new FileWriter($X), ...)
+    message: File leak
+    languages:
+      - java
+    severity: WARNING
