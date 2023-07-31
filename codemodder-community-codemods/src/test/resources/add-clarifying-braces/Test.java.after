@@ -1,0 +1,30 @@
+package acme.test;
+
+public class Test
+{
+
+   void handleRequest() {
+
+        if(isAdmin) {
+            setupStuff0();
+            doAdminStuff0();
+        }
+
+        if(!isAdmin)
+            {
+                setupStuff1();
+            }
+            doNonAdminStuff();
+
+        while(isAdmin)
+            {
+                setupStuff2();
+            }
+            doAdminStuff();
+
+        if(!isAdmin)
+            setupStuff5();
+        doNonAdminStuff5();
+   }
+
+}
