@@ -1,0 +1,21 @@
+package acme.test;
+
+import java.io.File;
+import java.nio.file.Files;
+
+public class Test
+{
+    void foo(File dir, Path pathDir) {
+        // ruleid: upgrade-tempfile-to-nio
+        File change1 = Files.createTempFile("acme", ".txt");
+        // ruleid: upgrade-tempfile-to-nio
+        File change2 = Files.createTempFile(dir.toPath(), "acme", ".txt");
+
+        // ok: upgrade-tempfile-to-nio
+        File dontChange1 = Files.createTempFile("acme", ".txt");
+        // ok: upgrade-tempfile-to-nio
+        File dontChange2 = Files.createTempFile("acme", ".txt");
+        // ok: upgrade-tempfile-to-nio
+        File dontChange3 = Files.createTempFile(pathDir, "acme", ".txt");
+    }
+}

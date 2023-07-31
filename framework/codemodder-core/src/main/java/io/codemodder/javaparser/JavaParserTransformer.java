@@ -11,7 +11,7 @@ public abstract class JavaParserTransformer {
   private JavaParserTransformer() {}
 
   /** Useful for wrapping an expression with a surrounding method call. */
-  public static ExpressionWrapper wrap(Expression expression) {
+  public static ExpressionWrapper wrap(final Expression expression) {
     return new DefaultExpressionWrapper(expression);
   }
 
@@ -19,7 +19,7 @@ public abstract class JavaParserTransformer {
    * Useful for replacing an expression (method call or object creation) with a surrounding method
    * call.
    */
-  public static CallReplacer replace(Expression expression) {
+  public static CallReplacer replace(final Expression expression) {
     return new DefaultCallReplacer(expression);
   }
 
@@ -42,19 +42,5 @@ public abstract class JavaParserTransformer {
      * @return true if the transformation was successful, false otherwise
      */
     boolean withStaticMethod(String className, String methodName, boolean isStaticImport);
-  }
-
-  public interface CallReplacer {
-    /**
-     * Performs the actual transformation of replacing the given expression a static method call
-     * with the same arguments..
-     *
-     * @param className the class name of the static method
-     * @param methodName the method name
-     * @param isStaticImport whether or not the static method is imported
-     * @return true if the transformation was successful, false otherwise
-     */
-    boolean withStaticMethodWithSameArguments(
-        String className, String methodName, boolean isStaticImport);
   }
 }

@@ -1,0 +1,8 @@
+rules:
+  - id: upgrade-tempfile-to-nio
+    patterns:
+      - pattern: File.createTempFile(...)
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING

@@ -63,8 +63,9 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
         final ObjectCreationExpr objectCreationExpr,
         final Result result) {
       replace(objectCreationExpr)
-          .withStaticMethodWithSameArguments(
-              ObjectInputFilters.class.getName(), "createSafeObjectInputStream", true);
+          .withStaticMethod(ObjectInputFilters.class.getName(), "createSafeObjectInputStream")
+          .withStaticImport()
+          .withSameArguments();
       return true;
     }
 

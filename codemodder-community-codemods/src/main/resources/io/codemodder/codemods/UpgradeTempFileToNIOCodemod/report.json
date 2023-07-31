@@ -1,0 +1,8 @@
+{
+  "summary" : "Made temp file permissions more sane",
+  "change": "Made temp file permissions more sane",
+  "references" : [
+    "CWE for this",
+    "CVE for temp file stuff"
+  ]
+}
