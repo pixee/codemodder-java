@@ -1,0 +1,8 @@
+{
+  "summary" : "Add clarifying braces to misleading code",
+  "change": "Add clarifying braces to misleading code",
+  "references" : [
+    "https://cwe.mitre.org/data/definitions/483.html",
+    "https://www.synopsys.com/blogs/software-security/understanding-apple-goto-fail-vulnerability-2/"
+  ]
+}
