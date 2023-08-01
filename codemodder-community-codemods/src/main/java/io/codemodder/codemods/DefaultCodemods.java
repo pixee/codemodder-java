@@ -45,6 +45,7 @@ public final class DefaultCodemods {
         UpgradeSSLEngineTLSCodemod.class,
         UpgradeSSLParametersTLSCodemod.class,
         UpgradeSSLSocketProtocolsTLSCodemod.class,
+        UpgradeTempFileToNIOCodemod.class,
         ValidateJakartaForwardPathCodemod.class,
         VerbTamperingCodemod.class);
   }
