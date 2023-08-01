@@ -4,6 +4,9 @@
   "references" : [
     "https://cwe.mitre.org/data/definitions/378.html",
     "https://docs.fluidattacks.com/criteria/vulnerabilities/160/",
-    "https://github.com/apache/druid/issues/11130"
+    "https://github.com/apache/druid/issues/11130",
+    "https://owasp.org/www-community/vulnerabilities/Insecure_Temporary_File",
+    "https://nvd.nist.gov/vuln/detail/CVE-2022-41954",
+    "https://www.cvedetails.com/vulnerability-list/cwe-378/vulnerabilities.html"
   ]
 }
