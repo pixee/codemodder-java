@@ -1,8 +1,9 @@
 {
-  "summary" : "Made temp file permissions more sane",
-  "change": "Made temp file permissions more sane",
+  "summary" : "Modernize and secure temp file creation",
+  "change": "Modernize and secure temp file creation",
   "references" : [
-    "CWE for this",
-    "CVE for temp file stuff"
+    "https://cwe.mitre.org/data/definitions/378.html",
+    "https://docs.fluidattacks.com/criteria/vulnerabilities/160/",
+    "https://github.com/apache/druid/issues/11130"
   ]
 }

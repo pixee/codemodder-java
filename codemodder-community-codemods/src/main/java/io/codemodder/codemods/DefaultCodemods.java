@@ -38,7 +38,6 @@ public final class DefaultCodemods {
         SecureRandomCodemod.class,
         SQLParameterizerCodemod.class,
         SSRFCodemod.class,
-        SwitchLiteralFirstComparisonsCodemod.class,
         StackTraceExposureCodemod.class,
         SwitchLiteralFirstComparisonsCodemod.class,
         UnverifiedJwtCodemod.class,

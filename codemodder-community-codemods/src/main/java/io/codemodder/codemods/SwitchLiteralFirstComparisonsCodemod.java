@@ -15,7 +15,7 @@ import javax.inject.Inject;
  * null.
  */
 @Codemod(
-    id = "codeql:java/switch-literal-first",
+    id = "pixee:java/switch-literal-first",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SwitchLiteralFirstComparisonsCodemod
     extends SarifPluginJavaParserChanger<MethodCallExpr> {
