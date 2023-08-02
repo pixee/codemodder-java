@@ -4,6 +4,8 @@ import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.resolution.UnsolvedSymbolException;
+import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.pmd.PmdScan;
 import java.util.Set;
@@ -40,9 +42,18 @@ public final class SwitchLiteralFirstComparisonsCodemod
     }
     Expression leftSide = methodCallExpr.getScope().get();
     Expression rightSide = methodCallExpr.getArgument(0);
-    methodCallExpr.setScope(rightSide);
-    methodCallExpr.setArgument(0, leftSide);
-    return true;
+    try {
+      ResolvedType leftType = leftSide.calculateResolvedType();
+      if ("Ljava/lang/String;".equals(leftType.toDescriptor())) {
+        methodCallExpr.setScope(rightSide);
+        methodCallExpr.setArgument(0, leftSide);
+        return true;
+      }
+    } catch (UnsolvedSymbolException e) {
+      // expected in cases where we can't resolve the type
+    }
+
+    return false;
   }
 
   private static final Set<String> flippableComparisonMethods =
