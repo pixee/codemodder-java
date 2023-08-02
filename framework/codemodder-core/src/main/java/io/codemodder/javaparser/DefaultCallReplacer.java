@@ -13,7 +13,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithArguments;
 import java.util.Objects;
 import java.util.Optional;
 
-final class DefaultCallReplacer implements JavaParserTransformer.CallReplacer {
+final class DefaultCallReplacer implements CallReplacer {
 
   private final Expression call;
   private final NodeList<Expression> arguments;
@@ -27,24 +27,60 @@ final class DefaultCallReplacer implements JavaParserTransformer.CallReplacer {
   }
 
   @Override
-  public boolean withStaticMethodWithSameArguments(
-      final String className, final String methodName, final boolean isStaticImport) {
-    Optional<CompilationUnit> cu = call.findCompilationUnit();
-    if (cu.isEmpty()) {
-      return false;
+  public CallReplacerBuilder withStaticMethod(final String className, final String methodName) {
+    return new DefaultCallReplacerBuilder(className, methodName);
+  }
+
+  private class DefaultCallReplacerBuilder implements CallReplacerBuilder {
+
+    private final String className;
+    private final String methodName;
+    private boolean useStaticImport;
+
+    private DefaultCallReplacerBuilder(final String className, final String methodName) {
+      this.className = Objects.requireNonNull(className);
+      this.methodName = Objects.requireNonNull(methodName);
+      this.useStaticImport = false;
     }
-    Node parent = call.getParentNode().get();
-    String simpleName = className.substring(className.lastIndexOf('.') + 1);
-    MethodCallExpr safeCall =
-        isStaticImport
-            ? new MethodCallExpr(methodName, arguments.toArray(new Expression[0]))
-            : new MethodCallExpr(new NameExpr(simpleName), methodName, arguments);
-    parent.replace(call, safeCall);
-    if (isStaticImport) {
-      addStaticImportIfMissing(cu.get(), className + "." + methodName);
-    } else {
-      addImportIfMissing(cu.get(), className);
+
+    @Override
+    public CallReplacerBuilder withStaticImport() {
+      this.useStaticImport = true;
+      return this;
     }
-    return true;
+
+    @Override
+    public boolean withNewArguments(final NodeList<Expression> newArguments) {
+      return transform(className, methodName, useStaticImport, newArguments);
+    }
+
+    @Override
+    public boolean withSameArguments() {
+      return transform(className, methodName, useStaticImport, arguments);
+    }
+
+    private boolean transform(
+        final String className,
+        final String methodName,
+        final boolean isStaticImport,
+        final NodeList<Expression> newArguments) {
+      Optional<CompilationUnit> cu = call.findCompilationUnit();
+      if (cu.isEmpty()) {
+        return false;
+      }
+      Node parent = call.getParentNode().get();
+      String simpleName = className.substring(className.lastIndexOf('.') + 1);
+      MethodCallExpr safeCall =
+          isStaticImport
+              ? new MethodCallExpr(methodName, newArguments.toArray(new Expression[0]))
+              : new MethodCallExpr(new NameExpr(simpleName), methodName, newArguments);
+      parent.replace(call, safeCall);
+      if (isStaticImport) {
+        addStaticImportIfMissing(cu.get(), className + "." + methodName);
+      } else {
+        addImportIfMissing(cu.get(), className);
+      }
+      return true;
+    }
   }
 }

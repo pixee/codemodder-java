@@ -60,17 +60,17 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
       // it's the last statement in the block, there's no way to get confused, we can exit
       return false;
     }
-    Statement nextStatement = (Statement) childNodes.get(index + 1);
-    if (nextStatement.getRange().isEmpty()) {
+    Node nextChildNode = childNodes.get(index + 1);
+    if (nextChildNode.getRange().isEmpty()) {
       return false;
     }
-    Range nextStatementRange = nextStatement.getRange().get();
-    int nextStatementBeginColumn = nextStatementRange.begin.column;
+    Range nextChildNodeRange = nextChildNode.getRange().get();
+    int nextChildNodeBeginColumn = nextChildNodeRange.begin.column;
 
     Range onlyInnerStatementRange = stmt.getExistingSingleStatementRange();
     int onlyInnerStatementColumn = onlyInnerStatementRange.begin.column;
 
-    if (nextStatementBeginColumn >= onlyInnerStatementColumn) {
+    if (nextChildNodeBeginColumn >= onlyInnerStatementColumn) {
       stmt.addBraces();
       return true;
     }
