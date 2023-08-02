@@ -46,5 +46,5 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   private static final Set<String> flippableComparisonMethods =
-      Set.of("equals", "equalsIgnoreCase", "contentEquals");
+      Set.of("equals", "equalsIgnoreCase");
 }
