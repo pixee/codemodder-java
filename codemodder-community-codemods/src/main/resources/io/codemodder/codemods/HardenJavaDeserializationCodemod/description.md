@@ -31,4 +31,4 @@ Attackers can repurpose the logic of selected types within the Java classpath (c
   AcmeObject acme = (AcmeObject)ois.readObject();
 ```
 
-This is a tough vulnerability class to understand, but it is deadly serious because it's the highest impact possible (remote code execution) and extremely likely (automated tooling can exploit.) It's best to remove deserialization but our protections will protect you from all known exploitation strategies.
+This is a tough vulnerability class to understand, but it is deadly serious. It offers the highest impact possible (remote code execution), it's a common vulnerability (it's in the OWASP Top 10), and exploitation is easy enough that automated exploitation is possible. It's best to remove deserialization entirely, but our protections is effective against all known exploitation strategies.
