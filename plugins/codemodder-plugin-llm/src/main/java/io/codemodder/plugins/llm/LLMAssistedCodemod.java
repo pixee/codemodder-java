@@ -71,8 +71,6 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
       logger.debug("analysis: {}", analysis.getAnalysis());
 
       if (analysis.getRisk() == Risk.LOW) {
-        // TODO: We don't want to reprocess this file unless the codemod version changes. How do we
-        // keep track of that?
         return List.of();
       }
 
@@ -87,7 +85,6 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
 
       // If the LLM was unable to fix the threat, don't change the file.
       if (fix.getFix() == null || fix.getFix().length() == 0) {
-        // TODO: This is where we would interact with devs to understand how to fix the threat.
         logger.info("unable to fix: {}", context.path());
         return List.of();
       }
@@ -241,13 +238,13 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
 
   private ChatMessage getAnalyzeUserMessage(final String code) {
     return new ChatMessage(
-        ChatMessageRole.USER.value(), String.format(ANALYZE_USER_MESSAGE_TEMPLATE, code).strip());
+        ChatMessageRole.USER.value(), ANALYZE_USER_MESSAGE_TEMPLATE.formatted(code).strip());
   }
 
   private ChatMessage getFixUserMessage(final String code) {
     return new ChatMessage(
         ChatMessageRole.USER.value(),
-        String.format(FIX_USER_MESSAGE_TEMPLATE, getFixPrompt(), code).strip());
+        FIX_USER_MESSAGE_TEMPLATE.formatted(getFixPrompt(), code).strip());
   }
 
   /**
