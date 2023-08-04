@@ -8,14 +8,14 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
-/** Provides OpenAI-related functionality to codemodder. */
-public final class OpenAIProvider implements CodemodProvider {
+/** Provides LLM-related functionality to codemods. */
+public final class LLMProvider implements CodemodProvider {
 
   @Override
   public Set<AbstractModule> getModules(
-      final Path codeDirectory,
+      final Path repository,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
-    return Set.of(new OpenAIModule());
+    return Set.of(new LLMServiceModule());
   }
 }

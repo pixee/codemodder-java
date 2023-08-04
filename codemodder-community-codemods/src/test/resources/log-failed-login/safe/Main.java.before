@@ -1,0 +1,21 @@
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+public class Main {
+  private static final Logger LOG = LogManager.getLogger();
+
+  public static void main(String[] args) {
+    String inputUsername = args[0];
+    String inputPassword = args[1];
+
+    String actualUsername = "correctUsername";
+    String actualPassword = "correctPassword";
+
+    if (inputUsername.equals(actualUsername) && inputPassword.equals(actualPassword)) {
+      LOG.info("Login successful!");
+    } else {
+      LOG.error("Username or password incorrect");
+    }
+  }
+}
+
