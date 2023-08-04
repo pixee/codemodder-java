@@ -32,8 +32,8 @@ public final class LogFailedLoginCodemod extends LLMAssistedCodemod {
 
   @Override
   protected boolean isPatchExpected(Patch<String> patch) {
-    // This codemod should make just one modification.
-    if (patch.getDeltas().size() > 1) {
+    // This codemod should make two or fewer modifications.
+    if (patch.getDeltas().size() > 2) {
       return false;
     }
 
