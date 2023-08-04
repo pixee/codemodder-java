@@ -27,8 +27,8 @@ Our change is simple: any place we see `<http-method>` listed in a `<security-co
     </auth-constraint>
     <web-resource-collection>
       <url-pattern>/admin/*</url-pattern>
--      <http-method>GET</http-method>
--      <http-method>POST</http-method>
+-     <http-method>GET</http-method>
+-     <http-method>POST</http-method>
     </web-resource-collection>
   </security-constraint>
 ```
