@@ -1,11 +1,7 @@
 pluginManagement {
     // we proxy Gradle Plugin Portal
     repositories {
-        maven {
-            name = "pixeeArtifactory"
-            url = uri("https://pixee.jfrog.io/artifactory/default-maven-virtual")
-            credentials(PasswordCredentials::class)
-        }
+        mavenCentral()
     }
     includeBuild("../gradle/build-plugins")
 }
