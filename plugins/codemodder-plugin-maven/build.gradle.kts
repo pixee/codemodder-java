@@ -12,7 +12,7 @@ java {
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation("io.codemodder:codemodder-core")
+    implementation("io.codemodder:codemodder-base")
     implementation("io.github.pixee.maven:pom-operator:0.0.11") // TODO bring into monorepo
     {
         exclude(group = "com.google.inject", module = "guice")

@@ -15,6 +15,6 @@ plugins {
     id("io.codemodder.repositories")
 }
 
-includeBuild("codemodder-community-codemods")
+includeBuild("core-codemods")
 includeBuild("framework")
 includeBuild("plugins")

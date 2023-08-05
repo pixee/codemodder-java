@@ -33,7 +33,7 @@ java {
 }
 
 dependencies {
-    implementation("io.codemodder:codemodder-core")
+    implementation("io.codemodder:codemodder-base")
     implementation("io.codemodder:codemodder-plugin-semgrep")
     implementation("io.codemodder:codemodder-plugin-codeql")
     implementation("io.codemodder:codemodder-plugin-maven")
