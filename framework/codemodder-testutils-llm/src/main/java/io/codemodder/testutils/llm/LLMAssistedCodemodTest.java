@@ -249,27 +249,27 @@ public abstract class LLMAssistedCodemodTest {
       %s
       ```
       """;
-}
 
-enum AssessmentResult {
-  PASS,
-  FAIL;
-}
-
-class Assessment {
-  @JsonPropertyDescription("A detailed analysis of how the candidate's solution was assessed.")
-  @JsonProperty(required = true)
-  private String analysis;
-
-  @JsonPropertyDescription("The result of the assessment, either PASS or FAIL.")
-  @JsonProperty(required = true)
-  private AssessmentResult result;
-
-  public String getAnalysis() {
-    return analysis;
+  enum AssessmentResult {
+    PASS,
+    FAIL;
   }
 
-  public AssessmentResult getResult() {
-    return result;
+  static final class Assessment {
+    @JsonPropertyDescription("A detailed analysis of how the candidate's solution was assessed.")
+    @JsonProperty(required = true)
+    private String analysis;
+
+    @JsonPropertyDescription("The result of the assessment, either PASS or FAIL.")
+    @JsonProperty(required = true)
+    private AssessmentResult result;
+
+    public String getAnalysis() {
+      return analysis;
+    }
+
+    public AssessmentResult getResult() {
+      return result;
+    }
   }
 }

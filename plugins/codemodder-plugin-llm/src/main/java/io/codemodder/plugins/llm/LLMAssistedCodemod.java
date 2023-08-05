@@ -379,50 +379,50 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
       %s
       ```
       """;
-}
 
-enum Risk {
-  HIGH,
-  LOW;
-}
-
-class ThreatAnalysis {
-  @JsonPropertyDescription("A detailed analysis of how the risk was assessed.")
-  @JsonProperty(required = true)
-  private String analysis;
-
-  @JsonPropertyDescription("The risk of the security threat, either HIGH or LOW.")
-  @JsonProperty(required = true)
-  private Risk risk;
-
-  public ThreatAnalysis() {}
-
-  public ThreatAnalysis(final String analysis, final Risk risk) {
-    this.analysis = analysis;
-    this.risk = risk;
+  enum Risk {
+    HIGH,
+    LOW;
   }
 
-  public String getAnalysis() {
-    return analysis;
+  static class ThreatAnalysis {
+    @JsonPropertyDescription("A detailed analysis of how the risk was assessed.")
+    @JsonProperty(required = true)
+    private String analysis;
+
+    @JsonPropertyDescription("The risk of the security threat, either HIGH or LOW.")
+    @JsonProperty(required = true)
+    private Risk risk;
+
+    public ThreatAnalysis() {}
+
+    public ThreatAnalysis(final String analysis, final Risk risk) {
+      this.analysis = analysis;
+      this.risk = risk;
+    }
+
+    public String getAnalysis() {
+      return analysis;
+    }
+
+    public Risk getRisk() {
+      return risk;
+    }
   }
 
-  public Risk getRisk() {
-    return risk;
-  }
-}
+  static final class ThreatFix extends ThreatAnalysis {
+    @JsonPropertyDescription("The complete analyzed file with the security threat fixed.")
+    private String fix;
 
-class ThreatFix extends ThreatAnalysis {
-  @JsonPropertyDescription("The complete analyzed file with the security threat fixed.")
-  private String fix;
+    @JsonPropertyDescription("A short description of the fix. Required if the file is fixed.")
+    private String fixDescription;
 
-  @JsonPropertyDescription("A short description of the fix. Required if the file is fixed.")
-  private String fixDescription;
+    public String getFix() {
+      return fix;
+    }
 
-  public String getFix() {
-    return fix;
-  }
-
-  public String getFixDescription() {
-    return fixDescription;
+    public String getFixDescription() {
+      return fixDescription;
+    }
   }
 }
