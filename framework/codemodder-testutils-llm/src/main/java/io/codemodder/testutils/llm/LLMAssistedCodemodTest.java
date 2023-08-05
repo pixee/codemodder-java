@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.testutils.llm;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.MatcherAssert.assertThat;

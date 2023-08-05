@@ -1,6 +1,7 @@
 package io.codemodder.codemods;
 
 import io.codemodder.testutils.Metadata;
+import io.codemodder.testutils.llm.LLMAssistedCodemodTest;
 
 @Metadata(
     codemodType = LogFailedLoginCodemod.class,
