@@ -1,0 +1,16 @@
+public class MainPrint {
+    public static void main(String[] args) {
+
+        String inputUsername = args[0];
+        String inputPassword = args[1];
+
+        String actualUsername = "correctUsername";
+        String actualPassword = "correctPassword";
+
+        if (inputUsername.equals(actualUsername) && inputPassword.equals(actualPassword)) {
+            System.out.println("Login successful!");
+        } else {
+            System.out.println("Username or password incorrect");
+        }
+    }
+}

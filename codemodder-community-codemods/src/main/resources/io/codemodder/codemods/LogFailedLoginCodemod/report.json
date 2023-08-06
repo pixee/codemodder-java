@@ -1,0 +1,8 @@
+{
+  "summary": "Log failed login attempts",
+  "change": "<set by LLM>",
+  "references": [
+    "https://security.stackexchange.com/a/147261",
+    "https://security.stackexchange.com/a/189350"
+  ]
+}

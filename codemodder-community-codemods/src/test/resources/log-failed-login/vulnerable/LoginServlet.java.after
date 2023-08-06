@@ -1,0 +1,34 @@
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import org.mindrot.jbcrypt.BCrypt;
+import java.util.HashMap;
+
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    private HashMap<String, String> users = new HashMap<>();
+
+    public LoginServlet() {
+        super();
+        users.put("user1", BCrypt.hashpw("password1", BCrypt.gensalt()));
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        if (users.containsKey(username) && BCrypt.checkpw(password, users.get(username))) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write("Login successful!");
+        } else {
+            System.out.println("Failed login attempt for user: " + username);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Username or password incorrect");
+        }
+    }
+}

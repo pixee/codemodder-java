@@ -6,9 +6,11 @@ javaparser-symbolsolver = "3.15.15"
 java-security-toolkit = "1.0.6"
 java-security-toolkit-xstream = "1.0.2"
 javax-inject = "1"
+jtokkit = "0.6.1"
 commons-jexl = "3.2.1"
 logback = "1.4.5"
 maven = "3.8.7"
+openai = "0.14.0"
 picocli = "4.7.0"
 slf4j = "2.0.6"
 guice = "5.1.0"
@@ -37,9 +39,11 @@ java-security-toolkit-xstream = { module = "io.github.pixee:java-security-toolki
 javax-inject = { module="javax.inject:javax.inject", version.ref = "javax-inject"}
 jetbrains-annotations = "org.jetbrains:annotations:23.0.0"
 jfiglet = "com.github.lalyos:jfiglet:0.0.8"
+jtokkit = { module = "com.knuddels:jtokkit", version.ref="jtokkit" }
 juniversalchardet = "com.github.albfernandez:juniversalchardet:2.4.0"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
+openai-service = { module = "com.theokanning.openai-gpt3-java:service", version.ref = "openai" }
 picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
 picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
 progressbar = "me.tongfei:progressbar:0.9.3"

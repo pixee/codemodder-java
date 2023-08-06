@@ -1,0 +1,29 @@
+rules:
+  - id: log-failed-login
+    message: See LogFailedLoginCodemod.
+    severity: INFO
+    languages: [java]
+    pattern-either:
+      # Login and authentication classes.
+      - patterns:
+          - pattern: class $CLASS
+          - metavariable-regex:
+              metavariable: $CLASS
+              regex: (?i)login|authentication
+      # Login and authenticate methods.
+      - patterns:
+          - pattern: |
+              $RETURN $METHOD(...) {
+                ...
+              }
+          - metavariable-regex:
+              metavariable: $METHOD
+              regex: (?i)login|authenticate
+          - focus-metavariable: $METHOD
+      # Method statements referencing both a username and password (rare).
+      - patterns:
+          - pattern-inside: |
+              $RETURN $METHOD(...) {
+                ...
+              }
+          - pattern-regex: (?i)(username.*password)|(password.*username)

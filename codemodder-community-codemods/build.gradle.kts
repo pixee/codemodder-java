@@ -49,6 +49,7 @@ dependencies {
     testImplementation(testlibs.assertj)
     testImplementation(testlibs.mockito)
     testImplementation("io.codemodder:codemodder-testutils")
+    testImplementation("io.codemodder:codemodder-testutils-llm")
     testRuntimeOnly(testlibs.junit.jupiter.engine)
     testImplementation(testlibs.jgit)
 }
