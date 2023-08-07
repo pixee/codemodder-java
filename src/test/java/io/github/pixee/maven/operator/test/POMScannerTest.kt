@@ -63,12 +63,13 @@ class POMScannerTest: AbstractTestBase() {
     @Test
     fun testInvalidRelativePaths() {
         for (index in 1..3) {
-            val pomFile = getResourceAsFile("sample-child-with-broken-path-${index}.xml")
+            val name = "sample-child-with-broken-path-${index}.xml"
+            val pomFile = getResourceAsFile(name)
 
             try {
                 POMScanner.scanFrom(pomFile, currentDirectory)
 
-                fail("Unreachable code")
+                fail("Unreachable code for file: $name")
             } catch (e: Exception) {
                 LOGGER.info("Exception thrown: ", e)
 

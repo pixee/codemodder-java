@@ -9,7 +9,7 @@
         <groupId>br.com.ingenieux</groupId>
         <artifactId>sample-parent</artifactId>
         <version>1</version>
-        <relativePath>../../../../../../../../../../../../../sample-parent</relativePath>
+        <relativePath>../../../../../../../../../../../../../../../../../../sample-parent</relativePath>
     </parent>
 
     <artifactId>sample-child-with-relativepath</artifactId>

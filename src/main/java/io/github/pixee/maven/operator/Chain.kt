@@ -30,7 +30,7 @@ class Chain(vararg commands: Command) {
             done = nextCommand.execute(c)
 
             if (done) {
-                if (c.queryType == QueryType.NONE && (!(nextCommand is SupportCommand))) {
+                if (c.queryType == QueryType.NONE && (nextCommand !is SupportCommand)) {
                     c.modifiedByCommand = true
                 }
 
@@ -66,6 +66,7 @@ class Chain(vararg commands: Command) {
         val AVAILABLE_QUERY_COMMANDS = listOf(
             QueryType.SAFE to "QueryByResolver",
             QueryType.SAFE to "QueryByEmbedder",
+            QueryType.SAFE to "QueryByParsing",
             QueryType.UNSAFE to "QueryByInvoker",
         )
 
@@ -93,7 +94,6 @@ class Chain(vararg commands: Command) {
                     val commandClassName = "io.github.pixee.maven.operator.${it.second}"
 
                     try {
-                        @Suppress("DEPRECATION")
                         Class.forName(commandClassName).newInstance() as Command
                     } catch (e: Throwable) {
                         LOGGER.warn("Creating class '{}': ", commandClassName, e)

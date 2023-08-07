@@ -7,7 +7,7 @@
 
     <groupId>br.com.ingenieux</groupId>
     <version>1</version>
-    <artifactId>org-pom</artifactId>
+    <artifactId>super-pom</artifactId>
 
     <packaging>pom</packaging>
 </project>

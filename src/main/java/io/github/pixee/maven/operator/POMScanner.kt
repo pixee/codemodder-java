@@ -1,18 +1,36 @@
 package io.github.pixee.maven.operator
 
 import org.dom4j.Element
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
-import java.net.URI
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
 import kotlin.io.path.notExists
 
 object POMScanner {
+    private val LOGGER: Logger = LoggerFactory.getLogger(POMScanner::class.java)
+
     private val RE_WINDOWS_PATH = Regex("""^\p{Alpha}:""")
 
     @JvmStatic
     fun scanFrom(originalFile: File, topLevelDirectory: File): ProjectModelFactory {
+        val originalDocument = ProjectModelFactory.load(originalFile)
+
+        val parentPoms: List<File> = try {
+            getParentPoms(originalFile)
+        } catch (e: Exception) {
+            LOGGER.warn("While trying embedder: ", e)
+
+            return legacyScanFrom(originalFile, topLevelDirectory)
+        }
+
+        return originalDocument
+            .withParentPomFiles(parentPoms.map { POMDocumentFactory.load(it) })
+    }
+
+    private fun legacyScanFrom(originalFile: File, topLevelDirectory: File): ProjectModelFactory {
         val pomFile: POMDocument = POMDocumentFactory.load(originalFile)
         val parentPomFiles: MutableList<POMDocument> = arrayListOf()
 
@@ -25,9 +43,9 @@ object POMScanner {
             pomFileQueue.add(relativePathElement)
         }
 
-        var lastFile : File = originalFile
+        var lastFile: File = originalFile
 
-        fun resolvePath(baseFile: File, relativePath: String) : Path {
+        fun resolvePath(baseFile: File, relativePath: String): Path {
             var parentDir = baseFile
 
             if (parentDir.isFile) {
@@ -45,7 +63,7 @@ object POMScanner {
             return Paths.get(result.absolutePath)
         }
 
-        val prevPaths : MutableSet<String> = linkedSetOf()
+        val prevPaths: MutableSet<String> = linkedSetOf()
 
         while (pomFileQueue.isNotEmpty()) {
             val relativePathElement = pomFileQueue.poll()
@@ -60,7 +78,7 @@ object POMScanner {
                 throw InvalidPathException(pomFile.file, relativePath)
 
             if (prevPaths.contains(relativePath)) {
-                throw InvalidPathException(pomFile.file, relativePath, loop=true)
+                throw InvalidPathException(pomFile.file, relativePath, loop = true)
             } else {
                 prevPaths.add(relativePath)
             }
@@ -110,5 +128,23 @@ object POMScanner {
         }
 
         return !(path.startsWith("/") || path.startsWith("~"))
+    }
+
+
+    private fun getParentPoms(originalFile: File): List<File> {
+        val embedderFacadeResponse = EmbedderFacade.invokeEmbedder(
+            EmbedderFacadeRequest(offline = true, pomFile = originalFile)
+        )
+
+        val res = embedderFacadeResponse.modelBuildingResult
+
+        val rawModels = res.modelIds.map { res.getRawModel(it) }.toList()
+
+        val parentPoms: List<File> =
+            if (rawModels.size > 1) {
+                rawModels.subList(1, rawModels.size).mapNotNull { it.pomFile }.toList()
+            } else
+                emptyList()
+        return parentPoms
     }
 }

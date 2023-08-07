@@ -84,11 +84,11 @@ class ProjectModel internal constructor(
 
                     tempProperties.entries.forEach { entry ->
                         if (!result.containsKey(entry.key)) {
-                            result.put(entry.key, ArrayList())
+                            result[entry.key] = ArrayList()
                         }
 
                         val definitionList =
-                            result.get(entry.key) as MutableList<Pair<String, POMDocument>>
+                            result[entry.key] as MutableList<Pair<String, POMDocument>>
 
                         definitionList.add(entry.value to pomFile)
                     }
@@ -116,14 +116,16 @@ class ProjectModel internal constructor(
         return newPropertiesToAppend
     }
 
-    private fun propertiesDefinedOnPomDocument(pomFile: POMDocument): Map<String, String> {
-        val rootProperties =
-            pomFile.pomDocument.rootElement.elements("properties")
-                .flatMap { it.elements() }
-                .associate {
-                    it.name to it.text
-                }
-        return rootProperties
+    companion object {
+        fun propertiesDefinedOnPomDocument(pomFile: POMDocument): Map<String, String> {
+            val rootProperties =
+                pomFile.pomDocument.rootElement.elements("properties")
+                    .flatMap { it.elements() }
+                    .associate {
+                        it.name to it.text
+                    }
+            return rootProperties
+        }
     }
 }
 
