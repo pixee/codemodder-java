@@ -6,7 +6,13 @@
 
     <groupId>io.github.pixee.maven</groupId>
     <artifactId>pom-operator</artifactId>
-    <version>0.0.15</version>
+    <version>0.0.16-SNAPSHOT</version>
+
+    <name>POM Operator</name>
+
+    <description>A Library for Parsing and Modifying POMS</description>
+
+    <url>https://github.com/pixee/pom-operator</url>
 
     <scm>
         <connection>scm:git:git://github.com/pixee/pom-operator.git</connection>
