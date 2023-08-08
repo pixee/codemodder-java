@@ -9,11 +9,38 @@
     <version>0.0.14-SNAPSHOT</version>
 
     <scm>
-        <connection>scm:git:${project.scm.url}</connection>
-        <developerConnection>scm:git:${project.scm.url}</developerConnection>
-        <url>git@github.com:pixee/pom-operator.git</url>
+        <connection>scm:git:git://github.com/pixee/pom-operator.git</connection>
+        <developerConnection>scm:git:ssh://github.com:pixee/pom-operator.git</developerConnection>
+        <url>https://github.com/pixee/pom-operator/tree/master</url>
         <tag>HEAD</tag>
     </scm>
+
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <developers>
+        <developer>
+            <name>Aldrin Leal</name>
+            <organization>pixee</organization>
+            <organizationUrl>https://pixee.ai/</organizationUrl>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -24,20 +51,11 @@
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <versions.maven.resolver>1.9.2</versions.maven.resolver>
         <versions.maven.core>3.8.6</versions.maven.core>
+        <versions.maven-javadoc-plugin>2.9.1</versions.maven-javadoc-plugin>
+        <versions.nexus-staging-maven-plugin>1.6.13</versions.nexus-staging-maven-plugin>
+        <versions.maven-source-plugin>2.2.1</versions.maven-source-plugin>
+        <versions.maven-gpg-plugin>3.0.1</versions.maven-gpg-plugin>
     </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>pixee-libs-release</id>
-            <name>a0cpnsoovnjqt-artifactory-primary-0-releases</name>
-            <url>https://pixee.jfrog.io/artifactory/mailman</url>
-        </repository>
-        <snapshotRepository>
-            <id>pixee-libs-snapshot</id>
-            <name>a0cpnsoovnjqt-artifactory-primary-0-snapshots</name>
-            <url>https://pixee.jfrog.io/artifactory/mailman</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -277,14 +295,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>${maven-release-plugin.version}</version>
-                    <configuration>
-                        <scmCommentPrefix>[ci skip]</scmCommentPrefix>
-                        <tagNameFormat>@{project.version}</tagNameFormat>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <groupId>org.jetbrains.kotlin</groupId>
                     <artifactId>kotlin-maven-plugin</artifactId>
                     <version>${kotlin.version}</version>
@@ -319,6 +329,53 @@
                         <excludeReactor>false</excludeReactor>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>${versions.maven-gpg-plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${versions.maven-source-plugin}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>${versions.nexus-staging-maven-plugin}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <serverId>ossrh</serverId>
+                        <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                        <keepStagingRepositoryOnCloseRuleFailure>true
+                        </keepStagingRepositoryOnCloseRuleFailure>
+                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${versions.maven-javadoc-plugin}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>javadoc</goal>
+                                <goal>jar</goal>
+                                <goal>test-javadoc</goal>
+                                <goal>test-jar</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -326,6 +383,7 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
@@ -351,13 +409,20 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -408,6 +473,32 @@
                                     <goal>integration-test</goal>
                                     <goal>verify</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

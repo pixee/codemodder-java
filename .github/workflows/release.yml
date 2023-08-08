@@ -2,15 +2,15 @@ name: Create Release on Semantic Version Tag
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - "v*"
 
 env:
   M2_HOME: /opt/hostedtoolcache/maven/3.8.2
   JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/11.0.17-8
 
 jobs:
-  pre-release:
+  release:
     runs-on: "ubuntu-latest"
 
     steps:
@@ -22,22 +22,27 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.4
         with:
           maven-version: 3.8.2
 
-      - name: "Setting up Artifactory authentication"
-        uses: s4u/maven-settings-action@v2
-        with:
-          servers: |
-            [
-              {"id": "pixee-libs-release", "username": "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"},
-              {"id": "pixee-libs-snapshot", "username": "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"}
-            ]
-          githubServer: false
-
-      - name: Build with Maven
+      - name: "Publish to Maven Central"
         run: |
           mvn -N -B install
+            -Prelease \
+            -X \
+            --no-transfer-progress \
+            --batch-mode \
+            clean \
+            deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSPHRASE }}
