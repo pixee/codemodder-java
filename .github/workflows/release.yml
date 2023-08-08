@@ -35,7 +35,7 @@ jobs:
 
       - name: "Publish to Maven Central"
         run: |
-          mvn -N -B install
+          mvn -N -B \
             -Prelease \
             -X \
             --no-transfer-progress \

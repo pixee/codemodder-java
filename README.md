@@ -50,7 +50,7 @@ It implements a Chain of Responsibility strategy - each `Command` class attempts
 e.g. to generate version `0.0.2`:
 
 ```
-(mvn versions:set -DnewVersion=0.0.3 && mvn clean package source:jar javadoc:jar deploy && git commit -am "Generating Tag" && git tag v0.0.3 && git push && git push --tags)
+(mvn versions:set -DnewVersion=0.0.3 && git commit -am "Generating Tag" && git tag v0.0.3 && git push && git push --tags)
 (export V='0.0.11-SNAPSHOT' ; mvn versions:set -DnewVersion=${V} && (cd java-sample ; mvn versions:set -DnewVersion=${V} && git commit -am "Generating development version" && git push))
 ```
 
