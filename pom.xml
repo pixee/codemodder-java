@@ -6,7 +6,7 @@
 
     <groupId>io.github.pixee.maven</groupId>
     <artifactId>pom-operator</artifactId>
-    <version>0.0.16-SNAPSHOT</version>
+    <version>0.0.16</version>
 
     <name>POM Operator</name>
 
