@@ -4,12 +4,6 @@ plugins {
     id("io.codemodder.maven-publish")
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
-}
-
 dependencies {
     compileOnly(libs.jetbrains.annotations)
     implementation("io.codemodder:codemodder-core")
