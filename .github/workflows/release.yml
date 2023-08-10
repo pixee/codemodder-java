@@ -57,10 +57,12 @@ jobs:
 
       - uses: gradle/gradle-build-action@v2
         with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           arguments: --quiet setVersion -PnewVersion=${{ inputs.version }}
 
       - uses: gradle/gradle-build-action@v2
         with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           arguments: --console=plain --quiet build publish
 
       # share version bump
@@ -74,6 +76,7 @@ jobs:
       # set version for next release
       - uses: gradle/gradle-build-action@v2
         with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           arguments: -q bumpPatch applySnapshot
 
       - run: |
