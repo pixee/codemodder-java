@@ -55,5 +55,5 @@ python -m site
 
 ### Run the Community Codemods
 ```shell
-./gradlew :codemodder-community-codemods:run --args='--output /path/to/my.codetf --dry-run /path/to/project/'
+./gradlew :core-codemods:run --args='--output /path/to/my.codetf --dry-run /path/to/project/'
 ```
