@@ -53,7 +53,7 @@ python -m site
 ./gradlew check
 ```
 
-### Run the Community Codemods
+### Run the Core Codemods
 ```shell
 ./gradlew :core-codemods:run --args='--output /path/to/my.codetf --dry-run /path/to/project/'
 ```

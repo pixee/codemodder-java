@@ -51,7 +51,7 @@ public final class DefaultCodemods {
   }
 
   /**
-   * Entry point for community codemods.
+   * Entry point for core codemods.
    *
    * @param args the arguments to pass to the runner
    */
