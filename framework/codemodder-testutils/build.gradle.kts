@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":codemodder-core"))
+    api(project(":codemodder-base"))
 
     implementation(testlibs.bundles.junit.jupiter)
     implementation(testlibs.bundles.hamcrest)
