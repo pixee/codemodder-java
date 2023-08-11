@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation("io.codemodder:codemodder-core") {
+    implementation("io.codemodder:codemodder-base") {
         exclude(group = "com.google.inject", module = "guice")
     }
     implementation("com.google.inject:guice:5.1.0")

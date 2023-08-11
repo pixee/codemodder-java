@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation("io.codemodder:codemodder-core")
+    implementation("io.codemodder:codemodder-base")
     implementation("net.sourceforge.pmd:pmd-java:7.0.0-rc3")
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)

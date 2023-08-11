@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation("io.codemodder:codemodder-core")
+    implementation("io.codemodder:codemodder-base")
     implementation("io.codemodder:codemodder-plugin-llm")
     implementation("io.codemodder:codemodder-testutils")
     implementation(testlibs.bundles.hamcrest)

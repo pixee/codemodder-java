@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation("io.codemodder:codemodder-core")
+    implementation("io.codemodder:codemodder-base")
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
     testImplementation(testlibs.assertj)
