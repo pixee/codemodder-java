@@ -1,4 +1,4 @@
-rootProject.name = "codemodder-community-codemods"
+rootProject.name = "core-codemods"
 
 pluginManagement {
     includeBuild("../gradle/build-settings")
