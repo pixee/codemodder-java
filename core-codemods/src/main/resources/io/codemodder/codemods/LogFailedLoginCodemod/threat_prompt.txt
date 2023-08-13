@@ -4,7 +4,7 @@ Logging failed login attempts is important for security reasons, as it can help 
 
 In your analysis, please answer the following:
 - Does the code include login validation?
-- Does the code log any messages when login validation fails? If so, with what logging framework?
+- What logging framework does the code use? Does the code log any messages when login validation fails?
 - Does the code print any messages to the console when login validation fails?
 - Does the code throw any exceptions when login validation fails? If so, this may be considered logging.
 

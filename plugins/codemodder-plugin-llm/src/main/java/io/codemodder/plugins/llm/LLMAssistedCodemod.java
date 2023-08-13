@@ -64,9 +64,9 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
         });
 
     try {
-      String code = getCode(context);
+      CodemodInvocationContextFile file = new CodemodInvocationContextFile(context.path());
 
-      ThreatAnalysis analysis = analyzeThreat(code);
+      ThreatAnalysis analysis = analyzeThreat(file);
       logger.debug("risk: {}", analysis.getRisk());
       logger.debug("analysis: {}", analysis.getAnalysis());
 
@@ -74,9 +74,11 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
         return List.of();
       }
 
-      ThreatFix fix = fixThreat(code);
+      ThreatFix fix = fixThreat(file);
       logger.debug("risk: {}", fix.getRisk());
       logger.debug("analysis: {}", fix.getAnalysis());
+      logger.debug("fix: {}", fix.getFix());
+      logger.debug("fix description: {}", fix.getFixDescription());
 
       // If our second look determined that the risk of the threat is low, don't change the file.
       if (fix.getRisk() == Risk.LOW) {
@@ -89,9 +91,11 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
         return List.of();
       }
 
-      String fixedCode = fixLeadingAndTrailingWhitespace(code, fix.getFix());
+      // Apply the fix.
+      List<String> fixedLines = LLMDiffs.applyDiff(file.getLines(), fix.getFix());
 
-      Patch<String> patch = diff(code, fixedCode);
+      // Ensure the end result isn't wonky.
+      Patch<String> patch = DiffUtils.diff(file.getLines(), fixedLines);
       if (patch.getDeltas().size() == 0 || !isPatchExpected(patch)) {
         logger.error("unexpected patch: {}", patch);
         return List.of();
@@ -99,8 +103,8 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
 
       try {
         // Replace the file with the fixed version.
-        Files.writeString(
-            context.path(), fixLineSeparator(code, fixedCode), getCharset(context.path()));
+        String fixedFile = String.join(file.getLineSeparator(), fixedLines);
+        Files.writeString(context.path(), fixedFile, file.getCharset());
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
@@ -165,17 +169,9 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
     }
   }
 
-  private String getCode(final CodemodInvocationContext context) {
-    try {
-      return Files.readString(context.path(), getCharset(context.path()));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-  }
-
-  private ThreatAnalysis analyzeThreat(final String code) {
+  private ThreatAnalysis analyzeThreat(final CodemodInvocationContextFile file) {
     ChatMessage systemMessage = getSystemMessage();
-    ChatMessage userMessage = getAnalyzeUserMessage(code);
+    ChatMessage userMessage = getAnalyzeUserMessage(file);
 
     int tokenCount = countTokens(List.of(systemMessage, userMessage));
     if (tokenCount > 3796) {
@@ -193,9 +189,9 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
         "gpt-3.5-turbo-0613", 0.2D, systemMessage, userMessage, ThreatAnalysis.class);
   }
 
-  private ThreatFix fixThreat(final String code) {
+  private ThreatFix fixThreat(final CodemodInvocationContextFile file) {
     return getLLMResponse(
-        "gpt-4-0613", 0D, getSystemMessage(), getFixUserMessage(code), ThreatFix.class);
+        "gpt-4-0613", 0D, getSystemMessage(), getFixUserMessage(file), ThreatFix.class);
   }
 
   private <T> T getLLMResponse(
@@ -233,84 +229,24 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
   private ChatMessage getSystemMessage() {
     return new ChatMessage(
         ChatMessageRole.SYSTEM.value(),
-        SYSTEM_MESSAGE_TEMPLATE.formatted(getThreatPrompt()).strip());
+        SYSTEM_MESSAGE_TEMPLATE.formatted(getThreatPrompt().strip()).strip());
   }
 
-  private ChatMessage getAnalyzeUserMessage(final String code) {
+  private ChatMessage getAnalyzeUserMessage(final CodemodInvocationContextFile file) {
     return new ChatMessage(
-        ChatMessageRole.USER.value(), ANALYZE_USER_MESSAGE_TEMPLATE.formatted(code).strip());
+        ChatMessageRole.SYSTEM.value(),
+        ANALYZE_USER_MESSAGE_TEMPLATE
+            .formatted(file.getFileName(), file.formatLinesWithLineNumbers())
+            .strip());
   }
 
-  private ChatMessage getFixUserMessage(final String code) {
+  private ChatMessage getFixUserMessage(final CodemodInvocationContextFile file) {
     return new ChatMessage(
         ChatMessageRole.USER.value(),
-        FIX_USER_MESSAGE_TEMPLATE.formatted(getFixPrompt(), code).strip());
-  }
-
-  /**
-   * Fixes a string so that its leading and trailing whitespace match the original.
-   *
-   * @param original The original string.
-   * @param revised The revised string.
-   * @return The revised string with the original string's leading and trailing whitespace.
-   */
-  private String fixLeadingAndTrailingWhitespace(final String original, final String revised) {
-    char[] chars = original.toCharArray();
-
-    StringBuilder leadingWhitespace = new StringBuilder();
-    for (char c : chars) {
-      if (Character.isWhitespace(c)) {
-        leadingWhitespace.append(c);
-      } else {
-        break;
-      }
-    }
-
-    StringBuilder trailingWhitespace = new StringBuilder();
-    for (int i = chars.length - 1; i >= 0; i--) {
-      if (Character.isWhitespace(chars[i])) {
-        trailingWhitespace.insert(0, chars[i]);
-      } else {
-        break;
-      }
-    }
-
-    return leadingWhitespace + revised.strip() + trailingWhitespace;
-  }
-
-  /**
-   * Fixes a string so that its line separator matches the original.
-   *
-   * @param original The original string.
-   * @param revised The revised string.
-   * @return The revised string with the original string's line separator.
-   */
-  private String fixLineSeparator(final String original, final String revised) {
-    String lineSeparator = "\n";
-
-    Matcher m = Pattern.compile("(\\R)").matcher(original);
-    if (m.find()) {
-      // This assumes that the first line separator found is the one to use.
-      lineSeparator = m.group(1);
-    }
-
-    return String.join(lineSeparator, revised.split("\\R", -1));
-  }
-
-  /**
-   * Computes the difference between the original and revised strings.
-   *
-   * @param original The original string.
-   * @param revised The revised string.
-   * @return The diff.
-   */
-  private Patch<String> diff(final String original, final String revised) {
-    // Set the limit to -1 when splitting so the diff compares trailing whitespace.
-    return DiffUtils.diff(List.of(original.split("\\R", -1)), List.of(revised.split("\\R", -1)));
-  }
-
-  private Charset getCharset(Path path) throws IOException {
-    return Charset.forName(EncodingDetector.create().detect(path).orElse("UTF-8"));
+        FIX_USER_MESSAGE_TEMPLATE
+            .formatted(
+                getFixPrompt().strip(), file.getFileName(), file.formatLinesWithLineNumbers())
+            .strip());
   }
 
   /**
@@ -356,29 +292,94 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
 
   private static final String ANALYZE_USER_MESSAGE_TEMPLATE =
       """
-      Analyze the file below and save your threat analysis.
+      A file with line numbers is provided below. Analyze it and save your threat analysis.
 
-      ```java
+      --- %s
       %s
-      ```
       """;
 
   private static final String FIX_USER_MESSAGE_TEMPLATE =
       """
-      Analyze the file below and save your threat analysis.
-
-      If the risk is HIGH, use these requirements to create a fixed file:
-      - Preserve ALL of the formatting and comments from the original file.
-      - Change ONLY what is necessary to fix the vulnerability.
-      - DO NOT omit any code from the fixed file for brevity.
+      A file with line numbers is provided below. Analyze it. If the risk is HIGH, use these rules \
+      to make the MINIMUM number of changes necessary to reduce the file's risk to LOW:
+      - Each change MUST be syntactically correct.
+      - DO NOT change the file's formatting or comments.
       %s
 
-      Include the COMPLETE fixed file and a description of the changes in your analysis.
+      Create a diff patch for the changed file, using the unified format with a header. Include \
+      the diff patch and a summary of the changes with your threat analysis.
 
-      ```java
+      Save your threat analysis.
+
+      --- %s
       %s
-      ```
       """;
+
+  /**
+   * Provides some methods to simplify working with the file at {@link
+   * CodemodInvocationContext#path()}.
+   */
+  static final class CodemodInvocationContextFile {
+    private final String fileName;
+    private final Charset charset;
+
+    private final String lineSeparator;
+    private final List<String> lines;
+
+    public CodemodInvocationContextFile(final Path path) {
+      fileName = path.getFileName().toString();
+
+      try {
+        charset = Charset.forName(EncodingDetector.create().detect(path).orElse("UTF-8"));
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
+
+      try {
+        String s = Files.readString(path, charset);
+        lineSeparator = detectLineSeparator(s);
+        lines = List.of(s.split("\\R", -1));
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
+    }
+
+    public String getFileName() {
+      return fileName;
+    }
+
+    public Charset getCharset() {
+      return charset;
+    }
+
+    public String getLineSeparator() {
+      return lineSeparator;
+    }
+
+    public List<String> getLines() {
+      return lines;
+    }
+
+    public String formatLinesWithLineNumbers() {
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < lines.size(); i++) {
+        sb.append(i + 1);
+        sb.append(": ");
+        sb.append(lines.get(i));
+        sb.append("\n");
+      }
+      return sb.toString();
+    }
+
+    private String detectLineSeparator(final String s) {
+      Matcher m = Pattern.compile("(\\R)").matcher(s);
+      if (m.find()) {
+        // This assumes that the first line separator found is the one to use.
+        return m.group(1);
+      }
+      return "\n";
+    }
+  }
 
   enum Risk {
     HIGH,
@@ -411,7 +412,8 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
   }
 
   static final class ThreatFix extends ThreatAnalysis {
-    @JsonPropertyDescription("The complete analyzed file with the security threat fixed.")
+    @JsonPropertyDescription(
+        "The fix as a diff patch in unified format. Required if the risk is HIGH.")
     private String fix;
 
     @JsonPropertyDescription("A short description of the fix. Required if the file is fixed.")
