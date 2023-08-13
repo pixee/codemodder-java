@@ -1,5 +1,7 @@
 package io.codemodder;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
@@ -179,6 +181,10 @@ final class CLI implements Callable<Integer> {
 
   @Override
   public Integer call() throws IOException {
+    if (verbose) {
+      LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+      context.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME).setLevel(Level.DEBUG);
+    }
 
     if (listCodemods) {
       for (Class<? extends CodeChanger> codemodType : codemodTypes) {
