@@ -1,8 +1,6 @@
 package io.codemodder.plugins.llm;
 
 import com.google.inject.AbstractModule;
-import com.theokanning.openai.service.OpenAiService;
-import java.time.Duration;
 
 /** Provides configured LLM services. */
 public final class LLMServiceModule extends AbstractModule {
@@ -12,8 +10,6 @@ public final class LLMServiceModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(OpenAIService.class).toProvider(() -> new OpenAIService(getToken()));
-    bind(OpenAiService.class)
-        .toProvider(() -> new OpenAiService(getToken(), Duration.ofSeconds(60)));
   }
 
   private String getToken() {

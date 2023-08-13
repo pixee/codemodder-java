@@ -1,0 +1,3 @@
+- Remove ALL lines that log plaintext sensitive data at level INFO or higher.
+- Remove ALL lines that print plaintext sensitive data using `System.out.println`.
+- If you are unsure whether the sensitive data is included in the message, DO NOT remove or change the line.

@@ -2,17 +2,20 @@ package com.acme.testcode;
 
 public class Test {
 
+  private static final Log log;
+  private static final Logger LOGGER;
+
   public Auth login(final String securityToken) {
     String user = serviceReq.getUser();
     String pass = serviceReq.getPassword();
-    log.info("User and password: {}:{}", user, pass);
+    System.out.println("User and password: " + user + ":" + pass);
     return auth.login(user, pass);
   }
 
   public Auth withUpperLogger(final String securityToken) {
       String user = serviceReq.getUser();
       String pass = serviceReq.getPassword();
-      LOGGER.info("User and password: {}:{}", user, pass);
+      LOGGER.warn("User and password: {}:{}", user, pass);
       return auth.login(user, pass);
     }
 
