@@ -29,7 +29,7 @@ guice = { module = "com.google.inject:guice", version.ref = "guice" }
 immutables = "org.immutables:value:2.9.0"
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
-javadiff = "io.github.java-diff-utils:java-diff-utils:4.9"
+javadiff = "io.github.java-diff-utils:java-diff-utils:4.12"
 javaparser-core = { module = "com.github.javaparser:javaparser-core", version.ref = "javaparser-core" }
 javaparser-symbolsolver-core = { module = "com.github.javaparser:javaparser-symbol-solver-core", version.ref = "javaparser-core" }
 javaparser-symbolsolver-model = { module = "com.github.javaparser:javaparser-symbol-solver-model", version.ref = "javaparser-symbolsolver" }
