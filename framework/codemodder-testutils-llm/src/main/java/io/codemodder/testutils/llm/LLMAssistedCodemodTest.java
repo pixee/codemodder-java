@@ -175,7 +175,7 @@ public abstract class LLMAssistedCodemodTest {
                 original.getFileName().toString(),
                 readAllLines(original),
                 diff(original, revised),
-                3))
+                5))
         + "\n";
   }
 
@@ -208,12 +208,13 @@ public abstract class LLMAssistedCodemodTest {
                         ChatMessageRole.SYSTEM.value(),
                         SYSTEM_MESSAGE_TEMPLATE
                             .formatted(
-                                getRequirementsPrompt(), getUnifiedDiff(before, expectedAfter))
+                                getRequirementsPrompt().strip(),
+                                getUnifiedDiff(before, expectedAfter).strip())
                             .strip()),
                     new ChatMessage(
                         ChatMessageRole.USER.value(),
                         USER_MESSAGE_TEMPLATE
-                            .formatted(getUnifiedDiff(before, actualAfter))
+                            .formatted(getUnifiedDiff(before, actualAfter).strip())
                             .strip())))
             .functions(functionExecutor.getFunctions())
             .functionCall(ChatCompletionRequestFunctionCall.of(function.getName()))
@@ -233,14 +234,15 @@ public abstract class LLMAssistedCodemodTest {
       The interviewee was given code and asked to modify it to meet these requirements:
       %s
 
-      An example of a PASS:
+      A PASS example:
       ```diff
       %s
       ```
 
       You will be given the interviewee's solution in unified diff format. Analyze the changes \
-      line-by-line, compare them to the example, and assess whether they PASS or FAIL the \
-      assignment. If the changes have any syntax errors, they automatically FAIL.
+      line-by-line, compare them to the PASS example, and assess whether they PASS or FAIL the \
+      assignment. If the changes have any syntax errors or are made in a block of code that does \
+      not meet the requirements, they automatically FAIL.
       """;
 
   private static final String USER_MESSAGE_TEMPLATE =

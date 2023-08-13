@@ -26,3 +26,6 @@
   line separators (i.e. CR+LF).
 * [`LoginValidate.java.before`](vulnerable/LoginValidate.java.before) - Servlet that redirects a
   client on failed login attempts but does not log anything ([source](https://github.com/vikkyp20/LoginModule/blob/d6ca86391b1e5961fb213366a1eb1b1bbb35b751/src/java/login/LoginValidate.java)).
+* [`MainFrame.java.before`](vulnerable/MainFrame.java.before) - `JFrame` login form that imports
+  `java.util.logging` (JUL) but does not log anything on failed login attempts ([source](https://itsourcecode.com/free-projects/java-projects/login-code-in-java-with-source-code/)).
+  This file is intentionally poorly formatted and includes leading and trailing whitespace.
