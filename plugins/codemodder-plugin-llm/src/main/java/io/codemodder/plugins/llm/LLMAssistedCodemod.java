@@ -109,9 +109,9 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
         throw new UncheckedIOException(e);
       }
 
-      return List.of(
-          CodemodChange.from(
-              patch.getDeltas().get(0).getSource().getPosition(), fix.getFixDescription()));
+      // Report all the changes at the line number of the first change.
+      int line = patch.getDeltas().get(0).getSource().getPosition() + 1; // Position is 0-based.
+      return List.of(CodemodChange.from(line, fix.getFixDescription()));
     } catch (Exception e) {
       logger.error("failed to process: {}", context.path(), e);
       throw e;
