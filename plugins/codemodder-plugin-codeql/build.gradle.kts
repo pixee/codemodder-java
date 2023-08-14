@@ -4,6 +4,8 @@ plugins {
     id("io.codemodder.maven-publish")
 }
 
+description = "Codemod plugin for CodeQL"
+
 dependencies {
     compileOnly(libs.jetbrains.annotations)
     implementation("io.codemodder:codemodder-base")

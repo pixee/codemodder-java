@@ -4,6 +4,8 @@ plugins {
     id("io.codemodder.maven-publish")
 }
 
+description = "Base framework for writing codemods in Java"
+
 dependencies {
     compileOnly(libs.jetbrains.annotations)
 

@@ -4,6 +4,8 @@ plugins {
     id("io.codemodder.maven-publish")
 }
 
+description = "Utilities for testing llm-based codemods"
+
 dependencies {
     implementation("io.codemodder:codemodder-base")
     implementation("io.codemodder:codemodder-plugin-llm")

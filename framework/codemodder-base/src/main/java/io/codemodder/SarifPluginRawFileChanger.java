@@ -34,7 +34,7 @@ public abstract class SarifPluginRawFileChanger extends RawFileChanger {
    *
    * @param context the context of this files transformation
    * @param results the given SARIF results to act on
-   * @return a {@link List} of {@Link CodemodChange}s representing changes in the file.
+   * @return a {@link List} of {@link CodemodChange}s representing changes in the file.
    */
   public abstract List<CodemodChange> onFileFound(
       CodemodInvocationContext context, List<Result> results);

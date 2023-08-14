@@ -45,7 +45,7 @@ import org.jetbrains.annotations.VisibleForTesting;
  *
  * <p>Current Limitations are:
  *
- * <p>a. We skip parent finding if there's not a <relativePath/> declaration (this is by design), so
+ * <p>a. We skip parent finding if there's not a relativePath declaration (this is by design), so
  * sometimes pom finding will fail on purpose b. there are several flags on ProjectModelFactory
  * which aren't applied. They relate to verisons, upgrading and particularly: Actives Profiles c. If
  * you need anything declared in a ~/.m2/settings.xml, we don't support that (e.g., passwords or
