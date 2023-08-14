@@ -4,6 +4,8 @@ plugins {
     id("io.codemodder.maven-publish")
 }
 
+description = "Utilities for testing codemods"
+
 dependencies {
     api(project(":codemodder-base"))
 

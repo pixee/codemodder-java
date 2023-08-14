@@ -27,15 +27,19 @@ public interface CodemodReporterStrategy {
   List<String> getReferences();
 
   /**
-   * A {@link CodemodReporterStrategy} that reports based on text from a predictable location on classpath. This is an alternative to
-   * storing data inline to the Java source code of your {@link CodeChanger}. It's easier to maintain this
-   * "data" outside of code, so we prefer a simple mechanism for doing that. Both the files read are expected to be in
-   * <pre>/com/acme/MyCodemod/</pre> (assuming that's the name of your codemod type.)
+   * A {@link CodemodReporterStrategy} that reports based on text from a predictable location on
+   * classpath. This is an alternative to storing data inline to the Java source code of your {@link
+   * CodeChanger}. It's easier to maintain this "data" outside of code, so we prefer a simple
+   * mechanism for doing that. Both the files read are expected to be in
    *
-   * <p>The first expected file in that directory is <pre>report.json</pre>. It contains most of the fields we want to report:
+   * <pre>/com/acme/MyCodemod/</pre>
+   *
+   * (assuming that's the name of your codemod type.)
+   *
+   * <p>The first expected file in that directory is {@code report.json}. It contains most of the
+   * fields we want to report:
    *
    * <pre>{@code
-   *
    * {
    *     "summary": "A headline describing the changes provided by this codemod",
    *     "control": "A URL linking to the source of the security control added",
@@ -44,15 +48,20 @@ public interface CodemodReporterStrategy {
    *          "A URL for further reading",
    *          "Another URL for further reading"
    *     ]
+   * }
    * }</pre>
    *
-   * <p>The second file is <pre>description.md</pre>, and it provides last field needed by a {@link CodemodReporterStrategy } is the description of the codemod itself. This is expected
-   * to be a bigger piece of text, and thus it is stored in a separate file where it can be easily edited with an IDE supporting markdown.
+   * <p>The second file is ${@code description.md}, and it provides last field needed by a {@link
+   * CodemodReporterStrategy } is the description of the codemod itself. This is expected to be a
+   * bigger piece of text, and thus it is stored in a separate file where it can be easily edited
+   * with an IDE supporting markdown.
    *
-   * Thus, in a typical Java project, using this {@link CodemodReporterStrategy } would mean your artifact would retain at least these 3 files:
+   * <p>Thus, in a typical Java project, using this {@link CodemodReporterStrategy } would mean your
+   * artifact would retain at least these 3 files:
+   *
    * <ul>
-   *   <li>src/main/java/com/acme/MyCodemod.java</li>
-   *   <li>src/main/resources/com/acme/MyCodemod/report.json</li>
+   *   <li>src/main/java/com/acme/MyCodemod.java
+   *   <li>src/main/resources/com/acme/MyCodemod/report.json
    *   <li>src/main/resources/com/acme/MyCodemod/description.mdli>
    * </ul>
    *

@@ -8,6 +8,8 @@ plugins {
 
 val main = "io.codemodder.codemods.DefaultCodemods"
 
+description = "Codemods for fixing common errors across many Java projects"
+
 application {
     mainClass.set(main)
 }

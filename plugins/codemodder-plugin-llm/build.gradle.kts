@@ -4,6 +4,8 @@ plugins {
     id("io.codemodder.maven-publish")
 }
 
+description = "Codemod plugin for augmenting transformation with LLM assisted analysis and fixes"
+
 dependencies {
     compileOnly(libs.jetbrains.annotations)
     implementation("io.codemodder:codemodder-base") {

@@ -4,6 +4,8 @@ plugins {
     id("io.codemodder.maven-publish")
 }
 
+description = "Plugin for providing Maven dependency management functions to codemods."
+
 dependencies {
     compileOnly(libs.jetbrains.annotations)
     implementation("io.codemodder:codemodder-base")
