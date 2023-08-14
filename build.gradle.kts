@@ -35,3 +35,16 @@ tasks.register(PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME) {
         }
     dependsOn(tasks)
 }
+
+tasks.register(MavenPublishPlugin.PUBLISH_LOCAL_LIFECYCLE_TASK_NAME) {
+    group = "lifecycle"
+    description = "Runs the ${MavenPublishPlugin.PUBLISH_LOCAL_LIFECYCLE_TASK_NAME} task for all included builds."
+    val tasks =
+            gradle.includedBuilds.filter {
+                // filter out the gradle build logic builds, because we never publish artifacts from there
+                !it.projectDir.parentFile.name.equals("gradle")
+            }.map {
+                it.task(":${MavenPublishPlugin.PUBLISH_LOCAL_LIFECYCLE_TASK_NAME}")
+            }
+    dependsOn(tasks)
+}
