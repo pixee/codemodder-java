@@ -1,6 +1,17 @@
 plugins {
     alias(buildlibs.plugins.fileversioning)
+    alias(buildlibs.plugins.nexus.publish)
 }
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
+    }
+}
+
 
 /*
  In a composite build, running lifecycle tasks (such as check) from the root will not automatically

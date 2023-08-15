@@ -12,4 +12,5 @@ spotless = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.re
 
 [plugins]
 fileversioning = { id = "de.epitschke.gradle-file-versioning", version.ref = "fileversioning" }
+nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version = "1.3.0" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
