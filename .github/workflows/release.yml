@@ -24,6 +24,7 @@ jobs:
       ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSPHRASE }}
       ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
       ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_TOKEN }}
+      ORG_GRADLE_PROJECT_pixeeBuild: true
 
     steps:
       - uses: actions/checkout@v3
