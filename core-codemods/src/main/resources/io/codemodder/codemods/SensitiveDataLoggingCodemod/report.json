@@ -1,5 +1,9 @@
 {
-  "summary" : "Removed sensitive data from logs",
-  "change" : "Removed log statement which appeared to include sensitive data",
-  "references" : ["https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html", "https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/", "https://cwe.mitre.org/data/definitions/532.html"]
+  "summary": "Removed sensitive data from logs",
+  "change": "<set by LLM>",
+  "references": [
+    "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html",
+    "https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/",
+    "https://cwe.mitre.org/data/definitions/532.html"
+  ]
 }

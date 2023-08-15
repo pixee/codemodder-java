@@ -1,0 +1,20 @@
+rules:
+  - id: sensitive-data-logging
+    message: See SensitiveDataLoggingCodemod.
+    severity: INFO
+    languages:
+      - java
+    patterns:
+      - pattern-either:
+          - patterns:
+              - pattern-either:
+                  - pattern: (Log $X).$LEVEL(...,$ARG,...)
+                  - pattern: (Logger $X).$LEVEL(...,$ARG,...)
+                  - pattern: (Logger $X).log($LEVEL,...,$ARG,...)
+              - metavariable-pattern:
+                  metavariable: $LEVEL
+                  pattern-regex: (?i)info|warn|error|fatal|severe
+          - pattern: System.out.println($ARG)
+      - metavariable-pattern:
+          metavariable: $ARG
+          pattern-regex: (?i)password|secret|token|key|credentials|ssn

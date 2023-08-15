@@ -1,53 +1,48 @@
 package io.codemodder.codemods;
 
-import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.theokanning.openai.service.OpenAiService;
+import com.github.difflib.patch.AbstractDelta;
+import com.github.difflib.patch.DeleteDelta;
+import com.github.difflib.patch.Patch;
 import io.codemodder.Codemod;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.Line;
 import io.codemodder.ReviewGuidance;
-import io.codemodder.plugins.llm.OpenAIGPT35TurboCodeChanger;
-import java.io.IOException;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.IntStream;
+import io.codemodder.RuleSarif;
+import io.codemodder.plugins.llm.LLMAssistedCodemod;
+import io.codemodder.plugins.llm.OpenAIService;
+import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
-/** A cross-language codemod that removes any sensitive data being logged. */
+/** A codemod that removes any sensitive data being logged. */
 @Codemod(
     id = "pixee:java/sensitive-data-logging",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class SensitiveDataLoggingCodemod extends OpenAIGPT35TurboCodeChanger {
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
+public final class SensitiveDataLoggingCodemod extends LLMAssistedCodemod {
 
   @Inject
-  public SensitiveDataLoggingCodemod(final OpenAiService openAIService) {
-    super(openAIService);
+  public SensitiveDataLoggingCodemod(
+      @SemgrepScan(ruleId = "sensitive-data-logging") final RuleSarif sarif,
+      final OpenAIService openAI) {
+    super(sarif, openAI);
   }
 
   @Override
-  protected IntStream findLinesOfInterest(final CodemodInvocationContext context)
-      throws IOException {
-    return context
-        .lines()
-        .filter(
-            line ->
-                loggingCallPattern.matcher(line.content()).find()
-                    && KEYWORDS.stream()
-                        .anyMatch(keyword -> containsIgnoreCase(line.content(), keyword)))
-        .mapToInt(Line::number);
+  protected String getThreatPrompt() {
+    return getClassResourceAsString("threat_prompt.txt");
   }
 
   @Override
-  protected String getUserPrompt() {
-    return "I want to check if this code is logging sensitive data, like passwords, access tokens, API keys, session IDs, SSNs, or something similarly sensitive and remove the log statement if so. Make sure if you fix it, you remove only that statement. I am providing other lines just to give you context. I am worried about string variables.";
+  protected String getFixPrompt() {
+    return getClassResourceAsString("fix_prompt.txt");
   }
 
-  @VisibleForTesting
-  static final Pattern loggingCallPattern =
-      Pattern.compile("log(ger)?.(info|warn|error|fatal)", Pattern.CASE_INSENSITIVE);
+  @Override
+  protected boolean isPatchExpected(Patch<String> patch) {
+    // This codemod should only delete lines.
+    for (AbstractDelta<String> delta : patch.getDeltas()) {
+      if (!(delta instanceof DeleteDelta<String>)) {
+        return false;
+      }
+    }
 
-  private static final List<String> KEYWORDS =
-      List.of("password", "secret", "token", "key", "credentials", "ssn");
+    return true;
+  }
 }

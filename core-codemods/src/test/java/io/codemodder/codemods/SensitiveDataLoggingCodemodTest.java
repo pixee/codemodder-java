@@ -1,12 +1,17 @@
 package io.codemodder.codemods;
 
 import io.codemodder.testutils.Metadata;
-import io.codemodder.testutils.RawFileCodemodTest;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import io.codemodder.testutils.llm.LLMAssistedCodemodTest;
 
 @Metadata(
     codemodType = SensitiveDataLoggingCodemod.class,
     testResourceDir = "sensitive-data-logging",
     dependencies = {})
-@EnabledIfEnvironmentVariable(named = "CODEMODDER_OPENAI_API_KEY", matches = ".+")
-final class SensitiveDataLoggingCodemodTest implements RawFileCodemodTest {}
+final class SensitiveDataLoggingCodemodTest extends LLMAssistedCodemodTest {
+  @Override
+  protected String getRequirementsPrompt() {
+    return """
+        - Remove ALL lines that log sensitive data at INFO or higher severities.
+        """;
+  }
+}

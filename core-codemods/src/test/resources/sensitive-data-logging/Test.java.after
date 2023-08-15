@@ -2,6 +2,9 @@ package com.acme.testcode;
 
 public class Test {
 
+  private static final Log log;
+  private static final Logger LOGGER;
+
   public Auth login(final String securityToken) {
     String user = serviceReq.getUser();
     String pass = serviceReq.getPassword();
