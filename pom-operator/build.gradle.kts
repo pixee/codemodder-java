@@ -38,14 +38,8 @@ dependencies {
     testImplementation("io.github.java-diff-utils:java-diff-utils:4.12")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.7.10")
     compileOnly("org.slf4j:slf4j-api:2.0.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
-
-// tasks.withType<JavaCompile>() {
-//    options.encoding = "UTF-8"
-// }
-//
-// tasks.withType<Javadoc>() {
-//    options.encoding = "UTF-8"
-// }
