@@ -1,12 +1,12 @@
 package io.github.pixee.maven.operator.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.github.pixee.maven.operator.Util;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.SystemUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class POMOperatorJavaIT {
   @Test
@@ -35,6 +35,6 @@ public class POMOperatorJavaIT {
 
     int retCode = process.waitFor();
 
-    assertEquals("Embedded execution must return zero", 0, retCode);
+    assertEquals(0, retCode, "Embedded execution must return zero");
   }
 }

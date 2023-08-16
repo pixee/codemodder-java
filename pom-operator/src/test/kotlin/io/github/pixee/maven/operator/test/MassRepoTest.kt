@@ -6,8 +6,9 @@ import io.github.pixee.maven.operator.POMScanner
 import io.github.pixee.maven.operator.ProjectModelFactory
 import io.github.pixee.maven.operator.Util.which
 import org.apache.commons.lang3.SystemUtils
-import org.junit.Assert.*
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -235,14 +236,16 @@ class MassRepoIT {
             val dependencyAsStringWithPackaging = dependencyToUpgrade.toString()
 
             assertFalse(
-                "Dependency should be originally missing", originalDependencies.contains(
-                    dependencyAsStringWithPackaging
-                )
+                    originalDependencies.contains(
+                            dependencyAsStringWithPackaging
+                    ),
+                    "Dependency should be originally missing"
             )
             assertTrue(
-                "New Dependency should be appearing", finalDependencies.contains(
-                    dependencyAsStringWithPackaging
-                )
+                    finalDependencies.contains(
+                            dependencyAsStringWithPackaging
+                    ),
+                    "New Dependency should be appearing"
             )
         }
     }

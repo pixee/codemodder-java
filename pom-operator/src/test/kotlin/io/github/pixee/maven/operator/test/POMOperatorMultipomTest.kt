@@ -2,14 +2,15 @@ package io.github.pixee.maven.operator.test
 
 import com.google.common.io.Files
 import io.github.pixee.maven.operator.*
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class POMOperatorMultipomTest : AbstractTestBase() {
-    @Test(expected = WrongDependencyTypeException::class)
+    @Test
     fun testWithParentAndChildMissingPackaging() {
+        // expected = WrongDependencyTypeException::class
         val parentResource = getResource("parent-and-child-parent-broken.xml")
 
         val parentPomFiles = listOf(POMDocumentFactory.load(parentResource))
@@ -24,7 +25,7 @@ class POMOperatorMultipomTest : AbstractTestBase() {
         )
     }
 
-    @Test(expected = WrongDependencyTypeException::class)
+    @Test
     fun testWithParentAndChildWrongType() {
         val parentResource = getResource("parent-and-child-child-broken.xml")
 

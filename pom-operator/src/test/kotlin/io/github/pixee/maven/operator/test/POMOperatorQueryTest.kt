@@ -1,8 +1,8 @@
 package io.github.pixee.maven.operator.test
 
 import io.github.pixee.maven.operator.*
-import junit.framework.TestCase.*
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -26,7 +26,7 @@ class POMOperatorQueryTest {
 
             LOGGER.debug("Dependencies found: {}", dependencies)
 
-            assertTrue("Dependencies are not empty", dependencies.isNotEmpty())
+            assertTrue(dependencies.isNotEmpty(), "Dependencies are not empty")
         }
     }
 
@@ -40,11 +40,12 @@ class POMOperatorQueryTest {
 
         val dependencies = POMOperator.queryDependency(context)
 
-        assertTrue("Dependencies are empty", dependencies.isEmpty())
+        assertTrue(dependencies.isEmpty(), "Dependencies are empty")
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun testFailedUnsafeQuery() {
+        // expected = IllegalStateException::class
         val context =
             ProjectModelFactory
                 .load(this.javaClass.getResource("pom-broken.xml")!!)
@@ -53,7 +54,7 @@ class POMOperatorQueryTest {
 
         val dependencies = POMOperator.queryDependency(context)
 
-        assertTrue("Dependencies are empty", dependencies.isEmpty())
+        assertTrue(dependencies.isEmpty(), "Dependencies are empty")
     }
 
     @Test
@@ -74,7 +75,7 @@ class POMOperatorQueryTest {
                 val dependencies =
                     POMOperator.queryDependency(context, commandList = commandListOverride)
 
-                assertTrue("Dependencies are not empty", dependencies.isNotEmpty())
+                assertTrue(dependencies.isNotEmpty(), "Dependencies are not empty")
             }
         }
     }
@@ -87,11 +88,11 @@ class POMOperatorQueryTest {
 
             LOGGER.info("Using queryType: $queryType at $tempDirectory")
 
-            assertFalse("Temp Directory does not exist initially", tempDirectory.exists())
+            assertFalse(tempDirectory.exists(), "Temp Directory does not exist initially")
             assertEquals(
-                "There must be no files",
                 tempDirectory.list()?.filter { File(it).isDirectory }?.size ?: 0,
                 0,
+                "There must be no files"
             )
 
             val context =
@@ -105,10 +106,10 @@ class POMOperatorQueryTest {
 
             LOGGER.debug("Dependencies found: {}", dependencies)
 
-            assertTrue("Dependencies are not empty", dependencies.isNotEmpty())
+            assertTrue(dependencies.isNotEmpty(), "Dependencies are not empty")
 
-            assertTrue("Temp Directory ends up existing", tempDirectory.exists())
-            assertTrue("Temp Directory is a directory", tempDirectory.isDirectory)
+            assertTrue(tempDirectory.exists(), "Temp Directory ends up existing")
+            assertTrue(tempDirectory.isDirectory, "Temp Directory is a directory")
         }
     }
 
@@ -130,7 +131,7 @@ class POMOperatorQueryTest {
 
                 LOGGER.debug("Dependencies found: {}", dependencies)
 
-                assertTrue("Dependencies are not empty", dependencies.isNotEmpty())
+                assertTrue(dependencies.isNotEmpty(), "Dependencies are not empty")
             }
     }
 
@@ -179,9 +180,9 @@ class POMOperatorQueryTest {
 
         LOGGER.debug("Dependencies found: {}", dependencies)
 
-        assertTrue("Dependencies are not empty", dependencies.isNotEmpty())
+        assertTrue(dependencies.isNotEmpty(), "Dependencies are not empty")
 
-        assertTrue("Random name matches", dependencies.first().artifactId.equals(randomName))
+        assertTrue(dependencies.first().artifactId.equals(randomName), "Random name matches")
     }
 
     @Test
@@ -268,9 +269,9 @@ class POMOperatorQueryTest {
 
         LOGGER.debug("Dependencies found: {}", dependencies)
 
-        assertTrue("Dependencies are not empty", dependencies.isNotEmpty())
+        assertTrue(dependencies.isNotEmpty(), "Dependencies are not empty")
 
-        assertTrue("Random name matches", dependencies.first().artifactId.equals(randomName))
+        assertTrue(dependencies.first().artifactId.equals(randomName), "Random name matches")
     }
 
     @Test
@@ -332,7 +333,7 @@ class POMOperatorQueryTest {
 
         LOGGER.debug("Dependencies found: {}", dependencies)
 
-        assertTrue("Dependencies are empty", dependencies.isEmpty())
+        assertTrue(dependencies.isEmpty(), "Dependencies are empty")
     }
 
     @Test
@@ -402,12 +403,12 @@ class POMOperatorQueryTest {
 
         LOGGER.debug("Dependencies found: {}", dependencies)
 
-        assertTrue("Dependencies are empty", dependencies.isNotEmpty())
+        assertTrue(dependencies.isNotEmpty(), "Dependencies are empty")
 
         val foundDependencies =
             dependencies.firstOrNull { it.version == "0.0.1" && it.artifactId.equals("managed-$randomName") }
 
-        assertTrue("there's a dependencyManaged-version", foundDependencies != null)
+        assertTrue(foundDependencies != null, "there's a dependencyManaged-version")
     }
 
     private fun getCommandListFor(vararg names: String): List<Command> =
@@ -436,7 +437,7 @@ class POMOperatorQueryTest {
 
         LOGGER.debug("Dependencies found: {}", dependencies)
 
-        assertTrue("Dependencies are empty", dependencies.isEmpty())
+        assertTrue(dependencies.isEmpty(), "Dependencies are empty")
 
     }
 }

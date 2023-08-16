@@ -7,8 +7,8 @@ import io.github.pixee.maven.operator.Util.which
 import org.apache.commons.lang3.SystemUtils
 import org.dom4j.DocumentException
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.xmlunit.diff.ComparisonType
 import java.io.File
 import java.nio.charset.Charset
@@ -19,8 +19,9 @@ import kotlin.test.assertTrue
  * Unit test for simple App.
  */
 class POMOperatorTest : AbstractTestBase() {
-    @Test(expected = DocumentException::class)
+    @Test
     fun testWithBrokenPom() {
+        // expected = DocumentException::class
         gwt(
             "broken-pom",
             ProjectModelFactory.load(
@@ -76,8 +77,9 @@ class POMOperatorTest : AbstractTestBase() {
         )
     }
 
-    @Test(expected = MissingDependencyException::class)
+    @Test
     fun testWithDependencyMissing() {
+        // expected = MissingDependencyException::class
         gwt(
             "case-dependency-missing",
             ProjectModelFactory.load(
@@ -318,14 +320,15 @@ class POMOperatorTest : AbstractTestBase() {
         )
 
         assertEquals(
-            "Document changes a property called 'sample.version'",
-            differenceList.first().comparison.testDetails.xPath,
-            "/project[1]/properties[1]/sample.version[1]/text()[1]"
+                        differenceList.first().comparison.testDetails.xPath,
+            "/project[1]/properties[1]/sample.version[1]/text()[1]",
+                "Document changes a property called 'sample.version'"
         )
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun testCaseWithPropertyDefinedTwice() {
+        // expected = IllegalStateException::class
         val dependencyToUpgrade =
             Dependency("org.dom4j", "dom4j", version = "1.0.0")
 

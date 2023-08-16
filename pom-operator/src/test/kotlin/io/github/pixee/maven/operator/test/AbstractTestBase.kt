@@ -6,7 +6,7 @@ import io.github.pixee.maven.operator.ProjectModel
 import io.github.pixee.maven.operator.ProjectModelFactory
 import org.dom4j.Document
 import org.dom4j.io.SAXReader
-import org.junit.Assert.assertFalse
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.xmlunit.builder.DiffBuilder
@@ -57,8 +57,8 @@ open class AbstractTestBase {
             LOGGER.debug("context after: {}", context)
 
             assertFalse(
-                "Expected and outcome have differences",
-                getXmlDifferences(context.pomFile.resultPom, outcome).hasDifferences()
+                getXmlDifferences(context.pomFile.resultPom, outcome).hasDifferences(),
+                    "Expected and outcome have differences"
             )
         } else {
             val resultFilePath = "src/test/resources/" + this.javaClass.`package`.name.replace(

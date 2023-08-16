@@ -15,7 +15,7 @@ internal fun ProjectModel.getRuntimeResolvedProperties(): Map<String, String> =
             it.name to it.text
         }
 
-internal fun ProjectModel.getEffectivePom(): Document {
+fun ProjectModel.getEffectivePom(): Document {
     val tmpInputFile = File.createTempFile("tmp-pom-orig", ".xml")
 
     tmpInputFile.writeBytes(this.pomFile.resultPomBytes)
