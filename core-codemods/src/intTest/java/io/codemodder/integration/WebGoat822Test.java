@@ -30,11 +30,11 @@ final class WebGoat822Test extends GitRepositoryTest {
   void it_injects_dependency_even_when_no_poms_included() throws Exception {
 
     // save original pom contents
-    Path pom = repoDir.toPath().resolve("webgoat-lessons/insecure-deserialization/pom.xml");
-    assertThat(Files.exists(pom), is(true));
-    String originalPomContents = Files.readString(pom);
-    String encoding = UniversalDetector.detectCharset(pom);
-    List<String> originalPomContentLines = Files.readAllLines(pom);
+    Path modulePom = repoDir.toPath().resolve("webgoat-lessons/insecure-deserialization/pom.xml");
+    assertThat(Files.exists(modulePom), is(true));
+    String originalModulePomContents = Files.readString(modulePom);
+    String encoding = UniversalDetector.detectCharset(modulePom);
+    List<String> originalPomContentLines = Files.readAllLines(modulePom);
 
     DefaultCodemods.main(
         new String[] {
@@ -53,24 +53,28 @@ final class WebGoat822Test extends GitRepositoryTest {
     assertThat(results.size(), is(1));
     CodeTFResult result = results.get(0);
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
-    assertThat(changeset.size(), is(2));
+    assertThat(changeset.size(), is(3));
     assertThat(
         changeset.get(0).getPath(),
         equalTo(
             "webgoat-lessons/insecure-deserialization/src/main/java/org/owasp/webgoat/deserialization/InsecureDeserializationTask.java"));
     assertThat(
-        changeset.get(1).getPath(), equalTo("webgoat-lessons/insecure-deserialization/pom.xml"));
+            changeset.get(1).getPath(),
+            equalTo(
+                    "webgoat-lessons/insecure-deserialization/pom.xml"));
+    assertThat(
+            changeset.get(2).getPath(), equalTo("pom.xml"));
 
     // verify that we can apply the pom diff back to the original pom as a patch
-    String newPomContents = Files.readString(pom);
-    assertThat(newPomContents, not(equalTo(originalPomContents)));
+    String newModulePomContents = Files.readString(modulePom);
+    assertThat(newModulePomContents, not(equalTo(originalModulePomContents)));
     String diff = changeset.get(1).getDiff();
     List<String> pomPatchContents = diff.lines().toList();
     Patch<String> pomPatch = UnifiedDiffUtils.parseUnifiedDiff(pomPatchContents);
     List<String> newPomContentLines = DiffUtils.patch(originalPomContentLines, pomPatch);
-    assertThat(String.join("\n", newPomContentLines), equalTo(newPomContents.trim()));
+    assertThat(String.join("\n", newPomContentLines), equalTo(newModulePomContents.trim()));
 
-    String afterEncoding = UniversalDetector.detectCharset(pom);
+    String afterEncoding = UniversalDetector.detectCharset(modulePom);
     assertThat(encoding, equalTo(afterEncoding));
   }
 
