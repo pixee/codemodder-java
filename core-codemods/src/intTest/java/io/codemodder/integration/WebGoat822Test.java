@@ -65,8 +65,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             "webgoat-lessons/insecure-deserialization/src/main/java/org/owasp/webgoat/deserialization/InsecureDeserializationTask.java"));
     assertThat(
         changeset.get(1).getPath(), equalTo("webgoat-lessons/insecure-deserialization/pom.xml"));
-    assertThat(
-        changeset.get(2).getPath(), equalTo("pom.xml"));
+    assertThat(changeset.get(2).getPath(), equalTo("pom.xml"));
 
     // verify that we can apply the pom diff back to the original pom as a patch
     String newModulePomContents = Files.readString(modulePom);
