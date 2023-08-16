@@ -4,7 +4,6 @@ import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
-
 import io.codemodder.DependencyGAV;
 import io.codemodder.DependencyUpdateResult;
 import io.codemodder.ProjectProvider;
@@ -15,9 +14,7 @@ import io.github.pixee.maven.operator.POMDocument;
 import io.github.pixee.maven.operator.POMOperator;
 import io.github.pixee.maven.operator.POMScanner;
 import io.github.pixee.maven.operator.ProjectModel;
-import io.github.pixee.maven.operator.ProjectModelFactory;
 import io.github.pixee.maven.operator.QueryType;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -37,7 +34,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -59,32 +55,26 @@ import org.jetbrains.annotations.VisibleForTesting;
  */
 public final class MavenProvider implements ProjectProvider {
 
-  /**
-   * Represents a failure when doing a dependency update.
-   */
+  /** Represents a failure when doing a dependency update. */
   static class DependencyUpdateException extends RuntimeException {
     private DependencyUpdateException(String message, Throwable cause) {
       super(message, cause);
     }
   }
 
-  /**
-   * A seam for handling writing poms to disk.
-   */
+  /** A seam for handling writing poms to disk. */
   interface PomModifier {
     /**
      * Modifies a POM writing back its contents
      *
-     * @param path     where to write
+     * @param path where to write
      * @param contents contents to write
      * @throws IOException failure when writing
      */
     void modify(final Path path, final byte[] contents) throws IOException;
   }
 
-  /**
-   * Default Implementation of Pom Modifier Interface
-   */
+  /** Default Implementation of Pom Modifier Interface */
   static class DefaultPomModifier implements PomModifier {
     @Override
     public void modify(final Path path, final byte[] contents) throws IOException {
@@ -271,10 +261,10 @@ public final class MavenProvider implements ProjectProvider {
   @NotNull
   private final Collection<DependencyGAV> getDependenciesFrom(Path pomFile, Path projectDir) {
     ProjectModel originalProjectModel =
-        POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile()).
-            withQueryType(QueryType.SAFE).
-            withOffline(true).
-            build();
+        POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
+            .withQueryType(QueryType.SAFE)
+            .withOffline(true)
+            .build();
 
     Collection<Dependency> foundDependencies = POMOperator.queryDependency(originalProjectModel);
 
