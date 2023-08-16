@@ -2,21 +2,26 @@ package io.github.pixee.maven.operator.test
 
 import io.github.pixee.maven.operator.Dependency
 import io.github.pixee.maven.operator.POMOperator
+import io.github.pixee.maven.operator.POMScanner
 import io.github.pixee.maven.operator.ProjectModelFactory
 import io.github.pixee.maven.operator.Util.which
 import org.apache.commons.lang3.SystemUtils
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.lang.AssertionError
+import java.lang.Exception
 
 data class TestRepo(
     val slug: String,
     val branch: String = "master",
     val pomPath: String = "pom.xml",
     val useProperties: Boolean = false,
+    val useScanner: Boolean = false,
+    val offline: Boolean = false,
+    val commitId: String? = null,
 ) {
     fun cacheDir() = BASE_CACHE_DIR.resolve("repo-%08X".format(slug.hashCode()))
 
@@ -46,6 +51,35 @@ class MassRepoIT {
      */
 
     private val repos = listOf(
+        TestRepo(
+            "WebGoat/WebGoat",
+            useProperties = true,
+            branch = "main",
+            useScanner = false,
+            commitId = "e75cfbeb110e3d3a2ca3c8fee2754992d89c419d",
+            pomPath = "webgoat-lessons/xxe/pom.xml",
+        ) to "io.github.pixee:java-security-toolkit:1.0.2",
+        TestRepo(
+            "WebGoat/WebGoat",
+            useProperties = true,
+            branch = "main",
+            useScanner = true,
+            offline = true,
+            pomPath = "webgoat-container/pom.xml"
+        ) to "io.github.pixee:java-security-toolkit:1.0.2",
+        TestRepo(
+            "WebGoat/WebGoat",
+            useProperties = true,
+            branch = "main",
+            useScanner = false,
+            pomPath = "webgoat-container/pom.xml"
+        ) to "io.github.pixee:java-security-toolkit:1.0.2",
+        TestRepo(
+            "WebGoat/WebGoat",
+            useProperties = true,
+            branch = "main",
+            pomPath = "webgoat-container/pom.xml"
+        ) to "io.github.pixee:java-security-toolkit:1.0.2",
         TestRepo(
             "CRRogo/vert.x",
             useProperties = true,
@@ -107,6 +141,19 @@ class MassRepoIT {
 
             process.waitFor()
         }
+
+        if (null != repo.commitId) {
+            val command = arrayOf("git", "checkout", repo.commitId)
+
+            LOGGER.debug("Running command: ${command.joinToString(" ")}")
+
+            val process = ProcessBuilder(*command)
+                .directory(repo.cacheDir())
+                .inheritIO()
+                .start()
+
+            process.waitFor()
+        }
     }
 
     /**
@@ -124,7 +171,13 @@ class MassRepoIT {
      */
     @Test
     fun testAllOthers() {
-        repos.forEach { testOnRepo(it.first, it.second) }
+        repos.forEachIndexed { n, pair ->
+            try {
+                testOnRepo(pair.first, pair.second)
+            } catch (e: Throwable) {
+                throw AssertionError("while trying example $n of $pair", e)
+            }
+        }
     }
 
     private fun testOnRepo(
@@ -132,10 +185,11 @@ class MassRepoIT {
         dependencyToUpgradeString: String
     ) {
         LOGGER.info(
-            "Testing on repo {}, branch {} with dependency {}",
+            "Testing on repo {}, branch {} with dependency {} ({})",
             sampleRepo.slug,
             sampleRepo.branch,
-            dependencyToUpgradeString
+            dependencyToUpgradeString,
+            sampleRepo,
         )
 
         checkoutOrResetCachedRepo(sampleRepo)
@@ -145,40 +199,69 @@ class MassRepoIT {
         LOGGER.info("dependencies: {}", originalDependencies)
 
         val dependencyToUpgrade = Dependency.fromString(dependencyToUpgradeString)
-        val context = ProjectModelFactory.load(File(sampleRepo.cacheDir(), sampleRepo.pomPath))
+
+        val projectModelFactory = if (sampleRepo.useScanner) {
+            POMScanner.scanFrom(
+                File(sampleRepo.cacheDir(), sampleRepo.pomPath),
+                sampleRepo.cacheDir()
+            )
+        } else {
+            ProjectModelFactory.Companion.load(File(sampleRepo.cacheDir(), sampleRepo.pomPath))
+        }
+
+        val context = projectModelFactory
             .withDependency(dependencyToUpgrade)
             .withSkipIfNewer(false)
             .withUseProperties(sampleRepo.useProperties)
+            .withOffline(sampleRepo.offline)
             .build()
 
-        POMOperator.modify(context)
+        val result = POMOperator.modify(context)
 
-        val alternatePomFile =
-            File(File(sampleRepo.cacheDir(), sampleRepo.pomPath).parent, "pom-modified.xml")
-
-        alternatePomFile.writeBytes(context.pomFile.resultPomBytes)
+        context.allPomFiles.filter { it.dirty }.forEach {
+            it.file.writeBytes(it.resultPomBytes)
+        }
 
         val finalDependencies =
-            getDependenciesFrom(alternatePomFile.canonicalPath, sampleRepo.cacheDir())
+            getDependenciesFrom(sampleRepo)
 
         LOGGER.info("dependencies: {}", finalDependencies)
 
-        val dependencyAsStringWithPackaging = dependencyToUpgrade.toString()
+        val queryFailed = "" == originalDependencies && "" == finalDependencies
 
-        assertFalse(
-            "Dependency should be originally missing", originalDependencies.contains(
-                dependencyAsStringWithPackaging
+        if (queryFailed) {
+            assertTrue("Must be modified even when query failed", result)
+        } else {
+            val dependencyAsStringWithPackaging = dependencyToUpgrade.toString()
+
+            assertFalse(
+                "Dependency should be originally missing", originalDependencies.contains(
+                    dependencyAsStringWithPackaging
+                )
             )
-        )
-        assertTrue(
-            "New Dependency should be appearing", finalDependencies.contains(
-                dependencyAsStringWithPackaging
+            assertTrue(
+                "New Dependency should be appearing", finalDependencies.contains(
+                    dependencyAsStringWithPackaging
+                )
             )
-        )
+        }
     }
 
-    private fun getDependenciesFrom(repo: TestRepo): String =
+    private fun getDependenciesFrom(repo: TestRepo): String = try {
         getDependenciesFrom(repo.pomPath, repo.cacheDir())
+    } catch (e: Exception) {
+        val pomFile = File(repo.cacheDir(), repo.pomPath)
+
+        val dependencies =
+            POMOperator.queryDependency(
+                POMScanner.scanFrom(pomFile, repo.cacheDir())
+                    .withRepositoryPath(repo.cacheDir())
+                    .withOffline(false)
+                    .build()
+            )
+
+        dependencies.joinToString("\n")
+    }
 
     private fun getDependenciesFrom(pomPath: String, dir: File): String {
         val outputFile = File.createTempFile("tmp-pom", ".txt")
@@ -201,12 +284,18 @@ class MassRepoIT {
             "-DoutputFile=${outputFile.canonicalPath}"
         )
 
+        LOGGER.debug("Running: " + command.joinToString(" "))
+        LOGGER.debug("Dir: " + dir)
+
         val process = ProcessBuilder(*command.toTypedArray())
             .directory(dir)
             .inheritIO()
             .start()
 
         process.waitFor()
+
+        if (! outputFile.exists())
+            return ""
 
         val result = outputFile.readText()
 

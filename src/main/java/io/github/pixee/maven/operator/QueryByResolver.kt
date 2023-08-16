@@ -3,6 +3,7 @@ package io.github.pixee.maven.operator
 import org.apache.maven.model.building.ModelBuildingException
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.collection.CollectRequest
+import org.eclipse.aether.collection.DependencyCollectionException
 import org.eclipse.aether.graph.DependencyNode
 import org.eclipse.aether.graph.DependencyVisitor
 import org.slf4j.Logger
@@ -71,38 +72,44 @@ class QueryByResolver : AbstractQueryCommand() {
         val collectRequest =
             CollectRequest(deps, managedDeps, embedderFacadeResponse.remoteRepositories)
 
-        val collectResult = embedderFacadeResponse.repositorySystem!!.collectDependencies(
-            embedderFacadeResponse.session,
-            collectRequest
-        )
+        return try {
+            val collectResult = embedderFacadeResponse.repositorySystem!!.collectDependencies(
+                embedderFacadeResponse.session,
+                collectRequest
+            )
 
-        val returnList: MutableList<Dependency> = mutableListOf()
+            val returnList: MutableList<Dependency> = mutableListOf()
 
-        collectResult.root.accept(object : DependencyVisitor {
-            override fun visitEnter(node: DependencyNode?): Boolean {
-                node?.dependency?.apply {
-                    returnList.add(
-                        Dependency(
-                            groupId = this.artifact.groupId,
-                            artifactId = this.artifact.artifactId,
-                            version = this.artifact.version,
-                            classifier = this.artifact.classifier,
-                            packaging = this.artifact.extension,
-                            scope = this.scope,
+            collectResult.root.accept(object : DependencyVisitor {
+                override fun visitEnter(node: DependencyNode?): Boolean {
+                    node?.dependency?.apply {
+                        returnList.add(
+                            Dependency(
+                                groupId = this.artifact.groupId,
+                                artifactId = this.artifact.artifactId,
+                                version = this.artifact.version,
+                                classifier = this.artifact.classifier,
+                                packaging = this.artifact.extension,
+                                scope = this.scope,
+                            )
                         )
-                    )
+                    }
+
+                    return true
                 }
 
-                return true
-            }
+                override fun visitLeave(node: DependencyNode?): Boolean {
+                    return true
+                }
+            })
 
-            override fun visitLeave(node: DependencyNode?): Boolean {
-                return true
-            }
-        })
+            this.result = returnList.toList()
 
-        this.result = returnList.toList()
+            return true
+        } catch (e: DependencyCollectionException) {
+            LOGGER.warn("while resolving: ", e)
 
-        return true
+            return false
+        }
     }
 }
