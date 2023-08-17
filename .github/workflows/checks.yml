@@ -22,7 +22,13 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '17'
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          version: 'latest'
+          java-version: '17'
+          components: 'js,native-image'
+          github-token: ${{ secrets.github_token }}
       - uses: gradle/gradle-build-action@v2
         with:
           arguments: check --stacktrace
