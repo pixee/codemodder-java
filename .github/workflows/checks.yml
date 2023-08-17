@@ -27,3 +27,9 @@ jobs:
         with:
           arguments: check --stacktrace
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - name: Archive build results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: build-reports
+          path: target/
