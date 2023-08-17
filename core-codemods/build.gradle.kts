@@ -3,6 +3,7 @@ plugins {
     id("io.codemodder.runner")
     id("io.codemodder.container-publish")
     id("io.codemodder.maven-publish")
+    `jvm-test-suite`
 }
 
 val main = "io.codemodder.codemods.DefaultCodemods"
@@ -49,27 +50,34 @@ dependencies {
     testImplementation(testlibs.jgit)
 }
 
-sourceSets {
-    create("intTest") {
-        compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
-        runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+val integrationTestSuiteName = "intTest"
+testing {
+    @Suppress("UnstableApiUsage")
+    suites {
+        val test by getting(JvmTestSuite::class)
+        register<JvmTestSuite>(integrationTestSuiteName) {
+            testType.set(TestSuiteType.INTEGRATION_TEST)
+            dependencies {
+                implementation(project())
+                implementation(project(":framework:codemodder-testutils"))
+                implementation.bundle(testlibs.bundles.junit.jupiter)
+                implementation.bundle(testlibs.bundles.hamcrest)
+                implementation(testlibs.jgit)
+                implementation(libs.juniversalchardet)
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                    }
+                }
+            }
+        }
     }
 }
 
-val intTestImplementation: Configuration by configurations.getting {
-    extendsFrom(configurations.testImplementation.get())
+tasks.named("check") {
+    @Suppress("UnstableApiUsage")
+    dependsOn(testing.suites.named(integrationTestSuiteName))
 }
-val intTestRuntimeOnly: Configuration by configurations.getting {
-    extendsFrom(configurations.testRuntimeOnly.get())
-}
-
-val integrationTest = task<Test>("intTest") {
-    description = "Runs integration tests."
-    group = "verification"
-
-    testClassesDirs = sourceSets["intTest"].output.classesDirs
-    classpath = sourceSets["intTest"].runtimeClasspath
-    shouldRunAfter("test")
-}
-
-tasks.check { dependsOn(integrationTest) }
