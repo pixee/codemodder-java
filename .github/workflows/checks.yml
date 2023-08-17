@@ -23,6 +23,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - uses: stCarolas/setup-maven@v4.4
+        with:
+          maven-version: 3.8.2
       - uses: gradle/gradle-build-action@v2
         with:
           arguments: check --stacktrace
