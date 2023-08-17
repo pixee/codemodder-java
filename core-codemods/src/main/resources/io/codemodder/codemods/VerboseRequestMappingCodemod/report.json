@@ -1,0 +1,7 @@
+{
+  "summary": "Streamlined Spring MVC codebase by transforming @RequestMapping annotations to @GetMapping annotations for improved conciseness and clarity",
+  "change": "Automatically converted @RequestMapping annotations to @GetMapping annotations for cases involving undefined methods or explicit RequestMethod.GET",
+  "references": [
+    "https://docs.spring.io/spring-framework/docs/4.3.x/spring-framework-reference/htmlsingle/#mvc-ann-requestmapping"
+  ]
+}
