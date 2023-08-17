@@ -58,6 +58,11 @@ final class WebGoat822Test extends GitRepositoryTest {
     assertThat(results.size(), is(1));
     CodeTFResult result = results.get(0);
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
+    System.out.println(
+        "Changeset: "
+            + changeset.stream()
+                .map(CodeTFChangesetEntry::getPath)
+                .collect(Collectors.joining(",")));
     assertThat(changeset.size(), is(3));
     assertThat(
         changeset.get(0).getPath(),
