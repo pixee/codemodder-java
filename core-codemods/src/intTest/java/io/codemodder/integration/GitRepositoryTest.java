@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Stream;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
