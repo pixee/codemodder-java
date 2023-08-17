@@ -5,9 +5,10 @@ import static java.util.Objects.requireNonNull;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /** Represent a normally-structured Java source code directory and all its files underneath it. */
-public interface SourceDirectory {
+public interface SourceDirectory extends Comparable<SourceDirectory> {
 
   /** The filesystem path of the directory. */
   Path path();
@@ -61,6 +62,11 @@ public interface SourceDirectory {
           + sourceDirectoryPath
           + '\''
           + '}';
+    }
+
+    @Override
+    public int compareTo(@NotNull SourceDirectory other) {
+      return this.path().toString().compareTo(other.path().toString());
     }
   }
 }

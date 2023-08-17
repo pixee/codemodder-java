@@ -42,6 +42,7 @@ final class WebGoat822Test extends GitRepositoryTest {
           "**/InsecureDeserializationTask.java",
           "--output",
           outputFile.getPath(),
+          "--verbose",
           "--dont-exit",
           repoDir.getPath()
         });
@@ -78,7 +79,9 @@ final class WebGoat822Test extends GitRepositoryTest {
   @Test
   void it_transforms_webgoat_normally() throws Exception {
     DefaultCodemods.main(
-        new String[] {"--output", outputFile.getPath(), "--dont-exit", repoDir.getPath()});
+        new String[] {
+          "--output", outputFile.getPath(), "--verbose", "--dont-exit", repoDir.getPath()
+        });
 
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
@@ -117,6 +120,7 @@ final class WebGoat822Test extends GitRepositoryTest {
           outputFile.getPath(),
           "--sarif",
           "src/test/resources/webgoat_v8.2.2_codeql.sarif",
+          "--verbose",
           "--dont-exit",
           repoDir.getPath()
         });
