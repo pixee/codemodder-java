@@ -90,8 +90,10 @@ final class WebGoat822Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    fileChanges.stream().forEach(codeTFChangesetEntry ->
-        System.out.println("change: " + codeTFChangesetEntry.getPath()));
+    fileChanges.stream()
+        .forEach(
+            codeTFChangesetEntry ->
+                System.out.println("change: " + codeTFChangesetEntry.getPath()));
 
     assertThat(fileChanges.size(), is(49));
 
@@ -129,8 +131,10 @@ final class WebGoat822Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    fileChanges.stream().forEach(codeTFChangesetEntry ->
-        System.out.println("change: " + codeTFChangesetEntry.getPath()));
+    fileChanges.stream()
+        .forEach(
+            codeTFChangesetEntry ->
+                System.out.println("change: " + codeTFChangesetEntry.getPath()));
 
     assertThat(fileChanges.size(), is(54));
 
