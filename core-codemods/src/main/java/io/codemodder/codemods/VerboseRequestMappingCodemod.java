@@ -14,7 +14,8 @@ import javax.inject.Inject;
 @Codemod(
     id = "pixee:java/verbose-request-mapping",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class VerboseRequestMappingCodemod extends SarifPluginJavaParserChanger<AnnotationExpr> {
+public final class VerboseRequestMappingCodemod
+    extends SarifPluginJavaParserChanger<AnnotationExpr> {
 
   @Inject
   public VerboseRequestMappingCodemod(
@@ -29,10 +30,10 @@ public final class VerboseRequestMappingCodemod extends SarifPluginJavaParserCha
       final AnnotationExpr annotationExpr,
       final Result result) {
 
-      if (annotationExpr instanceof NormalAnnotationExpr) {
-          NormalAnnotationExpr normalAnnotationExpr = (NormalAnnotationExpr) annotationExpr;
-          normalAnnotationExpr.getPairs().removeIf(pair -> pair.getNameAsString().equals("method"));
-      }
+    if (annotationExpr instanceof NormalAnnotationExpr) {
+      NormalAnnotationExpr normalAnnotationExpr = (NormalAnnotationExpr) annotationExpr;
+      normalAnnotationExpr.getPairs().removeIf(pair -> pair.getNameAsString().equals("method"));
+    }
     annotationExpr.setName("GetMapping");
     addImportIfMissing(cu, "org.springframework.web.bind.annotation.GetMapping");
     return true;
