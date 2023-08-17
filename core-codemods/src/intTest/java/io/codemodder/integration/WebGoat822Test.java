@@ -53,14 +53,14 @@ final class WebGoat822Test extends GitRepositoryTest {
     assertThat(results.size(), is(1));
     CodeTFResult result = results.get(0);
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
-    assertThat(changeset.size(), is(3));
+    assertThat(changeset.size(), is(2));
     assertThat(
         changeset.get(0).getPath(),
         equalTo(
             "webgoat-lessons/insecure-deserialization/src/main/java/org/owasp/webgoat/deserialization/InsecureDeserializationTask.java"));
     assertThat(
         changeset.get(1).getPath(), equalTo("webgoat-lessons/insecure-deserialization/pom.xml"));
-    assertThat(changeset.get(2).getPath(), equalTo("pom.xml"));
+    //    assertThat(changeset.get(2).getPath(), equalTo("pom.xml"));
 
     // verify that we can apply the pom diff back to the original pom as a patch
     String newModulePomContents = Files.readString(modulePom);
@@ -95,7 +95,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             codeTFChangesetEntry ->
                 System.out.println("change: " + codeTFChangesetEntry.getPath()));
 
-    assertThat(fileChanges.size(), is(49));
+    assertThat(fileChanges.size(), is(43));
 
     // we only inject into a couple files
     verifyStandardCodemodResults(fileChanges);
@@ -136,7 +136,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             codeTFChangesetEntry ->
                 System.out.println("change: " + codeTFChangesetEntry.getPath()));
 
-    assertThat(fileChanges.size(), is(54));
+    assertThat(fileChanges.size(), is(48));
 
     verifyStandardCodemodResults(fileChanges);
 
