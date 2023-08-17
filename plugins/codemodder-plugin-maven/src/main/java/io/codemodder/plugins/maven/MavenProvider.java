@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -176,7 +175,6 @@ public final class MavenProvider implements ProjectProvider {
 
           if (foundIt) {
             skippedDependencies.add(newDependencyGAV);
-
             return;
           }
 
@@ -273,6 +271,6 @@ public final class MavenProvider implements ProjectProvider {
             dependency ->
                 DependencyGAV.createDefault(
                     dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()))
-        .collect(Collectors.toList());
+        .toList();
   }
 }
