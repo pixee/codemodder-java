@@ -7,11 +7,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
+import io.codemodder.Runner;
 import io.codemodder.codemods.DefaultCodemods;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFReport;
 import io.codemodder.codetf.CodeTFResult;
 import java.io.FileReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -36,7 +39,11 @@ final class WebGoat822Test extends GitRepositoryTest {
     String encoding = UniversalDetector.detectCharset(modulePom);
     List<String> originalPomContentLines = Files.readAllLines(modulePom);
 
-    DefaultCodemods.main(
+    var sw = new StringWriter();
+
+
+    Runner.run(
+        DefaultCodemods.asList(),
         new String[] {
           "--path-include",
           "**/InsecureDeserializationTask.java",
@@ -44,7 +51,11 @@ final class WebGoat822Test extends GitRepositoryTest {
           outputFile.getPath(),
           "--dont-exit",
           repoDir.getPath()
-        });
+        },
+        new PrintWriter(sw),
+        new PrintWriter(sw));
+
+    System.out.println(sw);
 
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
@@ -77,8 +88,11 @@ final class WebGoat822Test extends GitRepositoryTest {
 
   @Test
   void it_transforms_webgoat_normally() throws Exception {
-    DefaultCodemods.main(
-        new String[] {"--output", outputFile.getPath(), "--dont-exit", repoDir.getPath()});
+    Runner.run(
+        DefaultCodemods.asList(),
+        new String[] {"--output", outputFile.getPath(), "--dont-exit", repoDir.getPath()},
+        new PrintWriter(System.out),
+        new PrintWriter(System.err));
 
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
@@ -111,7 +125,8 @@ final class WebGoat822Test extends GitRepositoryTest {
   @Test
   void it_transforms_webgoat_with_codeql() throws Exception {
 
-    DefaultCodemods.main(
+    Runner.run(
+        DefaultCodemods.asList(),
         new String[] {
           "--output",
           outputFile.getPath(),
@@ -119,7 +134,9 @@ final class WebGoat822Test extends GitRepositoryTest {
           "src/test/resources/webgoat_v8.2.2_codeql.sarif",
           "--dont-exit",
           repoDir.getPath()
-        });
+        },
+        new PrintWriter(System.out),
+        new PrintWriter(System.err));
 
     var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
 
