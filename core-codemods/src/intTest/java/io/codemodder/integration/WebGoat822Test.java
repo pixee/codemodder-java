@@ -41,7 +41,6 @@ final class WebGoat822Test extends GitRepositoryTest {
 
     var sw = new StringWriter();
 
-
     Runner.run(
         DefaultCodemods.asList(),
         new String[] {
