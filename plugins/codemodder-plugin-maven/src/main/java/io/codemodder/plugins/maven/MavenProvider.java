@@ -4,9 +4,7 @@ import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
-import io.codemodder.DependencyGAV;
-import io.codemodder.DependencyUpdateResult;
-import io.codemodder.ProjectProvider;
+import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.github.pixee.maven.operator.Dependency;
@@ -56,6 +54,8 @@ import org.jetbrains.annotations.VisibleForTesting;
  */
 public final class MavenProvider implements ProjectProvider {
 
+  private final DependencyDescriptor dependencyDescriptor;
+
   /** Represents a failure when doing a dependency update. */
   static class DependencyUpdateException extends RuntimeException {
     private DependencyUpdateException(String message, Throwable cause) {
@@ -89,20 +89,32 @@ public final class MavenProvider implements ProjectProvider {
   private final PomFileFinder pomFileFinder;
 
   MavenProvider(
-      final PomModifier pomModifier, final PomFileFinder pomFileFinder, final boolean offline) {
+      final PomModifier pomModifier,
+      final PomFileFinder pomFileFinder,
+      final DependencyDescriptor dependencyDescriptor,
+      final boolean offline) {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
     this.pomModifier = pomModifier;
     this.pomFileFinder = pomFileFinder;
     this.offline = offline;
+    this.dependencyDescriptor = Objects.requireNonNull(dependencyDescriptor);
   }
 
   MavenProvider(final PomModifier pomModifier) {
-    this(pomModifier, new DefaultPomFileFinder(), false);
+    this(
+        pomModifier,
+        new DefaultPomFileFinder(),
+        DependencyDescriptor.createMarkdownDescriptor(),
+        false);
   }
 
   public MavenProvider() {
-    this(new DefaultPomModifier(), new DefaultPomFileFinder(), true);
+    this(
+        new DefaultPomModifier(),
+        new DefaultPomFileFinder(),
+        DependencyDescriptor.createMarkdownDescriptor(),
+        true);
   }
 
   @VisibleForTesting
@@ -205,7 +217,7 @@ public final class MavenProvider implements ProjectProvider {
 
               if (aPomFile.getDirty()) {
                 try {
-                  CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile);
+                  CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile, newDependencyGAV);
                   pomModifier.modify(path, aPomFile.getResultPomBytes());
                   injectedDependencies.add(newDependencyGAV);
                   changesets.add(entry);
@@ -228,7 +240,8 @@ public final class MavenProvider implements ProjectProvider {
         new String(byteArray, doc.getCharset()).split(Pattern.quote(doc.getEndl())));
   }
 
-  private CodeTFChangesetEntry getChanges(final Path projectDir, final POMDocument pomDocument) {
+  private CodeTFChangesetEntry getChanges(
+      final Path projectDir, final POMDocument pomDocument, final DependencyGAV newDependency) {
     List<String> originalPomContents = getLinesFrom(pomDocument, pomDocument.getOriginalPom());
     List<String> finalPomContents = getLinesFrom(pomDocument, pomDocument.getResultPomBytes());
 
@@ -247,8 +260,9 @@ public final class MavenProvider implements ProjectProvider {
 
     String relativePomPath = projectDir.relativize(pomDocumentPath).toString();
 
+    String description = dependencyDescriptor.create(newDependency);
     CodeTFChange change =
-        new CodeTFChange(position, Collections.emptyMap(), "", List.of(), null, List.of());
+        new CodeTFChange(position, Collections.emptyMap(), description, List.of(), null, List.of());
 
     List<String> patchDiff =
         UnifiedDiffUtils.generateUnifiedDiff(
@@ -260,7 +274,7 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   @NotNull
-  private final Collection<DependencyGAV> getDependenciesFrom(Path pomFile) {
+  private Collection<DependencyGAV> getDependenciesFrom(final Path pomFile) {
     ProjectModel originalProjectModel =
         ProjectModelFactory.load(pomFile.toFile()).withQueryType(QueryType.SAFE).build();
 
