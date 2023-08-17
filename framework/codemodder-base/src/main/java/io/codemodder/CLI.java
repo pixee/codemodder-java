@@ -173,7 +173,7 @@ final class CLI implements Callable<Integer> {
                 .filter(
                     f -> !Files.isSymbolicLink(f)) // could cause infinite loop if we follow links
                 .sorted()
-                .collect(Collectors.toList()));
+                .toList());
       }
       return allFiles;
     }
@@ -291,6 +291,7 @@ final class CLI implements Callable<Integer> {
     JavaParser javaParser = javaParserFactory.create(sourceDirectories);
     CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
     for (CodemodIdPair codemod : codemods) {
+      System.out.println("Running codemod: " + codemod.getId());
       CodemodExecutor codemodExecutor =
           new DefaultCodemodExecutor(
               projectPath,

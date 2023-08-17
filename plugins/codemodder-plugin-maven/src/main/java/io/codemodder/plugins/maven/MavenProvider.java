@@ -259,7 +259,7 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   @NotNull
-  private final Collection<DependencyGAV> getDependenciesFrom(Path pomFile, Path projectDir) {
+  private Collection<DependencyGAV> getDependenciesFrom(Path pomFile, Path projectDir) {
     ProjectModel originalProjectModel =
         POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
             .withQueryType(QueryType.SAFE)

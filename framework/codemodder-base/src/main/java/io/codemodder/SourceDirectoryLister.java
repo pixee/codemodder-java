@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface SourceDirectoryLister {
 
+  /** Return a sorted list of Java source directories. */
   List<SourceDirectory> listJavaSourceDirectories(List<File> directories) throws IOException;
 
   final class DefaultSourceDirectoryLister implements SourceDirectoryLister {
@@ -35,6 +36,7 @@ public interface SourceDirectoryLister {
             convertToSourceDirectories(javaSourceDirectoryPaths);
         javaSourceDirectories.addAll(sourceDirectories);
       }
+      Collections.sort(javaSourceDirectories);
       return javaSourceDirectories;
     }
 
