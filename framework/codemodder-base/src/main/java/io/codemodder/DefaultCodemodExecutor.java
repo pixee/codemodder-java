@@ -135,6 +135,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
         }
       } catch (Exception e) {
         unscannableFiles.add(filePath);
+        e.printStackTrace();
       }
     }
 
