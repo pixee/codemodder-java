@@ -87,6 +87,8 @@ class CompositeDependencyManagement : AbstractCommand() {
 
                 pomFileToModify.dirty = true
             }
+
+            return dependencyNodes[0] as Element
         } else {
             val dependenciesNode: Element =
                 if (null != parentElement.element("dependencies")) {
