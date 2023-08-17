@@ -7,11 +7,14 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 // @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -74,6 +77,11 @@ abstract class GitRepositoryTest {
     } else { // Repo has been cloned locally - do a hard reset instead
       Git.open(repoDir).reset().setMode(ResetCommand.ResetType.HARD).call();
     }
+  }
+
+  @AfterEach
+  void tearDown() throws Exception {
+    FileUtils.deleteQuietly(repoDir);
   }
 
   @BeforeEach
