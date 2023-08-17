@@ -8,7 +8,6 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
-    continue-on-error: true
     env:
       ORG_GRADLE_PROJECT_pixeeArtifactoryUsername: ${{ vars.PIXEE_ARTIFACTORY_USERNAME }}
       ORG_GRADLE_PROJECT_pixeeArtifactoryPassword: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
@@ -33,6 +32,7 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
       - name: Upload build reports
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: build-reports
           path: build/reports/
