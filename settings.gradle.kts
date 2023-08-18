@@ -9,6 +9,9 @@ dependencyResolutionManagement {
     versionCatalogs.create("buildlibs") {
         from(files("gradle/buildlibs.versions.toml"))
     }
+    versionCatalogs.create("testlibs") {
+        from(files("gradle/testlibs.versions.toml"))
+    }
 }
 
 plugins {
@@ -34,6 +37,7 @@ gradleEnterprise {
     }
 }
 
-includeBuild("core-codemods")
+include("core-codemods")
+//includeBuild("core-codemods")
 includeBuild("framework")
 includeBuild("plugins")
