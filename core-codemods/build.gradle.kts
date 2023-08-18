@@ -1,5 +1,4 @@
 plugins {
-    id("io.codemodder.root")
     id("io.codemodder.java-library")
     id("io.codemodder.runner")
     id("io.codemodder.container-publish")
