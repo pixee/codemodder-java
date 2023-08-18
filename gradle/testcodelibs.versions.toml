@@ -1,8 +1,0 @@
-[libraries]
-commons-fileupload = "commons-fileupload:commons-fileupload:1.5"
-jwt = "io.jsonwebtoken:jjwt-api:0.11.3"
-owasp = "org.owasp.encoder:encoder:1.2.3"
-servlet = "javax.servlet:javax.servlet-api:3.1.0"
-spring-web = "org.springframework:spring-web:4.3.11.RELEASE"
-xstream = "com.thoughtworks.xstream:xstream:1.4.7"
-java-security-toolkit-xstream = "io.github.pixee:java-security-toolkit-xstream:1.0.1"
