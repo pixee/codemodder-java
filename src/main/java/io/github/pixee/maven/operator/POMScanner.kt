@@ -30,7 +30,8 @@ object POMScanner {
             .withParentPomFiles(parentPoms.map { POMDocumentFactory.load(it) })
     }
 
-    private fun legacyScanFrom(originalFile: File, topLevelDirectory: File): ProjectModelFactory {
+    @JvmStatic
+    fun legacyScanFrom(originalFile: File, topLevelDirectory: File): ProjectModelFactory {
         val pomFile: POMDocument = POMDocumentFactory.load(originalFile)
         val parentPomFiles: MutableList<POMDocument> = arrayListOf()
 

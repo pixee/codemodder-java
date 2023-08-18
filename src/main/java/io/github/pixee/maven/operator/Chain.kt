@@ -65,8 +65,8 @@ class Chain(vararg commands: Command) {
          */
         val AVAILABLE_QUERY_COMMANDS = listOf(
             QueryType.SAFE to "QueryByResolver",
-            QueryType.SAFE to "QueryByEmbedder",
             QueryType.SAFE to "QueryByParsing",
+            QueryType.UNSAFE to "QueryByEmbedder",
             QueryType.UNSAFE to "QueryByInvoker",
         )
 
