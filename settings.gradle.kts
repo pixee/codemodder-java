@@ -38,6 +38,12 @@ gradleEnterprise {
 }
 
 include("core-codemods")
-//includeBuild("core-codemods")
-includeBuild("framework")
-includeBuild("plugins")
+include("framework:codemodder-base")
+include("framework:codemodder-testutils")
+include("framework:codemodder-testutils-llm")
+include("plugins:codemodder-plugin-aws")
+include("plugins:codemodder-plugin-codeql")
+include("plugins:codemodder-plugin-llm")
+include("plugins:codemodder-plugin-maven")
+include("plugins:codemodder-plugin-pmd")
+include("plugins:codemodder-plugin-semgrep")

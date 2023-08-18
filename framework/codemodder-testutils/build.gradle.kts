@@ -7,7 +7,7 @@ plugins {
 description = "Utilities for testing codemods"
 
 dependencies {
-    api(project(":codemodder-base"))
+    api(project(":framework:codemodder-base"))
 
     implementation(testlibs.bundles.junit.jupiter)
     implementation(testlibs.bundles.hamcrest)
