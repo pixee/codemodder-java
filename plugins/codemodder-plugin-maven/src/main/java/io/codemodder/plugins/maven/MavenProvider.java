@@ -124,7 +124,14 @@ public final class MavenProvider implements ProjectProvider {
   public DependencyUpdateResult updateDependencies(
       final Path projectDir, final Path file, final List<DependencyGAV> dependencies) {
     try {
-      return updateDependenciesInternal(projectDir, file, dependencies);
+      String dependenciesStr =
+          dependencies.stream().map(DependencyGAV::toString).collect(Collectors.joining(","));
+      System.out.println(
+          "Updating dependencies for " + file + " in " + projectDir + ": " + dependenciesStr);
+      DependencyUpdateResult dependencyUpdateResult =
+          updateDependenciesInternal(projectDir, file, dependencies);
+      System.out.println("Dependency update result: " + dependencyUpdateResult);
+      return dependencyUpdateResult;
     } catch (Exception e) {
       throw new DependencyUpdateException("Failure when updating dependencies", e);
     }
@@ -137,6 +144,7 @@ public final class MavenProvider implements ProjectProvider {
     Optional<Path> maybePomFile = pomFileFinder.findForFile(projectDir, file);
 
     if (maybePomFile.isEmpty()) {
+      System.out.println("Pom file was empty for " + file);
       return DependencyUpdateResult.EMPTY_UPDATE;
     }
 
@@ -162,6 +170,7 @@ public final class MavenProvider implements ProjectProvider {
 
     AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
         new AtomicReference<>(getDependenciesFrom(pomFile, projectDir));
+    System.out.println("Beginning dependency set size: " + foundDependenciesMapped.get().size());
 
     mappedDependencies.forEach(
         newDependency -> {
@@ -171,14 +180,17 @@ public final class MavenProvider implements ProjectProvider {
                   newDependency.getArtifactId(),
                   newDependency.getVersion());
 
+          System.out.println("Looking at injecting new dependency: " + newDependencyGAV);
           boolean foundIt =
               foundDependenciesMapped.get().stream().anyMatch(newDependencyGAV::equals);
 
           if (foundIt) {
+            System.out.println("Found it -- skipping");
             skippedDependencies.add(newDependencyGAV);
-
             return;
           }
+
+          System.out.println("Need to inject it...");
 
           ProjectModel projectModel =
               POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
@@ -191,30 +203,43 @@ public final class MavenProvider implements ProjectProvider {
           boolean result = POMOperator.modify(projectModel);
 
           if (result) {
-            for (POMDocument aPomFile : projectModel.getAllPomFiles()) {
+            System.out.println("Modified the pom -- writing it back");
+            Collection<POMDocument> allPomFiles = projectModel.getAllPomFiles();
+            System.out.print("Found " + allPomFiles.size() + " pom files -- " + allPomFiles);
+            for (POMDocument aPomFile : allPomFiles) {
               URI uri;
-
               try {
                 uri = aPomFile.getPomPath().toURI();
               } catch (URISyntaxException ex) {
+                ex.printStackTrace();
                 throw new DependencyUpdateException("Failure parsing URL: " + aPomFile, ex);
               }
 
               Path path = Path.of(uri);
 
               if (aPomFile.getDirty()) {
+                System.out.println("POM file " + path + " was dirty");
                 try {
                   CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile);
+                  System.out.println("Writing pom...");
                   pomModifier.modify(path, aPomFile.getResultPomBytes());
+                  System.out.println("POM written!");
                   injectedDependencies.add(newDependencyGAV);
                   changesets.add(entry);
                 } catch (IOException | UncheckedIOException exc) {
+                  System.err.println("Failed to write pom");
                   erroredFiles.add(path);
                 }
+              } else {
+                System.out.println("POM file " + path + " wasn't dirty");
               }
             }
 
-            foundDependenciesMapped.set(getDependenciesFrom(pomFile, projectDir));
+            Collection<DependencyGAV> newDependencySet = getDependenciesFrom(pomFile, projectDir);
+            System.out.println("New dependency set size: " + newDependencySet.size());
+            foundDependenciesMapped.set(newDependencySet);
+          } else {
+            System.out.println("POM file didn't need modification or it failed?");
           }
         });
 
