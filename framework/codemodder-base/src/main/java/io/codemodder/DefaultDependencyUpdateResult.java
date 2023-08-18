@@ -43,4 +43,18 @@ final class DefaultDependencyUpdateResult implements DependencyUpdateResult {
   public Set<Path> erroredFiles() {
     return erroredFiles;
   }
+
+  @Override
+  public String toString() {
+    return "DefaultDependencyUpdateResult{"
+        + "injectedDependencies="
+        + injectedDependencies
+        + ", skippedDependencies="
+        + skippedDependencies
+        + ", updatedChanges="
+        + updatedChanges
+        + ", erroredFiles="
+        + erroredFiles
+        + '}';
+  }
 }

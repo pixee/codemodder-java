@@ -98,7 +98,7 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   MavenProvider(final PomModifier pomModifier) {
-    this(pomModifier, new DefaultPomFileFinder(), false);
+    this(pomModifier, new DefaultPomFileFinder(), true);
   }
 
   public MavenProvider() {
@@ -125,7 +125,14 @@ public final class MavenProvider implements ProjectProvider {
   public DependencyUpdateResult updateDependencies(
       final Path projectDir, final Path file, final List<DependencyGAV> dependencies) {
     try {
-      return updateDependenciesInternal(projectDir, file, dependencies);
+      String dependenciesStr =
+          dependencies.stream().map(DependencyGAV::toString).collect(Collectors.joining(","));
+      System.out.println(
+          "Updating dependencies for " + file + " in " + projectDir + ": " + dependenciesStr);
+      DependencyUpdateResult dependencyUpdateResult =
+          updateDependenciesInternal(projectDir, file, dependencies);
+      System.out.println("Dependency update result: " + dependencyUpdateResult);
+      return dependencyUpdateResult;
     } catch (Exception e) {
       throw new DependencyUpdateException("Failure when updating dependencies", e);
     }
@@ -138,6 +145,7 @@ public final class MavenProvider implements ProjectProvider {
     Optional<Path> maybePomFile = pomFileFinder.findForFile(projectDir, file);
 
     if (maybePomFile.isEmpty()) {
+      System.out.println("Pom file was empty for " + file);
       return DependencyUpdateResult.EMPTY_UPDATE;
     }
 
@@ -162,7 +170,8 @@ public final class MavenProvider implements ProjectProvider {
     final Set<Path> erroredFiles = new LinkedHashSet<>();
 
     AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
-        new AtomicReference<>(getDependenciesFrom(pomFile));
+        new AtomicReference<>(getDependenciesFrom(pomFile, projectDir));
+    System.out.println("Beginning dependency set size: " + foundDependenciesMapped.get().size());
 
     mappedDependencies.forEach(
         newDependency -> {
@@ -172,50 +181,76 @@ public final class MavenProvider implements ProjectProvider {
                   newDependency.getArtifactId(),
                   newDependency.getVersion());
 
+          System.out.println("Looking at injecting new dependency: " + newDependencyGAV);
           boolean foundIt =
               foundDependenciesMapped.get().stream().anyMatch(newDependencyGAV::equals);
 
           if (foundIt) {
+            System.out.println("Found it -- skipping");
             skippedDependencies.add(newDependencyGAV);
-
             return;
           }
 
-          ProjectModel projectModel =
-              POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
+          System.out.println("Need to inject it...");
+
+          ProjectModelFactory projectModelFactory =
+              POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
                   .withDependency(newDependency)
                   .withSkipIfNewer(true)
                   .withUseProperties(true)
-                  .withOffline(this.offline)
-                  .build();
+                  .withOffline(this.offline);
+
+          if (this.offline) {
+            try {
+              projectModelFactory =
+                  projectModelFactory.withRepositoryPath(Files.createTempDirectory(null).toFile());
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
+          }
+
+          ProjectModel projectModel = projectModelFactory.build();
 
           boolean result = POMOperator.modify(projectModel);
 
           if (result) {
-            for (POMDocument aPomFile : projectModel.getAllPomFiles()) {
+            System.out.println("Modified the pom -- writing it back");
+            Collection<POMDocument> allPomFiles = projectModel.getAllPomFiles();
+            System.out.print("Found " + allPomFiles.size() + " pom files -- " + allPomFiles);
+            for (POMDocument aPomFile : allPomFiles) {
               URI uri;
-
               try {
                 uri = aPomFile.getPomPath().toURI();
               } catch (URISyntaxException ex) {
+                ex.printStackTrace();
                 throw new DependencyUpdateException("Failure parsing URL: " + aPomFile, ex);
               }
 
               Path path = Path.of(uri);
 
               if (aPomFile.getDirty()) {
+                System.out.println("POM file " + path + " was dirty");
                 try {
                   CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile);
+                  System.out.println("Writing pom...");
                   pomModifier.modify(path, aPomFile.getResultPomBytes());
+                  System.out.println("POM written!");
                   injectedDependencies.add(newDependencyGAV);
                   changesets.add(entry);
                 } catch (IOException | UncheckedIOException exc) {
+                  System.err.println("Failed to write pom");
                   erroredFiles.add(path);
                 }
+              } else {
+                System.out.println("POM file " + path + " wasn't dirty");
               }
             }
 
-            foundDependenciesMapped.set(getDependenciesFrom(pomFile));
+            Collection<DependencyGAV> newDependencySet = getDependenciesFrom(pomFile, projectDir);
+            System.out.println("New dependency set size: " + newDependencySet.size());
+            foundDependenciesMapped.set(newDependencySet);
+          } else {
+            System.out.println("POM file didn't need modification or it failed?");
           }
         });
 
@@ -260,9 +295,22 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   @NotNull
-  private final Collection<DependencyGAV> getDependenciesFrom(Path pomFile) {
-    ProjectModel originalProjectModel =
-        ProjectModelFactory.load(pomFile.toFile()).withQueryType(QueryType.SAFE).build();
+  private Collection<DependencyGAV> getDependenciesFrom(Path pomFile, Path projectDir) {
+    ProjectModelFactory projectModelFactory =
+        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
+            .withQueryType(QueryType.SAFE)
+            .withOffline(true);
+
+    if (this.offline) {
+      try {
+        projectModelFactory =
+            projectModelFactory.withRepositoryPath(Files.createTempDirectory(null).toFile());
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    ProjectModel originalProjectModel = projectModelFactory.build();
 
     Collection<Dependency> foundDependencies = POMOperator.queryDependency(originalProjectModel);
 

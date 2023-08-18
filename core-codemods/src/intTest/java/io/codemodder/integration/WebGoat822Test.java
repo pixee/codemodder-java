@@ -30,11 +30,11 @@ final class WebGoat822Test extends GitRepositoryTest {
   void it_injects_dependency_even_when_no_poms_included() throws Exception {
 
     // save original pom contents
-    Path pom = repoDir.toPath().resolve("webgoat-lessons/insecure-deserialization/pom.xml");
-    assertThat(Files.exists(pom), is(true));
-    String originalPomContents = Files.readString(pom);
-    String encoding = UniversalDetector.detectCharset(pom);
-    List<String> originalPomContentLines = Files.readAllLines(pom);
+    Path modulePom = repoDir.toPath().resolve("webgoat-lessons/insecure-deserialization/pom.xml");
+    assertThat(Files.exists(modulePom), is(true));
+    String originalModulePomContents = Files.readString(modulePom);
+    String encoding = UniversalDetector.detectCharset(modulePom);
+    List<String> originalPomContentLines = Files.readAllLines(modulePom);
 
     DefaultCodemods.main(
         new String[] {
@@ -42,11 +42,16 @@ final class WebGoat822Test extends GitRepositoryTest {
           "**/InsecureDeserializationTask.java",
           "--output",
           outputFile.getPath(),
+          "--verbose",
           "--dont-exit",
           repoDir.getPath()
         });
 
-    var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    var report = objectMapper.readValue(new FileReader(outputFile), CodeTFReport.class);
+
+    System.out.println(objectMapper.writeValueAsString(report));
 
     verifyNoFailedFiles(report);
     List<CodeTFResult> results = report.getResults();
@@ -62,24 +67,30 @@ final class WebGoat822Test extends GitRepositoryTest {
         changeset.get(1).getPath(), equalTo("webgoat-lessons/insecure-deserialization/pom.xml"));
 
     // verify that we can apply the pom diff back to the original pom as a patch
-    String newPomContents = Files.readString(pom);
-    assertThat(newPomContents, not(equalTo(originalPomContents)));
+    String newModulePomContents = Files.readString(modulePom);
+    assertThat(newModulePomContents, not(equalTo(originalModulePomContents)));
     String diff = changeset.get(1).getDiff();
     List<String> pomPatchContents = diff.lines().toList();
     Patch<String> pomPatch = UnifiedDiffUtils.parseUnifiedDiff(pomPatchContents);
     List<String> newPomContentLines = DiffUtils.patch(originalPomContentLines, pomPatch);
-    assertThat(String.join("\n", newPomContentLines), equalTo(newPomContents.trim()));
+    assertThat(String.join("\n", newPomContentLines), equalTo(newModulePomContents.trim()));
 
-    String afterEncoding = UniversalDetector.detectCharset(pom);
+    String afterEncoding = UniversalDetector.detectCharset(modulePom);
     assertThat(encoding, equalTo(afterEncoding));
   }
 
   @Test
   void it_transforms_webgoat_normally() throws Exception {
     DefaultCodemods.main(
-        new String[] {"--output", outputFile.getPath(), "--dont-exit", repoDir.getPath()});
+        new String[] {
+          "--output", outputFile.getPath(), "--verbose", "--dont-exit", repoDir.getPath()
+        });
 
-    var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    var report = objectMapper.readValue(new FileReader(outputFile), CodeTFReport.class);
+
+    System.out.println(objectMapper.writeValueAsString(report));
 
     verifyNoFailedFiles(report);
 
@@ -88,6 +99,12 @@ final class WebGoat822Test extends GitRepositoryTest {
             .map(CodeTFResult::getChangeset)
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
+
+    fileChanges.stream()
+        .forEach(
+            codeTFChangesetEntry ->
+                System.out.println("change: " + codeTFChangesetEntry.getPath()));
+
     assertThat(fileChanges.size(), is(43));
 
     // we only inject into a couple files
@@ -110,11 +127,16 @@ final class WebGoat822Test extends GitRepositoryTest {
           outputFile.getPath(),
           "--sarif",
           "src/test/resources/webgoat_v8.2.2_codeql.sarif",
+          "--verbose",
           "--dont-exit",
           repoDir.getPath()
         });
 
-    var report = new ObjectMapper().readValue(new FileReader(outputFile), CodeTFReport.class);
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    var report = objectMapper.readValue(new FileReader(outputFile), CodeTFReport.class);
+
+    System.out.println(objectMapper.writeValueAsString(report));
 
     verifyNoFailedFiles(report);
 
@@ -123,6 +145,12 @@ final class WebGoat822Test extends GitRepositoryTest {
             .map(CodeTFResult::getChangeset)
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
+
+    fileChanges.stream()
+        .forEach(
+            codeTFChangesetEntry ->
+                System.out.println("change: " + codeTFChangesetEntry.getPath()));
+
     assertThat(fileChanges.size(), is(48));
 
     verifyStandardCodemodResults(fileChanges);
