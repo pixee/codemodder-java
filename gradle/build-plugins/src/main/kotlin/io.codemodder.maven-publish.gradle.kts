@@ -1,5 +1,5 @@
 plugins {
-    id("io.codemodder.base")
+    id("io.codemodder.spotless")
     id("de.epitschke.gradle-file-versioning")
     `maven-publish`
     signing
