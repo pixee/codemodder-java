@@ -14,6 +14,7 @@ import io.github.pixee.maven.operator.POMDocument;
 import io.github.pixee.maven.operator.POMOperator;
 import io.github.pixee.maven.operator.POMScanner;
 import io.github.pixee.maven.operator.ProjectModel;
+import io.github.pixee.maven.operator.ProjectModelFactory;
 import io.github.pixee.maven.operator.QueryType;
 import java.io.File;
 import java.io.IOException;
