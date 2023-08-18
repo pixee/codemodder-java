@@ -8,7 +8,7 @@ description = "Codemod plugin for AWS"
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation("io.codemodder:codemodder-base") {
+    implementation(project(":framework:codemodder-base")) {
         exclude(group = "com.google.inject", module = "guice")
     }
     implementation("com.google.inject:guice:5.1.0")

@@ -29,13 +29,13 @@ tasks.publish {
 }
 
 dependencies {
-    implementation("io.codemodder:codemodder-base")
-    implementation("io.codemodder:codemodder-plugin-semgrep")
-    implementation("io.codemodder:codemodder-plugin-codeql")
-    implementation("io.codemodder:codemodder-plugin-maven")
-    implementation("io.codemodder:codemodder-plugin-llm")
-    implementation("io.codemodder:codemodder-plugin-aws")
-    implementation("io.codemodder:codemodder-plugin-pmd")
+    implementation(project(":framework:codemodder-base"))
+    implementation(project(":plugins:codemodder-plugin-semgrep"))
+    implementation(project(":plugins:codemodder-plugin-codeql"))
+    implementation(project(":plugins:codemodder-plugin-maven"))
+    implementation(project(":plugins:codemodder-plugin-llm"))
+    implementation(project(":plugins:codemodder-plugin-aws"))
+    implementation(project(":plugins:codemodder-plugin-pmd"))
     implementation(libs.juniversalchardet)
     implementation(libs.dom4j)
     implementation(libs.commons.jexl)
@@ -44,8 +44,8 @@ dependencies {
     testImplementation(testlibs.bundles.hamcrest)
     testImplementation(testlibs.assertj)
     testImplementation(testlibs.mockito)
-    testImplementation("io.codemodder:codemodder-testutils")
-    testImplementation("io.codemodder:codemodder-testutils-llm")
+    testImplementation(project(":framework:codemodder-testutils"))
+    testImplementation(project(":framework:codemodder-testutils-llm"))
     testRuntimeOnly(testlibs.junit.jupiter.engine)
     testImplementation(testlibs.jgit)
 }

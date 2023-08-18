@@ -8,7 +8,7 @@ description = "Codemod plugin for CodeQL"
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation("io.codemodder:codemodder-base")
+    implementation(project(":framework:codemodder-base"))
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
