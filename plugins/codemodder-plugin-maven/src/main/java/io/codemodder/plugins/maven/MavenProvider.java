@@ -193,7 +193,7 @@ public final class MavenProvider implements ProjectProvider {
           System.out.println("Need to inject it...");
 
           ProjectModel projectModel =
-              POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
+              POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
                   .withDependency(newDependency)
                   .withSkipIfNewer(true)
                   .withUseProperties(true)
@@ -286,7 +286,7 @@ public final class MavenProvider implements ProjectProvider {
   @NotNull
   private Collection<DependencyGAV> getDependenciesFrom(Path pomFile, Path projectDir) {
     ProjectModel originalProjectModel =
-        POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
+        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
             .withQueryType(QueryType.SAFE)
             .withOffline(true)
             .build();
