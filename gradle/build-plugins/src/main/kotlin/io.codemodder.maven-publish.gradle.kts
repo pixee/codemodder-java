@@ -16,7 +16,7 @@ extensions.getByType<nebula.plugin.contacts.ContactsExtension>().run {
         delegateClosureOf<nebula.plugin.contacts.Contact> {
             moniker("Pixee")
             github("pixee")
-        }
+        },
     )
 }
 
