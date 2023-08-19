@@ -140,6 +140,7 @@ final class SQLParameterizer {
       return Optional.empty();
     }
   }
+
   /**
    * Finds if the Statement object was created by a <conn>.createStatement() call and returns either
    * the call itself, if immediate, or the {@link LocalVariableDeclaration} that has it as an
