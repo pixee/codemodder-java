@@ -12,7 +12,7 @@ public class CodeQLRuleSarifFactory implements RuleSarifFactory {
   @Override
   public Optional<RuleSarif> build(
       String toolName, String rule, SarifSchema210 sarif, Path repositoryRoot) {
-    if (toolName.equals(CodeQLRuleSarif.toolName)) {
+    if (CodeQLRuleSarif.toolName.equals(toolName)) {
       return Optional.of(new CodeQLRuleSarif(rule, sarif, repositoryRoot));
     }
     return Optional.empty();
