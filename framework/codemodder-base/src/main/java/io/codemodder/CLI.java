@@ -120,6 +120,8 @@ final class CLI implements Callable<Integer> {
       split = ",")
   private List<String> sarifs;
 
+  private final DryRunTempDirCreationStrategy dryRunTempDirCreationStrategy;
+
   /** The format for the output file. */
   enum OutputFormat {
     CODETF,
@@ -135,7 +137,8 @@ final class CLI implements Callable<Integer> {
         new DefaultEncodingDetector(),
         JavaParserFactory.newFactory(),
         SourceDirectoryLister.createDefault(),
-        CodeTFReportGenerator.createDefault());
+        CodeTFReportGenerator.createDefault(),
+        new DefaultDryRunTempDirCreationStrategy());
   }
 
   CLI(
@@ -146,7 +149,8 @@ final class CLI implements Callable<Integer> {
       final EncodingDetector encodingDetector,
       final JavaParserFactory javaParserFactory,
       final SourceDirectoryLister sourceDirectoryLister,
-      final CodeTFReportGenerator reportGenerator) {
+      final CodeTFReportGenerator reportGenerator,
+      final DryRunTempDirCreationStrategy dryRunTempDirCreationStrategy) {
     Objects.requireNonNull(codemodTypes);
     this.codemodTypes = Collections.unmodifiableList(codemodTypes);
     this.clock = Objects.requireNonNull(clock);
@@ -156,6 +160,7 @@ final class CLI implements Callable<Integer> {
     this.sourceDirectoryLister = Objects.requireNonNull(sourceDirectoryLister);
     this.reportGenerator = Objects.requireNonNull(reportGenerator);
     this.args = Objects.requireNonNull(args);
+    this.dryRunTempDirCreationStrategy = Objects.requireNonNull(dryRunTempDirCreationStrategy);
   }
 
   @VisibleForTesting
@@ -176,6 +181,20 @@ final class CLI implements Callable<Integer> {
                 .toList());
       }
       return allFiles;
+    }
+  }
+
+  /** A seam responsible for creating a temp directory for the dry-run feature. */
+  @VisibleForTesting
+  interface DryRunTempDirCreationStrategy {
+    Path createTempDir() throws IOException;
+  }
+
+  private static class DefaultDryRunTempDirCreationStrategy
+      implements DryRunTempDirCreationStrategy {
+    @Override
+    public Path createTempDir() throws IOException {
+      return Files.createTempDirectory("codemodder-project");
     }
   }
 
@@ -219,7 +238,7 @@ final class CLI implements Callable<Integer> {
     if (dryRun) {
       // create a temp dir and copy all the contents into it -- this may be slow for big repos on
       // cloud i/o
-      Path copiedProjectDirectory = Files.createTempDirectory("codemodder-project");
+      Path copiedProjectDirectory = dryRunTempDirCreationStrategy.createTempDir();
       Stopwatch watch = Stopwatch.createStarted();
       log.info("Copying project directory for dry run..: {}", copiedProjectDirectory);
       FileUtils.copyDirectory(projectDirectory, copiedProjectDirectory.toFile());
