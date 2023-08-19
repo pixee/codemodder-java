@@ -1,6 +1,5 @@
 plugins {
     id("io.codemodder.spotless")
-    id("com.diffplug.spotless")
     java
 }
 
