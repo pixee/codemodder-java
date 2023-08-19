@@ -55,12 +55,12 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: --quiet setVersion -PnewVersion=${{ inputs.version }}
+          arguments: --quiet --no-configuration-cache setVersion -PnewVersion=${{ inputs.version }}
 
       - uses: gradle/gradle-build-action@v2
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: --console=plain --quiet build publishNebulaPublicationToSonatypeRepository closeSonatypeStagingRepository
+          arguments: --console=plain --quiet --no-configuration-cache build publishNebulaPublicationToSonatypeRepository closeSonatypeStagingRepository
 
       # share version bump
       - run: |
@@ -74,7 +74,7 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: -q bumpPatch applySnapshot
+          arguments: -q --no-configuration-cache bumpPatch applySnapshot
 
       - run: |
           git add version.txt
