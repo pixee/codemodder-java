@@ -51,8 +51,6 @@ final class WebGoat822Test extends GitRepositoryTest {
 
     var report = objectMapper.readValue(new FileReader(outputFile), CodeTFReport.class);
 
-    System.out.println(objectMapper.writeValueAsString(report));
-
     verifyNoFailedFiles(report);
     List<CodeTFResult> results = report.getResults();
     assertThat(results.size(), is(1));
