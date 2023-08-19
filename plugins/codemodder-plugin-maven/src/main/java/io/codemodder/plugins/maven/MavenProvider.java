@@ -129,8 +129,7 @@ public final class MavenProvider implements ProjectProvider {
     try {
       String dependenciesStr =
           dependencies.stream().map(DependencyGAV::toString).collect(Collectors.joining(","));
-      LOG.debug(
-          "Updating dependencies for {} in {}: {}", file, projectDir, dependenciesStr);
+      LOG.debug("Updating dependencies for {} in {}: {}", file, projectDir, dependenciesStr);
       DependencyUpdateResult dependencyUpdateResult =
           updateDependenciesInternal(projectDir, file, dependencies);
       LOG.debug("Dependency update result: {}", dependencyUpdateResult);
