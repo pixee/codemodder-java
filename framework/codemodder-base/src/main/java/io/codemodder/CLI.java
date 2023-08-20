@@ -358,7 +358,7 @@ final class CLI implements Callable<Integer> {
     } finally {
       if (dryRun) {
         // delete the temp directory
-        log.info("Cleaning temp directory");
+        log.debug("Cleaning temp directory: {}", projectDirectory);
         FileUtils.deleteDirectory(projectDirectory);
       }
     }
