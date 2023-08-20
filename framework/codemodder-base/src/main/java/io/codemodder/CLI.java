@@ -120,6 +120,8 @@ final class CLI implements Callable<Integer> {
       split = ",")
   private List<String> sarifs;
 
+  private final DryRunTempDirCreationStrategy dryRunTempDirCreationStrategy;
+
   /** The format for the output file. */
   enum OutputFormat {
     CODETF,
@@ -135,7 +137,8 @@ final class CLI implements Callable<Integer> {
         new DefaultEncodingDetector(),
         JavaParserFactory.newFactory(),
         SourceDirectoryLister.createDefault(),
-        CodeTFReportGenerator.createDefault());
+        CodeTFReportGenerator.createDefault(),
+        new DefaultDryRunTempDirCreationStrategy());
   }
 
   CLI(
@@ -146,7 +149,8 @@ final class CLI implements Callable<Integer> {
       final EncodingDetector encodingDetector,
       final JavaParserFactory javaParserFactory,
       final SourceDirectoryLister sourceDirectoryLister,
-      final CodeTFReportGenerator reportGenerator) {
+      final CodeTFReportGenerator reportGenerator,
+      final DryRunTempDirCreationStrategy dryRunTempDirCreationStrategy) {
     Objects.requireNonNull(codemodTypes);
     this.codemodTypes = Collections.unmodifiableList(codemodTypes);
     this.clock = Objects.requireNonNull(clock);
@@ -156,6 +160,7 @@ final class CLI implements Callable<Integer> {
     this.sourceDirectoryLister = Objects.requireNonNull(sourceDirectoryLister);
     this.reportGenerator = Objects.requireNonNull(reportGenerator);
     this.args = Objects.requireNonNull(args);
+    this.dryRunTempDirCreationStrategy = Objects.requireNonNull(dryRunTempDirCreationStrategy);
   }
 
   @VisibleForTesting
@@ -176,6 +181,20 @@ final class CLI implements Callable<Integer> {
                 .toList());
       }
       return allFiles;
+    }
+  }
+
+  /** A seam responsible for creating a temp directory for the dry-run feature. */
+  @VisibleForTesting
+  interface DryRunTempDirCreationStrategy {
+    Path createTempDir() throws IOException;
+  }
+
+  private static class DefaultDryRunTempDirCreationStrategy
+      implements DryRunTempDirCreationStrategy {
+    @Override
+    public Path createTempDir() throws IOException {
+      return Files.createTempDirectory("codemodder-project");
     }
   }
 
@@ -219,7 +238,7 @@ final class CLI implements Callable<Integer> {
     if (dryRun) {
       // create a temp dir and copy all the contents into it -- this may be slow for big repos on
       // cloud i/o
-      Path copiedProjectDirectory = Files.createTempDirectory("codemodder-project");
+      Path copiedProjectDirectory = dryRunTempDirCreationStrategy.createTempDir();
       Stopwatch watch = Stopwatch.createStarted();
       log.info("Copying project directory for dry run..: {}", copiedProjectDirectory);
       FileUtils.copyDirectory(projectDirectory, copiedProjectDirectory.toFile());
@@ -232,114 +251,117 @@ final class CLI implements Callable<Integer> {
       projectPath = copiedProjectDirectory;
     }
 
-    Instant start = clock.instant();
+    try {
+      Instant start = clock.instant();
 
-    // get path includes/excludes
-    List<String> pathIncludes = this.pathIncludes;
-    if (pathIncludes == null) {
-      pathIncludes = defaultPathIncludes;
-    }
+      // get path includes/excludes
+      List<String> pathIncludes = this.pathIncludes;
+      if (pathIncludes == null) {
+        pathIncludes = defaultPathIncludes;
+      }
 
-    List<String> pathExcludes = this.pathExcludes;
-    if (pathExcludes == null) {
-      pathExcludes = defaultPathExcludes;
-    }
-    IncludesExcludes includesExcludes =
-        IncludesExcludes.withSettings(projectDirectory, pathIncludes, pathExcludes);
+      List<String> pathExcludes = this.pathExcludes;
+      if (pathExcludes == null) {
+        pathExcludes = defaultPathExcludes;
+      }
+      IncludesExcludes includesExcludes =
+          IncludesExcludes.withSettings(projectDirectory, pathIncludes, pathExcludes);
 
-    // get all files that match
-    List<SourceDirectory> sourceDirectories =
-        sourceDirectoryLister.listJavaSourceDirectories(List.of(projectDirectory));
-    List<Path> filePaths = fileFinder.findFiles(sourceDirectories, includesExcludes);
+      // get all files that match
+      List<SourceDirectory> sourceDirectories =
+          sourceDirectoryLister.listJavaSourceDirectories(List.of(projectDirectory));
+      List<Path> filePaths = fileFinder.findFiles(sourceDirectories, includesExcludes);
 
-    // get codemod includes/excludes
-    final CodemodRegulator regulator;
-    if (codemodIncludes != null && codemodExcludes != null) {
-      log.error("Codemod includes and excludes cannot both be specified");
-      return ERROR_INVALID_ARGUMENT;
-    } else if (codemodIncludes == null && codemodExcludes == null) {
-      // the user didn't pass any includes, which means all are enabled
-      regulator = CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of());
-    } else if (codemodIncludes != null) {
-      regulator = CodemodRegulator.of(DefaultRuleSetting.DISABLED, codemodIncludes);
-    } else {
-      // the user only specified excludes
-      regulator = CodemodRegulator.of(DefaultRuleSetting.ENABLED, codemodExcludes);
-    }
+      // get codemod includes/excludes
+      final CodemodRegulator regulator;
+      if (codemodIncludes != null && codemodExcludes != null) {
+        log.error("Codemod includes and excludes cannot both be specified");
+        return ERROR_INVALID_ARGUMENT;
+      } else if (codemodIncludes == null && codemodExcludes == null) {
+        // the user didn't pass any includes, which means all are enabled
+        regulator = CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of());
+      } else if (codemodIncludes != null) {
+        regulator = CodemodRegulator.of(DefaultRuleSetting.DISABLED, codemodIncludes);
+      } else {
+        // the user only specified excludes
+        regulator = CodemodRegulator.of(DefaultRuleSetting.ENABLED, codemodExcludes);
+      }
 
-    // create the loader
-    List<Path> sarifFiles =
-        sarifs != null ? sarifs.stream().map(Path::of).collect(Collectors.toList()) : List.of();
-    Map<String, List<RuleSarif>> pathSarifMap =
-        SarifParser.create().parseIntoMap(sarifFiles, projectPath);
-    List<ParameterArgument> codemodParameters = createFromParameterStrings(this.codemodParameters);
-    CodemodLoader loader =
-        new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap, codemodParameters);
-    List<CodemodIdPair> codemods = loader.getCodemods();
+      // create the loader
+      List<Path> sarifFiles =
+          sarifs != null ? sarifs.stream().map(Path::of).collect(Collectors.toList()) : List.of();
+      Map<String, List<RuleSarif>> pathSarifMap =
+          SarifParser.create().parseIntoMap(sarifFiles, projectPath);
+      List<ParameterArgument> codemodParameters =
+          createFromParameterStrings(this.codemodParameters);
+      CodemodLoader loader =
+          new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap, codemodParameters);
+      List<CodemodIdPair> codemods = loader.getCodemods();
 
-    // create the project providers
-    List<ProjectProvider> projectProviders = loadProjectProviders();
-    List<CodeTFProvider> codeTFProviders = loadCodeTFProviders();
+      // create the project providers
+      List<ProjectProvider> projectProviders = loadProjectProviders();
+      List<CodeTFProvider> codeTFProviders = loadCodeTFProviders();
 
-    List<CodeTFResult> results = new ArrayList<>();
+      List<CodeTFResult> results = new ArrayList<>();
 
-    /*
-     * Run the codemods on the files. Note that we cache the compilation units so that we're always retaining
-     * the original concrete syntax information (e.g., line numbers) in JavaParser from the first access. This
-     * is what allows our codemods to act on SARIF-providing tools data accurately over multiple codemods.
-     */
-    JavaParser javaParser = javaParserFactory.create(sourceDirectories);
-    CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
-    for (CodemodIdPair codemod : codemods) {
-      System.out.println("Running codemod: " + codemod.getId());
-      CodemodExecutor codemodExecutor =
-          new DefaultCodemodExecutor(
-              projectPath,
-              includesExcludes,
-              codemod,
-              projectProviders,
-              codeTFProviders,
-              cachingJavaParser,
-              encodingDetector);
-      CodeTFResult result = codemodExecutor.execute(filePaths);
-      if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {
-        results.add(result);
+      /*
+       * Run the codemods on the files. Note that we cache the compilation units so that we're always retaining
+       * the original concrete syntax information (e.g., line numbers) in JavaParser from the first access. This
+       * is what allows our codemods to act on SARIF-providing tools data accurately over multiple codemods.
+       */
+      JavaParser javaParser = javaParserFactory.create(sourceDirectories);
+      CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
+      for (CodemodIdPair codemod : codemods) {
+        System.out.println("Running codemod: " + codemod.getId());
+        CodemodExecutor codemodExecutor =
+            new DefaultCodemodExecutor(
+                projectPath,
+                includesExcludes,
+                codemod,
+                projectProviders,
+                codeTFProviders,
+                cachingJavaParser,
+                encodingDetector);
+        CodeTFResult result = codemodExecutor.execute(filePaths);
+        if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {
+          results.add(result);
+        }
+      }
+
+      Instant end = clock.instant();
+      long elapsed = end.toEpochMilli() - start.toEpochMilli();
+
+      // write out the output
+      if (OutputFormat.CODETF.equals(outputFormat)) {
+        CodeTFReport report =
+            reportGenerator.createReport(
+                projectDirectory.toPath(),
+                String.join(" ", args),
+                sarifs == null
+                    ? List.of()
+                    : sarifs.stream().map(Path::of).collect(Collectors.toList()),
+                results,
+                elapsed);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        Files.writeString(outputPath, mapper.writeValueAsString(report));
+      } else if (OutputFormat.DIFF.equals(outputFormat)) {
+        throw new UnsupportedOperationException("not supported yet");
+      }
+
+      // this is a special exit code that tells the caller to not exit
+      if (dontExit) {
+        return -1;
+      }
+
+      return SUCCESS;
+    } finally {
+      if (dryRun) {
+        // delete the temp directory
+        log.debug("Cleaning temp directory: {}", projectDirectory);
+        FileUtils.deleteDirectory(projectDirectory);
       }
     }
-
-    Instant end = clock.instant();
-    long elapsed = end.toEpochMilli() - start.toEpochMilli();
-
-    // write out the output
-    if (OutputFormat.CODETF.equals(outputFormat)) {
-      CodeTFReport report =
-          reportGenerator.createReport(
-              projectDirectory.toPath(),
-              String.join(" ", args),
-              sarifs == null
-                  ? List.of()
-                  : sarifs.stream().map(Path::of).collect(Collectors.toList()),
-              results,
-              elapsed);
-      ObjectMapper mapper = new ObjectMapper();
-      mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-      Files.writeString(outputPath, mapper.writeValueAsString(report));
-    } else if (OutputFormat.DIFF.equals(outputFormat)) {
-      throw new UnsupportedOperationException("not supported yet");
-    }
-
-    if (dryRun) {
-      // delete the temp directory
-      log.info("Cleaning temp directory");
-      FileUtils.deleteDirectory(projectDirectory);
-    }
-
-    // this is a special exit code that tells the caller to not exit
-    if (dontExit) {
-      return -1;
-    }
-
-    return SUCCESS;
   }
 
   private List<CodeTFProvider> loadCodeTFProviders() {
