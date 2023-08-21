@@ -1,6 +1,8 @@
 dependencyResolutionManagement {
+    // we're comfortable using this API
+    @Suppress("UnstableApiUsage")
     repositories {
-        if (providers.gradleProperty("pixeeBuild").isPresent) {
+        if (providers.gradleProperty("pixeeArtifactoryUsername").isPresent) {
             maven {
                 name = "pixeeArtifactory"
                 url = uri("https://pixee.jfrog.io/artifactory/default-maven-virtual")

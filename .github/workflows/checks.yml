@@ -11,7 +11,6 @@ jobs:
     env:
       ORG_GRADLE_PROJECT_pixeeArtifactoryUsername: ${{ vars.PIXEE_ARTIFACTORY_USERNAME }}
       ORG_GRADLE_PROJECT_pixeeArtifactoryPassword: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
-      ORG_GRADLE_PROJECT_pixeeBuild: true
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
