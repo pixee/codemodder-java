@@ -3,13 +3,9 @@ rules:
     patterns:
       - pattern-either:
         - pattern: |
-            @RequestMapping(..., method = RequestMethod.GET)
+            @RequestMapping(method = $REQUEST_METHOD, ...)
         - pattern: |
-            @RequestMapping("...")
-        - pattern: |
-            @RequestMapping(method = RequestMethod.GET)
-        - pattern: |
-            @RequestMapping(method = RequestMethod.GET,...)
-    message: Semgrep found a match
+            @RequestMapping(method = $VALUE, ...)
+    message: Semgrep found a match.
     languages: [java]
     severity: WARNING

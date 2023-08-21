@@ -5,6 +5,7 @@ import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
@@ -30,12 +31,40 @@ public final class VerboseRequestMappingCodemod
       final AnnotationExpr annotationExpr,
       final Result result) {
 
-    if (annotationExpr instanceof NormalAnnotationExpr) {
-      NormalAnnotationExpr normalAnnotationExpr = (NormalAnnotationExpr) annotationExpr;
-      normalAnnotationExpr.getPairs().removeIf(pair -> pair.getNameAsString().equals("method"));
+    if (annotationExpr instanceof NormalAnnotationExpr normalAnnotationExpr) {
+
+      // Find the http method if it exists
+      MemberValuePair methodAttribute = null;
+      for (MemberValuePair pair : normalAnnotationExpr.getPairs()) {
+        if (pair.getNameAsString().equals("method")) {
+          methodAttribute = pair;
+          break;
+        }
+      }
+
+      if (methodAttribute != null) {
+        // Store method and remove the "method" attribute
+        String httpMethod = methodAttribute.getValue().toString();
+        normalAnnotationExpr.getPairs().remove(methodAttribute);
+
+        String newType = getType(annotationExpr, httpMethod);
+        annotationExpr.setName(newType);
+        addImportIfMissing(cu, "org.springframework.web.bind.annotation." + newType);
+        return true;
+      }
     }
-    annotationExpr.setName("GetMapping");
-    addImportIfMissing(cu, "org.springframework.web.bind.annotation.GetMapping");
-    return true;
+    return false;
+  }
+
+  public static String getType(AnnotationExpr annotationExpr, String httpMethod) {
+    String newType = switch (httpMethod) {
+        case "RequestMethod.GET", "GET" -> "GetMapping";
+        case "RequestMethod.PUT", "PUT" -> "PutMapping";
+        case "RequestMethod.DELETE", "DELETE" -> "DeleteMapping";
+        case "RequestMethod.POST", "POST" -> "PostMapping";
+        case "RequestMethod.PATCH", "PATCH" -> "PatchMapping";
+        default -> "";
+    };
+      return newType;
   }
 }

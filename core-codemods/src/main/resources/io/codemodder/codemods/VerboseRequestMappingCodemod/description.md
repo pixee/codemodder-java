@@ -1,42 +1,19 @@
-# Spring RequestMapping Codemod
+This change simplifies Spring MVC controller methods by making use of shortened annotations when applicable.
 
-This codemod is designed to enhance the conciseness and clarity of your Spring MVC codebase by transforming `@RequestMapping` annotations to their more streamlined equivalents. It specifically focuses on cases involving HTTP methods and path values.
+Version 4.3 introduced method-level variants for `@RequestMapping`.
+- `@GetMapping`
+- `@PutMapping`
+- `@PostMapping`
+- `@DeleteMapping`
+- `@PatchMapping`
 
-## Overview
+The [composed annotations](https://dzone.com/articles/using-the-spring-requestmapping-annotation) better express the semantics of the annotated methods. They act as wrapper to@RequestMapping and have become the standard ways of defining the endpoints.
 
-The [`@RequestMapping`](https://docs.spring.io/spring-framework/docs/4.3.x/spring-framework-reference/htmlsingle/#mvc-ann-requestmapping) annotation in Spring MVC is a versatile tool for mapping web requests to controller methods. However, it can sometimes lead to verbose and redundant code, particularly in scenarios involving HTTP methods. This codemod addresses this issue by identifying and updating instances of `@RequestMapping` annotations that can be simplified.
+```diff
++ @RequestMapping(value = "/example", method = RequestMethod.GET, params = {
+      "exampleId=09"
+  })
+  ...
++ @GetMapping(value = "/example", params = "exampleId=09" })
+```
 
-## Transformation Logic
-
-This codemod performs two primary transformations:
-
-1. **Undefined Method to `@GetMapping`**:
-    - Identifies `@RequestMapping` annotations where the HTTP method is undefined.
-    - Converts these annotations to `@GetMapping` annotations.
-    - Example:
-      ```java
-      // Before
-      @RequestMapping(value = "/example")
-      
-      // After
-      @GetMapping("/example")
-      ```
-
-2. **`@RequestMapping(method = RequestMethod.GET)` to `@GetMapping`**:
-    - Identifies `@RequestMapping` annotations with the HTTP method explicitly set to `RequestMethod.GET`.
-    - Converts these annotations to `@GetMapping` annotations.
-    - Example:
-      ```java
-      // Before
-      @RequestMapping(method = RequestMethod.GET, value = "/example")
-      
-      // After
-      @GetMapping("/example")
-      ```
-
-## Benefits
-
-- **Conciseness**: The transformed code is more concise and easier to read, reducing unnecessary verbosity in your codebase.
-- **Clarity**: The use of specialized annotations like `@GetMapping` better conveys the intended action of the method, enhancing code comprehension.
-- **Alignment with Best Practices**: The transformed code aligns with best practices outlined in the Spring documentation, making it easier for developers to follow established guidelines.
-l free to use this codemod to streamline your Spring MVC codebase and adhere to best practices for mapping web requests to controller methods.
