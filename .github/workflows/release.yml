@@ -35,8 +35,6 @@ jobs:
       - name: Install Semgrep
         run: python3 -m pip install semgrep
 
-      - uses: actions/setup-node@v3
-
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'

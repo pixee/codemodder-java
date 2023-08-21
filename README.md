@@ -13,14 +13,9 @@ source.
 
 ### First Time Set Up
 
-1. Configure JFrog Artifactory Authentication by adding the following properties
-   to your Gradle home gradle.properties (typically
-   `$HOME/.gradle/gradle.properties`):
-   ```
-   pixeeArtifactoryUsername=<your-username>
-   pixeeArtifactoryPassword=<your-token>
-   ```
-2. Install [Semgrep](https://semgrep.dev/) CLI. See
+1. Install JDK 17 for building this project. We recommend [Eclipse Adoptium](https://adoptium.net/)
+
+1. Install [Semgrep](https://semgrep.dev/) CLI. See
    [here](https://semgrep.dev/docs/getting-started/#installing-and-running-semgrep-locally)
    for instructions. It can usually be done via `pip`:
    ```shell
