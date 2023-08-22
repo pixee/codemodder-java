@@ -1,4 +1,4 @@
-This change hardens all [`BufferedReader#readLine()`](https://docs.oracle.com/javase/8/docs/api/java/io/BufferedReader.html#readLine--) operations against attack.
+This change hardens all [`BufferedReader#readLine()`](https://docs.oracle.com/javase/8/docs/api/java/io/BufferedReader.html#readLine--) operations against catastrophic conditions.
 
 There is no way to call `readLine()` safely since it is, by its nature, a read that must be terminated by the stream provider. A stream influenced by an attacker could keep providing bytes until the JVM runs out of memory.
 
