@@ -13,7 +13,7 @@ source.
 
 ### First Time Set Up
 
-1. Install JDK 17 for building this project. We recommend [Eclipse Adoptium](https://adoptium.net/)
+1. Install JDK 17 for building this project. We recommend [Eclipse Adoptium](https://adoptium.net/).
 
 1. Install [Semgrep](https://semgrep.dev/) CLI. See
    [here](https://semgrep.dev/docs/getting-started/#installing-and-running-semgrep-locally)
