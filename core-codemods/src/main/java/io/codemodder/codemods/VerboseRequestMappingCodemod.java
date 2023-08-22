@@ -57,14 +57,15 @@ public final class VerboseRequestMappingCodemod
   }
 
   public static String getType(AnnotationExpr annotationExpr, String httpMethod) {
-    String newType = switch (httpMethod) {
-        case "RequestMethod.GET", "GET" -> "GetMapping";
-        case "RequestMethod.PUT", "PUT" -> "PutMapping";
-        case "RequestMethod.DELETE", "DELETE" -> "DeleteMapping";
-        case "RequestMethod.POST", "POST" -> "PostMapping";
-        case "RequestMethod.PATCH", "PATCH" -> "PatchMapping";
-        default -> "";
-    };
-      return newType;
+    String newType =
+        switch (httpMethod) {
+          case "RequestMethod.GET", "GET" -> "GetMapping";
+          case "RequestMethod.PUT", "PUT" -> "PutMapping";
+          case "RequestMethod.DELETE", "DELETE" -> "DeleteMapping";
+          case "RequestMethod.POST", "POST" -> "PostMapping";
+          case "RequestMethod.PATCH", "PATCH" -> "PatchMapping";
+          default -> "";
+        };
+    return newType;
   }
 }
