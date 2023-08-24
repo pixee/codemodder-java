@@ -2,6 +2,7 @@ plugins {
     id("io.codemodder.base")
     id("io.codemodder.java-library")
     id("io.codemodder.maven-publish")
+    id("org.jetbrains.kotlin.jvm") version "1.8.20"
 }
 
 dependencies {
