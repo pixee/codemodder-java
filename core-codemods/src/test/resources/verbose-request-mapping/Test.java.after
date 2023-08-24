@@ -31,7 +31,7 @@ public class Test {
     @NonsenseMapping(value = "/example5")
     public String case5() { return "Case 5"; }
 
-    @NonsenseMapping(value = "/example6", method = RequestMethod.GET)
+    @NonsenseMapping(value = "/example6", method = RequestMethod.NONSENSE)
     public String case6() { return "Case 6"; }
 
 }
