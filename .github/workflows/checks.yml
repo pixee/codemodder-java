@@ -24,8 +24,8 @@ jobs:
           java-version: '17'
           cache: maven
           server-id: pixee
-          server-username: ORG_GRADLE_PROJECT_pixeeArtifactoryPassword
-          server-password: ORG_GRADLE_PROJECT_pixeeArtifactoryPassword
+          server-username: ${{ vars.PIXEE_ARTIFACTORY_USERNAME }}
+          server-password: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.4
         with:
