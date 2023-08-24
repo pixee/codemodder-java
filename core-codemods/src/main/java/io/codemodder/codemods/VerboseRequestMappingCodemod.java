@@ -39,9 +39,9 @@ public final class VerboseRequestMappingCodemod
       MemberValuePair methodAttribute = method.get();
       // Store method and remove the "method" attribute
       String httpMethod = methodAttribute.getValue().toString();
-      annotationExpr.getPairs().remove(methodAttribute);
       Optional<String> newType = getType(httpMethod);
       if (newType.isPresent()) {
+        annotationExpr.getPairs().remove(methodAttribute);
         annotationExpr.setName(newType.get());
         addImportIfMissing(cu, "org.springframework.web.bind.annotation." + newType.get());
         return true;
