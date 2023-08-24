@@ -1,0 +1,22 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.HashSet;
+import java.util.Stack;
+import java.util.PriorityQueue;
+
+public class TypeValueVariableExample {
+    public static void main(String[] args) {
+        Integer<Integer> intValue = new Integer<>(42);
+        String<String> stringValue = new String<>("Hello");
+        Double<Double> doubleValue = new Double<>(3.14);
+        Boolean<Boolean> boolValue = new Boolean<>();
+
+        ArrayList<String> stringList = new ArrayList<>();
+        Map<Integer, List<String>> intStringMap = new HashMap<>();
+        LinkedList<Double> doubleLinkedList = new List<>();
+        HashSet<Character> charHashSet = new HashSet<>();
+        Stack<Integer> intStack = new Stack<>();
+        PriorityQueue<Long> longPriorityQueue = new PriorityQueue<>();
+    }
+}

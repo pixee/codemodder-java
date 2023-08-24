@@ -1,0 +1,5 @@
+{
+  "summary" : "Type inference is a feature introduced in Java 7 simplifying the building of generic classes.",
+  "change" : "This change makes the code easier to review and removes IDE warnings that could harm readability.",
+  "references" : [ "https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html"]
+}

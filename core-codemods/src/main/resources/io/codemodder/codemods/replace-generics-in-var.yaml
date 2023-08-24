@@ -1,0 +1,18 @@
+rules:
+  - id: replace-generics-in-var
+    patterns:
+      - pattern-either:
+          - pattern: $TYPE<$VALUE> $VARIABLE = new $X<$VALUE>(...);
+          - pattern: $TYPE<$VALUE, $Y> $VARIABLE = new $X<$VALUE, $Y>(...);
+          - pattern: $TYPE<$VALUE, $Y, $Z> $VARIABLE = new $X<$VALUE, $Y, $Z>(...);
+          - pattern: $TYPE<$VALUE, $Y, $Z, $A> $VARIABLE = new $X<$VALUE, $Y, $Z, $A>(...);
+          - pattern: $TYPE<$VALUE, $Y, $Z, $A, $B> $VARIABLE = new $X<$VALUE, $Y, $Z, $A,
+              $B>(...);
+          - pattern: $TYPE<$VALUE, $Y, $Z, $A, $B, $C> $VARIABLE = new $X<$VALUE, $Y, $Z,
+              $A, $B, $C>(...);
+          - pattern: $TYPE<$VALUE, $Y, $Z, $A, $B, $C, $D> $VARIABLE = new $X<$VALUE, $Y,
+              $Z, $A, $B, $C, $D>(...);
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING
