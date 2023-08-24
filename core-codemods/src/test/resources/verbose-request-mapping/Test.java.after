@@ -27,6 +27,13 @@ public class Test {
     public String case4() {
         return "Case 4";
     }
+
+    @NonsenseMapping(value = "/example5")
+    public String case5() { return "Case 5"; }
+
+    @NonsenseMapping(value = "/example6", method = RequestMethod.GET)
+    public String case6() { return "Case 6"; }
+
 }
 
 @Controller
