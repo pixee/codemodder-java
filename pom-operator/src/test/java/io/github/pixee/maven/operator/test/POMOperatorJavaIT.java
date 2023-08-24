@@ -1,31 +1,24 @@
 package io.github.pixee.maven.operator.test;
 
-import org.apache.commons.lang3.SystemUtils;
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
 import io.github.pixee.maven.operator.Util;
-
-import static org.junit.Assert.assertEquals;
+import java.util.Arrays;
+import java.util.List;
+import org.apache.commons.lang3.SystemUtils;
+import org.junit.Test;
 
 public class POMOperatorJavaIT {
   @Test
   public void testJavaSample() throws Exception {
     String mvnAbsPath = Util.INSTANCE.which$pom_operator("mvn").getAbsolutePath();
 
-    List<String> argList = Arrays.asList(
-        mvnAbsPath,
-        "-B",
-        "-N",
-        "-f",
-        "java-sample/pom.xml",
-        "verify"
-    );
+    List<String> argList =
+        Arrays.asList(mvnAbsPath, "-B", "-N", "-f", "java-sample/pom.xml", "verify");
 
     if (SystemUtils.IS_OS_WINDOWS) {
-      List<String> newArgList = Arrays.asList(Util.INSTANCE.which$pom_operator("cmd").getAbsolutePath(), "/c");
+      List<String> newArgList =
+          Arrays.asList(Util.INSTANCE.which$pom_operator("cmd").getAbsolutePath(), "/c");
 
       newArgList.addAll(argList);
 

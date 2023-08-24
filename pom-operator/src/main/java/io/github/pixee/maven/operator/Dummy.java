@@ -1,8 +1,4 @@
 package io.github.pixee.maven.operator;
 
-/**
- * This dummy class is for Javadoc-generating purposes only
- */
-public class Dummy {
-
-}
+/** This dummy class is for Javadoc-generating purposes only */
+public class Dummy {}
