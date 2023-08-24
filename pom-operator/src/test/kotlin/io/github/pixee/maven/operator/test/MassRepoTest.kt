@@ -231,7 +231,7 @@ class MassRepoIT {
         val queryFailed = "" == originalDependencies && "" == finalDependencies
 
         if (queryFailed) {
-            assertTrue("Must be modified even when query failed", result)
+            assertTrue(result, "Must be modified even when query failed")
         } else {
             val dependencyAsStringWithPackaging = dependencyToUpgrade.toString()
 
