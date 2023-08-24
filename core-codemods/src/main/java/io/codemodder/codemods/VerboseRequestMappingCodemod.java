@@ -4,58 +4,53 @@ import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
+import java.util.Optional;
 import javax.inject.Inject;
 
 @Codemod(
     id = "pixee:java/verbose-request-mapping",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class VerboseRequestMappingCodemod
-    extends SarifPluginJavaParserChanger<AnnotationExpr> {
+    extends SarifPluginJavaParserChanger<NormalAnnotationExpr> {
 
   @Inject
   public VerboseRequestMappingCodemod(
       @SemgrepScan(ruleId = "verbose-request-mapping") final RuleSarif sarif) {
-    super(sarif, AnnotationExpr.class);
+    super(sarif, NormalAnnotationExpr.class);
   }
 
   @Override
   public boolean onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
-      final AnnotationExpr annotationExpr,
+      final NormalAnnotationExpr annotationExpr,
       final Result result) {
 
-    if (annotationExpr instanceof NormalAnnotationExpr normalAnnotationExpr) {
-
-      // Find the http method if it exists
-      MemberValuePair methodAttribute = null;
-      for (MemberValuePair pair : normalAnnotationExpr.getPairs()) {
-        if (pair.getNameAsString().equals("method")) {
-          methodAttribute = pair;
-          break;
-        }
-      }
-
-      if (methodAttribute != null) {
-        // Store method and remove the "method" attribute
-        String httpMethod = methodAttribute.getValue().toString();
-        normalAnnotationExpr.getPairs().remove(methodAttribute);
-
-        String newType = getType(annotationExpr, httpMethod);
-        annotationExpr.setName(newType);
-        addImportIfMissing(cu, "org.springframework.web.bind.annotation." + newType);
+    // Find the http method if it exists
+    Optional<MemberValuePair> method =
+        annotationExpr.getPairs().stream()
+            .filter(pair -> pair.getNameAsString().equals("method"))
+            .findFirst();
+    if (method.isPresent()) {
+      MemberValuePair methodAttribute = method.get();
+      // Store method and remove the "method" attribute
+      String httpMethod = methodAttribute.getValue().toString();
+      annotationExpr.getPairs().remove(methodAttribute);
+      Optional<String> newType = getType(httpMethod);
+      if (newType.isPresent()) {
+        annotationExpr.setName(newType.get());
+        addImportIfMissing(cu, "org.springframework.web.bind.annotation." + newType.get());
         return true;
       }
     }
     return false;
   }
 
-  public static String getType(AnnotationExpr annotationExpr, String httpMethod) {
+  public static Optional<String> getType(final String httpMethod) {
     String newType =
         switch (httpMethod) {
           case "RequestMethod.GET", "GET" -> "GetMapping";
@@ -63,8 +58,8 @@ public final class VerboseRequestMappingCodemod
           case "RequestMethod.DELETE", "DELETE" -> "DeleteMapping";
           case "RequestMethod.POST", "POST" -> "PostMapping";
           case "RequestMethod.PATCH", "PATCH" -> "PatchMapping";
-          default -> "";
+          default -> null;
         };
-    return newType;
+    return Optional.ofNullable(newType);
   }
 }
