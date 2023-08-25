@@ -3,6 +3,7 @@ package io.github.pixee.maven.operator.test
 import com.google.common.io.Files
 import io.github.pixee.maven.operator.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.io.File
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -10,7 +11,6 @@ import kotlin.test.assertTrue
 class POMOperatorMultipomTest : AbstractTestBase() {
     @Test
     fun testWithParentAndChildMissingPackaging() {
-        // expected = WrongDependencyTypeException::class
         val parentResource = getResource("parent-and-child-parent-broken.xml")
 
         val parentPomFiles = listOf(POMDocumentFactory.load(parentResource))
@@ -19,10 +19,12 @@ class POMOperatorMultipomTest : AbstractTestBase() {
             parentResource,
         ).withParentPomFiles(parentPomFiles)
 
-        gwt(
-            "parent-and-child",
-            parentPom.withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"))
-        )
+        assertThrows<WrongDependencyTypeException> {
+            gwt(
+                "parent-and-child",
+                parentPom.withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"))
+            )
+        }
     }
 
     @Test
@@ -37,10 +39,12 @@ class POMOperatorMultipomTest : AbstractTestBase() {
             parentResource,
         ).withParentPomFiles(parentPomFiles)
 
-        gwt(
-            "parent-and-child-wrong-type",
-            parentPom.withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"))
-        )
+        assertThrows<WrongDependencyTypeException> {
+            gwt(
+                "parent-and-child-wrong-type",
+                parentPom.withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"))
+            )
+        }
     }
 
     @Test
