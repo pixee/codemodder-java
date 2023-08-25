@@ -3,9 +3,11 @@ package io.github.pixee.maven.operator.test
 import io.github.pixee.maven.operator.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.lang.IllegalStateException
 import java.nio.file.Files
 
 class POMOperatorQueryTest {
@@ -45,16 +47,13 @@ class POMOperatorQueryTest {
 
     @Test
     fun testFailedUnsafeQuery() {
-        // expected = IllegalStateException::class
         val context =
             ProjectModelFactory
                 .load(this.javaClass.getResource("pom-broken.xml")!!)
                 .withQueryType(QueryType.UNSAFE)
                 .build()
 
-        val dependencies = POMOperator.queryDependency(context)
-
-        assertTrue(dependencies.isEmpty(), "Dependencies are empty")
+        assertThrows<IllegalStateException> { POMOperator.queryDependency(context) }
     }
 
     @Test
