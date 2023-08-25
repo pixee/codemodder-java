@@ -9,6 +9,7 @@ nebula-contacts-plugin = { module = "com.netflix.nebula.contacts:com.netflix.neb
 nebula-mavenscm-plugin = { module = "com.netflix.nebula.maven-scm:com.netflix.nebula.maven-scm.gradle.plugin", version = "20.3.0"}
 nebula-publish-plugin = { module = "com.netflix.nebula.maven-publish:com.netflix.nebula.maven-publish.gradle.plugin", version = "20.3.0"}
 spotless = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+kotlin = { module = "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin", version = "1.8.20"}
 
 [plugins]
 fileversioning = { id = "de.epitschke.gradle-file-versioning", version.ref = "fileversioning" }
