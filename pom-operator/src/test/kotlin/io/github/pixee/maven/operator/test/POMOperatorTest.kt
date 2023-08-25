@@ -9,6 +9,7 @@ import org.dom4j.DocumentException
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.xmlunit.diff.ComparisonType
 import java.io.File
 import java.nio.charset.Charset
@@ -21,13 +22,14 @@ import kotlin.test.assertTrue
 class POMOperatorTest : AbstractTestBase() {
     @Test
     fun testWithBrokenPom() {
-        // expected = DocumentException::class
-        gwt(
-            "broken-pom",
-            ProjectModelFactory.load(
-                POMOperatorTest::class.java.getResource("broken-pom.xml")!!,
-            ).withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"))
-        )
+        assertThrows<DocumentException> {
+            gwt(
+                    "broken-pom",
+                    ProjectModelFactory.load(
+                            POMOperatorTest::class.java.getResource("broken-pom.xml")!!,
+                    ).withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"))
+            )
+        }
     }
 
     @Test
@@ -79,13 +81,14 @@ class POMOperatorTest : AbstractTestBase() {
 
     @Test
     fun testWithDependencyMissing() {
-        // expected = MissingDependencyException::class
+        assertThrows<MissingDependencyException> {
         gwt(
             "case-dependency-missing",
             ProjectModelFactory.load(
                 POMOperatorTest::class.java.getResource("pom-case-1.xml")!!,
             )
         )
+        }
     }
 
     @Test
@@ -328,7 +331,6 @@ class POMOperatorTest : AbstractTestBase() {
 
     @Test
     fun testCaseWithPropertyDefinedTwice() {
-        // expected = IllegalStateException::class
         val dependencyToUpgrade =
             Dependency("org.dom4j", "dom4j", version = "1.0.0")
 
@@ -369,7 +371,9 @@ class POMOperatorTest : AbstractTestBase() {
                 .withOverrideIfAlreadyExists(false)
                 .build()
 
-        POMOperator.modify(context)
+        assertThrows<java.lang.IllegalStateException> {
+            POMOperator.modify(context)
+        }
     }
 
     @Test

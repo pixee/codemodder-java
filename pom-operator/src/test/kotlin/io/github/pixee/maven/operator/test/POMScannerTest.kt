@@ -3,6 +3,7 @@ package io.github.pixee.maven.operator.test
 import io.github.pixee.maven.operator.InvalidPathException
 import io.github.pixee.maven.operator.POMScanner
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.io.File
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -19,10 +20,9 @@ class POMScannerTest: AbstractTestBase() {
 
     @Test
     fun testTwoLevelsWithLoop() {
-        // expected = InvalidPathException::class
         val pomFile = getResourceAsFile("sample-child-with-relativepath-and-two-levels.xml")
 
-        val pmf = POMScanner.scanFrom(pomFile, currentDirectory)
+        assertThrows<InvalidPathException> {  POMScanner.scanFrom(pomFile, currentDirectory) }
     }
 
     @Test
