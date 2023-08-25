@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.version
-
 plugins {
     id("io.codemodder.spotless")
     id("org.jetbrains.kotlin.jvm")
