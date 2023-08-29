@@ -24,26 +24,13 @@ import org.junit.jupiter.api.io.TempDir;
  */
 final class MavenProviderTest {
 
-  private DependencyDescriptor defaultDescriptor;
-
-  private record PomModification(Path path, byte[] contents) {}
-
   private static class TestPomModifier implements MavenProvider.PomModifier {
-
-    private final List<PomModification> modifications = new ArrayList<>();
-
     @Override
-    public void modify(Path path, byte[] contents) {
-      this.modifications.add(new PomModification(path, contents));
-    }
-
-    public List<PomModification> getModifications() {
-      return modifications;
-    }
+    public void modify(final Path path, byte[] contents) {}
   }
 
   private TestPomModifier pomModifier;
-
+  private DependencyDescriptor defaultDescriptor;
   private PomFileUpdater pomFileUpdater;
   private PomFileFinder pomFileFinder;
   private Path projectDir;
