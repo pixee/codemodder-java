@@ -1,9 +1,13 @@
 package io.codemodder.testutils;
 
+import static java.nio.file.Files.readAllLines;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
+import com.github.difflib.DiffUtils;
+import com.github.difflib.patch.Patch;
 import io.codemodder.*;
+import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.CachingJavaParser;
@@ -11,6 +15,7 @@ import io.codemodder.javaparser.JavaParserFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -26,7 +31,12 @@ public interface CodemodTestMixin {
     }
 
     Class<? extends CodeChanger> codemod = metadata.codemodType();
-    Path testResourceDir = Path.of(metadata.testResourceDir());
+    // Test all files with the `.java.before` extension in `testResourceDir`.
+    List<Path> allBeforeFiles =
+        Files.walk(Path.of("src/test/resources/", metadata.testResourceDir()))
+            .filter(Files::isRegularFile)
+            .filter(path -> path.toString().endsWith(".java.before"))
+            .toList();
 
     List<DependencyGAV> dependencies =
         Arrays.stream(metadata.dependencies())
@@ -37,18 +47,21 @@ public interface CodemodTestMixin {
                 })
             .toList();
 
-    Path testDir = Path.of("src/test/resources/" + testResourceDir);
-    verifyCodemod(codemod, tmpDir, testDir, dependencies);
+    for (Path path : allBeforeFiles) {
+      verifyCodemod(codemod, tmpDir, path.getParent(), path, dependencies);
+    }
   }
 
   /**
    * A hook for verifying the before and after files. By default, this method will compare the
    * contents of the two files for exact equality.
    *
+   * @param before a file containing the contents before transformation
    * @param expected the file contents that are expected after transformation
    * @param after a file containing the contents after transformation
    */
-  default void verifyTransformedCode(final Path expected, final Path after) throws IOException {
+  default void verifyTransformedCode(final Path before, final Path expected, final Path after)
+      throws IOException {
     String expectedCode = Files.readString(expected);
     String transformedJavaCode = Files.readString(after);
     assertThat(transformedJavaCode, equalTo(expectedCode));
@@ -58,14 +71,15 @@ public interface CodemodTestMixin {
       final Class<? extends CodeChanger> codemodType,
       final Path tmpDir,
       final Path testResourceDir,
+      final Path before,
       final List<DependencyGAV> dependenciesExpected)
       throws IOException {
 
     // create a copy of the test file in the temp directory to serve as our "repository"
-    Path before = testResourceDir.resolve("Test.java.before");
-    Path after = testResourceDir.resolve("Test.java.after");
+    Path after =
+        before.resolveSibling(before.getFileName().toString().replace(".before", ".after"));
     Path pathToJavaFile = tmpDir.resolve("Test.java");
-    Files.copy(before, pathToJavaFile);
+    Files.copy(before, pathToJavaFile, StandardCopyOption.REPLACE_EXISTING);
 
     // Check for any sarif files and build the RuleSarif map
     List<Path> allSarifs = new ArrayList<>();
@@ -98,12 +112,25 @@ public interface CodemodTestMixin {
     // let them know if anything failed outright
     assertThat(result.getFailedFiles().size(), equalTo(0));
 
+    // If there is no `.after` file, verify that no changes were made.
+    if (Files.notExists(after)) {
+      assertThat(result.getChangeset(), is(empty()));
+      assertThat(diff(before, pathToJavaFile).getDeltas(), is(empty()));
+      return;
+    }
+
     // make sure the file is transformed to the expected output
-    verifyTransformedCode(after, pathToJavaFile);
+    verifyTransformedCode(before, after, pathToJavaFile);
 
     assertThat(changeset.size(), is(1));
     CodeTFChangesetEntry entry = changeset.get(0);
     assertThat(entry.getChanges().isEmpty(), is(false));
+
+    // make sure every change has a line number and description
+    for (CodeTFChange change : changeset.get(0).getChanges()) {
+      assertThat(change.getLineNumber(), is(greaterThan(0)));
+      assertThat(change.getDescription(), is(not(blankOrNullString())));
+    }
 
     // make sure that some of the basics are being reported
     assertThat(result.getSummary(), is(not(blankOrNullString())));
@@ -131,5 +158,9 @@ public interface CodemodTestMixin {
     String transformedAgainJavaCode = Files.readString(pathToJavaFile);
     String expectedCode = Files.readString(after);
     assertThat(transformedAgainJavaCode, equalTo(expectedCode));
+  }
+
+  private Patch<String> diff(final Path original, final Path revised) throws IOException {
+    return DiffUtils.diff(readAllLines(original), readAllLines(revised));
   }
 }

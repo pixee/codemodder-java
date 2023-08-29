@@ -54,7 +54,7 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
   @Override
   public List<CodemodChange> onFileFound(
       final CodemodInvocationContext context, final List<Result> results) {
-    logger.info("processing: {}", context.path());
+    logger.debug("processing: {}", context.path());
 
     // For fine-tuning the semgrep rule, debug log the matching snippets in the file.
     results.forEach(
