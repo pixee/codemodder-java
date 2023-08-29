@@ -41,6 +41,19 @@ public interface CodemodTestMixin {
     verifyCodemod(codemod, tmpDir, testDir, dependencies);
   }
 
+  /**
+   * A hook for verifying the before and after files. By default, this method will compare the
+   * contents of the two files for exact equality.
+   *
+   * @param expected the file contents that are expected after transformation
+   * @param after a file containing the contents after transformation
+   */
+  default void verifyTransformedCode(final Path expected, final Path after) throws IOException {
+    String expectedCode = Files.readString(expected);
+    String transformedJavaCode = Files.readString(after);
+    assertThat(transformedJavaCode, equalTo(expectedCode));
+  }
+
   private void verifyCodemod(
       final Class<? extends CodeChanger> codemodType,
       final Path tmpDir,
@@ -86,9 +99,8 @@ public interface CodemodTestMixin {
     assertThat(result.getFailedFiles().size(), equalTo(0));
 
     // make sure the file is transformed to the expected output
-    String expectedCode = Files.readString(after);
-    String transformedJavaCode = Files.readString(pathToJavaFile);
-    assertThat(transformedJavaCode, equalTo(expectedCode));
+    verifyTransformedCode(after, pathToJavaFile);
+
     assertThat(changeset.size(), is(1));
     CodeTFChangesetEntry entry = changeset.get(0);
     assertThat(entry.getChanges().isEmpty(), is(false));
@@ -117,6 +129,7 @@ public interface CodemodTestMixin {
     List<CodeTFChangesetEntry> changeset2 = result2.getChangeset();
     assertThat(changeset2.size(), is(0));
     String transformedAgainJavaCode = Files.readString(pathToJavaFile);
+    String expectedCode = Files.readString(after);
     assertThat(transformedAgainJavaCode, equalTo(expectedCode));
   }
 }
