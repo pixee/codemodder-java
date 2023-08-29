@@ -313,6 +313,15 @@ public final class MavenProvider implements ProjectProvider {
             .withQueryType(QueryType.SAFE)
             .withOffline(true);
 
+    if (this.offline) {
+      try {
+        projectModelFactory =
+            projectModelFactory.withRepositoryPath(Files.createTempDirectory(null).toFile());
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
     ProjectModel originalProjectModel = projectModelFactory.build();
 
     Collection<Dependency> foundDependencies = POMOperator.queryDependency(originalProjectModel);
