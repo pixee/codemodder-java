@@ -35,19 +35,10 @@ jobs:
       - name: Install Semgrep
         run: python3 -m pip install semgrep
 
-      - uses: actions/setup-node@v3
-
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '11'
-
-      - uses: graalvm/setup-graalvm@v1
-        with:
-          version: 'latest'
           java-version: '17'
-          components: 'js,native-image'
-          github-token: ${{ secrets.github_token }}
 
       - name: Fetch AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -62,12 +53,12 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: --quiet setVersion -PnewVersion=${{ inputs.version }}
+          arguments: --quiet --no-configuration-cache setVersion -PnewVersion=${{ inputs.version }}
 
       - uses: gradle/gradle-build-action@v2
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: --console=plain --quiet build publishNebulaPublicationToSonatypeRepository closeSonatypeStagingRepository
+          arguments: --console=plain --quiet --no-configuration-cache build publishNebulaPublicationToSonatypeRepository closeSonatypeStagingRepository
 
       # share version bump
       - run: |
@@ -81,7 +72,7 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: -q bumpPatch applySnapshot
+          arguments: -q --no-configuration-cache bumpPatch applySnapshot
 
       - run: |
           git add version.txt

@@ -1,11 +1,15 @@
 package io.codemodder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.codetf.CodeTFReport;
+import io.codemodder.codetf.CodeTFReportGenerator;
 import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.IOException;
@@ -13,11 +17,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import picocli.CommandLine;
 
 /** Test aspects of {@link CLI}. */
 final class CLITest {
@@ -110,6 +116,35 @@ final class CLITest {
     String normalJson = mapper.writeValueAsString(normalCodeTFResults);
     String dryRunJson = mapper.writeValueAsString(dryRunCodeTFResults);
     assertThat(normalJson).isEqualTo(dryRunJson);
+  }
+
+  @Test
+  void dry_run_failure_still_deletes_temp() throws IOException {
+    Path tmpDir = Files.createTempDirectory("dry-run-test");
+    CLI.DryRunTempDirCreationStrategy tmpDirStrategy = () -> tmpDir;
+    Path codetf = Files.createTempFile("codetf", ".json");
+
+    String[] args = {
+      "--dont-exit", "--dry-run", "--output", codetf.toString(), workingRepoDir.toString()
+    };
+    SourceDirectoryLister sourceDirectoryLister = mock(SourceDirectoryLister.class);
+    when(sourceDirectoryLister.listJavaSourceDirectories(any(List.class)))
+        .thenThrow(new IllegalArgumentException("intentional error"));
+    CLI cli =
+        new CLI(
+            args,
+            List.of(Cloud9Changer.class),
+            Clock.systemDefaultZone(),
+            new CLI.DefaultFileFinder(),
+            EncodingDetector.create(),
+            JavaParserFactory.newFactory(),
+            sourceDirectoryLister,
+            CodeTFReportGenerator.createDefault(),
+            tmpDirStrategy);
+    CommandLine commandLine = new CommandLine(cli).setCaseInsensitiveEnumValuesAllowed(true);
+    int code = commandLine.execute(args);
+    assertThat(code).isEqualTo(1);
+    assertThat(Files.notExists(tmpDir)).isTrue();
   }
 
   @Test

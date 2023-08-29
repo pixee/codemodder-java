@@ -1,0 +1,11 @@
+rules:
+  - id: verbose-request-mapping
+    patterns:
+      - pattern-either:
+        - pattern: |
+            @RequestMapping(method = $REQUEST_METHOD, ...)
+        - pattern: |
+            @RequestMapping(method = $VALUE, ...)
+    message: Semgrep found a match.
+    languages: [java]
+    severity: WARNING

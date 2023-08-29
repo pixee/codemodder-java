@@ -1,0 +1,78 @@
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+public class Test {
+
+    @RequestMapping("/example1")
+    public String case1() {
+        return "Case 1";
+    }
+
+    @GetMapping(value = "/example2")
+    public String case2() {
+        return "Case 2";
+    }
+
+    @GetMapping(value = "/example3")
+    public String case3() {
+        return "Case 3";
+    }
+
+    @RequestMapping(value = "/example4")
+    public String case4() {
+        return "Case 4";
+    }
+
+    @NonsenseMapping(value = "/example5")
+    public String case5() { return "Case 5"; }
+
+    @NonsenseMapping(value = "/example6", method = RequestMethod.NONSENSE)
+    public String case6() { return "Case 6"; }
+
+}
+
+@Controller
+@RequestMapping("/boys")
+public class DemoController {
+
+    @ResponseBody
+    @RequestMapping("/hello")
+    public String helloWorld() {
+        return "Hello World!";
+    }
+
+    @ResponseBody
+    @RequestMapping("/example")
+    public String welcomeGfgMessage() {
+        return "Welcome";
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/greet")
+    public String greet() {
+        return "Greetings!";
+    }
+
+    @ResponseBody
+    @PutMapping(value = "/update")
+    public String updateData() {
+        return "Data Updated!";
+    }
+
+    @ResponseBody
+    @DeleteMapping(value = "/delete")
+    public String deleteData() {
+        return "Data Deleted!";
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/create")
+    public String createData() {
+        return "Data Created!";
+    }
+}

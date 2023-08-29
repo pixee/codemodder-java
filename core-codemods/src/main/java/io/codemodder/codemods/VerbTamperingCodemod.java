@@ -33,7 +33,7 @@ public final class VerbTamperingCodemod extends RawFileChanger {
   @Override
   public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
     Path file = context.path();
-    if (!file.getFileName().toString().equalsIgnoreCase("web.xml")) {
+    if (!"web.xml".equalsIgnoreCase(file.getFileName().toString())) {
       return List.of();
     }
     try {

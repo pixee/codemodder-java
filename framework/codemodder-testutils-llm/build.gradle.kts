@@ -1,5 +1,4 @@
 plugins {
-    id("io.codemodder.base")
     id("io.codemodder.java-library")
     id("io.codemodder.maven-publish")
 }
@@ -7,9 +6,9 @@ plugins {
 description = "Utilities for testing llm-based codemods"
 
 dependencies {
-    implementation("io.codemodder:codemodder-base")
-    implementation("io.codemodder:codemodder-plugin-llm")
-    implementation("io.codemodder:codemodder-testutils")
+    implementation(project(":framework:codemodder-base"))
+    implementation(project(":plugins:codemodder-plugin-llm"))
+    implementation(project(":framework:codemodder-testutils"))
     implementation(testlibs.bundles.hamcrest)
     implementation(testlibs.bundles.junit.jupiter)
 }

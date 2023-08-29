@@ -6,13 +6,13 @@ In your analysis, please answer the following:
 - Does the code include login validation?
 - What logging framework does the code use? Does the code log any messages when login validation fails?
 - Does the code print any messages to the console when login validation fails?
-- Does the code throw any exceptions when login validation fails? If so, this may be considered logging.
+- Does the code throw an exception when login validation fails? If so, what type of exception? Throwing a type of login exception may be considered logging the failed login attempt.
 
 Examples of LOW risk:
 - code does not validate user login credentials
-- code logs any message at any level when login validation fails
+- code logs a message at INFO severity or higher when login validation fails
 - code prints to the console using `System.out.println` when login validation fails
-- code throws any type of exception when login validation fails
+- code throws a type of login exception when login validation fails
 
 Examples of HIGH risk:
-- when login validation fails, code does not log or print a message or throw an exception
+- when login validation fails, code does not log or print a message or throw a type of login exception

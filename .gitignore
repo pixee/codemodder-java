@@ -125,3 +125,4 @@ fabric.properties
 
 # env
 .env*
+.secrets
