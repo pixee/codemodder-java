@@ -58,8 +58,13 @@ final class SemgrepRuleSarif implements RuleSarif {
     }
     List<Result> results =
         sarif.getRuns().get(0).getResults().stream()
-            // if the semgrep is offline, the rule id will be exactly what we think it should be, if
-            // it's run just-in-time by our code, it will have this weird .<ruleId> suffix
+            /*
+             * The default Semgrep rules have a rule id reported that is what you'd expect. When you run
+             * your own custom rules locally, they'll contain part of the file system path to the rule.
+             *
+             * Because this provides support for both types, we need this check to account for which type
+             * of rule id we're dealing with.
+             */
             .filter(
                 result ->
                     result.getRuleId().endsWith("." + ruleId) || result.getRuleId().equals(ruleId))

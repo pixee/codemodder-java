@@ -1,8 +1,7 @@
 package io.codemodder.providers.sarif.semgrep;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.contrastsecurity.sarif.Region;
@@ -250,6 +249,14 @@ final class SemgrepModuleTest {
     assertThat(ruleSarif, is(notNullValue()));
     List<Region> regions = ruleSarif.getRegionsFromResultsByRule(javaFile);
     assertThat(regions.size(), is(1));
+
+    Region region = regions.get(0);
+    assertThat(region.getStartLine(), equalTo(91));
+    assertThat(region.getStartColumn(), equalTo(7));
+    assertThat(
+        ruleSarif.getRule(),
+        equalTo("java.lang.security.audit.unsafe-reflection.unsafe-reflection"));
+    assertThat(ruleSarif.getDriver(), equalTo("semgrep"));
   }
 
   @Codemod(
