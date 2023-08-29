@@ -1,5 +1,5 @@
 {
-  "summary" : "Introduced protections against DoS via unterminated read operations",
+  "summary" : "Protect `readLine()` against DoS",
   "change": "Replaced with a call that offers an upper bound on the number of characters that will be read before giving up and throwing a security exception",
   "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/BoundedLineReader.java",
   "references" : [
