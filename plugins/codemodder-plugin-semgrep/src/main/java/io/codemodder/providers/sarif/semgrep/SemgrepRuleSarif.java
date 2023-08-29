@@ -20,15 +20,17 @@ import java.util.Objects;
  * places the whole path to the rule in the field. This means our filtering logic is a little weird
  * and unexpected, but it works.
  */
-public final class SemgrepRuleSarif implements RuleSarif {
+final class SemgrepRuleSarif implements RuleSarif {
 
   private final SarifSchema210 sarif;
   private final String ruleId;
   private final Map<Path, List<Result>> resultsCache;
+  private final Path repositoryRoot;
 
-  public SemgrepRuleSarif(final String ruleId, final SarifSchema210 sarif) {
+  SemgrepRuleSarif(final String ruleId, final SarifSchema210 sarif, final Path repositoryRoot) {
     this.sarif = Objects.requireNonNull(sarif);
     this.ruleId = Objects.requireNonNull(ruleId);
+    this.repositoryRoot = Objects.requireNonNull(repositoryRoot);
     this.resultsCache = new HashMap<>();
   }
 
@@ -56,7 +58,11 @@ public final class SemgrepRuleSarif implements RuleSarif {
     }
     List<Result> results =
         sarif.getRuns().get(0).getResults().stream()
-            .filter(result -> result.getRuleId().endsWith("." + ruleId))
+            // if the semgrep is offline, the rule id will be exactly what we think it should be, if
+            // it's run just-in-time by our code, it will have this weird .<ruleId> suffix
+            .filter(
+                result ->
+                    result.getRuleId().endsWith("." + ruleId) || result.getRuleId().equals(ruleId))
             .filter(
                 result -> {
                   String uri =
@@ -67,7 +73,7 @@ public final class SemgrepRuleSarif implements RuleSarif {
                           .getArtifactLocation()
                           .getUri();
                   try {
-                    return Files.isSameFile(path, Path.of(uri));
+                    return Files.isSameFile(path, repositoryRoot.resolve(uri));
                   } catch (IOException e) { // this should never happen
                     throw new UncheckedIOException(e);
                   }

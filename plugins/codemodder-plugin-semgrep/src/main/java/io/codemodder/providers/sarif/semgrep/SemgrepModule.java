@@ -29,12 +29,21 @@ public final class SemgrepModule extends AbstractModule {
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;
   private final SemgrepRunner semgrepRunner;
+  private final List<RuleSarif> sarifs;
 
   public SemgrepModule(
       final Path codeDirectory, final List<Class<? extends CodeChanger>> codemodTypes) {
+    this(codeDirectory, codemodTypes, List.of());
+  }
+
+  public SemgrepModule(
+      final Path codeDirectory,
+      final List<Class<? extends CodeChanger>> codemodTypes,
+      final List<RuleSarif> sarifs) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
     this.semgrepRunner = SemgrepRunner.createDefault();
+    this.sarifs = Objects.requireNonNull(sarifs);
   }
 
   @Override
@@ -50,13 +59,15 @@ public final class SemgrepModule extends AbstractModule {
     // find all @SemgrepScan annotations in their parameters and batch them up for running
     List<Pair<String, SemgrepScan>> toBind = new ArrayList<>();
 
+    // find all the @OfflineSemgrepScan annotations and bind them as is
     Set<String> packagesScanned = new HashSet<>();
 
     for (Class<? extends CodeChanger> codemodType : codemodTypes) {
 
       String packageName = codemodType.getPackageName();
       if (!packagesScanned.contains(packageName)) {
-        final List<Parameter> targetedParams;
+        final List<Parameter> targetedParamsForJustInTimeScanning;
+        final List<Parameter> targetedParamsForOfflineScanning;
         try (ScanResult scan =
             new ClassGraph()
                 .enableAllInfo()
@@ -67,18 +78,46 @@ public final class SemgrepModule extends AbstractModule {
               scan.getClassesWithMethodAnnotation(Inject.class);
           List<Class<?>> injectableClasses = classesWithMethodAnnotation.loadClasses();
 
-          targetedParams =
+          List<Parameter> injectableParams =
               injectableClasses.stream()
                   .map(Class::getDeclaredConstructors)
                   .flatMap(Arrays::stream)
                   .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
                   .map(Executable::getParameters)
                   .flatMap(Arrays::stream)
+                  .toList();
+
+          targetedParamsForJustInTimeScanning =
+              injectableParams.stream()
                   .filter(param -> param.isAnnotationPresent(SemgrepScan.class))
+                  .toList();
+
+          targetedParamsForOfflineScanning =
+              injectableParams.stream()
+                  .filter(param -> param.isAnnotationPresent(OfflineSemgrepScan.class))
                   .toList();
         }
 
-        targetedParams.forEach(
+        // we can bind these right away, because the scan has already occurred
+        targetedParamsForOfflineScanning.forEach(
+            param -> {
+              if (!RuleSarif.class.equals(param.getType())) {
+                throw new IllegalArgumentException(
+                    "can't use @OfflineSemgrepScan on anything except RuleSarif (see "
+                        + param.getDeclaringExecutable().getDeclaringClass().getName()
+                        + ")");
+              }
+              // bind from existing SARIF
+              OfflineSemgrepScan annotation = param.getAnnotation(OfflineSemgrepScan.class);
+              RuleSarif ruleSarif =
+                  sarifs.stream()
+                      .filter(sarif -> sarif.getRule().equals(annotation.ruleId()))
+                      .findFirst()
+                      .orElse(RuleSarif.EMPTY);
+              bind(RuleSarif.class).annotatedWith(annotation).toInstance(ruleSarif);
+            });
+
+        targetedParamsForJustInTimeScanning.forEach(
             param -> {
               if (!RuleSarif.class.equals(param.getType())) {
                 throw new IllegalArgumentException(
@@ -185,7 +224,8 @@ public final class SemgrepModule extends AbstractModule {
     // bind the SARIF results
     for (Pair<String, SemgrepScan> bindingPair : toBind) {
       SemgrepScan sarifAnnotation = bindingPair.getRight();
-      SemgrepRuleSarif semgrepSarif = new SemgrepRuleSarif(bindingPair.getLeft(), sarif);
+      SemgrepRuleSarif semgrepSarif =
+          new SemgrepRuleSarif(bindingPair.getLeft(), sarif, codeDirectory);
       bind(RuleSarif.class).annotatedWith(sarifAnnotation).toInstance(semgrepSarif);
     }
 
