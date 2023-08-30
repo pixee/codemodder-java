@@ -9,7 +9,9 @@ import java.util.List;
 public interface JavaParserFactory {
 
   /**
-   * Create a JavaParser instance for the given project source directories
+   * Create a JavaParser instance for the given project source directories. Note that we should
+   * still operate on the files that are not in the source directories, but we may have less symbol
+   * resolution for them.
    *
    * @param sourceDirectories the path to the project
    * @return a JavaParser instance based on the given source directories
