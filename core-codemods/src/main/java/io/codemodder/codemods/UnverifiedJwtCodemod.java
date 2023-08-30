@@ -14,7 +14,7 @@ import io.codemodder.SarifPluginJavaParserChanger;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
-import io.codemodder.providers.sarif.codeql.CodeQLScan;
+import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import javax.inject.Inject;
 
 /** Fixes issues reported under the id "missing-jwt-signature-check". */
@@ -25,7 +25,7 @@ public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expressio
 
   @Inject
   public UnverifiedJwtCodemod(
-      @CodeQLScan(ruleId = "java/missing-jwt-signature-check") final RuleSarif sarif) {
+      @ProvidedCodeQLScan(ruleId = "java/missing-jwt-signature-check") final RuleSarif sarif) {
     super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
   }
 

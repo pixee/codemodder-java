@@ -20,15 +20,17 @@ import java.util.Objects;
  * places the whole path to the rule in the field. This means our filtering logic is a little weird
  * and unexpected, but it works.
  */
-public final class SemgrepRuleSarif implements RuleSarif {
+final class SemgrepRuleSarif implements RuleSarif {
 
   private final SarifSchema210 sarif;
   private final String ruleId;
   private final Map<Path, List<Result>> resultsCache;
+  private final Path repositoryRoot;
 
-  public SemgrepRuleSarif(final String ruleId, final SarifSchema210 sarif) {
+  SemgrepRuleSarif(final String ruleId, final SarifSchema210 sarif, final Path repositoryRoot) {
     this.sarif = Objects.requireNonNull(sarif);
     this.ruleId = Objects.requireNonNull(ruleId);
+    this.repositoryRoot = Objects.requireNonNull(repositoryRoot);
     this.resultsCache = new HashMap<>();
   }
 
@@ -56,7 +58,16 @@ public final class SemgrepRuleSarif implements RuleSarif {
     }
     List<Result> results =
         sarif.getRuns().get(0).getResults().stream()
-            .filter(result -> result.getRuleId().endsWith("." + ruleId))
+            /*
+             * The default Semgrep rules have a rule id reported that is what you'd expect. When you run
+             * your own custom rules locally, they'll contain part of the file system path to the rule.
+             *
+             * Because this provides support for both types, we need this check to account for which type
+             * of rule id we're dealing with.
+             */
+            .filter(
+                result ->
+                    result.getRuleId().endsWith("." + ruleId) || result.getRuleId().equals(ruleId))
             .filter(
                 result -> {
                   String uri =
@@ -67,7 +78,7 @@ public final class SemgrepRuleSarif implements RuleSarif {
                           .getArtifactLocation()
                           .getUri();
                   try {
-                    return Files.isSameFile(path, Path.of(uri));
+                    return Files.isSameFile(path, repositoryRoot.resolve(uri));
                   } catch (IOException e) { // this should never happen
                     throw new UncheckedIOException(e);
                   }

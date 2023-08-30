@@ -17,7 +17,7 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
-import io.codemodder.providers.sarif.codeql.CodeQLScan;
+import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import io.github.pixee.security.UnwantedTypes;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +37,7 @@ public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Exp
 
   @Inject
   public JEXLInjectionCodemod(
-      @CodeQLScan(ruleId = "java/jexl-expression-injection") final RuleSarif sarif) {
+      @ProvidedCodeQLScan(ruleId = "java/jexl-expression-injection") final RuleSarif sarif) {
     super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
   }
 

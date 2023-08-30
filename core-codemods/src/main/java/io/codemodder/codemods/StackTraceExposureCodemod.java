@@ -7,7 +7,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTs;
-import io.codemodder.providers.sarif.codeql.CodeQLScan;
+import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import javax.inject.Inject;
 
 /** Fixes issues reported under the id "java/stack-trace-exposure" */
@@ -18,7 +18,7 @@ public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expr
 
   @Inject
   public StackTraceExposureCodemod(
-      @CodeQLScan(ruleId = "java/stack-trace-exposure") final RuleSarif sarif) {
+      @ProvidedCodeQLScan(ruleId = "java/stack-trace-exposure") final RuleSarif sarif) {
     super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
   }
 

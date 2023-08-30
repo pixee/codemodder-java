@@ -34,11 +34,11 @@ public final class CodeQLModule extends AbstractModule {
     for (final Class<? extends CodeChanger> codemodType : codemodTypes) {
       final Constructor<?>[] constructors = codemodType.getDeclaredConstructors();
 
-      final Optional<CodeQLScan> annotation =
+      final Optional<ProvidedCodeQLScan> annotation =
           Stream.of(constructors)
               .filter(constructor -> constructor.getAnnotation(javax.inject.Inject.class) != null)
               .flatMap(constructor -> Stream.of(constructor.getParameters()))
-              .map(parameter -> parameter.getAnnotation(CodeQLScan.class))
+              .map(parameter -> parameter.getAnnotation(ProvidedCodeQLScan.class))
               .filter(Objects::nonNull)
               .findFirst();
 

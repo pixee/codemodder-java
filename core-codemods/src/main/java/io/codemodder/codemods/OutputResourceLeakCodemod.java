@@ -4,7 +4,7 @@ import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import io.codemodder.*;
-import io.codemodder.providers.sarif.codeql.CodeQLScan;
+import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import javax.inject.Inject;
 
 /**
@@ -18,7 +18,7 @@ public final class OutputResourceLeakCodemod extends SarifPluginJavaParserChange
 
   @Inject
   public OutputResourceLeakCodemod(
-      @CodeQLScan(ruleId = "java/output-resource-leak") final RuleSarif sarif) {
+      @ProvidedCodeQLScan(ruleId = "java/output-resource-leak") final RuleSarif sarif) {
     super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
   }
 

@@ -16,6 +16,11 @@ public final class SemgrepProvider implements CodemodProvider {
       final Path codeDirectory,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
-    return Set.of(new SemgrepModule(codeDirectory, codemodTypes));
+    return Set.of(new SemgrepModule(codeDirectory, codemodTypes, sarifs));
+  }
+
+  @Override
+  public List<String> wantsSarifToolNames() {
+    return List.of("semgrep");
   }
 }
