@@ -13,6 +13,7 @@ import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -21,6 +22,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -166,19 +168,17 @@ final class CLI implements Callable<Integer> {
   @VisibleForTesting
   static class DefaultFileFinder implements FileFinder {
     @Override
-    public List<Path> findFiles(
-        final List<SourceDirectory> sourceDirectories, final IncludesExcludes includesExcludes) {
+    public List<Path> findFiles(final Path projectDir, final IncludesExcludes includesExcludes) {
       List<Path> allFiles = new ArrayList<>();
-      for (SourceDirectory directory : sourceDirectories) {
-        allFiles.addAll(
-            directory.files().stream()
-                .map(File::new)
-                .filter(includesExcludes::shouldInspect)
-                .map(File::toPath)
-                .filter(
-                    f -> !Files.isSymbolicLink(f)) // could cause infinite loop if we follow links
-                .sorted()
-                .toList());
+      try (Stream<Path> paths = Files.walk(projectDir)) {
+        paths
+            .filter(Files::isRegularFile)
+            .filter(p -> !Files.isSymbolicLink(p)) // could cause infinite loop if we follow links
+            .filter(p -> includesExcludes.shouldInspect(p.toFile()))
+            .sorted()
+            .forEach(allFiles::add);
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
       }
       return allFiles;
     }
@@ -270,7 +270,7 @@ final class CLI implements Callable<Integer> {
       // get all files that match
       List<SourceDirectory> sourceDirectories =
           sourceDirectoryLister.listJavaSourceDirectories(List.of(projectDirectory));
-      List<Path> filePaths = fileFinder.findFiles(sourceDirectories, includesExcludes);
+      List<Path> filePaths = fileFinder.findFiles(projectPath, includesExcludes);
 
       // get codemod includes/excludes
       final CodemodRegulator regulator;

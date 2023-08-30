@@ -7,13 +7,12 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import io.codemodder.SourceDirectory;
-import java.io.IOException;
 import java.util.List;
 
 final class DefaultJavaParserFactory implements JavaParserFactory {
 
   @Override
-  public JavaParser create(final List<SourceDirectory> sourceDirectories) throws IOException {
+  public JavaParser create(final List<SourceDirectory> sourceDirectories) {
     final JavaParser javaParser = new JavaParser();
     final CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
     combinedTypeSolver.add(new ReflectionTypeSolver());
