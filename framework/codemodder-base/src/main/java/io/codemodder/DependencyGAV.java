@@ -175,5 +175,12 @@ public interface DependencyGAV {
 
   /** There are multiple XSS rules require an XSS encoder. */
   DependencyGAV OWASP_XSS_JAVA_ENCODER =
-      DependencyGAV.createDefault("org.owasp.encoder", "encoder", "1.2.3");
+      DependencyGAV.createDefault(
+          "org.owasp.encoder",
+          "encoder",
+          "1.2.3",
+          "This library holds XSS encoders for different contexts.",
+          DependencyLicenses.BSD_3_CLAUSE,
+          "https://github.com/OWASP/owasp-java-encoder",
+          true);
 }

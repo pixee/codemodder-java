@@ -144,10 +144,57 @@ final class MavenProviderTest {
     assertThat(result.erroredFiles()).isEmpty();
 
     // we've updated all the poms, so we merge this with the pre-existing one change
-    assertThat(result.packageChanges().size()).isEqualTo(2);
+    Set<CodeTFChangesetEntry> changes = result.packageChanges();
+    assertThat(changes.size()).isEqualTo(2);
+
+    // we don't have license facts for these dependencies, so we should be silent on their license!
+    boolean matchedLicenseFacts =
+        changes.stream()
+            .map(CodeTFChangesetEntry::getChanges)
+            .flatMap(Collection::stream)
+            .anyMatch(c -> c.getDescription().contains("License: "));
+    assertThat(matchedLicenseFacts).isFalse();
 
     // we injected all the dependencies, total success!
     assertThat(result.injectedPackages()).containsOnly(marsDependency1, marsDependency2);
+  }
+
+  @Test
+  void it_captures_deeper_dependency_facts_when_available() throws IOException {
+    Files.writeString(module1Pom, simplePom);
+
+    MavenProvider provider =
+        new MavenProvider(
+            new MavenProvider.DefaultPomModifier(),
+            new MavenProvider.DefaultPomFileFinder(),
+            defaultDescriptor,
+            false);
+
+    DependencyUpdateResult result =
+        provider.updateDependencies(
+            projectDir,
+            marsJavaFile,
+            List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT, DependencyGAV.OWASP_XSS_JAVA_ENCODER));
+
+    // we injected all the dependencies, total success!
+    assertThat(result.injectedPackages())
+        .containsOnly(DependencyGAV.JAVA_SECURITY_TOOLKIT, DependencyGAV.OWASP_XSS_JAVA_ENCODER);
+
+    Set<CodeTFChangesetEntry> changes = result.packageChanges();
+
+    boolean matchedXssJavaEncoderFacts =
+        changes.stream()
+            .map(CodeTFChangesetEntry::getChanges)
+            .flatMap(Collection::stream)
+            .anyMatch(c -> c.getDescription().contains("License: BSD 3-Clause"));
+    assertThat(matchedXssJavaEncoderFacts).isTrue();
+
+    boolean matchedToolkitFacts =
+        changes.stream()
+            .map(CodeTFChangesetEntry::getChanges)
+            .flatMap(Collection::stream)
+            .anyMatch(c -> c.getDescription().contains("License: MIT"));
+    assertThat(matchedToolkitFacts).isTrue();
   }
 
   @Test

@@ -162,19 +162,19 @@ public final class MavenProvider implements ProjectProvider {
 
     Path pomFile = maybePomFile.get();
     Set<CodeTFChangesetEntry> changesets = new LinkedHashSet<>();
-
-    List<Dependency> mappedDependencies =
-        dependencies.stream()
-            .map(
-                dependencyGAV ->
-                    new Dependency(
-                        dependencyGAV.group(),
-                        dependencyGAV.artifact(),
-                        dependencyGAV.version(),
-                        null,
-                        null,
-                        null))
-            .toList();
+    //
+    //    List<Dependency> mappedDependencies =
+    //        dependencies.stream()
+    //            .map(
+    //                dependencyGAV ->
+    //                    new Dependency(
+    //                        dependencyGAV.group(),
+    //                        dependencyGAV.artifact(),
+    //                        dependencyGAV.version(),
+    //                        null,
+    //                        null,
+    //                        null))
+    //            .toList();
 
     final List<DependencyGAV> skippedDependencies = new ArrayList<>();
     final List<DependencyGAV> injectedDependencies = new ArrayList<>();
@@ -184,14 +184,8 @@ public final class MavenProvider implements ProjectProvider {
         new AtomicReference<>(getDependenciesFrom(pomFile, projectDir));
     LOG.debug("Beginning dependency set size: {}", foundDependenciesMapped.get().size());
 
-    mappedDependencies.forEach(
-        newDependency -> {
-          DependencyGAV newDependencyGAV =
-              DependencyGAV.createDefault(
-                  newDependency.getGroupId(),
-                  newDependency.getArtifactId(),
-                  newDependency.getVersion());
-
+    dependencies.forEach(
+        newDependencyGAV -> {
           LOG.debug("Looking at injecting new dependency: {}", newDependencyGAV);
           boolean foundIt =
               foundDependenciesMapped.get().stream().anyMatch(newDependencyGAV::equals);
@@ -203,7 +197,14 @@ public final class MavenProvider implements ProjectProvider {
           }
 
           LOG.debug("Need to inject it...");
-
+          Dependency newDependency =
+              new Dependency(
+                  newDependencyGAV.group(),
+                  newDependencyGAV.artifact(),
+                  newDependencyGAV.version(),
+                  null,
+                  null,
+                  null);
           ProjectModelFactory projectModelFactory =
               POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
                   .withDependency(newDependency)
