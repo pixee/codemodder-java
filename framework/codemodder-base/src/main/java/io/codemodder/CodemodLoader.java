@@ -104,7 +104,7 @@ public final class CodemodLoader {
 
     // add all provider modules
     for (final CodemodProvider provider : providers) {
-      final List<String> wantsSarif = getWantsSarif(provider);
+      final List<String> wantsSarif = provider.wantsSarifToolNames();
       final var allWantedSarifs =
           wantsSarif.stream()
               .flatMap(toolName -> ruleSarifByTool.getOrDefault(toolName, List.of()).stream())
@@ -139,12 +139,6 @@ public final class CodemodLoader {
 
   public List<CodemodIdPair> getCodemods() {
     return codemods;
-  }
-
-  private static List<String> getWantsSarif(final CodemodProvider provider) {
-    return Optional.ofNullable(provider.getClass().getAnnotation(WantsSarif.class))
-        .map(wants -> Arrays.asList(wants.toolNames()))
-        .orElse(List.of());
   }
 
   private static void validateRequiredFields(final Codemod codemodAnnotation) {

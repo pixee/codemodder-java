@@ -18,4 +18,8 @@ public interface CodemodProvider {
    */
   Set<AbstractModule> getModules(
       Path repository, List<Class<? extends CodeChanger>> codemodTypes, List<RuleSarif> sarifs);
+
+  default List<String> wantsSarifToolNames() {
+    return List.of();
+  }
 }
