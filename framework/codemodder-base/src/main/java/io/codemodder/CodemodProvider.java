@@ -18,7 +18,16 @@ public interface CodemodProvider {
    */
   Set<AbstractModule> getModules(
       Path repository, List<Class<? extends CodeChanger>> codemodTypes, List<RuleSarif> sarifs);
-
+  
+  /**
+   * Tools this provider is interested in processing the SARIF output of. Codemodder CLI will look
+   * for the SARIF outputted by tools in this list in the repository root and then provide the
+   * results to {@link #getModules(Path, List, List)} as a {@link List} of {@link RuleSarif}s.
+   *
+   * <p>By default, this returns an empty list.
+   *
+   * @return a list of tool names that output SARIF that this provider wants to process
+   */
   default List<String> wantsSarifToolNames() {
     return List.of();
   }
