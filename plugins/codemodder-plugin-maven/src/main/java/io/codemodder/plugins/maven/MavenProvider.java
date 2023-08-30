@@ -4,9 +4,7 @@ import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
-import io.codemodder.DependencyGAV;
-import io.codemodder.DependencyUpdateResult;
-import io.codemodder.ProjectProvider;
+import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.github.pixee.maven.operator.Dependency;
@@ -43,8 +41,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides Maven dependency management functions to codemods.
  *
- * <p>Arshan asked me to add some more docs. Here they are in order to bring more context:
- *
  * <p>Current Limitations are:
  *
  * <p>a. We skip parent finding if there's not a relativePath declaration (this is by design), so
@@ -57,6 +53,8 @@ import org.slf4j.LoggerFactory;
  * somewhere writable
  */
 public final class MavenProvider implements ProjectProvider {
+
+  private final DependencyDescriptor dependencyDescriptor;
 
   /** Represents a failure when doing a dependency update. */
   static class DependencyUpdateException extends RuntimeException {
@@ -91,20 +89,32 @@ public final class MavenProvider implements ProjectProvider {
   private final PomFileFinder pomFileFinder;
 
   MavenProvider(
-      final PomModifier pomModifier, final PomFileFinder pomFileFinder, final boolean offline) {
+      final PomModifier pomModifier,
+      final PomFileFinder pomFileFinder,
+      final DependencyDescriptor dependencyDescriptor,
+      final boolean offline) {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
     this.pomModifier = pomModifier;
     this.pomFileFinder = pomFileFinder;
     this.offline = offline;
+    this.dependencyDescriptor = Objects.requireNonNull(dependencyDescriptor);
   }
 
   MavenProvider(final PomModifier pomModifier) {
-    this(pomModifier, new DefaultPomFileFinder(), true);
+    this(
+        pomModifier,
+        new DefaultPomFileFinder(),
+        DependencyDescriptor.createMarkdownDescriptor(),
+        true);
   }
 
   public MavenProvider() {
-    this(new DefaultPomModifier(), new DefaultPomFileFinder(), true);
+    this(
+        new DefaultPomModifier(),
+        new DefaultPomFileFinder(),
+        DependencyDescriptor.createMarkdownDescriptor(),
+        true);
   }
 
   @VisibleForTesting
@@ -153,19 +163,6 @@ public final class MavenProvider implements ProjectProvider {
     Path pomFile = maybePomFile.get();
     Set<CodeTFChangesetEntry> changesets = new LinkedHashSet<>();
 
-    List<Dependency> mappedDependencies =
-        dependencies.stream()
-            .map(
-                dependencyGAV ->
-                    new Dependency(
-                        dependencyGAV.group(),
-                        dependencyGAV.artifact(),
-                        dependencyGAV.version(),
-                        null,
-                        null,
-                        null))
-            .toList();
-
     final List<DependencyGAV> skippedDependencies = new ArrayList<>();
     final List<DependencyGAV> injectedDependencies = new ArrayList<>();
     final Set<Path> erroredFiles = new LinkedHashSet<>();
@@ -174,14 +171,8 @@ public final class MavenProvider implements ProjectProvider {
         new AtomicReference<>(getDependenciesFrom(pomFile, projectDir));
     LOG.debug("Beginning dependency set size: {}", foundDependenciesMapped.get().size());
 
-    mappedDependencies.forEach(
-        newDependency -> {
-          DependencyGAV newDependencyGAV =
-              DependencyGAV.createDefault(
-                  newDependency.getGroupId(),
-                  newDependency.getArtifactId(),
-                  newDependency.getVersion());
-
+    dependencies.forEach(
+        newDependencyGAV -> {
           LOG.debug("Looking at injecting new dependency: {}", newDependencyGAV);
           boolean foundIt =
               foundDependenciesMapped.get().stream().anyMatch(newDependencyGAV::equals);
@@ -193,7 +184,14 @@ public final class MavenProvider implements ProjectProvider {
           }
 
           LOG.debug("Need to inject it...");
-
+          Dependency newDependency =
+              new Dependency(
+                  newDependencyGAV.group(),
+                  newDependencyGAV.artifact(),
+                  newDependencyGAV.version(),
+                  null,
+                  null,
+                  null);
           ProjectModelFactory projectModelFactory =
               POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
                   .withDependency(newDependency)
@@ -232,8 +230,7 @@ public final class MavenProvider implements ProjectProvider {
               if (aPomFile.getDirty()) {
                 LOG.debug("POM file {} was dirty", path);
                 try {
-                  CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile);
-                  LOG.debug("Writing pom...");
+                  CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile, newDependencyGAV);
                   pomModifier.modify(path, aPomFile.getResultPomBytes());
                   LOG.debug("POM written!");
                   injectedDependencies.add(newDependencyGAV);
@@ -264,7 +261,8 @@ public final class MavenProvider implements ProjectProvider {
         new String(byteArray, doc.getCharset()).split(Pattern.quote(doc.getEndl())));
   }
 
-  private CodeTFChangesetEntry getChanges(final Path projectDir, final POMDocument pomDocument) {
+  private CodeTFChangesetEntry getChanges(
+      final Path projectDir, final POMDocument pomDocument, final DependencyGAV newDependency) {
     List<String> originalPomContents = getLinesFrom(pomDocument, pomDocument.getOriginalPom());
     List<String> finalPomContents = getLinesFrom(pomDocument, pomDocument.getResultPomBytes());
 
@@ -283,8 +281,9 @@ public final class MavenProvider implements ProjectProvider {
 
     String relativePomPath = projectDir.relativize(pomDocumentPath).toString();
 
+    String description = dependencyDescriptor.create(newDependency);
     CodeTFChange change =
-        new CodeTFChange(position, Collections.emptyMap(), "", List.of(), null, List.of());
+        new CodeTFChange(position, Collections.emptyMap(), description, List.of(), null, List.of());
 
     List<String> patchDiff =
         UnifiedDiffUtils.generateUnifiedDiff(
@@ -296,7 +295,7 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   @NotNull
-  private Collection<DependencyGAV> getDependenciesFrom(Path pomFile, Path projectDir) {
+  private Collection<DependencyGAV> getDependenciesFrom(final Path pomFile, final Path projectDir) {
     ProjectModelFactory projectModelFactory =
         POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
             .withQueryType(QueryType.SAFE)

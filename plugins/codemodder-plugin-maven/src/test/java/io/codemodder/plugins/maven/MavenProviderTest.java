@@ -23,41 +23,14 @@ import org.junit.jupiter.api.io.TempDir;
  * types.
  */
 final class MavenProviderTest {
-  private static class PomModification {
-    final Path path;
-
-    final byte[] contents;
-
-    public PomModification(Path path, byte[] contents) {
-      this.path = path;
-      this.contents = contents;
-    }
-
-    public Path getPath() {
-      return path;
-    }
-
-    public byte[] getContents() {
-      return contents;
-    }
-  }
 
   private static class TestPomModifier implements MavenProvider.PomModifier {
-
-    private final List<PomModification> modifications = new ArrayList<>();
-
     @Override
-    public void modify(Path path, byte[] contents) throws IOException {
-      this.modifications.add(new PomModification(path, contents));
-    }
-
-    public List<PomModification> getModifications() {
-      return modifications;
-    }
+    public void modify(final Path path, byte[] contents) {}
   }
 
   private TestPomModifier pomModifier;
-
+  private DependencyDescriptor defaultDescriptor;
   private PomFileUpdater pomFileUpdater;
   private PomFileFinder pomFileFinder;
   private Path projectDir;
@@ -97,6 +70,7 @@ final class MavenProviderTest {
   void setup(final @TempDir Path projectDir) throws IOException {
 
     this.projectDir = projectDir;
+    this.defaultDescriptor = DependencyDescriptor.createMarkdownDescriptor();
 
     marsJavaFile = this.projectDir.resolve("module1/src/main/java/com/acme/Mars.java");
     venusJavaFile = this.projectDir.resolve("module1/src/main/java/com/acme/Venus.java");
@@ -153,15 +127,13 @@ final class MavenProviderTest {
 
   @Test
   void it_returns_changeset_when_no_issues() throws IOException {
-    CodeTFChangesetEntry changesetEntry =
-        new CodeTFChangesetEntry(marsJavaFile.toString(), "diff here", List.of());
-
     Files.writeString(module1Pom, simplePom);
 
     MavenProvider provider =
         new MavenProvider(
             new MavenProvider.DefaultPomModifier(),
             new MavenProvider.DefaultPomFileFinder(),
+            defaultDescriptor,
             false);
 
     DependencyUpdateResult result =
@@ -172,17 +144,65 @@ final class MavenProviderTest {
     assertThat(result.erroredFiles()).isEmpty();
 
     // we've updated all the poms, so we merge this with the pre-existing one change
-    assertThat(result.packageChanges().size() == 2);
+    Set<CodeTFChangesetEntry> changes = result.packageChanges();
+    assertThat(changes.size()).isEqualTo(2);
+
+    // we don't have license facts for these dependencies, so we should be silent on their license!
+    boolean matchedLicenseFacts =
+        changes.stream()
+            .map(CodeTFChangesetEntry::getChanges)
+            .flatMap(Collection::stream)
+            .anyMatch(c -> c.getDescription().contains("License: "));
+    assertThat(matchedLicenseFacts).isFalse();
 
     // we injected all the dependencies, total success!
     assertThat(result.injectedPackages()).containsOnly(marsDependency1, marsDependency2);
   }
 
   @Test
+  void it_captures_deeper_dependency_facts_when_available() throws IOException {
+    Files.writeString(module1Pom, simplePom);
+
+    MavenProvider provider =
+        new MavenProvider(
+            new MavenProvider.DefaultPomModifier(),
+            new MavenProvider.DefaultPomFileFinder(),
+            defaultDescriptor,
+            false);
+
+    DependencyUpdateResult result =
+        provider.updateDependencies(
+            projectDir,
+            marsJavaFile,
+            List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT, DependencyGAV.OWASP_XSS_JAVA_ENCODER));
+
+    // we injected all the dependencies, total success!
+    assertThat(result.injectedPackages())
+        .containsOnly(DependencyGAV.JAVA_SECURITY_TOOLKIT, DependencyGAV.OWASP_XSS_JAVA_ENCODER);
+
+    Set<CodeTFChangesetEntry> changes = result.packageChanges();
+
+    boolean matchedXssJavaEncoderFacts =
+        changes.stream()
+            .map(CodeTFChangesetEntry::getChanges)
+            .flatMap(Collection::stream)
+            .anyMatch(c -> c.getDescription().contains("License: BSD 3-Clause"));
+    assertThat(matchedXssJavaEncoderFacts).isTrue();
+
+    boolean matchedToolkitFacts =
+        changes.stream()
+            .map(CodeTFChangesetEntry::getChanges)
+            .flatMap(Collection::stream)
+            .anyMatch(c -> c.getDescription().contains("License: MIT"));
+    assertThat(matchedToolkitFacts).isTrue();
+  }
+
+  @Test
   void it_returns_empty_when_no_pom() throws IOException {
     when(pomFileFinder.findForFile(any(), any())).thenReturn(Optional.empty());
 
-    MavenProvider provider = new MavenProvider(pomModifier, pomFileFinder, false);
+    MavenProvider provider =
+        new MavenProvider(pomModifier, pomFileFinder, defaultDescriptor, false);
 
     DependencyUpdateResult result =
         provider.updateDependencies(projectDir, marsJavaFile, List.of(marsDependency1));
@@ -236,7 +256,6 @@ final class MavenProviderTest {
     Files.writeString(module1Pom, simplePom);
 
     // introduce a failure
-    // when(pomModifier.modify(any(), any())).thenThrow(new IOException("failed to update pom"));
     doThrow(new IOException("failed to update pom")).when(pomModifier).modify(any(), any());
 
     MavenProvider provider = new MavenProvider(pomModifier);
@@ -262,7 +281,7 @@ final class MavenProviderTest {
         provider.updateDependencies(
             projectDir, module1Pom, List.of(marsDependency1, marsDependency2, venusDependency));
 
-    assertThat(result.packageChanges().size() == 3);
+    assertThat(result.packageChanges().size()).isEqualTo(3);
 
     CodeTFChangesetEntry changesetEntry = result.packageChanges().iterator().next();
     assertThat(changesetEntry.getPath()).isEqualTo("module1/pom.xml");
@@ -298,49 +317,50 @@ final class MavenProviderTest {
           + "</project>";
 
   private static final String simplePomAfterChanges =
-      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-          + "  <project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
-          + "      <modelVersion>4.0.0</modelVersion>\n"
-          + "      <groupId>link.sharpe</groupId>\n"
-          + "      <artifactId>mavenproject1</artifactId>\n"
-          + "      <version>1.0-SNAPSHOT</version>\n"
-          + "      <dependencyManagement>\n"
-          + "          <dependencies>\n"
-          + "              <dependency>\n"
-          + "                  <groupId>com.acme.mars</groupId>\n"
-          + "                  <artifactId>mars1</artifactId>\n"
-          + "                  <version>${versions.mars1}</version>\n"
-          + "              </dependency>\n"
-          + "              <dependency>\n"
-          + "                  <groupId>com.acme.mars</groupId>\n"
-          + "                  <artifactId>mars2</artifactId>\n"
-          + "                  <version>${versions.mars2}</version>\n"
-          + "              </dependency>\n"
-          + "              <dependency>\n"
-          + "                  <groupId>com.acme.venus</groupId>\n"
-          + "                  <artifactId>venus</artifactId>\n"
-          + "                  <version>${versions.venus}</version>\n"
-          + "              </dependency>\n"
-          + "          </dependencies>\n"
-          + "      </dependencyManagement>\n"
-          + "      <properties>\n"
-          + "          <versions.mars1>1.0.1</versions.mars1>\n"
-          + "          <versions.mars2>1.0.1</versions.mars2>\n"
-          + "          <versions.venus>1.0.2</versions.venus>\n"
-          + "      </properties>\n"
-          + "      <dependencies>\n"
-          + "          <dependency>\n"
-          + "              <groupId>com.acme.mars</groupId>\n"
-          + "              <artifactId>mars1</artifactId>\n"
-          + "          </dependency>\n"
-          + "          <dependency>\n"
-          + "              <groupId>com.acme.mars</groupId>\n"
-          + "              <artifactId>mars2</artifactId>\n"
-          + "          </dependency>\n"
-          + "          <dependency>\n"
-          + "              <groupId>com.acme.venus</groupId>\n"
-          + "              <artifactId>venus</artifactId>\n"
-          + "          </dependency>\n"
-          + "      </dependencies>\n"
-          + "  </project>";
+      """
+                  <?xml version="1.0" encoding="UTF-8"?>
+                    <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                        <modelVersion>4.0.0</modelVersion>
+                        <groupId>link.sharpe</groupId>
+                        <artifactId>mavenproject1</artifactId>
+                        <version>1.0-SNAPSHOT</version>
+                        <dependencyManagement>
+                            <dependencies>
+                                <dependency>
+                                    <groupId>com.acme.mars</groupId>
+                                    <artifactId>mars1</artifactId>
+                                    <version>${versions.mars1}</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>com.acme.mars</groupId>
+                                    <artifactId>mars2</artifactId>
+                                    <version>${versions.mars2}</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>com.acme.venus</groupId>
+                                    <artifactId>venus</artifactId>
+                                    <version>${versions.venus}</version>
+                                </dependency>
+                            </dependencies>
+                        </dependencyManagement>
+                        <properties>
+                            <versions.mars1>1.0.1</versions.mars1>
+                            <versions.mars2>1.0.1</versions.mars2>
+                            <versions.venus>1.0.2</versions.venus>
+                        </properties>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.acme.mars</groupId>
+                                <artifactId>mars1</artifactId>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.acme.mars</groupId>
+                                <artifactId>mars2</artifactId>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.acme.venus</groupId>
+                                <artifactId>venus</artifactId>
+                            </dependency>
+                        </dependencies>
+                    </project>""";
 }
