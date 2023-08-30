@@ -9,7 +9,7 @@ import io.codemodder.RegionExtractor;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.SarifPluginJavaParserChanger;
-import io.codemodder.providers.sarif.codeql.CodeQLScan;
+import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import javax.inject.Inject;
 
 /**
@@ -23,7 +23,7 @@ public final class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<
 
   @Inject
   public JDBCResourceLeakCodemod(
-      @CodeQLScan(ruleId = "java/database-resource-leak") final RuleSarif sarif) {
+      @ProvidedCodeQLScan(ruleId = "java/database-resource-leak") final RuleSarif sarif) {
     super(sarif, MethodCallExpr.class, RegionExtractor.FROM_FIRST_LOCATION);
   }
 

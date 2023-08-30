@@ -11,7 +11,7 @@ import javax.inject.Qualifier;
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-public @interface CodeQLScan {
+public @interface ProvidedCodeQLScan {
 
   /** The CodeQL rule "id" field from the sarif. */
   String ruleId();

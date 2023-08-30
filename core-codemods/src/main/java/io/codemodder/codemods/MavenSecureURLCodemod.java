@@ -3,7 +3,7 @@ package io.codemodder.codemods;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.utils.Log;
 import io.codemodder.*;
-import io.codemodder.providers.sarif.codeql.CodeQLScan;
+import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +31,7 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
 
   @Inject
   MavenSecureURLCodemod(
-      @CodeQLScan(ruleId = "java/maven/non-https-url") final RuleSarif sarif,
+      @ProvidedCodeQLScan(ruleId = "java/maven/non-https-url") final RuleSarif sarif,
       XPathStreamProcessor processor) {
     super(sarif);
     this.processor = processor;

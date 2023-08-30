@@ -31,8 +31,8 @@ public final class SemgrepModule extends AbstractModule {
   private final SemgrepRunner semgrepRunner;
   private final List<RuleSarif> sarifs;
 
-  public SemgrepModule(
-      final Path codeDirectory, final List<Class<? extends CodeChanger>> codemodTypes) {
+  @VisibleForTesting
+  SemgrepModule(final Path codeDirectory, final List<Class<? extends CodeChanger>> codemodTypes) {
     this(codeDirectory, codemodTypes, List.of());
   }
 
@@ -59,7 +59,7 @@ public final class SemgrepModule extends AbstractModule {
     // find all @SemgrepScan annotations in their parameters and batch them up for running
     List<Pair<String, SemgrepScan>> toBind = new ArrayList<>();
 
-    // find all the @OfflineSemgrepScan annotations and bind them as is
+    // find all the @ProvidedSemgrepScan annotations and bind them as is
     Set<String> packagesScanned = new HashSet<>();
 
     for (Class<? extends CodeChanger> codemodType : codemodTypes) {
@@ -94,7 +94,7 @@ public final class SemgrepModule extends AbstractModule {
 
           targetedParamsForOfflineScanning =
               injectableParams.stream()
-                  .filter(param -> param.isAnnotationPresent(OfflineSemgrepScan.class))
+                  .filter(param -> param.isAnnotationPresent(ProvidedSemgrepScan.class))
                   .toList();
         }
 
@@ -103,12 +103,12 @@ public final class SemgrepModule extends AbstractModule {
             param -> {
               if (!RuleSarif.class.equals(param.getType())) {
                 throw new IllegalArgumentException(
-                    "can't use @OfflineSemgrepScan on anything except RuleSarif (see "
+                    "can't use @ProvidedSemgrepScan on anything except RuleSarif (see "
                         + param.getDeclaringExecutable().getDeclaringClass().getName()
                         + ")");
               }
               // bind from existing SARIF
-              OfflineSemgrepScan annotation = param.getAnnotation(OfflineSemgrepScan.class);
+              ProvidedSemgrepScan annotation = param.getAnnotation(ProvidedSemgrepScan.class);
               RuleSarif ruleSarif =
                   sarifs.stream()
                       .filter(sarif -> sarif.getRule().equals(annotation.ruleId()))

@@ -12,7 +12,7 @@ import javax.inject.Qualifier;
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-public @interface OfflineSemgrepScan {
+public @interface ProvidedSemgrepScan {
 
   /** The Semgrep rule "id". */
   String ruleId();

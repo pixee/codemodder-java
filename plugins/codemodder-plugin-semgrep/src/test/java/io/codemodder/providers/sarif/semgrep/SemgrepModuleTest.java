@@ -268,7 +268,8 @@ final class SemgrepModuleTest {
 
     @Inject
     UsesOfflineSemgrepCodemod(
-        @OfflineSemgrepScan(ruleId = "java.lang.security.audit.unsafe-reflection.unsafe-reflection")
+        @ProvidedSemgrepScan(
+                ruleId = "java.lang.security.audit.unsafe-reflection.unsafe-reflection")
             final RuleSarif ruleSarif) {
       this.ruleSarif = Objects.requireNonNull(ruleSarif);
     }

@@ -15,7 +15,7 @@ import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.SarifPluginJavaParserChanger;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.providers.sarif.codeql.CodeQLScan;
+import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -24,7 +24,8 @@ import javax.inject.Inject;
 public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
-  public InsecureCookieCodemod(@CodeQLScan(ruleId = "java/insecure-cookie") final RuleSarif sarif) {
+  public InsecureCookieCodemod(
+      @ProvidedCodeQLScan(ruleId = "java/insecure-cookie") final RuleSarif sarif) {
     super(sarif, MethodCallExpr.class, RegionExtractor.FROM_FIRST_LOCATION);
   }
 
