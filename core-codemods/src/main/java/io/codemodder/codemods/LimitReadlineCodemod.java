@@ -32,7 +32,7 @@ public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<Met
               type = CodemodParameter.ParameterType.NUMBER,
               label = "a positive integer",
               defaultValue = "5_000_000", // representing roughly 5MB
-              validationPattern = "(\\d|\\_)+")
+              validationPattern = "[0-9\\_]+")
           final Parameter limit) {
     super(sarif, MethodCallExpr.class);
     this.limit = Objects.requireNonNull(limit);
