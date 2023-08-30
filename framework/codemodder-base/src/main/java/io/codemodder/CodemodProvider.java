@@ -18,7 +18,7 @@ public interface CodemodProvider {
    */
   Set<AbstractModule> getModules(
       Path repository, List<Class<? extends CodeChanger>> codemodTypes, List<RuleSarif> sarifs);
-  
+
   /**
    * Tools this provider is interested in processing the SARIF output of. Codemodder CLI will look
    * for the SARIF outputted by tools in this list in the repository root and then provide the
