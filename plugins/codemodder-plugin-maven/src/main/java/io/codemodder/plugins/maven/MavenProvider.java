@@ -162,19 +162,6 @@ public final class MavenProvider implements ProjectProvider {
 
     Path pomFile = maybePomFile.get();
     Set<CodeTFChangesetEntry> changesets = new LinkedHashSet<>();
-    //
-    //    List<Dependency> mappedDependencies =
-    //        dependencies.stream()
-    //            .map(
-    //                dependencyGAV ->
-    //                    new Dependency(
-    //                        dependencyGAV.group(),
-    //                        dependencyGAV.artifact(),
-    //                        dependencyGAV.version(),
-    //                        null,
-    //                        null,
-    //                        null))
-    //            .toList();
 
     final List<DependencyGAV> skippedDependencies = new ArrayList<>();
     final List<DependencyGAV> injectedDependencies = new ArrayList<>();
