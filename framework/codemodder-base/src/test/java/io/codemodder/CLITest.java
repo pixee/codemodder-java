@@ -48,7 +48,7 @@ final class CLITest {
     Files.write(barJavaFile, "public class Bar {}".getBytes());
 
     /*
-     * Only add module2 to the discovered source directories. This will help prove that the module2 files can still be seen and changed, even if we couldn't locate it as a "source directory".
+     * Only add module2 to the discovered source directories. This will help prove that the module1 files can still be seen and changed, even if we couldn't locate it as a "source directory".
      */
     sourceDirectories =
         List.of(
