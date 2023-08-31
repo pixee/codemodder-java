@@ -155,7 +155,19 @@ public interface CodemodTestMixin {
     CodeTFResult result2 = executor2.execute(List.of(pathToJavaFile));
     List<CodeTFChangesetEntry> changeset2 = result2.getChangeset();
     assertThat(changeset2.size(), is(0));
-    String transformedAgainJavaCode = Files.readString(pathToJavaFile);
+
+    verifyRetransformedCode(before, after, pathToJavaFile);
+  }
+
+  /**
+   * A hook for verifying an "already fixed file", like the "after", isn't meaningfully transformed
+   * again. By default, this method will compare the contents of the previous "after" transformation
+   * to what happened after the second transformation. For deterministic codemods, they should be
+   * identical.
+   */
+  default void verifyRetransformedCode(
+      final Path before, final Path after, final Path afterRetransformation) throws IOException {
+    String transformedAgainJavaCode = Files.readString(afterRetransformation);
     String expectedCode = Files.readString(after);
     assertThat(transformedAgainJavaCode, equalTo(expectedCode));
   }
