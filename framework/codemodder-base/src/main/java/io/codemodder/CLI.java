@@ -169,15 +169,16 @@ final class CLI implements Callable<Integer> {
   static class DefaultFileFinder implements FileFinder {
     @Override
     public List<Path> findFiles(final Path projectDir, final IncludesExcludes includesExcludes) {
-      List<Path> allFiles = new ArrayList<>();
       final List<Path> allFiles;
       try (Stream<Path> paths = Files.walk(projectDir)) {
-        allFiles = paths
-            .filter(Files::isRegularFile)
-            .filter(p -> !Files.isSymbolicLink(p)) // could cause infinite loop if we follow links
-            .filter(p -> includesExcludes.shouldInspect(p.toFile()))
-            .sorted()
-            .toList();
+        allFiles =
+            paths
+                .filter(Files::isRegularFile)
+                .filter(
+                    p -> !Files.isSymbolicLink(p)) // could cause infinite loop if we follow links
+                .filter(p -> includesExcludes.shouldInspect(p.toFile()))
+                .sorted()
+                .toList();
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
