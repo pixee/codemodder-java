@@ -17,26 +17,34 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import org.junit.jupiter.api.Test;
+import java.util.function.Function;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.io.TempDir;
 
 /** The basic tests for codemods. */
 public interface CodemodTestMixin {
 
-  @Test
-  default void it_verifies_codemod(@TempDir final Path tmpDir) throws IOException {
+  @TestFactory
+  @EnabledIfEnvironmentVariable(named = "CODEMODDER_OPENAI_API_KEY", matches = ".+")
+  default Stream<DynamicTest> generateTestCases(@TempDir final Path tmpDir) throws IOException {
     Metadata metadata = getClass().getAnnotation(Metadata.class);
     if (metadata == null) {
-      throw new IllegalArgumentException("CodemodTest must be annotated with @Metadata");
+      throw new IllegalArgumentException("Test class must be annotated with @Metadata");
     }
 
-    Class<? extends CodeChanger> codemod = metadata.codemodType();
     // Test all files with the `.java.before` extension in `testResourceDir`.
-    List<Path> allBeforeFiles =
-        Files.walk(Path.of("src/test/resources/", metadata.testResourceDir()))
+    Path testResourceDir = Path.of("src/test/resources/", metadata.testResourceDir());
+    Stream<Path> inputStream =
+        Files.walk(testResourceDir)
             .filter(Files::isRegularFile)
-            .filter(path -> path.toString().endsWith(".java.before"))
-            .toList();
+            .filter(path -> path.toString().endsWith(".java.before"));
+
+    Function<Path, String> displayNameGenerator =
+        p -> p.toString().substring(testResourceDir.toString().length());
 
     List<DependencyGAV> dependencies =
         Arrays.stream(metadata.dependencies())
@@ -47,24 +55,10 @@ public interface CodemodTestMixin {
                 })
             .toList();
 
-    for (Path path : allBeforeFiles) {
-      verifyCodemod(codemod, tmpDir, path.getParent(), path, dependencies);
-    }
-  }
+    ThrowingConsumer<Path> testExecutor =
+        path -> verifyCodemod(metadata.codemodType(), tmpDir, testResourceDir, path, dependencies);
 
-  /**
-   * A hook for verifying the before and after files. By default, this method will compare the
-   * contents of the two files for exact equality.
-   *
-   * @param before a file containing the contents before transformation
-   * @param expected the file contents that are expected after transformation
-   * @param after a file containing the contents after transformation
-   */
-  default void verifyTransformedCode(final Path before, final Path expected, final Path after)
-      throws IOException {
-    String expectedCode = Files.readString(expected);
-    String transformedJavaCode = Files.readString(after);
-    assertThat(transformedJavaCode, equalTo(expectedCode));
+    return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
   }
 
   private void verifyCodemod(
@@ -157,6 +151,21 @@ public interface CodemodTestMixin {
     assertThat(changeset2.size(), is(0));
 
     verifyRetransformedCode(before, after, pathToJavaFile);
+  }
+
+  /**
+   * A hook for verifying the before and after files. By default, this method will compare the
+   * contents of the two files for exact equality.
+   *
+   * @param before a file containing the contents before transformation
+   * @param expected the file contents that are expected after transformation
+   * @param after a file containing the contents after transformation
+   */
+  default void verifyTransformedCode(final Path before, final Path expected, final Path after)
+      throws IOException {
+    String expectedCode = Files.readString(expected);
+    String transformedJavaCode = Files.readString(after);
+    assertThat(transformedJavaCode, equalTo(expectedCode));
   }
 
   /**
