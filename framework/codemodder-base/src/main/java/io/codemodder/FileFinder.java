@@ -13,10 +13,9 @@ interface FileFinder {
    * be taken into account downstream. The files should be sorted according to a system-dependent
    * method.
    *
-   * @param sourceDirectories the directories to search
+   * @param projectDir the directories to search
    * @param includesExcludes the includes and excludes
    * @return a list of files that match the includes and excludes
    */
-  List<Path> findFiles(List<SourceDirectory> sourceDirectories, IncludesExcludes includesExcludes)
-      throws IOException;
+  List<Path> findFiles(Path projectDir, IncludesExcludes includesExcludes) throws IOException;
 }

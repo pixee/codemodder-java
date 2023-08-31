@@ -88,8 +88,6 @@ final class WebGoat822Test extends GitRepositoryTest {
 
     var report = objectMapper.readValue(new FileReader(outputFile), CodeTFReport.class);
 
-    System.out.println(objectMapper.writeValueAsString(report));
-
     verifyNoFailedFiles(report);
 
     List<CodeTFChangesetEntry> fileChanges =
@@ -97,11 +95,6 @@ final class WebGoat822Test extends GitRepositoryTest {
             .map(CodeTFResult::getChangeset)
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
-
-    fileChanges.stream()
-        .forEach(
-            codeTFChangesetEntry ->
-                System.out.println("change: " + codeTFChangesetEntry.getPath()));
 
     assertThat(fileChanges.size(), is(43));
 
@@ -134,8 +127,6 @@ final class WebGoat822Test extends GitRepositoryTest {
 
     var report = objectMapper.readValue(new FileReader(outputFile), CodeTFReport.class);
 
-    System.out.println(objectMapper.writeValueAsString(report));
-
     verifyNoFailedFiles(report);
 
     List<CodeTFChangesetEntry> fileChanges =
@@ -143,11 +134,6 @@ final class WebGoat822Test extends GitRepositoryTest {
             .map(CodeTFResult::getChangeset)
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
-
-    fileChanges.stream()
-        .forEach(
-            codeTFChangesetEntry ->
-                System.out.println("change: " + codeTFChangesetEntry.getPath()));
 
     assertThat(fileChanges.size(), is(48));
 

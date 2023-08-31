@@ -75,7 +75,6 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
         filePaths.stream().filter(codemodRunner::supports).sorted().toList();
 
     for (Path filePath : codemodTargetFiles) {
-      System.out.println("  Running on file " + filePath.toString());
       // create the context necessary for the codemod to run
       LineIncludesExcludes lineIncludesExcludes =
           includesExcludes.getIncludesExcludesForFile(filePath.toFile());

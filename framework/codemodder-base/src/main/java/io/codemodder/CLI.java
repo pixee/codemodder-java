@@ -13,6 +13,7 @@ import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -21,6 +22,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -166,19 +168,19 @@ final class CLI implements Callable<Integer> {
   @VisibleForTesting
   static class DefaultFileFinder implements FileFinder {
     @Override
-    public List<Path> findFiles(
-        final List<SourceDirectory> sourceDirectories, final IncludesExcludes includesExcludes) {
-      List<Path> allFiles = new ArrayList<>();
-      for (SourceDirectory directory : sourceDirectories) {
-        allFiles.addAll(
-            directory.files().stream()
-                .map(File::new)
-                .filter(includesExcludes::shouldInspect)
-                .map(File::toPath)
+    public List<Path> findFiles(final Path projectDir, final IncludesExcludes includesExcludes) {
+      final List<Path> allFiles;
+      try (Stream<Path> paths = Files.walk(projectDir)) {
+        allFiles =
+            paths
+                .filter(Files::isRegularFile)
                 .filter(
-                    f -> !Files.isSymbolicLink(f)) // could cause infinite loop if we follow links
+                    p -> !Files.isSymbolicLink(p)) // could cause infinite loop if we follow links
+                .filter(p -> includesExcludes.shouldInspect(p.toFile()))
                 .sorted()
-                .toList());
+                .toList();
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
       }
       return allFiles;
     }
@@ -270,7 +272,7 @@ final class CLI implements Callable<Integer> {
       // get all files that match
       List<SourceDirectory> sourceDirectories =
           sourceDirectoryLister.listJavaSourceDirectories(List.of(projectDirectory));
-      List<Path> filePaths = fileFinder.findFiles(sourceDirectories, includesExcludes);
+      List<Path> filePaths = fileFinder.findFiles(projectPath, includesExcludes);
 
       // get codemod includes/excludes
       final CodemodRegulator regulator;
@@ -312,7 +314,6 @@ final class CLI implements Callable<Integer> {
       JavaParser javaParser = javaParserFactory.create(sourceDirectories);
       CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
       for (CodemodIdPair codemod : codemods) {
-        System.out.println("Running codemod: " + codemod.getId());
         CodemodExecutor codemodExecutor =
             new DefaultCodemodExecutor(
                 projectPath,
@@ -390,9 +391,7 @@ final class CLI implements Callable<Integer> {
     if (parameterStrings == null || parameterStrings.isEmpty()) {
       return List.of();
     }
-    return parameterStrings.stream()
-        .map(ParameterArgument::fromNameValuePairs)
-        .collect(Collectors.toUnmodifiableList());
+    return parameterStrings.stream().map(ParameterArgument::fromNameValuePairs).toList();
   }
 
   private static final int SUCCESS = 0;
@@ -412,7 +411,7 @@ final class CLI implements Callable<Integer> {
           "**/web.xml");
 
   private static final List<String> defaultPathExcludes =
-      List.of("**/test/**", "**/target/**", "**/build/**");
+      List.of("**/test/**", "**/target/**", "**/build/**", "**/.mvn/**", ".mvn/**");
 
   private static final Logger log = LoggerFactory.getLogger(CLI.class);
 }

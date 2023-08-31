@@ -37,7 +37,7 @@ final class CLITest {
   void setup(final @TempDir Path tmpDir) throws IOException {
     workingRepoDir = tmpDir;
     Path module1JavaDir =
-        Files.createDirectories(tmpDir.resolve("module1/src/main/java/com/acme/"));
+        Files.createDirectories(tmpDir.resolve("module1/src/alternateMain/java/com/acme/"));
     Path module2JavaDir =
         Files.createDirectories(tmpDir.resolve("module2/src/main/java/com/acme/util/"));
     fooJavaFile = module1JavaDir.resolve("Foo.java");
@@ -46,11 +46,12 @@ final class CLITest {
         fooJavaFile,
         "import com.acme.util.Bar; class Foo {private var bar = new Bar();}".getBytes());
     Files.write(barJavaFile, "public class Bar {}".getBytes());
+
+    /*
+     * Only add module2 to the discovered source directories. This will help prove that the module1 files can still be seen and changed, even if we couldn't locate it as a "source directory".
+     */
     sourceDirectories =
         List.of(
-            SourceDirectory.createDefault(
-                tmpDir.resolve("module1/src/main/java").toAbsolutePath(),
-                List.of(fooJavaFile.toAbsolutePath().toString())),
             SourceDirectory.createDefault(
                 tmpDir.resolve("module2/src/main/java").toAbsolutePath(),
                 List.of(barJavaFile.toAbsolutePath().toString())));
@@ -112,7 +113,7 @@ final class CLITest {
     List<CodeTFResult> dryRunCodeTFResults = dryRunCodeTFReport.getResults();
 
     // we just compare the results because the "run" section is non-deterministic (has elapsed time
-    // etc)
+    // etc.)
     String normalJson = mapper.writeValueAsString(normalCodeTFResults);
     String dryRunJson = mapper.writeValueAsString(dryRunCodeTFResults);
     assertThat(normalJson).isEqualTo(dryRunJson);
@@ -152,12 +153,12 @@ final class CLITest {
     FileFinder finder = new CLI.DefaultFileFinder();
 
     IncludesExcludes all = IncludesExcludes.any();
-    List<Path> files = finder.findFiles(sourceDirectories, all);
+    List<Path> files = finder.findFiles(workingRepoDir, all);
     assertThat(files).containsExactly(fooJavaFile, barJavaFile);
 
     IncludesExcludes onlyFoo =
         IncludesExcludes.withSettings(workingRepoDir.toFile(), List.of("**/Foo.java"), List.of());
-    files = finder.findFiles(sourceDirectories, onlyFoo);
+    files = finder.findFiles(workingRepoDir, onlyFoo);
     assertThat(files).containsExactly(fooJavaFile);
   }
 
