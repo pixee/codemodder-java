@@ -170,13 +170,14 @@ final class CLI implements Callable<Integer> {
     @Override
     public List<Path> findFiles(final Path projectDir, final IncludesExcludes includesExcludes) {
       List<Path> allFiles = new ArrayList<>();
+      final List<Path> allFiles;
       try (Stream<Path> paths = Files.walk(projectDir)) {
-        paths
+        allFiles = paths
             .filter(Files::isRegularFile)
             .filter(p -> !Files.isSymbolicLink(p)) // could cause infinite loop if we follow links
             .filter(p -> includesExcludes.shouldInspect(p.toFile()))
             .sorted()
-            .forEach(allFiles::add);
+            .toList();
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
