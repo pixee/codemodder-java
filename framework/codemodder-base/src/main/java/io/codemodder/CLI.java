@@ -312,7 +312,6 @@ final class CLI implements Callable<Integer> {
       JavaParser javaParser = javaParserFactory.create(sourceDirectories);
       CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
       for (CodemodIdPair codemod : codemods) {
-        System.out.println("Running codemod: " + codemod.getId());
         CodemodExecutor codemodExecutor =
             new DefaultCodemodExecutor(
                 projectPath,
@@ -410,7 +409,7 @@ final class CLI implements Callable<Integer> {
           "**/web.xml");
 
   private static final List<String> defaultPathExcludes =
-      List.of("**/test/**", "**/target/**", "**/build/**", "**/.mvn/**");
+      List.of("**/test/**", "**/target/**", "**/build/**", "**/.mvn/**", ".mvn/**");
 
   private static final Logger log = LoggerFactory.getLogger(CLI.class);
 }

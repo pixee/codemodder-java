@@ -355,7 +355,6 @@ final class DefaultCodemodExecutorTest {
             .writerWithDefaultPrettyPrinter();
     String codetf = writer.writeValueAsString(report);
     assertThat(codetf).isNotBlank();
-    System.out.println(codetf);
   }
 
   @Test
