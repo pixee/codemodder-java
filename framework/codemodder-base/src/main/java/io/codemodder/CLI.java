@@ -390,9 +390,7 @@ final class CLI implements Callable<Integer> {
     if (parameterStrings == null || parameterStrings.isEmpty()) {
       return List.of();
     }
-    return parameterStrings.stream()
-        .map(ParameterArgument::fromNameValuePairs)
-        .collect(Collectors.toUnmodifiableList());
+    return parameterStrings.stream().map(ParameterArgument::fromNameValuePairs).toList();
   }
 
   private static final int SUCCESS = 0;
@@ -412,7 +410,7 @@ final class CLI implements Callable<Integer> {
           "**/web.xml");
 
   private static final List<String> defaultPathExcludes =
-      List.of("**/test/**", "**/target/**", "**/build/**");
+      List.of("**/test/**", "**/target/**", "**/build/**", "**/.mvn/**");
 
   private static final Logger log = LoggerFactory.getLogger(CLI.class);
 }
