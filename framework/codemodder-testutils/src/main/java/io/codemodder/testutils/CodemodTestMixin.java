@@ -132,6 +132,8 @@ public interface CodemodTestMixin {
     // make sure the dependencies are added
     assertThat(dependenciesExpected, hasItems(dependenciesExpected.toArray(new DependencyGAV[0])));
 
+    String codeAfterFirstTransform = Files.readString(pathToJavaFile);
+
     // re-run the transformation again and make sure no changes are made
     CodemodLoader loader2 = new CodemodLoader(List.of(codemodType), tmpDir, map);
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
@@ -148,7 +150,8 @@ public interface CodemodTestMixin {
     List<CodeTFChangesetEntry> changeset2 = result2.getChangeset();
     assertThat(changeset2.size(), is(0));
 
-    verifyRetransformedCode(before, after, pathToJavaFile);
+    String codeAfterSecondTransform = Files.readString(pathToJavaFile);
+    assertThat(codeAfterFirstTransform, equalTo(codeAfterSecondTransform));
   }
 
   /**
@@ -164,19 +167,6 @@ public interface CodemodTestMixin {
     String expectedCode = Files.readString(expected);
     String transformedJavaCode = Files.readString(after);
     assertThat(transformedJavaCode, equalTo(expectedCode));
-  }
-
-  /**
-   * A hook for verifying an "already fixed file", like the "after", isn't meaningfully transformed
-   * again. By default, this method will compare the contents of the previous "after" transformation
-   * to what happened after the second transformation. For deterministic codemods, they should be
-   * identical.
-   */
-  default void verifyRetransformedCode(
-      final Path before, final Path after, final Path afterRetransformation) throws IOException {
-    String transformedAgainJavaCode = Files.readString(afterRetransformation);
-    String expectedCode = Files.readString(after);
-    assertThat(transformedAgainJavaCode, equalTo(expectedCode));
   }
 
   private Patch<String> diff(final Path original, final Path revised) throws IOException {

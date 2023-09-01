@@ -49,12 +49,6 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
     }
   }
 
-  @Override
-  default void verifyRetransformedCode(
-      final Path before, final Path expected, final Path retransformedAfter) throws IOException {
-    verifyTransformedCode(before, expected, retransformedAfter);
-  }
-
   private Assessment assessChanges(
       final Path before, final Path actualAfter, final Path expectedAfter) throws IOException {
     // Create a function to get the LLM to return a structured response.

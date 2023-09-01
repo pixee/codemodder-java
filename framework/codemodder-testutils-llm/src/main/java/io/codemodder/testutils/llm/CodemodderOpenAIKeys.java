@@ -2,7 +2,7 @@ package io.codemodder.testutils.llm;
 
 /**
  * A utility class to check that the {@code CODEMODDER_OPENAI_API_KEY} environment variable is set
- * for our JUnit tests.
+ * for JUnit tests.
  */
 @SuppressWarnings("unused")
 public final class CodemodderOpenAIKeys {
