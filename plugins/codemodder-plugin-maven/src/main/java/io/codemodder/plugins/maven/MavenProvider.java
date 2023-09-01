@@ -21,15 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -282,8 +274,17 @@ public final class MavenProvider implements ProjectProvider {
     String relativePomPath = projectDir.relativize(pomDocumentPath).toString();
 
     String description = dependencyDescriptor.create(newDependency);
+    final Map<String, String> properties;
+    if (description != null && !description.isBlank()) {
+      /*
+       * Tell downstream consumers that this is a change based on surrounding context.
+       */
+      properties = Map.of("contextual", "true");
+    } else {
+      properties = Collections.emptyMap();
+    }
     CodeTFChange change =
-        new CodeTFChange(position, Collections.emptyMap(), description, List.of(), null, List.of());
+        new CodeTFChange(position, properties, description, List.of(), null, List.of());
 
     List<String> patchDiff =
         UnifiedDiffUtils.generateUnifiedDiff(

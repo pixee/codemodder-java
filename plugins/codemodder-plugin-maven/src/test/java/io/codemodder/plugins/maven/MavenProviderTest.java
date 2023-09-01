@@ -193,6 +193,7 @@ final class MavenProviderTest {
         changes.stream()
             .map(CodeTFChangesetEntry::getChanges)
             .flatMap(Collection::stream)
+            .filter(c -> "true".equals(c.getProperties().get("contextual")))
             .anyMatch(c -> c.getDescription().contains("License: MIT"));
     assertThat(matchedToolkitFacts).isTrue();
   }
