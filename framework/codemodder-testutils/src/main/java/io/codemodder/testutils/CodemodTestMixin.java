@@ -21,7 +21,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.io.TempDir;
 public interface CodemodTestMixin {
 
   @TestFactory
-  @EnabledIfEnvironmentVariable(named = "CODEMODDER_OPENAI_API_KEY", matches = ".+")
   default Stream<DynamicTest> generateTestCases(@TempDir final Path tmpDir) throws IOException {
     Metadata metadata = getClass().getAnnotation(Metadata.class);
     if (metadata == null) {

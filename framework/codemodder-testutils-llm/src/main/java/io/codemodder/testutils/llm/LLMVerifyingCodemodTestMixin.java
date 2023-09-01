@@ -22,10 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 /** A mixin for codemod tests that use the LLM framework to change the code. */
-@EnabledIfEnvironmentVariable(named = "CODEMODDER_OPENAI_API_KEY", matches = ".+")
 public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
 
   /**
