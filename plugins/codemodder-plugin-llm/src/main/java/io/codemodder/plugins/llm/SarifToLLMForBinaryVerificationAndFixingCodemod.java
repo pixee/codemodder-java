@@ -2,8 +2,6 @@ package io.codemodder.plugins.llm;
 
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.Patch;
 import com.knuddels.jtokkit.Encodings;
@@ -69,22 +67,22 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
     try {
       FileDescription file = new FileDescription(context.path());
 
-      ThreatAnalysis analysis = analyzeThreat(file);
+      BinaryThreatAnalysis analysis = analyzeThreat(file);
       logger.debug("risk: {}", analysis.getRisk());
       logger.debug("analysis: {}", analysis.getAnalysis());
 
-      if (analysis.getRisk() == Risk.LOW) {
+      if (analysis.getRisk() == BinaryThreatRisk.LOW) {
         return List.of();
       }
 
-      ThreatFix fix = fixThreat(file);
+      BinaryThreatAnalysisAndFix fix = fixThreat(file);
       logger.debug("risk: {}", fix.getRisk());
       logger.debug("analysis: {}", fix.getAnalysis());
       logger.debug("fix: {}", fix.getFix());
       logger.debug("fix description: {}", fix.getFixDescription());
 
       // If our second look determined that the risk of the threat is low, don't change the file.
-      if (fix.getRisk() == Risk.LOW) {
+      if (fix.getRisk() == BinaryThreatRisk.LOW) {
         return List.of();
       }
 
@@ -142,7 +140,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
    */
   protected abstract boolean isPatchExpected(Patch<String> patch);
 
-  private ThreatAnalysis analyzeThreat(final FileDescription file) {
+  private BinaryThreatAnalysis analyzeThreat(final FileDescription file) {
     ChatMessage systemMessage = getSystemMessage();
     ChatMessage userMessage = getAnalyzeUserMessage(file);
 
@@ -151,20 +149,24 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       // The max tokens for gpt-3.5-turbo-0613 is 4,096. If the estimated token count, which doesn't
       // include the function (~100 tokens) or the reply (~200 tokens), is close to the max, assume
       // the code is safe (for now).
-      return new ThreatAnalysis(
+      return new BinaryThreatAnalysis(
           "Ignoring file: estimated prompt token count (" + tokenCount + ") is too high.",
-          Risk.LOW);
+          BinaryThreatRisk.LOW);
     } else {
       logger.debug("estimated prompt token count: {}", tokenCount);
     }
 
     return getLLMResponse(
-        "gpt-3.5-turbo-0613", 0.2D, systemMessage, userMessage, ThreatAnalysis.class);
+        "gpt-3.5-turbo-0613", 0.2D, systemMessage, userMessage, BinaryThreatAnalysis.class);
   }
 
-  private ThreatFix fixThreat(final FileDescription file) {
+  private BinaryThreatAnalysisAndFix fixThreat(final FileDescription file) {
     return getLLMResponse(
-        "gpt-4-0613", 0D, getSystemMessage(), getFixUserMessage(file), ThreatFix.class);
+        "gpt-4-0613",
+        0D,
+        getSystemMessage(),
+        getFixUserMessage(file),
+        BinaryThreatAnalysisAndFix.class);
   }
 
   private <T> T getLLMResponse(
@@ -287,51 +289,4 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       --- %s
       %s
       """;
-
-  enum Risk {
-    HIGH,
-    LOW;
-  }
-
-  static class ThreatAnalysis {
-    @JsonPropertyDescription("A detailed analysis of how the risk was assessed.")
-    @JsonProperty(required = true)
-    private String analysis;
-
-    @JsonPropertyDescription("The risk of the security threat, either HIGH or LOW.")
-    @JsonProperty(required = true)
-    private Risk risk;
-
-    public ThreatAnalysis() {}
-
-    public ThreatAnalysis(final String analysis, final Risk risk) {
-      this.analysis = analysis;
-      this.risk = risk;
-    }
-
-    public String getAnalysis() {
-      return analysis;
-    }
-
-    public Risk getRisk() {
-      return risk;
-    }
-  }
-
-  static final class ThreatFix extends ThreatAnalysis {
-    @JsonPropertyDescription(
-        "The fix as a diff patch in unified format. Required if the risk is HIGH.")
-    private String fix;
-
-    @JsonPropertyDescription("A short description of the fix. Required if the file is fixed.")
-    private String fixDescription;
-
-    public String getFix() {
-      return fix;
-    }
-
-    public String getFixDescription() {
-      return fixDescription;
-    }
-  }
 }
