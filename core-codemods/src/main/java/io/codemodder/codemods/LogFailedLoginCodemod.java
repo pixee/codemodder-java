@@ -9,12 +9,12 @@ import io.codemodder.Codemod;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.plugins.llm.OpenAIService;
-import io.codemodder.plugins.llm.SarifToLLMVerifyAndFixCodemod;
+import io.codemodder.plugins.llm.SarifToLLMForBinaryVerificationAndFixingCodemod;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
 @Codemod(id = "pixee:java/log-failed-login", reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
-public final class LogFailedLoginCodemod extends SarifToLLMVerifyAndFixCodemod {
+public final class LogFailedLoginCodemod extends SarifToLLMForBinaryVerificationAndFixingCodemod {
 
   @Inject
   public LogFailedLoginCodemod(

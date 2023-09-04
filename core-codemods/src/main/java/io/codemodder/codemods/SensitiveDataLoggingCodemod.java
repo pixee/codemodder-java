@@ -9,7 +9,7 @@ import io.codemodder.Codemod;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.plugins.llm.OpenAIService;
-import io.codemodder.plugins.llm.SarifToLLMVerifyAndFixCodemod;
+import io.codemodder.plugins.llm.SarifToLLMForBinaryVerificationAndFixingCodemod;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -17,7 +17,8 @@ import javax.inject.Inject;
 @Codemod(
     id = "pixee:java/sensitive-data-logging",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
-public final class SensitiveDataLoggingCodemod extends SarifToLLMVerifyAndFixCodemod {
+public final class SensitiveDataLoggingCodemod
+    extends SarifToLLMForBinaryVerificationAndFixingCodemod {
 
   @Inject
   public SensitiveDataLoggingCodemod(

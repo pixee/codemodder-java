@@ -41,12 +41,15 @@ import org.slf4j.LoggerFactory;
  *   <li>Using a more reliable (and more expensive model), confirm the finding and rewrite the code
  * </ol>
  */
-public abstract class SarifToLLMVerifyAndFixCodemod extends SarifPluginRawFileChanger {
+public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
+    extends SarifPluginRawFileChanger {
 
-  private static final Logger logger = LoggerFactory.getLogger(SarifToLLMVerifyAndFixCodemod.class);
+  private static final Logger logger =
+      LoggerFactory.getLogger(SarifToLLMForBinaryVerificationAndFixingCodemod.class);
   private final OpenAIService openAI;
 
-  protected SarifToLLMVerifyAndFixCodemod(final RuleSarif sarif, final OpenAIService openAI) {
+  protected SarifToLLMForBinaryVerificationAndFixingCodemod(
+      final RuleSarif sarif, final OpenAIService openAI) {
     super(sarif);
     this.openAI = openAI;
   }
