@@ -2,8 +2,6 @@ package io.codemodder.plugins.llm;
 
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.Patch;
 import com.knuddels.jtokkit.Encodings;
@@ -19,34 +17,37 @@ import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.FunctionExecutor;
 import io.codemodder.CodemodChange;
 import io.codemodder.CodemodInvocationContext;
-import io.codemodder.EncodingDetector;
 import io.codemodder.RuleSarif;
 import io.codemodder.SarifPluginRawFileChanger;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import java.util.MissingResourceException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An extension of {@link SarifPluginRawFileChanger} that uses large language models (LLMs) to
- * analyze and fix the files found by the static analysis tool.
+ * An extension of {@link SarifPluginRawFileChanger} that uses large language models (LLMs) to more
+ * deeply analyze and then fix the files found by the static analysis tool.
+ *
+ * <p>It has three phases:
+ *
+ * <ol>
+ *   <li>Use a SARIF file to find locations of interest for analysis
+ *   <li>Analyze the "threat" of the location found using a more inexpensive or faster model
+ *   <li>Using a more reliable (and more expensive model), confirm the finding and rewrite the code
+ * </ol>
  */
-public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
+public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
+    extends SarifPluginRawFileChanger {
 
-  private static final Logger logger = LoggerFactory.getLogger(LLMAssistedCodemod.class);
+  private static final Logger logger =
+      LoggerFactory.getLogger(SarifToLLMForBinaryVerificationAndFixingCodemod.class);
   private final OpenAIService openAI;
 
-  protected LLMAssistedCodemod(final RuleSarif sarif, final OpenAIService openAI) {
+  protected SarifToLLMForBinaryVerificationAndFixingCodemod(
+      final RuleSarif sarif, final OpenAIService openAI) {
     super(sarif);
     this.openAI = openAI;
   }
@@ -64,24 +65,24 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
         });
 
     try {
-      CodemodInvocationContextFile file = new CodemodInvocationContextFile(context.path());
+      FileDescription file = new FileDescription(context.path());
 
-      ThreatAnalysis analysis = analyzeThreat(file);
+      BinaryThreatAnalysis analysis = analyzeThreat(file);
       logger.debug("risk: {}", analysis.getRisk());
       logger.debug("analysis: {}", analysis.getAnalysis());
 
-      if (analysis.getRisk() == Risk.LOW) {
+      if (analysis.getRisk() == BinaryThreatRisk.LOW) {
         return List.of();
       }
 
-      ThreatFix fix = fixThreat(file);
+      BinaryThreatAnalysisAndFix fix = fixThreat(file);
       logger.debug("risk: {}", fix.getRisk());
       logger.debug("analysis: {}", fix.getAnalysis());
       logger.debug("fix: {}", fix.getFix());
       logger.debug("fix description: {}", fix.getFixDescription());
 
       // If our second look determined that the risk of the threat is low, don't change the file.
-      if (fix.getRisk() == Risk.LOW) {
+      if (fix.getRisk() == BinaryThreatRisk.LOW) {
         return List.of();
       }
 
@@ -139,37 +140,7 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
    */
   protected abstract boolean isPatchExpected(Patch<String> patch);
 
-  /**
-   * Returns a class resource as a {@code String}.
-   *
-   * <p>The absolute name of the class resource is of the following form:
-   *
-   * <blockquote>
-   *
-   * {@code /modifiedPackageName/className/relativeName}
-   *
-   * </blockquote>
-   *
-   * Where the {@code modifiedPackageName} is the package name of this object with {@code '/'}
-   * substituted for {@code '.'}.
-   *
-   * @param relativeName The relative name of the resource.
-   * @return The resource as a {@code String}.
-   * @throws MissingResourceException If the resource was not found.
-   */
-  protected String getClassResourceAsString(final String relativeName) {
-    String resourceName = "/" + getClass().getName().replace('.', '/') + "/" + relativeName;
-    try (InputStream stream = getClass().getResourceAsStream(resourceName)) {
-      if (stream == null) {
-        throw new MissingResourceException(resourceName, getClass().getName(), resourceName);
-      }
-      return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-  }
-
-  private ThreatAnalysis analyzeThreat(final CodemodInvocationContextFile file) {
+  private BinaryThreatAnalysis analyzeThreat(final FileDescription file) {
     ChatMessage systemMessage = getSystemMessage();
     ChatMessage userMessage = getAnalyzeUserMessage(file);
 
@@ -178,20 +149,24 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
       // The max tokens for gpt-3.5-turbo-0613 is 4,096. If the estimated token count, which doesn't
       // include the function (~100 tokens) or the reply (~200 tokens), is close to the max, assume
       // the code is safe (for now).
-      return new ThreatAnalysis(
+      return new BinaryThreatAnalysis(
           "Ignoring file: estimated prompt token count (" + tokenCount + ") is too high.",
-          Risk.LOW);
+          BinaryThreatRisk.LOW);
     } else {
       logger.debug("estimated prompt token count: {}", tokenCount);
     }
 
     return getLLMResponse(
-        "gpt-3.5-turbo-0613", 0.2D, systemMessage, userMessage, ThreatAnalysis.class);
+        "gpt-3.5-turbo-0613", 0.2D, systemMessage, userMessage, BinaryThreatAnalysis.class);
   }
 
-  private ThreatFix fixThreat(final CodemodInvocationContextFile file) {
+  private BinaryThreatAnalysisAndFix fixThreat(final FileDescription file) {
     return getLLMResponse(
-        "gpt-4-0613", 0D, getSystemMessage(), getFixUserMessage(file), ThreatFix.class);
+        "gpt-4-0613",
+        0D,
+        getSystemMessage(),
+        getFixUserMessage(file),
+        BinaryThreatAnalysisAndFix.class);
   }
 
   private <T> T getLLMResponse(
@@ -232,7 +207,7 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
         SYSTEM_MESSAGE_TEMPLATE.formatted(getThreatPrompt().strip()).strip());
   }
 
-  private ChatMessage getAnalyzeUserMessage(final CodemodInvocationContextFile file) {
+  private ChatMessage getAnalyzeUserMessage(final FileDescription file) {
     return new ChatMessage(
         ChatMessageRole.SYSTEM.value(),
         ANALYZE_USER_MESSAGE_TEMPLATE
@@ -240,7 +215,7 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
             .strip());
   }
 
-  private ChatMessage getFixUserMessage(final CodemodInvocationContextFile file) {
+  private ChatMessage getFixUserMessage(final FileDescription file) {
     return new ChatMessage(
         ChatMessageRole.USER.value(),
         FIX_USER_MESSAGE_TEMPLATE
@@ -314,117 +289,4 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
       --- %s
       %s
       """;
-
-  /**
-   * Provides some methods to simplify working with the file at {@link
-   * CodemodInvocationContext#path()}.
-   */
-  static final class CodemodInvocationContextFile {
-    private final String fileName;
-    private final Charset charset;
-
-    private final String lineSeparator;
-    private final List<String> lines;
-
-    public CodemodInvocationContextFile(final Path path) {
-      fileName = path.getFileName().toString();
-
-      try {
-        charset = Charset.forName(EncodingDetector.create().detect(path).orElse("UTF-8"));
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-
-      try {
-        String s = Files.readString(path, charset);
-        lineSeparator = detectLineSeparator(s);
-        lines = List.of(s.split("\\R", -1));
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    }
-
-    public String getFileName() {
-      return fileName;
-    }
-
-    public Charset getCharset() {
-      return charset;
-    }
-
-    public String getLineSeparator() {
-      return lineSeparator;
-    }
-
-    public List<String> getLines() {
-      return lines;
-    }
-
-    public String formatLinesWithLineNumbers() {
-      StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < lines.size(); i++) {
-        sb.append(i + 1);
-        sb.append(": ");
-        sb.append(lines.get(i));
-        sb.append("\n");
-      }
-      return sb.toString();
-    }
-
-    private String detectLineSeparator(final String s) {
-      Matcher m = Pattern.compile("(\\R)").matcher(s);
-      if (m.find()) {
-        // This assumes that the first line separator found is the one to use.
-        return m.group(1);
-      }
-      return "\n";
-    }
-  }
-
-  enum Risk {
-    HIGH,
-    LOW;
-  }
-
-  static class ThreatAnalysis {
-    @JsonPropertyDescription("A detailed analysis of how the risk was assessed.")
-    @JsonProperty(required = true)
-    private String analysis;
-
-    @JsonPropertyDescription("The risk of the security threat, either HIGH or LOW.")
-    @JsonProperty(required = true)
-    private Risk risk;
-
-    public ThreatAnalysis() {}
-
-    public ThreatAnalysis(final String analysis, final Risk risk) {
-      this.analysis = analysis;
-      this.risk = risk;
-    }
-
-    public String getAnalysis() {
-      return analysis;
-    }
-
-    public Risk getRisk() {
-      return risk;
-    }
-  }
-
-  static final class ThreatFix extends ThreatAnalysis {
-    @JsonPropertyDescription(
-        "The fix as a diff patch in unified format. Required if the risk is HIGH.")
-    private String fix;
-
-    @JsonPropertyDescription("A short description of the fix. Required if the file is fixed.")
-    private String fixDescription;
-
-    public String getFix() {
-      return fix;
-    }
-
-    public String getFixDescription() {
-      return fixDescription;
-    }
-  }
 }

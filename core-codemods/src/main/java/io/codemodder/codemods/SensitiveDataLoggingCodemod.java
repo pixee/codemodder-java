@@ -1,13 +1,15 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.CodemodResources.getClassResourceAsString;
+
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.DeleteDelta;
 import com.github.difflib.patch.Patch;
 import io.codemodder.Codemod;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
-import io.codemodder.plugins.llm.LLMAssistedCodemod;
 import io.codemodder.plugins.llm.OpenAIService;
+import io.codemodder.plugins.llm.SarifToLLMForBinaryVerificationAndFixingCodemod;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -15,7 +17,8 @@ import javax.inject.Inject;
 @Codemod(
     id = "pixee:java/sensitive-data-logging",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
-public final class SensitiveDataLoggingCodemod extends LLMAssistedCodemod {
+public final class SensitiveDataLoggingCodemod
+    extends SarifToLLMForBinaryVerificationAndFixingCodemod {
 
   @Inject
   public SensitiveDataLoggingCodemod(
@@ -26,12 +29,12 @@ public final class SensitiveDataLoggingCodemod extends LLMAssistedCodemod {
 
   @Override
   protected String getThreatPrompt() {
-    return getClassResourceAsString("threat_prompt.txt");
+    return getClassResourceAsString(getClass(), "threat_prompt.txt");
   }
 
   @Override
   protected String getFixPrompt() {
-    return getClassResourceAsString("fix_prompt.txt");
+    return getClassResourceAsString(getClass(), "fix_prompt.txt");
   }
 
   @Override
