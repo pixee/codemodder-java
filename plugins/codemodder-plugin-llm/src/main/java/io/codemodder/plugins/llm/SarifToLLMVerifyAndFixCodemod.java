@@ -19,34 +19,34 @@ import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.FunctionExecutor;
 import io.codemodder.CodemodChange;
 import io.codemodder.CodemodInvocationContext;
-import io.codemodder.EncodingDetector;
 import io.codemodder.RuleSarif;
 import io.codemodder.SarifPluginRawFileChanger;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import java.util.MissingResourceException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An extension of {@link SarifPluginRawFileChanger} that uses large language models (LLMs) to
- * analyze and fix the files found by the static analysis tool.
+ * An extension of {@link SarifPluginRawFileChanger} that uses large language models (LLMs) to more
+ * deeply analyze and then fix the files found by the static analysis tool.
+ *
+ * <p>It has three phases:
+ *
+ * <ol>
+ *   <li>Use a SARIF file to find locations of interest for analysis
+ *   <li>Analyze the "threat" of the location found using a more inexpensive or faster model
+ *   <li>Using a more reliable (and more expensive model), confirm the finding and rewrite the code
+ * </ol>
  */
-public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
+public abstract class SarifToLLMVerifyAndFixCodemod extends SarifPluginRawFileChanger {
 
-  private static final Logger logger = LoggerFactory.getLogger(LLMAssistedCodemod.class);
+  private static final Logger logger = LoggerFactory.getLogger(SarifToLLMVerifyAndFixCodemod.class);
   private final OpenAIService openAI;
 
-  protected LLMAssistedCodemod(final RuleSarif sarif, final OpenAIService openAI) {
+  protected SarifToLLMVerifyAndFixCodemod(final RuleSarif sarif, final OpenAIService openAI) {
     super(sarif);
     this.openAI = openAI;
   }
@@ -64,7 +64,7 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
         });
 
     try {
-      CodemodInvocationContextFile file = new CodemodInvocationContextFile(context.path());
+      FileDescription file = new FileDescription(context.path());
 
       ThreatAnalysis analysis = analyzeThreat(file);
       logger.debug("risk: {}", analysis.getRisk());
@@ -139,37 +139,7 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
    */
   protected abstract boolean isPatchExpected(Patch<String> patch);
 
-  /**
-   * Returns a class resource as a {@code String}.
-   *
-   * <p>The absolute name of the class resource is of the following form:
-   *
-   * <blockquote>
-   *
-   * {@code /modifiedPackageName/className/relativeName}
-   *
-   * </blockquote>
-   *
-   * Where the {@code modifiedPackageName} is the package name of this object with {@code '/'}
-   * substituted for {@code '.'}.
-   *
-   * @param relativeName The relative name of the resource.
-   * @return The resource as a {@code String}.
-   * @throws MissingResourceException If the resource was not found.
-   */
-  protected String getClassResourceAsString(final String relativeName) {
-    String resourceName = "/" + getClass().getName().replace('.', '/') + "/" + relativeName;
-    try (InputStream stream = getClass().getResourceAsStream(resourceName)) {
-      if (stream == null) {
-        throw new MissingResourceException(resourceName, getClass().getName(), resourceName);
-      }
-      return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-  }
-
-  private ThreatAnalysis analyzeThreat(final CodemodInvocationContextFile file) {
+  private ThreatAnalysis analyzeThreat(final FileDescription file) {
     ChatMessage systemMessage = getSystemMessage();
     ChatMessage userMessage = getAnalyzeUserMessage(file);
 
@@ -189,7 +159,7 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
         "gpt-3.5-turbo-0613", 0.2D, systemMessage, userMessage, ThreatAnalysis.class);
   }
 
-  private ThreatFix fixThreat(final CodemodInvocationContextFile file) {
+  private ThreatFix fixThreat(final FileDescription file) {
     return getLLMResponse(
         "gpt-4-0613", 0D, getSystemMessage(), getFixUserMessage(file), ThreatFix.class);
   }
@@ -232,7 +202,7 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
         SYSTEM_MESSAGE_TEMPLATE.formatted(getThreatPrompt().strip()).strip());
   }
 
-  private ChatMessage getAnalyzeUserMessage(final CodemodInvocationContextFile file) {
+  private ChatMessage getAnalyzeUserMessage(final FileDescription file) {
     return new ChatMessage(
         ChatMessageRole.SYSTEM.value(),
         ANALYZE_USER_MESSAGE_TEMPLATE
@@ -240,7 +210,7 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
             .strip());
   }
 
-  private ChatMessage getFixUserMessage(final CodemodInvocationContextFile file) {
+  private ChatMessage getFixUserMessage(final FileDescription file) {
     return new ChatMessage(
         ChatMessageRole.USER.value(),
         FIX_USER_MESSAGE_TEMPLATE
@@ -314,72 +284,6 @@ public abstract class LLMAssistedCodemod extends SarifPluginRawFileChanger {
       --- %s
       %s
       """;
-
-  /**
-   * Provides some methods to simplify working with the file at {@link
-   * CodemodInvocationContext#path()}.
-   */
-  static final class CodemodInvocationContextFile {
-    private final String fileName;
-    private final Charset charset;
-
-    private final String lineSeparator;
-    private final List<String> lines;
-
-    public CodemodInvocationContextFile(final Path path) {
-      fileName = path.getFileName().toString();
-
-      try {
-        charset = Charset.forName(EncodingDetector.create().detect(path).orElse("UTF-8"));
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-
-      try {
-        String s = Files.readString(path, charset);
-        lineSeparator = detectLineSeparator(s);
-        lines = List.of(s.split("\\R", -1));
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    }
-
-    public String getFileName() {
-      return fileName;
-    }
-
-    public Charset getCharset() {
-      return charset;
-    }
-
-    public String getLineSeparator() {
-      return lineSeparator;
-    }
-
-    public List<String> getLines() {
-      return lines;
-    }
-
-    public String formatLinesWithLineNumbers() {
-      StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < lines.size(); i++) {
-        sb.append(i + 1);
-        sb.append(": ");
-        sb.append(lines.get(i));
-        sb.append("\n");
-      }
-      return sb.toString();
-    }
-
-    private String detectLineSeparator(final String s) {
-      Matcher m = Pattern.compile("(\\R)").matcher(s);
-      if (m.find()) {
-        // This assumes that the first line separator found is the one to use.
-        return m.group(1);
-      }
-      return "\n";
-    }
-  }
 
   enum Risk {
     HIGH,

@@ -1,18 +1,20 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.CodemodResources.getClassResourceAsString;
+
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.InsertDelta;
 import com.github.difflib.patch.Patch;
 import io.codemodder.Codemod;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
-import io.codemodder.plugins.llm.LLMAssistedCodemod;
 import io.codemodder.plugins.llm.OpenAIService;
+import io.codemodder.plugins.llm.SarifToLLMVerifyAndFixCodemod;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
 @Codemod(id = "pixee:java/log-failed-login", reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
-public final class LogFailedLoginCodemod extends LLMAssistedCodemod {
+public final class LogFailedLoginCodemod extends SarifToLLMVerifyAndFixCodemod {
 
   @Inject
   public LogFailedLoginCodemod(
@@ -22,12 +24,12 @@ public final class LogFailedLoginCodemod extends LLMAssistedCodemod {
 
   @Override
   protected String getThreatPrompt() {
-    return getClassResourceAsString("threat_prompt.txt");
+    return getClassResourceAsString(getClass(), "threat_prompt.txt");
   }
 
   @Override
   protected String getFixPrompt() {
-    return getClassResourceAsString("fix_prompt.txt");
+    return getClassResourceAsString(getClass(), "fix_prompt.txt");
   }
 
   @Override
