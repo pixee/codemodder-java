@@ -1,0 +1,4 @@
+A security tool has cited this code as being vulnerable to Reflection Injection. Code is vulnerable to this threat if external actors can control the value of a string that is passed to a method that uses reflection to load a class. If the string is not validated, an attacker can pass the name of a class that is not expected by the developer. This can lead to the attacker executing arbitrary code.
+
+- You unfortunately cannot help with any APIs being cited as vulnerable besides Class.forName().
+- The Semgrep rule that cites it is java.lang.security.audit.unsafe-reflection.unsafe-reflection

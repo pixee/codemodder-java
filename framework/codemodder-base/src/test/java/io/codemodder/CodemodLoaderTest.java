@@ -2,6 +2,7 @@ package io.codemodder;
 
 import static io.codemodder.CodemodLoader.isValidCodemodId;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -62,6 +63,10 @@ final class CodemodLoaderTest {
     assertThat(isValidCodemodId("some-thing:java/id"), CoreMatchers.is(false));
     assertThat(isValidCodemodId("missing:token"), CoreMatchers.is(false));
     assertThat(isValidCodemodId("missing:separator/"), CoreMatchers.is(false));
+    assertThat(
+        isValidCodemodId(
+            "semgrep:java/java.lang.security.audit.unsafe-reflection.unsafe-reflection"),
+        is(true));
   }
 
   @Test

@@ -54,13 +54,21 @@ public interface CodemodTestMixin {
             .toList();
 
     ThrowingConsumer<Path> testExecutor =
-        path -> verifyCodemod(metadata.codemodType(), tmpDir, testResourceDir, path, dependencies);
+        path ->
+            verifyCodemod(
+                metadata.codemodType(),
+                metadata.renameTestFile(),
+                tmpDir,
+                testResourceDir,
+                path,
+                dependencies);
 
     return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
   }
 
   private void verifyCodemod(
       final Class<? extends CodeChanger> codemodType,
+      final String renameTestFile,
       final Path tmpDir,
       final Path testResourceDir,
       final Path before,
@@ -80,6 +88,17 @@ public interface CodemodTestMixin {
         .forEachRemaining(allSarifs::add);
 
     Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
+
+    // rename file if needed
+    if (!renameTestFile.isBlank()) {
+      Path parent = tmpDir.resolve(renameTestFile).getParent();
+      if (!Files.exists(parent)) {
+        Files.createDirectories(parent);
+      }
+      Path newPathToJavaFile = tmpDir.resolve(renameTestFile);
+      Files.copy(pathToJavaFile, newPathToJavaFile, StandardCopyOption.REPLACE_EXISTING);
+      pathToJavaFile = newPathToJavaFile;
+    }
 
     // run the codemod
     CodemodLoader loader = new CodemodLoader(List.of(codemodType), tmpDir, map);

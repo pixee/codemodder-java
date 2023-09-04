@@ -1,0 +1,9 @@
+{
+  "summary": "Remediate reflect injection findings",
+  "change": "<set by LLM>",
+  "references": [
+    "https://cwe.mitre.org/data/definitions/470.html",
+    "https://owasp.org/www-community/vulnerabilities/Unsafe_use_of_Reflection",
+    "https://capec.mitre.org/data/definitions/138.html"
+  ]
+}

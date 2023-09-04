@@ -1,0 +1,102 @@
+package com.acme.core;
+
+import com.amazonaws.services.secretsmanager.AWSSecretsManager;
+import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
+import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
+import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/** Default way to connect to RDS instance. */
+public final class RDSUtil {
+
+    private static final int PORT = 6609;
+
+    /**
+     * This fake utility connects to a database!
+     * But it's very real looking!
+     */
+    public static Connection connectToDatabase() throws SQLException {
+      AWSSimpleSystemsManagement ssm = AWSSimpleSystemsManagementClientBuilder.standard().build();
+      String host = getHost(ssm);
+      String name = getName(ssm);
+      String user = getUser(ssm);
+      String password = getPassword();
+      String dbUrl = getUrl(host, name);
+      LOG.warn("Connecting to {}", dbUrl);
+      return DriverManager.getConnection(dbUrl, user, password);
+    }
+
+    public static String getPassword() {
+      String passwordSecretIdArn = System.getenv("ACME_PASSWORD_ID");
+      AWSSecretsManager secretsManager = AWSSecretsManagerClientBuilder.standard().build();
+      GetSecretValueRequest secretRequest =
+          new GetSecretValueRequest().withSecretId(passwordSecretIdArn);
+      GetSecretValueResult secretValue = secretsManager.getSecretValue(secretRequest);
+      return secretValue.getSecretString();
+    }
+
+    public static String getHost() {
+      AWSSimpleSystemsManagement ssm = AWSSimpleSystemsManagementClientBuilder.standard().build();
+      return getHost(ssm);
+    }
+
+    private static String getHost(final AWSSimpleSystemsManagement ssm) {
+      String hostParameterName = System.getenv("ACME_DB_HOST");
+      return ssm.getParameter(new GetParameterRequest().withName(hostParameterName))
+          .getParameter()
+          .getValue();
+    }
+
+    public static String getName() {
+      AWSSimpleSystemsManagement ssm = AWSSimpleSystemsManagementClientBuilder.standard().build();
+      return getName(ssm);
+    }
+
+    private static String getName(final AWSSimpleSystemsManagement ssm) {
+      String nameParameterName = System.getenv("ACME_DB_NAME");
+      return ssm.getParameter(new GetParameterRequest().withName(nameParameterName))
+          .getParameter()
+          .getValue();
+    }
+
+    public static String getUser() {
+      AWSSimpleSystemsManagement ssm = AWSSimpleSystemsManagementClientBuilder.standard().build();
+      return getUser(ssm);
+    }
+
+    private static String getUser(final AWSSimpleSystemsManagement ssm) {
+      String userParameterName = System.getenv("ACME_DB_USER");
+      return ssm.getParameter(new GetParameterRequest().withName(userParameterName))
+          .getParameter()
+          .getValue();
+    }
+
+    public static String getUrl() {
+      return getUrl(getHost(), getName());
+    }
+
+    public static String getUrl(final String host, final String name) {
+      return "jdbc:mariadb://" + host + ":" + PORT + "/" + name;
+    }
+
+    static {
+      try {
+        Class.forName(getDriverName());
+      } catch (ClassNotFoundException e) {
+        throw new IllegalStateException("Couldn't load mariadb driver", e);
+      }
+    }
+
+    public static String getDriverName() {
+      return "org.mariadb.jdbc.Driver";
+    }
+
+    private static final Logger LOG = LogManager.getLogger(RDSUtil.class);
+}
