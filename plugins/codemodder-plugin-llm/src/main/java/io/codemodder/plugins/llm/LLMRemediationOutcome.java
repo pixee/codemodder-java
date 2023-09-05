@@ -9,6 +9,9 @@ public interface LLMRemediationOutcome {
   /** A description of the code that the LLM will attempt to use to match. */
   String description();
 
+  /** A description of the fix for cases that match this description. */
+  String fix();
+
   /** Whether this outcome should lead to a code change. */
   boolean shouldApplyCodeChanges();
 }

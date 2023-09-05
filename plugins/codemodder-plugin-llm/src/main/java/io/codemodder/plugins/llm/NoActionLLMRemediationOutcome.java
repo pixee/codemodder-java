@@ -12,6 +12,11 @@ public record NoActionLLMRemediationOutcome(String key, String description)
   }
 
   @Override
+  public String fix() {
+    return "N/A";
+  }
+
+  @Override
   public boolean shouldApplyCodeChanges() {
     return false;
   }

@@ -33,29 +33,29 @@ public class ReflectionInjectionCodemod extends SarifToLLMForMultiOutcomeCodemod
         openAIService,
         List.of(
             new CodeChangingLLMRemediationOutcome(
-                "false_positive_is_constant",
+                "false_positive_is_constant_from_method",
                 """
-                                          The class name loaded is actually a constant expression, but it's defined elsewhere in this type. This is of course technically a false positive, but if we can just refactor the code to use the constant expression instead, we can do that to make the tool happy.
-                                          """,
+                                                  The class name loaded is actually a constant, but it's referenced indirectly through an intermediate method. This is a false positive, but if we can just refactor the code to use the constant expression instead, we can do that to make the tool happy.
+                                                  """,
                 """
-                                          If you can refactor the code to make it so the Class.forName() call can reference a member field, change it. If not, add a Semgrep suppression comment above it.
-                                          """),
+                                                  Refactor the code to make it so the Class.forName() is passed the variable field, or a string literal.
+                                                  """),
             new CodeChangingLLMRemediationOutcome(
                 "false_positive_has_constant_prefix",
                 """
                                               The class name loaded is visibly prefixed with a constant expression sometime before loading.
                                               This may be considered a false positive by developers because it's fairly limited what an
                                               attacker could do with such a tightly controlled reflection. We could suppress the issue in
-                                              this case, because forcing it through a control like Reflection#verifyAndLoadPackage() seems
-                                              redundant.                                                                                                                                                                                                                                                                                                     * redundant.
+                                              this case, because forcing it through a control like Reflection#verifyAndLoadPackage() is
+                                              redundant.
                                               """,
                 """
-                                            Add a Semgrep suppression comment above it.
+                                            Add a Semgrep suppression comment above the line cited to prevent it from being reported again.
                                             """),
             new CodeChangingLLMRemediationOutcome(
                 "unverifiable_but_type_constrained",
                 """
-                                              The source of the class name can't be verified, but there are clues about what the loaded
+                                              The source of the class name string can't be verified to be constant, but there are clues about what the loaded
                                               class instance type has to be (e.g., it's casted to something after being loaded.) In this
                                               case, if it is not expected to be anything related to code loading, we can use a control like
                                               Reflection#loadClass() and make sure that it can't be a type that would commonly be used
@@ -67,9 +67,9 @@ public class ReflectionInjectionCodemod extends SarifToLLMForMultiOutcomeCodemod
             new NoActionLLMRemediationOutcome(
                 "unverifiable_and_potentially_intentionally_unsafe",
                 """
-                                             The source of the class name can't be verified, but it's used in a way that suggests it's
-                                             related to loading or executing arbitrary code by design, in which case we can't do anything
-                                             and we should leave further analysis to the user.
+                                             The source of the class name can't be verified to be constant, but it's used in a way that suggests it's
+                                             related to OSGi, classloading plugins, or executing arbitrary code by design, in which case we can't
+                                             do anything and we should leave further analysis to the user.
                                               """)));
   }
 

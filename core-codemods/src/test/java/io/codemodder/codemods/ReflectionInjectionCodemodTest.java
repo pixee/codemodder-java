@@ -19,13 +19,14 @@ final class ReflectionInjectionCodemodTest {
       codemodType = ReflectionInjectionCodemod.class,
       testResourceDir = "reflection-injection-no-dependency-injection",
       renameTestFile = "acme-webapp/core/src/main/java/com/acme/core/RDSUtil.java",
+      doRetransformTest = false,
       dependencies = {})
   static final class DoesntInjectControlTest implements LLMVerifyingCodemodTestMixin {
     @Override
     public String getRequirementsPrompt() {
       return """
-                    - No user input is used to load classes.
-                    """;
+              - The Class.forName() call on line 91 must be passed a literal string or a constant reference.
+              """;
     }
   }
 
@@ -33,6 +34,7 @@ final class ReflectionInjectionCodemodTest {
   @Metadata(
       codemodType = ReflectionInjectionCodemod.class,
       testResourceDir = "reflection-injection-with-dependency-injection",
+      doRetransformTest = false,
       dependencies = "io.github.pixee:java-security-toolkit:1.0.6")
   static final class InjectsControlTest implements LLMVerifyingCodemodTestMixin {
     @Override

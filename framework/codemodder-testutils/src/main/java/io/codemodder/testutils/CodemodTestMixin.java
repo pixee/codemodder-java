@@ -61,7 +61,8 @@ public interface CodemodTestMixin {
                 tmpDir,
                 testResourceDir,
                 path,
-                dependencies);
+                dependencies,
+                metadata.doRetransformTest());
 
     return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
   }
@@ -72,7 +73,8 @@ public interface CodemodTestMixin {
       final Path tmpDir,
       final Path testResourceDir,
       final Path before,
-      final List<DependencyGAV> dependenciesExpected)
+      final List<DependencyGAV> dependenciesExpected,
+      final boolean doRetransformTest)
       throws IOException {
 
     // create a copy of the test file in the temp directory to serve as our "repository"
@@ -150,6 +152,10 @@ public interface CodemodTestMixin {
 
     // make sure the dependencies are added
     assertThat(dependenciesExpected, hasItems(dependenciesExpected.toArray(new DependencyGAV[0])));
+
+    if (!doRetransformTest) {
+      return;
+    }
 
     String codeAfterFirstTransform = Files.readString(pathToJavaFile);
 

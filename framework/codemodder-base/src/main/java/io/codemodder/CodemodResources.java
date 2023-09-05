@@ -6,7 +6,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.MissingResourceException;
 
-/** A utility class for accessing a codemod's resources in it's "default location" the classpath. */
+/** A utility class for accessing a codemod's resources in its "default location" the classpath. */
 public final class CodemodResources {
 
   private CodemodResources() {}
@@ -25,6 +25,7 @@ public final class CodemodResources {
    * Where the {@code modifiedPackageName} is the package name of this object with {@code '/'}
    * substituted for {@code '.'}.
    *
+   * @param type The codemod type.
    * @param relativeName The relative name of the resource.
    * @return The resource as a {@code String}.
    * @throws MissingResourceException If the resource was not found.

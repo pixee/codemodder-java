@@ -224,7 +224,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
             .messages(List.of(systemMessage, userMessage))
             .functions(functionExecutor.getFunctions())
             .functionCall(ChatCompletionRequestFunctionCall.of(function.getName()))
-            .temperature(0.2)
+            .temperature(0.0)
             .build();
 
     ChatCompletionResult result = openAI.createChatCompletion(request);
@@ -275,10 +275,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
     int line = region.getStartLine();
     int column = region.getStartColumn();
 
-    String outcomeDescriptions =
-        remediationOutcomes.stream()
-            .map(outcome -> "Outcome: '" + outcome.key() + "': " + outcome.description())
-            .collect(Collectors.joining("\n"));
+    String outcomeDescriptions = formatOutcomeDescriptions(false);
 
     return new ChatMessage(
         ChatMessageRole.SYSTEM.value(),
@@ -292,18 +289,42 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
             .strip());
   }
 
+  private String formatOutcomeDescriptions(boolean includeFixes) {
+    if (includeFixes) {
+      return remediationOutcomes.stream()
+          .map(
+              outcome ->
+                  "Outcome: '"
+                      + outcome.key()
+                      + "': "
+                      + outcome.description()
+                      + "Code Change Directions: "
+                      + outcome.fix())
+          .collect(Collectors.joining("\n"));
+    }
+    return remediationOutcomes.stream()
+        .map(outcome -> "Outcome: '" + outcome.key() + "': " + outcome.description())
+        .collect(Collectors.joining("\n"));
+  }
+
   /** Because the larger context size on GPT-4, we can ask it to handle all the results. */
   private ChatMessage getChangeCodeMessage(final FileDescription file, final List<Result> results) {
 
     String locations =
         results.stream()
             .map(r -> r.getLocations().get(0).getPhysicalLocation().getRegion())
-            .map(r -> r.getStartLine() + ":" + r.getStartColumn())
-            .collect(Collectors.joining(", "));
+            .map(r -> "  Line " + r.getStartLine() + ", column " + r.getStartColumn())
+            .collect(Collectors.joining("\n"));
+
+    String outcomeDescriptions = formatOutcomeDescriptions(true);
     return new ChatMessage(
         ChatMessageRole.USER.value(),
         CHANGE_CODE_USER_MESSAGE_TEMPLATE
-            .formatted(locations, file.getFileName(), file.formatLinesWithLineNumbers())
+            .formatted(
+                locations,
+                outcomeDescriptions,
+                file.getFileName(),
+                file.formatLinesWithLineNumbers())
             .strip());
   }
 
@@ -319,23 +340,6 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
             A file with line numbers is provided below. Analyze ONLY line %s, column %s, and discern which "outcome" best describes the code. You should save your categorization analysis. Ignore any other file contents.
             Here are the possible outcomes:
             %s
-            --- %s
-            %s
-            """;
-
-  private static final String CHANGE_CODE_USER_MESSAGE_TEMPLATE =
-      """
-            A file with line numbers is provided below. Here are some results that were found in the file:
-            %s
-            For each result, decide which "outcome" you want to place it in. Then, if
-            the category requires code change, make the changes as described in the "directions"
-            to make the MINIMUM number of changes necessary to fix the threat:
-            - Each change MUST be syntactically correct.
-            - DO NOT change the file's formatting or comments.
-            Create a diff patch for the changed file if and only if any of the outcomes require code changes.
-            The patch must use the unified format with a header. Include \
-            the diff patch and a summary of the changes with your analysis.
-            Save your categorization and code change analysis.
             --- %s
             %s
             """;
@@ -367,6 +371,28 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
     }
   }
 
+  private static final String CHANGE_CODE_USER_MESSAGE_TEMPLATE =
+      """
+          A file with line numbers is provided below. Here are the locations that the tool cited you need to analyze:
+
+          %s
+
+          For each result, decide which "outcome" you want to place it in. Then, if that outcome requires code change, make the changes as described in the Code Change Directions. Here are the possible outcomes:
+
+          %s
+
+          You MUST make the MINIMUM number of changes necessary to fix the issue.
+          - Each change MUST be syntactically correct.
+          - DO NOT change the file's formatting or comments.
+          Create a diff patch for the changed file if and only if any of the outcomes require code changes.
+          The patch must use the unified format with a header. Include \
+          the diff patch and a summary of the changes with your analysis.
+
+          Save your categorization and code change analysis of all the results.
+          --- %s
+          %s
+          """;
+
   static final class CodeChangeResponse {
     @JsonPropertyDescription(
         "The code change a diff patch in unified format. Required if any of the outcome keys indicate a change.")
@@ -375,10 +401,18 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     @JsonPropertyDescription("The outcomes of the analysis of the locations given in the code.")
     private List<LocationOutcome> outcomes;
+
+    public String getCodeChange() {
+      return codeChange;
+    }
+
+    public List<LocationOutcome> getOutcomes() {
+      return outcomes;
+    }
   }
 
   static final class LocationOutcome {
-    @JsonPropertyDescription("The line to which this analysis is related")
+    @JsonPropertyDescription("The line in the file to which this analysis is related")
     private int line;
 
     @JsonPropertyDescription("The column to which this analysis is related")
@@ -390,5 +424,21 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
     @JsonPropertyDescription(
         "A short description of the code change. Required only if the file needs a change.")
     private String fixDescription;
+
+    public String getFixDescription() {
+      return fixDescription;
+    }
+
+    public String getOutcomeKey() {
+      return outcomeKey;
+    }
+
+    public int getLine() {
+      return line;
+    }
+
+    public int getColumn() {
+      return column;
+    }
   }
 }

@@ -27,4 +27,10 @@ public @interface Metadata {
    * target certain file names. Also supports directories in the path.
    */
   String renameTestFile() default "";
+
+  /**
+   * Whether to re-run the transformed code through a second transformation with the same inputs,
+   * but with the transformed code, to see if another transformation is erroneously made.
+   */
+  boolean doRetransformTest() default true;
 }
