@@ -11,11 +11,18 @@ import com.github.difflib.patch.Patch;
 import com.theokanning.openai.completion.chat.*;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest.ChatCompletionRequestFunctionCall;
 import com.theokanning.openai.service.FunctionExecutor;
-import io.codemodder.*;
+import io.codemodder.CodemodChange;
+import io.codemodder.CodemodInvocationContext;
+import io.codemodder.RuleSarif;
+import io.codemodder.SarifPluginRawFileChanger;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,7 +208,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
   }
 
   private CodeChangeResponse changeCode(final FileDescription file, final List<Result> results) {
-    return getCodeChangeMResponse(getSystemMessage(), getChangeCodeMessage(file, results));
+    return getCodeChangeResponse(getSystemMessage(), getChangeCodeMessage(file, results));
   }
 
   private CategorizeResponse getCategorizationResponse(
@@ -234,7 +241,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
     return functionExecutor.execute(response.getFunctionCall());
   }
 
-  private CodeChangeResponse getCodeChangeMResponse(
+  private CodeChangeResponse getCodeChangeResponse(
       final ChatMessage systemMessage, final ChatMessage userMessage) {
     // Create a function to get the LLM to return a structured response.
     ChatFunction function =
@@ -289,22 +296,49 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
             .strip());
   }
 
+  /**
+   * Format the outcome descriptions for sending to the LLM. Should look something like this:
+   *
+   * <pre>
+   * ===
+   * Outcome: 'assignment_is_redundant':
+   * Description: The variable is assigned and re-assigned to the same value. This is redundant and should be removed.
+   * Code Changes Required: YES
+   * Code Change Directions: Remove the initial assignment.
+   * ===
+   * Outcome: 'assignment_can_be_streamlined':
+   * Description: The variable is created and then assigned in separate adjacent statements.
+   * Code Changes Required: YES
+   * Code Change Directions: Combine the two statements together.
+   * ===
+   * ...
+   * </pre>
+   */
   private String formatOutcomeDescriptions(boolean includeFixes) {
-    if (includeFixes) {
-      return remediationOutcomes.stream()
-          .map(
-              outcome ->
-                  "Outcome: '"
-                      + outcome.key()
-                      + "': "
-                      + outcome.description()
-                      + "Code Change Directions: "
-                      + outcome.fix())
-          .collect(Collectors.joining("\n"));
-    }
+    String withFixTemplate =
+        """
+            ============
+            Outcome: %s
+            Description: %s
+            Code Changes Required: YES
+            Code Change Directions For Outcome: %s
+            """;
+    String withoutFixTemplate =
+        """
+            ============
+            Outcome: %s
+            Description: %s
+            Code Changes Required: NO
+            """;
+
+    Function<LLMRemediationOutcome, String> withFixProvider =
+        (outcome) -> withFixTemplate.formatted(outcome.key(), outcome.description(), outcome.fix());
+    Function<LLMRemediationOutcome, String> withoutFixProvider =
+        (outcome) -> withoutFixTemplate.formatted(outcome.key(), outcome.description());
     return remediationOutcomes.stream()
-        .map(outcome -> "Outcome: '" + outcome.key() + "': " + outcome.description())
-        .collect(Collectors.joining("\n"));
+            .map(oc -> includeFixes ? withFixProvider.apply(oc) : withoutFixProvider.apply(oc))
+            .collect(Collectors.joining("\n"))
+        + "\n============";
   }
 
   /** Because the larger context size on GPT-4, we can ask it to handle all the results. */
@@ -373,25 +407,26 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
 
   private static final String CHANGE_CODE_USER_MESSAGE_TEMPLATE =
       """
-          A file with line numbers is provided below. Here are the locations that the tool cited you need to analyze:
+              A file with line numbers is provided below. Here are the locations that the tool cited you need to analyze:
 
-          %s
+              %s
 
-          For each result, decide which "outcome" you want to place it in. Then, if that outcome requires code change, make the changes as described in the Code Change Directions. Here are the possible outcomes:
+              For each result, decide which "outcome" you want to place it in. Then, if that outcome requires code changes, make the changes as described in the Code Change Directions and save them. Here are the possible outcomes:
 
-          %s
+              %s
 
-          You MUST make the MINIMUM number of changes necessary to fix the issue.
-          - Each change MUST be syntactically correct.
-          - DO NOT change the file's formatting or comments.
-          Create a diff patch for the changed file if and only if any of the outcomes require code changes.
-          The patch must use the unified format with a header. Include \
-          the diff patch and a summary of the changes with your analysis.
+              Pick which outcome best describes the code. If you are making code changes, you MUST make the MINIMUM number of changes necessary to fix the issue.
+              - Each change MUST be syntactically correct.
+              - DO NOT change the file's formatting or comments.
+              - Create a diff patch for the changed file if and only if any of the outcomes require code changes.
+              - The patch must use the unified format with a header. Include the diff patch and a summary of the changes with your analysis.
 
-          Save your categorization and code change analysis of all the results.
-          --- %s
-          %s
-          """;
+              If you wish to suppress a Semgrep finding in the code, insert a comment above it and put `// nosemgrep: <ruleid>`
+
+              Save your categorization and code change analysis of all the results.
+              --- %s
+              %s
+              """;
 
   static final class CodeChangeResponse {
     @JsonPropertyDescription(

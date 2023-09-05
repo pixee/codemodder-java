@@ -17,7 +17,6 @@ import org.apache.logging.log4j.Logger;
 public final class RDSUtil {
 
     private static final int PORT = 6609;
-    private static final String DRIVER_NAME = "org.mariadb.jdbc.Driver";
 
     /**
      * This fake utility connects to a database!
@@ -89,14 +88,15 @@ public final class RDSUtil {
 
     static {
       try {
-        Class.forName(DRIVER_NAME);
+        // nosemgrep: java.lang.security.audit.unsafe-reflection.unsafe-reflection
+        Class.forName(getDriverName());
       } catch (ClassNotFoundException e) {
         throw new IllegalStateException("Couldn't load mariadb driver", e);
       }
     }
 
     public static String getDriverName() {
-      return DRIVER_NAME;
+      return "org.mariadb.jdbc.Driver";
     }
 
     private static final Logger LOG = LogManager.getLogger(RDSUtil.class);

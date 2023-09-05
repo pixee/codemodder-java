@@ -1,0 +1,47 @@
+package com.acme.core;
+
+import com.amazonaws.services.secretsmanager.AWSSecretsManager;
+import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
+import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
+import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/** Default way to connect to load actions. */
+public final class ActionLoader {
+
+    public static String getUser() {
+      AWSSimpleSystemsManagement ssm = AWSSimpleSystemsManagementClientBuilder.standard().build();
+      return getUser(ssm);
+    }
+
+    private static String getUser(final AWSSimpleSystemsManagement ssm) {
+      String userParameterName = System.getenv("ACME_DB_USER");
+      return ssm.getParameter(new GetParameterRequest().withName(userParameterName))
+          .getParameter()
+          .getValue();
+    }
+
+    //
+    // load the action loader on startup
+    //
+
+    static {
+      try {
+        // nosemgrep: java.lang.security.audit.unsafe-reflection.unsafe-reflection
+        Class<?> c = Class.forName("com.acme.actions." + getActionLoader());
+        save(c);
+      } catch (ClassNotFoundException e) {
+        throw new IllegalStateException("Couldn't load mariadb driver", e);
+      }
+    }
+
+    public static String getActionLoader() {
+      return "com.acme.actions.Loader";
+    }
+
+    private static final Logger LOG = LogManager.getLogger(ActionLoader.class);
+}

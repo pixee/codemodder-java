@@ -1,0 +1,85 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": [
+            {
+              "descriptor": {
+                "id": "Syntax error"
+              },
+              "level": "warning",
+              "message": {
+                "text": "Syntax error at line 5 in Foo file"
+              }
+            }
+          ]
+        }
+      ],
+      "results": [
+        {
+          "fingerprints": {
+            "matchBasedId/v1": "2efd08b1cfc31cf327ccd30f89f466b900c7bdbb887b9874dbd754803e4bc836989fd5aba0cfc67c91a85142c2351cccf31373d87d95ea7e1a3980792c6e526e_0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "acme-webapp/core/src/main/java/com/acme/core/ActionLoader.java",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "endColumn": 37,
+                  "endLine": 34,
+                  "snippet": {
+                    "text": "      Class.forName(getActionLoader());"
+                  },
+                  "startColumn": 7,
+                  "startLine": 34
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "If an attacker can supply values that the application then uses to determine which class to instantiate or which method to invoke, the potential exists for the attacker to create control flow paths through the application that were not intended by the application developers. This attack vector may allow the attacker to bypass authentication or access control checks or otherwise cause the application to behave in an unexpected manner."
+          },
+          "properties": {},
+          "ruleId": "java.lang.security.audit.unsafe-reflection.unsafe-reflection"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "semgrep",
+          "rules": [
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "fullDescription": {
+                "text": "If an attacker can supply values that the application then uses to determine which class to instantiate or which method to invoke, the potential exists for the attacker to create control flow paths through the application that were not intended by the application developers. This attack vector may allow the attacker to bypass authentication or access control checks or otherwise cause the application to behave in an unexpected manner."
+              },
+              "helpUri": "https://semgrep.dev/r/java.lang.security.audit.unsafe-reflection.unsafe-reflection",
+              "id": "java.lang.security.audit.unsafe-reflection.unsafe-reflection",
+              "name": "java.lang.security.audit.unsafe-reflection.unsafe-reflection",
+              "properties": {
+                "precision": "very-high",
+                "tags": [
+                  "CWE-470: Use of Externally-Controlled Input to Select Classes or Code ('Unsafe Reflection')",
+                  "OWASP-A03:2021 - Injection",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "If an attacker can supply values that the application then uses to determine which class to instantiate or which method to invoke, the potential exists for the attacker to create control flow paths through the application that were not intended by the application developers. This attack vector may allow the attacker to bypass authentication or access control checks or otherwise cause the application to behave in an unexpected manner."
+              }
+            }
+          ],
+          "semanticVersion": "1.15.0"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}
