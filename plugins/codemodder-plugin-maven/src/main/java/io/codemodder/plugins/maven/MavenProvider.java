@@ -279,7 +279,7 @@ public final class MavenProvider implements ProjectProvider {
       /*
        * Tell downstream consumers that this is a change based on surrounding context.
        */
-      properties = Map.of("contextual", "true");
+      properties = Map.of("contextual_description", "true");
     } else {
       properties = Collections.emptyMap();
     }
