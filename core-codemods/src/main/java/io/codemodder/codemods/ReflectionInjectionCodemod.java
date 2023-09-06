@@ -4,6 +4,7 @@ import io.codemodder.Codemod;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.plugins.llm.CodeChangingLLMRemediationOutcome;
+import io.codemodder.plugins.llm.NoActionLLMRemediationOutcome;
 import io.codemodder.plugins.llm.OpenAIService;
 import io.codemodder.plugins.llm.SarifToLLMForMultiOutcomeCodemod;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
@@ -40,6 +41,9 @@ public class ReflectionInjectionCodemod extends SarifToLLMForMultiOutcomeCodemod
                 "has_constant_prefix",
                 "The class name is prefixed with a constant or literal expression before loading so the package is hardcoded.",
                 "Change the code to add a Semgrep suppression comment above the line cited to prevent it from being reported again."),
+            new NoActionLLMRemediationOutcome(
+                "not_class_forname",
+                "The code at that line:column is not using Class.forName() to load a class. You can only fix Class.forName calls, so we have no code changes to make."),
             new CodeChangingLLMRemediationOutcome(
                 "unverifiable_and_potentially_intentionally_unsafe",
                 "The code context suggests that the this feature is related to OSGi or other classloading middleware, and that it is intentionally executing arbitrary code by design.",
@@ -47,7 +51,7 @@ public class ReflectionInjectionCodemod extends SarifToLLMForMultiOutcomeCodemod
             new CodeChangingLLMRemediationOutcome(
                 "not_obvious_but_can_introduce_control",
                 "Select this outcome if none of the other outcomes feel clear. You cannot select this outcome if there is a static prefix used in the type name.",
-                "Change the code to use a Java security control API. Add a static import for the method io.github.pixee.Reflection.loadAndVerify(String) and use it to load the class name instead of directly calling Class.forName().")));
+                "Change the code to use a Java security control API. First, add a static import for the static method io.github.pixee.Reflection.loadAndVerify. Then, replace the Class.forName() call with loadAndVerify(). You MUST pass the SAME arguments to loadAndVerify() that were there for Class.forName().")));
   }
 
   @Override

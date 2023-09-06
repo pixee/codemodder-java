@@ -87,4 +87,24 @@ final class ReflectionInjectionCodemodTest {
               """;
     }
   }
+
+  /**
+   * Confirms that other APIs besides Class.forName() will not be handled even if cited by the
+   * SARIF.
+   */
+  @Nested
+  @Metadata(
+      codemodType = ReflectionInjectionCodemod.class,
+      testResourceDir = "reflection-injection/not_class_forname",
+      renameTestFile = "acme-webapp/core/src/main/java/com/acme/core/Main.java",
+      doRetransformTest = false,
+      dependencies = {})
+  final class NotClassForNameTest implements LLMVerifyingCodemodTestMixin {
+    @Override
+    public String getRequirementsPrompt() {
+      return """
+              - The code has not been modified.
+              """;
+    }
+  }
 }
