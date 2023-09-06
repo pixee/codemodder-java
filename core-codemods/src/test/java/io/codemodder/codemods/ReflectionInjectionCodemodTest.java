@@ -3,6 +3,8 @@ package io.codemodder.codemods;
 import io.codemodder.testutils.Metadata;
 import io.codemodder.testutils.llm.LLMVerifyingCodemodTestMixin;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Have test cases that look like the following:
@@ -13,12 +15,13 @@ import org.junit.jupiter.api.Nested;
  *   <li>an OSGi class loader that looks up classes
  * </ol>
  */
+@Execution(ExecutionMode.CONCURRENT)
 final class ReflectionInjectionCodemodTest {
 
   @Nested
   @Metadata(
       codemodType = ReflectionInjectionCodemod.class,
-      testResourceDir = "reflection-injection/false_positive_driver_loading",
+      testResourceDir = "reflection-injection/driver_loading",
       renameTestFile = "acme-webapp/core/src/main/java/com/acme/core/RDSUtil.java",
       doRetransformTest = false,
       dependencies = {})
@@ -34,7 +37,7 @@ final class ReflectionInjectionCodemodTest {
   @Nested
   @Metadata(
       codemodType = ReflectionInjectionCodemod.class,
-      testResourceDir = "reflection-injection/false_positive_is_constant_from_method",
+      testResourceDir = "reflection-injection/is_constant_from_method",
       renameTestFile = "acme-webapp/core/src/main/java/com/acme/core/ActionLoader.java",
       doRetransformTest = false,
       dependencies = {})
@@ -50,7 +53,7 @@ final class ReflectionInjectionCodemodTest {
   @Nested
   @Metadata(
       codemodType = ReflectionInjectionCodemod.class,
-      testResourceDir = "reflection-injection/false_positive_has_constant_prefix",
+      testResourceDir = "reflection-injection/has_constant_prefix",
       renameTestFile = "acme-webapp/core/src/main/java/com/acme/core/ActionLoader.java",
       doRetransformTest = false,
       dependencies = {})

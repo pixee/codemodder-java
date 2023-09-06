@@ -1,8 +1,5 @@
 package io.codemodder.codemods;
 
-import static io.codemodder.CodemodResources.getClassResourceAsString;
-
-import com.github.difflib.patch.Patch;
 import io.codemodder.Codemod;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
@@ -32,15 +29,15 @@ public class ReflectionInjectionCodemod extends SarifToLLMForMultiOutcomeCodemod
         openAIService,
         List.of(
             new CodeChangingLLMRemediationOutcome(
-                "false_positive_driver_loading",
+                "driver_loading",
                 "The Class.forName() result is not assigned to anything, the class name being loaded isn't obviously from an untrusted source, and the surrounding code looks like it is related to loading a JDBC driver.",
                 "Change the code to add a Semgrep suppression comment above the line cited to prevent it from being reported again."),
             new CodeChangingLLMRemediationOutcome(
-                "false_positive_is_constant_from_method",
+                "is_constant_from_method",
                 "The class name loaded is actually a constant, but it's referenced indirectly through an intermediate method.",
-                "Refactor the code to make it so the Class.forName() is passed the same thing as the method, the variable field directly, or a string literal."),
+                "Change the code to so the Class.forName() is passed the same thing as the method. You can pass it the variable field directly, or a string literal."),
             new CodeChangingLLMRemediationOutcome(
-                "false_positive_has_constant_prefix",
+                "has_constant_prefix",
                 "The class name is prefixed with a constant or literal expression before loading so the package is hardcoded.",
                 "Change the code to add a Semgrep suppression comment above the line cited to prevent it from being reported again."),
             new CodeChangingLLMRemediationOutcome(
@@ -55,15 +52,12 @@ public class ReflectionInjectionCodemod extends SarifToLLMForMultiOutcomeCodemod
 
   @Override
   protected String getThreatPrompt() {
-    return getClassResourceAsString(getClass(), "threat_prompt.txt");
-  }
+    return """
+            A security tool has cited this code as being vulnerable to Reflection Injection. Code is vulnerable to this threat if external actors can control the value of a string that is passed to a method that uses reflection to load a class. If the string is not validated, an attacker can pass the name of a class that is not expected by the developer. This can lead to the attacker executing arbitrary code.
 
-  /**
-   * This could make 1-to-N changes that are additions and subtractions, so there's not much ability
-   * to verify the patch is rational.
-   */
-  @Override
-  protected boolean isPatchExpected(final Patch<String> patch) {
-    return true;
+            - You unfortunately cannot help with any APIs being cited as vulnerable besides Class.forName().
+            - The Semgrep rule that cites it is java.lang.security.audit.unsafe-reflection.unsafe-reflection
+
+            """;
   }
 }

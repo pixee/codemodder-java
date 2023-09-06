@@ -18,10 +18,7 @@ import io.codemodder.SarifPluginRawFileChanger;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -77,53 +74,52 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
           logger.debug("{}:{}", region.getStartLine(), region.getSnippet().getText());
         });
 
+    List<CodemodChange> changes = new ArrayList<>();
+    for (Result result : results) {
+      Optional<CodemodChange> change = processResult(context, result);
+      change.ifPresent(changes::add);
+    }
+    return List.copyOf(changes);
+  }
+
+  private Optional<CodemodChange> processResult(
+      final CodemodInvocationContext context, final Result result) {
     try {
       FileDescription file = new FileDescription(context.path());
 
-      boolean needDeeperInspectionAndPossibleChange = false;
-      for (Result result : results) {
-        CategorizeResponse analysis = categorize(file, result);
-        String outcomeKey = analysis.getOutcomeKey();
-        logger.debug("outcomeKey: {}", outcomeKey);
-        logger.debug("analysis: {}", analysis.getAnalysis());
-        if (outcomeKey == null || outcomeKey.isBlank()) {
-          logger.debug("unable to determine outcome");
-          continue;
-        }
-        Optional<LLMRemediationOutcome> outcome =
-            remediationOutcomes.stream()
-                .filter(oc -> oc.key().equals(analysis.outcomeKey))
-                .findFirst();
-        if (outcome.isEmpty()) {
-          logger.debug("unable to find outcome for key: {}", analysis.outcomeKey);
-          continue;
-        }
-        LLMRemediationOutcome matchedOutcome = outcome.get();
-        logger.debug("outcomeKey: {}", matchedOutcome.key());
-        logger.debug("description: {}", matchedOutcome.description());
-        if (!matchedOutcome.shouldApplyCodeChanges()) {
-          logger.debug("Matched outcome suggests there should be no code changes");
-          continue;
-        }
-        needDeeperInspectionAndPossibleChange = true;
+      CategorizeResponse analysis = categorize(file, result);
+      String outcomeKey = analysis.getOutcomeKey();
+      logger.debug("outcomeKey: {}", outcomeKey);
+      logger.debug("analysis: {}", analysis.getAnalysis());
+      if (outcomeKey == null || outcomeKey.isBlank()) {
+        logger.debug("unable to determine outcome");
+        return Optional.empty();
+      }
+      Optional<LLMRemediationOutcome> outcome =
+          remediationOutcomes.stream()
+              .filter(oc -> oc.key().equals(analysis.outcomeKey))
+              .findFirst();
+      if (outcome.isEmpty()) {
+        logger.debug("unable to find outcome for key: {}", analysis.outcomeKey);
+        return Optional.empty();
+      }
+      LLMRemediationOutcome matchedOutcome = outcome.get();
+      logger.debug("outcomeKey: {}", matchedOutcome.key());
+      logger.debug("description: {}", matchedOutcome.description());
+      if (!matchedOutcome.shouldApplyCodeChanges()) {
+        logger.debug("Matched outcome suggests there should be no code changes");
+        return Optional.empty();
       }
 
-      if (!needDeeperInspectionAndPossibleChange) {
-        logger.debug("No need for deeper inspection and possible changes");
-        return List.of();
-      }
-
-      CodeChangeResponse response = changeCode(file, results);
-      logger.debug(
-          "outcomes: {}",
-          response.outcomes.stream().map(res -> res.outcomeKey).collect(Collectors.toList()));
+      CodeChangeResponse response = changeCode(file, result);
+      logger.debug("outcome: {}", response.outcomeKey);
       logger.debug("analysis: {}", response.codeChange);
 
       // If our second look determined that there are no outcomes associated with code changes, we
       // should quit
-      if (response.outcomes.isEmpty()) {
+      if (response.outcomeKey == null || outcomeKey.isEmpty()) {
         logger.debug("No outcomes detected");
-        return List.of();
+        return Optional.empty();
       }
 
       List<String> codeChangingOutcomeKeys =
@@ -131,18 +127,18 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
               .filter(LLMRemediationOutcome::shouldApplyCodeChanges)
               .map(LLMRemediationOutcome::key)
               .toList();
-      List<String> outcomes = response.outcomes.stream().map(res -> res.outcomeKey).toList();
-      boolean anyRequireCodeChanges = outcomes.stream().anyMatch(codeChangingOutcomeKeys::contains);
+
+      boolean anyRequireCodeChanges = codeChangingOutcomeKeys.contains(response.outcomeKey);
       if (!anyRequireCodeChanges) {
         logger.debug("On second analysis, outcomes require no code changes");
-        return List.of();
+        return Optional.empty();
       }
 
       String codeChange = response.codeChange;
       // If the LLM was unable to fix the threat, don't change the file.
       if (codeChange == null || codeChange.length() == 0) {
         logger.info("unable to fix because diff not present: {}", context.path());
-        return List.of();
+        return Optional.empty();
       }
 
       // Apply the fix.
@@ -150,9 +146,9 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
 
       // Ensure the end result isn't wonky.
       Patch<String> patch = DiffUtils.diff(file.getLines(), fixedLines);
-      if (patch.getDeltas().size() == 0 || !isPatchExpected(patch)) {
-        logger.error("unexpected or invalid patch: {}", patch);
-        return List.of();
+      if (patch.getDeltas().size() == 0) {
+        logger.error("empty patch: {}", patch);
+        return Optional.empty();
       }
 
       try {
@@ -164,11 +160,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
       }
 
       // Report all the changes at their respective line number
-      return response.outcomes.stream()
-          .filter(outcome -> outcome.fixDescription != null && !outcome.fixDescription.isBlank())
-          .filter(outcome -> codeChangingOutcomeKeys.contains(outcome.outcomeKey))
-          .map(outcome -> CodemodChange.from(outcome.line, outcome.fixDescription))
-          .toList();
+      return Optional.of(CodemodChange.from(response.line, response.fixDescription));
     } catch (Exception e) {
       logger.error("failed to process: {}", context.path(), e);
       throw e;
@@ -181,13 +173,6 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
    * @return The prompt.
    */
   protected abstract String getThreatPrompt();
-
-  /**
-   * Returns whether the patch returned by the LLM is within the expectations of this codemod.
-   *
-   * @return {@code true} if the patch is expected; otherwise, {@code false}.
-   */
-  protected abstract boolean isPatchExpected(Patch<String> patch);
 
   private CategorizeResponse categorize(final FileDescription file, final Result result) {
     ChatMessage systemMessage = getSystemMessage();
@@ -207,8 +192,8 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
     return getCategorizationResponse(systemMessage, userMessage);
   }
 
-  private CodeChangeResponse changeCode(final FileDescription file, final List<Result> results) {
-    return getCodeChangeResponse(getSystemMessage(), getChangeCodeMessage(file, results));
+  private CodeChangeResponse changeCode(final FileDescription file, final Result result) {
+    return getCodeChangeResponse(getSystemMessage(), getChangeCodeMessage(file, result));
   }
 
   private CategorizeResponse getCategorizationResponse(
@@ -341,21 +326,24 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
         + "\n============";
   }
 
-  /** Because the larger context size on GPT-4, we can ask it to handle all the results. */
-  private ChatMessage getChangeCodeMessage(final FileDescription file, final List<Result> results) {
+  /**
+   * Analyze a single SARIF result, and get the changed file back as well if it warrants change.
+   *
+   * @param file the file being analyzed
+   * @param result the result to analyze
+   * @return the message to send to the LLM
+   */
+  private ChatMessage getChangeCodeMessage(final FileDescription file, final Result result) {
 
-    String locations =
-        results.stream()
-            .map(r -> r.getLocations().get(0).getPhysicalLocation().getRegion())
-            .map(r -> "  Line " + r.getStartLine() + ", column " + r.getStartColumn())
-            .collect(Collectors.joining("\n"));
+    Region region = result.getLocations().get(0).getPhysicalLocation().getRegion();
+    String regionStr = "  Line " + region.getStartLine() + ", column " + region.getStartColumn();
 
     String outcomeDescriptions = formatOutcomeDescriptions(true);
     return new ChatMessage(
         ChatMessageRole.USER.value(),
         CHANGE_CODE_USER_MESSAGE_TEMPLATE
             .formatted(
-                locations,
+                regionStr,
                 outcomeDescriptions,
                 file.getFileName(),
                 file.formatLinesWithLineNumbers())
@@ -371,7 +359,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
 
   private static final String CATEGORIZE_CODE_USER_MESSAGE_TEMPLATE =
       """
-            A file with line numbers is provided below. Analyze ONLY line %s, column %s, and discern which "outcome" best describes the code. You should save your categorization analysis. Ignore any other file contents.
+            Analyze ONLY line %s, column %s, and discern which "outcome" best describes the code. You should save your categorization analysis. You MUST ignore any other file contents, even if they look like they have issues.
             Here are the possible outcomes:
             %s
             --- %s
@@ -407,11 +395,11 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
 
   private static final String CHANGE_CODE_USER_MESSAGE_TEMPLATE =
       """
-              A file with line numbers is provided below. Here are the locations that the tool cited you need to analyze:
+              The tool has cited the following location for you to analyze:
 
               %s
 
-              For each result, decide which "outcome" you want to place it in. Then, if that outcome requires code changes, make the changes as described in the Code Change Directions and save them. Here are the possible outcomes:
+              Decide which "outcome" you want to place it in. Then, if that outcome requires code changes, make the changes as described in the Code Change Directions and save them. Here are the possible outcomes:
 
               %s
 
@@ -421,9 +409,9 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
               - Create a diff patch for the changed file if and only if any of the outcomes require code changes.
               - The patch must use the unified format with a header. Include the diff patch and a summary of the changes with your analysis.
 
-              If you wish to suppress a Semgrep finding in the code, insert a comment above it and put `// nosemgrep: <ruleid>`
+              If you the outcome says you should suppress a Semgrep finding in the code, insert a comment above it and put `// nosemgrep: <ruleid>`
 
-              Save your categorization and code change analysis of all the results.
+              Save your categorization and code change analysis when you're done.
               --- %s
               %s
               """;
@@ -434,19 +422,6 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
     private String codeChange;
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    @JsonPropertyDescription("The outcomes of the analysis of the locations given in the code.")
-    private List<LocationOutcome> outcomes;
-
-    public String getCodeChange() {
-      return codeChange;
-    }
-
-    public List<LocationOutcome> getOutcomes() {
-      return outcomes;
-    }
-  }
-
-  static final class LocationOutcome {
     @JsonPropertyDescription("The line in the file to which this analysis is related")
     private int line;
 
@@ -474,6 +449,10 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
 
     public int getColumn() {
       return column;
+    }
+
+    public String getCodeChange() {
+      return codeChange;
     }
   }
 }
