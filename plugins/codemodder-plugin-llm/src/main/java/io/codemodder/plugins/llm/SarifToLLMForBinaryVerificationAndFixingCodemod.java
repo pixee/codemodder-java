@@ -1,7 +1,7 @@
 package io.codemodder.plugins.llm;
 
-import static io.codemodder.plugins.llm.Tokens.countTokens;
 
+import static io.codemodder.plugins.llm.Tokens.countTokens;
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.github.difflib.DiffUtils;
