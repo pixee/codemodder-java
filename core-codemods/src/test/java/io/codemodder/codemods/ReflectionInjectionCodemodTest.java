@@ -107,4 +107,23 @@ final class ReflectionInjectionCodemodTest {
               """;
     }
   }
+
+  @Nested
+  @Metadata(
+      codemodType = ReflectionInjectionCodemod.class,
+      testResourceDir =
+          "reflection-injection/unverifiable_and_potentially_intentionally_unsafe_with_3_args",
+      renameTestFile = "acme-webapp/core/src/main/java/com/acme/core/Main.java",
+      doRetransformTest = false,
+      dependencies = "io.github.pixee:java-security-toolkit:1.0.7")
+  final class ThreeArgsTest implements LLMVerifyingCodemodTestMixin {
+    @Override
+    public String getRequirementsPrompt() {
+      return """
+              - The Class.forName() call inside loadGameTypeFromRequest() was replaced by loadAndVerify() to add security
+              - The 3 original arguments passed to Class.forName are now going to loadAndVerify
+              - There is a static import for io.github.pixee.Reflection.loadAndVerify
+              """;
+    }
+  }
 }

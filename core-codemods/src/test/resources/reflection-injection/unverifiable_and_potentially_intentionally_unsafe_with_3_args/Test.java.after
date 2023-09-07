@@ -1,0 +1,54 @@
+package ai.mage;
+
+import ai.models.MatchType;
+import static io.github.pixee.Reflections.loadAndVerify;
+
+public class Main {
+
+    private static MatchType loadGameTypeFromPlugin(GamePlugin plugin) {
+        try {
+            classLoader.addURL(new File(pluginFolder, plugin.getJar()).toURI().toURL());
+            logger.debug("Loading game type: " + plugin.getClassName());
+            return (MatchType) Class.forName(plugin.getTypeName(), true, classLoader).getConstructor().newInstance();
+        } catch (ClassNotFoundException ex) {
+            logger.warn("Game type not found:" + plugin.getJar() + " - check plugin folder", ex);
+        } catch (Exception ex) {
+            logger.fatal("Error loading game type " + plugin.getJar(), ex);
+        }
+        return null;
+    }
+
+    private static MatchType loadGameTypeFromRequest(HttpRequest request) {
+        try {
+            return (MatchType) loadAndVerify(request.getParameter("game_type"), false, HttpRequest.class.getClassLoader()).getConstructor().newInstance();
+        } catch (ClassNotFoundException ex) {
+            logger.warn("Game type not found:" + plugin.getJar() + " - check plugin folder", ex);
+        } catch (Exception ex) {
+            logger.fatal("Error loading game type " + plugin.getJar(), ex);
+        }
+        return null;
+    }
+
+    private static void deleteSavedGames() {
+        File directory = new File("saved/");
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        File[] files = directory.listFiles(
+                (dir, name) -> name.endsWith(".game")
+        );
+        if (files != null) {
+            for (File file : files) {
+                file.delete();
+            }
+        }
+    }
+
+    public static MageVersion getVersion() {
+        return version;
+    }
+
+    public static boolean isTestMode() {
+        return testMode;
+    }
+}
