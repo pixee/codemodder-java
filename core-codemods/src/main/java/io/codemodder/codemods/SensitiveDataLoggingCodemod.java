@@ -2,15 +2,18 @@ package io.codemodder.codemods;
 
 import static io.codemodder.CodemodResources.getClassResourceAsString;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.DeleteDelta;
 import com.github.difflib.patch.Patch;
 import io.codemodder.Codemod;
+import io.codemodder.CodemodInvocationContext;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.plugins.llm.OpenAIService;
 import io.codemodder.plugins.llm.SarifToLLMForBinaryVerificationAndFixingCodemod;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
+import java.util.List;
 import javax.inject.Inject;
 
 /** A codemod that removes any sensitive data being logged. */
@@ -28,7 +31,8 @@ public final class SensitiveDataLoggingCodemod
   }
 
   @Override
-  protected String getThreatPrompt() {
+  protected String getThreatPrompt(
+      final CodemodInvocationContext context, final List<Result> results) {
     return getClassResourceAsString(getClass(), "threat_prompt.txt");
   }
 

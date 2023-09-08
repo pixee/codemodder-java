@@ -9,11 +9,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** Utilities for working with diff patches returned by an LLM. */
-final class LLMDiffs {
+public final class LLMDiffs {
+
   private static final Pattern HUNK_RANGE_PATTERN =
       Pattern.compile("^@@\\s+-(\\d+)(?:,\\d+)?\\s+\\+\\d+(?:,\\d+)?\\s+@@");
 
   private static final int MAX_FUZZ = 3;
+
+  private LLMDiffs() {} // Prevent instantiation.
 
   /**
    * Applies a diff in unified format to {@code target}.
