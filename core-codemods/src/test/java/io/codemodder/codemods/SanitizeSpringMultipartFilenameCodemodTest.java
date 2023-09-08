@@ -7,5 +7,5 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = SanitizeSpringMultipartFilenameCodemod.class,
     testResourceDir = "sanitize-spring-multipart-filename",
-        dependencies = DependencyGAV.JAVA_SECURITY_TOOLKIT_GAV)
+    dependencies = DependencyGAV.JAVA_SECURITY_TOOLKIT_GAV)
 final class SanitizeSpringMultipartFilenameCodemodTest implements CodemodTestMixin {}

@@ -161,7 +161,8 @@ public interface DependencyGAV {
   }
 
   String JAVA_SECURITY_TOOLKIT_VERSION = "1.0.7";
-  String JAVA_SECURITY_TOOLKIT_GAV = "io.github.pixee:java-security-toolkit:" + JAVA_SECURITY_TOOLKIT_VERSION;
+  String JAVA_SECURITY_TOOLKIT_GAV =
+      "io.github.pixee:java-security-toolkit:" + JAVA_SECURITY_TOOLKIT_VERSION;
 
   /**
    * The pixee Java Security Toolkit is required by many weaves/visitors, so we'll expose it here.

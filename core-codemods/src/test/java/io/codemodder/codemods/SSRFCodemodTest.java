@@ -7,5 +7,5 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = SSRFCodemod.class,
     testResourceDir = "ssrf",
-        dependencies = DependencyGAV.JAVA_SECURITY_TOOLKIT_GAV)
+    dependencies = DependencyGAV.JAVA_SECURITY_TOOLKIT_GAV)
 final class SSRFCodemodTest implements CodemodTestMixin {}
