@@ -160,6 +160,9 @@ public interface DependencyGAV {
         group, artifact, version, justification, license, repositoryUrl, noTransitiveDependencies);
   }
 
+  String JAVA_SECURITY_TOOLKIT_VERSION = "1.0.7";
+  String JAVA_SECURITY_TOOLKIT_GAV = "io.github.pixee:java-security-toolkit:" + JAVA_SECURITY_TOOLKIT_VERSION;
+
   /**
    * The pixee Java Security Toolkit is required by many weaves/visitors, so we'll expose it here.
    */
@@ -167,7 +170,7 @@ public interface DependencyGAV {
       createDefault(
           "io.github.pixee",
           "java-security-toolkit",
-          "1.0.7",
+          JAVA_SECURITY_TOOLKIT_VERSION,
           "This library holds security tools for protecting Java API calls.",
           DependencyLicenses.MIT,
           "https://github.com/pixee/java-security-toolkit",

@@ -25,6 +25,7 @@ public final class CodemodResources {
    * Where the {@code modifiedPackageName} is the package name of this object with {@code '/'}
    * substituted for {@code '.'}.
    *
+   * @param type The codemod type.
    * @param relativeName The relative name of the resource.
    * @return The resource as a {@code String}.
    * @throws MissingResourceException If the resource was not found.

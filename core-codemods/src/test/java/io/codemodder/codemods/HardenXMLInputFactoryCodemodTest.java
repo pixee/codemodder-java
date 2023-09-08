@@ -1,10 +1,11 @@
 package io.codemodder.codemods;
 
+import io.codemodder.DependencyGAV;
 import io.codemodder.testutils.CodemodTestMixin;
 import io.codemodder.testutils.Metadata;
 
 @Metadata(
     codemodType = HardenXMLInputFactoryCodemod.class,
     testResourceDir = "harden-xmlinputfactory",
-    dependencies = "io.github.pixee:java-security-toolkit:1.0.7")
+        dependencies = DependencyGAV.JAVA_SECURITY_TOOLKIT_GAV)
 final class HardenXMLInputFactoryCodemodTest implements CodemodTestMixin {}
