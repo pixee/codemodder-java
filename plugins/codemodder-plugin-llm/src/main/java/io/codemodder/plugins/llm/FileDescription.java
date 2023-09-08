@@ -1,75 +1,34 @@
 package io.codemodder.plugins.llm;
 
-import io.codemodder.EncodingDetector;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-/** Provides some methods to simplify working with the files. */
-final class FileDescription {
+/** Provides a set of useful methods to simplify working with the files. */
+public interface FileDescription {
 
-  private final String fileName;
-  private final Charset charset;
+  /** Returns the file name. */
+  String getFileName();
 
-  private final String lineSeparator;
-  private final List<String> lines;
+  /** Returns the file's charset. Assumed to be UTF-8 if none can be detected. */
+  Charset getCharset();
 
-  FileDescription(final Path path) {
-    fileName = path.getFileName().toString();
+  /**
+   * Returns the file's preferred line separator by locating the first line separator and assuming
+   * "\n" if none are found.
+   */
+  String getLineSeparator();
 
-    try {
-      charset = Charset.forName(EncodingDetector.create().detect(path).orElse("UTF-8"));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+  /** Returns the file as a list of lines. */
+  List<String> getLines();
 
-    try {
-      String s = Files.readString(path, charset);
-      lineSeparator = detectLineSeparator(s);
-      lines = List.of(s.split("\\R", -1));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-  }
+  /**
+   * Return the file as a single string, but with each line prefixed with the line number, starting
+   * with 1.
+   */
+  String formatLinesWithLineNumbers();
 
-  String getFileName() {
-    return fileName;
-  }
-
-  Charset getCharset() {
-    return charset;
-  }
-
-  String getLineSeparator() {
-    return lineSeparator;
-  }
-
-  List<String> getLines() {
-    return lines;
-  }
-
-  String formatLinesWithLineNumbers() {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < lines.size(); i++) {
-      sb.append(i + 1);
-      sb.append(": ");
-      sb.append(lines.get(i));
-      sb.append("\n");
-    }
-    return sb.toString();
-  }
-
-  private String detectLineSeparator(final String s) {
-    Matcher m = Pattern.compile("(\\R)").matcher(s);
-    if (m.find()) {
-      // This assumes that the first line separator found is the one to use.
-      return m.group(1);
-    }
-    return "\n";
+  static FileDescription from(final Path path) {
+    return new DefaultFileDescription(path);
   }
 }
