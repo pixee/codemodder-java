@@ -60,7 +60,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
         });
 
     try {
-      FileDescription file = new FileDescription(context.path());
+      FileDescription file = FileDescription.from(context.path());
 
       BinaryThreatAnalysis analysis = analyzeThreat(file, context, results);
       logger.debug("risk: {}", analysis.getRisk());
