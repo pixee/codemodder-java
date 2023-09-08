@@ -2,15 +2,18 @@ package io.codemodder.codemods;
 
 import static io.codemodder.CodemodResources.getClassResourceAsString;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.InsertDelta;
 import com.github.difflib.patch.Patch;
 import io.codemodder.Codemod;
+import io.codemodder.CodemodInvocationContext;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.plugins.llm.OpenAIService;
 import io.codemodder.plugins.llm.SarifToLLMForBinaryVerificationAndFixingCodemod;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
+import java.util.List;
 import javax.inject.Inject;
 
 @Codemod(id = "pixee:java/log-failed-login", reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
@@ -23,7 +26,8 @@ public final class LogFailedLoginCodemod extends SarifToLLMForBinaryVerification
   }
 
   @Override
-  protected String getThreatPrompt() {
+  protected String getThreatPrompt(
+      final CodemodInvocationContext context, final List<Result> results) {
     return getClassResourceAsString(getClass(), "threat_prompt.txt");
   }
 

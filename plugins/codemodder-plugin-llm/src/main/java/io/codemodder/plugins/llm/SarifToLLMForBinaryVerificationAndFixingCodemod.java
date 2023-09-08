@@ -18,6 +18,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
   protected SarifToLLMForBinaryVerificationAndFixingCodemod(
       final RuleSarif sarif, final OpenAIService openAI) {
     super(sarif);
-    this.openAI = openAI;
+    this.openAI = Objects.requireNonNull(openAI);
   }
 
   @Override
@@ -61,7 +62,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
     try {
       FileDescription file = new FileDescription(context.path());
 
-      BinaryThreatAnalysis analysis = analyzeThreat(file);
+      BinaryThreatAnalysis analysis = analyzeThreat(file, context, results);
       logger.debug("risk: {}", analysis.getRisk());
       logger.debug("analysis: {}", analysis.getAnalysis());
 
@@ -69,7 +70,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
         return List.of();
       }
 
-      BinaryThreatAnalysisAndFix fix = fixThreat(file);
+      BinaryThreatAnalysisAndFix fix = fixThreat(file, context, results);
       logger.debug("risk: {}", fix.getRisk());
       logger.debug("analysis: {}", fix.getAnalysis());
       logger.debug("fix: {}", fix.getFix());
@@ -118,7 +119,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
    *
    * @return The prompt.
    */
-  protected abstract String getThreatPrompt();
+  protected abstract String getThreatPrompt(CodemodInvocationContext context, List<Result> results);
 
   /**
    * Instructs the LLM on how to fix the threat.
@@ -134,8 +135,11 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
    */
   protected abstract boolean isPatchExpected(Patch<String> patch);
 
-  private BinaryThreatAnalysis analyzeThreat(final FileDescription file) {
-    ChatMessage systemMessage = getSystemMessage();
+  private BinaryThreatAnalysis analyzeThreat(
+      final FileDescription file,
+      final CodemodInvocationContext context,
+      final List<Result> results) {
+    ChatMessage systemMessage = getSystemMessage(context, results);
     ChatMessage userMessage = getAnalyzeUserMessage(file);
 
     int tokenCount = countTokens(List.of(systemMessage, userMessage));
@@ -154,11 +158,14 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
         "gpt-3.5-turbo-0613", 0.2D, systemMessage, userMessage, BinaryThreatAnalysis.class);
   }
 
-  private BinaryThreatAnalysisAndFix fixThreat(final FileDescription file) {
+  private BinaryThreatAnalysisAndFix fixThreat(
+      final FileDescription file,
+      final CodemodInvocationContext context,
+      final List<Result> results) {
     return getLLMResponse(
         "gpt-4-0613",
         0D,
-        getSystemMessage(),
+        getSystemMessage(context, results),
         getFixUserMessage(file),
         BinaryThreatAnalysisAndFix.class);
   }
@@ -195,10 +202,11 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
     return functionExecutor.execute(response.getFunctionCall());
   }
 
-  private ChatMessage getSystemMessage() {
+  private ChatMessage getSystemMessage(CodemodInvocationContext context, List<Result> results) {
+    String threatPrompt = getThreatPrompt(context, results);
     return new ChatMessage(
         ChatMessageRole.SYSTEM.value(),
-        SYSTEM_MESSAGE_TEMPLATE.formatted(getThreatPrompt().strip()).strip());
+        SYSTEM_MESSAGE_TEMPLATE.formatted(threatPrompt.strip()).strip());
   }
 
   private ChatMessage getAnalyzeUserMessage(final FileDescription file) {

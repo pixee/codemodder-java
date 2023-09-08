@@ -1,7 +1,6 @@
 package io.codemodder.codemods;
 
 import com.contrastsecurity.sarif.Result;
-import com.github.javaparser.utils.Log;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import java.io.IOException;
@@ -9,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,6 +19,8 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import org.dom4j.DocumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /** Fixes issues reported under the id "java/maven/non-https-url". */
@@ -27,14 +29,14 @@ import org.xml.sax.SAXException;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
 
-  private XPathStreamProcessor processor;
+  private final XPathStreamProcessor processor;
 
   @Inject
   MavenSecureURLCodemod(
       @ProvidedCodeQLScan(ruleId = "java/maven/non-https-url") final RuleSarif sarif,
-      XPathStreamProcessor processor) {
+      final XPathStreamProcessor processor) {
     super(sarif);
-    this.processor = processor;
+    this.processor = Objects.requireNonNull(processor);
   }
 
   @Override
@@ -43,7 +45,7 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
     try {
       return processXml(context, context.path());
     } catch (SAXException | DocumentException | IOException | XMLStreamException e) {
-      Log.error("Problem transforming xml file:" + context.path() + "");
+      LOG.error("Problem transforming xml file: {}", context.path());
       return List.of();
     }
   }
@@ -95,4 +97,6 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
       xmlEventWriter.add(nextEvent);
     }
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(MavenSecureURLCodemod.class);
 }
