@@ -62,6 +62,7 @@ final class CodemodLoaderTest {
     assertThat(isValidCodemodId("some-thing:java/id"), CoreMatchers.is(false));
     assertThat(isValidCodemodId("missing:token"), CoreMatchers.is(false));
     assertThat(isValidCodemodId("missing:separator/"), CoreMatchers.is(false));
+    assertThat(isValidCodemodId("vendor:java/java.lang.security.some-vuln"), CoreMatchers.is(true));
   }
 
   @Test

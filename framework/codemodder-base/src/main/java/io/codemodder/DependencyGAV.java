@@ -167,7 +167,7 @@ public interface DependencyGAV {
       createDefault(
           "io.github.pixee",
           "java-security-toolkit",
-          "1.0.6",
+          "1.0.7",
           "This library holds security tools for protecting Java API calls.",
           DependencyLicenses.MIT,
           "https://github.com/pixee/java-security-toolkit",

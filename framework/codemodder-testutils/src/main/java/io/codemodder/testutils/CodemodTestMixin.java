@@ -54,17 +54,27 @@ public interface CodemodTestMixin {
             .toList();
 
     ThrowingConsumer<Path> testExecutor =
-        path -> verifyCodemod(metadata.codemodType(), tmpDir, testResourceDir, path, dependencies);
+        path ->
+            verifyCodemod(
+                metadata.codemodType(),
+                metadata.renameTestFile(),
+                tmpDir,
+                testResourceDir,
+                path,
+                dependencies,
+                metadata.doRetransformTest());
 
     return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
   }
 
   private void verifyCodemod(
       final Class<? extends CodeChanger> codemodType,
+      final String renameTestFile,
       final Path tmpDir,
       final Path testResourceDir,
       final Path before,
-      final List<DependencyGAV> dependenciesExpected)
+      final List<DependencyGAV> dependenciesExpected,
+      final boolean doRetransformTest)
       throws IOException {
 
     // create a copy of the test file in the temp directory to serve as our "repository"
@@ -80,6 +90,17 @@ public interface CodemodTestMixin {
         .forEachRemaining(allSarifs::add);
 
     Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
+
+    // rename file if needed
+    if (!renameTestFile.isBlank()) {
+      Path parent = tmpDir.resolve(renameTestFile).getParent();
+      if (!Files.exists(parent)) {
+        Files.createDirectories(parent);
+      }
+      Path newPathToJavaFile = tmpDir.resolve(renameTestFile);
+      Files.copy(pathToJavaFile, newPathToJavaFile, StandardCopyOption.REPLACE_EXISTING);
+      pathToJavaFile = newPathToJavaFile;
+    }
 
     // run the codemod
     CodemodLoader loader = new CodemodLoader(List.of(codemodType), tmpDir, map);
@@ -131,6 +152,12 @@ public interface CodemodTestMixin {
 
     // make sure the dependencies are added
     assertThat(dependenciesExpected, hasItems(dependenciesExpected.toArray(new DependencyGAV[0])));
+
+    // tests like those driven by provided SARIF files will not have a retransform test because the
+    // concept is nonsensical
+    if (!doRetransformTest) {
+      return;
+    }
 
     String codeAfterFirstTransform = Files.readString(pathToJavaFile);
 

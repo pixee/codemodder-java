@@ -6,5 +6,5 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = HardenXMLDecoderCodemod.class,
     testResourceDir = "harden-xmldecoder-stream",
-    dependencies = "io.github.pixee:java-security-toolkit:1.0.6")
+    dependencies = "io.github.pixee:java-security-toolkit:1.0.7")
 final class HardenXMLDecoderCodemodTest implements CodemodTestMixin {}
