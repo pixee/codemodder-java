@@ -411,7 +411,7 @@ final class CLI implements Callable<Integer> {
           "**/web.xml");
 
   private static final List<String> defaultPathExcludes =
-      List.of("**/test/**", "**/target/**", "**/build/**", "**/.mvn/**", ".mvn/**");
+      List.of("**/test/**", "**/tests/**", "**/target/**", "**/build/**", "**/.mvn/**", ".mvn/**");
 
   private static final Logger log = LoggerFactory.getLogger(CLI.class);
 }
