@@ -225,9 +225,9 @@ final class MavenProviderTest {
    * place those facts.
    */
   @Test
-  void it_returns_changeset_when_using_parent_pom() throws IOException {
-    Files.writeString(module1Pom, simplePom);
-    Files.writeString(rootPom, parentPomContents);
+  void it_returns_expected_changeset_when_using_parent_pom() throws IOException {
+    Files.writeString(module1Pom, childPomWithJustDependencies);
+    Files.writeString(rootPom, parentPomWithDependencyMgmtContents);
 
     MavenProvider provider =
         new MavenProvider(
@@ -245,7 +245,23 @@ final class MavenProviderTest {
 
     // we've updated all the poms, so we merge this with the pre-existing one change
     List<CodeTFChangesetEntry> changes = result.packageChanges();
-    assertThat(changes.size()).isEqualTo(2);
+    assertThat(changes.size()).isEqualTo(4);
+
+    // module1/pom.xml adding mars1 to dependencies
+    assertThat(changes.get(0).getPath()).isEqualTo("module1/pom.xml");
+    assertThat(changes.get(0).getChanges().get(0).getLineNumber()).isEqualTo(19);
+
+    // pom.xml adding mars1 to dependency management
+    assertThat(changes.get(1).getPath()).isEqualTo("pom.xml");
+    assertThat(changes.get(1).getChanges().get(0).getLineNumber()).isEqualTo(15);
+
+    // module1/pom.xml adding mars2 to dependencies
+    assertThat(changes.get(2).getPath()).isEqualTo("module1/pom.xml");
+    assertThat(changes.get(2).getChanges().get(0).getLineNumber()).isEqualTo(23);
+
+    // pom.xml adding mars2 to dependency management
+    assertThat(changes.get(3).getPath()).isEqualTo("pom.xml");
+    assertThat(changes.get(3).getChanges().get(0).getLineNumber()).isEqualTo(20);
 
     // we don't have license facts for these dependencies, so we should be silent on their license!
     boolean matchedLicenseFacts =
@@ -256,6 +272,10 @@ final class MavenProviderTest {
     assertThat(matchedLicenseFacts).isFalse();
 
     // we injected all the dependencies, total success!
+    assertThat(Files.readString(rootPom))
+        .isEqualToIgnoringWhitespace(parentPomWithDependencyMgmtContentsAfter);
+    assertThat(Files.readString(module1Pom))
+        .isEqualToIgnoringWhitespace(childPomWithJustDependenciesAfter);
     assertThat(result.injectedPackages()).containsOnly(marsDependency1, marsDependency2);
   }
 
@@ -487,7 +507,7 @@ final class MavenProviderTest {
                         </dependencies>
                     </project>""";
 
-  private static final String parentPomContents =
+  private static final String parentPomWithDependencyMgmtContents =
       """
           <?xml version="1.0" encoding="UTF-8"?>
           <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -495,56 +515,109 @@ final class MavenProviderTest {
               <groupId>link.sharpe</groupId>
               <artifactId>mavenproject1-parent</artifactId>
               <version>1.0-SNAPSHOT</version>
+              <packaging>pom</packaging>
+              <dependencyManagement>
+                <dependencies>
+                  <dependency>
+                    <groupId>com.other</groupId>
+                    <artifactId>other</artifactId>
+                    <version>1.0.0</version>
+                  </dependency>
+                </dependencies>
+              </dependencyManagement>
           </project>
-                  """;
-  private static final String simplePomAfterChangesWithParentPom =
+          """;
+
+  private static final String parentPomWithDependencyMgmtContentsAfter =
       """
           <?xml version="1.0" encoding="UTF-8"?>
-            <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-                <modelVersion>4.0.0</modelVersion>
-                <groupId>link.sharpe</groupId>
-                <artifactId>mavenproject1-child</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <dependencyManagement>
+          <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+              <modelVersion>4.0.0</modelVersion>
+              <groupId>link.sharpe</groupId>
+              <artifactId>mavenproject1-parent</artifactId>
+              <version>1.0-SNAPSHOT</version>
+              <packaging>pom</packaging>
+              <dependencyManagement>
+                <dependencies>
+                  <dependency>
+                    <groupId>com.other</groupId>
+                    <artifactId>other</artifactId>
+                    <version>1.0.0</version>
+                  </dependency>
+                      <dependency>
+                        <groupId>com.acme.mars</groupId>
+                        <artifactId>mars1</artifactId>
+                        <version>${versions.mars1}</version>
+                      </dependency>
+                      <dependency>
+                        <groupId>com.acme.mars</groupId>
+                        <artifactId>mars2</artifactId>
+                        <version>${versions.mars2}</version>
+                      </dependency>
+                </dependencies>
+              </dependencyManagement>
+              <properties>
+                  <versions.mars1>1.0.1</versions.mars1>
+                  <versions.mars2>1.0.1</versions.mars2>
+              </properties>
+          </project>
+          """;
+
+  private static final String childPomWithJustDependencies =
+      """
+              <?xml version="1.0" encoding="UTF-8"?>
+                <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                    <modelVersion>4.0.0</modelVersion>
+                    <parent>
+                      <groupId>link.sharpe</groupId>
+                      <artifactId>mavenproject1-parent</artifactId>
+                      <version>1.0-SNAPSHOT</version>
+                      <relativePath>../pom.xml</relativePath>
+                    </parent>
+                    <groupId>link.sharpe</groupId>
+                    <artifactId>mavenproject1-child</artifactId>
+                    <version>1.0-SNAPSHOT</version>
                     <dependencies>
+                        <dependency>
+                            <groupId>com.acme.venus</groupId>
+                            <artifactId>venus</artifactId>
+                            <version>1.0.2</version>
+                        </dependency>
+                    </dependencies>
+                </project>
+                """;
+
+  private static final String childPomWithJustDependenciesAfter =
+      """
+              <?xml version="1.0" encoding="UTF-8"?>
+                <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                    <modelVersion>4.0.0</modelVersion>
+                    <parent>
+                      <groupId>link.sharpe</groupId>
+                      <artifactId>mavenproject1-parent</artifactId>
+                      <version>1.0-SNAPSHOT</version>
+                      <relativePath>../pom.xml</relativePath>
+                    </parent>
+                    <groupId>link.sharpe</groupId>
+                    <artifactId>mavenproject1-child</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.acme.venus</groupId>
+                            <artifactId>venus</artifactId>
+                            <version>1.0.2</version>
+                        </dependency>
                         <dependency>
                             <groupId>com.acme.mars</groupId>
                             <artifactId>mars1</artifactId>
-                            <version>${versions.mars1}</version>
                         </dependency>
                         <dependency>
                             <groupId>com.acme.mars</groupId>
                             <artifactId>mars2</artifactId>
-                            <version>${versions.mars2}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.acme.venus</groupId>
-                            <artifactId>venus</artifactId>
-                            <version>${versions.venus}</version>
                         </dependency>
                     </dependencies>
-                </dependencyManagement>
-                <properties>
-                    <versions.mars1>1.0.1</versions.mars1>
-                    <versions.mars2>1.0.1</versions.mars2>
-                    <versions.venus>1.0.2</versions.venus>
-                </properties>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.acme.mars</groupId>
-                        <artifactId>mars1</artifactId>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.acme.mars</groupId>
-                        <artifactId>mars2</artifactId>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.acme.venus</groupId>
-                        <artifactId>venus</artifactId>
-                    </dependency>
-                </dependencies>
-            </project>
-            """;
+                </project>
+                """;
 
   private static final String webgoatPom =
       """
