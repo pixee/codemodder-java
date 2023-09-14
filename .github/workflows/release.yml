@@ -1,8 +1,5 @@
 name: Release
 
-env:
-  AWS_REGION: "us-east-1"
-
 on:
   workflow_dispatch:
     inputs:
@@ -39,16 +36,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Fetch AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::218200003247:role/DeployCodemodderImagesRole
-          role-session-name: github
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Install ECR Credential Helper
-        run: sudo apt install amazon-ecr-credential-helper
 
       - uses: gradle/gradle-build-action@v2
         with:
