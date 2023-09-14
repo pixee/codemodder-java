@@ -19,18 +19,18 @@ public interface DependencyUpdateResult {
    * This includes the changes that were passed in, as well as any changes that were made to the
    * project as a result of our updates.
    */
-  Set<CodeTFChangesetEntry> packageChanges();
+  List<CodeTFChangesetEntry> packageChanges();
 
   /** The set of files that we attempted to update, but failed. */
   Set<Path> erroredFiles();
 
   /** An update reporting no actions and no errors. */
-  DependencyUpdateResult EMPTY_UPDATE = create(List.of(), List.of(), Set.of(), Set.of());
+  DependencyUpdateResult EMPTY_UPDATE = create(List.of(), List.of(), List.of(), Set.of());
 
   static DependencyUpdateResult create(
       final List<DependencyGAV> injectedDependencies,
       final List<DependencyGAV> skippedPackages,
-      final Set<CodeTFChangesetEntry> updatedChanges,
+      final List<CodeTFChangesetEntry> updatedChanges,
       final Set<Path> erroredFiles) {
     return new DefaultDependencyUpdateResult(
         injectedDependencies, skippedPackages, updatedChanges, erroredFiles);

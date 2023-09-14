@@ -196,8 +196,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     for (ProjectProvider projectProvider : projectProviders) {
       DependencyUpdateResult result =
           projectProvider.updateDependencies(projectDir, file, dependencies);
-      unscannableFiles.addAll(
-          result.erroredFiles().stream().map(Path::toAbsolutePath).collect(Collectors.toList()));
+      unscannableFiles.addAll(result.erroredFiles().stream().map(Path::toAbsolutePath).toList());
       pkgChanges.addAll(result.packageChanges());
       for (DependencyGAV dependency : result.injectedPackages()) {
         String packageUrl = toPackageUrl(dependency);

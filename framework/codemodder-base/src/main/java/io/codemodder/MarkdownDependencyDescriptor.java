@@ -2,6 +2,9 @@ package io.codemodder;
 
 import java.util.Optional;
 
+/**
+ * A dependency descriptor that renders a dependency as a markdown table, with a links to more info.
+ */
 final class MarkdownDependencyDescriptor implements DependencyDescriptor {
 
   @Override

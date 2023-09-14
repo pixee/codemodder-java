@@ -153,7 +153,7 @@ public final class MavenProvider implements ProjectProvider {
     }
 
     Path pomFile = maybePomFile.get();
-    Set<CodeTFChangesetEntry> changesets = new LinkedHashSet<>();
+    List<CodeTFChangesetEntry> changesets = new ArrayList<>();
 
     final List<DependencyGAV> skippedDependencies = new ArrayList<>();
     final List<DependencyGAV> injectedDependencies = new ArrayList<>();

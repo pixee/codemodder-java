@@ -55,5 +55,12 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
   }
 
   private static final DependencyGAV JAVA_SECURITY_TOOLKIT_XSTREAM =
-      DependencyGAV.createDefault("io.github.pixee", "java-security-toolkit-xstream", "1.0.2");
+      DependencyGAV.createDefault(
+          "io.github.pixee",
+          "java-security-toolkit-xstream",
+          "1.0.2",
+          "This library holds security APIs for hardening XStream operations.",
+          DependencyLicenses.MIT,
+          "https://github.com/pixee/java-security-toolkit-xstream",
+          true);
 }

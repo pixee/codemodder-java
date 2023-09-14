@@ -100,7 +100,7 @@ final class DefaultCodemodExecutorTest {
 
       // if no new dependencies to add, nope out
       if (newDeps.isEmpty()) {
-        return DependencyUpdateResult.create(List.of(), skippedDependencies, Set.of(), Set.of());
+        return DependencyUpdateResult.create(List.of(), skippedDependencies, List.of(), Set.of());
       }
 
       List<String> allDeps = new ArrayList<>();
@@ -132,7 +132,7 @@ final class DefaultCodemodExecutorTest {
               null,
               List.of());
       CodeTFChangesetEntry entry = new CodeTFChangesetEntry("deps.txt", diff, List.of(change));
-      Set<CodeTFChangesetEntry> changes = Set.of(entry);
+      List<CodeTFChangesetEntry> changes = List.of(entry);
       return DependencyUpdateResult.create(
           remainingFileDependencies, skippedDependencies, changes, Set.of());
     }
@@ -413,7 +413,8 @@ final class DefaultCodemodExecutorTest {
     ProjectProvider skippingProvider = mock(ProjectProvider.class);
     DependencyGAV skipped = DependencyGAV.createDefault("org.spring", "dep1", "1.1.1");
     when(skippingProvider.updateDependencies(any(), any(), any()))
-        .thenReturn(DependencyUpdateResult.create(List.of(), List.of(skipped), Set.of(), Set.of()));
+        .thenReturn(
+            DependencyUpdateResult.create(List.of(), List.of(skipped), List.of(), Set.of()));
 
     executor =
         new DefaultCodemodExecutor(

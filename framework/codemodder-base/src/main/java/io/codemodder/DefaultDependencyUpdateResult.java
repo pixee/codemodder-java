@@ -10,13 +10,13 @@ final class DefaultDependencyUpdateResult implements DependencyUpdateResult {
 
   private final List<DependencyGAV> injectedDependencies;
   private final List<DependencyGAV> skippedDependencies;
-  private final Set<CodeTFChangesetEntry> updatedChanges;
+  private final List<CodeTFChangesetEntry> updatedChanges;
   private final Set<Path> erroredFiles;
 
   DefaultDependencyUpdateResult(
       final List<DependencyGAV> injectedDependencies,
       final List<DependencyGAV> skippedDependencies,
-      final Set<CodeTFChangesetEntry> updatedChanges,
+      final List<CodeTFChangesetEntry> updatedChanges,
       final Set<Path> erroredFiles) {
     this.injectedDependencies = Objects.requireNonNull(injectedDependencies);
     this.skippedDependencies = Objects.requireNonNull(skippedDependencies);
@@ -35,7 +35,7 @@ final class DefaultDependencyUpdateResult implements DependencyUpdateResult {
   }
 
   @Override
-  public Set<CodeTFChangesetEntry> packageChanges() {
+  public List<CodeTFChangesetEntry> packageChanges() {
     return updatedChanges;
   }
 
