@@ -49,11 +49,11 @@ jobs:
 
       # share version bump
       - run: |
+          git checkout -b bot/update-version
           git add version.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m '🚀 release v${{ inputs.version }}'
-          git push
 
       # set version for next release
       - uses: gradle/gradle-build-action@v2
@@ -63,5 +63,8 @@ jobs:
 
       - run: |
           git add version.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m '🚧 prepare for next development iteration'
-          git push
+          git push origin bot/update-version
+          gh pr create --title "🚧 prepare for next development iteration" --body "This PR was automatically created by the release workflow. Please review and merge it to update the version.txt file."
