@@ -217,13 +217,6 @@ public final class ASTExpectations {
       return new MethodCallExpectation(mc);
     }
 
-    public LocalVariableDeclaratorExpectation withInitialization() {
-      if (varRef.isEmpty()) {
-        return this;
-      }
-      return new LocalVariableDeclaratorExpectation(Optional.empty());
-    }
-
     @Override
     public Optional<VariableDeclarator> result() {
       return varRef;

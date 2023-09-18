@@ -24,10 +24,14 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
 
   @Inject
   public SemgrepOverlyPermissiveFilePermissionsCodemod(
-      final PermissionAddCallChanger addCallChanger,
-      final FromStringChanger fromStringChanger,
-      final InlineFromStringChanger inlineFromStringChanger) {
-    super(addCallChanger, fromStringChanger, inlineFromStringChanger);
+      @ProvidedSemgrepScan(
+              ruleId =
+                  "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission")
+          final RuleSarif sarif) {
+    super(
+        new PermissionAddCallChanger(sarif),
+        new FromStringChanger(sarif),
+        new InlineFromStringChanger(sarif));
   }
 
   /**
@@ -39,12 +43,8 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
    */
   private static final class InlineFromStringChanger
       extends SarifPluginJavaParserChanger<ExpressionStmt> {
-    @Inject
-    public InlineFromStringChanger(
-        @ProvidedSemgrepScan(
-                ruleId =
-                    "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission")
-            final RuleSarif sarif) {
+
+    private InlineFromStringChanger(final RuleSarif sarif) {
       super(
           sarif,
           ExpressionStmt.class,
@@ -87,12 +87,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
    * <p>{@code var p = Permissions.fromString("rwxrwxrwx")}
    */
   private static final class FromStringChanger extends SarifPluginJavaParserChanger<ExpressionStmt> {
-    @Inject
-    public FromStringChanger(
-        @ProvidedSemgrepScan(
-                ruleId =
-                    "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission")
-            final RuleSarif sarif) {
+    private FromStringChanger(final RuleSarif sarif) {
       super(
           sarif,
           ExpressionStmt.class,
@@ -142,12 +137,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
   private static final class PermissionAddCallChanger
       extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
-    @Inject
-    public PermissionAddCallChanger(
-        @ProvidedSemgrepScan(
-                ruleId =
-                    "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission")
-            final RuleSarif sarif) {
+    private PermissionAddCallChanger(final RuleSarif sarif) {
       super(
           sarif,
           MethodCallExpr.class,
