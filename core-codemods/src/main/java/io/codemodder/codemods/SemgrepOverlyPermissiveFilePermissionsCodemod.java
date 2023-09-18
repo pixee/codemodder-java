@@ -37,7 +37,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
    * <p>{@code Files.setPosixFilePermissions(startupScript,
    * PosixFilePermissions.fromString("rwxrwxrwx"));}
    */
-  private static class InlineFromStringChanger
+  private static final class InlineFromStringChanger
       extends SarifPluginJavaParserChanger<ExpressionStmt> {
     @Inject
     public InlineFromStringChanger(
