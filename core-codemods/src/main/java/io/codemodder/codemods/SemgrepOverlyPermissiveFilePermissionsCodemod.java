@@ -31,7 +31,8 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
   }
 
   /**
-   * This only handles the case where the permission is added inline like:
+   * This handles the case where the permission is added inline to {@code setPosixFilePermissions()}
+   * like:
    *
    * <p>{@code Files.setPosixFilePermissions(startupScript,
    * PosixFilePermissions.fromString("rwxrwxrwx"));}
@@ -81,7 +82,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
   }
 
   /**
-   * This only handles the case where the permission is added to a set a call like:
+   * This handles the case where permissions are created from UNIX permission strings like:
    *
    * <p>{@code var p = Permissions.fromString("rwxrwxrwx")}
    */
@@ -135,7 +136,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
   }
 
   /**
-   * This only handles the case where the permission is added to a set via {@link
+   * This handles the case where the permission is added to a set via {@link
    * java.util.Set#add(Object)} call.
    */
   private static class PermissionAddCallChanger
