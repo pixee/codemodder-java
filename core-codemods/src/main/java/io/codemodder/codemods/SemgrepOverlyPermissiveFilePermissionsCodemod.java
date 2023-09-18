@@ -139,7 +139,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
    * This handles the case where the permission is added to a set via {@link
    * java.util.Set#add(Object)} call.
    */
-  private static class PermissionAddCallChanger
+  private static final class PermissionAddCallChanger
       extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
     @Inject
