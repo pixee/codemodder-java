@@ -7,4 +7,4 @@ import io.codemodder.testutils.Metadata;
     codemodType = StackTraceExposureCodemod.class,
     testResourceDir = "stack-trace-exposure",
     dependencies = {})
-public class StackTraceExposureCodemodTest implements CodemodTestMixin {}
+final class StackTraceExposureCodemodTest implements CodemodTestMixin {}

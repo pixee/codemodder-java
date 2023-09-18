@@ -1,0 +1,139 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": []
+        }
+      ],
+      "results": [
+        {
+          "fingerprints": {
+            "matchBasedId/v1": "864e99bae5a379c7ea1cf1187648a32a4329f3e24ef8022c989bd87f0e55920f4dade2fd894f166cdf3f764ad53ea7c58ea6efa3c02d5ca37826fcdfa65f6192_0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Test.java",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "endColumn": 61,
+                  "endLine": 16,
+                  "snippet": {
+                    "text": "      filePermissions.add(PosixFilePermission.OTHERS_WRITE);\n      filePermissions.add(PosixFilePermission.OTHERS_EXECUTE);\n      Files.setPosixFilePermissions(script,filePermissions);"
+                  },
+                  "startColumn": 7,
+                  "startLine": 14
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Detected file permissions that are overly permissive (read, write, and execute). It is generally a bad practices to set overly permissive file permission such as read+write+exec for all users. If the file affected is a configuration, a binary, a script or sensitive data, it can lead to privilege escalation or information leakage. Instead, follow the principle of least privilege and give users only the  permissions they need."
+          },
+          "properties": {},
+          "ruleId": "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission"
+        },
+        {
+          "fingerprints": {
+            "matchBasedId/v1": "864e99bae5a379c7ea1cf1187648a32a4329f3e24ef8022c989bd87f0e55920f4dade2fd894f166cdf3f764ad53ea7c58ea6efa3c02d5ca37826fcdfa65f6192_1"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Test.java",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "endColumn": 61,
+                  "endLine": 16,
+                  "snippet": {
+                    "text": "      filePermissions.add(PosixFilePermission.OTHERS_EXECUTE);\n      Files.setPosixFilePermissions(script,filePermissions);"
+                  },
+                  "startColumn": 7,
+                  "startLine": 15
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Detected file permissions that are overly permissive (read, write, and execute). It is generally a bad practices to set overly permissive file permission such as read+write+exec for all users. If the file affected is a configuration, a binary, a script or sensitive data, it can lead to privilege escalation or information leakage. Instead, follow the principle of least privilege and give users only the  permissions they need."
+          },
+          "properties": {},
+          "ruleId": "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission"
+        },
+        {
+          "fingerprints": {
+            "matchBasedId/v1": "0053e1e22ee95e9ce45310008eb466fec02bed7d573e561eb531488bc2a39a0c859c3c8033c9714ec69e8e20a04137ff36e029f91018b88ecf415dd9efeac734_0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Test.java",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "endColumn": 100,
+                  "endLine": 22,
+                  "snippet": {
+                    "text": "        Files.setPosixFilePermissions(startupScript, PosixFilePermissions.fromString(\"rwxrwxr-x\"));"
+                  },
+                  "startColumn": 9,
+                  "startLine": 22
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Detected file permissions that are overly permissive (read, write, and execute). It is generally a bad practices to set overly permissive file permission such as read+write+exec for all users. If the file affected is a configuration, a binary, a script or sensitive data, it can lead to privilege escalation or information leakage. Instead, follow the principle of least privilege and give users only the  permissions they need."
+          },
+          "properties": {},
+          "ruleId": "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission"
+        },
+        {
+          "fingerprints": {
+            "matchBasedId/v1": "eae55e4284dcaaf8970ca139289db67d4d65f90534118158b0e0c0380e68e7c8b67257a43f87105eca6ca2b0f88fc18aac12c4e8adebc400802897ee628dd14d_0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Test.java",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "endColumn": 68,
+                  "endLine": 26,
+                  "snippet": {
+                    "text": "        Set<PosixFilePermission> permissions = PosixFilePermissions.fromString(\"rwxrwxr-x\");\n        Files.setPosixFilePermissions(shutdownScript, permissions);"
+                  },
+                  "startColumn": 9,
+                  "startLine": 25
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Detected file permissions that are overly permissive (read, write, and execute). It is generally a bad practices to set overly permissive file permission such as read+write+exec for all users. If the file affected is a configuration, a binary, a script or sensitive data, it can lead to privilege escalation or information leakage. Instead, follow the principle of least privilege and give users only the  permissions they need."
+          },
+          "properties": {},
+          "ruleId": "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "semgrep",
+          "rules": [
+          ]
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

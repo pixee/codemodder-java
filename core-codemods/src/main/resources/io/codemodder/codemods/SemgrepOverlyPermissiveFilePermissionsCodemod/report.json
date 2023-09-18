@@ -1,0 +1,9 @@
+{
+  "summary" : "Fixed overly permissive file permissions (issue discovered by Semgrep)",
+  "change" : "Reduced permissions to disable world read/write/execute privileges",
+  "references" : [
+    "https://find-sec-bugs.github.io/bugs.htm#OVERLY_PERMISSIVE_FILE_PERMISSION",
+    "https://registry.semgrep.dev/rule/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission",
+    "https://cwe.mitre.org/data/definitions/732.html"
+  ]
+}

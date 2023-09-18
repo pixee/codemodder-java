@@ -1,0 +1,29 @@
+package com.acme;
+
+import java.nio.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
+import java.util.HashSet;
+import java.nio.file.Files;
+
+public class ScriptRunner {
+
+    public void create(Path script) {
+      Set<PosixFilePermission> filePermissions = new HashSet<PosixFilePermission>();
+      filePermissions.add(PosixFilePermission.OTHERS_WRITE);
+      filePermissions.add(PosixFilePermission.OTHERS_EXECUTE);
+      Files.setPosixFilePermissions(script,filePermissions);
+      runScript(script);
+    }
+
+    public void updateNewScript(Path startupScript, Path shutdownScript) {
+        // why not have anybody be able to execute?
+        Files.setPosixFilePermissions(startupScript, PosixFilePermissions.fromString("rwxrwxr-x"));
+
+        // same for script
+        Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rwxrwxr-x");
+        Files.setPosixFilePermissions(shutdownScript, permissions);
+    }
+
+}
