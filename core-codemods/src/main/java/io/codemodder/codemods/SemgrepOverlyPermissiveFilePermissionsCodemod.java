@@ -86,7 +86,8 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
    *
    * <p>{@code var p = Permissions.fromString("rwxrwxrwx")}
    */
-  private static final class FromStringChanger extends SarifPluginJavaParserChanger<ExpressionStmt> {
+  private static final class FromStringChanger
+      extends SarifPluginJavaParserChanger<ExpressionStmt> {
     private FromStringChanger(final RuleSarif sarif) {
       super(
           sarif,
