@@ -7,4 +7,4 @@ import io.codemodder.testutils.Metadata;
     codemodType = UnverifiedJwtCodemod.class,
     testResourceDir = "missing-jwt-signature-check",
     dependencies = {})
-public class UnverifiedJwtCodemodTest implements CodemodTestMixin {}
+final class UnverifiedJwtCodemodTest implements CodemodTestMixin {}

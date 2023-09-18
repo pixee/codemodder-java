@@ -1,0 +1,5 @@
+{
+  "summary" : "Semgrep: Fixed overly permissive file permissions",
+  "change" : "Scoped to limit ungrouped users",
+  "references" : ["https://owasp.org/www-community/vulnerabilities/Insecure_Randomness"]
+}
