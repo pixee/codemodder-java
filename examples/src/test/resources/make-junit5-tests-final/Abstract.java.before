@@ -1,0 +1,6 @@
+import org.junit.jupiter.api.Test;
+
+abstract class ShouldntBeMadeFinalTest {
+   @Test
+   void it_tests_foo() {}
+}
