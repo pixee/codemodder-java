@@ -1,0 +1,6 @@
+import org.junit.jupiter.api.Test;
+
+final class AcmeTest {
+   @Test
+   void it_tests_foo() {}
+}
