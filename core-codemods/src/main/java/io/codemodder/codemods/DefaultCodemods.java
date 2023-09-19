@@ -47,6 +47,7 @@ public final class DefaultCodemods {
         UpgradeSSLSocketProtocolsTLSCodemod.class,
         UpgradeTempFileToNIOCodemod.class,
         ValidateJakartaForwardPathCodemod.class,
+        VerboseRequestMappingCodemod.class,
         VerbTamperingCodemod.class);
   }
 
