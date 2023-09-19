@@ -1,7 +1,6 @@
 plugins {
     id("io.codemodder.java-library")
     id("io.codemodder.runner")
-    `jvm-test-suite`
 }
 
 description = "Example codemods"
