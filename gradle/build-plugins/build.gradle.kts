@@ -19,7 +19,6 @@ tasks.check {
 }
 
 dependencies {
-    implementation(buildlibs.fileversioning)
     implementation(buildlibs.spotless)
     implementation(buildlibs.nebula.publish.plugin)
     implementation(buildlibs.nebula.contacts.plugin)
