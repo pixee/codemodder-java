@@ -175,7 +175,7 @@ public interface DependencyGAV {
           "This library holds security tools for protecting Java API calls.",
           DependencyLicenses.MIT,
           "https://github.com/pixee/java-security-toolkit",
-          true);
+          false);
 
   /** There are multiple XSS rules require an XSS encoder. */
   DependencyGAV OWASP_XSS_JAVA_ENCODER =

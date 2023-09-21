@@ -79,11 +79,13 @@ public final class MavenProvider implements ProjectProvider {
 
   private final PomModifier pomModifier;
   private final PomFileFinder pomFileFinder;
+  private final ArtifactInjectionPositionFinder positionFinder;
 
   MavenProvider(
       final PomModifier pomModifier,
       final PomFileFinder pomFileFinder,
       final DependencyDescriptor dependencyDescriptor,
+      final ArtifactInjectionPositionFinder positionFinder,
       final boolean offline) {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
@@ -91,6 +93,20 @@ public final class MavenProvider implements ProjectProvider {
     this.pomFileFinder = pomFileFinder;
     this.offline = offline;
     this.dependencyDescriptor = Objects.requireNonNull(dependencyDescriptor);
+    this.positionFinder = Objects.requireNonNull(positionFinder);
+  }
+
+  MavenProvider(
+      final PomModifier pomModifier,
+      final PomFileFinder pomFileFinder,
+      final DependencyDescriptor dependencyDescriptor,
+      final boolean offline) {
+    this(
+        pomModifier,
+        pomFileFinder,
+        dependencyDescriptor,
+        new DefaultArtifactInjectionPositionFinder(),
+        offline);
   }
 
   MavenProvider(final PomModifier pomModifier) {
@@ -98,6 +114,7 @@ public final class MavenProvider implements ProjectProvider {
         pomModifier,
         new DefaultPomFileFinder(),
         DependencyDescriptor.createMarkdownDescriptor(),
+        new DefaultArtifactInjectionPositionFinder(),
         true);
   }
 
@@ -106,6 +123,7 @@ public final class MavenProvider implements ProjectProvider {
         new DefaultPomModifier(),
         new DefaultPomFileFinder(),
         DependencyDescriptor.createMarkdownDescriptor(),
+        new DefaultArtifactInjectionPositionFinder(),
         true);
   }
 
@@ -260,8 +278,8 @@ public final class MavenProvider implements ProjectProvider {
 
     Patch<String> patch = DiffUtils.diff(originalPomContents, finalPomContents);
 
-    AbstractDelta<String> delta = patch.getDeltas().get(0);
-    int position = 1 + delta.getSource().getPosition();
+    List<AbstractDelta<String>> deltas = patch.getDeltas();
+    int position = positionFinder.find(deltas, newDependency.artifact());
 
     Path pomDocumentPath;
 

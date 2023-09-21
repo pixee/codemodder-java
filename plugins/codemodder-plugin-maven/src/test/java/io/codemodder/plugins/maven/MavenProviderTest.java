@@ -169,13 +169,13 @@ final class MavenProviderTest {
         Arguments.of(simplePom, 7), // inject both dependencies and properties
         Arguments.of(
             simplePomWithExistingSections,
-            13), // already has both sections, just inject into those places
+            16), // already has both sections, just inject into those places
         Arguments.of(
             webgoatPomThatJustNeedsUpgrades,
             151), // just updating the version number here, everything else is fine
         Arguments.of(
             webgoatPom,
-            151) // injects both dependencies and properties in a more complicated, real-life
+            413) // injects both dependencies and properties in a more complicated, real-life
         // scenario
         );
   }
