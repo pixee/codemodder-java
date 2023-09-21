@@ -166,17 +166,14 @@ final class MavenProviderTest {
 
   private static Stream<Arguments> expectedChangeDescriptionLocations() {
     return Stream.of(
-        Arguments.of(simplePom, 7), // inject both dependencies and properties
+        Arguments.of(simplePom, 7), // injects all new text in one delta
         Arguments.of(
             simplePomWithExistingSections,
-            16), // already has both sections, just inject into those places
+            16), // already has both sections, record at dependencies section
         Arguments.of(
             webgoatPomThatJustNeedsUpgrades,
-            151), // just updating the version number here, everything else is fine
-        Arguments.of(
-            webgoatPom,
-            413) // injects both dependencies and properties in a more complicated, real-life
-        // scenario
+            151), // just updating the version number here in the properties
+        Arguments.of(webgoatPom, 413) // add to the end of the dependencies section
         );
   }
 
