@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":plugins:codemodder-plugin-semgrep"))
     implementation(project(":plugins:codemodder-plugin-codeql"))
     implementation(project(":plugins:codemodder-plugin-maven"))
+    implementation(project(":plugins:codemodder-plugin-jpms"))
     implementation(project(":plugins:codemodder-plugin-llm"))
     implementation(project(":plugins:codemodder-plugin-aws"))
     implementation(project(":plugins:codemodder-plugin-pmd"))
