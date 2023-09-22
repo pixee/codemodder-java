@@ -42,7 +42,7 @@ final class MarkdownDependencyDescriptorTest {
         // unknown license
         Arguments.of(
             createDefault(
-                group, artifact, version, justification, null, "FakeLicense 1.3", repoUrl, true),
+                group, artifact, version, null, justification, "FakeLicense 1.3", repoUrl, true),
             """
                         We need this to sanitize HTML
 
