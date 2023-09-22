@@ -30,11 +30,15 @@ public interface DependencyGAV {
   /** The license for this dependency. */
   Optional<String> license();
 
+  /** The module name for JPMS systems. */
+  Optional<String> moduleName();
+
   class Default implements DependencyGAV {
 
     private final String group;
     private final String artifact;
     private final String version;
+    private final String moduleName;
     private final String license;
     private final String justification;
     private final String repositoryUrl;
@@ -44,6 +48,7 @@ public interface DependencyGAV {
         final String group,
         final String artifact,
         final String version,
+        final String moduleName,
         final String justification,
         final String license,
         final String repositoryUrl,
@@ -51,6 +56,7 @@ public interface DependencyGAV {
       this.group = Objects.requireNonNull(group, "group");
       this.artifact = Objects.requireNonNull(artifact, "artifact");
       this.version = Objects.requireNonNull(version, "version");
+      this.moduleName = moduleName;
       this.justification = justification;
       this.license = license;
       this.repositoryUrl = repositoryUrl;
@@ -93,6 +99,11 @@ public interface DependencyGAV {
     }
 
     @Override
+    public Optional<String> moduleName() {
+      return Optional.ofNullable(moduleName);
+    }
+
+    @Override
     public boolean equals(final Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -126,13 +137,13 @@ public interface DependencyGAV {
   /**
    * Create a new {@link DependencyGAV} with the given group, artifact, and version -- the bare
    * minimum to describe a dependency for injection. If more information is available, consider
-   * using {@link #createDefault(String, String, String, String, String, String, Boolean)} which
-   * allows for more actionable information for developers to make informed choices about
+   * using {@link #createDefault(String, String, String, String, String, String, String, Boolean)}
+   * which allows for more actionable information for developers to make informed choices about
    * dependencies.
    */
   static DependencyGAV createDefault(
       final String group, final String artifact, final String version) {
-    return new Default(group, artifact, version, null, null, null, null);
+    return new Default(group, artifact, version, null, null, null, null, null);
   }
 
   /**
@@ -142,6 +153,7 @@ public interface DependencyGAV {
    * @param group the group of the dependency
    * @param artifact the artifact of the dependency
    * @param version the version of the dependency
+   * @param moduleName the module name for JPMS systems
    * @param justification a short text for the justification for adding this dependency (can be
    *     null)
    * @param license the license for this dependency (see {@link DependencyLicenses} for common
@@ -152,12 +164,20 @@ public interface DependencyGAV {
       final String group,
       final String artifact,
       final String version,
+      final String moduleName,
       final String justification,
       final String license,
       final String repositoryUrl,
       final Boolean noTransitiveDependencies) {
     return new Default(
-        group, artifact, version, justification, license, repositoryUrl, noTransitiveDependencies);
+        group,
+        artifact,
+        version,
+        moduleName,
+        justification,
+        license,
+        repositoryUrl,
+        noTransitiveDependencies);
   }
 
   String JAVA_SECURITY_TOOLKIT_VERSION = "1.0.7";
@@ -172,6 +192,7 @@ public interface DependencyGAV {
           "io.github.pixee",
           "java-security-toolkit",
           JAVA_SECURITY_TOOLKIT_VERSION,
+          "io.github.pixee.security",
           "This library holds security tools for protecting Java API calls.",
           DependencyLicenses.MIT,
           "https://github.com/pixee/java-security-toolkit",
@@ -183,6 +204,7 @@ public interface DependencyGAV {
           "org.owasp.encoder",
           "encoder",
           "1.2.3",
+          null,
           "This library holds XSS encoders for different contexts.",
           DependencyLicenses.BSD_3_CLAUSE,
           "https://github.com/OWASP/owasp-java-encoder",

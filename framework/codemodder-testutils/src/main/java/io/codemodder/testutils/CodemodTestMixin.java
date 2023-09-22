@@ -103,12 +103,12 @@ public interface CodemodTestMixin {
     }
 
     // run the codemod
-    CodemodLoader loader = new CodemodLoader(List.of(codemodType), tmpDir, map);
+    JavaParserFactory factory = JavaParserFactory.newFactory();
+    CodemodLoader loader = new CodemodLoader(List.of(codemodType), tmpDir, map, factory);
 
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat(codemods.size(), equalTo(1));
     CodemodIdPair codemod = codemods.get(0);
-    JavaParserFactory factory = JavaParserFactory.newFactory();
     SourceDirectory dir = SourceDirectory.createDefault(tmpDir, List.of(pathToJavaFile.toString()));
     CodemodExecutor executor =
         CodemodExecutor.from(
@@ -162,7 +162,7 @@ public interface CodemodTestMixin {
     String codeAfterFirstTransform = Files.readString(pathToJavaFile);
 
     // re-run the transformation again and make sure no changes are made
-    CodemodLoader loader2 = new CodemodLoader(List.of(codemodType), tmpDir, map);
+    CodemodLoader loader2 = new CodemodLoader(List.of(codemodType), tmpDir, map, factory);
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
     CodemodExecutor executor2 =
         CodemodExecutor.from(

@@ -192,7 +192,9 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     List<CodeTFPackageAction> pkgActions = new ArrayList<>();
     Set<Path> unscannableFiles = new HashSet<>();
     List<DependencyGAV> skippedDependencies = new ArrayList<>();
+    Set<DependencyGAV> successfullyInjectedPackages = new HashSet<>();
     List<CodeTFChangesetEntry> pkgChanges = new ArrayList<>();
+
     for (ProjectProvider projectProvider : projectProviders) {
       DependencyUpdateResult result =
           projectProvider.updateDependencies(projectDir, file, dependencies);
@@ -215,9 +217,10 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
                 CodeTFPackageAction.CodeTFPackageActionResult.SKIPPED,
                 packageUrl));
       }
-      dependencies.removeAll(new HashSet<>(result.injectedPackages()));
+      successfullyInjectedPackages.addAll(result.injectedPackages());
     }
     dependencies.stream()
+        .filter(d -> !successfullyInjectedPackages.contains(d))
         .filter(d -> !skippedDependencies.contains(d))
         .forEach(
             dep -> {
