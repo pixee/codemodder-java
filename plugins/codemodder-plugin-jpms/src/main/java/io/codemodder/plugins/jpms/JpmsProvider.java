@@ -1,5 +1,10 @@
 package io.codemodder.plugins.jpms;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import io.codemodder.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,7 +57,7 @@ public final class JpmsProvider implements ProjectProvider {
 
   private Optional<Path> findModuleInfoJava(final Path projectDir, final Path file)
       throws IOException {
-    // start with th
+    // start with the parent of the file we're changing
     Path parent = file;
     while (parent != null && !Files.isSameFile(parent, projectDir)) {
       // if we're in a src/main/java dir, check for the presence of `module-info.java`
@@ -62,7 +67,56 @@ public final class JpmsProvider implements ProjectProvider {
       }
       parent = parent.getParent();
     }
+
+    // let's read the package of the file we're trying to change and see if we can find the
+    // secondary dir location
+    Optional<String> packageName = readPackageNameFromFile(file);
+    if (packageName.isEmpty()) {
+      return Optional.empty();
+    }
+
+    parent = file;
+    while (parent != null && !Files.isSameFile(parent, projectDir)) {
+      String name = parent.getFileName().toString();
+      // if we're in a src/main/java dir, check for the presence of `module-info.java`
+      if ("java".equals(name) || "src".equals(name)) {
+        List<Path> packageDirs =
+            Files.list(parent)
+                .filter(Files::isDirectory)
+                .filter(
+                    path -> path.getFileName().toString().matches("[a-zA-Z0-9]+\\.[a-zA-Z0-9]+"))
+                .toList();
+        for (Path packageDir : packageDirs) {
+          String packageDirName = packageDir.getFileName().toString();
+          if (packageName.get().startsWith(packageDirName)) {
+            Path moduleInfoJava = packageDir.resolve("module-info.java");
+            if (Files.exists(moduleInfoJava) && Files.isRegularFile(moduleInfoJava)) {
+              return Optional.of(moduleInfoJava);
+            }
+          }
+        }
+      }
+      parent = parent.getParent();
+    }
+
     return Optional.empty();
+  }
+
+  private Optional<String> readPackageNameFromFile(final Path javaFile) throws IOException {
+    JavaParser javaParser = new JavaParser();
+    ParseResult<CompilationUnit> parseResult = javaParser.parse(javaFile);
+    if (!parseResult.isSuccessful()) {
+      LOG.warn("Couldn't parse java file to inspect package");
+      return Optional.empty();
+    }
+    Optional<CompilationUnit> result = parseResult.getResult();
+    if (result.isEmpty()) {
+      LOG.warn("Couldn't find compilation unit to inspect package");
+      return Optional.empty();
+    }
+    CompilationUnit compilationUnit = result.get();
+    Optional<PackageDeclaration> packageDeclaration = compilationUnit.getPackageDeclaration();
+    return packageDeclaration.map(NodeWithName::getNameAsString);
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(JpmsProvider.class);
