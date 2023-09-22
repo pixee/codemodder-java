@@ -59,6 +59,7 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
           "io.github.pixee",
           "java-security-toolkit-xstream",
           "1.0.2",
+          null,
           "This library holds security APIs for hardening XStream operations.",
           DependencyLicenses.MIT,
           "https://github.com/pixee/java-security-toolkit-xstream",

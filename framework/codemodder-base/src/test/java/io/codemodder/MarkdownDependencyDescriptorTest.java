@@ -25,7 +25,7 @@ final class MarkdownDependencyDescriptorTest {
     return Stream.of(
         // has everything
         Arguments.of(
-            createDefault(group, artifact, version, justification, license, repoUrl, true),
+            createDefault(group, artifact, version, null, justification, license, repoUrl, true),
             """
                         We need this to sanitize HTML
 
@@ -33,7 +33,7 @@ final class MarkdownDependencyDescriptorTest {
                         """),
         // no description
         Arguments.of(
-            createDefault(group, artifact, version, null, license, repoUrl, true),
+            createDefault(group, artifact, version, null, null, license, repoUrl, true),
             """
                         This dependency change is required to use the new code.
 
@@ -42,7 +42,7 @@ final class MarkdownDependencyDescriptorTest {
         // unknown license
         Arguments.of(
             createDefault(
-                group, artifact, version, justification, "FakeLicense 1.3", repoUrl, true),
+                group, artifact, version, justification, null, "FakeLicense 1.3", repoUrl, true),
             """
                         We need this to sanitize HTML
 
@@ -50,7 +50,7 @@ final class MarkdownDependencyDescriptorTest {
                         """),
         // no license
         Arguments.of(
-            createDefault(group, artifact, version, justification, null, repoUrl, true),
+            createDefault(group, artifact, version, null, justification, null, repoUrl, true),
             """
                         We need this to sanitize HTML
 
@@ -58,7 +58,7 @@ final class MarkdownDependencyDescriptorTest {
                         """),
         // no repo url
         Arguments.of(
-            createDefault(group, artifact, version, justification, null, null, true),
+            createDefault(group, artifact, version, null, justification, null, null, true),
             """
                         We need this to sanitize HTML
 
@@ -66,7 +66,7 @@ final class MarkdownDependencyDescriptorTest {
                         """),
         // add repo url back, and now there's transitive deps
         Arguments.of(
-            createDefault(group, artifact, version, justification, null, repoUrl, false),
+            createDefault(group, artifact, version, null, justification, null, repoUrl, false),
             """
                         We need this to sanitize HTML
 
