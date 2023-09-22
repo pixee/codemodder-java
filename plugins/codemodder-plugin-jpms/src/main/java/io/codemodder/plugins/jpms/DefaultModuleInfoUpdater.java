@@ -1,5 +1,7 @@
 package io.codemodder.plugins.jpms;
 
+import static io.codemodder.plugins.jpms.ModuleIndents.tryFixUpSpacing;
+
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
@@ -7,14 +9,18 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.modules.ModuleDeclaration;
+import com.github.javaparser.ast.modules.ModuleDirective;
 import com.github.javaparser.ast.modules.ModuleRequiresDirective;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.DependencyGAV;
 import io.codemodder.DependencyUpdateResult;
+import io.codemodder.EncodingDetector;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -22,6 +28,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class DefaultModuleInfoUpdater implements ModuleInfoUpdater {
+
+  private final EncodingDetector encoderDetector;
+
+  DefaultModuleInfoUpdater() {
+    this.encoderDetector = EncodingDetector.create();
+  }
 
   @Override
   public DependencyUpdateResult update(
@@ -59,10 +71,21 @@ final class DefaultModuleInfoUpdater implements ModuleInfoUpdater {
     boolean changed = false;
     List<DependencyGAV> injectedDependencies = new ArrayList<>();
     List<DependencyGAV> skippedDependencies = new ArrayList<>();
+    NodeList<ModuleDirective> existingDirectives = moduleDeclaration.getDirectives();
     for (DependencyGAV dependency : remainingFileDependencies) {
       if (dependency.moduleName().isPresent()) {
+        String newModuleName = dependency.moduleName().get();
+        boolean alreadyHadIt =
+            existingDirectives.stream()
+                .filter(d -> d instanceof ModuleRequiresDirective)
+                .map(ModuleDirective::asModuleRequiresDirective)
+                .anyMatch(d -> d.getNameAsString().equals(newModuleName));
+        if (alreadyHadIt) {
+          skippedDependencies.add(dependency);
+          continue;
+        }
         ModuleRequiresDirective directive = new ModuleRequiresDirective();
-        directive.setName(dependency.moduleName().get());
+        directive.setName(newModuleName);
         moduleDeclaration.addDirective(directive);
         injectedDependencies.add(dependency);
         changed = true;
@@ -71,14 +94,17 @@ final class DefaultModuleInfoUpdater implements ModuleInfoUpdater {
       }
     }
 
-    String after = cu.toString();
     if (!changed) {
       log.debug("No changes to module-info.java: {}", moduleInfoJava);
-      return DependencyUpdateResult.EMPTY_UPDATE;
+      return DependencyUpdateResult.create(List.of(), skippedDependencies, List.of(), Set.of());
     }
 
     log.debug("Updating module-info.java: {}", moduleInfoJava);
-    Files.writeString(moduleInfoJava, after);
+    String rawAfter = LexicalPreservingPrinter.print(cu);
+    String after =
+        tryFixUpSpacing(moduleInfoJava, rawAfter, moduleDeclaration, injectedDependencies);
+    String charset = encoderDetector.detect(moduleInfoJava).orElse("UTF-8");
+    Files.writeString(moduleInfoJava, after, Charset.forName(charset));
 
     String relativePath = projectDir.relativize(moduleInfoJava).toString();
     List<String> beforeLines = Files.readAllLines(moduleInfoJava);

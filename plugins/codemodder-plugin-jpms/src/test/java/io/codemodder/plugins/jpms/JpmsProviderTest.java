@@ -8,9 +8,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 final class JpmsProviderTest {
 
@@ -20,6 +24,13 @@ final class JpmsProviderTest {
   private Path moduleInfoJavaFile;
   private List<DependencyGAV> dependencies;
   private JpmsProvider provider;
+
+  private static final String comAcmeModule =
+      """
+            module com.acme {
+              exports com.acme;
+            }
+            """;
 
   @BeforeEach
   void setup(@TempDir Path tmpDir) throws IOException {
@@ -34,7 +45,8 @@ final class JpmsProviderTest {
     Files.writeString(javaFileWereChanging, "package com.acme;\n\npublic class Acme {}");
 
     Files.createFile(moduleInfoJavaFile);
-    Files.writeString(moduleInfoJavaFile, "module com.acme { }");
+
+    Files.writeString(moduleInfoJavaFile, comAcmeModule);
 
     // the java security toolkit has a module name, but not the OWASP encoder
     this.dependencies =
@@ -51,6 +63,24 @@ final class JpmsProviderTest {
   void it_doesnt_escape_project_root() throws IOException {
     // by putting the module-info.java below the project dir, we should not find it
     Files.move(moduleInfoJavaFile, tmpDir.resolve("module-info.java"));
+    verifyNoChangesMade();
+  }
+
+  @Test
+  void it_doesnt_inject_when_no_dependencies() throws IOException {
+    dependencies = List.of();
+    verifyNoChangesMade();
+  }
+
+  @Test
+  void it_doesnt_inject_when_no_module_insertable_dependencies() throws IOException {
+    dependencies = List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER);
+    verifyNoChangesMade();
+  }
+
+  @Test
+  void it_fails_gracefully_when_no_module() throws IOException {
+    Files.delete(moduleInfoJavaFile);
     verifyNoChangesMade();
   }
 
@@ -81,9 +111,82 @@ final class JpmsProviderTest {
     Path packageDir = projectDir.resolve("module1/src/main/java/com.acme");
     Files.createDirectories(packageDir);
     moduleInfoJavaFile = packageDir.resolve("module-info.java");
-    Files.writeString(moduleInfoJavaFile, "module com.acme { }");
+    Files.writeString(moduleInfoJavaFile, comAcmeModule);
 
     verifySuccessfulInjection();
+  }
+
+  @Test
+  void it_skips_when_present() throws IOException {
+    dependencies = List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+    String comAcmeModuleAlreadyHasSecurityToolkit =
+        """
+            module com.acme {
+              exports com.acme;
+                requires io.github.pixee.security; // weird indentation or comments shouldn't throw it off
+            }
+            """;
+    Files.writeString(moduleInfoJavaFile, comAcmeModuleAlreadyHasSecurityToolkit);
+    DependencyUpdateResult result =
+        provider.updateDependencies(projectDir, javaFileWereChanging, dependencies);
+    assertThat(result.skippedPackages()).containsOnly(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+    assertThat(result.injectedPackages()).isEmpty();
+    assertThat(result.erroredFiles()).isEmpty();
+    assertThat(result.packageChanges()).isEmpty();
+  }
+
+  @ParameterizedTest
+  @MethodSource("indentTestCases")
+  void it_indents_correctly(final String in, final String expectedOut) throws IOException {
+    Files.writeString(moduleInfoJavaFile, in);
+    provider.updateDependencies(projectDir, javaFileWereChanging, dependencies);
+    String contents = Files.readString(moduleInfoJavaFile);
+
+    // should have detected that there's a weird 5 space indent
+    assertThat(contents).isEqualTo(expectedOut);
+  }
+
+  public static Stream<Arguments> indentTestCases() {
+    return Stream.of(
+        // this one uses a non-standard amount of spaces: 5
+        Arguments.of(
+            """
+            module com.acme {
+                 exports com.acme;
+            }
+            """,
+            """
+                    module com.acme {
+                         exports com.acme;
+                         requires io.github.pixee.security;
+                    }
+                    """),
+        // if you don't use a space, we won't either
+        Arguments.of(
+            """
+            module com.acme {
+            exports com.acme;
+            }
+            """,
+            """
+                    module com.acme {
+                    exports com.acme;
+                    requires io.github.pixee.security;
+                    }
+                    """),
+        // with nothing, we'll fall back to 2
+        Arguments.of(
+            """
+            module com.acme {
+
+            }
+            """,
+            """
+                    module com.acme {
+                      requires io.github.pixee.security;
+
+                    }
+                    """));
   }
 
   private void verifySuccessfulInjection() throws IOException {
@@ -100,6 +203,12 @@ final class JpmsProviderTest {
     // the module-info.java file should have been updated
     String contents = Files.readString(moduleInfoJavaFile);
     assertThat(contents)
-        .isEqualToIgnoringWhitespace("module com.acme { requires io.github.pixee.security; }");
+        .isEqualTo(
+            """
+                        module com.acme {
+                          exports com.acme;
+                          requires io.github.pixee.security;
+                        }
+                        """);
   }
 }
