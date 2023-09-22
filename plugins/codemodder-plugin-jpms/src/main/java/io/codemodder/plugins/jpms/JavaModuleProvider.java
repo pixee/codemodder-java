@@ -14,16 +14,16 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Provides JPMS (Java Platform Module System) management functions to codemods. */
-public final class JpmsProvider implements ProjectProvider {
+/** Provides Java module management functions to codemods. */
+public final class JavaModuleProvider implements ProjectProvider {
 
   private final ModuleInfoUpdater moduleInfoUpdater;
 
-  public JpmsProvider() {
+  public JavaModuleProvider() {
     this(new DefaultModuleInfoUpdater());
   }
 
-  private JpmsProvider(final ModuleInfoUpdater moduleInfoUpdater) {
+  private JavaModuleProvider(final ModuleInfoUpdater moduleInfoUpdater) {
     this.moduleInfoUpdater = moduleInfoUpdater;
   }
 
@@ -120,5 +120,5 @@ public final class JpmsProvider implements ProjectProvider {
     return packageDeclaration.map(NodeWithName::getNameAsString);
   }
 
-  private static final Logger LOG = LoggerFactory.getLogger(JpmsProvider.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JavaModuleProvider.class);
 }

@@ -16,14 +16,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-final class JpmsProviderTest {
+final class JavaModuleProviderTest {
 
   private Path tmpDir;
   private Path projectDir;
   private Path javaFileWereChanging;
   private Path moduleInfoJavaFile;
   private List<DependencyGAV> dependencies;
-  private JpmsProvider provider;
+  private JavaModuleProvider provider;
 
   private static final String comAcmeModule =
       """
@@ -51,7 +51,7 @@ final class JpmsProviderTest {
     // the java security toolkit has a module name, but not the OWASP encoder
     this.dependencies =
         List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT, DependencyGAV.OWASP_XSS_JAVA_ENCODER);
-    this.provider = new JpmsProvider();
+    this.provider = new JavaModuleProvider();
   }
 
   @Test
