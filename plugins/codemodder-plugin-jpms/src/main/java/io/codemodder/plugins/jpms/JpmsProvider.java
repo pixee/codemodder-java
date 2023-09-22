@@ -55,6 +55,7 @@ public final class JpmsProvider implements ProjectProvider {
     return result;
   }
 
+  /** From the given file, find the module-info.java file that should be updated, if any exist. */
   private Optional<Path> findModuleInfoJava(final Path projectDir, final Path file)
       throws IOException {
     // start with the parent of the file we're changing

@@ -80,7 +80,12 @@ final class ModuleIndents {
     return fixedUpAfter;
   }
 
-  /** Get */
+  /**
+   * Get the indentation (leading whitespace) at the given line of the given file.
+   *
+   * @param file the code file to read from
+   * @param line the 1-based line number to read
+   */
   private static String getIndentationAtLine(final Path file, final int line) throws IOException {
     List<String> lines = Files.readAllLines(file);
     String lineText = lines.get(line - 1);
