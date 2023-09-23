@@ -13,6 +13,14 @@ public interface CallReplacer {
    */
   CallReplacerBuilder withStaticMethod(String className, String methodName);
 
+  /**
+   * Performs the actual transformation of replacing the given expression another arbitrary
+   * expression.
+   *
+   * @param expression the expression to replace with
+   */
+  void withExpression(Expression expression);
+
   /** Builder for {@link CallReplacer}. */
   interface CallReplacerBuilder {
 

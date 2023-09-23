@@ -32,6 +32,7 @@ public final class DefaultCodemods {
         OutputResourceLeakCodemod.class,
         PreventFileWriterLeakWithFilesCodemod.class,
         RandomizeSeedCodemod.class,
+        ReplaceDefaultHttpClientCodemod.class,
         SanitizeApacheMultipartFilenameCodemod.class,
         SanitizeHttpHeaderCodemod.class,
         SanitizeSpringMultipartFilenameCodemod.class,

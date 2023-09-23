@@ -31,6 +31,12 @@ final class DefaultCallReplacer implements CallReplacer {
     return new DefaultCallReplacerBuilder(className, methodName);
   }
 
+  @Override
+  public void withExpression(final Expression expression) {
+    Node parent = call.getParentNode().get();
+    parent.replace(call, expression);
+  }
+
   private class DefaultCallReplacerBuilder implements CallReplacerBuilder {
 
     private final String className;
