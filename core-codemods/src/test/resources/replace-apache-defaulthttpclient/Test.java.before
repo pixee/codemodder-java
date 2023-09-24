@@ -1,0 +1,14 @@
+package com.acme.testcode;
+
+import org.apache.http.impl.client.DefaultHttpClient;
+
+final class Test {
+
+  public void doThing() {
+    // ruleid: replace-apache-defaulthttpclient
+    HttpClient client1 = new DefaultHttpClient();
+
+    // ok: replace-apache-defaulthttpclient
+    HttpClient client2 = new DefaultHttpClient(params);
+  }
+}
