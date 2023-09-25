@@ -17,6 +17,7 @@ public final class DefaultCodemods {
         DisableAutomaticDirContextDeserializationCodemod.class,
         HardenJavaDeserializationCodemod.class,
         HardenProcessCreationCodemod.class,
+        HardenSnakeYamlCreationCodemod.class,
         HardenXMLDecoderCodemod.class,
         HardenXMLInputFactoryCodemod.class,
         HardenXStreamCodemod.class,
