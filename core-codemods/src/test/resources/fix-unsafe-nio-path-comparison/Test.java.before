@@ -1,0 +1,27 @@
+package com.acme.testcode;
+
+import java.io.File;
+import java.nio.file.Path;
+
+final class Test {
+
+  void doThing(File child, File parent, Path somethingElse) {
+    // ruleid: fix-unsafe-nio-path-comparison
+    boolean unsafe1 = child.getCanonicalPath().startsWith(parent.getCanonicalPath());
+
+    // ruleid: fix-unsafe-nio-path-comparison
+    if(child.getCanonicalPath().startsWith(parent.getCanonicalPath())) {
+      // this is unsafe
+    }
+
+    // ok: fix-unsafe-nio-path-comparison
+    if(child.getCanonicalPath().startsWith(somethingElse)) {
+      // this can't be confirmed to be unsafe
+    }
+  }
+
+  File getChild() {
+    return super.getChild();
+  }
+
+}
