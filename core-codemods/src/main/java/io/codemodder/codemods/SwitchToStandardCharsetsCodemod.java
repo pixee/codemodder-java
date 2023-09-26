@@ -47,14 +47,14 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
         final MethodCallExpr methodCallExpr,
         final Result result) {
 
-      final Charset c = getSpecifiedCharset(methodCallExpr);
-      if (c == null) {
+      final Optional<Charset> c = getSpecifiedCharset(methodCallExpr.getArgument(0));
+      if (c.isEmpty()) {
         return false;
       }
 
       FieldAccessExpr field =
           new FieldAccessExpr(
-              new NameExpr(StandardCharsets.class.getSimpleName()), getCharsetFieldName(c));
+              new NameExpr(StandardCharsets.class.getSimpleName()), getCharsetFieldName(c.get()));
       methodCallExpr.setArgument(0, field);
       addImportIfMissing(cu, StandardCharsets.class);
 
@@ -85,14 +85,14 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
         final MethodCallExpr methodCallExpr,
         final Result result) {
 
-      final Charset c = getSpecifiedCharset(methodCallExpr);
-      if (c == null) {
+      final Optional<Charset> c = getSpecifiedCharset(methodCallExpr.getArgument(0));
+      if (c.isEmpty()) {
         return false;
       }
 
       FieldAccessExpr field =
           new FieldAccessExpr(
-              new NameExpr(StandardCharsets.class.getSimpleName()), getCharsetFieldName(c));
+              new NameExpr(StandardCharsets.class.getSimpleName()), getCharsetFieldName(c.get()));
       Optional<Node> parentNode = methodCallExpr.getParentNode();
       parentNode.get().replace(methodCallExpr, field);
       addImportIfMissing(cu, StandardCharsets.class);
@@ -101,12 +101,17 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
     }
   }
 
-  private static Charset getSpecifiedCharset(final MethodCallExpr methodCallExpr) {
-    Expression argument = methodCallExpr.getArgument(0);
-    Optional<StringLiteralExpr> charsetRef = expect(argument).toBeStringLiteral().result();
+  /**
+   * Get the standard charset specified by the first argument to this method.
+   *
+   * @param node the string literal argument
+   * @return a {@link Charset} if the argument is a known charset, otherwise {@link Optional#empty}
+   */
+  private static Optional<Charset> getSpecifiedCharset(final Node node) {
+    Optional<StringLiteralExpr> charsetRef = expect(node).toBeStringLiteral().result();
 
     if (charsetRef.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
 
     StringLiteralExpr charsetExpr = charsetRef.get();
@@ -121,10 +126,10 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
       case "UTF-16BE" -> c = StandardCharsets.UTF_16BE;
       case "ISO-8859-1" -> c = StandardCharsets.ISO_8859_1;
       default -> {
-        return null;
+        return Optional.empty();
       }
     }
-    return c;
+    return Optional.of(c);
   }
 
   private static String getCharsetFieldName(final Charset c) {

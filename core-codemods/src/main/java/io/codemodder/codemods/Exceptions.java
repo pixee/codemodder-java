@@ -27,17 +27,23 @@ final class Exceptions {
   }
 
   /**
-   * Attempts to remove handling of {@link java.io.UnsupportedEncodingException} in situations where
-   * we can guess it's no longer needed. This method is not guaranteed to be correct due to limited
-   * type resolution.
+   * This method attempts to "clean up" after a method/constructor which is known to throw an
+   * exception is now gone.
+   *
+   * <p>In this case, we may want to alter its existing try block, or maybe even if its method
+   * signature.
+   *
+   * <p>This method is not guaranteed to be correct in situations in which there is limited type
+   * resolution, like in the case of first party library information being missing.
    *
    * @param node the new or modified node
-   * @param exceptionFqcn the fully qualified class name of the exception that is no longer thrown
-   *     after the change to the node
+   * @param exceptionNoLongerThrownFqcn the fully qualified class name of the exception that is no
+   *     longer thrown after the change to the node
    */
-  static void cleanupExceptionHandling(final Node node, final String exceptionFqcn) {
+  static void cleanupExceptionHandling(final Node node, final String exceptionNoLongerThrownFqcn) {
     Optional<TryStmt> tryStmt = node.findAncestor(TryStmt.class);
-    String exceptionSimpleName = exceptionFqcn.substring(exceptionFqcn.lastIndexOf('.') + 1);
+    String exceptionSimpleName =
+        exceptionNoLongerThrownFqcn.substring(exceptionNoLongerThrownFqcn.lastIndexOf('.') + 1);
     if (tryStmt.isPresent()) {
       TryStmt tryStatement = tryStmt.get();
       Node parent = tryStatement.getParentNode().get();
@@ -46,7 +52,7 @@ final class Exceptions {
       List<ObjectCreationExpr> allConstructorsInTry =
           tryStatement.getTryBlock().findAll(ObjectCreationExpr.class).stream().toList();
       if (anyOtherMethodsAreKnownThrowThis(
-          allOtherMethodCallsInTry, allConstructorsInTry, exceptionFqcn)) {
+          allOtherMethodCallsInTry, allConstructorsInTry, exceptionNoLongerThrownFqcn)) {
         // we can't touch it
         return;
       }
@@ -78,7 +84,7 @@ final class Exceptions {
       List<ObjectCreationExpr> allConstructorsInTry =
           method.findAll(ObjectCreationExpr.class).stream().toList();
       if (anyOtherMethodsAreKnownThrowThis(
-          allOtherMethodCallsInTry, allConstructorsInTry, exceptionFqcn)) {
+          allOtherMethodCallsInTry, allConstructorsInTry, exceptionNoLongerThrownFqcn)) {
         // we can't touch it
         return;
       }

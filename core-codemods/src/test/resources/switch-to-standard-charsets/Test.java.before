@@ -34,6 +34,17 @@ final class Test {
      }
    }
 
+   void cantRemoveTryBlock(String tryblock) {
+     try {
+       new Object(); // just a random constructor
+       tryblock.getBytes("UTF-8");
+     } catch (UnsupportedEncodingException e) {
+       e.printStackTrace();
+     } catch (IllegalArgumentException e) {
+       e.printStackTrace(System.err);
+     }
+   }
+
    void removePropagating(String removeProp) throws UnsupportedEncodingException {
      removeProp.getBytes("UTF-8");
      new Skadoodle(); // just a random, unresolvable constructor

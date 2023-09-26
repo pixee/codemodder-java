@@ -33,6 +33,15 @@ final class Test {
      }
    }
 
+   void cantRemoveTryBlock(String tryblock) {
+     try {
+       new Object(); // just a random constructor
+       tryblock.getBytes(StandardCharsets.UTF_8);
+     } catch (IllegalArgumentException e) {
+       e.printStackTrace(System.err);
+     }
+   }
+
    void removePropagating(String removeProp) {
      removeProp.getBytes(StandardCharsets.UTF_8);
      new Skadoodle(); // just a random, unresolvable constructor
