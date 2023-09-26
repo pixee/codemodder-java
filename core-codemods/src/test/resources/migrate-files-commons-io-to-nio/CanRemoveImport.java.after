@@ -1,0 +1,11 @@
+package com.acme.testcode;
+
+import java.io.File;
+import java.nio.file.Files;
+public final class Test {
+
+  void doThing(File file, Charset charset) {
+    Files.readString(file.toPath());
+  }
+
+}

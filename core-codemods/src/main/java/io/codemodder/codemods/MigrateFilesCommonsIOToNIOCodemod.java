@@ -1,5 +1,6 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.ast.ASTTransforms.removeImportIfUnused;
 import static io.codemodder.javaparser.JavaParserTransformer.replace;
 
 import com.contrastsecurity.sarif.Result;
@@ -92,9 +93,16 @@ public final class MigrateFilesCommonsIOToNIOCodemod extends CompositeJavaParser
         final MethodCallExpr readFileToStringCall,
         final Result result) {
       switchFirstArgumentToPath(readFileToStringCall.getArguments());
-      return replace(readFileToStringCall)
-          .withStaticMethod("java.nio.file.Files", methodName)
-          .withSameArguments();
+      boolean success =
+          replace(readFileToStringCall)
+              .withStaticMethod("java.nio.file.Files", methodName)
+              .withSameArguments();
+
+      if (success) {
+        removeImportIfUnused(cu, "org.apache.commons.io.FileUtils");
+      }
+
+      return success;
     }
 
     /**
