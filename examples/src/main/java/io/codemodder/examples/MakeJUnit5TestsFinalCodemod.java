@@ -9,7 +9,6 @@ import io.codemodder.codetf.CodeTFReference;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 
 /** A codemod that adds final modifiers to JUnit 5 tests. */
@@ -59,11 +58,6 @@ public final class MakeJUnit5TestsFinalCodemod
   @Override
   public String getDescription() {
     return "JUnit 5 tests should be final!";
-  }
-
-  @Override
-  public Optional<String> getSourceControlUrl() {
-    return Optional.empty();
   }
 
   @Override

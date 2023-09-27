@@ -8,7 +8,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.commons.io.IOUtils;
@@ -19,8 +18,6 @@ public interface CodemodReporterStrategy {
   String getSummary();
 
   String getDescription();
-
-  Optional<String> getSourceControlUrl();
 
   String getChange(Path path, CodemodChange change);
 
@@ -101,8 +98,6 @@ public interface CodemodReporterStrategy {
         StreamSupport.stream(referencesNode.spliterator(), false)
             .map(JsonNode::asText)
             .collect(Collectors.toList());
-    Optional<String> sourceControlLink =
-        Optional.ofNullable(parent.get("control")).map(JsonNode::asText);
 
     return new CodemodReporterStrategy() {
       @Override
@@ -113,11 +108,6 @@ public interface CodemodReporterStrategy {
       @Override
       public String getDescription() {
         return description;
-      }
-
-      @Override
-      public Optional<String> getSourceControlUrl() {
-        return sourceControlLink;
       }
 
       @Override
@@ -141,11 +131,6 @@ public interface CodemodReporterStrategy {
 
       @Override
       public String getDescription() {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public Optional<String> getSourceControlUrl() {
         throw new UnsupportedOperationException();
       }
 

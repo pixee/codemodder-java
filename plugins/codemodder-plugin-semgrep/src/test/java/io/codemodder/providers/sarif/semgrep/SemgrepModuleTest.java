@@ -19,7 +19,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
@@ -56,11 +55,6 @@ final class SemgrepModuleTest {
     @Override
     public String getDescription() {
       return null;
-    }
-
-    @Override
-    public Optional<String> getSourceControlUrl() {
-      return Optional.empty();
     }
 
     @Override
@@ -282,11 +276,6 @@ final class SemgrepModuleTest {
     @Override
     public String getDescription() {
       return null;
-    }
-
-    @Override
-    public Optional<String> getSourceControlUrl() {
-      return Optional.empty();
     }
 
     @Override
