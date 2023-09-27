@@ -14,7 +14,7 @@ dependencies {
     api(libs.java.security.toolkit)
     api(libs.commons.lang3)
 
-    api("io.codemodder:codetf-java:2.1.2")
+    api("io.codemodder:codetf-java:2.1.4")
     api(libs.slf4j.api)
     api(libs.javaparser.core)
     api(libs.javaparser.symbolsolver.core)
