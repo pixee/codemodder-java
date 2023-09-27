@@ -1,0 +1,19 @@
+package com.acme.testcode;
+
+import java.io.File;
+import org.apache.commons.io.FileUtils;
+
+public final class Test {
+
+  void doThing(File file, Charset charset) {
+    // ruleid: migrate-files-commons-io-to-nio-read-file-to-string
+    String s = FileUtils.readFileToString(file);
+
+    List<String> s2 = FileUtils.readLines(file, charset);
+    List<String> s3 = FileUtils.readLines(file, "UTF-8");// this one can't be migrated directly
+
+    // ok: migrate-files-commons-io-to-nio-read-file-to-string
+    String s = my.acme.FileUtils.readFileToString(file.toPath());
+  }
+
+}
