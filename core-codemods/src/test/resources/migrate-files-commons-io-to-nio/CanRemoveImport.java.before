@@ -1,0 +1,12 @@
+package com.acme.testcode;
+
+import java.io.File;
+import org.apache.commons.io.FileUtils;
+
+public final class Test {
+
+  void doThing(File file, Charset charset) {
+    FileUtils.readFileToString(file);
+  }
+
+}

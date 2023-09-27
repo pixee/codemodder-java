@@ -8,12 +8,15 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import java.util.Optional;
 
 public final class ASTTransforms {
   /** Add an import in alphabetical order. */
@@ -184,5 +187,28 @@ public final class ASTTransforms {
         .forEach(innerTry.getTryBlock()::addStatement);
     outerTry.setTryBlock(innerTry.getTryBlock());
     return outerTry;
+  }
+
+  /** Remove an import if we can't find references to it in the code. */
+  public static void removeImportIfUnused(final CompilationUnit cu, final String className) {
+    final NodeList<ImportDeclaration> imports = cu.getImports();
+    Optional<ImportDeclaration> importToRemove =
+        imports.stream().filter(i -> i.getNameAsString().equals(className)).findFirst();
+    if (importToRemove.isEmpty()) {
+      // this wasn't imported, so there's nothing to do. maybe it's a package-protected class?
+      return;
+    }
+    String simpleName = className.substring(className.lastIndexOf('.') + 1);
+    if (cu.findAll(Node.class).stream()
+        .filter(n -> n instanceof NodeWithSimpleName<?>)
+        .map(n -> (NodeWithSimpleName<?>) n)
+        .anyMatch(n -> n.getNameAsString().equals(simpleName))) {
+      return;
+    }
+    if (cu.findAll(ClassOrInterfaceType.class).stream()
+        .anyMatch(n -> n.getNameAsString().equals(simpleName))) {
+      return;
+    }
+    cu.remove(importToRemove.get());
   }
 }
