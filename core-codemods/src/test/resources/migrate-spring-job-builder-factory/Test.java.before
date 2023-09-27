@@ -1,0 +1,18 @@
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+
+@Configuration
+@EnableBatchProcessing
+public class MyJobConfig {
+
+    @Autowired
+    private JobBuilderFactory jobBuilderFactory;
+
+    @Bean
+    public Job myJob(Step step) {
+        // ruleid: migrate-spring-job-builder-factory
+        return this.jobBuilderFactory.get("myJob")
+                .start(step)
+                .build();
+    }
+
+}
