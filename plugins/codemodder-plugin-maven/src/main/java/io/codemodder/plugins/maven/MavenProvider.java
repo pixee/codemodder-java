@@ -301,8 +301,7 @@ public final class MavenProvider implements ProjectProvider {
     } else {
       properties = Collections.emptyMap();
     }
-    CodeTFChange change =
-        new CodeTFChange(position, properties, description, List.of(), null, List.of());
+    CodeTFChange change = new CodeTFChange(position, properties, description, List.of(), List.of());
 
     List<String> patchDiff =
         UnifiedDiffUtils.generateUnifiedDiff(
