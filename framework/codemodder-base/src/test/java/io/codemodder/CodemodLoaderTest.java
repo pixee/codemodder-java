@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
@@ -37,11 +36,6 @@ final class CodemodLoaderTest {
     @Override
     public String getDescription() {
       return "description";
-    }
-
-    @Override
-    public Optional<String> getSourceControlUrl() {
-      return Optional.empty();
     }
 
     @Override

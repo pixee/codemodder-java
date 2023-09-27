@@ -9,7 +9,6 @@ import io.codemodder.codetf.CodeTFReference;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 
 /** A codemod that makes JUnit 5 tests package private. */
@@ -58,11 +57,6 @@ public final class MakeJUnit5TestsPackagePrivateCodemod
   @Override
   public String getDescription() {
     return "JUnit 5 tests should be package-private!";
-  }
-
-  @Override
-  public Optional<String> getSourceControlUrl() {
-    return Optional.empty();
   }
 
   @Override

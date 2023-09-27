@@ -579,11 +579,6 @@ final class DefaultCodemodExecutorTest {
     }
 
     @Override
-    public Optional<String> getSourceControlUrl() {
-      return Optional.empty();
-    }
-
-    @Override
     public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
       return "injects-dependency-1-change";
     }
@@ -622,11 +617,6 @@ final class DefaultCodemodExecutorTest {
     @Override
     public List<CodeTFReference> getReferences() {
       return List.of(new CodeTFReference("https://dep2.com/", "https://dep2.com/"));
-    }
-
-    @Override
-    public Optional<String> getSourceControlUrl() {
-      return Optional.of("https://dep2-control.com/src");
     }
 
     @Override

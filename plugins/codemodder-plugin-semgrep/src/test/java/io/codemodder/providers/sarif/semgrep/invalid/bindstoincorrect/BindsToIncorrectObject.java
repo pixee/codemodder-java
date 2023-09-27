@@ -9,7 +9,6 @@ import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 
 /** An invalid codemod that binds SARIF to a non-SARIF object. */
@@ -29,11 +28,6 @@ public final class BindsToIncorrectObject implements CodeChanger {
   @Override
   public String getDescription() {
     return "description";
-  }
-
-  @Override
-  public Optional<String> getSourceControlUrl() {
-    return Optional.empty();
   }
 
   @Override

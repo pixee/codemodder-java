@@ -2,7 +2,6 @@ package io.codemodder;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 /** Reports static text for all */
 public final class UselessReportStrategy implements CodemodReporterStrategy {
@@ -17,11 +16,6 @@ public final class UselessReportStrategy implements CodemodReporterStrategy {
   @Override
   public String getDescription() {
     return "description";
-  }
-
-  @Override
-  public Optional<String> getSourceControlUrl() {
-    return Optional.empty();
   }
 
   @Override
