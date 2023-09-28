@@ -1,17 +1,23 @@
 package io.codemodder.codemods;
 
 import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
+import static io.codemodder.ast.ASTTransforms.removeImportIfUnused;
+import static io.codemodder.javaparser.ASTExpectations.expect;
+import static io.codemodder.javaparser.JavaParserTransformer.replace;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
+import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -24,10 +30,11 @@ public final class MigrateSpringJobBuilderFactoryCodemod
 
   private static final String RULE =
       """
-          rules:
-            - id: migrate-spring-job-builder-factory
-              pattern: (org.springframework.batch.core.configuration.annotation.JobBuilderFactory $FACTORY).get($JOB).start($STEP).build();
-              pattern-inside: |
+      rules:
+        - id: migrate-spring-job-builder-factory
+          patterns:
+            - pattern: (org.springframework.batch.core.configuration.annotation.JobBuilderFactory $FACTORY).get($JOB).start($STEP).build()
+            - pattern-inside: |
                 @EnableBatchProcessing
                 class $X {
                   ...
@@ -37,7 +44,7 @@ public final class MigrateSpringJobBuilderFactoryCodemod
                   }
                   ...
                 }
-                  """;
+      """;
 
   @Inject
   public MigrateSpringJobBuilderFactoryCodemod(@SemgrepScan(yaml = RULE) RuleSarif sarif) {
@@ -62,16 +69,44 @@ public final class MigrateSpringJobBuilderFactoryCodemod
       return false;
     }
 
+    Optional<MethodCallExpr> previousStart =
+        expect(jobBuilderFactoryBuild.getScope().get())
+            .toBeMethodCallExpression()
+            .withName("start")
+            .result();
+    if (previousStart.isEmpty()) {
+      return false;
+    }
+
+    Optional<MethodCallExpr> previousGet =
+        expect(previousStart.get().getScope().get())
+            .toBeMethodCallExpression()
+            .withName("get")
+            .result();
+
+    if (previousGet.isEmpty()) {
+      return false;
+    }
+
+    Optional<FieldAccessExpr> jobBuilderFactoryName =
+        expect(previousGet.get().getScope().get()).toBeFieldAccessExpression().result();
+    if (jobBuilderFactoryName.isEmpty()) {
+      return false;
+    }
+
     // if there's a JobRepository in the arguments to the function, use that or create a new one
     MethodDeclaration methodDeclaration = methodDeclarationRef.get();
     Parameter jobRepository;
 
     Optional<Parameter> jobRepositoryParameterRef =
         methodDeclaration.getParameters().stream()
-            .filter(p -> p.getTypeAsString().equals(JOB_REPOSITORY) || p.getTypeAsString().equals())
+            .filter(
+                p ->
+                    p.getTypeAsString().equals(JOB_REPOSITORY)
+                        || p.getTypeAsString().equals(JOB_REPOSITORY_FQCN))
             .findFirst();
 
-    if (jobRepositoryParameterRef.isEmpty()) {
+    if (jobRepositoryParameterRef.isPresent()) {
       jobRepository = jobRepositoryParameterRef.get();
     } else {
       jobRepository =
@@ -83,18 +118,51 @@ public final class MigrateSpringJobBuilderFactoryCodemod
     ClassOrInterfaceType jobBuilderType = StaticJavaParser.parseClassOrInterfaceType("JobBuilder");
     ObjectCreationExpr newJobBuilder = new ObjectCreationExpr();
     newJobBuilder.setType(jobBuilderType);
-    newJobBuilder.addArgument(jobRepository.getNameAsString());
-    newJobBuilder.addArgument(jobBuilderFactoryBuild.getArgument(0));
+    newJobBuilder.addArgument(new NameExpr(jobRepository.getNameAsString()));
+    newJobBuilder.addArgument(previousGet.get().getArgument(0));
+
+    MethodCallExpr start = new MethodCallExpr(newJobBuilder, "start");
+    start.addArgument(previousStart.get().getArgument(0));
+
+    MethodCallExpr build = new MethodCallExpr(start, "build");
+    replace(jobBuilderFactoryBuild).withExpression(build);
 
     addImportIfMissing(cu, JOB_REPOSITORY_FQCN);
     addImportIfMissing(cu, JOB_BUILDER_FQCN);
-    removeImportIfUnused(cu, JOB_REPOSITORY_FQCN);
-    return false;
+
+    // remove variable if unused
+    FieldAccessExpr factoryVariableName = jobBuilderFactoryName.get();
+    String simpleVariableName = factoryVariableName.getNameAsString();
+
+    // don't try to be smart about scopes or anything, just remove the variable if there's literally
+    // no other references to it and it's private
+    if (cu.findAll(FieldAccessExpr.class).stream()
+        .noneMatch(f -> simpleVariableName.equals(f.getNameAsString()))) {
+      List<VariableDeclarator> matchingVariables =
+          cu.findAll(VariableDeclarator.class).stream()
+              .filter(vd -> vd.getNameAsString().equals(simpleVariableName))
+              .toList();
+      if (matchingVariables.size() == 1) {
+        VariableDeclarator variable = matchingVariables.get(0);
+        Node parentNode = variable.getParentNode().get();
+        if (parentNode instanceof FieldDeclaration fieldDeclaration
+            && fieldDeclaration.isPrivate()) {
+          fieldDeclaration.remove(variable);
+          if (fieldDeclaration.getVariables().isEmpty()) {
+            fieldDeclaration.remove();
+          }
+        }
+      }
+    }
+
+    removeImportIfUnused(cu, JOB_BUILDER_FACTORY_FQCN);
+
+    return true;
   }
 
-  private static final String JOB_REPOSITORY = "JobRepository";
   private static final String JOB_REPOSITORY_FQCN =
       "org.springframework.batch.core.repository.JobRepository";
+  private static final String JOB_REPOSITORY = "JobRepository";
   private static final String JOB_BUILDER_FQCN =
       "org.springframework.batch.core.job.builder.JobBuilder";
   private static final String JOB_BUILDER_FACTORY_FQCN =
