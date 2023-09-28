@@ -1,0 +1,8 @@
+{
+  "summary" : "Switch to StandardCharsets fields instead of strings",
+  "change": "Switched to pointers instead of String lookups for charset retrieval",
+  "references" : [
+    "https://community.sonarsource.com/t/use-standardcharsets-instead-of-charset-names/638",
+    "https://github.com/pmd/pmd/issues/3190"
+  ]
+}

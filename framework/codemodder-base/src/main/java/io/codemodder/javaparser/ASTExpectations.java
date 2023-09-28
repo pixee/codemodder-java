@@ -4,6 +4,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -87,9 +88,32 @@ public final class ASTExpectations {
       return new ExpressionStatementExpectation(Optional.of((ExpressionStmt) nodeRef.get()));
     }
 
+    public StringLiteralExpectation toBeStringLiteral() {
+      if (nodeRef.isEmpty() || !(nodeRef.get() instanceof StringLiteralExpr)) {
+        return new StringLiteralExpectation(Optional.empty());
+      }
+      return new StringLiteralExpectation(Optional.of((StringLiteralExpr) nodeRef.get()));
+    }
+
     @Override
     public Optional<Node> result() {
       return nodeRef;
+    }
+  }
+
+  /** A type for querying and filtering string literals. */
+  public static class StringLiteralExpectation
+      implements ASTExpectationProducer<StringLiteralExpr> {
+
+    private final Optional<StringLiteralExpr> stringLiteralExpr;
+
+    public StringLiteralExpectation(final Optional<StringLiteralExpr> stringLiteralExpr) {
+      this.stringLiteralExpr = stringLiteralExpr;
+    }
+
+    @Override
+    public Optional<StringLiteralExpr> result() {
+      return stringLiteralExpr;
     }
   }
 
