@@ -103,13 +103,13 @@ public final class ASTExpectations {
         return new FieldAccessExpectation(Optional.empty());
       }
       return new FieldAccessExpectation(Optional.of((FieldAccessExpr) nodeRef.get()));
+    }
 
     public StringLiteralExpectation toBeStringLiteral() {
       if (nodeRef.isEmpty() || !(nodeRef.get() instanceof StringLiteralExpr)) {
         return new StringLiteralExpectation(Optional.empty());
       }
       return new StringLiteralExpectation(Optional.of((StringLiteralExpr) nodeRef.get()));
-
     }
 
     @Override
@@ -145,7 +145,7 @@ public final class ASTExpectations {
       return name;
     }
   }
-    
+
   /** A type for querying and filtering string literals. */
   public static class StringLiteralExpectation
       implements ASTExpectationProducer<StringLiteralExpr> {
