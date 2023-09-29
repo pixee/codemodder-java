@@ -115,7 +115,10 @@ final class DefaultModuleInfoUpdater implements ModuleInfoUpdater {
 
     String diffString = String.join("\n", patchDiff);
     int position = 1 + patch.getDeltas().get(0).getSource().getPosition();
-    CodeTFChange change = new CodeTFChange(position, Map.of(), "", List.of(), List.of());
+    String description =
+        "Added module visibility for new "
+            + (injectedDependencies.size() == 1 ? "dependency" : "dependencies");
+    CodeTFChange change = new CodeTFChange(position, Map.of(), description, List.of(), List.of());
     CodeTFChangesetEntry entry =
         new CodeTFChangesetEntry(relativePath, diffString, List.of(change));
     return DependencyUpdateResult.create(
