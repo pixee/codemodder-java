@@ -8,7 +8,7 @@ description = "Plugin for providing Maven dependency management functions to cod
 dependencies {
     compileOnly(libs.jetbrains.annotations)
     implementation(project(":framework:codemodder-base"))
-    implementation("io.github.pixee.maven:pom-operator:0.0.22") // TODO bring into monorepo
+    implementation("io.github.pixee.maven:pom-operator:0.0.23") // TODO bring into monorepo
     {
         exclude(group = "com.google.inject", module = "guice")
     }
