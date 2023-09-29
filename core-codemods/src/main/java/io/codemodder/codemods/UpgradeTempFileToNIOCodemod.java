@@ -1,5 +1,6 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 import static io.codemodder.javaparser.JavaParserTransformer.replace;
 
 import com.contrastsecurity.sarif.Result;
@@ -43,6 +44,7 @@ public final class UpgradeTempFileToNIOCodemod
     nioTmpFileCall.setArguments(newArguments);
     MethodCallExpr replacement = new MethodCallExpr(nioTmpFileCall, "toFile");
     replace(foundCreateTempCall).withExpression(replacement);
+    addImportIfMissing(cu, Files.class);
     return true;
   }
 
