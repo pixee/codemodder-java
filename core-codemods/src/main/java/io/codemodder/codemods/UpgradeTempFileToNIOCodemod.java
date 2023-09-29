@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.nio.file.Files;
@@ -37,9 +38,12 @@ public final class UpgradeTempFileToNIOCodemod
       final Result result) {
 
     NodeList<Expression> newArguments = getNewArguments(foundCreateTempCall);
-    return replace(foundCreateTempCall)
-        .withStaticMethod("java.nio.file.Files", "createTempFile")
-        .withNewArguments(newArguments);
+    NameExpr nioFiles = new NameExpr(Files.class.getSimpleName());
+    MethodCallExpr nioTmpFileCall = new MethodCallExpr(nioFiles, "createTempFile");
+    nioTmpFileCall.setArguments(newArguments);
+    MethodCallExpr replacement = new MethodCallExpr(nioTmpFileCall, "toFile");
+    replace(foundCreateTempCall).withExpression(replacement);
+    return true;
   }
 
   private NodeList<Expression> getNewArguments(final MethodCallExpr foundCreateTempCall) {
