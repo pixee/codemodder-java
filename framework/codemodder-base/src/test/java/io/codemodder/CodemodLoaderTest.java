@@ -51,7 +51,7 @@ final class CodemodLoaderTest {
 
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
-      return null;
+      return "no description";
     }
   }
 
@@ -108,7 +108,7 @@ final class CodemodLoaderTest {
 
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
-      return null;
+      return "added a b then a newline";
     }
   }
 
@@ -147,7 +147,7 @@ final class CodemodLoaderTest {
 
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
-      return null;
+      return "added a c then newline";
     }
   }
 
@@ -230,7 +230,7 @@ final class CodemodLoaderTest {
 
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
-      return null;
+      return "added the number parameter";
     }
   }
 

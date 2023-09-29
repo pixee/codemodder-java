@@ -269,7 +269,6 @@ final class DefaultCodemodExecutorTest {
     assertThat(javaFile2Entry.getChanges()).hasSize(1);
     CodeTFChange firstCodeChange = javaFile2Entry.getChanges().get(0);
     assertThat(firstCodeChange.getLineNumber()).isEqualTo(2);
-    assertThat(firstCodeChange.getSourceControlUrl()).isNull();
     assertThat(firstCodeChange.getDescription()).isEqualTo("injects-dependency-1-change");
     List<CodeTFPackageAction> javaFile2PackageActions = firstCodeChange.getPackageActions();
     assertThat(javaFile2PackageActions.size()).isEqualTo(1);
@@ -281,24 +280,26 @@ final class DefaultCodemodExecutorTest {
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionResult.COMPLETED);
     assertThat(javaFile2Entry.getDiff())
         .isEqualTo(
-            "--- Test2.java\n"
-                + "+++ Test2.java\n"
-                + "@@ -1,3 +1,5 @@\n"
-                + " class Test2 {\n"
-                + "-  void needsDep1() {}\n"
-                + "+  void needsDep1() {\n"
-                + "+      Dependency1.doStuff();\n"
-                + "+  }\n"
-                + " }");
+            """
+                        --- Test2.java
+                        +++ Test2.java
+                        @@ -1,3 +1,5 @@
+                         class Test2 {
+                        -  void needsDep1() {}
+                        +  void needsDep1() {
+                        +      Dependency1.doStuff();
+                        +  }
+                         }""");
     CodeTFChangesetEntry firstDepsEntry = firstChangeset.get(1);
     assertThat(firstDepsEntry.getPath()).isEqualTo("deps.txt");
     assertThat(firstDepsEntry.getDiff())
         .isEqualTo(
-            "--- deps.txt\n"
-                + "+++ deps.txt\n"
-                + "@@ -1,1 +1,2 @@\n"
-                + " my-org:my-existing-dependency:1.0.0\n"
-                + "+pkg:maven/org.spring/dep1@1.1.1");
+            """
+                        --- deps.txt
+                        +++ deps.txt
+                        @@ -1,1 +1,2 @@
+                         my-org:my-existing-dependency:1.0.0
+                        +pkg:maven/org.spring/dep1@1.1.1""");
 
     CodeTFResult injectDependency2Result = report.getResults().get(1);
     List<CodeTFChangesetEntry> secondChangeset = injectDependency2Result.getChangeset();
@@ -315,18 +316,18 @@ final class DefaultCodemodExecutorTest {
     assertThat(javaFile4Entry.getChanges()).hasSize(1);
     assertThat(javaFile4Entry.getDiff())
         .isEqualTo(
-            "--- Test4.java\n"
-                + "+++ Test4.java\n"
-                + "@@ -1,3 +1,5 @@\n"
-                + " class Test4 {\n"
-                + "-  void needsDep2() {}\n"
-                + "+  void needsDep2() {\n"
-                + "+      Dependency2.doStuff();\n"
-                + "+  }\n"
-                + " }");
+            """
+                        --- Test4.java
+                        +++ Test4.java
+                        @@ -1,3 +1,5 @@
+                         class Test4 {
+                        -  void needsDep2() {}
+                        +  void needsDep2() {
+                        +      Dependency2.doStuff();
+                        +  }
+                         }""");
 
     CodeTFChange secondCodeChange = javaFile4Entry.getChanges().get(0);
-    assertThat(secondCodeChange.getSourceControlUrl()).isEqualTo("https://dep2-control.com/src");
     List<CodeTFPackageAction> javaFile4PackageActions = secondCodeChange.getPackageActions();
     assertThat(javaFile4PackageActions.size()).isEqualTo(1);
     assertThat(javaFile4PackageActions.get(0).getAction())
@@ -340,12 +341,13 @@ final class DefaultCodemodExecutorTest {
     assertThat(secondDepsEntry.getPath()).isEqualTo("deps.txt");
     assertThat(secondDepsEntry.getDiff())
         .isEqualTo(
-            "--- deps.txt\n"
-                + "+++ deps.txt\n"
-                + "@@ -1,2 +1,3 @@\n"
-                + " my-org:my-existing-dependency:1.0.0\n"
-                + " pkg:maven/org.spring/dep1@1.1.1\n"
-                + "+pkg:maven/org.apache/dep2@2.2.2");
+            """
+                        --- deps.txt
+                        +++ deps.txt
+                        @@ -1,2 +1,3 @@
+                         my-org:my-existing-dependency:1.0.0
+                         pkg:maven/org.spring/dep1@1.1.1
+                        +pkg:maven/org.apache/dep2@2.2.2""");
 
     // assert that the report can be serialized by jackson to json without error
     ObjectWriter writer =
@@ -394,15 +396,16 @@ final class DefaultCodemodExecutorTest {
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionResult.FAILED);
     assertThat(javaFile2Entry.getDiff())
         .isEqualTo(
-            "--- Test2.java\n"
-                + "+++ Test2.java\n"
-                + "@@ -1,3 +1,5 @@\n"
-                + " class Test2 {\n"
-                + "-  void needsDep1() {}\n"
-                + "+  void needsDep1() {\n"
-                + "+      Dependency1.doStuff();\n"
-                + "+  }\n"
-                + " }");
+            """
+                        --- Test2.java
+                        +++ Test2.java
+                        @@ -1,3 +1,5 @@
+                         class Test2 {
+                        -  void needsDep1() {}
+                        +  void needsDep1() {
+                        +      Dependency1.doStuff();
+                        +  }
+                         }""");
   }
 
   @Test
@@ -446,15 +449,16 @@ final class DefaultCodemodExecutorTest {
         .isEqualTo(CodeTFPackageAction.CodeTFPackageActionResult.SKIPPED);
     assertThat(javaFile2Entry.getDiff())
         .isEqualTo(
-            "--- Test2.java\n"
-                + "+++ Test2.java\n"
-                + "@@ -1,3 +1,5 @@\n"
-                + " class Test2 {\n"
-                + "-  void needsDep1() {}\n"
-                + "+  void needsDep1() {\n"
-                + "+      Dependency1.doStuff();\n"
-                + "+  }\n"
-                + " }");
+            """
+                        --- Test2.java
+                        +++ Test2.java
+                        @@ -1,3 +1,5 @@
+                         class Test2 {
+                        -  void needsDep1() {}
+                        +  void needsDep1() {
+                        +      Dependency1.doStuff();
+                        +  }
+                         }""");
   }
 
   private static void hasBeforeAfterCodemodMetadata(final CodeTFResult result) {
@@ -469,16 +473,17 @@ final class DefaultCodemodExecutorTest {
     CodeTFChange change = entry.getChanges().get(0);
     assertThat(change.getLineNumber()).isEqualTo(2);
     assertThat(change.getPackageActions()).isEmpty();
-    assertThat(change.getDescription()).isEqualTo("");
+    assertThat(change.getDescription()).isEqualTo("before-after");
     assertThat(entry.getDiff())
         .isEqualTo(
-            "--- Test1.java\n"
-                + "+++ Test1.java\n"
-                + "@@ -1,3 +1,3 @@\n"
-                + " class Test1 {\n"
-                + "-  void before() {}\n"
-                + "+  void after() {}\n"
-                + " }");
+            """
+                        --- Test1.java
+                        +++ Test1.java
+                        @@ -1,3 +1,3 @@
+                         class Test1 {
+                        -  void before() {}
+                        +  void after() {}
+                         }""");
   }
 
   private static void isJavaFile3ChangedCorrectly(final CodeTFChangesetEntry entry) {
@@ -487,17 +492,18 @@ final class DefaultCodemodExecutorTest {
     CodeTFChange change = entry.getChanges().get(0);
     assertThat(change.getLineNumber()).isEqualTo(3);
     assertThat(change.getPackageActions()).isEmpty();
-    assertThat(change.getDescription()).isEqualTo("");
+    assertThat(change.getDescription()).isEqualTo("before-after");
     assertThat(entry.getDiff())
         .isEqualTo(
-            "--- Test3.java\n"
-                + "+++ Test3.java\n"
-                + "@@ -1,4 +1,4 @@\n"
-                + " class Test3 {\n"
-                + "   void nothing() {}\n"
-                + "-  void before() {}\n"
-                + "+  void after() {}\n"
-                + " }");
+            """
+                        --- Test3.java
+                        +++ Test3.java
+                        @@ -1,4 +1,4 @@
+                         class Test3 {
+                           void nothing() {}
+                        -  void before() {}
+                        +  void after() {}
+                         }""");
   }
 
   /** Changes all method calls to methods named "before" to "after". */
@@ -538,7 +544,7 @@ final class DefaultCodemodExecutorTest {
 
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
-      return "";
+      return "before-after";
     }
   }
 
