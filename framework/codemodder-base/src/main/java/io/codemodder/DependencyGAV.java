@@ -180,7 +180,7 @@ public interface DependencyGAV {
         noTransitiveDependencies);
   }
 
-  String JAVA_SECURITY_TOOLKIT_VERSION = "1.0.7";
+  String JAVA_SECURITY_TOOLKIT_VERSION = "1.1.0";
   String JAVA_SECURITY_TOOLKIT_GAV =
       "io.github.pixee:java-security-toolkit:" + JAVA_SECURITY_TOOLKIT_VERSION;
 

@@ -2,6 +2,7 @@ package io.codemodder.plugins.jpms;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
@@ -105,6 +106,8 @@ public final class JavaModuleProvider implements ProjectProvider {
 
   private Optional<String> readPackageNameFromFile(final Path javaFile) throws IOException {
     JavaParser javaParser = new JavaParser();
+    ParserConfiguration parserConfiguration = javaParser.getParserConfiguration();
+    parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.BLEEDING_EDGE);
     ParseResult<CompilationUnit> parseResult = javaParser.parse(javaFile);
     if (!parseResult.isSuccessful()) {
       LOG.warn("Couldn't parse java file to inspect package");
