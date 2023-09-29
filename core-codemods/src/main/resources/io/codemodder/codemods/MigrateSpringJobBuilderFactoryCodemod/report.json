@@ -1,0 +1,11 @@
+{
+  "summary" : "Migrated thing",
+  "change" : "Migrated thing",
+  "references" : [
+    "https://owasp.org/www-community/vulnerabilities/Use_of_Obsolete_Methods",
+    "https://cwe.mitre.org/data/definitions/477.html",
+    "https://github.com/spring-projects/spring-batch/issues/4188",
+    "https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/core/configuration/annotation/JobBuilderFactory.html",
+    "https://github.com/spring-projects/spring-batch/wiki/Spring-Batch-5.0-Migration-Guide"
+  ]
+}
