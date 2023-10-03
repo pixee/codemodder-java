@@ -78,7 +78,7 @@ abstract class GitRepositoryTest {
 
   @BeforeEach
   void createOutputFile() throws IOException {
-    this.outputFile = File.createTempFile("report", ".log");
+    this.outputFile = Files.createTempFile("report", ".log").toFile();
     outputFile.deleteOnExit();
   }
 }
