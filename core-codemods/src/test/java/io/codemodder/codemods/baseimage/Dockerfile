@@ -1,4 +1,3 @@
-# Use a base image with JDK 17 and Python pre-installed
 FROM ubuntu:20.04
 
 # Install OpenJDK 17
@@ -14,7 +13,6 @@ RUN apt-get update && \
 # Update the package list and install wget
 RUN apt-get update && apt-get install -y wget unzip && apt-get clean
 
-# Install Gradle
 # Install Gradle
 ENV GRADLE_VERSION=8.2.1
 ENV GRADLE_HOME=/opt/gradle
