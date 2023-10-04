@@ -55,7 +55,7 @@ final class WebGoat822Test extends GitRepositoryTest {
     assertThat(results.size(), is(1));
     CodeTFResult result = results.get(0);
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
-    assertThat(changeset.size(), is(2));
+    assertThat(changeset.size(), is(3));
     assertThat(
         changeset.get(0).getPath(),
         equalTo(
@@ -95,7 +95,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    assertThat(fileChanges.size(), is(48));
+    assertThat(fileChanges.size(), is(54));
 
     // we only inject into a couple files
     verifyStandardCodemodResults(fileChanges);
@@ -133,7 +133,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    assertThat(fileChanges.size(), is(53));
+    assertThat(fileChanges.size(), is(59));
 
     verifyStandardCodemodResults(fileChanges);
 
