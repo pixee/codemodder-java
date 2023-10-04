@@ -1,4 +1,4 @@
-package com.example.demo.api;
+package com.example.moveswitchdefaultlast.api;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
