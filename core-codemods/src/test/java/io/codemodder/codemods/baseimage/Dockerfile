@@ -23,19 +23,6 @@ RUN wget -q "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-
     unzip -q "/tmp/gradle-${GRADLE_VERSION}-bin.zip" -d /opt && \
     rm -rf "/tmp/gradle-${GRADLE_VERSION}-bin.zip"
 
-
-# Create a directory for Gradle installation
-RUN mkdir -p /opt/gradle
-
-# Download and extract Gradle distribution, then clean up
-RUN apt-get update && \
-    apt-get install -y wget unzip && \
-    wget -q $GRADLE_URL -O /tmp/gradle.zip && \
-    unzip -q /tmp/gradle.zip -d /opt/gradle && \
-    rm /tmp/gradle.zip && \
-    apt-get remove -y wget unzip && \
-    apt-get clean
-
 ENV PATH="${GRADLE_HOME}/bin:${PATH}"
 
 # Set environment variables (optional)
