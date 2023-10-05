@@ -5,6 +5,13 @@ plugins {
 
 description = "Base framework for writing codemods in Java"
 
+// add the project version to the manifest
+tasks.jar {
+    manifest {
+        attributes["Implementation-Version"] = version
+    }
+}
+
 dependencies {
     compileOnly(libs.jetbrains.annotations)
 
