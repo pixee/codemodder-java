@@ -75,8 +75,33 @@ final class CLITest {
   }
 
   @Test
-  void dry_run_works() throws IOException {
+  void it_does_structured_logging() throws IOException {
+    Path codetf = Files.createTempFile("normal", ".codetf");
+    String[] args =
+        new String[] {
+          "--dont-exit",
+          "--verbose",
+          "--log-format=json",
+          "--output",
+          codetf.toString(),
+          workingRepoDir.toString()
+        };
 
+    final var stdoutWriter = new StringWriter();
+    final var stderrWriter = new StringWriter();
+    try (var stdout = new PrintWriter(stdoutWriter);
+        var stderr = new PrintWriter(stderrWriter)) {
+      Runner.run(List.of(Cloud9Changer.class), args, stdout, stderr);
+      // confirm change happened
+      assertThat(Files.readString(fooJavaFile)).contains("cloud9");
+    }
+    // confirm JSON was captured
+    String output = stdoutWriter.toString();
+    assertThat(output).contains("{ }");
+  }
+
+  @Test
+  void dry_run_works() throws IOException {
     Path normalCodetf = Files.createTempFile("normal", ".codetf");
     Path dryRunCodetf = Files.createTempFile("dryrun", ".codetf");
 

@@ -4,6 +4,8 @@ import static io.codemodder.Logs.logEnteringPhase;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
@@ -26,6 +28,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.logstash.logback.encoder.LogstashEncoder;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -77,6 +80,12 @@ final class CLI implements Callable<Integer> {
       description = "the format for the data output file (\"codetf\" or \"diff\")",
       defaultValue = "codetf")
   private OutputFormat outputFormat;
+
+  @CommandLine.Option(
+      names = {"--log-format"},
+      description = "the format of log data(\"human\" or \"json\")",
+      defaultValue = "human")
+  private LogFormat logFormat;
 
   @CommandLine.Option(
       names = {"--list"},
@@ -131,6 +140,12 @@ final class CLI implements Callable<Integer> {
   enum OutputFormat {
     CODETF,
     DIFF
+  }
+
+  /** The format for the log output. */
+  enum LogFormat {
+    HUMAN,
+    JSON
   }
 
   CLI(final String[] args, final List<Class<? extends CodeChanger>> codemodTypes) {
@@ -207,8 +222,11 @@ final class CLI implements Callable<Integer> {
   public Integer call() throws IOException {
 
     if (verbose) {
-      LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-      context.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME).setLevel(Level.DEBUG);
+      setupVerboseLogging();
+    }
+
+    if (LogFormat.JSON.equals(logFormat)) {
+      setupJsonLogging();
     }
 
     if (listCodemods) {
@@ -406,6 +424,30 @@ final class CLI implements Callable<Integer> {
         log.debug("cleaned temp directory: {}", projectDirectory);
       }
     }
+  }
+
+  private void setupJsonLogging() {
+    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+    ch.qos.logback.classic.Logger rootLogger =
+        context.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME);
+    rootLogger.detachAndStopAllAppenders();
+    LogstashEncoder logstashEncoder = new LogstashEncoder();
+    logstashEncoder.setContext(context);
+    logstashEncoder.start();
+
+    ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
+    appender.setContext(context);
+    appender.setEncoder(logstashEncoder);
+    appender.start();
+
+    rootLogger.addAppender(appender);
+  }
+
+  private void setupVerboseLogging() {
+    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+    ch.qos.logback.classic.Logger rootLogger =
+        context.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME);
+    rootLogger.setLevel(Level.DEBUG);
   }
 
   private static void logMetrics(final List<CodeTFResult> results) {
