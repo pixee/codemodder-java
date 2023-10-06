@@ -1,6 +1,5 @@
 package com.example.moveswitchdefaultlast.api;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +23,8 @@ public class TestController {
 
             // Case
             case 4 -> "Thursday";
+            // Default case
+            default -> "Invalid day";
 
             // Case
             case 5 -> "Friday";
@@ -33,9 +34,6 @@ public class TestController {
 
             // Case
             case 7 -> "Sunday";
-
-            // Default case
-            default -> "Invalid day";
         };
 
       return dayString;

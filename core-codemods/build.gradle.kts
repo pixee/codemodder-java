@@ -3,6 +3,7 @@ plugins {
     id("io.codemodder.runner")
     id("io.codemodder.maven-publish")
     `jvm-test-suite`
+    kotlin("jvm") version "1.9.20-Beta2"
 }
 
 val main = "io.codemodder.codemods.DefaultCodemods"
@@ -34,6 +35,7 @@ dependencies {
     testRuntimeOnly(testlibs.junit.jupiter.engine)
     testImplementation(testlibs.jgit)
     testImplementation("org.testcontainers:testcontainers:1.19.0")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 val integrationTestSuiteName = "intTest"
@@ -66,4 +68,10 @@ testing {
 tasks.named("check") {
     @Suppress("UnstableApiUsage")
     dependsOn(testing.suites.named(integrationTestSuiteName))
+}
+repositories {
+    mavenCentral()
+}
+kotlin {
+    jvmToolchain(17)
 }

@@ -7,13 +7,17 @@ import java.io.File;
 
 public class DockerContainerFactory {
 
-    public static GenericContainer<?> createContainer(final String codemodId, final String runCodemod) {
+    public static final String CODEMOD_ID_ARG_NAME = "CODEMOD_ID";
+    public static final String RUN_CODEMOD_ARG_NAME = "RUN_CODEMOD";
+
+    public static GenericContainer<?> createContainer(final String codemodId, final boolean runCodemod) {
         return new GenericContainer(
                 new ImageFromDockerfile()
-                        .withFileFromPath("core-codemods", new File("/Users/arturo/IdeaProjects/codemodder-java/core-codemods").toPath())
+                        // TODO: remove absolute path for the build context resources
+                        .withFileFromPath("test-applications", new File("/Users/arturo/IdeaProjects/codemodder-java/core-codemods/src/test/resources/test-applications").toPath())
                         .withFileFromPath("Dockerfile", new File("/Users/arturo/IdeaProjects/codemodder-java/core-codemods/src/test/java/io/codemodder/codemods/integration/Dockerfile").toPath())
-                        .withBuildArg("RUN_CODEMOD", runCodemod)
-                        .withBuildArg("CODEMOD_ID", codemodId)
+                        .withBuildArg(CODEMOD_ID_ARG_NAME, codemodId)
+                        .withBuildArg(RUN_CODEMOD_ARG_NAME, String.valueOf(runCodemod))
         )
                 .withExposedPorts(8080);
     }

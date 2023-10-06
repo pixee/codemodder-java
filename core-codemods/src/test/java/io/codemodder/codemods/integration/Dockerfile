@@ -3,10 +3,13 @@ FROM codemodder-base
 ARG RUN_CODEMOD=false
 ARG CODEMOD_ID
 
+ENV GRADLE_USER_HOME=/gradle-cache
+
 #Copy test project
 WORKDIR /test-applications
-COPY /core-codemods/src/test/resources/test-applications/$CODEMOD_ID /test-applications/$CODEMOD_ID
+COPY /test-applications/$CODEMOD_ID /test-applications/$CODEMOD_ID
 
+# Run the tool against the test project
 WORKDIR /codemodder-java/core-codemods-0.0.1/bin
 
 # Use the argument to conditionally run tool
@@ -16,9 +19,9 @@ RUN if [ "$RUN_CODEMOD" = "true" ]; then \
         echo "Tool will not run"; \
     fi
 
+# Generate test application jar
 WORKDIR /test-applications/$CODEMOD_ID
-
-RUN ./gradlew bootJar
+RUN gradle bootJar --info
 
 WORKDIR /test-applications/move-switch-default-last/build/libs
-CMD ["java", "-jar", "move-switch-default-last-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "test-app.jar"]

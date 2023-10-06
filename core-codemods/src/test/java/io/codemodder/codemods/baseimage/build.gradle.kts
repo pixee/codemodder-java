@@ -1,15 +1,5 @@
-import org.springframework.boot.gradle.tasks.bundling.BootJar
-
 plugins {
     java
-    id("org.springframework.boot") version "3.1.4"
-}
-
-group = "com.example"
-version = "0.0.1-SNAPSHOT"
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -22,8 +12,3 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-tomcat:3.1.4")
     implementation("org.springframework:spring-webmvc:6.0.12")
 }
-
-tasks.named<BootJar>("bootJar") {
-    archiveFileName.set("test-app.jar")
-}
-
