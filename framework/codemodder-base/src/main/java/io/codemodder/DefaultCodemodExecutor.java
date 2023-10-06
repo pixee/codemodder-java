@@ -172,7 +172,6 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             emptyMap(),
             changeDescription,
             pkgActions,
-            codeChanger.getSourceControlUrl().orElse(null),
             codemodChange.getParameters());
 
     for (CodeTFProvider provider : codetfProviders) {

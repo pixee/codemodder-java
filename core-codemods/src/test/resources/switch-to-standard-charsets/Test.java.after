@@ -1,0 +1,56 @@
+package com.acme.testcode;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
+final class Test {
+
+   void foo(String str) throws UnsupportedEncodingException {
+       str.getBytes(StandardCharsets.UTF_8);
+       str.getBytes(StandardCharsets.UTF_16);
+       str.getBytes(StandardCharsets.UTF_16LE);
+       str.getBytes(StandardCharsets.UTF_16BE);
+       str.getBytes(StandardCharsets.US_ASCII);
+       str.getBytes(StandardCharsets.ISO_8859_1);
+       str.getBytes("unknown charset");
+       str.getBytes(StandardCharsets.UTF_8);
+
+       Object o = new Object();
+       o.getBytes("UTF-8"); // this is not a string, so shouldn't act on it
+   }
+
+   void bar(String s) {
+     Charset c = StandardCharsets.UTF_8;
+     byte[] b = s.getBytes(StandardCharsets.UTF_16LE);
+     Charset.forName("unknown");
+   }
+
+   void removeTryBlock(String tryblock) {
+     {
+       new Object(); // just a random constructor
+       tryblock.getBytes(StandardCharsets.UTF_8);
+     }
+   }
+
+   void cantRemoveTryBlock(String tryblock) {
+     try {
+       new Object(); // just a random constructor
+       tryblock.getBytes(StandardCharsets.UTF_8);
+     } catch (IllegalArgumentException e) {
+       e.printStackTrace(System.err);
+     }
+   }
+
+   void removePropagating(String removeProp) {
+     removeProp.getBytes(StandardCharsets.UTF_8);
+     new Skadoodle(); // just a random, unresolvable constructor
+   }
+
+   void cantResolve(String tryblock) {
+     {
+       tryblock.getBytes(StandardCharsets.UTF_8);
+       cantResolveThisMethod(); // probably doesn't throw UnsupportedEncodingException, so it's fine
+     }
+   }
+}

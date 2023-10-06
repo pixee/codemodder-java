@@ -77,7 +77,7 @@ public final class PmdModule extends AbstractModule {
               toBind.add(rulePair);
             });
 
-        LOG.debug("Finished scanning codemod package: {}", packageName);
+        LOG.trace("Finished scanning codemod package: {}", packageName);
         packagesScanned.add(packageName);
       }
     }

@@ -38,7 +38,8 @@ public abstract class JavaParserTransformer {
      *
      * @param className the class name of the static method
      * @param methodName the method name
-     * @param isStaticImport whether or not the static method is imported
+     * @param isStaticImport whether the static method should be imported and referenced in an
+     *     unqualified way
      * @return true if the transformation was successful, false otherwise
      */
     boolean withStaticMethod(String className, String methodName, boolean isStaticImport);

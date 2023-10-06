@@ -2,7 +2,6 @@ package io.codemodder;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 /** A reporter with empty strings for testing purposes. */
 public final class EmptyReporter implements CodemodReporterStrategy {
@@ -14,11 +13,6 @@ public final class EmptyReporter implements CodemodReporterStrategy {
   @Override
   public String getDescription() {
     return "";
-  }
-
-  @Override
-  public Optional<String> getSourceControlUrl() {
-    return Optional.empty();
   }
 
   @Override

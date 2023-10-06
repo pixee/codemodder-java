@@ -1,11 +1,14 @@
 package io.codemodder;
 
+import static io.codemodder.Logs.logEnteringPhase;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
 import com.google.common.base.Stopwatch;
+import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFReport;
 import io.codemodder.codetf.CodeTFReportGenerator;
 import io.codemodder.codetf.CodeTFResult;
@@ -202,6 +205,7 @@ final class CLI implements Callable<Integer> {
 
   @Override
   public Integer call() throws IOException {
+
     if (verbose) {
       LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
       context.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME).setLevel(Level.DEBUG);
@@ -214,6 +218,9 @@ final class CLI implements Callable<Integer> {
       }
       return SUCCESS;
     }
+
+    logEnteringPhase(Logs.ExecutionPhase.STARTING);
+    log.info("codemodder: java/{}", CLI.class.getPackage().getImplementationVersion());
 
     if (output == null) {
       log.error("The output file is required");
@@ -237,16 +244,18 @@ final class CLI implements Callable<Integer> {
       return ERROR_CANT_READ_PROJECT_DIRECTORY;
     }
 
+    logEnteringPhase(Logs.ExecutionPhase.SETUP);
+
     if (dryRun) {
       // create a temp dir and copy all the contents into it -- this may be slow for big repos on
       // cloud i/o
       Path copiedProjectDirectory = dryRunTempDirCreationStrategy.createTempDir();
       Stopwatch watch = Stopwatch.createStarted();
-      log.info("Copying project directory for dry run..: {}", copiedProjectDirectory);
+      log.debug("dry run temporary directory: {}", copiedProjectDirectory);
       FileUtils.copyDirectory(projectDirectory, copiedProjectDirectory.toFile());
       watch.stop();
       Duration elapsed = watch.elapsed();
-      log.info("Copy took: {}", elapsed);
+      log.debug("dry run copy finished: {}ms", elapsed.toMillis());
 
       // now that we've copied it, reassign the project directory to that place
       projectDirectory = copiedProjectDirectory.toFile();
@@ -268,6 +277,9 @@ final class CLI implements Callable<Integer> {
       }
       IncludesExcludes includesExcludes =
           IncludesExcludes.withSettings(projectDirectory, pathIncludes, pathExcludes);
+
+      log.debug("including paths: {}", pathIncludes);
+      log.debug("excluding paths: {}", pathExcludes);
 
       // get all files that match
       List<SourceDirectory> sourceDirectories =
@@ -300,6 +312,8 @@ final class CLI implements Callable<Integer> {
           new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap, codemodParameters);
       List<CodemodIdPair> codemods = loader.getCodemods();
 
+      log.debug("sarif files: {}", sarifFiles.size());
+
       // create the project providers
       List<ProjectProvider> projectProviders = loadProjectProviders();
       List<CodeTFProvider> codeTFProviders = loadCodeTFProviders();
@@ -311,6 +325,7 @@ final class CLI implements Callable<Integer> {
        * the original concrete syntax information (e.g., line numbers) in JavaParser from the first access. This
        * is what allows our codemods to act on SARIF-providing tools data accurately over multiple codemods.
        */
+      logEnteringPhase(Logs.ExecutionPhase.SCANNING);
       JavaParser javaParser = javaParserFactory.create(sourceDirectories);
       CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
       for (CodemodIdPair codemod : codemods) {
@@ -323,14 +338,39 @@ final class CLI implements Callable<Integer> {
                 codeTFProviders,
                 cachingJavaParser,
                 encodingDetector);
+        log.info("running codemod: {}", codemod.getId());
         CodeTFResult result = codemodExecutor.execute(filePaths);
         if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {
           results.add(result);
+        }
+        if (!result.getChangeset().isEmpty()) {
+          log.info("changed:");
+          result
+              .getChangeset()
+              .forEach(
+                  entry -> {
+                    log.info("  - " + entry.getPath());
+                    String indentedDiff =
+                        entry
+                            .getDiff()
+                            .lines()
+                            .map(line -> "      " + line)
+                            .collect(Collectors.joining(System.lineSeparator()));
+                    log.debug("    diff:");
+                    log.debug(indentedDiff);
+                  });
+        }
+        if (!result.getFailedFiles().isEmpty()) {
+          log.info("failed:");
+          result.getFailedFiles().forEach(f -> log.info("  - {}", f));
         }
       }
 
       Instant end = clock.instant();
       long elapsed = end.toEpochMilli() - start.toEpochMilli();
+
+      logEnteringPhase(Logs.ExecutionPhase.REPORT);
+      logMetrics(results);
 
       // write out the output
       if (OutputFormat.CODETF.equals(outputFormat)) {
@@ -346,9 +386,12 @@ final class CLI implements Callable<Integer> {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         Files.writeString(outputPath, mapper.writeValueAsString(report));
+        log.debug("report file: {}", outputPath);
       } else if (OutputFormat.DIFF.equals(outputFormat)) {
         throw new UnsupportedOperationException("not supported yet");
       }
+
+      log.debug("elapsed: {}ms", elapsed);
 
       // this is a special exit code that tells the caller to not exit
       if (dontExit) {
@@ -359,10 +402,26 @@ final class CLI implements Callable<Integer> {
     } finally {
       if (dryRun) {
         // delete the temp directory
-        log.debug("Cleaning temp directory: {}", projectDirectory);
         FileUtils.deleteDirectory(projectDirectory);
+        log.debug("cleaned temp directory: {}", projectDirectory);
       }
     }
+  }
+
+  private static void logMetrics(final List<CodeTFResult> results) {
+    List<String> failedFiles = results.stream().flatMap(r -> r.getFailedFiles().stream()).toList();
+
+    List<String> changedFiles =
+        results.stream()
+            .flatMap(r -> r.getChangeset().stream())
+            .map(CodeTFChangesetEntry::getPath)
+            .toList();
+
+    long uniqueChangedFiles = changedFiles.stream().distinct().count();
+    long uniqueFailedFiles = failedFiles.stream().distinct().count();
+
+    log.debug("failed files: {} ({} unique)", failedFiles.size(), uniqueFailedFiles);
+    log.debug("changed files: {} ({} unique)", changedFiles.size(), uniqueChangedFiles);
   }
 
   private List<CodeTFProvider> loadCodeTFProviders() {
@@ -411,7 +470,14 @@ final class CLI implements Callable<Integer> {
           "**/web.xml");
 
   private static final List<String> defaultPathExcludes =
-      List.of("**/test/**", "**/tests/**", "**/target/**", "**/build/**", "**/.mvn/**", ".mvn/**");
+      List.of(
+          "**/test/**",
+          "**/intTest/**",
+          "**/tests/**",
+          "**/target/**",
+          "**/build/**",
+          "**/.mvn/**",
+          ".mvn/**");
 
   private static final Logger log = LoggerFactory.getLogger(CLI.class);
 }

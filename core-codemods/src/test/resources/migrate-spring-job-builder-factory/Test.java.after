@@ -1,0 +1,14 @@
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+
+@Configuration
+@EnableBatchProcessing
+public class MyJobConfig {
+
+    @Bean
+    public Job myJob(Step step, JobRepository jobRepository) {
+        // ruleid: migrate-spring-job-builder-factory
+        return new JobBuilder(jobRepository, "myJob").start(step).build();
+    }
+
+}

@@ -2,20 +2,21 @@ package acme.test;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Test
 {
     void foo(File dir, Path pathDir) {
         // ruleid: upgrade-tempfile-to-nio
-        File change1 = Files.createTempFile("acme", ".txt");
+        File change1 = Files.createTempFile("acme", ".txt").toFile();
         // ruleid: upgrade-tempfile-to-nio
-        File change2 = Files.createTempFile(dir.toPath(), "acme", ".txt");
+        File change2 = Files.createTempFile(dir.toPath(), "acme", ".txt").toFile();
 
         // ok: upgrade-tempfile-to-nio
-        File dontChange1 = Files.createTempFile("acme", ".txt");
+        File dontChange1 = Files.createTempFile("acme", ".txt").toFile();
         // ok: upgrade-tempfile-to-nio
-        File dontChange2 = Files.createTempFile("acme", ".txt");
+        Path dontChange2 = Files.createTempFile("acme", ".txt");
         // ok: upgrade-tempfile-to-nio
-        File dontChange3 = Files.createTempFile(pathDir, "acme", ".txt");
+        File dontChange3 = Files.createTempFile(pathDir, "acme", ".txt").toFile();
     }
 }

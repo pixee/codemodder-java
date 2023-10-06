@@ -177,7 +177,7 @@ public final class SemgrepModule extends AbstractModule {
               toBind.add(rulePair);
             });
 
-        LOG.debug("Finished scanning codemod package: {}", packageName);
+        LOG.trace("Finished scanning codemod package: {}", packageName);
         packagesScanned.add(packageName);
       }
     }

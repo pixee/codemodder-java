@@ -129,7 +129,6 @@ final class DefaultCodemodExecutorTest {
               Collections.emptyMap(),
               "updated deps",
               List.of(packageAddResult),
-              null,
               List.of());
       CodeTFChangesetEntry entry = new CodeTFChangesetEntry("deps.txt", diff, List.of(change));
       List<CodeTFChangesetEntry> changes = List.of(entry);
@@ -270,7 +269,6 @@ final class DefaultCodemodExecutorTest {
     assertThat(javaFile2Entry.getChanges()).hasSize(1);
     CodeTFChange firstCodeChange = javaFile2Entry.getChanges().get(0);
     assertThat(firstCodeChange.getLineNumber()).isEqualTo(2);
-    assertThat(firstCodeChange.getSourceControlUrl()).isNull();
     assertThat(firstCodeChange.getDescription()).isEqualTo("injects-dependency-1-change");
     List<CodeTFPackageAction> javaFile2PackageActions = firstCodeChange.getPackageActions();
     assertThat(javaFile2PackageActions.size()).isEqualTo(1);
@@ -327,7 +325,6 @@ final class DefaultCodemodExecutorTest {
                 + " }");
 
     CodeTFChange secondCodeChange = javaFile4Entry.getChanges().get(0);
-    assertThat(secondCodeChange.getSourceControlUrl()).isEqualTo("https://dep2-control.com/src");
     List<CodeTFPackageAction> javaFile4PackageActions = secondCodeChange.getPackageActions();
     assertThat(javaFile4PackageActions.size()).isEqualTo(1);
     assertThat(javaFile4PackageActions.get(0).getAction())
@@ -470,7 +467,7 @@ final class DefaultCodemodExecutorTest {
     CodeTFChange change = entry.getChanges().get(0);
     assertThat(change.getLineNumber()).isEqualTo(2);
     assertThat(change.getPackageActions()).isEmpty();
-    assertThat(change.getDescription()).isEqualTo("");
+    assertThat(change.getDescription()).isEqualTo("some description");
     assertThat(entry.getDiff())
         .isEqualTo(
             "--- Test1.java\n"
@@ -488,7 +485,7 @@ final class DefaultCodemodExecutorTest {
     CodeTFChange change = entry.getChanges().get(0);
     assertThat(change.getLineNumber()).isEqualTo(3);
     assertThat(change.getPackageActions()).isEmpty();
-    assertThat(change.getDescription()).isEqualTo("");
+    assertThat(change.getDescription()).isEqualTo("some description");
     assertThat(entry.getDiff())
         .isEqualTo(
             "--- Test3.java\n"
@@ -539,7 +536,7 @@ final class DefaultCodemodExecutorTest {
 
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
-      return "";
+      return "some description";
     }
   }
 
@@ -576,11 +573,6 @@ final class DefaultCodemodExecutorTest {
     @Override
     public List<CodeTFReference> getReferences() {
       return List.of(new CodeTFReference("https://dep1.com/", "https://dep1.com/"));
-    }
-
-    @Override
-    public Optional<String> getSourceControlUrl() {
-      return Optional.empty();
     }
 
     @Override
@@ -622,11 +614,6 @@ final class DefaultCodemodExecutorTest {
     @Override
     public List<CodeTFReference> getReferences() {
       return List.of(new CodeTFReference("https://dep2.com/", "https://dep2.com/"));
-    }
-
-    @Override
-    public Optional<String> getSourceControlUrl() {
-      return Optional.of("https://dep2-control.com/src");
     }
 
     @Override
