@@ -30,18 +30,6 @@ RUN gradle --version
 # Install Semgrep using pip
 RUN pip install semgrep
 
-# Intall gradle dependencies
-WORKDIR /codemodder-java
-COPY /core-codemods/src/test/java/io/codemodder/codemods/baseimage/build.gradle.kts /gradle-dependencies/build.gradle.kts
-
-ENV GRADLE_USER_HOME=/gradle-cache
-
-# Mount a volume for the Gradle cache
-VOLUME $GRADLE_USER_HOME
-
-WORKDIR /gradle-dependencies
-RUN gradle dependencies --info
-
 # Generate tool executable
 WORKDIR /codemodder-java
 COPY /core-codemods/build/distributions/core-codemods-0.0.1.tar /codemodder-java

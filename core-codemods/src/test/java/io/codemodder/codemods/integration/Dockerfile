@@ -1,13 +1,9 @@
-FROM codemodder-base
+FROM project-image
 
 ARG RUN_CODEMOD=false
 ARG CODEMOD_ID
 
 ENV GRADLE_USER_HOME=/gradle-cache
-
-#Copy test project
-WORKDIR /test-applications
-COPY /test-applications/$CODEMOD_ID /test-applications/$CODEMOD_ID
 
 # Run the tool against the test project
 WORKDIR /codemodder-java/core-codemods-0.0.1/bin
