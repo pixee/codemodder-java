@@ -7,13 +7,13 @@ import com.github.difflib.patch.Patch;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
-import io.github.pixee.maven.operator.Dependency;
-import io.github.pixee.maven.operator.POMDocument;
-import io.github.pixee.maven.operator.POMOperator;
-import io.github.pixee.maven.operator.POMScanner;
-import io.github.pixee.maven.operator.ProjectModel;
-import io.github.pixee.maven.operator.ProjectModelFactory;
-import io.github.pixee.maven.operator.QueryType;
+import io.codemodder.plugins.maven.operator.Dependency;
+import io.codemodder.plugins.maven.operator.POMDocument;
+import io.codemodder.plugins.maven.operator.POMOperator;
+import io.codemodder.plugins.maven.operator.POMScanner;
+import io.codemodder.plugins.maven.operator.ProjectModel;
+import io.codemodder.plugins.maven.operator.ProjectModelFactory;
+import io.codemodder.plugins.maven.operator.QueryType;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -25,6 +25,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.xml.stream.XMLStreamException;
+import org.dom4j.DocumentException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -162,7 +164,7 @@ public final class MavenProvider implements ProjectProvider {
   @NotNull
   private DependencyUpdateResult updateDependenciesInternal(
       final Path projectDir, final Path file, final List<DependencyGAV> dependencies)
-      throws IOException {
+      throws IOException, DocumentException, URISyntaxException, XMLStreamException {
     Optional<Path> maybePomFile = pomFileFinder.findForFile(projectDir, file);
 
     if (maybePomFile.isEmpty()) {
@@ -202,12 +204,21 @@ public final class MavenProvider implements ProjectProvider {
                   null,
                   null,
                   null);
-          ProjectModelFactory projectModelFactory =
-              POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
-                  .withDependency(newDependency)
-                  .withSkipIfNewer(true)
-                  .withUseProperties(true)
-                  .withOffline(this.offline);
+          ProjectModelFactory projectModelFactory = null;
+          try {
+            projectModelFactory =
+                POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
+                    .withDependency(newDependency)
+                    .withSkipIfNewer(true)
+                    .withUseProperties(true)
+                    .withOffline(this.offline);
+          } catch (DocumentException e) {
+            throw new RuntimeException(e);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+          }
 
           if (this.offline) {
             try {
@@ -220,11 +231,20 @@ public final class MavenProvider implements ProjectProvider {
 
           ProjectModel projectModel = projectModelFactory.build();
 
-          boolean result = POMOperator.modify(projectModel);
+          boolean result = false;
+          try {
+            result = POMOperator.modify(projectModel);
+          } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          } catch (XMLStreamException e) {
+            throw new RuntimeException(e);
+          }
 
           if (result) {
             LOG.trace("Modified the pom -- writing it back");
-            Collection<POMDocument> allPomFiles = projectModel.getAllPomFiles();
+            Collection<POMDocument> allPomFiles = projectModel.allPomFiles();
             LOG.trace("Found " + allPomFiles.size() + " pom files -- " + allPomFiles);
             for (POMDocument aPomFile : allPomFiles) {
               URI uri;
@@ -254,7 +274,18 @@ public final class MavenProvider implements ProjectProvider {
               }
             }
 
-            Collection<DependencyGAV> newDependencySet = getDependenciesFrom(pomFile, projectDir);
+            Collection<DependencyGAV> newDependencySet = null;
+            try {
+              newDependencySet = getDependenciesFrom(pomFile, projectDir);
+            } catch (DocumentException e) {
+              throw new RuntimeException(e);
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            } catch (URISyntaxException e) {
+              throw new RuntimeException(e);
+            } catch (XMLStreamException e) {
+              throw new RuntimeException(e);
+            }
             LOG.trace("New dependency set size: {}", newDependencySet.size());
             foundDependenciesMapped.set(newDependencySet);
           } else {
@@ -313,7 +344,8 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   @NotNull
-  private Collection<DependencyGAV> getDependenciesFrom(final Path pomFile, final Path projectDir) {
+  private Collection<DependencyGAV> getDependenciesFrom(final Path pomFile, final Path projectDir)
+      throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModelFactory projectModelFactory =
         POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
             .withQueryType(QueryType.SAFE)
