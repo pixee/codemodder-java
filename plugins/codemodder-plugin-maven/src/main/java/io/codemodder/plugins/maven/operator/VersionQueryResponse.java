@@ -1,9 +1,7 @@
 package io.codemodder.plugins.maven.operator;
 
 import com.github.zafarkhaja.semver.Version;
-import lombok.Getter;
 
-@Getter
 public class VersionQueryResponse {
 
   private final Version source;
@@ -12,5 +10,13 @@ public class VersionQueryResponse {
   public VersionQueryResponse(Version source, Version target) {
     this.source = source;
     this.target = target;
+  }
+
+  public Version getSource() {
+    return source;
+  }
+
+  public Version getTarget() {
+    return target;
   }
 }

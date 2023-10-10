@@ -2,7 +2,7 @@ package io.codemodder.plugins.maven.operator;
 
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
+import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.Text;
 
@@ -33,8 +33,9 @@ public class CheckParentPackaging extends AbstractCommand {
   @Override
   public boolean execute(ProjectModel pm) {
     Collection<POMDocument> wrongParentPoms =
-        CollectionUtils.select(
-            pm.getParentPomFiles(), pomFile -> !packagingTypePredicate(pomFile, "pom"));
+        pm.getParentPomFiles().stream()
+            .filter(pomFile -> !packagingTypePredicate(pomFile, "pom"))
+            .collect(Collectors.toList());
 
     if (!wrongParentPoms.isEmpty()) {
       throw new WrongDependencyTypeException("Wrong packaging type for parentPom");

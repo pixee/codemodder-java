@@ -2,9 +2,7 @@ package io.codemodder.plugins.maven.operator;
 
 import java.io.File;
 import java.io.IOException;
-import lombok.Getter;
 
-@Getter
 public class InvalidPathException extends IOException {
   private final File parentPath;
   private final String relativePath;
@@ -22,5 +20,17 @@ public class InvalidPathException extends IOException {
     this.parentPath = parentPath;
     this.relativePath = relativePath;
     this.loop = loop;
+  }
+
+  public File getParentPath() {
+    return parentPath;
+  }
+
+  public String getRelativePath() {
+    return relativePath;
+  }
+
+  public boolean isLoop() {
+    return loop;
   }
 }

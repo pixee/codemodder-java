@@ -4,8 +4,8 @@ import com.github.zafarkhaja.semver.Version;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
-import org.apache.commons.collections4.CollectionUtils;
 
 /** Facade for the POM Operator */
 public class POMOperator {
@@ -66,8 +66,8 @@ public class POMOperator {
 
     if (queryVersionResult.size() == 1) {
       List<VersionDefinition> queryVersionResultList =
-          CollectionUtils.isNotEmpty(queryVersionResult)
-              ? queryVersionResult.stream().toList()
+          queryVersionResult != null && !queryVersionResult.isEmpty()
+              ? queryVersionResult.stream().collect(Collectors.toList())
               : Collections.emptyList();
       Version mappedVersion = mapVersion(queryVersionResultList.get(0).getValue());
 

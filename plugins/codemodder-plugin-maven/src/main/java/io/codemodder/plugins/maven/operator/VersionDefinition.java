@@ -1,8 +1,5 @@
 package io.codemodder.plugins.maven.operator;
 
-import lombok.Getter;
-
-@Getter
 public class VersionDefinition {
   private Kind kind;
   private String value;
@@ -18,5 +15,13 @@ public class VersionDefinition {
 
   public void setValue(String value) {
     this.value = value;
+  }
+
+  public Kind getKind() {
+    return kind;
+  }
+
+  public String getValue() {
+    return value;
   }
 }

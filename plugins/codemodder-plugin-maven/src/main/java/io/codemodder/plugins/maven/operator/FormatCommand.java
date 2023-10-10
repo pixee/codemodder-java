@@ -17,6 +17,7 @@ import kotlin.sequences.Sequence;
 import kotlin.text.MatchGroupCollection;
 import kotlin.text.MatchResult;
 import kotlin.text.Regex;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
@@ -134,7 +135,7 @@ public class FormatCommand extends AbstractCommand {
 
   private String parseLineEndings(POMDocument pomFile) throws IOException {
     InputStream inputStream = new ByteArrayInputStream(pomFile.getOriginalPom());
-    byte[] bytes = inputStream.readAllBytes();
+    byte[] bytes = IOUtils.toByteArray(inputStream);
     String str = new String(bytes, pomFile.getCharset());
 
     Map<String, Integer> lineEndingCounts = new HashMap<>();

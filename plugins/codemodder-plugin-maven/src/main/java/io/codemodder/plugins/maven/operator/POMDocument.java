@@ -4,8 +4,6 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import lombok.Getter;
-import lombok.Setter;
 import org.dom4j.Document;
 
 /**
@@ -19,8 +17,6 @@ import org.dom4j.Document;
  *
  * <p>Original Content (originalPom) Modified Content (resultPomBytes)
  */
-@Getter
-@Setter
 public class POMDocument {
 
   private byte[] originalPom;
@@ -66,5 +62,101 @@ public class POMDocument {
 
   public boolean getDirty() {
     return this.dirty;
+  }
+
+  public byte[] getOriginalPom() {
+    return originalPom;
+  }
+
+  public void setOriginalPom(byte[] originalPom) {
+    this.originalPom = originalPom;
+  }
+
+  public URL getPomPath() {
+    return pomPath;
+  }
+
+  public void setPomPath(URL pomPath) {
+    this.pomPath = pomPath;
+  }
+
+  public Document getPomDocument() {
+    return pomDocument;
+  }
+
+  public void setPomDocument(Document pomDocument) {
+    this.pomDocument = pomDocument;
+  }
+
+  public Document getResultPom() {
+    return resultPom;
+  }
+
+  public void setResultPom(Document resultPom) {
+    this.resultPom = resultPom;
+  }
+
+  public File getFile() {
+    return file;
+  }
+
+  public void setFile(File file) {
+    this.file = file;
+  }
+
+  public Charset getCharset() {
+    return charset;
+  }
+
+  public void setCharset(Charset charset) {
+    this.charset = charset;
+  }
+
+  public String getEndl() {
+    return endl;
+  }
+
+  public void setEndl(String endl) {
+    this.endl = endl;
+  }
+
+  public String getIndent() {
+    return indent;
+  }
+
+  public void setIndent(String indent) {
+    this.indent = indent;
+  }
+
+  public byte[] getResultPomBytes() {
+    return resultPomBytes;
+  }
+
+  public void setResultPomBytes(byte[] resultPomBytes) {
+    this.resultPomBytes = resultPomBytes;
+  }
+
+  public String getPreamble() {
+    return preamble;
+  }
+
+  public void setPreamble(String preamble) {
+    this.preamble = preamble;
+  }
+
+  public String getSuffix() {
+    return suffix;
+  }
+
+  public void setSuffix(String suffix) {
+    this.suffix = suffix;
+  }
+
+  public boolean isDirty() {
+    return dirty;
+  }
+
+  public void setDirty(boolean dirty) {
+    this.dirty = dirty;
   }
 }

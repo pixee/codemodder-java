@@ -105,7 +105,7 @@ public class Chain {
     return filterByQueryType(
         AVAILABLE_DEPENDENCY_QUERY_COMMANDS,
         queryType,
-        List.of(CheckLocalRepositoryDirCommand.CheckParentDirCommand.getInstance()),
+        Arrays.asList(CheckLocalRepositoryDirCommand.CheckParentDirCommand.getInstance()),
         it -> it == queryType);
   }
 

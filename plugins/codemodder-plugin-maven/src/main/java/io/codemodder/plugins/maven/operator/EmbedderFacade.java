@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.maven.model.building.*;
 import org.apache.maven.project.ProjectModelResolver;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
@@ -28,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class EmbedderFacade {
 
-  @Getter private static EmbedderFacade instance = new EmbedderFacade();
+  private static EmbedderFacade instance = new EmbedderFacade();
   private static final Logger LOGGER = LoggerFactory.getLogger(EmbedderFacade.class);
 
   private EmbedderFacade() {}
@@ -110,8 +107,10 @@ public class EmbedderFacade {
         modelBuildingResult, session, repositorySystem, remoteRepositories);
   }
 
-  @Getter
-  @Setter
+  public static EmbedderFacade getInstance() {
+    return instance;
+  }
+
   public static class EmbedderFacadeRequest {
     private final boolean offline;
     private final File localRepositoryPath;
@@ -128,21 +127,36 @@ public class EmbedderFacade {
       this.offline = offline;
       this.localRepositoryPath = localRepositoryPath;
       this.pomFile = pomFile;
-      this.activeProfileIds =
-          CollectionUtils.isNotEmpty(activeProfileIds) ? activeProfileIds : Collections.emptyList();
+      this.activeProfileIds = activeProfileIds != null ? activeProfileIds : Collections.emptyList();
       this.inactiveProfileIds =
-          CollectionUtils.isNotEmpty(inactiveProfileIds)
-              ? inactiveProfileIds
-              : Collections.emptyList();
+          inactiveProfileIds != null ? inactiveProfileIds : Collections.emptyList();
     }
 
     public boolean getOffline() {
       return offline;
     }
+
+    public boolean isOffline() {
+      return offline;
+    }
+
+    public File getLocalRepositoryPath() {
+      return localRepositoryPath;
+    }
+
+    public File getPomFile() {
+      return pomFile;
+    }
+
+    public Collection<String> getActiveProfileIds() {
+      return activeProfileIds;
+    }
+
+    public Collection<String> getInactiveProfileIds() {
+      return inactiveProfileIds;
+    }
   }
 
-  @Getter
-  @Setter
   public static class EmbedderFacadeResponse {
     private final ModelBuildingResult modelBuildingResult;
     private final RepositorySystemSession session;
@@ -158,9 +172,23 @@ public class EmbedderFacade {
       this.session = session;
       this.repositorySystem = repositorySystem;
       this.remoteRepositories =
-          CollectionUtils.isNotEmpty(remoteRepositories)
-              ? remoteRepositories
-              : Collections.emptyList();
+          remoteRepositories != null ? remoteRepositories : Collections.emptyList();
+    }
+
+    public ModelBuildingResult getModelBuildingResult() {
+      return modelBuildingResult;
+    }
+
+    public RepositorySystemSession getSession() {
+      return session;
+    }
+
+    public RepositorySystem getRepositorySystem() {
+      return repositorySystem;
+    }
+
+    public List<RemoteRepository> getRemoteRepositories() {
+      return remoteRepositories;
     }
   }
 }

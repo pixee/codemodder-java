@@ -2,14 +2,9 @@ package io.codemodder.plugins.maven.operator;
 
 import java.io.File;
 import java.util.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
-@Getter
-@Setter
 public class ProjectModel {
   private POMDocument pomFile;
   private List<POMDocument> parentPomFiles;
@@ -37,8 +32,7 @@ public class ProjectModel {
       String finishedByClass,
       boolean offline) {
     this.pomFile = pomFile;
-    this.parentPomFiles =
-        CollectionUtils.isNotEmpty(parentPomFiles) ? parentPomFiles : Collections.emptyList();
+    this.parentPomFiles = parentPomFiles != null ? parentPomFiles : Collections.emptyList();
     this.dependency = dependency;
     this.skipIfNewer = skipIfNewer;
     this.useProperties = useProperties;
@@ -154,5 +148,101 @@ public class ProjectModel {
     allFiles.add(pomFile);
     allFiles.addAll(parentPomFiles);
     return allFiles;
+  }
+
+  public POMDocument getPomFile() {
+    return pomFile;
+  }
+
+  public void setPomFile(POMDocument pomFile) {
+    this.pomFile = pomFile;
+  }
+
+  public List<POMDocument> getParentPomFiles() {
+    return parentPomFiles;
+  }
+
+  public void setParentPomFiles(List<POMDocument> parentPomFiles) {
+    this.parentPomFiles = parentPomFiles;
+  }
+
+  public Dependency getDependency() {
+    return dependency;
+  }
+
+  public void setDependency(Dependency dependency) {
+    this.dependency = dependency;
+  }
+
+  public boolean isSkipIfNewer() {
+    return skipIfNewer;
+  }
+
+  public void setSkipIfNewer(boolean skipIfNewer) {
+    this.skipIfNewer = skipIfNewer;
+  }
+
+  public boolean isUseProperties() {
+    return useProperties;
+  }
+
+  public void setUseProperties(boolean useProperties) {
+    this.useProperties = useProperties;
+  }
+
+  public Set<String> getActiveProfiles() {
+    return activeProfiles;
+  }
+
+  public void setActiveProfiles(Set<String> activeProfiles) {
+    this.activeProfiles = activeProfiles;
+  }
+
+  public boolean isOverrideIfAlreadyExists() {
+    return overrideIfAlreadyExists;
+  }
+
+  public void setOverrideIfAlreadyExists(boolean overrideIfAlreadyExists) {
+    this.overrideIfAlreadyExists = overrideIfAlreadyExists;
+  }
+
+  public QueryType getQueryType() {
+    return queryType;
+  }
+
+  public void setQueryType(QueryType queryType) {
+    this.queryType = queryType;
+  }
+
+  public File getRepositoryPath() {
+    return repositoryPath;
+  }
+
+  public void setRepositoryPath(File repositoryPath) {
+    this.repositoryPath = repositoryPath;
+  }
+
+  public String getFinishedByClass() {
+    return finishedByClass;
+  }
+
+  public void setFinishedByClass(String finishedByClass) {
+    this.finishedByClass = finishedByClass;
+  }
+
+  public boolean isOffline() {
+    return offline;
+  }
+
+  public void setOffline(boolean offline) {
+    this.offline = offline;
+  }
+
+  public boolean isModifiedByCommand() {
+    return modifiedByCommand;
+  }
+
+  public void setModifiedByCommand(boolean modifiedByCommand) {
+    this.modifiedByCommand = modifiedByCommand;
   }
 }

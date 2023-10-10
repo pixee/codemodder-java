@@ -143,7 +143,7 @@ public abstract class AbstractQueryCommand extends AbstractCommand {
     request.setNoTransferProgress(true);
     request.setBatchMode(true);
     request.setRecursive(false);
-    request.setProfiles(List.of(c.getActiveProfiles().toArray(new String[0])));
+    request.setProfiles(Arrays.asList(c.getActiveProfiles().toArray(new String[0])));
     request.setDebug(true);
     request.setOffline(c.isOffline());
     request.setProperties(props);
@@ -182,7 +182,7 @@ public abstract class AbstractQueryCommand extends AbstractCommand {
     }
 
     /** Step 2: Find Maven Executable given the operating system and PATH variable contents */
-    List<String> possibleExecutables = List.of("mvn", "mvnw");
+    List<String> possibleExecutables = Arrays.asList("mvn", "mvnw");
 
     File foundExecutable =
         possibleExecutables.stream()
