@@ -3,11 +3,6 @@ plugins {
     id("io.codemodder.maven-publish")
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
 description = "Plugin for providing Maven dependency management functions to codemods."
 
 dependencies {
