@@ -34,7 +34,6 @@ dependencies {
     testRuntimeOnly(testlibs.junit.jupiter.engine)
     testImplementation(testlibs.jgit)
     testImplementation("org.testcontainers:testcontainers:1.19.0")
-    testImplementation("org.testcontainers:junit-jupiter:1.19.0")
 }
 
 val integrationTestSuiteName = "intTest"
