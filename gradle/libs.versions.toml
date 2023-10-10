@@ -42,6 +42,7 @@ jfiglet = "com.github.lalyos:jfiglet:0.0.8"
 jtokkit = { module = "com.knuddels:jtokkit", version.ref="jtokkit" }
 juniversalchardet = "com.github.albfernandez:juniversalchardet:2.4.0"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:7.4"
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
 openai-service = { module = "com.theokanning.openai-gpt3-java:service", version.ref = "openai" }
 picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
