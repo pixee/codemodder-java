@@ -5,6 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -75,29 +79,32 @@ final class CLITest {
   }
 
   @Test
-  void it_does_structured_logging() throws IOException {
-    Path codetf = Files.createTempFile("normal", ".codetf");
-    String[] args =
-        new String[] {
-          "--dont-exit",
-          "--verbose",
-          "--log-format=json",
-          "--output",
-          codetf.toString(),
-          workingRepoDir.toString()
-        };
+  void structured_appender_works_with_project_name() throws IOException {
+    Path outputFile = Files.createTempFile("codemodder", ".out");
+    writeLogMessageToFile(outputFile, "cloud9");
+    String output = Files.readString(outputFile);
+    assertThat(output).contains("\"project_name\":\"cloud9\"");
+  }
 
-    final var stdoutWriter = new StringWriter();
-    final var stderrWriter = new StringWriter();
-    try (var stdout = new PrintWriter(stdoutWriter);
-        var stderr = new PrintWriter(stderrWriter)) {
-      Runner.run(List.of(Cloud9Changer.class), args, stdout, stderr);
-      // confirm change happened
-      assertThat(Files.readString(fooJavaFile)).contains("cloud9");
-    }
-    // confirm JSON was captured
-    String output = stdoutWriter.toString();
-    assertThat(output).contains("{ }");
+  @Test
+  void structured_appender_works_without_project_name() throws IOException {
+    Path outputFile = Files.createTempFile("codemodder", ".out");
+    writeLogMessageToFile(outputFile, null);
+    String output = Files.readString(outputFile);
+    assertThat(output).doesNotContain("cloud9");
+  }
+
+  private static void writeLogMessageToFile(final Path outputFile, final String projectName) {
+    LoggerContext context = new LoggerContext();
+    FileAppender<ILoggingEvent> appender = new FileAppender<>();
+    appender.setContext(context);
+
+    appender.setFile(outputFile.toAbsolutePath().toString());
+    appender.setImmediateFlush(true);
+    CLI.configureAppender(appender, Optional.ofNullable(projectName));
+    Logger log = context.getLogger("myRootLogger");
+    log.addAppender(appender);
+    log.info("this is a test");
   }
 
   @Test
