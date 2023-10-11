@@ -127,3 +127,4 @@ fabric.properties
 # env
 .env*
 .secrets
+/plugins/codemodder-plugin-maven/.cache/
