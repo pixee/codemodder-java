@@ -1788,7 +1788,7 @@
                 <phase>generate-sources</phase>
                 <configuration>
                   <target>
-                    <mkdir dir="${project.build.directory}/dependency"></mkdir>>
+                    <mkdir dir="${project.build.directory}/dependency"></mkdir>
                   </target>
                 </configuration>
               </execution>
