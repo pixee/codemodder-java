@@ -21,7 +21,7 @@ import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.builder.Input;
 import org.xmlunit.diff.Diff;
 
-public class AbstractTestBase {
+class AbstractTestBase {
   protected static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 
   protected File getResource(String name) throws URISyntaxException {

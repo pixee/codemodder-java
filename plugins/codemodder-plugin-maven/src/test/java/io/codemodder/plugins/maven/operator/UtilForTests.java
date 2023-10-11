@@ -14,7 +14,7 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-public class UtilForTests {
+class UtilForTests {
   public static Map<String, String> getRuntimeResolvedProperties(ProjectModel projectModel)
       throws IOException {
     Document effectivePom = getEffectivePom(projectModel);

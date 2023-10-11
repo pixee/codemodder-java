@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.dom4j.DocumentException;
 import org.junit.jupiter.api.Test;
 
-public class POMScannerTest extends AbstractTestBase {
+final class POMScannerTest extends AbstractTestBase {
   private final File currentDirectory = new File(System.getProperty("user.dir"));
 
   @Test

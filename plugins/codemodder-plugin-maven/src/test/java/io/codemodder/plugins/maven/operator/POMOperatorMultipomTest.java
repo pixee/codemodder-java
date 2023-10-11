@@ -16,7 +16,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class POMOperatorMultipomTest extends AbstractTestBase {
+final class POMOperatorMultipomTest extends AbstractTestBase {
 
   @Test
   public void testWithParentAndChildMissingPackaging() {

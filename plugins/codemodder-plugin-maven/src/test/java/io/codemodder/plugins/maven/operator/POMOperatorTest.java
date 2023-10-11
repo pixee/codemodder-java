@@ -22,7 +22,7 @@ import org.xmlunit.diff.ComparisonType;
 import org.xmlunit.diff.Diff;
 import org.xmlunit.diff.Difference;
 
-public class POMOperatorTest extends AbstractTestBase {
+final class POMOperatorTest extends AbstractTestBase {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 

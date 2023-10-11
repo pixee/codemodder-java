@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class POMOperatorVersionQueryTest {
+final class POMOperatorVersionQueryTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorVersionQueryTest.class);
 

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MassRepoIT {
+final class MassRepoIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(MassRepoIT.class);
 
   private static class TestRepo {
