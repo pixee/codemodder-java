@@ -14,7 +14,7 @@ import org.apache.maven.shared.invoker.InvocationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractQueryCommand extends AbstractCommand {
+abstract class AbstractQueryCommand extends AbstractCommand {
 
   public static final String DEPENDENCY_TREE_MOJO_REFERENCE =
       "org.apache.maven.plugins:maven-dependency-plugin:3.3.0:tree";

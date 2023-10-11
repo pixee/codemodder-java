@@ -6,7 +6,7 @@ import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 
-public class QueryByInvoker extends AbstractQueryCommand {
+class QueryByInvoker extends AbstractQueryCommand {
 
   @Override
   protected void extractDependencyTree(File outputPath, File pomFilePath, ProjectModel c) {

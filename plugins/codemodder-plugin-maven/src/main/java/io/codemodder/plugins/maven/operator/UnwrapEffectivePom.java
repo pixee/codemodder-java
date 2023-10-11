@@ -9,7 +9,7 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UnwrapEffectivePom extends AbstractVersionCommand {
+class UnwrapEffectivePom extends AbstractVersionCommand {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UnwrapEffectivePom.class);
 

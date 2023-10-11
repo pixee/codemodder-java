@@ -14,7 +14,7 @@ import org.eclipse.aether.graph.DependencyVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueryByResolver extends AbstractQueryCommand {
+class QueryByResolver extends AbstractQueryCommand {
   private static final Logger LOGGER = LoggerFactory.getLogger(QueryByResolver.class);
 
   @Override

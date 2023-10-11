@@ -1,7 +1,7 @@
 package io.codemodder.plugins.maven.operator;
 
 /** Represents bumping an existing dependency. */
-public class SimpleUpgrade extends AbstractCommand {
+class SimpleUpgrade extends AbstractCommand {
 
   private static SimpleUpgrade instance;
 

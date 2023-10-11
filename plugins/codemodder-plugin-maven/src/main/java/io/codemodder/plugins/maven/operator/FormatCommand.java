@@ -22,7 +22,7 @@ import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FormatCommand extends AbstractCommand {
+class FormatCommand extends AbstractCommand {
 
   private static final Set<String> LINE_ENDINGS = new HashSet<>();
   private static final Regex RE_EMPTY_ELEMENT_NO_ATTRIBUTES;

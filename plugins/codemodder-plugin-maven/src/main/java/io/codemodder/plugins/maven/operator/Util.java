@@ -18,7 +18,7 @@ import org.jaxen.dom4j.Dom4jXPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Util {
+class Util {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
   private static final Pattern PROPERTY_REFERENCE_PATTERN = Pattern.compile("^\\$\\{(.*)}$");

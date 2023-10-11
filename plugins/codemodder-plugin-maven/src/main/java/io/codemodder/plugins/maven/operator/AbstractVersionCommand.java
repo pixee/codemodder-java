@@ -3,7 +3,7 @@ package io.codemodder.plugins.maven.operator;
 import java.util.*;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 
-public class AbstractVersionCommand extends AbstractCommand {
+class AbstractVersionCommand extends AbstractCommand {
 
   public Set<VersionDefinition> result = new TreeSet<>(VERSION_KIND_COMPARATOR);
 

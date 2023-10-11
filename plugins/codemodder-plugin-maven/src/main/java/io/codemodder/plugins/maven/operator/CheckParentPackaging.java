@@ -7,7 +7,7 @@ import org.dom4j.Element;
 import org.dom4j.Text;
 
 /** Guard Command Singleton used to validate required parameters */
-public class CheckParentPackaging extends AbstractCommand {
+class CheckParentPackaging extends AbstractCommand {
   private static final CheckParentPackaging INSTANCE = new CheckParentPackaging();
 
   private CheckParentPackaging() {

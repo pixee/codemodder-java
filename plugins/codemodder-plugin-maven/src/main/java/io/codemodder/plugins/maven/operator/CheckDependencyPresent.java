@@ -1,6 +1,6 @@
 package io.codemodder.plugins.maven.operator;
 
-public class CheckDependencyPresent extends AbstractCommand {
+class CheckDependencyPresent extends AbstractCommand {
   private static final CheckDependencyPresent INSTANCE = new CheckDependencyPresent();
 
   private CheckDependencyPresent() {

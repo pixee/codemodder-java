@@ -11,7 +11,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
-public class POMDocumentFactory {
+class POMDocumentFactory {
 
   public static POMDocument load(InputStream is)
       throws IOException, DocumentException, URISyntaxException {

@@ -1,6 +1,6 @@
 package io.codemodder.plugins.maven.operator;
 
-public class VersionDefinition {
+class VersionDefinition {
   private Kind kind;
   private String value;
 

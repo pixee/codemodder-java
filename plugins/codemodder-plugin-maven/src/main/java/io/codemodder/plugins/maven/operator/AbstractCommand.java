@@ -8,7 +8,7 @@ import javax.xml.stream.XMLStreamException;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
-public abstract class AbstractCommand implements Command {
+abstract class AbstractCommand implements Command {
 
   protected boolean handleDependency(ProjectModel pm, String lookupExpression) {
     List<Node> dependencyNodes =

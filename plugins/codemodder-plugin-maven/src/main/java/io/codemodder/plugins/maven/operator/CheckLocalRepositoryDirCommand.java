@@ -2,7 +2,7 @@ package io.codemodder.plugins.maven.operator;
 
 import java.io.File;
 
-public class CheckLocalRepositoryDirCommand {
+class CheckLocalRepositoryDirCommand {
 
   public static class CheckParentDirCommand extends AbstractQueryCommand {
 

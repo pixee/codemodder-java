@@ -7,7 +7,7 @@ import org.xmlunit.builder.Input;
 import org.xmlunit.diff.Diff;
 
 /** Command Class to Short-Circuit/Discard Processing when no pom changes were made */
-public class DiscardFormatCommand extends AbstractCommand {
+class DiscardFormatCommand extends AbstractCommand {
 
   private static DiscardFormatCommand instance;
 

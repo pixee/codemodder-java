@@ -10,7 +10,7 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueryByParsing extends AbstractQueryCommand {
+class QueryByParsing extends AbstractQueryCommand {
 
   private final Set<Dependency> dependencies = new LinkedHashSet<>();
   private final Set<Dependency> dependencyManagement =

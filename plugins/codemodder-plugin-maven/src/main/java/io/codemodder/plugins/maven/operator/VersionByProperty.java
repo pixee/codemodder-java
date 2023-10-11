@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class VersionByProperty extends AbstractVersionCommand {
+class VersionByProperty extends AbstractVersionCommand {
 
   @Override
   public boolean execute(ProjectModel pm) {

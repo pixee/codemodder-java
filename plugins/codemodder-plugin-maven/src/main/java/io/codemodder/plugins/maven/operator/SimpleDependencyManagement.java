@@ -1,7 +1,7 @@
 package io.codemodder.plugins.maven.operator;
 
 /** Represents handling dependency management for a project. */
-public class SimpleDependencyManagement extends AbstractCommand {
+class SimpleDependencyManagement extends AbstractCommand {
 
   private static SimpleDependencyManagement instance;
 

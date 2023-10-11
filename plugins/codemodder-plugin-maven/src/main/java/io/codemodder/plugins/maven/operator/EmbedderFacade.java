@@ -23,7 +23,7 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EmbedderFacade {
+class EmbedderFacade {
 
   private static EmbedderFacade instance = new EmbedderFacade();
   private static final Logger LOGGER = LoggerFactory.getLogger(EmbedderFacade.class);

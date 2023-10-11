@@ -8,7 +8,7 @@ import org.dom4j.Node;
  * Represents a POM Upgrade Strategy by simply adding a dependency/ section (and optionally a
  * dependencyManagement/ section as well)
  */
-public class SimpleInsert implements Command {
+class SimpleInsert implements Command {
   @Override
   public boolean execute(ProjectModel pm) {
     List<Node> dependencyManagementNodeList =

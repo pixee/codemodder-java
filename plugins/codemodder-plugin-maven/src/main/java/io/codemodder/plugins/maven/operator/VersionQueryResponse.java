@@ -2,7 +2,7 @@ package io.codemodder.plugins.maven.operator;
 
 import com.github.zafarkhaja.semver.Version;
 
-public class VersionQueryResponse {
+class VersionQueryResponse {
 
   private final Version source;
   private final Version target;

@@ -5,7 +5,7 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
-public class VersionByCompilerDefinition extends AbstractVersionCommand {
+class VersionByCompilerDefinition extends AbstractVersionCommand {
   @Override
   public boolean execute(ProjectModel pm) {
     Set<VersionDefinition> definedSettings =

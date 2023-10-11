@@ -3,7 +3,7 @@ package io.codemodder.plugins.maven.operator;
 import java.io.File;
 import java.io.IOException;
 
-public class InvalidPathException extends IOException {
+class InvalidPathException extends IOException {
   private final File parentPath;
   private final String relativePath;
   private final boolean loop;

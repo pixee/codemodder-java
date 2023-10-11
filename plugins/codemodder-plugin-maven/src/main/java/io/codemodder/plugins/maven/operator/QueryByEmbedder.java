@@ -15,7 +15,7 @@ import org.apache.maven.shared.utils.cli.Commandline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueryByEmbedder extends AbstractQueryCommand {
+class QueryByEmbedder extends AbstractQueryCommand {
 
   public static final String MAVEN_MULTIMODULE_PROJECT_DIRECTORY =
       "maven.multiModuleProjectDirectory";

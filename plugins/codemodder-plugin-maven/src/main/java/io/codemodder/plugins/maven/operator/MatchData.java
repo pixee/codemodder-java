@@ -3,7 +3,7 @@ package io.codemodder.plugins.maven.operator;
 import kotlin.ranges.IntRange;
 import kotlin.text.Regex;
 
-public class MatchData {
+class MatchData {
   private final IntRange range;
   private final String content;
   private final String elementName;

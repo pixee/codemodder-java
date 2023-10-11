@@ -4,7 +4,7 @@ import java.util.List;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
-public class CompositeDependencyManagement extends AbstractCommand {
+class CompositeDependencyManagement extends AbstractCommand {
 
   @Override
   public boolean execute(ProjectModel pm) {
