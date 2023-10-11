@@ -13,7 +13,7 @@ public class POMOperatorJavaIT {
     String mvnAbsPath = Util.which("mvn").getAbsolutePath();
 
     List<String> argList =
-        Arrays.asList(mvnAbsPath, "-B", "-N", "-f", "java-sample/pom.xml", "verify");
+        Arrays.asList(mvnAbsPath, "-B", "-N", "-f", "src/test/resources/io/codemodder/plugins/maven/operator/sample/pom.xml", "verify");
 
     if (SystemUtils.IS_OS_WINDOWS) {
       List<String> newArgList = Arrays.asList(Util.which("cmd").getAbsolutePath(), "/c");

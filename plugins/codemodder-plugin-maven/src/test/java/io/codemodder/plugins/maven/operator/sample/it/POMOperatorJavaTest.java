@@ -1,12 +1,11 @@
-package io.github.pixee.it;
+package io.codemodder.plugins.maven.operator.sample.it;
 
-import io.github.pixee.maven.operator.POMOperator;
-import io.github.pixee.maven.operator.ProjectModelFactory;
-import io.github.pixee.maven.operator.ProjectModel;
+import io.codemodder.plugins.maven.operator.Dependency;
+import io.codemodder.plugins.maven.operator.POMOperator;
+import io.codemodder.plugins.maven.operator.ProjectModel;
+import io.codemodder.plugins.maven.operator.ProjectModelFactory;
 import org.dom4j.DocumentException;
-import org.junit.Test;
-
-import io.github.pixee.maven.operator.Dependency;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
