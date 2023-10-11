@@ -35,16 +35,16 @@ public class CodemodIntegrationTestSetup {
     return Arrays.stream(metadata.tests())
         .map(
             test -> {
-              final String testURL =
-                  test.testUrl().formatted(originalCodeContainer.getMappedPort(8080));
+              final String endpointURL =
+                  test.endpoint().formatted(originalCodeContainer.getMappedPort(8080));
               final String httpVerb = test.httpVerb();
               final String expectedResponse = test.expectedResponse();
 
               return DynamicTest.dynamicTest(
                   "It_should_compare_application_behavior",
                   () -> {
-                    final String originalCodeResponse = doRequest(testURL, httpVerb);
-                    final String transformedCodeResponse = doRequest(testURL, httpVerb);
+                    final String originalCodeResponse = doRequest(endpointURL, httpVerb);
+                    final String transformedCodeResponse = doRequest(endpointURL, httpVerb);
 
                     assertThat(originalCodeResponse).isEqualTo(expectedResponse);
                     assertThat(transformedCodeResponse).isEqualTo(expectedResponse);

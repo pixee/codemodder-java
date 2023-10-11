@@ -28,3 +28,21 @@ docker build -f core-codemods/src/test/java/io/codemodder/codemods/projectimage/
 ```
 ./gradlew :core-codemods:test --tests io.codemodder.codemods.integration.MoveSwitchDefaultCaseLastIntegrationTest
 ```
+
+### Adding a new integration test
+- Add new test project where `codemod` will be performed during the integration test, the project must be named as the codemod ID.
+- Create the codemod integration test class and extend `CodemodIntegrationTestSetup` class which will manage the containers creation.
+```
+public class MoveSwitchDefaultCaseLastIntegrationTest extends CodemodIntegrationTestSetup {}
+```
+
+- Annotate the test class with the `IntegrationTestMetadata` annotation that will contain the ID of the codemod being tested and the
+  values for the test cases.
+```
+@IntegrationTestMetadata(
+    codemodId = "move-switch-default-last",
+    tests = {
+      @TestPropertiesMetadata(endpoint = "http://localhost:%s?day=1", expectedResponse = "Monday"),
+      @TestPropertiesMetadata(endpoint = "http://localhost:%s?day=2", expectedResponse = "Tuesday")
+    })
+```

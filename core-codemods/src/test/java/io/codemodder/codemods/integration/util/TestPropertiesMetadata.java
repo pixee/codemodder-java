@@ -9,9 +9,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface TestPropertiesMetadata {
 
-  String testUrl();
+  /** The endpoint of the test. */
+  String endpoint();
 
+  /** Endpoint verb. */
   String httpVerb() default "GET";
 
+  /** The expected response of the endpoint. */
   String expectedResponse();
 }

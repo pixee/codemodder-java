@@ -12,5 +12,6 @@ public @interface IntegrationTestMetadata {
   /** The codemod being tested. */
   String codemodId();
 
+  /** The set of tests to perform in the project. */
   TestPropertiesMetadata[] tests();
 }

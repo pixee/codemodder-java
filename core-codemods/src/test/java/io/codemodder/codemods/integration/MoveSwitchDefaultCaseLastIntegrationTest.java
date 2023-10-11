@@ -6,7 +6,7 @@ import io.codemodder.codemods.integration.util.TestPropertiesMetadata;
 @IntegrationTestMetadata(
     codemodId = "move-switch-default-last",
     tests = {
-      @TestPropertiesMetadata(testUrl = "http://localhost:%s?day=1", expectedResponse = "Monday"),
-      @TestPropertiesMetadata(testUrl = "http://localhost:%s?day=2", expectedResponse = "Tuesday")
+      @TestPropertiesMetadata(endpoint = "http://localhost:%s?day=1", expectedResponse = "Monday"),
+      @TestPropertiesMetadata(endpoint = "http://localhost:%s?day=2", expectedResponse = "Tuesday")
     })
 public class MoveSwitchDefaultCaseLastIntegrationTest extends CodemodIntegrationTestSetup {}
