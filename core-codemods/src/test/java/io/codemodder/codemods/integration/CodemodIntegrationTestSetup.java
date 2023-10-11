@@ -12,6 +12,8 @@ import org.junit.jupiter.api.TestFactory;
 import org.testcontainers.containers.GenericContainer;
 
 public class CodemodIntegrationTestSetup {
+
+  private static final String endpointBasePath = "http://localhost:%s";
   private static GenericContainer<?> originalCodeContainer;
   private static GenericContainer<?> transformedCodeContainer;
 
@@ -35,16 +37,22 @@ public class CodemodIntegrationTestSetup {
     return Arrays.stream(metadata.tests())
         .map(
             test -> {
-              final String endpointURL =
-                  test.endpoint().formatted(originalCodeContainer.getMappedPort(8080));
+              final String originalContainerEndpointURL =
+                  endpointBasePath.formatted(originalCodeContainer.getMappedPort(8080))
+                      + test.endpoint();
+              final String transformedContainerEndpointURL =
+                  endpointBasePath.formatted(transformedCodeContainer.getMappedPort(8080))
+                      + test.endpoint();
               final String httpVerb = test.httpVerb();
               final String expectedResponse = test.expectedResponse();
 
               return DynamicTest.dynamicTest(
                   "It_should_compare_application_behavior",
                   () -> {
-                    final String originalCodeResponse = doRequest(endpointURL, httpVerb);
-                    final String transformedCodeResponse = doRequest(endpointURL, httpVerb);
+                    final String originalCodeResponse =
+                        doRequest(originalContainerEndpointURL, httpVerb);
+                    final String transformedCodeResponse =
+                        doRequest(transformedContainerEndpointURL, httpVerb);
 
                     assertThat(originalCodeResponse).isEqualTo(expectedResponse);
                     assertThat(transformedCodeResponse).isEqualTo(expectedResponse);

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestController {
 
-    @GetMapping("/")
+    @GetMapping("/test")
     public String switchTest(@RequestParam final int day) {
 
         final String dayString = switch (day) {
