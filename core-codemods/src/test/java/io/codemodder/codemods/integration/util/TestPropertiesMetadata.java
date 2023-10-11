@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
 public @interface TestPropertiesMetadata {
 
   String testUrl();
-  String httpVerb();
+
+  String httpVerb() default "GET";
+
   String expectedResponse();
 }

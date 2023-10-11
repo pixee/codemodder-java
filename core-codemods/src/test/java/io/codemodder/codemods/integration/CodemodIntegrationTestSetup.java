@@ -4,20 +4,16 @@ import static io.codemodder.codemods.integration.util.TestApplicationRequestUtil
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.codemodder.codemods.integration.util.IntegrationTestMetadata;
-import io.codemodder.codemods.integration.util.TestApplicationRequestUtil;
-
 import java.util.Arrays;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.testcontainers.containers.GenericContainer;
 
 public class CodemodIntegrationTestSetup {
-    private static GenericContainer<?> originalCodeContainer;
-    private static GenericContainer<?> transformedCodeContainer;
+  private static GenericContainer<?> originalCodeContainer;
+  private static GenericContainer<?> transformedCodeContainer;
 
   @TestFactory
   Stream<DynamicTest> generateTestCases() {
@@ -29,42 +25,36 @@ public class CodemodIntegrationTestSetup {
 
     final String codemodId = metadata.codemodId();
 
-   originalCodeContainer =
-        DockerContainerFactory.createContainer(codemodId, false);
-   transformedCodeContainer =
-        DockerContainerFactory.createContainer(codemodId, true);
+    originalCodeContainer = DockerContainerFactory.createContainer(codemodId, false);
+    transformedCodeContainer = DockerContainerFactory.createContainer(codemodId, true);
 
-    originalCodeContainer.start();
-    transformedCodeContainer.start();
+    Stream.of(originalCodeContainer, transformedCodeContainer)
+        .parallel()
+        .forEach(GenericContainer::start);
 
-    return Arrays.stream(metadata.tests()).map(
+    return Arrays.stream(metadata.tests())
+        .map(
             test -> {
-                final String testURL = test.testUrl().formatted(originalCodeContainer.getMappedPort(8080));
-                final String httpVerb = test.httpVerb();
-                final String expectedResponse = test.expectedResponse();
+              final String testURL =
+                  test.testUrl().formatted(originalCodeContainer.getMappedPort(8080));
+              final String httpVerb = test.httpVerb();
+              final String expectedResponse = test.expectedResponse();
 
-                return DynamicTest.dynamicTest(
-                        "It_should_compare_application_behavior",
-                        () -> {
-                            final String originalCodeResponse =
-                                    doRequest(
-                                            testURL,
-                                            httpVerb);
-                            final String transformedCodeResponse =
-                                    doRequest(
-                                            testURL,
-                                            httpVerb);
+              return DynamicTest.dynamicTest(
+                  "It_should_compare_application_behavior",
+                  () -> {
+                    final String originalCodeResponse = doRequest(testURL, httpVerb);
+                    final String transformedCodeResponse = doRequest(testURL, httpVerb);
 
-                            assertThat(originalCodeResponse).isEqualTo(expectedResponse);
-                            assertThat(transformedCodeResponse).isEqualTo(expectedResponse);
-                        }
-                );
+                    assertThat(originalCodeResponse).isEqualTo(expectedResponse);
+                    assertThat(transformedCodeResponse).isEqualTo(expectedResponse);
+                  });
             });
   }
 
   @AfterAll
-    public static void tearDown() {
-      originalCodeContainer.stop();
-      transformedCodeContainer.stop();
+  public static void tearDown() {
+    originalCodeContainer.stop();
+    transformedCodeContainer.stop();
   }
 }

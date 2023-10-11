@@ -1,8 +1,6 @@
 package io.codemodder.codemods.integration;
 
-import java.io.File;
 import java.nio.file.Path;
-
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
@@ -16,8 +14,7 @@ public class DockerContainerFactory {
     return new GenericContainer(
             new ImageFromDockerfile()
                 .withFileFromPath(
-                    "test-applications",
-                    Path.of("src/test/resources/test-applications"))
+                    "test-applications", Path.of("src/test/resources/test-applications"))
                 .withFileFromPath(
                     "Dockerfile",
                     Path.of("src/test/java/io/codemodder/codemods/integration/Dockerfile"))

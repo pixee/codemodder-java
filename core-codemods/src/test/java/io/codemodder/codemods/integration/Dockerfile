@@ -1,6 +1,9 @@
-FROM project-image
+ARG CODEMOD_ID
+
+FROM $CODEMOD_ID
 
 ARG RUN_CODEMOD=false
+#defining the argument again because the value is unavailable after the first stage ends.
 ARG CODEMOD_ID
 
 ENV GRADLE_USER_HOME=/gradle-cache
