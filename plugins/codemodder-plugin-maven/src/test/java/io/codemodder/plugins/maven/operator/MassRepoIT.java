@@ -20,7 +20,7 @@ final class MassRepoIT {
     private boolean offline;
     private String commitId;
 
-    public TestRepo(
+    TestRepo(
         String slug,
         boolean useProperties,
         String branch,
@@ -37,13 +37,13 @@ final class MassRepoIT {
       this.pomPath = pomPath != null ? pomPath : "pom.xml";
     }
 
-    public File cacheDir() {
+    File cacheDir() {
       String cacheDirName =
           BASE_CACHE_DIR + File.separator + "repo-" + String.format("%08X", slug.hashCode());
       return new File(cacheDirName);
     }
 
-    public static final File BASE_CACHE_DIR =
+    static final File BASE_CACHE_DIR =
         new File(System.getProperty("user.dir") + "/.cache").getAbsoluteFile();
   }
 
@@ -225,14 +225,14 @@ final class MassRepoIT {
   }
 
   @Test
-  public void testBasic() throws Exception {
+  void testBasic() throws Exception {
     Pair<TestRepo, String> firstCase = repos.get(0);
 
     testOnRepo(firstCase.first, firstCase.second);
   }
 
   @Test
-  public void testAllOthers() {
+  void testAllOthers() {
     for (int n = 0; n < repos.size(); n++) {
       Pair<TestRepo, String> pair = repos.get(n);
       try {

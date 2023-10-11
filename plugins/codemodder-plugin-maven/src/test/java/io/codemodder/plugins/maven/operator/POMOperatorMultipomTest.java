@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 final class POMOperatorMultipomTest extends AbstractTestBase {
 
   @Test
-  public void testWithParentAndChildMissingPackaging() {
+  void testWithParentAndChildMissingPackaging() {
     Assertions.assertThrows(
         WrongDependencyTypeException.class,
         () -> {
@@ -37,7 +37,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
   }
 
   @Test
-  public void testWithParentAndChildWrongType() {
+  void testWithParentAndChildWrongType() {
     Assertions.assertThrows(
         WrongDependencyTypeException.class,
         () -> {
@@ -58,7 +58,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
   }
 
   @Test
-  public void testWithMultiplePomsBasicNoVersionProperty() throws Exception {
+  void testWithMultiplePomsBasicNoVersionProperty() throws Exception {
     File parentPomFile = getResource("sample-parent/pom.xml");
 
     ProjectModelFactory projectModelFactory =
@@ -80,7 +80,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
   }
 
   @Test
-  public void testWithMultiplePomsBasicWithVersionProperty() throws Exception {
+  void testWithMultiplePomsBasicWithVersionProperty() throws Exception {
     File parentPomFile = getResource("sample-parent/pom.xml");
 
     File sampleChild = getResource("sample-child-with-relativepath.xml");
@@ -110,7 +110,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
     Assert.assertFalse(pomString.contains(version));
   }
 
-  public void validateDepsFrom(ProjectModel context) throws Exception {
+  void validateDepsFrom(ProjectModel context) throws Exception {
     Map<POMDocument, File> resultFiles = copyFiles(context);
 
     resultFiles
@@ -141,8 +141,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
         foundDependency);
   }
 
-  public Map<POMDocument, File> copyFiles(ProjectModel context)
-      throws IOException, URISyntaxException {
+  Map<POMDocument, File> copyFiles(ProjectModel context) throws IOException, URISyntaxException {
     File commonPath = new File(context.getPomFile().getPomPath().toURI()).getCanonicalFile();
 
     for (POMDocument p : context.getParentPomFiles()) {
@@ -162,7 +161,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
   }
 
   // Using original kotlin code decompiled version
-  public Map<POMDocument, File> buildMap(ProjectModel context, int commonPathLen, File tmpOutputDir)
+  Map<POMDocument, File> buildMap(ProjectModel context, int commonPathLen, File tmpOutputDir)
       throws URISyntaxException, IOException {
     List allPomFiles = context.allPomFiles();
     Iterable allPomFilesIterable = (Iterable) allPomFiles;

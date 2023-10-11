@@ -22,7 +22,7 @@ final class POMOperatorDependencyQueryTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 
   @Test
-  public void testBasicQuery()
+  void testBasicQuery()
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     for (QueryType queryType : QueryType.values()) {
       if (queryType != QueryType.NONE) {
@@ -39,7 +39,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  public void testFailedSafeQuery()
+  void testFailedSafeQuery()
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModelFactory context =
         ProjectModelFactory.load(getClass().getResource("pom-broken.xml"));
@@ -51,7 +51,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  public void testFailedUnsafeQuery()
+  void testFailedUnsafeQuery()
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     Assertions.assertThrows(
         IllegalStateException.class,
@@ -67,7 +67,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  public void testAllQueryTypes()
+  void testAllQueryTypes()
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     String[] pomFiles = {"pom-1.xml", "pom-3.xml"};
     for (String pomFile : pomFiles) {
@@ -94,7 +94,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  public void testTemporaryDirectory()
+  void testTemporaryDirectory()
       throws IOException, DocumentException, URISyntaxException, XMLStreamException {
     for (QueryType queryType : QueryType.values()) {
       if (queryType != QueryType.NONE) {
@@ -127,7 +127,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  public void testTemporaryDirectoryAndFullyOffline()
+  void testTemporaryDirectoryAndFullyOffline()
       throws IOException, DocumentException, URISyntaxException, XMLStreamException {
     for (QueryType queryType : QueryType.values()) {
       if (queryType != QueryType.NONE && queryType == QueryType.SAFE) {
@@ -148,7 +148,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  public void testOnSyntheticDependency() throws Exception {
+  void testOnSyntheticDependency() throws Exception {
     File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
 
     Path tempPom = new File(tempDirectory, "pom.xml").toPath();
@@ -201,7 +201,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  public void testOnCompositeSyntheticDependency() throws Exception {
+  void testOnCompositeSyntheticDependency() throws Exception {
     File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
 
     Path tempParentPom = new File(tempDirectory, "pom-parent.xml").toPath();
@@ -290,7 +290,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  public void testOnCompositeSyntheticDependencyIncompleteWithoutParsing() throws Exception {
+  void testOnCompositeSyntheticDependencyIncompleteWithoutParsing() throws Exception {
     File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
     Path tempPom = new File(tempDirectory, "pom.xml").toPath();
     String randomName = "random-artifact-" + System.currentTimeMillis();
@@ -343,7 +343,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  public void testOnCompositeSyntheticDependencyIncompleteButWithParser() throws Exception {
+  void testOnCompositeSyntheticDependencyIncompleteButWithParser() throws Exception {
     File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
     Path tempPom = new File(tempDirectory, "pom.xml").toPath();
     String randomName = "random-artifact-" + System.currentTimeMillis();
@@ -434,7 +434,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  public void testOfflineQueryResolution() throws Exception {
+  void testOfflineQueryResolution() throws Exception {
     File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
     File pomFile = new File(getClass().getResource("nested/child/pom/pom-3-child.xml").getFile());
 

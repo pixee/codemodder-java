@@ -17,7 +17,7 @@ final class POMOperatorVersionQueryTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorVersionQueryTest.class);
 
   @Test
-  public void testBasicQuery() {
+  void testBasicQuery() {
     String pomFile = "pom-1.xml";
 
     Arrays.stream(QueryType.values())
@@ -51,7 +51,7 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  public void testPomVersionZero() {
+  void testPomVersionZero() {
     Arrays.stream(QueryType.values())
         .filter(queryType -> queryType != QueryType.NONE)
         .forEach(
@@ -75,7 +75,7 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  public void testPomVersion1and2() {
+  void testPomVersion1and2() {
     IntStream.rangeClosed(1, 2)
         .forEach(
             index -> {
@@ -118,7 +118,7 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  public void testPomVersion4and5and6Offline() {
+  void testPomVersion4and5and6Offline() {
     IntStream.rangeClosed(4, 6)
         .forEach(
             index -> {
@@ -161,7 +161,7 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  public void testPomVersion3() {
+  void testPomVersion3() {
     String pomFile = "pom-version-3.xml";
     LOGGER.info("Using file: " + pomFile);
 
@@ -196,7 +196,7 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  public void testPomVersionsMismatching() {
+  void testPomVersionsMismatching() {
     String pomFile = "pom-version-7.xml";
 
     Arrays.stream(QueryType.values())
@@ -229,7 +229,7 @@ final class POMOperatorVersionQueryTest {
             });
   }
 
-  public Optional<VersionQueryResponse> versionDefinitions(
+  Optional<VersionQueryResponse> versionDefinitions(
       String pomFile, QueryType queryType, boolean offline)
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModel context =

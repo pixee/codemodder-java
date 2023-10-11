@@ -14,21 +14,21 @@ final class POMScannerTest extends AbstractTestBase {
   private final File currentDirectory = new File(System.getProperty("user.dir"));
 
   @Test
-  public void testBasic() throws Exception {
+  void testBasic() throws Exception {
     File pomFile = getResourceAsFile("sample-child-with-relativepath.xml");
 
     ProjectModel pmf = POMScanner.scanFrom(pomFile, currentDirectory).build();
   }
 
   @Test
-  public void testTwoLevelsWithLoop() throws Exception {
+  void testTwoLevelsWithLoop() throws Exception {
     File pomFile = getResourceAsFile("sample-child-with-relativepath-and-two-levels.xml");
 
     ProjectModel pmf = POMScanner.scanFrom(pomFile, currentDirectory).build();
   }
 
   @Test
-  public void testTwoLevelsWithoutLoop() throws Exception {
+  void testTwoLevelsWithoutLoop() throws Exception {
     File pomFile = getResourceAsFile("sample-child-with-relativepath-and-two-levels-nonloop.xml");
 
     ProjectModel pmf = POMScanner.scanFrom(pomFile, currentDirectory).build();
@@ -55,7 +55,7 @@ final class POMScannerTest extends AbstractTestBase {
   }
 
   @Test
-  public void testMultipleChildren() throws DocumentException, IOException, URISyntaxException {
+  void testMultipleChildren() throws DocumentException, IOException, URISyntaxException {
     for (int index = 1; index <= 3; index++) {
       File pomFile = getResourceAsFile("nested/child/pom/pom-" + index + "-child.xml");
 
@@ -84,7 +84,7 @@ final class POMScannerTest extends AbstractTestBase {
   }
 
   @Test
-  public void testMissingRelativeParentElement()
+  void testMissingRelativeParentElement()
       throws DocumentException, IOException, URISyntaxException {
     File pomFile = getResourceAsFile("nested/child/pom/pom-demo.xml");
 
@@ -94,7 +94,7 @@ final class POMScannerTest extends AbstractTestBase {
   }
 
   @Test
-  public void testLegacyWithInvalidRelativePaths()
+  void testLegacyWithInvalidRelativePaths()
       throws DocumentException, IOException, URISyntaxException {
     for (int index = 1; index <= 3; index++) {
       String name = "sample-child-with-broken-path-" + index + ".xml";
@@ -107,7 +107,7 @@ final class POMScannerTest extends AbstractTestBase {
   }
 
   @Test
-  public void testWithRelativePathEmpty() throws Exception {
+  void testWithRelativePathEmpty() throws Exception {
     for (int index = 3; index <= 4; index++) {
       File pomFile = getResourceAsFile("pom-multiple-pom-parent-level-" + index + ".xml");
 
@@ -128,8 +128,7 @@ final class POMScannerTest extends AbstractTestBase {
   }
 
   @Test
-  public void testWithMissingRelativePath()
-      throws DocumentException, IOException, URISyntaxException {
+  void testWithMissingRelativePath() throws DocumentException, IOException, URISyntaxException {
     File pomFile =
         getResourceAsFile("sample-parent/sample-child/pom-multiple-pom-parent-level-6.xml");
 

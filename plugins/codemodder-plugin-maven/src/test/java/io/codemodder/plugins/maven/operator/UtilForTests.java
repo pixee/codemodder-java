@@ -15,7 +15,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 class UtilForTests {
-  public static Map<String, String> getRuntimeResolvedProperties(ProjectModel projectModel)
+  static Map<String, String> getRuntimeResolvedProperties(ProjectModel projectModel)
       throws IOException {
     Document effectivePom = getEffectivePom(projectModel);
     List<Element> propertyElements = effectivePom.getRootElement().element("properties").elements();
@@ -28,7 +28,7 @@ class UtilForTests {
     return propertiesMap;
   }
 
-  public static Document getEffectivePom(ProjectModel projectModel) throws IOException {
+  static Document getEffectivePom(ProjectModel projectModel) throws IOException {
     File tmpInputFile = File.createTempFile("tmp-pom-orig", ".xml");
     File tmpOutputFile = File.createTempFile("tmp-pom", ".xml");
 

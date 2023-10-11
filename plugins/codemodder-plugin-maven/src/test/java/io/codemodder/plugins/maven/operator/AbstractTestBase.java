@@ -28,7 +28,7 @@ class AbstractTestBase {
     return new File(this.getClass().getResource(name).toURI());
   }
 
-  public File getResourceAsFile(String name) throws URISyntaxException {
+  File getResourceAsFile(String name) throws URISyntaxException {
     File resourceUrl = getResource(name);
     return new File(resourceUrl.toURI());
   }
@@ -69,7 +69,7 @@ class AbstractTestBase {
     return context;
   }
 
-  public static Diff getXmlDifferences(Document original, Document modified) {
+  static Diff getXmlDifferences(Document original, Document modified) {
     String originalDoc = original.asXML();
     String modifiedDoc = modified.asXML();
 

@@ -27,7 +27,7 @@ final class POMOperatorTest extends AbstractTestBase {
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 
   @Test
-  public void testWithBrokenPom() {
+  void testWithBrokenPom() {
     Assertions.assertThrows(
         DocumentException.class,
         () -> {
@@ -39,7 +39,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testWithMultipleDependencies() throws Exception {
+  void testWithMultipleDependencies() throws Exception {
     List<Dependency> deps = new ArrayList<>();
     deps.add(Dependency.fromString("org.slf4j:slf4j-api:1.7.25"));
     deps.add(Dependency.fromString("io.github.pixee:java-code-security-toolkit:1.0.2"));
@@ -102,7 +102,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testWithDependencyMissing() {
+  void testWithDependencyMissing() {
     Assertions.assertThrows(
         MissingDependencyException.class,
         () -> {
@@ -113,7 +113,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testCaseOne() throws Exception {
+  void testCaseOne() throws Exception {
 
     ProjectModelFactory projectModelFactory =
         ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-1.xml"))
@@ -145,7 +145,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testCaseThree() throws Exception {
+  void testCaseThree() throws Exception {
     Dependency dependencyToUpgradeOnCaseThree =
         new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
 
@@ -183,7 +183,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testCaseThreeButWithLowerVersion() throws Exception {
+  void testCaseThreeButWithLowerVersion() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
 
@@ -203,7 +203,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testCase4() throws Exception {
+  void testCase4() throws Exception {
     File pomPath = new File(POMOperatorTest.class.getResource("webgoat-parent.xml").toURI());
 
     List<String> args = new ArrayList<>();
@@ -251,7 +251,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testCaseWithEmptyElement() throws Exception {
+  void testCaseWithEmptyElement() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
@@ -285,7 +285,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testCaseWithEmptyElementHiddenInComment() throws Exception {
+  void testCaseWithEmptyElementHiddenInComment() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
@@ -312,7 +312,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testCaseWithProperty() throws Exception {
+  void testCaseWithProperty() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
 
@@ -354,7 +354,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testCaseWithPropertyDefinedTwice() {
+  void testCaseWithPropertyDefinedTwice() {
     Assertions.assertThrows(
         IllegalStateException.class,
         () -> {
@@ -404,7 +404,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testCaseWithoutPropertyButDefiningOne()
+  void testCaseWithoutPropertyButDefiningOne()
       throws XMLStreamException, URISyntaxException, IOException, DocumentException {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
@@ -458,7 +458,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testFileWithTabs()
+  void testFileWithTabs()
       throws XMLStreamException, URISyntaxException, IOException, DocumentException {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
@@ -491,7 +491,7 @@ final class POMOperatorTest extends AbstractTestBase {
   }
 
   @Test
-  public void testCaseWithEmptyElementFromCustomer() throws Exception {
+  void testCaseWithEmptyElementFromCustomer() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
