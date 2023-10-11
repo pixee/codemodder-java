@@ -1,27 +1,19 @@
 package io.codemodder.plugins.maven.operator;
 
-import io.codemodder.plugins.maven.operator.Util;
-import org.apache.commons.lang3.SystemUtils;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import org.apache.commons.lang3.SystemUtils;
+import org.junit.jupiter.api.Test;
 
 public class POMOperatorJavaIT {
   @Test
   public void testJavaSample() throws Exception {
     String mvnAbsPath = Util.which("mvn").getAbsolutePath();
 
-    List<String> argList = Arrays.asList(
-        mvnAbsPath,
-        "-B",
-        "-N",
-        "-f",
-        "java-sample/pom.xml",
-        "verify"
-    );
+    List<String> argList =
+        Arrays.asList(mvnAbsPath, "-B", "-N", "-f", "java-sample/pom.xml", "verify");
 
     if (SystemUtils.IS_OS_WINDOWS) {
       List<String> newArgList = Arrays.asList(Util.which("cmd").getAbsolutePath(), "/c");
