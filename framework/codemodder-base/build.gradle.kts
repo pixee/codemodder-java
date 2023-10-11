@@ -34,6 +34,7 @@ dependencies {
 
     implementation(libs.tuples)
     implementation(libs.logback.classic)
+    implementation(libs.logstash.logback.encoder)
     implementation(libs.maven.model)
     implementation(libs.picocli)
     implementation(libs.juniversalchardet)
