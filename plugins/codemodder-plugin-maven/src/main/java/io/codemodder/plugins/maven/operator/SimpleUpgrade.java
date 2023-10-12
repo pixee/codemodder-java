@@ -5,9 +5,7 @@ class SimpleUpgrade extends AbstractCommand {
 
   private static SimpleUpgrade instance;
 
-  private SimpleUpgrade() {
-    // Private constructor to prevent instantiation.
-  }
+  private SimpleUpgrade() {}
 
   public static SimpleUpgrade getInstance() {
     if (instance == null) {
