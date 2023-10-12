@@ -8,8 +8,15 @@ import javax.xml.stream.XMLStreamException;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+/** Base implementation of Command - used by SimpleDependency and SimpleInsert */
 abstract class AbstractCommand implements Command {
 
+  /**
+   * Given a POM, locate its coordinates for a given dependency based on lookupExpression and
+   * figures out the upgrade
+   *
+   * <p>TODO review this
+   */
   protected boolean handleDependency(ProjectModel pm, String lookupExpression) {
     List<Node> dependencyNodes =
         Util.selectXPathNodes(pm.getPomFile().getResultPom(), lookupExpression);

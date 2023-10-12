@@ -14,13 +14,26 @@ import org.apache.maven.shared.invoker.InvocationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Common Base Class - Meant to be used by Simple Queries using either Invoker and/or Embedder, thus
+ * relying on dependency:tree mojo outputting into a text file - which might be cached.
+ */
 abstract class AbstractQueryCommand extends AbstractCommand {
 
-  public static final String DEPENDENCY_TREE_MOJO_REFERENCE =
+  private static final String DEPENDENCY_TREE_MOJO_REFERENCE =
       "org.apache.maven.plugins:maven-dependency-plugin:3.3.0:tree";
 
   protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractQueryCommand.class);
 
+  /**
+   * Generates a temporary file path used to store the output of the
+   *
+   * <pre>dependency:tree</pre>
+   *
+   * mojo
+   *
+   * @param pomFilePath POM Original File Path
+   */
   private File getOutputPath(File pomFilePath) {
     File basePath = pomFilePath.getParentFile();
 
@@ -31,23 +44,37 @@ abstract class AbstractQueryCommand extends AbstractCommand {
     return outputPath;
   }
 
-  protected File getPomFilePath(POMDocument d) throws URISyntaxException {
+  /**
+   * Given a POM URI, returns a File Object
+   *
+   * @param d POMDocument
+   */
+  private File getPomFilePath(POMDocument d) throws URISyntaxException {
     Path pomPath = Paths.get(d.getPomPath().toURI());
     return pomPath.toFile();
   }
 
+  /**
+   * Abstract Method to extract dependencies
+   *
+   * @param outputPath Output Path to where to store the content
+   * @param pomFilePath Input Pom Path
+   * @param c Project Model
+   */
   protected abstract void extractDependencyTree(File outputPath, File pomFilePath, ProjectModel c);
 
+  /**
+   * Internal Holder Variable
+   *
+   * <p>Todo: OF COURSE IT BREAKS THE PROTOCOL
+   */
   protected Collection<Dependency> result = null;
 
   public Collection<Dependency> getResult() {
     return result;
   }
 
-  public void setResult(Collection<Dependency> result) {
-    this.result = result;
-  }
-
+  /** We declare the main logic here - details are made in the child classes for now */
   @Override
   public boolean execute(ProjectModel pm) throws URISyntaxException, IOException {
     File pomFilePath = getPomFilePath(pm.getPomFile());
@@ -68,7 +95,22 @@ abstract class AbstractQueryCommand extends AbstractCommand {
     return true;
   }
 
-  protected Map<String, Dependency> extractDependencies(File outputPath) throws IOException {
+  /**
+   * Given a File containing the output of the dependency:tree mojo, read its contents and parse,
+   * creating an array of dependencies
+   *
+   * <p>About the file contents: We receive something such as this, then filter it out:
+   *
+   * <pre>
+   *     br.com.ingenieux:pom-operator:jar:0.0.1-SNAPSHOT
+   *     +- xerces:xercesImpl:jar:2.12.1:compile
+   *     |  \- xml-apis:xml-apis:jar:1.4.01:compile
+   *     \- org.jetbrains.kotlin:kotlin-test:jar:1.5.31:test
+   * </pre>
+   *
+   * @param outputPath file to read
+   */
+  private Map<String, Dependency> extractDependencies(File outputPath) throws IOException {
     Map<String, Dependency> dependencyMap = new HashMap<>();
     try (BufferedReader reader = new BufferedReader(new FileReader(outputPath))) {
       String line;
@@ -155,6 +197,11 @@ abstract class AbstractQueryCommand extends AbstractCommand {
     return request;
   }
 
+  /**
+   * Locates where Maven is at - HOME var and main launcher script.
+   *
+   * @param invocationRequest InvocationRequest to be filled up
+   */
   private void findMaven(InvocationRequest invocationRequest) {
     /*
      * Step 1: Locate Maven Home
