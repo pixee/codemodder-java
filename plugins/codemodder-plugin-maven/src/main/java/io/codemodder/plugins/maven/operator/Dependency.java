@@ -25,20 +25,13 @@ public class Dependency {
     this.scope = scope != null ? scope : "compile";
   }
 
-  public Dependency(String groupId, String artifactId, String version) {
-    this(groupId, artifactId, version, null, null, null);
-  }
-
-  public Dependency(String groupId, String artifactId) {
-    this(groupId, artifactId, null, null, null, null);
-  }
-
   @Override
   public String toString() {
     return String.join(":", groupId, artifactId, packaging, version);
   }
 
-  public static Dependency fromString(String str) {
+  /** Given a string, parses - and creates - a new dependency Object */
+  static Dependency fromString(String str) {
     String[] elements = str.split(":");
 
     if (elements.length < 3) {
