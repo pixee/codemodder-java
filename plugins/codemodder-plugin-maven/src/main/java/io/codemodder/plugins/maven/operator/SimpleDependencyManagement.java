@@ -7,6 +7,11 @@ class SimpleDependencyManagement extends AbstractCommand {
 
   private SimpleDependencyManagement() {}
 
+  /**
+   * Gets the singleton instance of SimpleDependencyManagement.
+   *
+   * @return The singleton instance of SimpleDependencyManagement.
+   */
   public static SimpleDependencyManagement getInstance() {
     if (instance == null) {
       instance = new SimpleDependencyManagement();
@@ -14,6 +19,12 @@ class SimpleDependencyManagement extends AbstractCommand {
     return instance;
   }
 
+  /**
+   * Executes the dependency management for a project based on the provided ProjectModel.
+   *
+   * @param pm The ProjectModel containing the configuration and settings for dependency management.
+   * @return `true` if the dependency management is successful, `false` otherwise.
+   */
   @Override
   public boolean execute(ProjectModel pm) {
     if (pm.getDependency() == null) {
