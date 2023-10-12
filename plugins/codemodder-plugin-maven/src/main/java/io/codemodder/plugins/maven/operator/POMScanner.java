@@ -18,12 +18,25 @@ import org.dom4j.tree.DefaultElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The POMScanner class provides methods for scanning Maven POM (Project Object Model) files,
+ * including the original POM and its parent POMs, to create a ProjectModelFactory. This class
+ * offers both modern and legacy scanning methods for flexibility.
+ */
 public class POMScanner {
 
   private static final Pattern RE_WINDOWS_PATH = Pattern.compile("^[A-Za-z]:");
 
   private static final Logger LOGGER = LoggerFactory.getLogger(POMScanner.class);
 
+  /**
+   * Scans a POM file and its parent POMs, if any, and creates a ProjectModelFactory.
+   *
+   * @param originalFile The original POM file to scan.
+   * @param topLevelDirectory The top-level directory containing the POM files.
+   * @return A ProjectModelFactory representing the scanned POMs.
+   * @throws Exception If an error occurs during the scanning process.
+   */
   public static ProjectModelFactory scanFrom(File originalFile, File topLevelDirectory)
       throws Exception {
     ProjectModelFactory originalDocument = ProjectModelFactory.load(originalFile);
@@ -62,6 +75,16 @@ public class POMScanner {
     }
   }
 
+  /**
+   * Scans a POM file and its parent POMs using the legacy method and creates a ProjectModelFactory.
+   *
+   * @param originalFile The original POM file to scan.
+   * @param topLevelDirectory The top-level directory containing the POM files.
+   * @return A ProjectModelFactory representing the scanned POMs.
+   * @throws DocumentException If a document error occurs.
+   * @throws IOException If an I/O error occurs.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   */
   public static ProjectModelFactory legacyScanFrom(File originalFile, File topLevelDirectory)
       throws DocumentException, IOException, URISyntaxException {
     POMDocument pomFile = POMDocumentFactory.load(originalFile);
