@@ -70,11 +70,24 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    */
   protected Collection<Dependency> result = null;
 
+  /**
+   * Retrieves the collection of dependencies resulting from the query command execution.
+   *
+   * @return A collection of Dependency objects representing project dependencies.
+   */
   public Collection<Dependency> getResult() {
     return result;
   }
 
-  /** We declare the main logic here - details are made in the child classes for now */
+  /**
+   * We declare the main logic here - details are made in the child classes for now Executes the
+   * query command, extracting and processing project dependencies.
+   *
+   * @param pm The ProjectModel representing the project on which to execute the command.
+   * @return true if the execution was successful, false otherwise.
+   * @throws URISyntaxException If there is an issue with URIs in the execution.
+   * @throws IOException If an IO error occurs during execution.
+   */
   @Override
   public boolean execute(ProjectModel pm) throws URISyntaxException, IOException {
     File pomFilePath = getPomFilePath(pm.getPomFile());
