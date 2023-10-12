@@ -11,6 +11,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
+/** Factory for a POMDocument */
 class POMDocumentFactory {
 
   public static POMDocument load(InputStream is)
