@@ -11,6 +11,11 @@ class CheckParentPackaging extends AbstractCommand {
 
   private CheckParentPackaging() {}
 
+  /**
+   * Gets the singleton instance of the CheckParentPackaging command.
+   *
+   * @return The singleton instance of CheckParentPackaging.
+   */
   public static CheckParentPackaging getInstance() {
     return INSTANCE;
   }
@@ -27,6 +32,14 @@ class CheckParentPackaging extends AbstractCommand {
     return false;
   }
 
+  /**
+   * Checks and validates the packaging type for parent POMs and the main POM file.
+   *
+   * @param pm ProjectModel containing project information.
+   * @return false, indicating that the packaging type checks were performed without errors.
+   * @throws WrongDependencyTypeException if the packaging type is incorrect for parent POMs or the
+   *     main POM file.
+   */
   @Override
   public boolean execute(ProjectModel pm) {
     Collection<POMDocument> wrongParentPoms =
