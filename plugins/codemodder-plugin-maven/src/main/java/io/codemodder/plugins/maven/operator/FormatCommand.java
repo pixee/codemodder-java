@@ -51,6 +51,15 @@ class FormatCommand extends AbstractCommand {
         new Regex("<([\\p{Alnum}_\\-.]+)>\\s*</\\1>|<([\\p{Alnum}_\\-.]+)\\s*/>");
   }
 
+  /**
+   * Execute the formatting operation.
+   *
+   * @param pm The ProjectModel to operate on.
+   * @return `true` if the formatting operation was successful, `false` otherwise.
+   * @throws XMLStreamException if there is an issue with XML processing.
+   * @throws IOException if there is an issue with I/O operations.
+   * @throws URISyntaxException if there is an issue with URI syntax.
+   */
   @Override
   public boolean execute(ProjectModel pm)
       throws XMLStreamException, IOException, URISyntaxException {
@@ -65,8 +74,13 @@ class FormatCommand extends AbstractCommand {
   }
 
   /**
-   * When doing the opposite, render the XML using the optionally supplied encoding (defaults to
-   * UTF8 obviously) but apply the original formatting as well
+   * Perform post-processing after formatting. When doing the opposite, render the XML using the
+   * optionally supplied encoding (defaults to UTF8 obviously) but apply the original formatting as
+   * well
+   *
+   * @param pm The ProjectModel to operate on.
+   * @return `true` if the post-processing was successful, `false` otherwise.
+   * @throws XMLStreamException if there is an issue with XML processing.
    */
   @Override
   public boolean postProcess(ProjectModel pm) throws XMLStreamException {
