@@ -24,13 +24,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class EmbedderFacade {
-
-  private static EmbedderFacade instance = new EmbedderFacade();
   private static final Logger LOGGER = LoggerFactory.getLogger(EmbedderFacade.class);
 
   private EmbedderFacade() {}
 
-  public static EmbedderFacadeResponse invokeEmbedder(EmbedderFacadeRequest req)
+  static EmbedderFacadeResponse invokeEmbedder(EmbedderFacadeRequest req)
       throws ModelBuildingException {
     File localRepoPath;
 
@@ -107,18 +105,14 @@ class EmbedderFacade {
         modelBuildingResult, session, repositorySystem, remoteRepositories);
   }
 
-  public static EmbedderFacade getInstance() {
-    return instance;
-  }
-
-  public static class EmbedderFacadeRequest {
+  static class EmbedderFacadeRequest {
     private final boolean offline;
     private final File localRepositoryPath;
     private final File pomFile;
     private final Collection<String> activeProfileIds;
     private final Collection<String> inactiveProfileIds;
 
-    public EmbedderFacadeRequest(
+    EmbedderFacadeRequest(
         boolean offline,
         File localRepositoryPath,
         File pomFile,
@@ -157,7 +151,7 @@ class EmbedderFacade {
     }
   }
 
-  public static class EmbedderFacadeResponse {
+  static class EmbedderFacadeResponse {
     private final ModelBuildingResult modelBuildingResult;
     private final RepositorySystemSession session;
     private final RepositorySystem repositorySystem;
