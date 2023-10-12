@@ -1,5 +1,10 @@
 package io.codemodder.plugins.maven.operator;
 
+/**
+ * Represents a tuple (kind / version string) applicable from a pom.xml file
+ *
+ * <p>For Internal Consumption (thus Internal)
+ */
 class VersionDefinition {
   private Kind kind;
   private String value;
