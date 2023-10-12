@@ -5,8 +5,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+/**
+ * Represents a strategy for querying version settings defined by properties in the Maven project.
+ */
 class VersionByProperty extends AbstractVersionCommand {
 
+  /**
+   * Executes the strategy for querying version settings defined by properties in the Maven project.
+   *
+   * @param pm The ProjectModel containing the configuration and settings for the version query.
+   * @return `true` if the query is successful, `false` otherwise.
+   */
   @Override
   public boolean execute(ProjectModel pm) {
     Set<VersionDefinition> definedProperties = new TreeSet<>(VERSION_KIND_COMPARATOR);
