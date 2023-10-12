@@ -21,7 +21,7 @@ public class POMOperator {
    */
   public static boolean modify(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
-    return Chain.createForModify().execute(projectModel);
+    return CommandChain.createForModify().execute(projectModel);
   }
 
   /**
@@ -123,7 +123,7 @@ public class POMOperator {
   static Collection<Dependency> queryDependency(
       ProjectModel projectModel, List<Command> commandList)
       throws URISyntaxException, IOException, XMLStreamException {
-    Chain chain = Chain.createForDependencyQuery(projectModel.getQueryType());
+    CommandChain chain = CommandChain.createForDependencyQuery(projectModel.getQueryType());
 
     executeChain(commandList, chain, projectModel);
 
@@ -152,7 +152,7 @@ public class POMOperator {
    */
   static Set<VersionDefinition> queryVersions(ProjectModel projectModel, List<Command> commandList)
       throws URISyntaxException, IOException, XMLStreamException {
-    Chain chain = Chain.createForVersionQuery(projectModel.getQueryType());
+    CommandChain chain = CommandChain.createForVersionQuery(projectModel.getQueryType());
 
     executeChain(commandList, chain, projectModel);
 
@@ -174,7 +174,7 @@ public class POMOperator {
   }
 
   private static void executeChain(
-      List<Command> commandList, Chain chain, ProjectModel projectModel)
+      List<Command> commandList, CommandChain chain, ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     if (!commandList.isEmpty()) {
       chain.getCommandList().clear();

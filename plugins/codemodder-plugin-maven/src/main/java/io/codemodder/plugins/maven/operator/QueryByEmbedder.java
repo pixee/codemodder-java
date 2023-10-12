@@ -75,7 +75,7 @@ class QueryByEmbedder extends AbstractQueryCommand {
        * <p>If that happens, we'll move to the next strategy (Invoker-based likely) by throwing a
        * custom exception which is caught inside the Chain#execute method
        *
-       * @see Chain#execute
+       * @see CommandChain#execute
        */
       if (1 == result && (!outputPath.exists())) {
         throw new InvalidContextException();

@@ -12,13 +12,13 @@ import org.slf4j.LoggerFactory;
  *
  * @constructor commands: Commands to Use
  */
-class Chain {
-  private static final Logger LOGGER = LoggerFactory.getLogger(Chain.class);
+class CommandChain {
+  private static final Logger LOGGER = LoggerFactory.getLogger(CommandChain.class);
 
   /** Internal ArrayList of the Commands */
   private List<Command> commandList;
 
-  private Chain(Command... commands) {
+  private CommandChain(Command... commands) {
     this.commandList = new ArrayList<>(Arrays.asList(commands));
   }
 
@@ -81,8 +81,8 @@ class Chain {
    *
    * @return A pre-configured Chain for modifying a POM.
    */
-  public static Chain createForModify() {
-    return new Chain(
+  public static CommandChain createForModify() {
+    return new CommandChain(
         CheckDependencyPresent.getInstance(),
         CheckParentPackaging.getInstance(),
         new FormatCommand(),
@@ -93,7 +93,7 @@ class Chain {
         SimpleInsert.getInstance());
   }
 
-  private static Chain filterByQueryType(
+  private static CommandChain filterByQueryType(
       List<Pair<QueryType, String>> commandList,
       QueryType queryType,
       List<AbstractQueryCommand> initialCommands,
@@ -122,7 +122,7 @@ class Chain {
           "Unable to load any available strategy for " + queryType.name());
     }
 
-    return new Chain(commands.toArray(new Command[0]));
+    return new CommandChain(commands.toArray(new Command[0]));
   }
 
   /**
@@ -131,7 +131,7 @@ class Chain {
    * @param queryType The QueryType to determine the set of commands to include in the Chain.
    * @return A pre-configured Chain for dependency querying.
    */
-  public static Chain createForDependencyQuery(QueryType queryType) {
+  public static CommandChain createForDependencyQuery(QueryType queryType) {
     return filterByQueryType(
         AVAILABLE_DEPENDENCY_QUERY_COMMANDS,
         queryType,
@@ -145,7 +145,7 @@ class Chain {
    * @param queryType The QueryType to determine the set of commands to include in the Chain.
    * @return A pre-configured Chain for version querying.
    */
-  public static Chain createForVersionQuery(QueryType queryType) {
+  public static CommandChain createForVersionQuery(QueryType queryType) {
     return filterByQueryType(
         AVAILABLE_QUERY_VERSION_COMMANDS,
         queryType,

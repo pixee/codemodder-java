@@ -71,7 +71,7 @@ final class POMOperatorDependencyQueryTest {
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     String[] pomFiles = {"pom-1.xml", "pom-3.xml"};
     for (String pomFile : pomFiles) {
-      for (Pair<QueryType, String> chain : Chain.AVAILABLE_DEPENDENCY_QUERY_COMMANDS) {
+      for (Pair<QueryType, String> chain : CommandChain.AVAILABLE_DEPENDENCY_QUERY_COMMANDS) {
         String commandClassName = "io.codemodder.plugins.maven.operator." + chain.getSecond();
 
         List<Command> commandListOverride = new ArrayList<>();
