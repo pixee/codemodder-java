@@ -23,11 +23,21 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class provides an interface for invoking Maven Embedder to build and resolve project models.
+ */
 class EmbedderFacade {
   private static final Logger LOGGER = LoggerFactory.getLogger(EmbedderFacade.class);
 
   private EmbedderFacade() {}
 
+  /**
+   * Invokes Maven Embedder to build and resolve project models.
+   *
+   * @param req An EmbedderFacadeRequest object containing request parameters.
+   * @return An EmbedderFacadeResponse containing the results of the model building and resolution.
+   * @throws ModelBuildingException if there is an issue with model building.
+   */
   static EmbedderFacadeResponse invokeEmbedder(EmbedderFacadeRequest req)
       throws ModelBuildingException {
     File localRepoPath;
@@ -105,6 +115,7 @@ class EmbedderFacade {
         modelBuildingResult, session, repositorySystem, remoteRepositories);
   }
 
+  /** Request object for invoking Maven Embedder. */
   static class EmbedderFacadeRequest {
     private final boolean offline;
     private final File localRepositoryPath;
@@ -151,6 +162,7 @@ class EmbedderFacade {
     }
   }
 
+  /** Response object for invoking Maven Embedder. */
   static class EmbedderFacadeResponse {
     private final ModelBuildingResult modelBuildingResult;
     private final RepositorySystemSession session;
