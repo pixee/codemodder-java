@@ -69,7 +69,7 @@ final class SQLParameterizer {
                         try {
                           String resolvedType = s.calculateResolvedType().describe();
                           return "java.sql.Statement".equals(resolvedType);
-                        } catch (UnsolvedSymbolException e) {
+                        } catch (IllegalArgumentException | UnsolvedSymbolException e) {
                           return false;
                         }
                       })
