@@ -7,6 +7,11 @@ class SimpleUpgrade extends AbstractCommand {
 
   private SimpleUpgrade() {}
 
+  /**
+   * Gets the singleton instance of SimpleUpgrade.
+   *
+   * @return The singleton instance of SimpleUpgrade.
+   */
   public static SimpleUpgrade getInstance() {
     if (instance == null) {
       instance = new SimpleUpgrade();
@@ -14,6 +19,12 @@ class SimpleUpgrade extends AbstractCommand {
     return instance;
   }
 
+  /**
+   * Executes the strategy for bumping an existing dependency in the Maven project.
+   *
+   * @param pm The ProjectModel containing the configuration and settings for the upgrade.
+   * @return `true` if the upgrade is successful, `false` otherwise.
+   */
   @Override
   public boolean execute(ProjectModel pm) {
     if (pm.getDependency() == null) {
