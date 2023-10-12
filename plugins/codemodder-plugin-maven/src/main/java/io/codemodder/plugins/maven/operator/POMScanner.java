@@ -148,6 +148,10 @@ public class POMScanner {
         parentElement2.add(newRelativePathElement);
       }
 
+      // One Last Test - Does the previous mention at least ArtifactId equals to parent declared at
+      // previous?
+      // If not break and warn
+
       String myArtifactId =
           newPomFile.getPomDocument().getRootElement().element("artifactId") != null
               ? newPomFile.getPomDocument().getRootElement().element("artifactId").getText()
