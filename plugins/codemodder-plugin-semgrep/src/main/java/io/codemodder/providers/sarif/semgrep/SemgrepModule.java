@@ -30,19 +30,29 @@ public final class SemgrepModule extends AbstractModule {
   private final Path codeDirectory;
   private final SemgrepRunner semgrepRunner;
   private final List<RuleSarif> sarifs;
+  private final List<String> includePatterns;
+  private final List<String> excludePatterns;
 
   @VisibleForTesting
-  SemgrepModule(final Path codeDirectory, final List<Class<? extends CodeChanger>> codemodTypes) {
-    this(codeDirectory, codemodTypes, List.of());
+  SemgrepModule(
+      final Path codeDirectory,
+      final List<String> includePatterns,
+      final List<String> excludePatterns,
+      final List<Class<? extends CodeChanger>> codemodTypes) {
+    this(codeDirectory, includePatterns, excludePatterns, codemodTypes, List.of());
   }
 
   public SemgrepModule(
       final Path codeDirectory,
+      final List<String> includePatterns,
+      final List<String> excludePatterns,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
     this.semgrepRunner = SemgrepRunner.createDefault();
+    this.includePatterns = Objects.requireNonNull(includePatterns);
+    this.excludePatterns = Objects.requireNonNull(excludePatterns);
     this.sarifs = Objects.requireNonNull(sarifs);
   }
 
@@ -216,7 +226,7 @@ public final class SemgrepModule extends AbstractModule {
     // actually run the SARIF only once
     SarifSchema210 sarif;
     try {
-      sarif = semgrepRunner.run(yamlPathsToRun, codeDirectory);
+      sarif = semgrepRunner.run(yamlPathsToRun, codeDirectory, includePatterns, excludePatterns);
     } catch (IOException e) {
       throw new IllegalArgumentException("Semgrep execution failed", e);
     }

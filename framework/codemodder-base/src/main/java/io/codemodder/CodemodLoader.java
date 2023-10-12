@@ -27,6 +27,8 @@ public final class CodemodLoader {
         codemodTypes,
         CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
         repositoryDir,
+        IncludesExcludes.ALL_PATTERN,
+        IncludesExcludes.NONE_PATTERN,
         includedFiles,
         Map.of(),
         List.of());
@@ -35,12 +37,33 @@ public final class CodemodLoader {
   public CodemodLoader(
       final List<Class<? extends CodeChanger>> codemodTypes,
       final Path repositoryDir,
+      final List<String> includePatterns,
+      final List<String> excludePatterns,
+      final List<Path> includedFiles) {
+    this(
+        codemodTypes,
+        CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+        repositoryDir,
+        includePatterns,
+        excludePatterns,
+        includedFiles,
+        Map.of(),
+        List.of());
+  }
+
+  public CodemodLoader(
+      final List<Class<? extends CodeChanger>> codemodTypes,
+      final Path repositoryDir,
+      final List<String> includePatterns,
+      final List<String> excludePatterns,
       final List<Path> includedFiles,
       final List<ParameterArgument> parameterArguments) {
     this(
         codemodTypes,
         CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
         repositoryDir,
+        includePatterns,
+        excludePatterns,
         includedFiles,
         Map.of(),
         parameterArguments);
@@ -49,12 +72,16 @@ public final class CodemodLoader {
   public CodemodLoader(
       final List<Class<? extends CodeChanger>> codemodTypes,
       final Path repositoryDir,
+      final List<String> includePatterns,
+      final List<String> excludePatterns,
       final List<Path> includedFiles,
       final Map<String, List<RuleSarif>> ruleSarifByTool) {
     this(
         codemodTypes,
         CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
         repositoryDir,
+        includePatterns,
+        excludePatterns,
         includedFiles,
         ruleSarifByTool,
         List.of());
@@ -64,6 +91,8 @@ public final class CodemodLoader {
       final List<Class<? extends CodeChanger>> codemodTypes,
       final CodemodRegulator codemodRegulator,
       final Path repositoryDir,
+      final List<String> includePatterns,
+      final List<String> excludePatterns,
       final List<Path> includedFiles,
       final Map<String, List<RuleSarif>> ruleSarifByTool,
       final List<ParameterArgument> codemodParameters) {
@@ -118,7 +147,13 @@ public final class CodemodLoader {
               .flatMap(toolName -> ruleSarifByTool.getOrDefault(toolName, List.of()).stream())
               .toList();
       final Set<AbstractModule> modules =
-          provider.getModules(repositoryDir, includedFiles, codemodTypes, allWantedSarifs);
+          provider.getModules(
+              repositoryDir,
+              includePatterns,
+              excludePatterns,
+              includedFiles,
+              codemodTypes,
+              allWantedSarifs);
       allModules.addAll(modules);
     }
 

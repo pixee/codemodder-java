@@ -14,10 +14,13 @@ public final class SemgrepProvider implements CodemodProvider {
   @Override
   public Set<AbstractModule> getModules(
       final Path codeDirectory,
+      final List<String> includedPatterns,
+      final List<String> excludePatterns,
       final List<Path> includedFiles,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
-    return Set.of(new SemgrepModule(codeDirectory, codemodTypes, sarifs));
+    return Set.of(
+        new SemgrepModule(codeDirectory, includedPatterns, excludePatterns, codemodTypes, sarifs));
   }
 
   @Override

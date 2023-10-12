@@ -247,7 +247,9 @@ final class CodemodLoaderTest {
     {
       String paramArg = "codemod=pixee:java/parameterized,name=my-param-number,value=456";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(), List.of(param));
+      CodemodLoader loader =
+          new CodemodLoader(
+              codemods, tmpDir, List.of(), List.of(), Files.list(tmpDir).toList(), List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
       assertThat(changer.parameter.getDefaultValue(), equalTo("456"));
@@ -262,7 +264,9 @@ final class CodemodLoaderTest {
       String paramArg =
           "codemod=pixee:java/parameterized,name=my-param-number,value=456,file=src/main/java/Foo.java";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(foo, bar), List.of(param));
+      CodemodLoader loader =
+          new CodemodLoader(
+              codemods, tmpDir, List.of(), List.of(), List.of(foo, bar), List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
 
@@ -278,10 +282,14 @@ final class CodemodLoaderTest {
     // finally, we run with a parameter with file and line info and see that it had the intended
     // effects
     {
+      Path p = tmpDir.resolve("foo.txt");
+      Files.writeString(p, "1\n2\n3");
+
       String paramArg =
           "codemod=pixee:java/parameterized,name=my-param-number,value=456,file=src/main/java/Foo.java,line=5";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(), List.of(param));
+      CodemodLoader loader =
+          new CodemodLoader(codemods, tmpDir, List.of(), List.of(), List.of(p), List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
 
@@ -305,8 +313,7 @@ final class CodemodLoaderTest {
               FileCache.createDefault(),
               JavaCache.from(new JavaParser()),
               EncodingDetector.create());
-      Path p = tmpDir.resolve("foo.txt");
-      Files.writeString(p, "1\n2\n3");
+
       CodeTFResult result = executor.execute(List.of(p));
       CodeTFChangesetEntry entry = result.getChangeset().get(0);
       assertThat(result.getCodemod(), equalTo("pixee:java/parameterized"));

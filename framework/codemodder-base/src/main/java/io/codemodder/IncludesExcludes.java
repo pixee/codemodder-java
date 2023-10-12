@@ -182,4 +182,7 @@ public interface IncludesExcludes {
   static IncludesExcludes any() {
     return new MatchesEverything();
   }
+
+  List<String> ALL_PATTERN = List.of("**");
+  List<String> NONE_PATTERN = List.of();
 }

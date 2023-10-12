@@ -104,7 +104,13 @@ public interface CodemodTestMixin {
 
     // run the codemod
     CodemodLoader loader =
-        new CodemodLoader(List.of(codemodType), tmpDir, List.of(pathToJavaFile), map);
+        new CodemodLoader(
+            List.of(codemodType),
+            tmpDir,
+            IncludesExcludes.ALL_PATTERN,
+            IncludesExcludes.NONE_PATTERN,
+            List.of(pathToJavaFile),
+            map);
 
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat(codemods.size(), equalTo(1));
@@ -165,7 +171,13 @@ public interface CodemodTestMixin {
 
     // re-run the transformation again and make sure no changes are made
     CodemodLoader loader2 =
-        new CodemodLoader(List.of(codemodType), tmpDir, List.of(pathToJavaFile), map);
+        new CodemodLoader(
+            List.of(codemodType),
+            tmpDir,
+            IncludesExcludes.ALL_PATTERN,
+            IncludesExcludes.NONE_PATTERN,
+            List.of(pathToJavaFile),
+            map);
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
     CodemodExecutor executor2 =
         CodemodExecutor.from(

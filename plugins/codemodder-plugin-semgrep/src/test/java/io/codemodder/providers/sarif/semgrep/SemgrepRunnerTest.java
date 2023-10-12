@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
+import io.codemodder.IncludesExcludes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -32,7 +33,13 @@ final class SemgrepRunnerTest {
     Files.copy(resourceAsStream, ruleFile, StandardCopyOption.REPLACE_EXISTING);
 
     // run the scan
-    SarifSchema210 sarif = new DefaultSemgrepRunner().run(List.of(ruleFile), repositoryDir);
+    SarifSchema210 sarif =
+        new DefaultSemgrepRunner()
+            .run(
+                List.of(ruleFile),
+                repositoryDir,
+                IncludesExcludes.ALL_PATTERN,
+                IncludesExcludes.NONE_PATTERN);
 
     // assert the scan went as we think it should
     List<Run> runs = sarif.getRuns();

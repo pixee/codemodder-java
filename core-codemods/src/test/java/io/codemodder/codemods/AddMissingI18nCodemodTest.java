@@ -222,7 +222,13 @@ final class AddMissingI18nCodemodTest {
 
   private CodeTFResult runCodemod() throws IOException {
     List<Path> files = Files.list(repoRoot).filter(Files::isRegularFile).toList();
-    var loader = new CodemodLoader(List.of(AddMissingI18nCodemod.class), repoRoot, files);
+    var loader =
+        new CodemodLoader(
+            List.of(AddMissingI18nCodemod.class),
+            repoRoot,
+            IncludesExcludes.ALL_PATTERN,
+            IncludesExcludes.NONE_PATTERN,
+            files);
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));
     CodemodIdPair pair = codemods.get(0);

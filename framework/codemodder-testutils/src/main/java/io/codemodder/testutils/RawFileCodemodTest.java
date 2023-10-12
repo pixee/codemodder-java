@@ -111,7 +111,13 @@ public interface RawFileCodemodTest {
       Files.copy(beforeFile, tmpFilePath);
 
       final CodemodLoader loader =
-          new CodemodLoader(List.of(codemod), tmpDir, List.of(afterFile), map);
+          new CodemodLoader(
+              List.of(codemod),
+              tmpDir,
+              IncludesExcludes.ALL_PATTERN,
+              IncludesExcludes.NONE_PATTERN,
+              List.of(tmpFilePath),
+              map);
       List<CodemodIdPair> codemods = loader.getCodemods();
       assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));
       verifySingleCase(tmpDir, codemods.get(0), tmpFilePath, afterFile);

@@ -14,6 +14,8 @@ public final class LLMProvider implements CodemodProvider {
   @Override
   public Set<AbstractModule> getModules(
       final Path repository,
+      final List<String> includePatterns,
+      final List<String> excludePatterns,
       final List<Path> includedFiles,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
