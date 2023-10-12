@@ -40,7 +40,13 @@ public class POMOperator {
     Set<VersionDefinition> queryVersionResult =
         queryVersions(projectModel, Collections.emptyList());
 
+    /*
+     * Likely Source / Target
+     */
     if (queryVersionResult.size() == 2) {
+      /*
+       * but if there's `release` we`ll throw an exception
+       */
       if (queryVersionResult.stream().anyMatch(it -> it.getKind() == Kind.RELEASE)) {
         throw new IllegalStateException(
             "Unexpected queryVersionResult Combination: " + queryVersionResult);
@@ -64,6 +70,7 @@ public class POMOperator {
       return Optional.of(new VersionQueryResponse(mappedSourceVersion, mappedTargetVersion));
     }
 
+    /** Could be either source, target or release - we pick the value anyway */
     if (queryVersionResult.size() == 1) {
       List<VersionDefinition> queryVersionResultList =
           queryVersionResult != null && !queryVersionResult.isEmpty()
@@ -99,7 +106,7 @@ public class POMOperator {
    * @param projectModel Project Model (Context) class
    * @param commandList do not use (required for tests)
    */
-  public static Collection<Dependency> queryDependency(
+  static Collection<Dependency> queryDependency(
       ProjectModel projectModel, List<Command> commandList)
       throws URISyntaxException, IOException, XMLStreamException {
     Chain chain = Chain.createForDependencyQuery(projectModel.getQueryType());
@@ -129,8 +136,7 @@ public class POMOperator {
    * @param projectModel Project Model (Context) class
    * @param commandList do not use (required for tests)
    */
-  public static Set<VersionDefinition> queryVersions(
-      ProjectModel projectModel, List<Command> commandList)
+  static Set<VersionDefinition> queryVersions(ProjectModel projectModel, List<Command> commandList)
       throws URISyntaxException, IOException, XMLStreamException {
     Chain chain = Chain.createForVersionQuery(projectModel.getQueryType());
 
