@@ -9,7 +9,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.dom4j.DocumentException;
 
-/** Builder Object for ProjectModel instances */
+/**
+ * Builder Object for creating instances of the ProjectModel class, which represent the input
+ * parameters for chain operations.
+ */
 public class ProjectModelFactory {
   private POMDocument pomFile;
   private List<POMDocument> parentPomFiles;
@@ -114,24 +117,51 @@ public class ProjectModelFactory {
     return this;
   }
 
+  /**
+   * Creates a new instance of ProjectModelFactory.
+   *
+   * @return A new ProjectModelFactory instance.
+   */
   private static ProjectModelFactory create() {
     return new ProjectModelFactory();
   }
 
-  /** Mostly Delegates to POMDocumentFactory */
+  /**
+   * Load a ProjectModelFactory instance from an InputStream.
+   *
+   * @param is The InputStream to load from.
+   * @return A ProjectModelFactory instance with the specified POMDocument.
+   * @throws DocumentException If there is an issue with document parsing.
+   * @throws IOException If there is an I/O issue.
+   * @throws URISyntaxException If there is an issue with the URI.
+   */
   static ProjectModelFactory load(InputStream is)
       throws DocumentException, IOException, URISyntaxException {
     POMDocument pomDocument = POMDocumentFactory.load(is);
     return ProjectModelFactory.create().withPomFile(pomDocument);
   }
 
-  /** Mostly Delegates to POMDocumentFactory */
+  /**
+   * Load a ProjectModelFactory instance from a File.
+   *
+   * @param f The File to load from.
+   * @return A ProjectModelFactory instance with the specified POMDocument.
+   * @throws Exception If there is an issue with loading the POMDocument.
+   */
   static ProjectModelFactory load(File f) throws Exception {
     URL fileUrl = f.toURI().toURL();
     return load(fileUrl);
   }
 
-  /** Mostly Delegates to POMDocumentFactory */
+  /**
+   * Load a ProjectModelFactory instance from a URL.
+   *
+   * @param url The URL to load from.
+   * @return A ProjectModelFactory instance with the specified POMDocument.
+   * @throws DocumentException If there is an issue with document parsing.
+   * @throws IOException If there is an I/O issue.
+   * @throws URISyntaxException If there is an issue with the URI.
+   */
   static ProjectModelFactory load(URL url)
       throws DocumentException, IOException, URISyntaxException {
     POMDocument pomFile = POMDocumentFactory.load(url);
@@ -145,7 +175,11 @@ public class ProjectModelFactory {
     return ProjectModelFactory.create().withPomFile(pomFile).withParentPomFiles(parentPomFilesList);
   }
 
-  /** Fluent Setter */
+  /**
+   * Build and return a ProjectModel instance based on the configured parameters.
+   *
+   * @return A ProjectModel instance with the specified configuration.
+   */
   public ProjectModel build() {
     return new ProjectModel(
         pomFile,
