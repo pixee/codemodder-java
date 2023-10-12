@@ -17,8 +17,6 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import io.codemodder.codetf.*;
 import io.codemodder.javaparser.JavaCache;
 import io.codemodder.javaparser.JavaParserChanger;
-
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

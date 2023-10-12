@@ -1,5 +1,7 @@
 package io.codemodder;
 
+import static java.util.Collections.emptyMap;
+
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import io.codemodder.codetf.CodeTFChange;
@@ -9,18 +11,15 @@ import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.JavaCache;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.javaparser.JavaParserCodemodRunner;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.util.Collections.emptyMap;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class DefaultCodemodExecutor implements CodemodExecutor {
 
@@ -77,7 +76,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
      * Filter the files to those that the CodemodRunner supports.
      */
     List<Path> codemodTargetFiles =
-            filePaths.stream().filter(codemodRunner::supports).sorted().toList();
+        filePaths.stream().filter(codemodRunner::supports).sorted().toList();
 
     for (Path filePath : codemodTargetFiles) {
       // create the context necessary for the codemod to run
@@ -86,15 +85,19 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
       try {
         CodemodInvocationContext context =
-              new DefaultCodemodInvocationContext(
-                      codeDirectory, filePath, fileCache.get(filePath), codemod.getId(), lineIncludesExcludes);
+            new DefaultCodemodInvocationContext(
+                codeDirectory,
+                filePath,
+                fileCache.get(filePath),
+                codemod.getId(),
+                lineIncludesExcludes);
         // run the codemod on the file
         List<CodemodChange> codemodChanges = codemodRunner.run(context);
 
         if (codemodChanges.isEmpty()) {
           continue;
         }
-        
+
         // update the dependencies in the manifest file if needed
         List<DependencyGAV> dependencies =
             codemodChanges.stream()
