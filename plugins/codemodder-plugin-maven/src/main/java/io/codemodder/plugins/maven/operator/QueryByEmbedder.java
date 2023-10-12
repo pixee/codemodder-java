@@ -15,12 +15,13 @@ import org.apache.maven.shared.utils.cli.Commandline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Uses Maven Embedder to Implement */
 class QueryByEmbedder extends AbstractQueryCommand {
-
-  public static final String MAVEN_MULTIMODULE_PROJECT_DIRECTORY =
+  private static final String MAVEN_MULTIMODULE_PROJECT_DIRECTORY =
       "maven.multiModuleProjectDirectory";
   private static final Logger LOGGER = LoggerFactory.getLogger(QueryByEmbedder.class);
 
+  /** Runs the "dependency:tree" mojo - but using Embedder instead. */
   public void extractDependencyTree(File outputPath, File pomFilePath, ProjectModel c) {
     MavenCli mavenCli = new MavenCli();
 
@@ -61,6 +62,15 @@ class QueryByEmbedder extends AbstractQueryCommand {
         LOGGER.debug("baosErr: {}", baosErr);
       }
 
+      /**
+       * Sometimes the Embedder will fail - it will return this specific exit code (1) as well as
+       * not generate this file
+       *
+       * <p>If that happens, we'll move to the next strategy (Invoker-based likely) by throwing a
+       * custom exception which is caught inside the Chain#execute method
+       *
+       * @see Chain#execute
+       */
       if (1 == result && (!outputPath.exists())) {
         throw new InvalidContextException();
       }
