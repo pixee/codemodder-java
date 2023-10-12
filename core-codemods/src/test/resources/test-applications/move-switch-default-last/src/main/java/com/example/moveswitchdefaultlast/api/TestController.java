@@ -10,33 +10,38 @@ public class TestController {
     @GetMapping("/test")
     public String switchTest(@RequestParam final int day) {
 
-        final String dayString = switch (day) {
+        switch(day) {
 
-            // Case
-            case 1 -> "Monday";
+            default: return "Invalid";
 
-            // Case
-            case 2 -> "Tuesday";
+            case 1: {
+                return "Monday";
+            }
 
-            // Case
-            case 3 -> "Wednesday";
+            case 2: {
+                return "Tuesday";
+            }
 
-            // Case
-            case 4 -> "Thursday";
-            // Default case
-            default -> "Invalid day";
+            case 3: {
+                return "Wednesday";
+            }
 
-            // Case
-            case 5 -> "Friday";
+            case 4: {
+                return "Thursday";
+            }
 
-            // Case
-            case 6 -> "Saturday";
+            case 5: {
+                return "Friday";
+            }
 
-            // Case
-            case 7 -> "Sunday";
-        };
+            case 6: {
+                return "Saturday";
+            }
 
-      return dayString;
+            case 7: {
+                return "Sunday";
+            }
+        }
     }
 
 }
