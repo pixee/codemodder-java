@@ -4,12 +4,10 @@ import java.io.File;
 
 class CheckLocalRepositoryDirCommand {
 
-  public static class CheckParentDirCommand extends AbstractQueryCommand {
+  static class CheckParentDirCommand extends AbstractQueryCommand {
 
-    // Singleton instance
     private static final CheckParentDirCommand INSTANCE = new CheckParentDirCommand();
 
-    // Private constructor to prevent external instantiation
     private CheckParentDirCommand() {}
 
     public static CheckParentDirCommand getInstance() {
