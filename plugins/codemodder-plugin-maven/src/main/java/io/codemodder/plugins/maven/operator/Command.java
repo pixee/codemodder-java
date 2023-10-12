@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import javax.xml.stream.XMLStreamException;
 
-/** Interface representing a command. */
+/** Represents a Command in a Chain of Responsibility Pattern */
 public interface Command {
   /**
-   * Given a context, performs an operation.
+   * Given a context, performs an operation
    *
-   * @param pm Context (Project Model) to use.
-   * @return true if the execution was successful AND the chain must end.
+   * @param pm Context (Project Model) to use
+   * @return true if the execution was successful *AND* the chain must end
    */
   boolean execute(ProjectModel pm) throws URISyntaxException, IOException, XMLStreamException;
 
