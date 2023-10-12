@@ -11,9 +11,21 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
-/** Factory for a POMDocument */
+/**
+ * Factory class for creating instances of the {@link POMDocument} class, which represents a POM
+ * (Project Object Model) file along with its various properties and contents.
+ */
 class POMDocumentFactory {
 
+  /**
+   * Loads a POM document from the provided input stream.
+   *
+   * @param is The input stream containing the POM document data.
+   * @return A new instance of {@link POMDocument} representing the loaded POM.
+   * @throws IOException If an I/O error occurs while reading the input stream.
+   * @throws DocumentException If an error occurs while parsing the POM document.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   */
   public static POMDocument load(InputStream is)
       throws IOException, DocumentException, URISyntaxException {
 
@@ -26,12 +38,30 @@ class POMDocumentFactory {
     return new POMDocument(originalPom, null, pomDocument);
   }
 
+  /**
+   * Loads a POM document from the provided file.
+   *
+   * @param f The file representing the POM document.
+   * @return A new instance of {@link POMDocument} representing the loaded POM.
+   * @throws IOException If an I/O error occurs while reading the file.
+   * @throws DocumentException If an error occurs while parsing the POM document.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   */
   public static POMDocument load(File f) throws IOException, DocumentException, URISyntaxException {
 
     URL fileUrl = f.toURI().toURL();
     return load(fileUrl);
   }
 
+  /**
+   * Loads a POM document from the provided URL.
+   *
+   * @param url The URL of the POM document.
+   * @return A new instance of {@link POMDocument} representing the loaded POM.
+   * @throws IOException If an I/O error occurs while reading the URL.
+   * @throws DocumentException If an error occurs while parsing the POM document.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   */
   public static POMDocument load(URL url)
       throws IOException, DocumentException, URISyntaxException {
     InputStream inputStream = url.openStream();
