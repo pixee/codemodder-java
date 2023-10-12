@@ -14,7 +14,7 @@ class QueryByInvoker extends AbstractQueryCommand {
 
     InvocationRequest invocationRequest = buildInvocationRequest(outputPath, pomFilePath, c);
 
-    InvocationResult invocationResult = null;
+    InvocationResult invocationResult;
     try {
       invocationResult = invoker.execute(invocationRequest);
     } catch (MavenInvocationException e) {
