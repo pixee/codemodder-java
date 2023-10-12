@@ -4,8 +4,18 @@ import java.util.List;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+/**
+ * A command for managing dependencies within a composite POM, including dependency management and
+ * addition.
+ */
 class CompositeDependencyManagement extends AbstractCommand {
 
+  /**
+   * Executes the CompositeDependencyManagement command to manage dependencies in a composite POM.
+   *
+   * @param pm ProjectModel containing project information.
+   * @return true if the command modifies the POM and sets it as dirty, false otherwise.
+   */
   @Override
   public boolean execute(ProjectModel pm) {
     // Abort if not multi-pom
