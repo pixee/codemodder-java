@@ -22,6 +22,12 @@ import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This Command handles Formatting - particularly storing the original document preamble (the
+ * Processing Instruction and the first XML Element contents), which are the only ones which are
+ * tricky to format (due to element and its attributes being freeform - thus formatting lost when
+ * serializing the DOM and the PI being completely optional for the POM Document)
+ */
 class FormatCommand extends AbstractCommand {
 
   private static final Set<String> LINE_ENDINGS = new HashSet<>();
@@ -58,9 +64,14 @@ class FormatCommand extends AbstractCommand {
     return super.execute(pm);
   }
 
+  /**
+   * When doing the opposite, render the XML using the optionally supplied encoding (defaults to
+   * UTF8 obviously) but apply the original formatting as well
+   */
   @Override
   public boolean postProcess(ProjectModel pm) throws XMLStreamException {
     for (POMDocument pomFile : pm.allPomFiles()) {
+      /** Serializes it back */
       byte[] content = serializePomFile(pomFile);
       pomFile.setResultPomBytes(content);
     }
@@ -145,6 +156,13 @@ class FormatCommand extends AbstractCommand {
     return Collections.max(lineEndingCounts.entrySet(), Map.Entry.comparingByValue()).getKey();
   }
 
+  /**
+   * Guesses the indent character (spaces / tabs) and length from the original document formatting
+   * settings
+   *
+   * @param pomFile (project model) where it takes its input pom
+   * @return indent string
+   */
   private String guessIndent(POMDocument pomFile) throws XMLStreamException {
     InputStream inputStream = new ByteArrayInputStream(pomFile.getOriginalPom());
     XMLEventReader eventReader = inputFactory.createXMLEventReader(inputStream);
@@ -228,6 +246,7 @@ class FormatCommand extends AbstractCommand {
     XMLEventReader eventReader = inputFactory.createXMLEventReader(inputStream);
 
     Charset charset = null;
+    /** Parse, while grabbing its preamble and encoding */
     int elementIndex = 0;
     boolean mustTrack = false;
     boolean hasPreamble = false;
@@ -443,6 +462,12 @@ class FormatCommand extends AbstractCommand {
     return sb.toString();
   }
 
+  /**
+   * Serialize a POM Document
+   *
+   * @param pom pom document
+   * @return bytes for the pom document
+   */
   private byte[] serializePomFile(POMDocument pom) throws XMLStreamException {
     // Generate a String representation. We'll need to patch it up and apply back
     // differences we recorded previously on the pom (see the pom member variables)
@@ -451,16 +476,17 @@ class FormatCommand extends AbstractCommand {
     BitSet originalElementMap = elementBitSet(pom.getOriginalPom());
     BitSet targetElementMap = elementBitSet(xmlRepresentation.getBytes());
 
+    // Let's find out the original empty elements from the original pom and store into a stack
     List<MatchData> elementsToReplace = getElementsToReplace(originalElementMap, pom);
 
+    // Lets to the replacements backwards on the existing, current pom
     Map<Integer, MatchData> emptyElements = getEmptyElements(targetElementMap, xmlRepresentation);
 
     for (Map.Entry<Integer, MatchData> entry : emptyElements.entrySet()) {
       Integer key = entry.getKey();
       MatchData match = entry.getValue();
 
-      MatchData nextMatch =
-          elementsToReplace.remove(0); // Assuming removeFirst() removes the first element.
+      MatchData nextMatch = elementsToReplace.remove(0);
 
       xmlRepresentation = replaceRange(xmlRepresentation, match.getRange(), nextMatch.getContent());
     }
@@ -483,6 +509,12 @@ class FormatCommand extends AbstractCommand {
       }
     }
 
+    /**
+     * We might need to replace the beginning of the POM with the same content from the very
+     * beginning
+     *
+     * <p>Grab the same initial offset from the formatted element like we did
+     */
     XMLInputFactory inputFactory = XMLInputFactory.newInstance();
     XMLEventReader eventReader =
         inputFactory.createXMLEventReader(
@@ -492,18 +524,20 @@ class FormatCommand extends AbstractCommand {
       XMLEvent event = eventReader.nextEvent();
 
       if (event.isEndElement()) {
+        /** Apply the formatting and tweak its XML Representation */
         EndElement endElementEvent = (EndElement) event;
         int offset = endElementEvent.getLocation().getCharacterOffset();
         xmlRepresentation =
             pom.getPreamble() + xmlRepresentation.substring(offset) + pom.getSuffix();
         break;
       }
-
+      /** This code shouldn't be unreachable at all */
       if (!eventReader.hasNext()) {
         throw new IllegalStateException("Couldn't find document start");
       }
     }
 
+    /** Serializes it back from (string to ByteArray) */
     byte[] serializedContent = xmlRepresentation.getBytes(pom.getCharset());
 
     return serializedContent;

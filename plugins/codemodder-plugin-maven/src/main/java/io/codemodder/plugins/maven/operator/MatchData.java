@@ -3,6 +3,7 @@ package io.codemodder.plugins.maven.operator;
 import kotlin.ranges.IntRange;
 import kotlin.text.Regex;
 
+/** Data Class used to keep track of matches (ranges, content, referring tag name) */
 class MatchData {
   private final IntRange range;
   private final String content;
@@ -10,7 +11,7 @@ class MatchData {
   private final boolean hasAttributes;
   private final Regex modifiedContent;
 
-  public MatchData(
+  MatchData(
       IntRange range,
       String content,
       String elementName,
@@ -27,27 +28,27 @@ class MatchData {
     this.modifiedContent = modifiedContent;
   }
 
-  public boolean getHasAttributes() {
+  boolean getHasAttributes() {
     return hasAttributes;
   }
 
-  public IntRange getRange() {
+  IntRange getRange() {
     return range;
   }
 
-  public String getContent() {
+  String getContent() {
     return content;
   }
 
-  public String getElementName() {
+  String getElementName() {
     return elementName;
   }
 
-  public boolean isHasAttributes() {
+  boolean isHasAttributes() {
     return hasAttributes;
   }
 
-  public Regex getModifiedContent() {
+  Regex getModifiedContent() {
     return modifiedContent;
   }
 }
