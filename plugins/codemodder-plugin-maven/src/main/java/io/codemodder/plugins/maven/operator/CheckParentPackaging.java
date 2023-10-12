@@ -2,7 +2,6 @@ package io.codemodder.plugins.maven.operator;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.Text;
 
@@ -10,9 +9,7 @@ import org.dom4j.Text;
 class CheckParentPackaging extends AbstractCommand {
   private static final CheckParentPackaging INSTANCE = new CheckParentPackaging();
 
-  private CheckParentPackaging() {
-    // Private constructor to prevent instantiation
-  }
+  private CheckParentPackaging() {}
 
   public static CheckParentPackaging getInstance() {
     return INSTANCE;
@@ -35,14 +32,14 @@ class CheckParentPackaging extends AbstractCommand {
     Collection<POMDocument> wrongParentPoms =
         pm.getParentPomFiles().stream()
             .filter(pomFile -> !packagingTypePredicate(pomFile, "pom"))
-            .collect(Collectors.toList());
+            .toList();
 
     if (!wrongParentPoms.isEmpty()) {
       throw new WrongDependencyTypeException("Wrong packaging type for parentPom");
     }
 
     if (!pm.getParentPomFiles().isEmpty()) {
-      // Check if the main pom file has a valid parent and packaging
+      // check main pom file has a inheritance to one of the members listed
       if (!hasValidParentAndPackaging(pm.getPomFile())) {
         throw new WrongDependencyTypeException("Invalid parent/packaging combo for main pomfile");
       }
