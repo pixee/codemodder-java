@@ -5,7 +5,19 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+/**
+ * Represents a strategy for querying version settings defined by the Maven Compiler Plugin
+ * configuration in the POM.
+ */
 class VersionByCompilerDefinition extends AbstractVersionCommand {
+
+  /**
+   * Executes the strategy for querying version settings defined by the Maven Compiler Plugin
+   * configuration in the POM.
+   *
+   * @param pm The ProjectModel containing the configuration and settings for the version query.
+   * @return `true` if the query is successful, `false` otherwise.
+   */
   @Override
   public boolean execute(ProjectModel pm) {
     Set<VersionDefinition> definedSettings =
