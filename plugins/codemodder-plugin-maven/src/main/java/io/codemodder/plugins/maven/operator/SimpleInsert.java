@@ -14,10 +14,22 @@ class SimpleInsert implements Command {
 
   private SimpleInsert() {}
 
+  /**
+   * Gets the singleton instance of SimpleInsert.
+   *
+   * @return The singleton instance of SimpleInsert.
+   */
   public static SimpleInsert getInstance() {
     return INSTANCE;
   }
 
+  /**
+   * Executes the POM upgrade strategy by adding a dependency and optionally a dependencyManagement
+   * section.
+   *
+   * @param pm The ProjectModel containing the configuration and settings for the upgrade.
+   * @return `true` if the upgrade is successful, `false` otherwise.
+   */
   @Override
   public boolean execute(ProjectModel pm) {
     List<Node> dependencyManagementNodeList =
@@ -83,6 +95,12 @@ class SimpleInsert implements Command {
     return dependencyNode;
   }
 
+  /**
+   * This method is not used for this strategy and always returns `false`.
+   *
+   * @param c The ProjectModel.
+   * @return `false`.
+   */
   @Override
   public boolean postProcess(ProjectModel c) {
     return false;
