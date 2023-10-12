@@ -20,6 +20,21 @@ public class ProjectModel {
   private boolean offline;
   private boolean modifiedByCommand;
 
+  /**
+   * Constructs a new ProjectModel instance with the specified parameters.
+   *
+   * @param pomFile The POMDocument representing the main POM file.
+   * @param parentPomFiles A list of POMDocuments representing parent POM files.
+   * @param dependency The Dependency object to operate on.
+   * @param skipIfNewer Whether to skip the operation if the dependency is newer.
+   * @param useProperties Whether to use properties during the operation.
+   * @param activeProfiles A set of active profiles to consider during property resolution.
+   * @param overrideIfAlreadyExists Whether to override the dependency if it already exists.
+   * @param queryType The type of query operation to perform.
+   * @param repositoryPath The path to the repository.
+   * @param finishedByClass The name of the class that finished the operation.
+   * @param offline Whether to perform the operation in offline mode.
+   */
   public ProjectModel(
       POMDocument pomFile,
       List<POMDocument> parentPomFiles,
@@ -46,6 +61,12 @@ public class ProjectModel {
     this.modifiedByCommand = false;
   }
 
+  /**
+   * Returns a map of properties defined on the root of the given POMDocument.
+   *
+   * @param pomFile The POMDocument to extract properties from.
+   * @return A map of property names and their values.
+   */
   public static Map<String, String> propertiesDefinedOnPomDocument(POMDocument pomFile) {
     Map<String, String> rootProperties = new HashMap<>();
     List<Element> propertyElements =
@@ -77,6 +98,12 @@ public class ProjectModel {
     return newPropertiesToAppend;
   }
 
+  /**
+   * Returns a map of properties defined in various POM files based on their names.
+   *
+   * @return A map where keys are property names, and values are lists of pairs containing the
+   *     property value and the corresponding POMDocument.
+   */
   public Map<String, List<Pair<String, POMDocument>>> propertiesDefinedByFile() {
     Map<String, List<Pair<String, POMDocument>>> result = new LinkedHashMap<>();
     List<POMDocument> allPomFiles = allPomFiles();
@@ -116,6 +143,11 @@ public class ProjectModel {
     return result;
   }
 
+  /**
+   * Returns a map of resolved properties from the POM files in the context of active profiles.
+   *
+   * @return A map of property names and their resolved values.
+   */
   public Map<String, String> resolvedProperties() {
     Map<String, String> result = new LinkedHashMap<>();
     List<POMDocument> allPomFiles = allPomFiles();
@@ -145,7 +177,11 @@ public class ProjectModel {
     return Collections.unmodifiableMap(result);
   }
 
-  /** Involved POM Files */
+  /**
+   * Returns a list of all POM files involved in the context.
+   *
+   * @return A list of POMDocument instances representing all relevant POM files.
+   */
   public List<POMDocument> allPomFiles() {
     List<POMDocument> allFiles = new ArrayList<>();
     allFiles.add(pomFile);
