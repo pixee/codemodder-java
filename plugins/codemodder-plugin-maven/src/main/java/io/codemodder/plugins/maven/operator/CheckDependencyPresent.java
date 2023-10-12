@@ -1,11 +1,10 @@
 package io.codemodder.plugins.maven.operator;
 
+/** Guard Command Singleton use to validate required parameters */
 class CheckDependencyPresent extends AbstractCommand {
   private static final CheckDependencyPresent INSTANCE = new CheckDependencyPresent();
 
-  private CheckDependencyPresent() {
-    // Private constructor to prevent instantiation
-  }
+  private CheckDependencyPresent() {}
 
   public static CheckDependencyPresent getInstance() {
     return INSTANCE;
