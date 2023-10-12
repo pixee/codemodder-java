@@ -38,6 +38,15 @@ public class POMDocument {
 
   private boolean dirty;
 
+  /**
+   * Constructs a new `POMDocument` with the specified original POM bytes, path (if available), and
+   * DOM contents.
+   *
+   * @param originalPom The byte array representing the original content of the POM.
+   * @param pomPath The URL or file path to the POM.
+   * @param pomDocument The DOM (Document Object Model) representation of the POM.
+   * @throws URISyntaxException If there is an issue with the provided URL.
+   */
   public POMDocument(byte[] originalPom, URL pomPath, Document pomDocument)
       throws URISyntaxException {
 
@@ -55,6 +64,13 @@ public class POMDocument {
     this.dirty = false;
   }
 
+  /**
+   * Constructs a new `POMDocument` with the specified original POM bytes and DOM contents.
+   *
+   * @param originalPom The byte array representing the original content of the POM.
+   * @param pomDocument The DOM (Document Object Model) representation of the POM.
+   * @throws URISyntaxException If there is an issue with the provided URL.
+   */
   public POMDocument(byte[] originalPom, Document pomDocument) throws URISyntaxException {
 
     this(originalPom, null, pomDocument);
