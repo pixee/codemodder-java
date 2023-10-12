@@ -3,11 +3,13 @@ package io.codemodder.plugins.maven.operator;
 import java.util.*;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 
+/** Base Class for Version Detection Commands */
 class AbstractVersionCommand extends AbstractCommand {
 
-  public Set<VersionDefinition> result = new TreeSet<>(VERSION_KIND_COMPARATOR);
+  /** Internal Result */
+  Set<VersionDefinition> result = new TreeSet<>(VERSION_KIND_COMPARATOR);
 
-  public static final Comparator<VersionDefinition> VERSION_KIND_COMPARATOR =
+  static final Comparator<VersionDefinition> VERSION_KIND_COMPARATOR =
       new Comparator<VersionDefinition>() {
         @Override
         public int compare(VersionDefinition o1, VersionDefinition o2) {
@@ -18,8 +20,8 @@ class AbstractVersionCommand extends AbstractCommand {
         }
       };
 
-  public static final Map<String, Kind> TYPE_TO_KIND = new HashMap<>();
-  public static final Map<String, Kind> PROPERTY_TO_KIND = new HashMap<>();
+  static final Map<String, Kind> TYPE_TO_KIND = new HashMap<>();
+  static final Map<String, Kind> PROPERTY_TO_KIND = new HashMap<>();
 
   static {
     TYPE_TO_KIND.put("source", Kind.SOURCE);
