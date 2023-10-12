@@ -7,13 +7,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 
-/** Facade for the POM Operator */
+/** Facade for the POM Operator, providing methods for modifying and querying POM files. */
 public class POMOperator {
 
   /**
    * Bump a Dependency Version on a POM.
    *
    * @param projectModel Project Model (Context) class
+   * @return true if the modification was successful; otherwise, false.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws IOException If an I/O error occurs.
+   * @throws XMLStreamException If an error occurs while handling XML streams.
    */
   public static boolean modify(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
@@ -24,6 +28,10 @@ public class POMOperator {
    * Public API - Query for all the artifacts referenced inside a POM File.
    *
    * @param projectModel Project Model (Context) Class
+   * @return a collection of Dependency objects representing the artifacts referenced in the POM.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws IOException If an I/O error occurs.
+   * @throws XMLStreamException If an error occurs while handling XML streams.
    */
   public static Collection<Dependency> queryDependency(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
@@ -34,6 +42,11 @@ public class POMOperator {
    * Public API - Query for all the versions mentioned inside a POM File.
    *
    * @param projectModel Project Model (Context) Class
+   * @return an optional VersionQueryResponse object containing source and target versions, if
+   *     found.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws IOException If an I/O error occurs.
+   * @throws XMLStreamException If an error occurs while handling XML streams.
    */
   public static Optional<VersionQueryResponse> queryVersions(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
@@ -93,7 +106,8 @@ public class POMOperator {
    *
    * <p>Other versions are appended with ".0.0".
    *
-   * @return mapped version
+   * @param version The version string to map.
+   * @return the mapped semantic version.
    */
   public static Version mapVersion(String version) {
     String fixedVersion = version + (version.startsWith("1.") ? ".0" : ".0.0");
