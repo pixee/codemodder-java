@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * this one is a bit more complex, as it intents to to a "best effort" attempt at parsing a pom
- * focusing only on dependency right now, * without relying to any maven infrastructure at all
+ * Parses a Maven POM focusing on extracting dependency information without relying on any Maven
+ * infrastructure.
  */
 class QueryByParsing extends AbstractQueryCommand {
 
@@ -43,6 +43,12 @@ class QueryByParsing extends AbstractQueryCommand {
     // Not implemented
   }
 
+  /**
+   * Executes the parsing strategy to extract dependency information from POM files.
+   *
+   * @param pm The ProjectModel containing input parameters for the operation.
+   * @return `true` if the operation succeeds; otherwise, `false`.
+   */
   @Override
   public boolean execute(ProjectModel pm) {
     /** Enlist all pom files given an hierarchy */
