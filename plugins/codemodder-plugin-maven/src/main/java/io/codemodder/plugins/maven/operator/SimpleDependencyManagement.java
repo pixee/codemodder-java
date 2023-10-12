@@ -5,9 +5,7 @@ class SimpleDependencyManagement extends AbstractCommand {
 
   private static SimpleDependencyManagement instance;
 
-  private SimpleDependencyManagement() {
-    // Private constructor to prevent instantiation.
-  }
+  private SimpleDependencyManagement() {}
 
   public static SimpleDependencyManagement getInstance() {
     if (instance == null) {
