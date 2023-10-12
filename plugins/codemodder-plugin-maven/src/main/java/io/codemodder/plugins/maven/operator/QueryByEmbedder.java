@@ -15,13 +15,19 @@ import org.apache.maven.shared.utils.cli.Commandline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Uses Maven Embedder to Implement */
+/** Uses Maven Embedder to Implement querying the project's dependency tree. */
 class QueryByEmbedder extends AbstractQueryCommand {
   private static final String MAVEN_MULTIMODULE_PROJECT_DIRECTORY =
       "maven.multiModuleProjectDirectory";
   private static final Logger LOGGER = LoggerFactory.getLogger(QueryByEmbedder.class);
 
-  /** Runs the "dependency:tree" mojo - but using Embedder instead. */
+  /**
+   * Runs the "dependency:tree" mojo using Maven Embedder instead.
+   *
+   * @param outputPath The output path for the dependency tree file.
+   * @param pomFilePath The path to the POM file.
+   * @param c The ProjectModel representing input parameters.
+   */
   public void extractDependencyTree(File outputPath, File pomFilePath, ProjectModel c) {
     MavenCli mavenCli = new MavenCli();
 
