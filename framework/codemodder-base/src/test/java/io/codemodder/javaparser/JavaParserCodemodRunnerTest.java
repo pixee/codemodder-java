@@ -82,21 +82,25 @@ final class JavaParserCodemodRunnerTest {
   @Test
   void it_returns_fixed_file() throws IOException {
     String javaCode =
-        "import thing;\n"
-            + "class A {\n"
-            + "  void foo() {\n"
-            + "    bar();\n"
-            + "    bar();\n"
-            + "  }\n"
-            + "}\n";
+        """
+                    import thing;
+                    class A {
+                      void foo() {
+                        bar();
+                        bar();
+                      }
+                    }
+                    """;
     String updatedCode =
-        "import thing;\n"
-            + "class A {\n"
-            + "  void foo() {\n"
-            + "    newMethodName();\n"
-            + "    newMethodName();\n"
-            + "  }\n"
-            + "}\n";
+        """
+                    import thing;
+                    class A {
+                      void foo() {
+                        newMethodName();
+                        newMethodName();
+                      }
+                    }
+                    """;
 
     CodemodChange change1 = CodemodChange.from(4, DependencyGAV.JAVA_SECURITY_TOOLKIT);
     CodemodChange change2 = CodemodChange.from(5, DependencyGAV.JAVA_SECURITY_TOOLKIT);
@@ -120,21 +124,25 @@ final class JavaParserCodemodRunnerTest {
   @Test
   void it_composes_successfully() throws IOException {
     String javaCode =
-        "import thing;\n"
-            + "class A {\n"
-            + "  void foo() {\n"
-            + "    bar();\n"
-            + "    bar();\n"
-            + "  }\n"
-            + "}\n";
+        """
+                    import thing;
+                    class A {
+                      void foo() {
+                        bar();
+                        bar();
+                      }
+                    }
+                    """;
     String updatedCode =
-        "import thing;\n"
-            + "class B {\n"
-            + "  void foo() {\n"
-            + "    newMethodName();\n"
-            + "    newMethodName();\n"
-            + "  }\n"
-            + "}\n";
+        """
+                    import thing;
+                    class B {
+                      void foo() {
+                        newMethodName();
+                        newMethodName();
+                      }
+                    }
+                    """;
 
     Path javaFile = tmpDir.resolve("Foo.java");
     Files.write(javaFile, javaCode.getBytes());
