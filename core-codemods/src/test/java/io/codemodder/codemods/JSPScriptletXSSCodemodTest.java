@@ -35,11 +35,11 @@ final class JSPScriptletXSSCodemodTest {
     String dir = "src/test/resources/encode-jsp-scriptlet/" + jspDir;
     copyDir(Path.of(dir), tmpDir);
 
-
     Path beforeJsp = tmpDir.resolve("test.jsp.before");
     Path jsp = tmpDir.resolve("test.jsp");
     Files.copy(beforeJsp, jsp);
-    CodemodLoader codemodInvoker = new CodemodLoader(List.of(JSPScriptletXSSCodemod.class), tmpDir, List.of(jsp));
+    CodemodLoader codemodInvoker =
+        new CodemodLoader(List.of(JSPScriptletXSSCodemod.class), tmpDir, List.of(jsp));
     CodemodIdPair codemod = codemodInvoker.getCodemods().get(0);
     CodemodExecutor executor =
         CodemodExecutor.from(

@@ -24,7 +24,8 @@ final class DefaultPmdRunner implements PmdRunner {
   }
 
   @Override
-  public SarifSchema210 run(final List<String> ruleIds, final Path projectDir, final List<Path> sourceFiles) {
+  public SarifSchema210 run(
+      final List<String> ruleIds, final Path projectDir, final List<Path> sourceFiles) {
     // configure the PMD run
     PMDConfiguration config = new PMDConfiguration();
     config.setDefaultLanguageVersion(LanguageRegistry.PMD.getLanguageVersionById("java", null));

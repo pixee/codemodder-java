@@ -23,7 +23,9 @@ public final class PmdModule extends AbstractModule {
   private final List<Path> includedFiles;
 
   public PmdModule(
-      final Path codeDirectory, final List<Path> includedFiles, final List<Class<? extends CodeChanger>> codemodTypes) {
+      final Path codeDirectory,
+      final List<Path> includedFiles,
+      final List<Class<? extends CodeChanger>> codemodTypes) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
     this.includedFiles = Objects.requireNonNull(includedFiles);

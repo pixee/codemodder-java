@@ -20,7 +20,9 @@ public final class CodemodLoader {
   private final List<CodemodIdPair> codemods;
 
   public CodemodLoader(
-      final List<Class<? extends CodeChanger>> codemodTypes, final Path repositoryDir, final List<Path> includedFiles) {
+      final List<Class<? extends CodeChanger>> codemodTypes,
+      final Path repositoryDir,
+      final List<Path> includedFiles) {
     this(
         codemodTypes,
         CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),

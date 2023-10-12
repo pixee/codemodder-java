@@ -36,10 +36,7 @@ public interface RawFileCodemodTest {
 
   /** Verify a single test case composed of a .before and .after file. */
   private void verifySingleCase(
-      final Path tmpDir,
-      final CodemodIdPair pair,
-      final Path file,
-      final Path filePathAfter)
+      final Path tmpDir, final CodemodIdPair pair, final Path file, final Path filePathAfter)
       throws IOException {
     CodemodExecutor executor =
         CodemodExecutor.from(
@@ -87,7 +84,6 @@ public interface RawFileCodemodTest {
     final Map<String, List<RuleSarif>> map =
         SarifParser.create().parseIntoMap(allSarifFiles, tmpDir);
 
-
     // grab all the .before and .after files in the dir
     final var allBeforeFiles =
         Files.list(testResourceDir)
@@ -99,7 +95,6 @@ public interface RawFileCodemodTest {
             .collect(Collectors.toMap(f -> trimExtension(f), f -> f));
 
     // run the codemod
-
 
     for (var beforeFile : allBeforeFiles) {
       final var afterFile = afterFilesMap.get(trimExtension(beforeFile));
@@ -115,7 +110,8 @@ public interface RawFileCodemodTest {
       final var tmpFilePath = tmpDir.resolve(tmpFileName);
       Files.copy(beforeFile, tmpFilePath);
 
-      final CodemodLoader loader = new CodemodLoader(List.of(codemod), tmpDir, List.of(afterFile), map);
+      final CodemodLoader loader =
+          new CodemodLoader(List.of(codemod), tmpDir, List.of(afterFile), map);
       List<CodemodIdPair> codemods = loader.getCodemods();
       assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));
       verifySingleCase(tmpDir, codemods.get(0), tmpFilePath, afterFile);

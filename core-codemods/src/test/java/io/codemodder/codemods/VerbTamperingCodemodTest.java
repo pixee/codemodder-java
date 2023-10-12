@@ -47,7 +47,8 @@ final class VerbTamperingCodemodTest {
     String dir = "src/test/resources/verb-tampering/" + webXmlDir;
     copyDir(Path.of(dir), tmpDir);
     Path webxml = tmpDir.resolve("web.xml");
-    CodemodLoader loader = new CodemodLoader(List.of(VerbTamperingCodemod.class), tmpDir, List.of(webxml));
+    CodemodLoader loader =
+        new CodemodLoader(List.of(VerbTamperingCodemod.class), tmpDir, List.of(webxml));
     CodemodExecutor executor =
         CodemodExecutor.from(
             tmpDir,

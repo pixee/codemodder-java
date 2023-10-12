@@ -17,7 +17,10 @@ public interface CodemodProvider {
    * @return a set of modules that perform dependency injection
    */
   Set<AbstractModule> getModules(
-      Path repository, List<Path> includedFiles, List<Class<? extends CodeChanger>> codemodTypes, List<RuleSarif> sarifs);
+      Path repository,
+      List<Path> includedFiles,
+      List<Class<? extends CodeChanger>> codemodTypes,
+      List<RuleSarif> sarifs);
 
   /**
    * Tools this provider is interested in processing the SARIF output of. Codemodder CLI will look
