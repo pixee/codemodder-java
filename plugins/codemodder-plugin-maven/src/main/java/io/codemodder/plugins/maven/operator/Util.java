@@ -18,12 +18,23 @@ import org.jaxen.dom4j.Dom4jXPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Common Utilities */
 class Util {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
+
+  /** Represents a Property Reference - as a regex */
   private static final Pattern PROPERTY_REFERENCE_PATTERN = Pattern.compile("^\\$\\{(.*)}$");
 
-  public static Element addIndentedElement(Element element, POMDocument d, String name) {
+  /**
+   * Method that easily allows to add an element inside another while retaining formatting
+   *
+   * @param element Element
+   * @param d ProjectModel / Context
+   * @param name new element ("tag") name
+   * @return created element inside `this` object, already indented after and (optionally) before
+   */
+  static Element addIndentedElement(Element element, POMDocument d, String name) {
     List<Node> contentList = element.content();
 
     int indentLevel = findIndentLevel(element);
@@ -51,6 +62,11 @@ class Util {
     return newElement;
   }
 
+  /**
+   * Guesses the current indent level of the nearest nodes
+   *
+   * @return indent level
+   */
   private static int findIndentLevel(Element startingNode) {
     int level = 0;
     Element node = startingNode;
@@ -63,7 +79,8 @@ class Util {
     return level;
   }
 
-  public static void upgradeVersionNode(
+  /** Given a Version Node, upgrades a resulting POM */
+  static void upgradeVersionNode(
       ProjectModel c, Element versionNode, POMDocument pomDocumentHoldingProperty) {
     if (c.isUseProperties()) {
       String propertyName = propertyName(c, versionNode);
@@ -85,6 +102,7 @@ class Util {
     }
   }
 
+  /** Upserts a given property */
   private static void upgradeProperty(ProjectModel c, POMDocument d, String propertyName) {
     if (d.getResultPom().getRootElement().element("properties") == null) {
       addIndentedElement(d.getResultPom().getRootElement(), d, "properties");
@@ -126,10 +144,12 @@ class Util {
     }
   }
 
+  /** Escapes a Property Name */
   private static String escapedPropertyName(String propertyName) {
     return "${" + propertyName + "}";
   }
 
+  /** Creates a property Name */
   static String propertyName(ProjectModel c, Element versionNode) {
     String version = versionNode.getTextTrim();
 
@@ -149,7 +169,8 @@ class Util {
     return "versions.default";
   }
 
-  public static boolean findOutIfUpgradeIsNeeded(ProjectModel c, Element versionNode) {
+  /** Identifies if an upgrade is needed */
+  static boolean findOutIfUpgradeIsNeeded(ProjectModel c, Element versionNode) {
     String currentVersionNodeText = resolveVersion(c, versionNode.getText());
 
     Version currentVersion = Version.valueOf(currentVersionNodeText);
@@ -170,7 +191,12 @@ class Util {
     }
   }
 
-  public static String buildLookupExpressionForDependency(Dependency dependency) {
+  /**
+   * Builds a Lookup Expression String for a given dependency
+   *
+   * @param dependency Dependency
+   */
+  static String buildLookupExpressionForDependency(Dependency dependency) {
     return "/m:project"
         + "/m:dependencies"
         + "/m:dependency"
@@ -182,7 +208,13 @@ class Util {
         + "']]";
   }
 
-  public static String buildLookupExpressionForDependencyManagement(Dependency dependency) {
+  /**
+   * Builds a Lookup Expression String for a given dependency, but under the
+   * &gt;dependencyManagement&gt; section
+   *
+   * @param dependency Dependency
+   */
+  static String buildLookupExpressionForDependencyManagement(Dependency dependency) {
     return "/m:project"
         + "/m:dependencyManagement"
         + "/m:dependencies"
@@ -195,7 +227,7 @@ class Util {
         + "']]";
   }
 
-  public static File which(String path) {
+  static File which(String path) {
     List<String> nativeExecutables;
     if (SystemUtils.IS_OS_WINDOWS) {
       nativeExecutables = new ArrayList<>();
@@ -240,7 +272,12 @@ class Util {
     return result;
   }
 
-  public static List<Node> selectXPathNodes(Node node, String expression) {
+  /**
+   * Extension Function to Select the XPath Nodes
+   *
+   * @param expression expression to use
+   */
+  static List<Node> selectXPathNodes(Node node, String expression) {
     try {
       return createXPathExpression(expression).selectNodes(node);
     } catch (Exception e) {
@@ -248,7 +285,8 @@ class Util {
     }
   }
 
-  public static final SimpleNamespaceContext namespaceContext;
+  /** Hard-Coded POM Namespace Map */
+  private static final SimpleNamespaceContext namespaceContext;
 
   static {
     Map<String, String> namespaces = new HashMap<>();
@@ -256,7 +294,12 @@ class Util {
     namespaceContext = new SimpleNamespaceContext(namespaces);
   }
 
-  public static Dom4jXPath createXPathExpression(String expression) throws Exception {
+  /**
+   * Creates a XPath Expression from a given expression string
+   *
+   * @param expression expression to create xpath from
+   */
+  private static Dom4jXPath createXPathExpression(String expression) throws Exception {
     Dom4jXPath xpath = new Dom4jXPath(expression);
     xpath.setNamespaceContext(namespaceContext);
     return xpath;
