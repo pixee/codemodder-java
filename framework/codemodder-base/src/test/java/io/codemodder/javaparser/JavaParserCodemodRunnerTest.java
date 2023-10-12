@@ -108,6 +108,7 @@ final class JavaParserCodemodRunnerTest {
     when(context.codemodId()).thenReturn("my-codemod-id");
     when(context.lineIncludesExcludes()).thenReturn(new LineIncludesExcludes.MatchesEverything());
     when(context.path()).thenReturn(javaFile);
+    when(context.contents()).thenReturn(javaCode);
     CodeDirectory dir = mock(CodeDirectory.class);
     when(dir.asPath()).thenReturn(tmpDir);
     when(context.codeDirectory()).thenReturn(dir);
@@ -141,6 +142,7 @@ final class JavaParserCodemodRunnerTest {
     when(context.codemodId()).thenReturn("pixee-test:java/my-composite");
     when(context.lineIncludesExcludes()).thenReturn(new LineIncludesExcludes.MatchesEverything());
     when(context.path()).thenReturn(javaFile);
+    when(context.contents()).thenReturn(javaCode);
     CodeDirectory dir = mock(CodeDirectory.class);
     when(dir.asPath()).thenReturn(tmpDir);
     when(context.codeDirectory()).thenReturn(dir);
