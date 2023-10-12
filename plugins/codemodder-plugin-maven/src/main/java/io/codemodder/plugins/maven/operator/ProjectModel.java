@@ -5,11 +5,7 @@ import java.util.*;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
-/**
- * ProjectModel represents the input parameters for the chain
- *
- * @todo consider resolution and also Topological Sort of Properties for cross-property reference
- */
+/** ProjectModel represents the input parameters for the chain */
 public class ProjectModel {
   private POMDocument pomFile;
   private List<POMDocument> parentPomFiles;
