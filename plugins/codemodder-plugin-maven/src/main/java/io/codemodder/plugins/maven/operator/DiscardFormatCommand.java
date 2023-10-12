@@ -11,6 +11,15 @@ class DiscardFormatCommand extends AbstractCommand {
 
   DiscardFormatCommand() {}
 
+  /**
+   * Post-processes the ProjectModel to check if any POM changes were made by comparing the original
+   * POMs with the modified ones. If no differences are found, the processing is short-circuited,
+   * and the modified POMs are discarded.
+   *
+   * @param pm ProjectModel containing project information.
+   * @return true if the processing should be discarded due to no changes; false otherwise.
+   * @throws XMLStreamException if there is an issue with XML stream processing.
+   */
   @Override
   public boolean postProcess(ProjectModel pm) throws XMLStreamException {
     boolean mustSkip = false;
