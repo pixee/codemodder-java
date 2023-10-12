@@ -10,6 +10,10 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * this one is a bit more complex, as it intents to to a "best effort" attempt at parsing a pom
+ * focusing only on dependency right now, * without relying to any maven infrastructure at all
+ */
 class QueryByParsing extends AbstractQueryCommand {
 
   private final Set<Dependency> dependencies = new LinkedHashSet<>();
@@ -41,6 +45,7 @@ class QueryByParsing extends AbstractQueryCommand {
 
   @Override
   public boolean execute(ProjectModel pm) {
+    /** Enlist all pom files given an hierarchy */
     List<POMDocument> pomFilesByHierarchy = pm.allPomFiles();
     Collections.reverse(pomFilesByHierarchy);
 
@@ -143,6 +148,7 @@ class QueryByParsing extends AbstractQueryCommand {
     return child != null ? child.getText() : null;
   }
 
+  /** Updates the Properties member variable based on whats on the POMDocument */
   private void updateProperties(POMDocument pomDocument) {
     Map<String, String> propsDefined = ProjectModel.propertiesDefinedOnPomDocument(pomDocument);
 
