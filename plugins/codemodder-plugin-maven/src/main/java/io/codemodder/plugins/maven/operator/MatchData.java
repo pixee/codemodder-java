@@ -11,6 +11,15 @@ class MatchData {
   private final boolean hasAttributes;
   private final Regex modifiedContent;
 
+  /**
+   * Data Class used to keep track of matches (ranges, content, referring tag name).
+   *
+   * @param range The range (start and end positions) of the matched content.
+   * @param content The content of the matched element.
+   * @param elementName The name of the referring tag.
+   * @param hasAttributes A boolean indicating whether the element has attributes.
+   * @param modifiedContent A regular expression representing the modified content of the element.
+   */
   MatchData(
       IntRange range,
       String content,
