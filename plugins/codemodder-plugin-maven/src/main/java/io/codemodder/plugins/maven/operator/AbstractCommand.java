@@ -13,9 +13,11 @@ abstract class AbstractCommand implements Command {
 
   /**
    * Given a POM, locate its coordinates for a given dependency based on lookupExpression and
-   * figures out the upgrade
+   * determines whether an upgrade is necessary.
    *
-   * <p>TODO review this
+   * @param pm The ProjectModel containing the POM and other project information.
+   * @param lookupExpression An XPath expression to locate the desired dependency node.
+   * @return true if an upgrade was performed, false otherwise.
    */
   protected boolean handleDependency(ProjectModel pm, String lookupExpression) {
     List<Node> dependencyNodes =
@@ -55,6 +57,12 @@ abstract class AbstractCommand implements Command {
     return false;
   }
 
+  /**
+   * Retrieves the local repository path from various sources or default values.
+   *
+   * @param pm The ProjectModel containing information about the project.
+   * @return A File object representing the local repository path.
+   */
   protected File getLocalRepositoryPath(ProjectModel pm) {
     File localRepositoryPath = null;
 
