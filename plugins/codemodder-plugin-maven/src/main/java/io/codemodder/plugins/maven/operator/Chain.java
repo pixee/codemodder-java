@@ -22,15 +22,24 @@ class Chain {
     this.commandList = new ArrayList<>(Arrays.asList(commands));
   }
 
+  /**
+   * Retrieves the list of commands in the Chain.
+   *
+   * @return A list of Command objects in the Chain.
+   */
   public List<Command> getCommandList() {
     return commandList;
   }
 
   /**
-   * Executes the Commands in the Chain of Responsibility
+   * Executes the Chain of Responsibility, applying a sequence of commands on the provided
+   * ProjectModel.
    *
-   * @param c ProjectModel (context)
-   * @return Boolean if successful
+   * @param c ProjectModel (context) on which to execute the commands.
+   * @return true if all commands execute successfully, false otherwise.
+   * @throws URISyntaxException If there is an issue with URIs during execution.
+   * @throws IOException If an IO error occurs during execution.
+   * @throws XMLStreamException If there is an issue with XML processing during execution.
    */
   public boolean execute(ProjectModel c)
       throws URISyntaxException, IOException, XMLStreamException {
@@ -67,7 +76,11 @@ class Chain {
     return result;
   }
 
-  /** Returns a Pre-Configured Chain with the Defaults for Modifying a POM */
+  /**
+   * Creates a pre-configured Chain with default commands for modifying a POM.
+   *
+   * @return A pre-configured Chain for modifying a POM.
+   */
   public static Chain createForModify() {
     return new Chain(
         CheckDependencyPresent.getInstance(),
@@ -112,7 +125,12 @@ class Chain {
     return new Chain(commands.toArray(new Command[0]));
   }
 
-  /** returns a pre-configured chain with the defaults for Dependency Querying */
+  /**
+   * Creates a pre-configured Chain for dependency querying based on the specified query type.
+   *
+   * @param queryType The QueryType to determine the set of commands to include in the Chain.
+   * @return A pre-configured Chain for dependency querying.
+   */
   public static Chain createForDependencyQuery(QueryType queryType) {
     return filterByQueryType(
         AVAILABLE_DEPENDENCY_QUERY_COMMANDS,
@@ -121,7 +139,12 @@ class Chain {
         it -> it == queryType);
   }
 
-  /** returns a pre-configured chain for Version Query */
+  /**
+   * Creates a pre-configured Chain for version querying based on the specified query type.
+   *
+   * @param queryType The QueryType to determine the set of commands to include in the Chain.
+   * @return A pre-configured Chain for version querying.
+   */
   public static Chain createForVersionQuery(QueryType queryType) {
     return filterByQueryType(
         AVAILABLE_QUERY_VERSION_COMMANDS,
