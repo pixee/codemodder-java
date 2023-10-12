@@ -14,6 +14,7 @@ public final class AwsProvider implements CodemodProvider {
   @Override
   public Set<AbstractModule> getModules(
       final Path codeDirectory,
+      final List<Path> includedFiles,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
     return Set.of(new AwsClientModule());

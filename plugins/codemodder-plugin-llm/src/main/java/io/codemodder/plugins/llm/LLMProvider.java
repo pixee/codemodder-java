@@ -14,6 +14,7 @@ public final class LLMProvider implements CodemodProvider {
   @Override
   public Set<AbstractModule> getModules(
       final Path repository,
+      final List<Path> includedFiles,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
     return Set.of(new LLMServiceModule());

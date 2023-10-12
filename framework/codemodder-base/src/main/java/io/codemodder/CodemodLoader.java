@@ -20,11 +20,12 @@ public final class CodemodLoader {
   private final List<CodemodIdPair> codemods;
 
   public CodemodLoader(
-      final List<Class<? extends CodeChanger>> codemodTypes, final Path repositoryDir) {
+      final List<Class<? extends CodeChanger>> codemodTypes, final Path repositoryDir, final List<Path> includedFiles) {
     this(
         codemodTypes,
         CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
         repositoryDir,
+        includedFiles,
         Map.of(),
         List.of());
   }
@@ -32,11 +33,13 @@ public final class CodemodLoader {
   public CodemodLoader(
       final List<Class<? extends CodeChanger>> codemodTypes,
       final Path repositoryDir,
+      final List<Path> includedFiles,
       final List<ParameterArgument> parameterArguments) {
     this(
         codemodTypes,
         CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
         repositoryDir,
+        includedFiles,
         Map.of(),
         parameterArguments);
   }
@@ -44,11 +47,13 @@ public final class CodemodLoader {
   public CodemodLoader(
       final List<Class<? extends CodeChanger>> codemodTypes,
       final Path repositoryDir,
+      final List<Path> includedFiles,
       final Map<String, List<RuleSarif>> ruleSarifByTool) {
     this(
         codemodTypes,
         CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
         repositoryDir,
+        includedFiles,
         ruleSarifByTool,
         List.of());
   }
@@ -57,6 +62,7 @@ public final class CodemodLoader {
       final List<Class<? extends CodeChanger>> codemodTypes,
       final CodemodRegulator codemodRegulator,
       final Path repositoryDir,
+      final List<Path> includedFiles,
       final Map<String, List<RuleSarif>> ruleSarifByTool,
       final List<ParameterArgument> codemodParameters) {
 
@@ -110,7 +116,7 @@ public final class CodemodLoader {
               .flatMap(toolName -> ruleSarifByTool.getOrDefault(toolName, List.of()).stream())
               .toList();
       final Set<AbstractModule> modules =
-          provider.getModules(repositoryDir, codemodTypes, allWantedSarifs);
+          provider.getModules(repositoryDir, includedFiles, codemodTypes, allWantedSarifs);
       allModules.addAll(modules);
     }
 

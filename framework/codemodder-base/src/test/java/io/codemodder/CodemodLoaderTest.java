@@ -64,7 +64,7 @@ final class CodemodLoaderTest {
     assertThrows(
         UnsupportedOperationException.class,
         () -> {
-          new CodemodLoader(List.of(ValidCodemod.class, ValidCodemod.class), tmpDir);
+          new CodemodLoader(List.of(ValidCodemod.class, ValidCodemod.class), tmpDir, List.of());
         });
   }
 
@@ -157,7 +157,7 @@ final class CodemodLoaderTest {
 
     List<Class<? extends CodeChanger>> codemods =
         List.of(ChangesFile.class, ChangesFileAgain.class);
-    CodemodLoader loader = new CodemodLoader(codemods, tmpDir);
+    CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(file));
 
     for (CodemodIdPair codemodIdPair : loader.getCodemods()) {
       CodemodExecutor executor =
@@ -235,7 +235,7 @@ final class CodemodLoaderTest {
 
     // first, we run without any parameters and ensure we get the right stuff
     {
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir);
+      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of());
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
       assertThat(changer.parameter.getDefaultValue(), equalTo("123"));
@@ -247,7 +247,7 @@ final class CodemodLoaderTest {
     {
       String paramArg = "codemod=pixee:java/parameterized,name=my-param-number,value=456";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
+      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(), List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
       assertThat(changer.parameter.getDefaultValue(), equalTo("456"));
@@ -262,7 +262,7 @@ final class CodemodLoaderTest {
       String paramArg =
           "codemod=pixee:java/parameterized,name=my-param-number,value=456,file=src/main/java/Foo.java";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
+      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(foo, bar), List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
 
@@ -281,7 +281,7 @@ final class CodemodLoaderTest {
       String paramArg =
           "codemod=pixee:java/parameterized,name=my-param-number,value=456,file=src/main/java/Foo.java,line=5";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
+      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(), List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
 

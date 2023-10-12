@@ -24,7 +24,7 @@ final class DefaultPmdRunner implements PmdRunner {
   }
 
   @Override
-  public SarifSchema210 run(final List<String> ruleIds, final Path projectDir) {
+  public SarifSchema210 run(final List<String> ruleIds, final Path projectDir, final List<Path> sourceFiles) {
     // configure the PMD run
     PMDConfiguration config = new PMDConfiguration();
     config.setDefaultLanguageVersion(LanguageRegistry.PMD.getLanguageVersionById("java", null));
@@ -63,8 +63,8 @@ final class DefaultPmdRunner implements PmdRunner {
       Path sarifFile = Files.createTempFile("pmd", ".sarif");
       config.setReportFile(sarifFile);
 
-      // calculate the source directories for PMD to scan (only looks for src/main/java now)
-      config.addInputPath(projectDir);
+      // calculate the source directories for PMD to scan
+      sourceFiles.forEach(config::addInputPath);
 
       // run the analysis
       try (PmdAnalysis pmd = PmdAnalysis.create(config)) {

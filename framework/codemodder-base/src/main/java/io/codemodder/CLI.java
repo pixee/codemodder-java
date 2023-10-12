@@ -336,7 +336,7 @@ final class CLI implements Callable<Integer> {
       List<ParameterArgument> codemodParameters =
           createFromParameterStrings(this.codemodParameters);
       CodemodLoader loader =
-          new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap, codemodParameters);
+          new CodemodLoader(codemodTypes, regulator, projectPath, filePaths, pathSarifMap, codemodParameters);
       List<CodemodIdPair> codemods = loader.getCodemods();
 
       log.debug("sarif files: {}", sarifFiles.size());
@@ -357,6 +357,8 @@ final class CLI implements Callable<Integer> {
 
       FileCache fileCache = FileCache.createDefault();
       JavaCache javaCache = JavaCache.from(javaParser);
+
+      log.info("entering codemod execution");
 
       for (CodemodIdPair codemod : codemods) {
         log.info("running codemod: {}", codemod.getId());

@@ -14,7 +14,7 @@ public interface PmdRunner {
    * @param codeDir the directory containing the code to be run on
    * @return the resulting SARIF
    */
-  SarifSchema210 run(List<String> ruleIds, Path codeDir);
+  SarifSchema210 run(List<String> ruleIds, Path codeDir, List<Path> includedFiles);
 
   static PmdRunner createDefault() {
     return new DefaultPmdRunner();

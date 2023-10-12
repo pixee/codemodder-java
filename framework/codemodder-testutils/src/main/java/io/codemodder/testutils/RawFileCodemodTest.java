@@ -36,29 +36,11 @@ public interface RawFileCodemodTest {
 
   /** Verify a single test case composed of a .before and .after file. */
   private void verifySingleCase(
-      final CodemodLoader loader,
       final Path tmpDir,
-      final Metadata metadata,
-      final Path filePathBefore,
+      final CodemodIdPair pair,
+      final Path file,
       final Path filePathAfter)
       throws IOException {
-
-    String tmpFileName = trimExtension(filePathBefore);
-    final String renameFile = metadata.renameTestFile();
-    if (!renameFile.isBlank()) {
-      Path parent = tmpDir.resolve(renameFile).getParent();
-      if (!Files.exists(parent)) {
-        Files.createDirectories(parent);
-      }
-      tmpFileName = renameFile;
-    }
-    final var tmpFilePath = tmpDir.resolve(tmpFileName);
-    Files.copy(filePathBefore, tmpFilePath);
-
-    List<CodemodIdPair> codemods = loader.getCodemods();
-    assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));
-
-    CodemodIdPair pair = codemods.get(0);
     CodemodExecutor executor =
         CodemodExecutor.from(
             tmpDir,
@@ -69,7 +51,7 @@ public interface RawFileCodemodTest {
             FileCache.createDefault(),
             JavaCache.from(new JavaParser()),
             EncodingDetector.create());
-    CodeTFResult result = executor.execute(List.of(tmpFilePath));
+    CodeTFResult result = executor.execute(List.of(file));
 
     // let them know if anything failed outright
     assertThat("Some files failed to scan", result.getFailedFiles().size(), equalTo(0));
@@ -79,9 +61,9 @@ public interface RawFileCodemodTest {
     assertThat(result.getDescription(), is(not(blankOrNullString())));
     assertThat(result.getReferences(), is(not(empty())));
 
-    final var modifiedFile = Files.readString(tmpFilePath);
+    final var modifiedFile = Files.readString(file);
     assertThat(modifiedFile, equalTo(Files.readString(filePathAfter)));
-    Files.deleteIfExists(tmpFilePath);
+    Files.deleteIfExists(file);
   }
 
   private static String trimExtension(final Path path) {
@@ -105,8 +87,6 @@ public interface RawFileCodemodTest {
     final Map<String, List<RuleSarif>> map =
         SarifParser.create().parseIntoMap(allSarifFiles, tmpDir);
 
-    // run the codemod
-    final CodemodLoader invoker = new CodemodLoader(List.of(codemod), tmpDir, map);
 
     // grab all the .before and .after files in the dir
     final var allBeforeFiles =
@@ -118,9 +98,27 @@ public interface RawFileCodemodTest {
             .filter(file -> file.getFileName().toString().endsWith(".after"))
             .collect(Collectors.toMap(f -> trimExtension(f), f -> f));
 
+    // run the codemod
+
+
     for (var beforeFile : allBeforeFiles) {
       final var afterFile = afterFilesMap.get(trimExtension(beforeFile));
-      verifySingleCase(invoker, tmpDir, metadata, beforeFile, afterFile);
+      String tmpFileName = trimExtension(beforeFile);
+      final String renameFile = metadata.renameTestFile();
+      if (!renameFile.isBlank()) {
+        Path parent = tmpDir.resolve(renameFile).getParent();
+        if (!Files.exists(parent)) {
+          Files.createDirectories(parent);
+        }
+        tmpFileName = renameFile;
+      }
+      final var tmpFilePath = tmpDir.resolve(tmpFileName);
+      Files.copy(beforeFile, tmpFilePath);
+
+      final CodemodLoader loader = new CodemodLoader(List.of(codemod), tmpDir, List.of(afterFile), map);
+      List<CodemodIdPair> codemods = loader.getCodemods();
+      assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));
+      verifySingleCase(tmpDir, codemods.get(0), tmpFilePath, afterFile);
     }
   }
 }

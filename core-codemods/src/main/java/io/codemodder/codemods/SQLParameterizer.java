@@ -64,7 +64,14 @@ final class SQLParameterizer {
       final Predicate<MethodCallExpr> hasScopeSQLStatement =
           n ->
               n.getScope()
-                  .filter(s -> s.calculateResolvedType().describe().equals("java.sql.Statement"))
+                  .filter(s -> {
+                    try {
+                      String resolvedType = s.calculateResolvedType().describe();
+                      return "java.sql.Statement".equals(resolvedType);
+                    } catch (UnsolvedSymbolException e) {
+                      return false;
+                    }
+                  })
                   .isPresent();
 
       final Predicate<MethodCallExpr> isFirstArgumentNotSLE =

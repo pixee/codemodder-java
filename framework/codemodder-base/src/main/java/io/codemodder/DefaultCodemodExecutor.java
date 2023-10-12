@@ -78,6 +78,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     List<Path> codemodTargetFiles =
         filePaths.stream().filter(codemodRunner::supports).sorted().toList();
 
+    log.debug("scanning: {} files", codemodTargetFiles.size());
+
     for (Path filePath : codemodTargetFiles) {
       // create the context necessary for the codemod to run
       LineIncludesExcludes lineIncludesExcludes =
@@ -260,5 +262,5 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     return path;
   }
 
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultCodemodExecutor.class);
+  private static final Logger log = LoggerFactory.getLogger(DefaultCodemodExecutor.class);
 }

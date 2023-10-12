@@ -20,11 +20,13 @@ public final class PmdModule extends AbstractModule {
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;
   private final PmdRunner pmdRunner;
+  private final List<Path> includedFiles;
 
   public PmdModule(
-      final Path codeDirectory, final List<Class<? extends CodeChanger>> codemodTypes) {
+      final Path codeDirectory, final List<Path> includedFiles, final List<Class<? extends CodeChanger>> codemodTypes) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
+    this.includedFiles = Objects.requireNonNull(includedFiles);
     this.pmdRunner = PmdRunner.createDefault();
   }
 
@@ -88,7 +90,7 @@ public final class PmdModule extends AbstractModule {
     }
 
     List<String> rules = toBind.stream().map(Pair::getLeft).toList();
-    SarifSchema210 sarif = pmdRunner.run(rules, codeDirectory);
+    SarifSchema210 sarif = pmdRunner.run(rules, codeDirectory, includedFiles);
 
     // bind the SARIF results to individual codemods
     for (Pair<String, PmdScan> bindingPair : toBind) {
