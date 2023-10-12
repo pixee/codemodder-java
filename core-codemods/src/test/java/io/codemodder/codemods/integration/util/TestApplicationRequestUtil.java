@@ -11,16 +11,22 @@ public class TestApplicationRequestUtil {
   public static String doRequest(final String testUrl, final String httpVerb) throws IOException {
 
     return switch (httpVerb) {
-      case "GET" -> sendGET(testUrl);
+      case "GET" -> sendRequest(testUrl, "GET");
+
+      case "POST" -> sendRequest(testUrl, "POST");
+
+      case "PUT" -> sendRequest(testUrl, "PUT");
+
+      case "DELETE" -> sendRequest(testUrl, "DELETE");
 
       default -> throw new IllegalStateException("Unexpected value: " + httpVerb);
     };
   }
 
-  private static String sendGET(final String url) throws IOException {
+  private static String sendRequest(final String url, final String httpVerb) throws IOException {
     URL obj = new URL(url);
     HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-    con.setRequestMethod("GET");
+    con.setRequestMethod(httpVerb);
     int responseCode = con.getResponseCode();
     if (responseCode == HttpURLConnection.HTTP_OK) { // success
       BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -35,7 +41,7 @@ public class TestApplicationRequestUtil {
       // print result
       return response.toString();
     } else {
-      return "GET request did not work.";
+      return "Request did not work.";
     }
   }
 }

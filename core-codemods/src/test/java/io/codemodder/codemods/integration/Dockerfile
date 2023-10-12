@@ -22,5 +22,5 @@ RUN if [ "$RUN_CODEMOD" = "true" ]; then \
 WORKDIR /test-applications/$CODEMOD_ID
 RUN gradle bootJar --info
 
-WORKDIR /test-applications/move-switch-default-last/build/libs
+WORKDIR /test-applications/$CODEMOD_ID/build/libs
 CMD ["java", "-jar", "test-app.jar"]

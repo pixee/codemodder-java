@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.testcontainers.containers.GenericContainer;
 
-public class CodemodIntegrationTestSetup {
+public class CodemodIntegrationTestMixin {
 
   private static final String endpointBasePath = "http://localhost:%s";
   private static GenericContainer<?> originalCodeContainer;

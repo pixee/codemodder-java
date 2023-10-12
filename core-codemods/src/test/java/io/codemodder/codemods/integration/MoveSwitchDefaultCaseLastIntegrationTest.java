@@ -9,4 +9,4 @@ import io.codemodder.codemods.integration.util.TestPropertiesMetadata;
       @TestPropertiesMetadata(endpoint = "/test?day=1", expectedResponse = "Monday"),
       @TestPropertiesMetadata(endpoint = "/test?day=2", expectedResponse = "Tuesday")
     })
-public class MoveSwitchDefaultCaseLastIntegrationTest extends CodemodIntegrationTestSetup {}
+public class MoveSwitchDefaultCaseLastIntegrationTest extends CodemodIntegrationTestMixin {}
