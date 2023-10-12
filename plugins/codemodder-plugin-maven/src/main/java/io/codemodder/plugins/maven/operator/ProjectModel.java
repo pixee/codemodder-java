@@ -5,6 +5,11 @@ import java.util.*;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+/**
+ * ProjectModel represents the input parameters for the chain
+ *
+ * @todo consider resolution and also Topological Sort of Properties for cross-property reference
+ */
 public class ProjectModel {
   private POMDocument pomFile;
   private List<POMDocument> parentPomFiles;
@@ -117,7 +122,8 @@ public class ProjectModel {
 
   public Map<String, String> resolvedProperties() {
     Map<String, String> result = new LinkedHashMap<>();
-    List<POMDocument> allPomFiles = allPomFiles(); // Implement this method
+    List<POMDocument> allPomFiles = allPomFiles();
+    Collections.reverse(allPomFiles); // parent first, children later - thats why its reversed
 
     for (POMDocument pomFile : allPomFiles) {
       Map<String, String> rootProperties = propertiesDefinedOnPomDocument(pomFile);
@@ -143,6 +149,7 @@ public class ProjectModel {
     return Collections.unmodifiableMap(result);
   }
 
+  /** Involved POM Files */
   public List<POMDocument> allPomFiles() {
     List<POMDocument> allFiles = new ArrayList<>();
     allFiles.add(pomFile);
