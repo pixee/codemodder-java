@@ -52,13 +52,13 @@ final class DefaultPmdRunnerTest {
   }
 
   @Test
-  void it_runs_and_finds_stuff() {
+  void it_runs_and_finds_stuff() throws IOException {
     DefaultPmdRunner runner = new DefaultPmdRunner();
     List<String> ruleIds =
         List.of(
             "category/java/bestpractices.xml/OneDeclarationPerLine",
             "category/java/bestpractices.xml/MissingOverride");
-    SarifSchema210 sarif = runner.run(ruleIds, projectDir);
+    SarifSchema210 sarif = runner.run(ruleIds, projectDir, Files.list(projectDir).toList());
     assertThat(sarif.getRuns()).hasSize(1);
     Run run = sarif.getRuns().get(0);
     List<Result> results = run.getResults();
