@@ -2,6 +2,10 @@ package io.codemodder.plugins.maven.operator;
 
 import java.util.Objects;
 
+/**
+ * Represents a dependency in a Maven POM. A dependency consists of a group ID, artifact ID,
+ * version, classifier, packaging, and scope.
+ */
 public class Dependency {
   private String groupId;
   private String artifactId;
@@ -10,6 +14,16 @@ public class Dependency {
   private String packaging;
   private String scope;
 
+  /**
+   * Initializes a new Dependency object with the provided attributes.
+   *
+   * @param groupId The group ID of the dependency.
+   * @param artifactId The artifact ID of the dependency.
+   * @param version The version of the dependency.
+   * @param classifier The classifier of the dependency (may be null).
+   * @param packaging The packaging type of the dependency (default is "jar" if null).
+   * @param scope The scope of the dependency (default is "compile" if null).
+   */
   public Dependency(
       String groupId,
       String artifactId,
