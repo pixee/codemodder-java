@@ -14,6 +14,12 @@ import org.eclipse.aether.graph.DependencyVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is a resolver that actually embeds much of Maven Logic into that.
+ *
+ * <p>Futurely TODO Support Third Party / User-Supplied Repositories (right now it only supports
+ * central)
+ */
 class QueryByResolver extends AbstractQueryCommand {
   private static final Logger LOGGER = LoggerFactory.getLogger(QueryByResolver.class);
 
@@ -116,7 +122,7 @@ class QueryByResolver extends AbstractQueryCommand {
     }
   }
 
-  private static List<String> filterActiveProfiles(Collection<String> profiles) {
+  private List<String> filterActiveProfiles(Collection<String> profiles) {
     List<String> activeProfiles = new ArrayList<>();
     for (String profile : profiles) {
       if (!profile.startsWith("!")) {
@@ -126,7 +132,7 @@ class QueryByResolver extends AbstractQueryCommand {
     return activeProfiles;
   }
 
-  private static List<String> filterExcludedProfiles(Collection<String> profiles) {
+  private List<String> filterExcludedProfiles(Collection<String> profiles) {
     List<String> excludedProfiles = new ArrayList<>();
     for (String profile : profiles) {
       if (profile.startsWith("!")) {
