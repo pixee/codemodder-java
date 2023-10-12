@@ -9,6 +9,15 @@ import org.dom4j.Node;
  * dependencyManagement/ section as well)
  */
 class SimpleInsert implements Command {
+
+  private static final SimpleInsert INSTANCE = new SimpleInsert();
+
+  private SimpleInsert() {}
+
+  public static SimpleInsert getInstance() {
+    return INSTANCE;
+  }
+
   @Override
   public boolean execute(ProjectModel pm) {
     List<Node> dependencyManagementNodeList =

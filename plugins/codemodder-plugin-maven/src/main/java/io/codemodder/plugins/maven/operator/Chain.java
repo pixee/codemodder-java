@@ -73,11 +73,11 @@ class Chain {
         CheckDependencyPresent.getInstance(),
         CheckParentPackaging.getInstance(),
         new FormatCommand(),
-        DiscardFormatCommand.getInstance(),
+        new DiscardFormatCommand(),
         new CompositeDependencyManagement(),
         SimpleUpgrade.getInstance(),
         SimpleDependencyManagement.getInstance(),
-        new SimpleInsert());
+        SimpleInsert.getInstance());
   }
 
   private static Chain filterByQueryType(

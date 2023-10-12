@@ -9,18 +9,7 @@ import org.xmlunit.diff.Diff;
 /** Command Class to Short-Circuit/Discard Processing when no pom changes were made */
 class DiscardFormatCommand extends AbstractCommand {
 
-  private static DiscardFormatCommand instance;
-
-  private DiscardFormatCommand() {
-    // Private constructor to prevent instantiation.
-  }
-
-  public static DiscardFormatCommand getInstance() {
-    if (instance == null) {
-      instance = new DiscardFormatCommand();
-    }
-    return instance;
-  }
+  DiscardFormatCommand() {}
 
   @Override
   public boolean postProcess(ProjectModel pm) throws XMLStreamException {
