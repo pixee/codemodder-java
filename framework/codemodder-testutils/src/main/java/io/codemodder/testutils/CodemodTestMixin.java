@@ -10,7 +10,7 @@ import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaCache;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -117,7 +117,8 @@ public interface CodemodTestMixin {
             codemod,
             List.of(),
             List.of(),
-            CachingJavaParser.from(factory.create(List.of(dir))),
+            FileCache.createDefault(),
+            JavaCache.from(factory.create(List.of(dir))),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(pathToJavaFile));
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
@@ -171,7 +172,8 @@ public interface CodemodTestMixin {
             codemod2,
             List.of(),
             List.of(),
-            CachingJavaParser.from(factory.create(List.of(dir))),
+            FileCache.createDefault(),
+            JavaCache.from(factory.create(List.of(dir))),
             EncodingDetector.create());
     CodeTFResult result2 = executor2.execute(List.of(pathToJavaFile));
     List<CodeTFChangesetEntry> changeset2 = result2.getChangeset();

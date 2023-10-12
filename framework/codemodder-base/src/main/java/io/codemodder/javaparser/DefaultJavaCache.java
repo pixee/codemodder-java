@@ -12,12 +12,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-final class DefaultCachingJavaParser implements CachingJavaParser {
+final class DefaultJavaCache implements JavaCache {
 
   private final JavaParser parser;
   private final Map<Path, CompilationUnit> cache;
 
-  DefaultCachingJavaParser(final JavaParser parser) {
+  DefaultJavaCache(final JavaParser parser) {
     this.parser = Objects.requireNonNull(parser);
     this.cache = new HashMap<>();
   }
@@ -37,5 +37,20 @@ final class DefaultCachingJavaParser implements CachingJavaParser {
       cache.put(file, cu);
       return cu;
     }
+  }
+
+  @Override
+  public CompilationUnit parseJavaFile(final Path file, final String contents) throws IOException {
+    if (cache.containsKey(file)) {
+      return cache.get(file);
+    }
+    final ParseResult<CompilationUnit> result = parser.parse(contents);
+    if (!result.isSuccessful()) {
+      throw new RuntimeException("can't parse file");
+    }
+    CompilationUnit cu = result.getResult().orElseThrow();
+    LexicalPreservingPrinter.setup(cu);
+    cache.put(file, cu);
+    return cu;
   }
 }

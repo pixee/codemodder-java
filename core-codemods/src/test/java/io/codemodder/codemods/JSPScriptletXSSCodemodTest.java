@@ -7,7 +7,7 @@ import com.github.javaparser.JavaParser;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaCache;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,7 +47,8 @@ final class JSPScriptletXSSCodemodTest {
             codemod,
             List.of(),
             List.of(),
-            CachingJavaParser.from(new JavaParser()),
+            FileCache.createDefault(),
+            JavaCache.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(jsp));
 

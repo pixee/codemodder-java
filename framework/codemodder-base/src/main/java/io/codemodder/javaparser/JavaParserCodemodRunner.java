@@ -22,11 +22,11 @@ import java.util.Objects;
 public final class JavaParserCodemodRunner implements CodemodRunner {
 
   private final JavaParserChanger javaParserChanger;
-  private final CachingJavaParser parser;
+  private final JavaCache parser;
   private final EncodingDetector encodingDetector;
 
   public JavaParserCodemodRunner(
-      final CachingJavaParser parser,
+      final JavaCache parser,
       final JavaParserChanger javaParserChanger,
       final EncodingDetector encodingDetector) {
     this.parser = Objects.requireNonNull(parser);
@@ -42,7 +42,7 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
   @Override
   public List<CodemodChange> run(final CodemodInvocationContext context) throws IOException {
     Path file = context.path();
-    CompilationUnit cu = parser.parseJavaFile(file);
+    CompilationUnit cu = parser.parseJavaFile(file, context.contents());
     List<CodemodChange> changes = javaParserChanger.visit(context, cu);
     if (!changes.isEmpty()) {
       String encodingName = encodingDetector.detect(file).orElse("UTF-8");

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.javaparser.JavaParser;
 import io.codemodder.codetf.*;
-import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaCache;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -167,7 +167,8 @@ final class CodemodLoaderTest {
               codemodIdPair,
               List.of(),
               List.of(),
-              CachingJavaParser.from(new JavaParser()),
+              FileCache.createDefault(),
+              JavaCache.from(new JavaParser()),
               EncodingDetector.create());
       executor.execute(List.of(file));
     }
@@ -301,7 +302,8 @@ final class CodemodLoaderTest {
               pair,
               List.of(),
               List.of(),
-              CachingJavaParser.from(new JavaParser()),
+              FileCache.createDefault(),
+              JavaCache.from(new JavaParser()),
               EncodingDetector.create());
       Path p = tmpDir.resolve("foo.txt");
       Files.writeString(p, "1\n2\n3");

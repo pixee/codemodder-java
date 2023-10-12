@@ -1,7 +1,7 @@
 package io.codemodder;
 
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaCache;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -17,7 +17,8 @@ public interface CodemodExecutor {
       final CodemodIdPair codemod,
       final List<ProjectProvider> projectProviders,
       final List<CodeTFProvider> codetfProviders,
-      final CachingJavaParser javaParser,
+      final FileCache fileCache,
+      final JavaCache javaParser,
       final EncodingDetector encodingDetector) {
     return new DefaultCodemodExecutor(
         projectDir,
@@ -25,6 +26,7 @@ public interface CodemodExecutor {
         codemod,
         projectProviders,
         codetfProviders,
+        fileCache,
         javaParser,
         encodingDetector);
   }

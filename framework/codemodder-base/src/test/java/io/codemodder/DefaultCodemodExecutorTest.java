@@ -15,8 +15,10 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import io.codemodder.codetf.*;
-import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaCache;
 import io.codemodder.javaparser.JavaParserChanger;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +38,7 @@ final class DefaultCodemodExecutorTest {
   private Path javaFile3;
   private Path javaFile4;
   private EncodingDetector encodingDetector;
-  private CachingJavaParser cachingJavaParser;
+  private JavaCache javaCache;
   private IncludesExcludes includesEverything;
   private BeforeToAfterChanger beforeToAfterChanger;
   private CodemodIdPair beforeAfterCodemod;
@@ -46,7 +48,7 @@ final class DefaultCodemodExecutorTest {
     this.repoDir = tmpDir;
     beforeToAfterChanger = new BeforeToAfterChanger();
     beforeAfterCodemod = new CodemodIdPair("codemodder:java/id", beforeToAfterChanger);
-    cachingJavaParser = CachingJavaParser.from(new JavaParser());
+    javaCache = JavaCache.from(new JavaParser());
     encodingDetector = EncodingDetector.create();
     includesEverything = IncludesExcludes.any();
     executor =
@@ -56,7 +58,8 @@ final class DefaultCodemodExecutorTest {
             beforeAfterCodemod,
             List.of(),
             List.of(),
-            cachingJavaParser,
+            FileCache.createDefault(),
+            javaCache,
             encodingDetector);
 
     javaFile1 = repoDir.resolve("Test1.java");
@@ -179,7 +182,8 @@ final class DefaultCodemodExecutorTest {
             beforeAfterCodemod,
             List.of(),
             List.of(addsPrefixProvider),
-            cachingJavaParser,
+            FileCache.createDefault(),
+            javaCache,
             encodingDetector);
 
     CodeTFResult result = executor.execute(List.of(javaFile1));
@@ -243,7 +247,8 @@ final class DefaultCodemodExecutorTest {
               codemod,
               List.of(depsProvider),
               List.of(),
-              CachingJavaParser.from(new JavaParser()),
+              FileCache.createDefault(),
+              JavaCache.from(new JavaParser()),
               EncodingDetector.create());
       CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
       results.add(result);
@@ -368,7 +373,8 @@ final class DefaultCodemodExecutorTest {
             codemod,
             List.of(badProvider),
             List.of(),
-            CachingJavaParser.from(new JavaParser()),
+            FileCache.createDefault(),
+            JavaCache.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
     List<CodeTFChangesetEntry> firstChangeset = result.getChangeset();
@@ -420,7 +426,8 @@ final class DefaultCodemodExecutorTest {
             codemod,
             List.of(skippingProvider),
             List.of(),
-            CachingJavaParser.from(new JavaParser()),
+            FileCache.createDefault(),
+            JavaCache.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(javaFile2));
     List<CodeTFChangesetEntry> firstChangeset = result.getChangeset();

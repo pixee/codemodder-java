@@ -9,7 +9,7 @@ import java.nio.file.Path;
  * Responsible for parsing Java files and maintaining the compilation units across different
  * accesses.
  */
-public interface CachingJavaParser {
+public interface JavaCache {
 
   /**
    * Return the {@link CompilationUnit} for the given Java file. If the given file has not been seen
@@ -22,8 +22,10 @@ public interface CachingJavaParser {
    */
   CompilationUnit parseJavaFile(Path file) throws IOException;
 
-  /** Return a simple implementation of the {@link CachingJavaParser} interface. */
-  static CachingJavaParser from(final JavaParser parser) {
-    return new DefaultCachingJavaParser(parser);
+  CompilationUnit parseJavaFile(Path file, String contents) throws IOException;
+
+  /** Return a simple implementation of the {@link JavaCache} interface. */
+  static JavaCache from(final JavaParser parser) {
+    return new DefaultJavaCache(parser);
   }
 }

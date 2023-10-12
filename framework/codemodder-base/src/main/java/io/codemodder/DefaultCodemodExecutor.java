@@ -1,33 +1,37 @@
 package io.codemodder;
 
-import static java.util.Collections.emptyMap;
-
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFPackageAction;
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaCache;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.javaparser.JavaParserCodemodRunner;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
+
+import static java.util.Collections.emptyMap;
 
 final class DefaultCodemodExecutor implements CodemodExecutor {
 
   private final CodemodIdPair codemod;
   private final List<ProjectProvider> projectProviders;
   private final List<CodeTFProvider> codetfProviders;
-  private final CachingJavaParser cachingJavaParser;
+  private final JavaCache javaCache;
   private final Path projectDir;
   private final IncludesExcludes includesExcludes;
   private final EncodingDetector encodingDetector;
+  private final FileCache fileCache;
 
   DefaultCodemodExecutor(
       final Path projectDir,
@@ -35,14 +39,16 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       final CodemodIdPair codemod,
       final List<ProjectProvider> projectProviders,
       final List<CodeTFProvider> codetfProviders,
-      final CachingJavaParser cachingJavaParser,
+      final FileCache fileCache,
+      final JavaCache javaCache,
       final EncodingDetector encodingDetector) {
     this.projectDir = Objects.requireNonNull(projectDir);
     this.includesExcludes = Objects.requireNonNull(includesExcludes);
     this.codemod = Objects.requireNonNull(codemod);
     this.codetfProviders = Objects.requireNonNull(codetfProviders);
     this.projectProviders = Objects.requireNonNull(projectProviders);
-    this.cachingJavaParser = Objects.requireNonNull(cachingJavaParser);
+    this.fileCache = Objects.requireNonNull(fileCache);
+    this.javaCache = Objects.requireNonNull(javaCache);
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
   }
 
@@ -59,8 +65,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     CodemodRunner codemodRunner;
     if (codeChanger instanceof JavaParserChanger) {
       codemodRunner =
-          new JavaParserCodemodRunner(
-              cachingJavaParser, (JavaParserChanger) codeChanger, encodingDetector);
+          new JavaParserCodemodRunner(javaCache, (JavaParserChanger) codeChanger, encodingDetector);
     } else if (codeChanger instanceof RawFileChanger) {
       codemodRunner = new RawFileCodemodRunner((RawFileChanger) codeChanger);
     } else {
@@ -72,66 +77,70 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
      * Filter the files to those that the CodemodRunner supports.
      */
     List<Path> codemodTargetFiles =
-        filePaths.stream().filter(codemodRunner::supports).sorted().toList();
+            filePaths.stream().filter(codemodRunner::supports).sorted().toList();
 
     for (Path filePath : codemodTargetFiles) {
       // create the context necessary for the codemod to run
       LineIncludesExcludes lineIncludesExcludes =
           includesExcludes.getIncludesExcludesForFile(filePath.toFile());
-      CodemodInvocationContext context =
-          new DefaultCodemodInvocationContext(
-              codeDirectory, filePath, codemod.getId(), lineIncludesExcludes);
-      try {
-        // capture the "before" for the diff, if needed
-        List<String> beforeFile = Files.readAllLines(filePath);
 
+      try {
+        CodemodInvocationContext context =
+              new DefaultCodemodInvocationContext(
+                      codeDirectory, filePath, fileCache.get(filePath), codemod.getId(), lineIncludesExcludes);
         // run the codemod on the file
         List<CodemodChange> codemodChanges = codemodRunner.run(context);
 
-        if (!codemodChanges.isEmpty()) {
-          // update the dependencies in the manifest file if needed
-          List<DependencyGAV> dependencies =
-              codemodChanges.stream()
-                  .map(CodemodChange::getDependenciesNeeded)
-                  .flatMap(Collection::stream)
-                  .distinct()
-                  .collect(Collectors.toList());
-          List<CodeTFPackageAction> pkgActions;
-          List<CodeTFChangesetEntry> dependencyChangesetEntries = Collections.emptyList();
-          if (!dependencies.isEmpty()) {
-            CodemodPackageUpdateResult packageAddResult = addPackages(filePath, dependencies);
-            unscannableFiles.addAll(packageAddResult.filesFailedToChange());
-            pkgActions = packageAddResult.packageActions();
-            dependencyChangesetEntries = packageAddResult.manifestChanges();
-          } else {
-            pkgActions = Collections.emptyList();
-          }
-
-          // record the change for the file
-          List<CodeTFChange> changes =
-              codemodChanges.stream()
-                  .map(
-                      change ->
-                          translateCodemodChangetoCodeTFChange(
-                              codeChanger, filePath, change, pkgActions))
-                  .collect(Collectors.toList());
-
-          // make sure we add the file's entry first, then the dependency entries, so the causality
-          // is clear
-          List<String> afterFile = Files.readAllLines(filePath);
-          List<String> patchDiff =
-              UnifiedDiffUtils.generateUnifiedDiff(
-                  filePath.getFileName().toString(),
-                  filePath.getFileName().toString(),
-                  beforeFile,
-                  DiffUtils.diff(beforeFile, afterFile),
-                  3);
-
-          String diff = String.join("\n", patchDiff);
-          changeset.add(
-              new CodeTFChangesetEntry(getRelativePath(projectDir, filePath), diff, changes));
-          changeset.addAll(dependencyChangesetEntries);
+        if (codemodChanges.isEmpty()) {
+          continue;
         }
+        
+        // update the dependencies in the manifest file if needed
+        List<DependencyGAV> dependencies =
+            codemodChanges.stream()
+                .map(CodemodChange::getDependenciesNeeded)
+                .flatMap(Collection::stream)
+                .distinct()
+                .collect(Collectors.toList());
+        List<CodeTFPackageAction> pkgActions;
+        List<CodeTFChangesetEntry> dependencyChangesetEntries = Collections.emptyList();
+        if (!dependencies.isEmpty()) {
+          CodemodPackageUpdateResult packageAddResult = addPackages(filePath, dependencies);
+          unscannableFiles.addAll(packageAddResult.filesFailedToChange());
+          pkgActions = packageAddResult.packageActions();
+          dependencyChangesetEntries = packageAddResult.manifestChanges();
+        } else {
+          pkgActions = Collections.emptyList();
+        }
+
+        // record the change for the file
+        List<CodeTFChange> changes =
+            codemodChanges.stream()
+                .map(
+                    change ->
+                        translateCodemodChangetoCodeTFChange(
+                            codeChanger, filePath, change, pkgActions))
+                .collect(Collectors.toList());
+
+        // make sure we add the file's entry first, then the dependency entries, so the causality
+        // is clear
+        List<String> beforeFile = fileCache.get(filePath).lines().toList();
+        String afterContents = Files.readString(filePath);
+        List<String> afterFile = afterContents.lines().toList();
+        List<String> patchDiff =
+            UnifiedDiffUtils.generateUnifiedDiff(
+                filePath.getFileName().toString(),
+                filePath.getFileName().toString(),
+                beforeFile,
+                DiffUtils.diff(beforeFile, afterFile),
+                3);
+
+        String diff = String.join("\n", patchDiff);
+        changeset.add(
+            new CodeTFChangesetEntry(getRelativePath(projectDir, filePath), diff, changes));
+        changeset.addAll(dependencyChangesetEntries);
+        fileCache.put(filePath, afterContents);
+
       } catch (Exception e) {
         unscannableFiles.add(filePath);
         e.printStackTrace();
@@ -247,4 +256,6 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     }
     return path;
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultCodemodExecutor.class);
 }

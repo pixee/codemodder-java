@@ -15,7 +15,7 @@ import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFReport;
 import io.codemodder.codetf.CodeTFReportGenerator;
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaCache;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
@@ -354,8 +354,13 @@ final class CLI implements Callable<Integer> {
        */
       logEnteringPhase(Logs.ExecutionPhase.SCANNING);
       JavaParser javaParser = javaParserFactory.create(sourceDirectories);
-      CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
+
+      FileCache fileCache = FileCache.createDefault();
+      JavaCache javaCache = JavaCache.from(javaParser);
+
       for (CodemodIdPair codemod : codemods) {
+        log.info("running codemod: {}", codemod.getId());
+
         CodemodExecutor codemodExecutor =
             new DefaultCodemodExecutor(
                 projectPath,
@@ -363,9 +368,10 @@ final class CLI implements Callable<Integer> {
                 codemod,
                 projectProviders,
                 codeTFProviders,
-                cachingJavaParser,
+                fileCache,
+                javaCache,
                 encodingDetector);
-        log.info("running codemod: {}", codemod.getId());
+
         CodeTFResult result = codemodExecutor.execute(filePaths);
         if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {
           results.add(result);

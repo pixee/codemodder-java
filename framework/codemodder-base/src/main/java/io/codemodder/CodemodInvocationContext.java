@@ -18,6 +18,9 @@ public interface CodemodInvocationContext {
   /** The individual file being changed. */
   Path path();
 
+  /** The original contents of the file */
+  String contents();
+
   /** The ID of the codemod changing the file. */
   String codemodId();
 
