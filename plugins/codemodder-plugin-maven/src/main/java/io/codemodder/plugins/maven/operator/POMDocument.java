@@ -29,8 +29,13 @@ public class POMDocument {
   private String endl;
   private String indent;
   private byte[] resultPomBytes;
+
+  /** Preamble Contents are stored here */
   private String preamble;
+
+  /** Afterword - if needed */
   private String suffix;
+
   private boolean dirty;
 
   public POMDocument(byte[] originalPom, URL pomPath, Document pomDocument)
