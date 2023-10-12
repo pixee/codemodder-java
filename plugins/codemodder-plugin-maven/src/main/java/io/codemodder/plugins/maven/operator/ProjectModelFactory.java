@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.dom4j.DocumentException;
 
+/** Builder Object for ProjectModel instances */
 public class ProjectModelFactory {
   private POMDocument pomFile;
   private List<POMDocument> parentPomFiles;
@@ -27,11 +28,21 @@ public class ProjectModelFactory {
     queryType = QueryType.NONE;
   }
 
+  /**
+   * Fluent Setter
+   *
+   * @param pomFile POM File
+   */
   public ProjectModelFactory withPomFile(POMDocument pomFile) {
     this.pomFile = pomFile;
     return this;
   }
 
+  /**
+   * Fluent Setter
+   *
+   * @param parentPomFiles Parent POM Files
+   */
   public ProjectModelFactory withParentPomFiles(Collection<POMDocument> parentPomFiles) {
     this.parentPomFiles =
         new ArrayList<>(
@@ -39,74 +50,102 @@ public class ProjectModelFactory {
     return this;
   }
 
+  /**
+   * Fluent Setter
+   *
+   * @param dep dependency
+   */
   public ProjectModelFactory withDependency(Dependency dep) {
     this.dependency = dep;
     return this;
   }
 
+  /** Fluent Setter */
   public ProjectModelFactory withSkipIfNewer(boolean skipIfNewer) {
     this.skipIfNewer = skipIfNewer;
     return this;
   }
 
+  /** Fluent Setter */
   public ProjectModelFactory withUseProperties(boolean useProperties) {
     this.useProperties = useProperties;
     return this;
   }
 
+  /** Fluent Setter */
   public ProjectModelFactory withActiveProfiles(String... activeProfiles) {
     this.activeProfiles = new HashSet<>(Arrays.asList(activeProfiles));
     return this;
   }
 
+  /** Fluent Setter */
   public ProjectModelFactory withOverrideIfAlreadyExists(boolean overrideIfAlreadyExists) {
     this.overrideIfAlreadyExists = overrideIfAlreadyExists;
     return this;
   }
 
+  /**
+   * Fluent Setter
+   *
+   * @param queryType query type
+   */
   public ProjectModelFactory withQueryType(QueryType queryType) {
     this.queryType = queryType;
     return this;
   }
 
+  /**
+   * Fluent Setter
+   *
+   * @param repositoryPath Repository Path
+   */
   public ProjectModelFactory withRepositoryPath(File repositoryPath) {
     this.repositoryPath = repositoryPath;
     return this;
   }
 
+  /**
+   * Fluent Setter
+   *
+   * @param offline Offline
+   */
   public ProjectModelFactory withOffline(boolean offline) {
     this.offline = offline;
     return this;
   }
 
-  public static ProjectModelFactory create() {
+  private static ProjectModelFactory create() {
     return new ProjectModelFactory();
   }
 
-  public static ProjectModelFactory load(InputStream is)
+  /** Mostly Delegates to POMDocumentFactory */
+  static ProjectModelFactory load(InputStream is)
       throws DocumentException, IOException, URISyntaxException {
     POMDocument pomDocument = POMDocumentFactory.load(is);
     return ProjectModelFactory.create().withPomFile(pomDocument);
   }
 
-  public static ProjectModelFactory load(File f) throws Exception {
+  /** Mostly Delegates to POMDocumentFactory */
+  static ProjectModelFactory load(File f) throws Exception {
     URL fileUrl = f.toURI().toURL();
     return load(fileUrl);
   }
 
-  public static ProjectModelFactory load(URL url)
+  /** Mostly Delegates to POMDocumentFactory */
+  static ProjectModelFactory load(URL url)
       throws DocumentException, IOException, URISyntaxException {
     POMDocument pomFile = POMDocumentFactory.load(url);
     return ProjectModelFactory.create().withPomFile(pomFile);
   }
 
-  public static ProjectModelFactory loadFor(
-      POMDocument pomFile, Collection<POMDocument> parentPomFiles) {
+  /** Mostly Delegates to POMDocumentFactory */
+  static ProjectModelFactory loadFor(POMDocument pomFile, Collection<POMDocument> parentPomFiles) {
     List<POMDocument> parentPomFilesList = new ArrayList<>(parentPomFiles);
     ProjectModelFactory pmf = ProjectModelFactory.create();
     return ProjectModelFactory.create().withPomFile(pomFile).withParentPomFiles(parentPomFilesList);
   }
 
+  /** Fluent Setter */
   public ProjectModel build() {
     return new ProjectModel(
         pomFile,
