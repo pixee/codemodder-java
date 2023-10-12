@@ -28,6 +28,13 @@ class QueryByResolver extends AbstractQueryCommand {
     // Not yet implemented
   }
 
+  /**
+   * Executes the Maven resolution process and populates the result with resolved dependencies.
+   *
+   * @param pm The project model containing the configuration and settings for resolution.
+   * @return `true` if the resolution is successful, `false` otherwise.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   */
   @Override
   public boolean execute(ProjectModel pm) throws URISyntaxException {
     EmbedderFacade.EmbedderFacadeRequest req =
