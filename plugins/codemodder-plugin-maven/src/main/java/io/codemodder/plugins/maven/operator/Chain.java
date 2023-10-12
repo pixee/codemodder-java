@@ -7,14 +7,18 @@ import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Implements a Chain of Responsibility Pattern
+ *
+ * @constructor commands: Commands to Use
+ */
 class Chain {
   private static final Logger LOGGER = LoggerFactory.getLogger(Chain.class);
 
   /** Internal ArrayList of the Commands */
   private List<Command> commandList;
 
-  // Constructor that takes an array of CommandJ
-  public Chain(Command... commands) {
+  private Chain(Command... commands) {
     this.commandList = new ArrayList<>(Arrays.asList(commands));
   }
 
@@ -22,6 +26,12 @@ class Chain {
     return commandList;
   }
 
+  /**
+   * Executes the Commands in the Chain of Responsibility
+   *
+   * @param c ProjectModel (context)
+   * @return Boolean if successful
+   */
   public boolean execute(ProjectModel c)
       throws URISyntaxException, IOException, XMLStreamException {
     boolean done = false;
@@ -57,6 +67,7 @@ class Chain {
     return result;
   }
 
+  /** Returns a Pre-Configured Chain with the Defaults for Modifying a POM */
   public static Chain createForModify() {
     return new Chain(
         CheckDependencyPresent.getInstance(),
@@ -69,7 +80,7 @@ class Chain {
         new SimpleInsert());
   }
 
-  public static Chain filterByQueryType(
+  private static Chain filterByQueryType(
       List<Pair<QueryType, String>> commandList,
       QueryType queryType,
       List<AbstractQueryCommand> initialCommands,
@@ -101,6 +112,7 @@ class Chain {
     return new Chain(commands.toArray(new Command[0]));
   }
 
+  /** returns a pre-configured chain with the defaults for Dependency Querying */
   public static Chain createForDependencyQuery(QueryType queryType) {
     return filterByQueryType(
         AVAILABLE_DEPENDENCY_QUERY_COMMANDS,
@@ -109,6 +121,7 @@ class Chain {
         it -> it == queryType);
   }
 
+  /** returns a pre-configured chain for Version Query */
   public static Chain createForVersionQuery(QueryType queryType) {
     return filterByQueryType(
         AVAILABLE_QUERY_VERSION_COMMANDS,
@@ -117,7 +130,15 @@ class Chain {
         it -> it.ordinal() <= queryType.ordinal());
   }
 
-  public static final List<Pair<QueryType, String>> AVAILABLE_DEPENDENCY_QUERY_COMMANDS =
+  /**
+   * Some classes won't have all available dependencies on the classpath during runtime for this
+   * reason we'll use
+   *
+   * <pre>Class.forName</pre>
+   *
+   * and report issues creating
+   */
+  static final List<Pair<QueryType, String>> AVAILABLE_DEPENDENCY_QUERY_COMMANDS =
       new ArrayList<>(
           Arrays.asList(
               new Pair<>(QueryType.SAFE, "QueryByResolver"),
@@ -125,14 +146,15 @@ class Chain {
               new Pair<>(QueryType.UNSAFE, "QueryByEmbedder"),
               new Pair<>(QueryType.UNSAFE, "QueryByInvoker")));
 
-  public static final List<Pair<QueryType, String>> AVAILABLE_QUERY_VERSION_COMMANDS =
+  /** List of Commands for Version Query */
+  private static final List<Pair<QueryType, String>> AVAILABLE_QUERY_VERSION_COMMANDS =
       new ArrayList<>(
           Arrays.asList(
               new Pair<>(QueryType.NONE, "UnwrapEffectivePom"),
               new Pair<>(QueryType.SAFE, "VersionByCompilerDefinition"),
               new Pair<>(QueryType.SAFE, "VersionByProperty")));
 
-  public interface QueryTypeFilter {
+  private interface QueryTypeFilter {
     boolean filter(QueryType queryType);
   }
 }
