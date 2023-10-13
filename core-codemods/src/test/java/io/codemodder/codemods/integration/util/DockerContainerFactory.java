@@ -1,4 +1,4 @@
-package io.codemodder.codemods.integration;
+package io.codemodder.codemods.integration.util;
 
 import java.nio.file.Path;
 import org.testcontainers.containers.GenericContainer;

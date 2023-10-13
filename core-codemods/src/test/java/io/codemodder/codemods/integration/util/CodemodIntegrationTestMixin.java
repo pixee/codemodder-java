@@ -1,9 +1,8 @@
-package io.codemodder.codemods.integration;
+package io.codemodder.codemods.integration.util;
 
 import static io.codemodder.codemods.integration.util.TestApplicationRequestUtil.doRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.codemodder.codemods.integration.util.IntegrationTestMetadata;
 import java.util.Arrays;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;

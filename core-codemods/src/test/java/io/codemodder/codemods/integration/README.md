@@ -14,26 +14,26 @@ be transformed and tested integrally.
 #### Generate codemodder base image
 Run the `build`command in the root of the project.
 ```
-docker build -f core-codemods/src/test/java/io/codemodder/codemods/baseimage/Dockerfile -t codemodder-base:latest .
+docker build -f core-codemods/src/test/java/io/codemodder/codemods/integration/baseimage/Dockerfile -t codemodder-base:latest .
 ```
 
 #### Generate test project base image
 Run the `build`command in the root of the project, the `CODEMOD_ID` argument must have the value of the ID of the codemod we want to test.
 The image tag must be the codemod ID also.
 ```
-docker build -f core-codemods/src/test/java/io/codemodder/codemods/projectimage/Dockerfile --build-arg CODEMOD_ID=move-switch-default-last -t move-switch-default-last .
+docker build -f core-codemods/src/test/java/io/codemodder/codemods/integration/projectimage/Dockerfile --build-arg CODEMOD_ID=move-switch-default-last -t move-switch-default-last .
 ```
 
 #### Running the integration test for a specific codemod
 ```
-./gradlew :core-codemods:test --tests io.codemodder.codemods.integration.MoveSwitchDefaultCaseLastIntegrationTest
+./gradlew :core-codemods:test --tests io.codemodder.codemods.integration.tests.MoveSwitchDefaultCaseLastIntegrationTest
 ```
 
 ### Adding a new integration test
 - Add new test project where `codemod` will be performed during the integration test, the project must be named as the codemod ID.
-- Create the codemod integration test class and extend `CodemodIntegrationTestSetup` class which will manage the containers creation.
+- Create the codemod integration test class and extend `CodemodIntegrationTestMixin` class which will manage the containers creation.
 ```
-public class MoveSwitchDefaultCaseLastIntegrationTest extends CodemodIntegrationTestSetup {}
+public class MoveSwitchDefaultCaseLastIntegrationTest extends CodemodIntegrationTestMixin {}
 ```
 
 - Annotate the test class with the `IntegrationTestMetadata` annotation that will contain the ID of the codemod being tested and the

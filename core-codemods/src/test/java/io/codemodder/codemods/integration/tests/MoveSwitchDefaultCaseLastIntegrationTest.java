@@ -1,5 +1,6 @@
-package io.codemodder.codemods.integration;
+package io.codemodder.codemods.integration.tests;
 
+import io.codemodder.codemods.integration.util.CodemodIntegrationTestMixin;
 import io.codemodder.codemods.integration.util.IntegrationTestMetadata;
 import io.codemodder.codemods.integration.util.TestPropertiesMetadata;
 
