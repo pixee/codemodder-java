@@ -78,7 +78,6 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
         filePaths.stream().filter(codemodRunner::supports).sorted().toList();
 
     for (Path filePath : codemodTargetFiles) {
-
       // create the context necessary for the codemod to run
       LineIncludesExcludes lineIncludesExcludes =
           includesExcludes.getIncludesExcludesForFile(filePath.toFile());
@@ -137,7 +136,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
           changeset.add(
               new CodeTFChangesetEntry(getRelativePath(projectDir, filePath), diff, changes));
           changeset.addAll(dependencyChangesetEntries);
-          fileCache.put(filePath, afterContents);
+          fileCache.overrideEntry(filePath, afterContents);
         }
       } catch (Exception e) {
         unscannableFiles.add(filePath);

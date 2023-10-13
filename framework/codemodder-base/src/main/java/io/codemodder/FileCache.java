@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A cache for file contents. This is useful for caching file contents when running codemods that
+ * A cache for file contents. We cache contents because generally memory is cheap and fast. We may
+ * want to offer configuration here eventually for situations where the opposite is true.
  */
 public interface FileCache {
 
@@ -15,9 +16,13 @@ public interface FileCache {
   String get(Path path) throws IOException;
 
   /** Put the string contents of a file into the cache. */
-  void put(Path path, String contents);
+  void overrideEntry(Path path, String contents);
 
   static FileCache createDefault() {
+    return createDefault(5000);
+  }
+
+  static FileCache createDefault(final int maxSize) {
     return new FileCache() {
       private final Map<Path, String> fileCache = new ConcurrentHashMap<>();
 
@@ -26,7 +31,7 @@ public interface FileCache {
         String contents = fileCache.get(path);
         if (contents == null) {
           contents = Files.readString(path);
-          if (fileCache.size() < 5000) {
+          if (fileCache.size() < maxSize) {
             fileCache.put(path, contents);
           }
         }
@@ -34,7 +39,10 @@ public interface FileCache {
       }
 
       @Override
-      public void put(final Path path, final String contents) {
+      public void overrideEntry(final Path path, final String contents) {
+        if (!fileCache.containsKey(path)) {
+          throw new IllegalArgumentException("cache entry must be for an existing key");
+        }
         fileCache.put(path, contents);
       }
     };

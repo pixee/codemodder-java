@@ -355,7 +355,7 @@ final class CLI implements Callable<Integer> {
       logEnteringPhase(Logs.ExecutionPhase.SCANNING);
       JavaParser javaParser = javaParserFactory.create(sourceDirectories);
       CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
-      FileCache fileCache = FileCache.createDefault();
+      FileCache fileCache = FileCache.createDefault(10_000);
       for (CodemodIdPair codemod : codemods) {
         CodemodExecutor codemodExecutor =
             new DefaultCodemodExecutor(
