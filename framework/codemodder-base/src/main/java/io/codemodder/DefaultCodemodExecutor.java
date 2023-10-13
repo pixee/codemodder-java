@@ -123,7 +123,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
           // make sure we add the file's entry first, then the dependency entries, so the causality
           // is clear
           List<String> beforeFile = fileContents.lines().toList();
-          List<String> afterFile = Files.readAllLines(filePath);
+          String afterContents = Files.readString(filePath);
+          List<String> afterFile = afterContents.lines().toList();
           List<String> patchDiff =
               UnifiedDiffUtils.generateUnifiedDiff(
                   filePath.getFileName().toString(),
@@ -136,6 +137,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
           changeset.add(
               new CodeTFChangesetEntry(getRelativePath(projectDir, filePath), diff, changes));
           changeset.addAll(dependencyChangesetEntries);
+          fileCache.put(filePath, afterContents);
         }
       } catch (Exception e) {
         unscannableFiles.add(filePath);
