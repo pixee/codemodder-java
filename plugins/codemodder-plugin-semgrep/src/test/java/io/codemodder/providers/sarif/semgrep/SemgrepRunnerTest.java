@@ -32,7 +32,8 @@ final class SemgrepRunnerTest {
     Files.copy(resourceAsStream, ruleFile, StandardCopyOption.REPLACE_EXISTING);
 
     // run the scan
-    SarifSchema210 sarif = new DefaultSemgrepRunner().run(List.of(ruleFile), repositoryDir);
+    SarifSchema210 sarif =
+        new DefaultSemgrepRunner().run(List.of(ruleFile), repositoryDir, List.of("**"), List.of());
 
     // assert the scan went as we think it should
     List<Run> runs = sarif.getRuns();
