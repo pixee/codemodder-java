@@ -7,7 +7,8 @@
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -126,3 +127,4 @@ fabric.properties
 # env
 .env*
 .secrets
+/plugins/codemodder-plugin-maven/.cache/
