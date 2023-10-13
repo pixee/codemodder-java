@@ -32,7 +32,9 @@ final class SemgrepJavaParserChangerTest {
     String javaCode = "class Foo { \n\n  Object a = new Stuff();\n  Object b = new That();\n }";
     Path javaFile = writeJavaFile(tmpDir, javaCode);
 
-    SemgrepModule module = new SemgrepModule(tmpDir, List.of(UsesInlineSemgrepCodemod.class));
+    SemgrepModule module =
+        new SemgrepModule(
+            tmpDir, List.of("**"), List.of(), List.of(UsesInlineSemgrepCodemod.class));
     Injector injector = Guice.createInjector(module);
     UsesInlineSemgrepCodemod instance = injector.getInstance(UsesInlineSemgrepCodemod.class);
     RuleSarif ruleSarif = instance.sarif;
@@ -42,7 +44,9 @@ final class SemgrepJavaParserChangerTest {
 
   @Test
   void it_fails_when_both_used(@TempDir Path tmpDir) {
-    SemgrepModule module = new SemgrepModule(tmpDir, List.of(InvalidUsesBothYamlStrategies.class));
+    SemgrepModule module =
+        new SemgrepModule(
+            tmpDir, List.of("**"), List.of(), List.of(InvalidUsesBothYamlStrategies.class));
     assertThrows(CreationException.class, () -> Guice.createInjector(module));
   }
 

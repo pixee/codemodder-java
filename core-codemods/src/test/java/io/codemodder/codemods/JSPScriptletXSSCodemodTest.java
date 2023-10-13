@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,11 +35,21 @@ final class JSPScriptletXSSCodemodTest {
       throws IOException {
     String dir = "src/test/resources/encode-jsp-scriptlet/" + jspDir;
     copyDir(Path.of(dir), tmpDir);
-    CodemodLoader codemodInvoker = new CodemodLoader(List.of(JSPScriptletXSSCodemod.class), tmpDir);
 
     Path beforeJsp = tmpDir.resolve("test.jsp.before");
     Path jsp = tmpDir.resolve("test.jsp");
     Files.copy(beforeJsp, jsp);
+
+    CodemodLoader codemodInvoker =
+        new CodemodLoader(
+            List.of(JSPScriptletXSSCodemod.class),
+            CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+            tmpDir,
+            List.of("**"),
+            List.of(),
+            List.of(jsp),
+            Map.of(),
+            List.of());
     CodemodIdPair codemod = codemodInvoker.getCodemods().get(0);
     CodemodExecutor executor =
         CodemodExecutor.from(

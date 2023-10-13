@@ -14,8 +14,11 @@ public final class PmdProvider implements CodemodProvider {
   @Override
   public Set<AbstractModule> getModules(
       final Path codeDirectory,
+      final List<Path> includedFiles,
+      final List<String> includePaths,
+      final List<String> excludePaths,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
-    return Set.of(new PmdModule(codeDirectory, codemodTypes));
+    return Set.of(new PmdModule(codeDirectory, includedFiles, codemodTypes));
   }
 }

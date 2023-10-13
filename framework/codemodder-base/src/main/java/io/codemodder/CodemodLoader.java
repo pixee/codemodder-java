@@ -20,43 +20,12 @@ public final class CodemodLoader {
   private final List<CodemodIdPair> codemods;
 
   public CodemodLoader(
-      final List<Class<? extends CodeChanger>> codemodTypes, final Path repositoryDir) {
-    this(
-        codemodTypes,
-        CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
-        repositoryDir,
-        Map.of(),
-        List.of());
-  }
-
-  public CodemodLoader(
-      final List<Class<? extends CodeChanger>> codemodTypes,
-      final Path repositoryDir,
-      final List<ParameterArgument> parameterArguments) {
-    this(
-        codemodTypes,
-        CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
-        repositoryDir,
-        Map.of(),
-        parameterArguments);
-  }
-
-  public CodemodLoader(
-      final List<Class<? extends CodeChanger>> codemodTypes,
-      final Path repositoryDir,
-      final Map<String, List<RuleSarif>> ruleSarifByTool) {
-    this(
-        codemodTypes,
-        CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
-        repositoryDir,
-        ruleSarifByTool,
-        List.of());
-  }
-
-  public CodemodLoader(
       final List<Class<? extends CodeChanger>> codemodTypes,
       final CodemodRegulator codemodRegulator,
       final Path repositoryDir,
+      final List<String> pathIncludes,
+      final List<String> pathExcludes,
+      final List<Path> includedFiles,
       final Map<String, List<RuleSarif>> ruleSarifByTool,
       final List<ParameterArgument> codemodParameters) {
 
@@ -110,7 +79,13 @@ public final class CodemodLoader {
               .flatMap(toolName -> ruleSarifByTool.getOrDefault(toolName, List.of()).stream())
               .toList();
       final Set<AbstractModule> modules =
-          provider.getModules(repositoryDir, codemodTypes, allWantedSarifs);
+          provider.getModules(
+              repositoryDir,
+              includedFiles,
+              pathIncludes,
+              pathExcludes,
+              codemodTypes,
+              allWantedSarifs);
       allModules.addAll(modules);
     }
 

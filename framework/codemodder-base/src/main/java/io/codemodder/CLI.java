@@ -336,7 +336,15 @@ final class CLI implements Callable<Integer> {
       List<ParameterArgument> codemodParameters =
           createFromParameterStrings(this.codemodParameters);
       CodemodLoader loader =
-          new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap, codemodParameters);
+          new CodemodLoader(
+              codemodTypes,
+              regulator,
+              projectPath,
+              pathIncludes,
+              pathExcludes,
+              filePaths,
+              pathSarifMap,
+              codemodParameters);
       List<CodemodIdPair> codemods = loader.getCodemods();
 
       log.debug("sarif files: {}", sarifFiles.size());

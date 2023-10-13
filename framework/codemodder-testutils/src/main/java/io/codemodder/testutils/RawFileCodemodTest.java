@@ -36,11 +36,12 @@ public interface RawFileCodemodTest {
 
   /** Verify a single test case composed of a .before and .after file. */
   private void verifySingleCase(
-      final CodemodLoader loader,
+      final Class<? extends CodeChanger> codemod,
       final Path tmpDir,
       final Metadata metadata,
       final Path filePathBefore,
-      final Path filePathAfter)
+      final Path filePathAfter,
+      final Map<String, List<RuleSarif>> ruleSarifMap)
       throws IOException {
 
     String tmpFileName = trimExtension(filePathBefore);
@@ -55,6 +56,16 @@ public interface RawFileCodemodTest {
     final var tmpFilePath = tmpDir.resolve(tmpFileName);
     Files.copy(filePathBefore, tmpFilePath);
 
+    final CodemodLoader loader =
+        new CodemodLoader(
+            List.of(codemod),
+            CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+            tmpDir,
+            List.of("**"),
+            List.of(),
+            List.of(tmpFilePath),
+            ruleSarifMap,
+            List.of());
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));
 
@@ -105,14 +116,11 @@ public interface RawFileCodemodTest {
     final Map<String, List<RuleSarif>> map =
         SarifParser.create().parseIntoMap(allSarifFiles, tmpDir);
 
-    // run the codemod
-    final CodemodLoader invoker = new CodemodLoader(List.of(codemod), tmpDir, map);
-
     // grab all the .before and .after files in the dir
     final var allBeforeFiles =
         Files.list(testResourceDir)
             .filter(file -> file.getFileName().toString().endsWith(".before"))
-            .collect(Collectors.toList());
+            .toList();
     final Map<String, Path> afterFilesMap =
         Files.list(testResourceDir)
             .filter(file -> file.getFileName().toString().endsWith(".after"))
@@ -120,7 +128,8 @@ public interface RawFileCodemodTest {
 
     for (var beforeFile : allBeforeFiles) {
       final var afterFile = afterFilesMap.get(trimExtension(beforeFile));
-      verifySingleCase(invoker, tmpDir, metadata, beforeFile, afterFile);
+      // run the codemod
+      verifySingleCase(codemod, tmpDir, metadata, beforeFile, afterFile, map);
     }
   }
 }

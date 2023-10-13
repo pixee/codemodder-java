@@ -103,7 +103,16 @@ public interface CodemodTestMixin {
     }
 
     // run the codemod
-    CodemodLoader loader = new CodemodLoader(List.of(codemodType), tmpDir, map);
+    CodemodLoader loader =
+        new CodemodLoader(
+            List.of(codemodType),
+            CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+            tmpDir,
+            List.of("**"),
+            List.of(),
+            List.of(pathToJavaFile),
+            map,
+            List.of());
 
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat(codemods.size(), equalTo(1));
@@ -163,7 +172,16 @@ public interface CodemodTestMixin {
     String codeAfterFirstTransform = Files.readString(pathToJavaFile);
 
     // re-run the transformation again and make sure no changes are made
-    CodemodLoader loader2 = new CodemodLoader(List.of(codemodType), tmpDir, map);
+    CodemodLoader loader2 =
+        new CodemodLoader(
+            List.of(codemodType),
+            CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+            tmpDir,
+            List.of("**"),
+            List.of(),
+            List.of(pathToJavaFile),
+            map,
+            List.of());
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
     CodemodExecutor executor2 =
         CodemodExecutor.from(
