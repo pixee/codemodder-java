@@ -117,6 +117,7 @@ public interface CodemodTestMixin {
             codemod,
             List.of(),
             List.of(),
+            FileCache.createDefault(),
             CachingJavaParser.from(factory.create(List.of(dir))),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(pathToJavaFile));
@@ -171,6 +172,7 @@ public interface CodemodTestMixin {
             codemod2,
             List.of(),
             List.of(),
+            FileCache.createDefault(),
             CachingJavaParser.from(factory.create(List.of(dir))),
             EncodingDetector.create());
     CodeTFResult result2 = executor2.execute(List.of(pathToJavaFile));

@@ -42,7 +42,7 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
   @Override
   public List<CodemodChange> run(final CodemodInvocationContext context) throws IOException {
     Path file = context.path();
-    CompilationUnit cu = parser.parseJavaFile(file);
+    CompilationUnit cu = parser.parseJavaFile(file, context.contents());
     List<CodemodChange> changes = javaParserChanger.visit(context, cu);
     if (!changes.isEmpty()) {
       String encodingName = encodingDetector.detect(file).orElse("UTF-8");

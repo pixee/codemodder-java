@@ -232,6 +232,7 @@ final class AddMissingI18nCodemodTest {
             pair,
             List.of(),
             List.of(),
+            FileCache.createDefault(),
             CachingJavaParser.from(new JavaParser()),
             EncodingDetector.create());
     return executor.execute(

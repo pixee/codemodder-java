@@ -21,6 +21,9 @@ public interface CodemodInvocationContext {
   /** The ID of the codemod changing the file. */
   String codemodId();
 
+  /** The original contents of the file before this codemod */
+  String contents();
+
   /**
    * Convenience method for stream-wise processing lines of the file being changed with line
    * numbers.
