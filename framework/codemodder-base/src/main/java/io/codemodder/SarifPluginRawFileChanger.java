@@ -1,7 +1,6 @@
 package io.codemodder;
 
 import com.contrastsecurity.sarif.Result;
-import java.io.IOException;
 import java.util.List;
 
 /** A {@link RawFileChanger} bundled with a {@link RuleSarif}. */
@@ -20,11 +19,10 @@ public abstract class SarifPluginRawFileChanger extends RawFileChanger {
   }
 
   @Override
-  public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
+  public List<CodemodChange> visitFile(final CodemodInvocationContext context) {
     List<Result> results = sarif.getResultsByPath(context.path());
     if (!results.isEmpty()) {
-      List<CodemodChange> allChanges = onFileFound(context, results);
-      return allChanges;
+      return onFileFound(context, results);
     }
     return List.of();
   }
