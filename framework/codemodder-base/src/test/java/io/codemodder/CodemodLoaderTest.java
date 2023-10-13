@@ -363,7 +363,4 @@ final class CodemodLoaderTest {
         Map.of(),
         params);
   }
-
-  private static List<String> ALL_PATTERN = List.of("**");
-  private static List<String> NONE_PATTERN = List.of();
 }
