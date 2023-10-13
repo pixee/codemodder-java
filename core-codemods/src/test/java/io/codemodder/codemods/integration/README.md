@@ -19,10 +19,11 @@ docker build -f core-codemods/src/test/java/io/codemodder/codemods/integration/b
 ```
 
 #### Generate test project base image
-Run the `docker build`command in the `codemodder-java` root directory, the `CODEMOD_ID` argument must have the value of the ID of the codemod we want to test.
-The image tag must be the codemod ID also.
+Run the `docker build`command in the `codemodder-java` root directory, the `CODEMOD_ID` argument must have the value of the ID of the codemod we want to test
+and the `CODEMODDER_BASE_IMAGE` argument should have the name of the codemodder base image we want to use as name.
+The image tag must be the codemod ID also.  
 ```
-docker build -f core-codemods/src/test/java/io/codemodder/codemods/integration/projectimage/Dockerfile --build-arg CODEMOD_ID=move-switch-default-last -t move-switch-default-last .
+docker build -f core-codemods/src/test/java/io/codemodder/codemods/integration/projectimage/Dockerfile --build-arg CODEMOD_ID=move-switch-default-last --build-arg CODEMODDER_BASE_IMAGE=codemodder-base -t move-switch-default-last .
 ```
 
 #### Running the integration test for a specific codemod
