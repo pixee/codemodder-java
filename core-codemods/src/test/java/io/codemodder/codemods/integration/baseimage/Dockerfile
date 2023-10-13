@@ -32,6 +32,7 @@ RUN pip install semgrep
 
 # Generate tool executable
 WORKDIR /codemodder-java
-COPY /core-codemods/build/distributions/core-codemods-0.0.1.tar /codemodder-java
-
-RUN tar -xvf /codemodder-java/core-codemods-0.0.1.tar
+RUN mkdir core-codemods
+COPY /core-codemods/build/distributions/*.tar /codemodder-java
+# Copy only the content of the extracted directory
+RUN tar -xvf /codemodder-java/*.tar -C /codemodder-java/core-codemods/ --strip-components=1

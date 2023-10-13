@@ -9,7 +9,7 @@ ARG CODEMOD_ID
 ENV GRADLE_USER_HOME=/gradle-cache
 
 # Run the tool against the test project
-WORKDIR /codemodder-java/core-codemods-0.0.1/bin
+WORKDIR /codemodder-java/core-codemods/bin
 
 # Use the argument to conditionally run tool
 RUN if [ "$RUN_CODEMOD" = "true" ]; then \

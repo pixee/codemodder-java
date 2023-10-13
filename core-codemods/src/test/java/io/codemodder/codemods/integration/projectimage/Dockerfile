@@ -9,7 +9,7 @@ WORKDIR /test-applications
 COPY /core-codemods/src/test/resources/test-applications/$CODEMOD_ID /test-applications/$CODEMOD_ID
 
 
-# Generate test application jar
+# Build application to download required dependencies
 WORKDIR /test-applications/$CODEMOD_ID
 
 ENV GRADLE_USER_HOME=/gradle-cache
