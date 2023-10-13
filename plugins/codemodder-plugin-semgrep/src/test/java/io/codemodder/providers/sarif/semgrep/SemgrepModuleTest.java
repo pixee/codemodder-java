@@ -168,7 +168,7 @@ final class SemgrepModuleTest {
     String javaCode = "class Foo { \n Object a = new Thing(); \n }";
     Path javaFile = Files.createTempFile(tmpDir, "HasThing", ".java");
     Files.writeString(javaFile, javaCode, StandardOpenOption.TRUNCATE_EXISTING);
-    SemgrepModule module = new SemgrepModule(tmpDir, List.of(UsesImplicitYamlPath.class));
+    SemgrepModule module = createModule(tmpDir, List.of(UsesImplicitYamlPath.class));
     Injector injector = Guice.createInjector(module);
     UsesImplicitYamlPath instance = injector.getInstance(UsesImplicitYamlPath.class);
 
@@ -186,7 +186,7 @@ final class SemgrepModuleTest {
     Path javaFile = Files.createTempFile(tmpDir, "HasStuff", ".java");
     Files.writeString(javaFile, javaCode, StandardOpenOption.TRUNCATE_EXISTING);
 
-    SemgrepModule module = new SemgrepModule(tmpDir, List.of(codemod));
+    SemgrepModule module = createModule(tmpDir, List.of(codemod));
     Injector injector = Guice.createInjector(module);
     SarifPluginJavaParserChanger<ObjectCreationExpr> instance =
         (SarifPluginJavaParserChanger<ObjectCreationExpr>) injector.getInstance(codemod);
@@ -197,7 +197,7 @@ final class SemgrepModuleTest {
 
   @Test
   void it_detects_rule_ids(final @TempDir Path tmpDir) throws IOException {
-    SemgrepModule module = new SemgrepModule(tmpDir, List.of(UsesImplicitYamlPath.class));
+    SemgrepModule module = createModule(tmpDir, List.of(UsesImplicitYamlPath.class));
 
     String id = module.detectSingleRuleFromYaml("rules:\n  - id: foo\n    pattern: bar\n");
     assertThat(id, is("foo"));
@@ -210,6 +210,11 @@ final class SemgrepModuleTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> module.detectSingleRuleFromYaml("rules:\n  - pattern: baz\n"));
+  }
+
+  private SemgrepModule createModule(
+      final Path dir, final List<Class<? extends CodeChanger>> codemodTypes) throws IOException {
+    return new SemgrepModule(dir, List.of("**"), List.of(), codemodTypes);
   }
 
   static Stream<Arguments> codemodsThatLookForNewStuffInstances() {
@@ -234,6 +239,8 @@ final class SemgrepModuleTest {
     SemgrepModule module =
         new SemgrepModule(
             tmpDir,
+            List.of("**"),
+            List.of(),
             List.of(UsesOfflineSemgrepCodemod.class),
             map.entrySet().iterator().next().getValue());
     Injector injector = Guice.createInjector(module);

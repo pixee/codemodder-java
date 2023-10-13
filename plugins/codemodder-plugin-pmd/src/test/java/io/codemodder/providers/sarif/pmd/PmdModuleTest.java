@@ -35,7 +35,7 @@ final class PmdModuleTest {
                     }
                     """);
 
-    PmdModule module = new PmdModule(tmpDir, List.of(UsesPmdCodemod.class));
+    PmdModule module = new PmdModule(tmpDir, List.of(javaFile), List.of(UsesPmdCodemod.class));
     Injector injector = Guice.createInjector(module);
     UsesPmdCodemod codemod = injector.getInstance(UsesPmdCodemod.class);
     RuleSarif ruleSarif = codemod.ruleSarif;

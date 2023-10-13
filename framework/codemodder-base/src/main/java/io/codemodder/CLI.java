@@ -4,6 +4,9 @@ import static io.codemodder.Logs.logEnteringPhase;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.OutputStreamAppender;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.JavaParser;
@@ -26,10 +29,14 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.logstash.logback.encoder.LogstashEncoder;
+import net.logstash.logback.fieldnames.LogstashCommonFieldNames;
+import net.logstash.logback.fieldnames.LogstashFieldNames;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import picocli.CommandLine;
 
 /** The mixinStandardHelpOptions provides version and help options. */
@@ -77,6 +84,17 @@ final class CLI implements Callable<Integer> {
       description = "the format for the data output file (\"codetf\" or \"diff\")",
       defaultValue = "codetf")
   private OutputFormat outputFormat;
+
+  @CommandLine.Option(
+      names = {"--log-format"},
+      description = "the format of log data(\"human\" or \"json\")",
+      defaultValue = "human")
+  private LogFormat logFormat;
+
+  @CommandLine.Option(
+      names = {"--project-name"},
+      description = "a descriptive name for the project being scanned for reporting")
+  private String projectName;
 
   @CommandLine.Option(
       names = {"--list"},
@@ -131,6 +149,12 @@ final class CLI implements Callable<Integer> {
   enum OutputFormat {
     CODETF,
     DIFF
+  }
+
+  /** The format for the log output. */
+  enum LogFormat {
+    HUMAN,
+    JSON
   }
 
   CLI(final String[] args, final List<Class<? extends CodeChanger>> codemodTypes) {
@@ -207,8 +231,11 @@ final class CLI implements Callable<Integer> {
   public Integer call() throws IOException {
 
     if (verbose) {
-      LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-      context.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME).setLevel(Level.DEBUG);
+      setupVerboseLogging();
+    }
+
+    if (LogFormat.JSON.equals(logFormat)) {
+      setupJsonLogging();
     }
 
     if (listCodemods) {
@@ -309,7 +336,15 @@ final class CLI implements Callable<Integer> {
       List<ParameterArgument> codemodParameters =
           createFromParameterStrings(this.codemodParameters);
       CodemodLoader loader =
-          new CodemodLoader(codemodTypes, regulator, projectPath, pathSarifMap, codemodParameters);
+          new CodemodLoader(
+              codemodTypes,
+              regulator,
+              projectPath,
+              pathIncludes,
+              pathExcludes,
+              filePaths,
+              pathSarifMap,
+              codemodParameters);
       List<CodemodIdPair> codemods = loader.getCodemods();
 
       log.debug("sarif files: {}", sarifFiles.size());
@@ -328,6 +363,7 @@ final class CLI implements Callable<Integer> {
       logEnteringPhase(Logs.ExecutionPhase.SCANNING);
       JavaParser javaParser = javaParserFactory.create(sourceDirectories);
       CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
+      FileCache fileCache = FileCache.createDefault(10_000);
       for (CodemodIdPair codemod : codemods) {
         CodemodExecutor codemodExecutor =
             new DefaultCodemodExecutor(
@@ -336,6 +372,7 @@ final class CLI implements Callable<Integer> {
                 codemod,
                 projectProviders,
                 codeTFProviders,
+                fileCache,
                 cachingJavaParser,
                 encodingDetector);
         log.info("running codemod: {}", codemod.getId());
@@ -406,6 +443,68 @@ final class CLI implements Callable<Integer> {
         log.debug("cleaned temp directory: {}", projectDirectory);
       }
     }
+  }
+
+  /**
+   * Performs a resetting of the logging settings because they're wildly different if we do
+   * structured logging.
+   */
+  private void setupJsonLogging() {
+    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+    ch.qos.logback.classic.Logger rootLogger =
+        context.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME);
+    rootLogger.detachAndStopAllAppenders();
+    ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
+    appender.setContext(context);
+    configureAppender(appender, Optional.ofNullable(projectName));
+    rootLogger.addAppender(appender);
+  }
+
+  /**
+   * This code is difficult to test because it affects stdout at runtime, and JUnit appears to be
+   * mucking with stdout capture.
+   */
+  @VisibleForTesting
+  static void configureAppender(
+      final OutputStreamAppender<ILoggingEvent> appender, final Optional<String> projectName) {
+    LogstashEncoder logstashEncoder = new LogstashEncoder();
+    logstashEncoder.setContext(appender.getContext());
+
+    // we need this to get the caller data, like the file, line, etc.
+    logstashEncoder.setIncludeCallerData(true);
+
+    // customize the output to the specification, but include timestamp as well since that's allowed
+    LogstashFieldNames fieldNames = logstashEncoder.getFieldNames();
+    fieldNames.setCallerFile("file");
+    fieldNames.setCallerLine("line");
+    fieldNames.setTimestamp("timestamp");
+    fieldNames.setCaller(null);
+    fieldNames.setCallerClass(LogstashCommonFieldNames.IGNORE_FIELD_INDICATOR);
+    fieldNames.setCallerMethod(LogstashCommonFieldNames.IGNORE_FIELD_INDICATOR);
+    fieldNames.setVersion(LogstashCommonFieldNames.IGNORE_FIELD_INDICATOR);
+    fieldNames.setLogger(LogstashCommonFieldNames.IGNORE_FIELD_INDICATOR);
+    fieldNames.setThread(LogstashCommonFieldNames.IGNORE_FIELD_INDICATOR);
+    fieldNames.setLevelValue(LogstashCommonFieldNames.IGNORE_FIELD_INDICATOR);
+
+    String projectNameKey = "project_name";
+    if (projectName.isPresent()) {
+      MDC.put(projectNameKey, projectName.get());
+    } else {
+      // clear it in case this from tests
+      MDC.remove(projectNameKey);
+    }
+
+    logstashEncoder.addIncludeMdcKeyName(projectNameKey);
+    logstashEncoder.start();
+    appender.setEncoder(logstashEncoder);
+    appender.start();
+  }
+
+  private void setupVerboseLogging() {
+    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+    ch.qos.logback.classic.Logger rootLogger =
+        context.getLogger(LoggingConfigurator.OUR_ROOT_LOGGER_NAME);
+    rootLogger.setLevel(Level.DEBUG);
   }
 
   private static void logMetrics(final List<CodeTFResult> results) {

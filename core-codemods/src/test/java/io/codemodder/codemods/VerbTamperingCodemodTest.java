@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,8 +47,20 @@ final class VerbTamperingCodemodTest {
       throws IOException {
     String dir = "src/test/resources/verb-tampering/" + webXmlDir;
     copyDir(Path.of(dir), tmpDir);
-    CodemodLoader loader = new CodemodLoader(List.of(VerbTamperingCodemod.class), tmpDir);
+
     Path webxml = tmpDir.resolve("web.xml");
+
+    CodemodLoader loader =
+        new CodemodLoader(
+            List.of(VerbTamperingCodemod.class),
+            CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+            tmpDir,
+            List.of("**"),
+            List.of(),
+            List.of(webxml),
+            Map.of(),
+            List.of());
+
     CodemodExecutor executor =
         CodemodExecutor.from(
             tmpDir,
@@ -55,6 +68,7 @@ final class VerbTamperingCodemodTest {
             loader.getCodemods().get(0),
             List.of(),
             List.of(),
+            FileCache.createDefault(),
             CachingJavaParser.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(webxml));

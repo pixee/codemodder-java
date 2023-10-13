@@ -17,6 +17,7 @@ public interface CodemodExecutor {
       final CodemodIdPair codemod,
       final List<ProjectProvider> projectProviders,
       final List<CodeTFProvider> codetfProviders,
+      final FileCache fileCache,
       final CachingJavaParser javaParser,
       final EncodingDetector encodingDetector) {
     return new DefaultCodemodExecutor(
@@ -25,6 +26,7 @@ public interface CodemodExecutor {
         codemod,
         projectProviders,
         codetfProviders,
+        fileCache,
         javaParser,
         encodingDetector);
   }
