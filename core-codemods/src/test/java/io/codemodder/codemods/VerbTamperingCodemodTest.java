@@ -55,6 +55,7 @@ final class VerbTamperingCodemodTest {
             loader.getCodemods().get(0),
             List.of(),
             List.of(),
+            FileCache.createDefault(),
             CachingJavaParser.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(webxml));

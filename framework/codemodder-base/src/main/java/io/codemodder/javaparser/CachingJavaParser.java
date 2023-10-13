@@ -17,10 +17,11 @@ public interface CachingJavaParser {
    * CompilationUnit}.
    *
    * @param file a Java file path
+   * @param contents the contents of the file
    * @return a {@link CompilationUnit} for the given file
    * @throws IOException if there is a file I/O error
    */
-  CompilationUnit parseJavaFile(Path file) throws IOException;
+  CompilationUnit parseJavaFile(Path file, String contents);
 
   /** Return a simple implementation of the {@link CachingJavaParser} interface. */
   static CachingJavaParser from(final JavaParser parser) {

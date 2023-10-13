@@ -167,6 +167,7 @@ final class CodemodLoaderTest {
               codemodIdPair,
               List.of(),
               List.of(),
+              FileCache.createDefault(),
               CachingJavaParser.from(new JavaParser()),
               EncodingDetector.create());
       executor.execute(List.of(file));
@@ -301,6 +302,7 @@ final class CodemodLoaderTest {
               pair,
               List.of(),
               List.of(),
+              FileCache.createDefault(),
               CachingJavaParser.from(new JavaParser()),
               EncodingDetector.create());
       Path p = tmpDir.resolve("foo.txt");

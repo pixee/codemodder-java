@@ -40,6 +40,7 @@ final class DefaultCodemodExecutorTest {
   private IncludesExcludes includesEverything;
   private BeforeToAfterChanger beforeToAfterChanger;
   private CodemodIdPair beforeAfterCodemod;
+  private FileCache fileCache;
 
   @BeforeEach
   void setup(final @TempDir Path tmpDir) throws IOException {
@@ -49,6 +50,7 @@ final class DefaultCodemodExecutorTest {
     cachingJavaParser = CachingJavaParser.from(new JavaParser());
     encodingDetector = EncodingDetector.create();
     includesEverything = IncludesExcludes.any();
+    fileCache = FileCache.createDefault();
     executor =
         new DefaultCodemodExecutor(
             repoDir,
@@ -56,6 +58,7 @@ final class DefaultCodemodExecutorTest {
             beforeAfterCodemod,
             List.of(),
             List.of(),
+            fileCache,
             cachingJavaParser,
             encodingDetector);
 
@@ -179,6 +182,7 @@ final class DefaultCodemodExecutorTest {
             beforeAfterCodemod,
             List.of(),
             List.of(addsPrefixProvider),
+            fileCache,
             cachingJavaParser,
             encodingDetector);
 
@@ -243,6 +247,7 @@ final class DefaultCodemodExecutorTest {
               codemod,
               List.of(depsProvider),
               List.of(),
+              fileCache,
               CachingJavaParser.from(new JavaParser()),
               EncodingDetector.create());
       CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
@@ -368,6 +373,7 @@ final class DefaultCodemodExecutorTest {
             codemod,
             List.of(badProvider),
             List.of(),
+            fileCache,
             CachingJavaParser.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
@@ -420,6 +426,7 @@ final class DefaultCodemodExecutorTest {
             codemod,
             List.of(skippingProvider),
             List.of(),
+            fileCache,
             CachingJavaParser.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(javaFile2));
