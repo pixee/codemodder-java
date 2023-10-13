@@ -40,7 +40,8 @@ public interface RawFileCodemodTest {
       final Path tmpDir,
       final Metadata metadata,
       final Path filePathBefore,
-      final Path filePathAfter)
+      final Path filePathAfter,
+      final Map<String, List<RuleSarif>> ruleSarifMap)
       throws IOException {
 
     String tmpFileName = trimExtension(filePathBefore);
@@ -63,7 +64,7 @@ public interface RawFileCodemodTest {
             List.of("**"),
             List.of(),
             List.of(tmpFilePath),
-            Map.of(),
+            ruleSarifMap,
             List.of());
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));
@@ -127,7 +128,7 @@ public interface RawFileCodemodTest {
     for (var beforeFile : allBeforeFiles) {
       final var afterFile = afterFilesMap.get(trimExtension(beforeFile));
       // run the codemod
-      verifySingleCase(codemod, tmpDir, metadata, beforeFile, afterFile);
+      verifySingleCase(codemod, tmpDir, metadata, beforeFile, afterFile, map);
     }
   }
 }
