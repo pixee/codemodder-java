@@ -20,7 +20,12 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
   }
 
   @Override
-  public SarifSchema210 run(final List<Path> ruleYamls, final Path repository) throws IOException {
+  public SarifSchema210 run(
+      final List<Path> ruleYamls,
+      final Path repository,
+      final List<String> includePatterns,
+      final List<String> excludePatterns)
+      throws IOException {
     Path repositoryPath = repository.toAbsolutePath();
     Path sarifFile = Files.createTempFile("semgrep", ".sarif");
 
@@ -32,6 +37,16 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
     args.add("--sarif");
     args.add("-o");
     args.add(sarifFile.toAbsolutePath().toString());
+
+    for (String includedFilePath : includePatterns) {
+      args.add("--include");
+      args.add(includedFilePath);
+    }
+
+    for (String excludedFilePath : excludePatterns) {
+      args.add("--exclude");
+      args.add(excludedFilePath);
+    }
 
     for (Path ruleYamlPath : ruleYamls) {
       args.add("--config");

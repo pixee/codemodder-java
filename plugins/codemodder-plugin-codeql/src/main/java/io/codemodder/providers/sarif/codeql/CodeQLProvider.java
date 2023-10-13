@@ -14,6 +14,9 @@ public final class CodeQLProvider implements CodemodProvider {
   @Override
   public Set<AbstractModule> getModules(
       final Path repository,
+      final List<Path> includedFiles,
+      final List<String> includePaths,
+      final List<String> excludePaths,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
     return Set.of(new CodeQLModule(codemodTypes, sarifs));

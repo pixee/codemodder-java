@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -220,8 +221,8 @@ final class AddMissingI18nCodemodTest {
         is(true));
   }
 
-  private CodeTFResult runCodemod() {
-    var loader = new CodemodLoader(List.of(AddMissingI18nCodemod.class), repoRoot);
+  private CodeTFResult runCodemod() throws IOException {
+    CodemodLoader loader = createLoader(AddMissingI18nCodemod.class, repoRoot);
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));
     CodemodIdPair pair = codemods.get(0);
@@ -239,6 +240,19 @@ final class AddMissingI18nCodemodTest {
             repoRoot.resolve("whatever_en_US.properties"),
             repoRoot.resolve("whatever_es_MX.properties"),
             repoRoot.resolve("whatever_bg.properties")));
+  }
+
+  private CodemodLoader createLoader(final Class<? extends CodeChanger> codemodType, final Path dir)
+      throws IOException {
+    return new CodemodLoader(
+        List.of(codemodType),
+        CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+        repoRoot,
+        List.of("**"),
+        List.of(),
+        Files.list(dir).toList(),
+        Map.of(),
+        List.of());
   }
 
   /** If we can't connect to AWS, skip the test. */

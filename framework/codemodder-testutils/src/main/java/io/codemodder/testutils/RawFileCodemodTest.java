@@ -105,7 +105,16 @@ public interface RawFileCodemodTest {
         SarifParser.create().parseIntoMap(allSarifFiles, tmpDir);
 
     // run the codemod
-    final CodemodLoader invoker = new CodemodLoader(List.of(codemod), tmpDir, map);
+    final CodemodLoader invoker =
+        new CodemodLoader(
+            List.of(codemod),
+            CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+            tmpDir,
+            List.of("**"),
+            List.of(),
+            Files.list(tmpDir).toList(),
+            Map.of(),
+            List.of());
 
     // grab all the .before and .after files in the dir
     final var allBeforeFiles =

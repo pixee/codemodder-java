@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
@@ -64,7 +65,7 @@ final class CodemodLoaderTest {
     assertThrows(
         UnsupportedOperationException.class,
         () -> {
-          new CodemodLoader(List.of(ValidCodemod.class, ValidCodemod.class), tmpDir);
+          createLoader(List.of(ValidCodemod.class, ValidCodemod.class), tmpDir);
         });
   }
 
@@ -157,7 +158,7 @@ final class CodemodLoaderTest {
 
     List<Class<? extends CodeChanger>> codemods =
         List.of(ChangesFile.class, ChangesFileAgain.class);
-    CodemodLoader loader = new CodemodLoader(codemods, tmpDir);
+    CodemodLoader loader = createLoader(codemods, tmpDir);
 
     for (CodemodIdPair codemodIdPair : loader.getCodemods()) {
       CodemodExecutor executor =
@@ -234,7 +235,7 @@ final class CodemodLoaderTest {
 
     // first, we run without any parameters and ensure we get the right stuff
     {
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir);
+      CodemodLoader loader = createLoader(codemods, tmpDir);
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
       assertThat(changer.parameter.getDefaultValue(), equalTo("123"));
@@ -246,7 +247,7 @@ final class CodemodLoaderTest {
     {
       String paramArg = "codemod=pixee:java/parameterized,name=my-param-number,value=456";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
+      CodemodLoader loader = createLoader(codemods, tmpDir, List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
       assertThat(changer.parameter.getDefaultValue(), equalTo("456"));
@@ -261,7 +262,7 @@ final class CodemodLoaderTest {
       String paramArg =
           "codemod=pixee:java/parameterized,name=my-param-number,value=456,file=src/main/java/Foo.java";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
+      CodemodLoader loader = createLoader(codemods, tmpDir, List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
 
@@ -280,7 +281,7 @@ final class CodemodLoaderTest {
       String paramArg =
           "codemod=pixee:java/parameterized,name=my-param-number,value=456,file=src/main/java/Foo.java,line=5";
       ParameterArgument param = ParameterArgument.fromNameValuePairs(paramArg);
-      CodemodLoader loader = new CodemodLoader(codemods, tmpDir, List.of(param));
+      CodemodLoader loader = createLoader(codemods, tmpDir, List.of(param));
       CodemodIdPair pair = loader.getCodemods().get(0);
       ParameterizedCodemod changer = (ParameterizedCodemod) pair.getChanger();
 
@@ -320,4 +321,49 @@ final class CodemodLoaderTest {
       assertThat(parameter.getQuestion(), equalTo("What do you want the number to be?"));
     }
   }
+
+  private CodemodLoader createLoader(final Class<? extends CodeChanger> codemodType, final Path dir)
+      throws IOException {
+    return new CodemodLoader(
+        List.of(codemodType),
+        CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+        dir,
+        List.of("**"),
+        List.of(),
+        Files.list(dir).toList(),
+        Map.of(),
+        List.of());
+  }
+
+  private CodemodLoader createLoader(
+      final List<Class<? extends CodeChanger>> codemodTypes, final Path dir) throws IOException {
+    return new CodemodLoader(
+        codemodTypes,
+        CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+        dir,
+        List.of("**"),
+        List.of(),
+        Files.list(dir).toList(),
+        Map.of(),
+        List.of());
+  }
+
+  private CodemodLoader createLoader(
+      final List<Class<? extends CodeChanger>> codemodTypes,
+      final Path dir,
+      final List<ParameterArgument> params)
+      throws IOException {
+    return new CodemodLoader(
+        codemodTypes,
+        CodemodRegulator.of(DefaultRuleSetting.ENABLED, List.of()),
+        dir,
+        List.of("**"),
+        List.of(),
+        Files.list(dir).toList(),
+        Map.of(),
+        params);
+  }
+
+  private static List<String> ALL_PATTERN = List.of("**");
+  private static List<String> NONE_PATTERN = List.of();
 }
