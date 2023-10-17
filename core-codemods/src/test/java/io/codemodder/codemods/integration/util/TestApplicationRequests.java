@@ -7,6 +7,7 @@ import java.net.URL;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
 public class TestApplicationRequests {
+  private TestApplicationRequests() {}
 
   private static final String ERROR_RESPONSE_MESSAGE = "Request failed with status: %s";
 
