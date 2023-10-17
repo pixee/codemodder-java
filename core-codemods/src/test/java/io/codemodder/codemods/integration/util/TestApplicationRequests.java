@@ -1,12 +1,14 @@
 package io.codemodder.codemods.integration.util;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
-public class TestApplicationRequestUtil {
+public class TestApplicationRequests {
+
+  private static final String ERROR_RESPONSE_MESSAGE = "Request failed with status: %s";
 
   public static String doRequest(final String testUrl, final String httpVerb) throws IOException {
 
@@ -24,24 +26,18 @@ public class TestApplicationRequestUtil {
   }
 
   private static String sendRequest(final String url, final String httpVerb) throws IOException {
-    URL obj = new URL(url);
-    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+    URL objUrl = new URL(url);
+    HttpURLConnection con = (HttpURLConnection) objUrl.openConnection();
     con.setRequestMethod(httpVerb);
     int responseCode = con.getResponseCode();
+
     if (responseCode == HttpURLConnection.HTTP_OK) { // success
-      BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-      String inputLine;
-      StringBuffer response = new StringBuffer();
-
-      while ((inputLine = in.readLine()) != null) {
-        response.append(inputLine);
-      }
-      in.close();
-
-      // print result
-      return response.toString();
+      InputStream input = con.getInputStream();
+      return IOUtils.toString(input, "UTF-8");
     } else {
-      return "Request did not work.";
+      con.disconnect();
+      throw new IOException(ERROR_RESPONSE_MESSAGE.formatted(responseCode));
     }
   }
 }

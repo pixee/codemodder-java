@@ -1,6 +1,6 @@
 package io.codemodder.codemods.integration.util;
 
-import static io.codemodder.codemods.integration.util.TestApplicationRequestUtil.doRequest;
+import static io.codemodder.codemods.integration.util.TestApplicationRequests.doRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
@@ -10,12 +10,19 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.testcontainers.containers.GenericContainer;
 
+/** The codemods integration tests mixin */
 public class CodemodIntegrationTestMixin {
 
   private static final String endpointBasePath = "http://localhost:%s";
   private static GenericContainer<?> originalCodeContainer;
   private static GenericContainer<?> transformedCodeContainer;
 
+  /**
+   * Setup and start test containers.
+   *
+   * @return a stream of dynamic tests generated based on the data extracted from {@link
+   *     IntegrationTestMetadata}
+   */
   @TestFactory
   Stream<DynamicTest> generateTestCases() {
     IntegrationTestMetadata metadata = getClass().getAnnotation(IntegrationTestMetadata.class);
@@ -60,7 +67,7 @@ public class CodemodIntegrationTestMixin {
   }
 
   @AfterAll
-  public static void tearDown() {
+  static void tearDown() {
     originalCodeContainer.stop();
     transformedCodeContainer.stop();
   }

@@ -5,9 +5,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/** Annotation to configure test cases for codemod integration test */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface TestPropertiesMetadata {
+public @interface IntegrationTestPropertiesMetadata {
 
   /** The endpoint of the test. */
   String endpoint();
