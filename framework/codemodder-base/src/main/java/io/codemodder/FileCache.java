@@ -19,7 +19,7 @@ public interface FileCache {
   void overrideEntry(Path path, String contents);
 
   static FileCache createDefault() {
-    return createDefault(5000);
+    return createDefault(10_000);
   }
 
   static FileCache createDefault(final int maxSize) {
