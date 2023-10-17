@@ -1,4 +1,4 @@
-package com.example.moveswitchdefaultlast.api;
+package ai.pixee.integration.moveswitchdefaultlast.api;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

@@ -1,4 +1,4 @@
-package com.example.verboserequestmapping;
+package ai.pixee.integration.verboserequestmapping;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
