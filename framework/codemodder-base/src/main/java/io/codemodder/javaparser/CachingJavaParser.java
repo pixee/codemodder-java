@@ -2,7 +2,6 @@ package io.codemodder.javaparser;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import java.io.IOException;
 import java.nio.file.Path;
 
 /**
@@ -19,7 +18,6 @@ public interface CachingJavaParser {
    * @param file a Java file path
    * @param contents the contents of the file
    * @return a {@link CompilationUnit} for the given file
-   * @throws IOException if there is a file I/O error
    */
   CompilationUnit parseJavaFile(Path file, String contents);
 

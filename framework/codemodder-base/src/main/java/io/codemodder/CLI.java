@@ -67,6 +67,18 @@ final class CLI implements Callable<Integer> {
   private boolean dryRun;
 
   @CommandLine.Option(
+      names = {"--max-files"},
+      description = "the number of files each codemod can scan",
+      defaultValue = "-1")
+  private int maxFiles;
+
+  @CommandLine.Option(
+      names = {"--max-file-size"},
+      description = "the maximum file size in bytes that each codemod can scan",
+      defaultValue = "-1")
+  private int maxFileSize;
+
+  @CommandLine.Option(
       names = {"--dont-exit"},
       description = "dont exit the process after running the codemods",
       hidden = true,
@@ -363,7 +375,9 @@ final class CLI implements Callable<Integer> {
       logEnteringPhase(Logs.ExecutionPhase.SCANNING);
       JavaParser javaParser = javaParserFactory.create(sourceDirectories);
       CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
-      FileCache fileCache = FileCache.createDefault(10_000);
+      int maxFileCacheSize = 10_000;
+      FileCache fileCache = FileCache.createDefault(maxFileCacheSize);
+
       for (CodemodIdPair codemod : codemods) {
         CodemodExecutor codemodExecutor =
             new DefaultCodemodExecutor(
@@ -374,7 +388,9 @@ final class CLI implements Callable<Integer> {
                 codeTFProviders,
                 fileCache,
                 cachingJavaParser,
-                encodingDetector);
+                encodingDetector,
+                maxFileSize,
+                maxFiles);
         log.info("running codemod: {}", codemod.getId());
         CodeTFResult result = codemodExecutor.execute(filePaths);
         if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {

@@ -120,7 +120,7 @@ public interface CodemodTestMixin {
     JavaParserFactory factory = JavaParserFactory.newFactory();
     SourceDirectory dir = SourceDirectory.createDefault(tmpDir, List.of(pathToJavaFile.toString()));
     CodemodExecutor executor =
-        CodemodExecutor.from(
+        CodemodExecutorFactory.from(
             tmpDir,
             IncludesExcludes.any(),
             codemod,
@@ -184,7 +184,7 @@ public interface CodemodTestMixin {
             List.of());
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
     CodemodExecutor executor2 =
-        CodemodExecutor.from(
+        CodemodExecutorFactory.from(
             tmpDir,
             IncludesExcludes.any(),
             codemod2,

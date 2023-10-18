@@ -62,7 +62,7 @@ final class VerbTamperingCodemodTest {
             List.of());
 
     CodemodExecutor executor =
-        CodemodExecutor.from(
+        CodemodExecutorFactory.from(
             tmpDir,
             IncludesExcludes.any(),
             loader.getCodemods().get(0),

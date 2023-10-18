@@ -18,6 +18,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class DefaultCodemodExecutor implements CodemodExecutor {
 
@@ -30,6 +32,15 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
   private final EncodingDetector encodingDetector;
   private final FileCache fileCache;
 
+  /** The max size of a file we'll scan. If a file is larger than this, we'll skip it. */
+  private final int maxFileSize;
+
+  /**
+   * The max number of files we'll scan. If there are more than this number of files, we'll skip
+   * them.
+   */
+  private final int maxFiles;
+
   DefaultCodemodExecutor(
       final Path projectDir,
       final IncludesExcludes includesExcludes,
@@ -38,7 +49,9 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       final List<CodeTFProvider> codetfProviders,
       final FileCache fileCache,
       final CachingJavaParser cachingJavaParser,
-      final EncodingDetector encodingDetector) {
+      final EncodingDetector encodingDetector,
+      final int maxFileSize,
+      final int maxFiles) {
     this.projectDir = Objects.requireNonNull(projectDir);
     this.includesExcludes = Objects.requireNonNull(includesExcludes);
     this.codemod = Objects.requireNonNull(codemod);
@@ -47,6 +60,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     this.cachingJavaParser = Objects.requireNonNull(cachingJavaParser);
     this.fileCache = Objects.requireNonNull(fileCache);
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
+    this.maxFileSize = maxFileSize;
+    this.maxFiles = maxFiles;
   }
 
   @Override
@@ -75,14 +90,27 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
      * Filter the files to those that the CodemodRunner supports.
      */
     List<Path> codemodTargetFiles =
-        filePaths.stream().filter(codemodRunner::supports).sorted().toList();
+        filePaths.stream()
+            .filter(codemodRunner::supports)
+            .limit(maxFiles != -1 ? maxFiles : Long.MAX_VALUE)
+            .sorted()
+            .toList();
 
     for (Path filePath : codemodTargetFiles) {
+
       // create the context necessary for the codemod to run
       LineIncludesExcludes lineIncludesExcludes =
           includesExcludes.getIncludesExcludesForFile(filePath.toFile());
 
       try {
+        if (maxFileSize != -1) {
+          long size = Files.size(filePath);
+          if (size > maxFileSize) {
+            unscannableFiles.add(filePath);
+            continue;
+          }
+        }
+
         String fileContents = fileCache.get(filePath);
         CodemodInvocationContext context =
             new DefaultCodemodInvocationContext(
@@ -253,4 +281,6 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     }
     return path;
   }
+
+  private static final Logger log = LoggerFactory.getLogger(DefaultCodemodExecutor.class);
 }

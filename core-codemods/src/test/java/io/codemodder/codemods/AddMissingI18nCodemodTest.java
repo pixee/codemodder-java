@@ -227,7 +227,7 @@ final class AddMissingI18nCodemodTest {
     assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));
     CodemodIdPair pair = codemods.get(0);
     CodemodExecutor executor =
-        CodemodExecutor.from(
+        CodemodExecutorFactory.from(
             repoRoot,
             IncludesExcludes.any(),
             pair,

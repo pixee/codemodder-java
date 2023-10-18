@@ -52,7 +52,7 @@ final class JSPScriptletXSSCodemodTest {
             List.of());
     CodemodIdPair codemod = codemodInvoker.getCodemods().get(0);
     CodemodExecutor executor =
-        CodemodExecutor.from(
+        CodemodExecutorFactory.from(
             tmpDir,
             IncludesExcludes.any(),
             codemod,
