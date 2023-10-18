@@ -1,5 +1,6 @@
 package io.codemodder.providers.sarif.pmd;
 
+import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
@@ -95,9 +96,30 @@ public final class PmdModule extends AbstractModule {
     SarifSchema210 sarif = pmdRunner.run(rules, codeDirectory, includedFiles);
 
     // bind the SARIF results to individual codemods
+    Map<String, Map<String, List<Result>>> resultsByRule = new HashMap<>();
+    List<Result> allResults = sarif.getRuns().get(0).getResults();
+    for (Result result : allResults) {
+      String ruleId = result.getRuleId();
+      Map<String, List<Result>> resultsByFile =
+          resultsByRule.computeIfAbsent(ruleId, k -> new HashMap<>());
+      String filePath =
+          result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri();
+      String normalizedFilePath = filePath.startsWith("file://") ? filePath.substring(7) : filePath;
+      List<Result> resultsForFile =
+          resultsByFile.computeIfAbsent(normalizedFilePath, k -> new ArrayList<>());
+      resultsForFile.add(result);
+    }
+
     for (Pair<String, PmdScan> bindingPair : toBind) {
       PmdScan sarifAnnotation = bindingPair.getRight();
-      PmdRuleSarif pmdSarif = new PmdRuleSarif(bindingPair.getLeft(), sarif);
+      String pmdRuleId = bindingPair.getLeft();
+      int lastSlash = pmdRuleId.lastIndexOf("/");
+      if (lastSlash == -1) {
+        throw new IllegalStateException("unexpected rule id: " + pmdRuleId);
+      }
+      pmdRuleId = pmdRuleId.substring(lastSlash + 1);
+      PmdRuleSarif pmdSarif =
+          new PmdRuleSarif(pmdRuleId, sarif, resultsByRule.getOrDefault(pmdRuleId, Map.of()));
       bind(RuleSarif.class).annotatedWith(sarifAnnotation).toInstance(pmdSarif);
     }
   }

@@ -60,7 +60,9 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             fileCache,
             cachingJavaParser,
-            encodingDetector);
+            encodingDetector,
+            -1,
+            -1);
 
     javaFile1 = repoDir.resolve("Test1.java");
     Files.write(javaFile1, List.of("class Test1 {", "  void before() {}", "}"));
@@ -184,7 +186,9 @@ final class DefaultCodemodExecutorTest {
             List.of(addsPrefixProvider),
             fileCache,
             cachingJavaParser,
-            encodingDetector);
+            encodingDetector,
+            -1,
+            -1);
 
     CodeTFResult result = executor.execute(List.of(javaFile1));
 
@@ -215,6 +219,60 @@ final class DefaultCodemodExecutorTest {
     assertThat(changeset.size()).isEqualTo(2);
     assertThat(changeset.get(0)).satisfies(DefaultCodemodExecutorTest::isJavaFile1ChangedCorrectly);
     assertThat(changeset.get(1)).satisfies(DefaultCodemodExecutorTest::isJavaFile3ChangedCorrectly);
+  }
+
+  @Test
+  void it_respects_max_files() {
+    executor =
+        new DefaultCodemodExecutor(
+            repoDir,
+            includesEverything,
+            beforeAfterCodemod,
+            List.of(),
+            List.of(),
+            fileCache,
+            cachingJavaParser,
+            encodingDetector,
+            -1,
+            1);
+
+    CodeTFResult result = executor.execute(List.of(javaFile1, javaFile2, javaFile3));
+    assertThat(result).satisfies(DefaultCodemodExecutorTest::hasBeforeAfterCodemodMetadata);
+
+    // should have only 1 entry for javaFile1 because we only allow scanning 1 file
+    List<CodeTFChangesetEntry> changeset = result.getChangeset();
+    assertThat(changeset.size()).isEqualTo(1);
+    assertThat(changeset.get(0)).satisfies(DefaultCodemodExecutorTest::isJavaFile1ChangedCorrectly);
+  }
+
+  @Test
+  void it_respects_max_file_size() throws IOException {
+    executor =
+        new DefaultCodemodExecutor(
+            repoDir,
+            includesEverything,
+            beforeAfterCodemod,
+            List.of(),
+            List.of(),
+            fileCache,
+            cachingJavaParser,
+            encodingDetector,
+            500,
+            -1);
+
+    // make javaFile1 too big to scan
+    String javaFile1Contents = Files.readString(javaFile1);
+    javaFile1Contents = " ".repeat(1000) + javaFile1Contents;
+    Files.writeString(javaFile1, javaFile1Contents);
+
+    // scan like normal
+    CodeTFResult result = executor.execute(List.of(javaFile1, javaFile2, javaFile3));
+    assertThat(result).satisfies(DefaultCodemodExecutorTest::hasBeforeAfterCodemodMetadata);
+
+    // should have only 1 entry for javaFile3 because javaFile1 is too big
+    List<CodeTFChangesetEntry> changeset = result.getChangeset();
+    assertThat(changeset.size()).isEqualTo(1);
+    assertThat(changeset.get(0)).satisfies(DefaultCodemodExecutorTest::isJavaFile3ChangedCorrectly);
   }
 
   @Test
@@ -249,7 +307,9 @@ final class DefaultCodemodExecutorTest {
               List.of(),
               fileCache,
               CachingJavaParser.from(new JavaParser()),
-              EncodingDetector.create());
+              EncodingDetector.create(),
+              -1,
+              -1);
       CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
       results.add(result);
     }
@@ -375,7 +435,9 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             fileCache,
             CachingJavaParser.from(new JavaParser()),
-            EncodingDetector.create());
+            EncodingDetector.create(),
+            -1,
+            -1);
     CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
     List<CodeTFChangesetEntry> firstChangeset = result.getChangeset();
 
@@ -428,7 +490,9 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             fileCache,
             CachingJavaParser.from(new JavaParser()),
-            EncodingDetector.create());
+            EncodingDetector.create(),
+            -1,
+            -1);
     CodeTFResult result = executor.execute(List.of(javaFile2));
     List<CodeTFChangesetEntry> firstChangeset = result.getChangeset();
 
