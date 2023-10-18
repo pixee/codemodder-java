@@ -92,8 +92,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     List<Path> codemodTargetFiles =
         filePaths.stream()
             .filter(codemodRunner::supports)
-            .limit(maxFiles != -1 ? maxFiles : Long.MAX_VALUE)
             .sorted()
+            .limit(maxFiles != -1 ? maxFiles : Long.MAX_VALUE)
             .toList();
 
     for (Path filePath : codemodTargetFiles) {

@@ -2,6 +2,7 @@ package io.codemodder.javaparser;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import java.io.IOException;
 import java.nio.file.Path;
 
 /**
@@ -16,10 +17,10 @@ public interface JavaParserFacde {
    * CompilationUnit}.
    *
    * @param file a Java file path
-   * @param contents the contents of the file
+   * @throws IOException if the file cannot be read
    * @return a {@link CompilationUnit} for the given file
    */
-  CompilationUnit parseJavaFile(Path file, String contents);
+  CompilationUnit parseJavaFile(Path file) throws IOException;
 
   /** Return a simple implementation of the {@link JavaParserFacde} interface. */
   static JavaParserFacde from(final JavaParser parser) {
