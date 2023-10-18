@@ -22,11 +22,11 @@ import java.util.Objects;
 public final class JavaParserCodemodRunner implements CodemodRunner {
 
   private final JavaParserChanger javaParserChanger;
-  private final CachingJavaParser parser;
+  private final JavaParserFacde parser;
   private final EncodingDetector encodingDetector;
 
   public JavaParserCodemodRunner(
-      final CachingJavaParser parser,
+      final JavaParserFacde parser,
       final JavaParserChanger javaParserChanger,
       final EncodingDetector encodingDetector) {
     this.parser = Objects.requireNonNull(parser);

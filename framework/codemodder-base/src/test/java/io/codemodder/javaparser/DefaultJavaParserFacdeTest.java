@@ -12,9 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-final class DefaultCachingJavaParserTest {
+final class DefaultJavaParserFacdeTest {
 
-  private DefaultCachingJavaParser cache;
+  private DefaultJavaParserFacde cache;
   private Path javaFile;
   private String javaCode;
 
@@ -30,7 +30,7 @@ final class DefaultCachingJavaParserTest {
                 """;
     Files.writeString(javaFile, javaCode);
     var srcDirs = List.of(SourceDirectory.createDefault(tmpDir, List.of(javaFile.toString())));
-    this.cache = new DefaultCachingJavaParser(JavaParserFactory.newFactory().create(srcDirs));
+    this.cache = new DefaultJavaParserFacde(JavaParserFactory.newFactory().create(srcDirs));
   }
 
   @Test

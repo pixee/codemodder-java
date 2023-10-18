@@ -73,7 +73,7 @@ final class JavaParserCodemodRunnerTest {
   void setup(@TempDir Path tmpDir) {
     this.runner =
         new JavaParserCodemodRunner(
-            CachingJavaParser.from(new JavaParser()),
+            JavaParserFacde.from(new JavaParser()),
             updatesAllMethodNamesChanger,
             EncodingDetector.create());
     this.tmpDir = tmpDir;
@@ -149,7 +149,7 @@ final class JavaParserCodemodRunnerTest {
 
     this.runner =
         new JavaParserCodemodRunner(
-            CachingJavaParser.from(new JavaParser()),
+            JavaParserFacde.from(new JavaParser()),
             new RunsBothCodemod(
                 new UpdatesMethodNamesParserChanger(),
                 new UpdatesClassNamesParserChanger(),
