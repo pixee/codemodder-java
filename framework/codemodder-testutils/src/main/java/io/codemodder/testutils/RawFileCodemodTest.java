@@ -7,7 +7,7 @@ import static org.hamcrest.Matchers.empty;
 import com.github.javaparser.JavaParser;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.JavaParserFacde;
+import io.codemodder.javaparser.JavaParserFacade;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -78,7 +78,7 @@ public interface RawFileCodemodTest {
             List.of(),
             List.of(),
             FileCache.createDefault(),
-            JavaParserFacde.from(new JavaParser()),
+            JavaParserFacade.from(new JavaParser()),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(tmpFilePath));
 

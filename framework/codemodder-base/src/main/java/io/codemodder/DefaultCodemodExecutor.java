@@ -10,7 +10,7 @@ import io.codemodder.codetf.CodeTFPackageAction;
 import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.javaparser.JavaParserCodemodRunner;
-import io.codemodder.javaparser.JavaParserFacde;
+import io.codemodder.javaparser.JavaParserFacade;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +26,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
   private final CodemodIdPair codemod;
   private final List<ProjectProvider> projectProviders;
   private final List<CodeTFProvider> codetfProviders;
-  private final JavaParserFacde javaParserFacde;
+  private final JavaParserFacade javaParserFacade;
   private final Path projectDir;
   private final IncludesExcludes includesExcludes;
   private final EncodingDetector encodingDetector;
@@ -48,7 +48,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       final List<ProjectProvider> projectProviders,
       final List<CodeTFProvider> codetfProviders,
       final FileCache fileCache,
-      final JavaParserFacde javaParserFacde,
+      final JavaParserFacade javaParserFacade,
       final EncodingDetector encodingDetector,
       final int maxFileSize,
       final int maxFiles) {
@@ -57,7 +57,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     this.codemod = Objects.requireNonNull(codemod);
     this.codetfProviders = Objects.requireNonNull(codetfProviders);
     this.projectProviders = Objects.requireNonNull(projectProviders);
-    this.javaParserFacde = Objects.requireNonNull(javaParserFacde);
+    this.javaParserFacade = Objects.requireNonNull(javaParserFacade);
     this.fileCache = Objects.requireNonNull(fileCache);
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
     this.maxFileSize = maxFileSize;
@@ -78,7 +78,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     if (codeChanger instanceof JavaParserChanger) {
       codemodRunner =
           new JavaParserCodemodRunner(
-              javaParserFacde, (JavaParserChanger) codeChanger, encodingDetector);
+              javaParserFacade, (JavaParserChanger) codeChanger, encodingDetector);
     } else if (codeChanger instanceof RawFileChanger) {
       codemodRunner = new RawFileCodemodRunner((RawFileChanger) codeChanger);
     } else {

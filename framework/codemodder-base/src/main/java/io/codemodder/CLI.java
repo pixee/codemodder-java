@@ -15,7 +15,7 @@ import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFReport;
 import io.codemodder.codetf.CodeTFReportGenerator;
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.JavaParserFacde;
+import io.codemodder.javaparser.JavaParserFacade;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
@@ -374,7 +374,7 @@ final class CLI implements Callable<Integer> {
        */
       logEnteringPhase(Logs.ExecutionPhase.SCANNING);
       JavaParser javaParser = javaParserFactory.create(sourceDirectories);
-      JavaParserFacde javaParserFacde = JavaParserFacde.from(javaParser);
+      JavaParserFacade javaParserFacade = JavaParserFacade.from(javaParser);
       int maxFileCacheSize = 10_000;
       FileCache fileCache = FileCache.createDefault(maxFileCacheSize);
 
@@ -387,7 +387,7 @@ final class CLI implements Callable<Integer> {
                 projectProviders,
                 codeTFProviders,
                 fileCache,
-                javaParserFacde,
+                javaParserFacade,
                 encodingDetector,
                 maxFileSize,
                 maxFiles);

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.javaparser.JavaParser;
 import io.codemodder.codetf.*;
-import io.codemodder.javaparser.JavaParserFacde;
+import io.codemodder.javaparser.JavaParserFacade;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -169,7 +169,7 @@ final class CodemodLoaderTest {
               List.of(),
               List.of(),
               FileCache.createDefault(),
-              JavaParserFacde.from(new JavaParser()),
+              JavaParserFacade.from(new JavaParser()),
               EncodingDetector.create(),
               -1,
               -1);
@@ -306,7 +306,7 @@ final class CodemodLoaderTest {
               List.of(),
               List.of(),
               FileCache.createDefault(),
-              JavaParserFacde.from(new JavaParser()),
+              JavaParserFacade.from(new JavaParser()),
               EncodingDetector.create(),
               -1,
               -1);

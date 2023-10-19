@@ -9,7 +9,7 @@ import java.nio.file.Path;
  * Responsible for parsing Java files and maintaining the compilation units across different
  * accesses.
  */
-public interface JavaParserFacde {
+public interface JavaParserFacade {
 
   /**
    * Return the {@link CompilationUnit} for the given Java file. If the given file has not been seen
@@ -22,8 +22,8 @@ public interface JavaParserFacde {
    */
   CompilationUnit parseJavaFile(Path file) throws IOException;
 
-  /** Return a simple implementation of the {@link JavaParserFacde} interface. */
-  static JavaParserFacde from(final JavaParser parser) {
-    return new DefaultJavaParserFacde(parser);
+  /** Return a simple implementation of the {@link JavaParserFacade} interface. */
+  static JavaParserFacade from(final JavaParser parser) {
+    return new DefaultJavaParserFacade(parser);
   }
 }

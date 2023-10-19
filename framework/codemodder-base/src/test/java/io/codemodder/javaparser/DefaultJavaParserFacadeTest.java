@@ -16,7 +16,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 final class DefaultJavaParserFacadeTest {
 
-  private DefaultJavaParserFacde parser;
+  private DefaultJavaParserFacade parser;
   private Path javaFile;
 
   @BeforeEach
@@ -31,7 +31,7 @@ final class DefaultJavaParserFacadeTest {
                 """;
     Files.writeString(javaFile, javaCode);
     var srcDirs = List.of(SourceDirectory.createDefault(tmpDir, List.of(javaFile.toString())));
-    this.parser = new DefaultJavaParserFacde(JavaParserFactory.newFactory().create(srcDirs));
+    this.parser = new DefaultJavaParserFacade(JavaParserFactory.newFactory().create(srcDirs));
   }
 
   @Test

@@ -16,7 +16,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import io.codemodder.codetf.*;
 import io.codemodder.javaparser.JavaParserChanger;
-import io.codemodder.javaparser.JavaParserFacde;
+import io.codemodder.javaparser.JavaParserFacade;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +36,7 @@ final class DefaultCodemodExecutorTest {
   private Path javaFile3;
   private Path javaFile4;
   private EncodingDetector encodingDetector;
-  private JavaParserFacde javaParserFacde;
+  private JavaParserFacade javaParserFacade;
   private IncludesExcludes includesEverything;
   private BeforeToAfterChanger beforeToAfterChanger;
   private CodemodIdPair beforeAfterCodemod;
@@ -47,7 +47,7 @@ final class DefaultCodemodExecutorTest {
     this.repoDir = tmpDir;
     beforeToAfterChanger = new BeforeToAfterChanger();
     beforeAfterCodemod = new CodemodIdPair("codemodder:java/id", beforeToAfterChanger);
-    javaParserFacde = JavaParserFacde.from(new JavaParser());
+    javaParserFacade = JavaParserFacade.from(new JavaParser());
     encodingDetector = EncodingDetector.create();
     includesEverything = IncludesExcludes.any();
     fileCache = FileCache.createDefault();
@@ -59,7 +59,7 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             List.of(),
             fileCache,
-            javaParserFacde,
+            javaParserFacade,
             encodingDetector,
             -1,
             -1);
@@ -185,7 +185,7 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             List.of(addsPrefixProvider),
             fileCache,
-            javaParserFacde,
+            javaParserFacade,
             encodingDetector,
             -1,
             -1);
@@ -231,7 +231,7 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             List.of(),
             fileCache,
-            javaParserFacde,
+            javaParserFacade,
             encodingDetector,
             -1,
             1);
@@ -255,7 +255,7 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             List.of(),
             fileCache,
-            javaParserFacde,
+            javaParserFacade,
             encodingDetector,
             500,
             -1);
@@ -306,7 +306,7 @@ final class DefaultCodemodExecutorTest {
               List.of(depsProvider),
               List.of(),
               fileCache,
-              JavaParserFacde.from(new JavaParser()),
+              JavaParserFacade.from(new JavaParser()),
               EncodingDetector.create(),
               -1,
               -1);
@@ -434,7 +434,7 @@ final class DefaultCodemodExecutorTest {
             List.of(badProvider),
             List.of(),
             fileCache,
-            JavaParserFacde.from(new JavaParser()),
+            JavaParserFacade.from(new JavaParser()),
             EncodingDetector.create(),
             -1,
             -1);
@@ -489,7 +489,7 @@ final class DefaultCodemodExecutorTest {
             List.of(skippingProvider),
             List.of(),
             fileCache,
-            JavaParserFacde.from(new JavaParser()),
+            JavaParserFacade.from(new JavaParser()),
             EncodingDetector.create(),
             -1,
             -1);

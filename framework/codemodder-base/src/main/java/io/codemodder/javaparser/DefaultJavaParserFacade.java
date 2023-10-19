@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
-final class DefaultJavaParserFacde implements JavaParserFacde {
+final class DefaultJavaParserFacade implements JavaParserFacade {
 
   private final JavaParser parser;
 
-  DefaultJavaParserFacde(final JavaParser parser) {
+  DefaultJavaParserFacade(final JavaParser parser) {
     this.parser = Objects.requireNonNull(parser);
   }
 
