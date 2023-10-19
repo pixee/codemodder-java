@@ -32,4 +32,7 @@ public @interface Codemod {
    * @return review guidance
    */
   ReviewGuidance reviewGuidance();
+
+  /** How important it is that this codemod execute sooner in the list of codemods being run. */
+  CodemodExecutionPriority executionPriority() default CodemodExecutionPriority.NORMAL;
 }

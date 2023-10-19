@@ -13,7 +13,8 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "codeql:java/input-resource-leak",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    executionPriority = CodemodExecutionPriority.HIGH)
 public final class InputResourceLeakCodemod extends SarifPluginJavaParserChanger<Expression> {
 
   @Inject

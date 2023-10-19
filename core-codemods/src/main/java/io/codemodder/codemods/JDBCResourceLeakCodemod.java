@@ -3,12 +3,7 @@ package io.codemodder.codemods;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.RegionExtractor;
-import io.codemodder.ReviewGuidance;
-import io.codemodder.RuleSarif;
-import io.codemodder.SarifPluginJavaParserChanger;
+import io.codemodder.*;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import javax.inject.Inject;
 
@@ -18,7 +13,8 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "codeql:java/database-resource-leak",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    executionPriority = CodemodExecutionPriority.HIGH)
 public final class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
