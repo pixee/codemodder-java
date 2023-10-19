@@ -21,7 +21,7 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
 
   @Override
   public SarifSchema210 run(
-      final List<Path> ruleYamls,
+      final Path ruleYaml,
       final Path repository,
       final List<String> includePatterns,
       final List<String> excludePatterns)
@@ -48,10 +48,9 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
       args.add(excludedFilePath);
     }
 
-    for (Path ruleYamlPath : ruleYamls) {
-      args.add("--config");
-      args.add(ruleYamlPath.toString());
-    }
+    args.add("--config");
+    args.add(ruleYaml.toString());
+
     args.add(repositoryPath.toString());
 
     LOG.trace("Process arguments: {}", args);

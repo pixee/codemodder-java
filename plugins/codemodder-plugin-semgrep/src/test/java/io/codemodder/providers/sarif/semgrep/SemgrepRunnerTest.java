@@ -33,7 +33,7 @@ final class SemgrepRunnerTest {
 
     // run the scan
     SarifSchema210 sarif =
-        new DefaultSemgrepRunner().run(List.of(ruleFile), repositoryDir, List.of("**"), List.of());
+        new DefaultSemgrepRunner().run(ruleFile, repositoryDir, List.of("**"), List.of());
 
     // assert the scan went as we think it should
     List<Run> runs = sarif.getRuns();
