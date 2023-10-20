@@ -25,7 +25,7 @@ final class RawFileCodemodRunner implements CodemodRunner {
 
   @Override
   public List<CodemodChange> run(final CodemodInvocationContext context) throws IOException {
-    if(!changer.shouldRun()) {
+    if (!changer.shouldRun()) {
       return List.of();
     }
     return changer.visitFile(context);

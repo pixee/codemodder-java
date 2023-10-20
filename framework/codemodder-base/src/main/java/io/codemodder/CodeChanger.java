@@ -23,7 +23,10 @@ public interface CodeChanger {
   String getIndividualChangeDescription(final Path filePath, final CodemodChange change);
 
   /**
-   * A lifecycle event that is called before any files are processed. This is a good place to short circuit if you don't have the necessary resources (e.g., SARIF).
+   * A lifecycle event that is called before any files are processed. This is a good place to short
+   * circuit if you don't have the necessary resources (e.g., SARIF).
    */
-  default boolean shouldRun() { return true; }
+  default boolean shouldRun() {
+    return true;
+  }
 }
