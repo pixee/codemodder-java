@@ -5,17 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.testcontainers.containers.GenericContainer;
 
 /** The codemods integration tests mixin */
-public class CodemodIntegrationTestMixin {
+public interface CodemodIntegrationTestMixin {
 
-  private static final String endpointBasePath = "http://localhost:%s";
-  private static GenericContainer<?> originalCodeContainer;
-  private static GenericContainer<?> transformedCodeContainer;
+  String endpointBasePath = "http://localhost:%s";
 
   /**
    * Setup and start test containers.
@@ -24,7 +21,7 @@ public class CodemodIntegrationTestMixin {
    *     IntegrationTestMetadata}
    */
   @TestFactory
-  Stream<DynamicTest> generateTestCases() {
+  default Stream<DynamicTest> generateTestCases() {
     IntegrationTestMetadata metadata = getClass().getAnnotation(IntegrationTestMetadata.class);
     if (metadata == null) {
       throw new IllegalArgumentException(
@@ -33,8 +30,10 @@ public class CodemodIntegrationTestMixin {
 
     final String codemodId = metadata.codemodId();
 
-    originalCodeContainer = DockerContainerFactory.createContainer(codemodId, false);
-    transformedCodeContainer = DockerContainerFactory.createContainer(codemodId, true);
+    GenericContainer<?> originalCodeContainer =
+        DockerContainerFactory.createContainer(codemodId, false);
+    GenericContainer<?> transformedCodeContainer =
+        DockerContainerFactory.createContainer(codemodId, true);
 
     Stream.of(originalCodeContainer, transformedCodeContainer)
         .parallel()
@@ -63,12 +62,11 @@ public class CodemodIntegrationTestMixin {
                     assertThat(originalCodeResponse).isEqualTo(expectedResponse);
                     assertThat(transformedCodeResponse).isEqualTo(expectedResponse);
                   });
+            })
+        .onClose(
+            () -> {
+              originalCodeContainer.stop();
+              transformedCodeContainer.stop();
             });
-  }
-
-  @AfterAll
-  static void tearDown() {
-    originalCodeContainer.stop();
-    transformedCodeContainer.stop();
   }
 }

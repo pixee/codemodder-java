@@ -25,4 +25,4 @@ import io.codemodder.codemods.integration.util.IntegrationTestPropertiesMetadata
           httpVerb = "POST",
           expectedResponse = "Data Created!")
     })
-public class VerboseRequestMappingCodemodIntegrationTest extends CodemodIntegrationTestMixin {}
+public class VerboseRequestMappingCodemodIntegrationTest implements CodemodIntegrationTestMixin {}
