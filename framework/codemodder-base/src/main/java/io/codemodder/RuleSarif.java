@@ -41,12 +41,12 @@ public interface RuleSarif {
   final class EmptyRuleSarif implements RuleSarif {
 
     @Override
-    public List<Region> getRegionsFromResultsByRule(Path path) {
+    public List<Region> getRegionsFromResultsByRule(final Path path) {
       return List.of();
     }
 
     @Override
-    public List<Result> getResultsByPath(Path path) {
+    public List<Result> getResultsByPath(final Path path) {
       return List.of();
     }
 
