@@ -69,7 +69,7 @@ final class SQLParameterizer {
                         try {
                           String resolvedType = s.calculateResolvedType().describe();
                           return "java.sql.Statement".equals(resolvedType);
-                        } catch (IllegalArgumentException | UnsolvedSymbolException e) {
+                        } catch (IllegalArgumentException | RuntimeException | UnsolvedSymbolException e) {
                           return false;
                         }
                       })
@@ -84,7 +84,7 @@ final class SQLParameterizer {
       return rule1.test(methodCallExpr);
 
       // Thrown by the JavaParser Symbol Solver when it can't resolve types
-    } catch (UnsolvedSymbolException | UnsupportedOperationException e) {
+    } catch (UnsolvedSymbolException | RuntimeException | UnsupportedOperationException e) {
       return false;
     }
   }
@@ -94,7 +94,7 @@ final class SQLParameterizer {
         e -> {
           try {
             return "java.sql.Connection".equals(e.calculateResolvedType().describe());
-          } catch (IllegalArgumentException | UnsolvedSymbolException ex) {
+          } catch (IllegalArgumentException | RuntimeException | UnsolvedSymbolException ex) {
             return false;
           }
         };
