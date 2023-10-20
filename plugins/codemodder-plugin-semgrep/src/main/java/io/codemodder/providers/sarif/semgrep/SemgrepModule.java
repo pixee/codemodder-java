@@ -152,15 +152,15 @@ public final class SemgrepModule extends AbstractModule {
 
   }
 
-  private static class SemgrepSarifProvider implements Provider<RuleSarif> {
-
-    private final SemgrepScan semgrepScan;
-    private final SemgrepRunner semgrepRunner;
-    private final String packageName;
-    private final Path codeDirectory;
-    private final List<String> includePatterns;
-    private final List<String> excludePatterns;
-    private final Class<? extends CodeChanger> codemodType;
+  private record SemgrepSarifProvider(
+      Path codeDirectory,
+      SemgrepScan semgrepScan,
+      Class<? extends CodeChanger> codemodType,
+      SemgrepRunner semgrepRunner,
+      String packageName,
+      List<String> includePatterns,
+      List<String> excludePatterns)
+      implements Provider<RuleSarif> {
 
     private SemgrepSarifProvider(
         final Path codeDirectory,
