@@ -41,6 +41,9 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
 
   @Override
   public List<CodemodChange> run(final CodemodInvocationContext context) throws IOException {
+    if(!javaParserChanger.shouldRun()) {
+      return List.of();
+    }
     Path file = context.path();
     CompilationUnit cu = parser.parseJavaFile(file);
     List<CodemodChange> changes = javaParserChanger.visit(context, cu);
@@ -52,4 +55,5 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
     }
     return changes;
   }
+
 }
