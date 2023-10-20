@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Objects;
 import javax.inject.Provider;
 
+/**
+ * A {@link RuleSarif} that lazily loads an underlying {@link RuleSarif} when needed. This can be
+ * used to delay execution.
+ */
 public class LazyLoadingRuleSarif implements RuleSarif {
 
   private RuleSarif ruleSarif;
