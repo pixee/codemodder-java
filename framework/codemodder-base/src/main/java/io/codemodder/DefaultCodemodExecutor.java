@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -40,6 +41,9 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
    * them.
    */
   private final int maxFiles;
+
+  /** This is a lock that we use to synchronize the update of the file cache and file system. */
+  private Object postExecutionLock = new Object();
 
   DefaultCodemodExecutor(
       final Path projectDir,
@@ -98,41 +102,66 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
     List<CodeTFChangesetEntry> changeset = new ArrayList<>();
 
+    ExecutorService executor = Executors.newFixedThreadPool(25);
+    CompletionService<String> service = new ExecutorCompletionService<>(executor);
+
+    // for each file, add a task to the completion service
     for (Path filePath : codemodTargetFiles) {
 
-      // create the context necessary for the codemod to run
-      LineIncludesExcludes lineIncludesExcludes =
-          includesExcludes.getIncludesExcludesForFile(filePath.toFile());
+      executor.submit(
+          () -> {
+            // create the context necessary for the codemod to run
+            LineIncludesExcludes lineIncludesExcludes =
+                includesExcludes.getIncludesExcludesForFile(filePath.toFile());
 
-      try {
-        if (maxFileSize != -1) {
-          long size = Files.size(filePath);
-          if (size > maxFileSize) {
-            unscannableFiles.add(filePath);
-            continue;
-          }
+            try {
+              if (maxFileSize != -1) {
+                long size = Files.size(filePath);
+                if (size > maxFileSize) {
+                  unscannableFiles.add(filePath);
+                  return;
+                }
+              }
+
+              String beforeFileContents = fileCache.get(filePath);
+              CodemodInvocationContext context =
+                  new DefaultCodemodInvocationContext(
+                      codeDirectory,
+                      filePath,
+                      beforeFileContents,
+                      codemod.getId(),
+                      lineIncludesExcludes);
+
+              // run the codemod on the file
+              List<CodemodChange> codemodChanges = codemodRunner.run(context);
+
+              if (!codemodChanges.isEmpty()) {
+                synchronized (this) {
+                  FilesUpdateResult updateResult =
+                      updateFiles(codeChanger, filePath, beforeFileContents, codemodChanges);
+                  unscannableFiles.addAll(updateResult.filesFailedToChange());
+                  changeset.addAll(updateResult.changeset());
+                }
+              }
+            } catch (Exception e) {
+              unscannableFiles.add(filePath);
+              e.printStackTrace();
+            }
+          });
+    }
+
+    executor.shutdown();
+    try {
+      boolean success = executor.awaitTermination(15, TimeUnit.MINUTES);
+      log.debug("Success running codemod: {}", success);
+      while (!executor.isTerminated()) {
+        final Future<String> future = service.poll();
+        if (future != null) {
+          System.out.println("Finished: " + future.get());
         }
-
-        String beforeFileContents = fileCache.get(filePath);
-        CodemodInvocationContext context =
-            new DefaultCodemodInvocationContext(
-                codeDirectory, filePath, beforeFileContents, codemod.getId(), lineIncludesExcludes);
-
-        // run the codemod on the file
-        List<CodemodChange> codemodChanges = codemodRunner.run(context);
-
-        if (!codemodChanges.isEmpty()) {
-          synchronized (this) {
-            FilesUpdateResult updateResult =
-                updateFiles(codeChanger, filePath, beforeFileContents, codemodChanges);
-            unscannableFiles.addAll(updateResult.filesFailedToChange());
-            changeset.addAll(updateResult.changeset());
-          }
-        }
-      } catch (Exception e) {
-        unscannableFiles.add(filePath);
-        e.printStackTrace();
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
     CodeTFResult result =

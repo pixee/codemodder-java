@@ -4,6 +4,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import java.io.IOException;
 import java.nio.file.Path;
+import javax.inject.Provider;
 
 /**
  * Responsible for parsing Java files and maintaining the compilation units across different
@@ -23,7 +24,7 @@ public interface JavaParserFacade {
   CompilationUnit parseJavaFile(Path file) throws IOException;
 
   /** Return a simple implementation of the {@link JavaParserFacade} interface. */
-  static JavaParserFacade from(final JavaParser parser) {
+  static JavaParserFacade from(final Provider<JavaParser> parser) {
     return new DefaultJavaParserFacade(parser);
   }
 }

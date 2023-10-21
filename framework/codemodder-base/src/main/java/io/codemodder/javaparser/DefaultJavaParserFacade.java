@@ -7,17 +7,26 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
+import javax.inject.Provider;
 
 final class DefaultJavaParserFacade implements JavaParserFacade {
 
-  private final JavaParser parser;
+  private final Provider<JavaParser> parserProvider;
+  private ThreadLocal<JavaParser> javaParserRef;
 
-  DefaultJavaParserFacade(final JavaParser parser) {
-    this.parser = Objects.requireNonNull(parser);
+  DefaultJavaParserFacade(final Provider<JavaParser> parserProvider) {
+    this.parserProvider = Objects.requireNonNull(parserProvider);
+    this.javaParserRef = new ThreadLocal<>();
   }
 
   @Override
   public CompilationUnit parseJavaFile(final Path file) throws IOException {
+    JavaParser parser = javaParserRef.get();
+    if (parser == null) {
+      parser = parserProvider.get();
+      javaParserRef.set(parser);
+    }
+
     final ParseResult<CompilationUnit> result = parser.parse(file);
     if (!result.isSuccessful()) {
       throw new RuntimeException("can't parse file");

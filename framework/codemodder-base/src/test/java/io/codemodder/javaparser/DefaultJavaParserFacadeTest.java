@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.SourceDirectory;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -31,7 +32,15 @@ final class DefaultJavaParserFacadeTest {
                 """;
     Files.writeString(javaFile, javaCode);
     var srcDirs = List.of(SourceDirectory.createDefault(tmpDir, List.of(javaFile.toString())));
-    this.parser = new DefaultJavaParserFacade(JavaParserFactory.newFactory().create(srcDirs));
+    this.parser =
+        new DefaultJavaParserFacade(
+            () -> {
+              try {
+                return JavaParserFactory.newFactory().create(srcDirs);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            });
   }
 
   @Test
