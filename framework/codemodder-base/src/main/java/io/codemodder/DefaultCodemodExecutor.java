@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
   private final IncludesExcludes includesExcludes;
   private final EncodingDetector encodingDetector;
   private final FileCache fileCache;
+  private final ThreadCountSelector threadCountSelector;
 
   /** The max size of a file we'll scan. If a file is larger than this, we'll skip it. */
   private final int maxFileSize;
@@ -41,9 +43,6 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
    * them.
    */
   private final int maxFiles;
-
-  /** This is a lock that we use to synchronize the update of the file cache and file system. */
-  private Object postExecutionLock = new Object();
 
   DefaultCodemodExecutor(
       final Path projectDir,
@@ -66,12 +65,13 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
     this.maxFileSize = maxFileSize;
     this.maxFiles = maxFiles;
+    this.threadCountSelector = new SystemThreadCountSelector();
   }
 
   @Override
   public CodeTFResult execute(final List<Path> filePaths) {
 
-    Set<Path> unscannableFiles = new HashSet<>();
+    Set<Path> unscannableFiles = new ConcurrentSkipListSet<>();
     DefaultCodeDirectory codeDirectory = new DefaultCodeDirectory(projectDir);
     CodeChanger codeChanger = codemod.getChanger();
 
@@ -100,9 +100,11 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             .limit(maxFiles != -1 ? maxFiles : Long.MAX_VALUE)
             .toList();
 
-    List<CodeTFChangesetEntry> changeset = new ArrayList<>();
+    List<CodeTFChangesetEntry> changeset = Collections.synchronizedList(new ArrayList<>());
 
-    ExecutorService executor = Executors.newFixedThreadPool(25);
+    int threadPoolSize = threadCountSelector.count();
+    log.debug("analysis thread pool size: {}", threadPoolSize);
+    ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
     CompletionService<String> service = new ExecutorCompletionService<>(executor);
 
     // for each file, add a task to the completion service
@@ -115,6 +117,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
                 includesExcludes.getIncludesExcludesForFile(filePath.toFile());
 
             try {
+
               if (maxFileSize != -1) {
                 long size = Files.size(filePath);
                 if (size > maxFileSize) {
@@ -143,6 +146,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
                   changeset.addAll(updateResult.changeset());
                 }
               }
+
             } catch (Exception e) {
               unscannableFiles.add(filePath);
               e.printStackTrace();
@@ -153,15 +157,15 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     executor.shutdown();
     try {
       boolean success = executor.awaitTermination(15, TimeUnit.MINUTES);
-      log.debug("Success running codemod: {}", success);
+      log.trace("Success running codemod: {}", success);
       while (!executor.isTerminated()) {
         final Future<String> future = service.poll();
         if (future != null) {
-          System.out.println("Finished: " + future.get());
+          log.trace("Finished: {}", future.get());
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Problem waiting for scanning threads to exit", e);
     }
 
     CodeTFResult result =
@@ -342,8 +346,19 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     return path;
   }
 
+  /** Describes the results of updating files after a codemod execution. */
   private record FilesUpdateResult(
       List<CodeTFChangesetEntry> changeset, List<Path> filesFailedToChange) {}
+
+  /**
+   * A thread count selection strategy that assumes Linux systems will be more heavily I/O gated.
+   */
+  private static class SystemThreadCountSelector implements ThreadCountSelector {
+    @Override
+    public int count() {
+      return SystemUtils.IS_OS_LINUX ? 5 : 1;
+    }
+  }
 
   private static final Logger log = LoggerFactory.getLogger(DefaultCodemodExecutor.class);
 }
