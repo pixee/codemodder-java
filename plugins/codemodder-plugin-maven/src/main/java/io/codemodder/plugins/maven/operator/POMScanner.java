@@ -3,6 +3,7 @@ package io.codemodder.plugins.maven.operator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -110,6 +111,8 @@ public class POMScanner {
       }
     }
 
+    lastFile = originalFile;
+
     Set<String> prevPaths = new HashSet<>();
     POMDocument prevPOMDocument = pomFile;
 
@@ -134,9 +137,9 @@ public class POMScanner {
         prevPaths.add(relativePath);
       }
 
-      Path newPath = POMScanner.resolvePath(originalFile, relativePath);
+      Path newPath = POMScanner.resolvePath(lastFile, relativePath);
 
-      if (!newPath.toFile().exists()) {
+      if (Files.notExists(newPath)) {
         LOGGER.warn("new path does not exist: " + newPath);
         break;
       }
