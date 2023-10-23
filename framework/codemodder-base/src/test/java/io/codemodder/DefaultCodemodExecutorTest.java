@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,7 @@ final class DefaultCodemodExecutorTest {
     this.repoDir = tmpDir;
     beforeToAfterChanger = new BeforeToAfterChanger();
     beforeAfterCodemod = new CodemodIdPair("codemodder:java/id", beforeToAfterChanger);
-    javaParserFacade = JavaParserFacade.from(new JavaParser());
+    javaParserFacade = JavaParserFacade.from(JavaParser::new);
     encodingDetector = EncodingDetector.create();
     includesEverything = IncludesExcludes.any();
     fileCache = FileCache.createDefault();
@@ -306,7 +307,7 @@ final class DefaultCodemodExecutorTest {
               List.of(depsProvider),
               List.of(),
               fileCache,
-              JavaParserFacade.from(new JavaParser()),
+              JavaParserFacade.from(JavaParser::new),
               EncodingDetector.create(),
               -1,
               -1);
@@ -434,7 +435,7 @@ final class DefaultCodemodExecutorTest {
             List.of(badProvider),
             List.of(),
             fileCache,
-            JavaParserFacade.from(new JavaParser()),
+            JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create(),
             -1,
             -1);
@@ -489,7 +490,7 @@ final class DefaultCodemodExecutorTest {
             List.of(skippingProvider),
             List.of(),
             fileCache,
-            JavaParserFacade.from(new JavaParser()),
+            JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create(),
             -1,
             -1);

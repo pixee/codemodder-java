@@ -234,7 +234,7 @@ final class AddMissingI18nCodemodTest {
             List.of(),
             List.of(),
             FileCache.createDefault(),
-            JavaParserFacade.from(new JavaParser()),
+            JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create());
     return executor.execute(
         List.of(

@@ -59,7 +59,7 @@ final class JSPScriptletXSSCodemodTest {
             List.of(),
             List.of(),
             FileCache.createDefault(),
-            JavaParserFacade.from(new JavaParser()),
+            JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(jsp));
 

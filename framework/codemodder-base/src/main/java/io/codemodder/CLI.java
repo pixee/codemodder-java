@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.inject.Provider;
 import net.logstash.logback.encoder.LogstashEncoder;
 import net.logstash.logback.fieldnames.LogstashCommonFieldNames;
 import net.logstash.logback.fieldnames.LogstashFieldNames;
@@ -373,8 +374,15 @@ final class CLI implements Callable<Integer> {
        * is what allows our codemods to act on SARIF-providing tools data accurately over multiple codemods.
        */
       logEnteringPhase(Logs.ExecutionPhase.SCANNING);
-      JavaParser javaParser = javaParserFactory.create(sourceDirectories);
-      JavaParserFacade javaParserFacade = JavaParserFacade.from(javaParser);
+      Provider<JavaParser> javaParserProvider =
+          () -> {
+            try {
+              return javaParserFactory.create(sourceDirectories);
+            } catch (IOException e) {
+              throw new UncheckedIOException(e);
+            }
+          };
+      JavaParserFacade javaParserFacade = JavaParserFacade.from(javaParserProvider);
       int maxFileCacheSize = 10_000;
       FileCache fileCache = FileCache.createDefault(maxFileCacheSize);
 

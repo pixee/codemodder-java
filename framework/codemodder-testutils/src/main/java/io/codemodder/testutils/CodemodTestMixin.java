@@ -127,7 +127,14 @@ public interface CodemodTestMixin {
             List.of(),
             List.of(),
             FileCache.createDefault(),
-            JavaParserFacade.from(factory.create(List.of(dir))),
+            JavaParserFacade.from(
+                () -> {
+                  try {
+                    return factory.create(List.of(dir));
+                  } catch (IOException e) {
+                    throw new RuntimeException(e);
+                  }
+                }),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(pathToJavaFile));
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
@@ -191,7 +198,14 @@ public interface CodemodTestMixin {
             List.of(),
             List.of(),
             FileCache.createDefault(),
-            JavaParserFacade.from(factory.create(List.of(dir))),
+            JavaParserFacade.from(
+                () -> {
+                  try {
+                    return factory.create(List.of(dir));
+                  } catch (IOException e) {
+                    throw new RuntimeException(e);
+                  }
+                }),
             EncodingDetector.create());
     CodeTFResult result2 = executor2.execute(List.of(pathToJavaFile));
     List<CodeTFChangesetEntry> changeset2 = result2.getChangeset();

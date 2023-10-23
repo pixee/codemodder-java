@@ -18,6 +18,9 @@ public interface FileCache {
   /** Put the string contents of a file into the cache. */
   void overrideEntry(Path path, String contents);
 
+  /** Remove the string contents of a file from the cache if it exists. */
+  void removeEntry(final Path resolve);
+
   static FileCache createDefault() {
     return createDefault(10_000);
   }
@@ -44,6 +47,11 @@ public interface FileCache {
           throw new IllegalArgumentException("cache entry must be for an existing key");
         }
         fileCache.put(path, contents);
+      }
+
+      @Override
+      public void removeEntry(final Path path) {
+        fileCache.remove(path);
       }
     };
   }
