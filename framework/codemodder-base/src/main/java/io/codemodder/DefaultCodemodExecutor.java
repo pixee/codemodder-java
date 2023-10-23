@@ -106,7 +106,6 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     List<CodeTFChangesetEntry> changeset = new ArrayList<>();
 
     int threadPoolSize = threadCountSelector.count();
-    log.debug("analysis thread pool size: {}", threadPoolSize);
     ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
     CompletionService<String> service = new ExecutorCompletionService<>(executor);
 
