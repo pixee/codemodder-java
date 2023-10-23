@@ -12,7 +12,7 @@ import javax.inject.Provider;
 final class DefaultJavaParserFacade implements JavaParserFacade {
 
   private final Provider<JavaParser> parserProvider;
-  private ThreadLocal<JavaParser> javaParserRef;
+  private final ThreadLocal<JavaParser> javaParserRef;
 
   DefaultJavaParserFacade(final Provider<JavaParser> parserProvider) {
     this.parserProvider = Objects.requireNonNull(parserProvider);

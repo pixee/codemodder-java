@@ -224,7 +224,7 @@ final class CodemodLoaderTest {
                 List.of(),
                 List.of(),
                 FileCache.createDefault(),
-                JavaParserFacade.from(new JavaParser()),
+                JavaParserFacade.from(JavaParser::new),
                 EncodingDetector.create(),
                 -1,
                 -1);
@@ -362,7 +362,7 @@ final class CodemodLoaderTest {
               List.of(),
               List.of(),
               FileCache.createDefault(),
-              JavaParserFacade.from(new JavaParser()),
+              JavaParserFacade.from(JavaParser::new),
               EncodingDetector.create(),
               -1,
               -1);

@@ -22,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +48,7 @@ final class DefaultCodemodExecutorTest {
     this.repoDir = tmpDir;
     beforeToAfterChanger = new BeforeToAfterChanger();
     beforeAfterCodemod = new CodemodIdPair("codemodder:java/id", beforeToAfterChanger);
-    javaParserFacade = JavaParserFacade.from(new JavaParser());
+    javaParserFacade = JavaParserFacade.from(JavaParser::new);
     encodingDetector = EncodingDetector.create();
     includesEverything = IncludesExcludes.any();
     fileCache = FileCache.createDefault();
@@ -308,7 +307,7 @@ final class DefaultCodemodExecutorTest {
               List.of(depsProvider),
               List.of(),
               fileCache,
-              JavaParserFacade.from(new JavaParser()),
+              JavaParserFacade.from(JavaParser::new),
               EncodingDetector.create(),
               -1,
               -1);
@@ -436,7 +435,7 @@ final class DefaultCodemodExecutorTest {
             List.of(badProvider),
             List.of(),
             fileCache,
-            JavaParserFacade.from(new JavaParser()),
+            JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create(),
             -1,
             -1);
@@ -491,7 +490,7 @@ final class DefaultCodemodExecutorTest {
             List.of(skippingProvider),
             List.of(),
             fileCache,
-            JavaParserFacade.from(new JavaParser()),
+            JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create(),
             -1,
             -1);
@@ -693,42 +692,6 @@ final class DefaultCodemodExecutorTest {
     public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
       return "injects-dependency-2-change";
     }
-  }
-
-  @Test
-  void multithread() throws ExecutionException, InterruptedException {
-
-    ExecutorService pool = Executors.newFixedThreadPool(5);
-    CompletionService<String> service = new ExecutorCompletionService<String>(pool);
-
-    List<Future> futures = new ArrayList<>();
-    for (int i = 0; i < 20; i++) {
-      final int count = i;
-      Future<?> f =
-          pool.submit(
-              () -> {
-                int seconds = RandomGenerator.getDefault().nextInt(5);
-                System.out.println(
-                    "starting thread " + count + " and sleeping for " + seconds + " seconds");
-                try {
-                  Thread.sleep(seconds * 1000);
-                } catch (InterruptedException e) {
-                  throw new RuntimeException(e);
-                }
-              });
-      futures.add(f);
-    }
-
-    pool.shutdown();
-    boolean success = pool.awaitTermination(30, TimeUnit.SECONDS);
-    System.out.println("Success: " + success);
-
-    while (!pool.isTerminated()) {
-      final Future<String> future = service.take();
-      System.out.println("Finished: " + future.get());
-    }
-
-    System.out.println("Finished all ");
   }
 
   private static final DependencyGAV dependency1 =
