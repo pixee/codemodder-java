@@ -20,14 +20,15 @@ import java.util.Objects;
  * places the whole path to the rule in the field. This means our filtering logic is a little weird
  * and unexpected, but it works.
  */
-final class SemgrepRuleSarif implements RuleSarif {
+final class SingleSemgrepRuleSarif implements RuleSarif {
 
   private final SarifSchema210 sarif;
   private final String ruleId;
   private final Map<Path, List<Result>> resultsCache;
   private final Path repositoryRoot;
 
-  SemgrepRuleSarif(final String ruleId, final SarifSchema210 sarif, final Path repositoryRoot) {
+  SingleSemgrepRuleSarif(
+      final String ruleId, final SarifSchema210 sarif, final Path repositoryRoot) {
     this.sarif = Objects.requireNonNull(sarif);
     this.ruleId = Objects.requireNonNull(ruleId);
     this.repositoryRoot = Objects.requireNonNull(repositoryRoot);
