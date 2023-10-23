@@ -100,7 +100,10 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             .limit(maxFiles != -1 ? maxFiles : Long.MAX_VALUE)
             .toList();
 
-    List<CodeTFChangesetEntry> changeset = Collections.synchronizedList(new ArrayList<>());
+    /*
+     * The changeset doesn't need to be thread-safe because it's only added to within a synchronized block.
+     */
+    List<CodeTFChangesetEntry> changeset = new ArrayList<>();
 
     int threadPoolSize = threadCountSelector.count();
     log.debug("analysis thread pool size: {}", threadPoolSize);
