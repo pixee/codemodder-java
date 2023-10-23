@@ -33,6 +33,7 @@ dependencies {
     testImplementation(project(":framework:codemodder-testutils-llm"))
     testRuntimeOnly(testlibs.junit.jupiter.engine)
     testImplementation(testlibs.jgit)
+    testImplementation("org.testcontainers:testcontainers:1.19.0")
 }
 
 val integrationTestSuiteName = "intTest"

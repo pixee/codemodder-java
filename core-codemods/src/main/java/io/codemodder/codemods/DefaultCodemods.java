@@ -29,6 +29,7 @@ public final class DefaultCodemods {
         JSPScriptletXSSCodemod.class,
         LimitReadlineCodemod.class,
         MavenSecureURLCodemod.class,
+        MoveSwitchDefaultCaseLastCodemod.class,
         OutputResourceLeakCodemod.class,
         PreventFileWriterLeakWithFilesCodemod.class,
         RandomizeSeedCodemod.class,
