@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Provider;
-import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +30,7 @@ public final class SemgrepModule extends AbstractModule {
   private final List<String> excludePatterns;
   private final SemgrepRuleFactory semgrepRuleFactory;
 
-  @VisibleForTesting
-  SemgrepModule(
+  public SemgrepModule(
       final Path codeDirectory,
       final List<String> includePatterns,
       final List<String> excludePatterns,
