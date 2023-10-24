@@ -63,6 +63,7 @@ final class DefaultCodemodExecutorTest {
             javaParserFacade,
             encodingDetector,
             -1,
+            -1,
             -1);
 
     javaFile1 = repoDir.resolve("Test1.java");
@@ -189,6 +190,7 @@ final class DefaultCodemodExecutorTest {
             javaParserFacade,
             encodingDetector,
             -1,
+            -1,
             -1);
 
     CodeTFResult result = executor.execute(List.of(javaFile1));
@@ -235,7 +237,8 @@ final class DefaultCodemodExecutorTest {
             javaParserFacade,
             encodingDetector,
             -1,
-            1);
+            1,
+            -1);
 
     CodeTFResult result = executor.execute(List.of(javaFile1, javaFile2, javaFile3));
     assertThat(result).satisfies(DefaultCodemodExecutorTest::hasBeforeAfterCodemodMetadata);
@@ -259,6 +262,7 @@ final class DefaultCodemodExecutorTest {
             javaParserFacade,
             encodingDetector,
             500,
+            -1,
             -1);
 
     // make javaFile1 too big to scan
@@ -309,6 +313,7 @@ final class DefaultCodemodExecutorTest {
               fileCache,
               JavaParserFacade.from(JavaParser::new),
               EncodingDetector.create(),
+              -1,
               -1,
               -1);
       CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
@@ -438,6 +443,7 @@ final class DefaultCodemodExecutorTest {
             JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create(),
             -1,
+            -1,
             -1);
     CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
     List<CodeTFChangesetEntry> firstChangeset = result.getChangeset();
@@ -492,6 +498,7 @@ final class DefaultCodemodExecutorTest {
             fileCache,
             JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create(),
+            -1,
             -1,
             -1);
     CodeTFResult result = executor.execute(List.of(javaFile2));

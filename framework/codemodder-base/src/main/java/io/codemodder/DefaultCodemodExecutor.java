@@ -17,7 +17,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -33,7 +32,6 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
   private final IncludesExcludes includesExcludes;
   private final EncodingDetector encodingDetector;
   private final FileCache fileCache;
-  private final ThreadCountSelector threadCountSelector;
 
   /** The max size of a file we'll scan. If a file is larger than this, we'll skip it. */
   private final int maxFileSize;
@@ -43,6 +41,9 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
    * them.
    */
   private final int maxFiles;
+
+  /** The max number of workers we'll use to scan files. */
+  private final int maxWorkers;
 
   DefaultCodemodExecutor(
       final Path projectDir,
@@ -54,7 +55,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       final JavaParserFacade javaParserFacade,
       final EncodingDetector encodingDetector,
       final int maxFileSize,
-      final int maxFiles) {
+      final int maxFiles,
+      final int maxWorkers) {
     this.projectDir = Objects.requireNonNull(projectDir);
     this.includesExcludes = Objects.requireNonNull(includesExcludes);
     this.codemod = Objects.requireNonNull(codemod);
@@ -65,7 +67,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
     this.maxFileSize = maxFileSize;
     this.maxFiles = maxFiles;
-    this.threadCountSelector = new SystemThreadCountSelector();
+    this.maxWorkers = maxWorkers;
   }
 
   @Override
@@ -105,8 +107,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
      */
     List<CodeTFChangesetEntry> changeset = new ArrayList<>();
 
-    int threadPoolSize = threadCountSelector.count();
-    ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
+    int workers = maxWorkers != -1 ? maxWorkers : 1;
+    ExecutorService executor = Executors.newFixedThreadPool(workers);
     CompletionService<String> service = new ExecutorCompletionService<>(executor);
 
     // for each file, add a task to the completion service
@@ -351,16 +353,6 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
   /** Describes the results of updating files after a codemod execution. */
   private record FilesUpdateResult(
       List<CodeTFChangesetEntry> changeset, List<Path> filesFailedToChange) {}
-
-  /**
-   * A thread count selection strategy that assumes Linux systems will be more heavily I/O gated.
-   */
-  private static class SystemThreadCountSelector implements ThreadCountSelector {
-    @Override
-    public int count() {
-      return SystemUtils.IS_OS_LINUX ? 5 : 1;
-    }
-  }
 
   private static final Logger log = LoggerFactory.getLogger(DefaultCodemodExecutor.class);
 }

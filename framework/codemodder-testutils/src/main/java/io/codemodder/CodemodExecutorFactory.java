@@ -26,6 +26,7 @@ public interface CodemodExecutorFactory {
         javaParser,
         encodingDetector,
         10_000_000,
-        10_000);
+        10_000,
+        -1);
   }
 }
