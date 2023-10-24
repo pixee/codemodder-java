@@ -9,8 +9,6 @@ interface SemgrepRuleFactory {
    * Given the user's configuration data, return a definition of a rule that can be used by
    * codemodder.
    */
-  SemgrepRule createYaml(
-      Class<? extends CodeChanger> codemodType,
-      final SemgrepScan scanInfo,
-      final String packageName);
+  SemgrepRule createRule(
+      Class<? extends CodeChanger> codemodType, SemgrepScan scanInfo, String packageName);
 }

@@ -17,14 +17,16 @@ import org.jetbrains.annotations.VisibleForTesting;
 final class DefaultSemgrepRuleFactory implements SemgrepRuleFactory {
 
   @Override
-  public SemgrepRule createYaml(
+  public SemgrepRule createRule(
       final Class<? extends CodeChanger> codemodType,
       final SemgrepScan semgrepScan,
       final String packageName) {
+
     String yamlPath = semgrepScan.pathToYaml();
     String declaredRuleId = semgrepScan.ruleId();
     Path yamlPathToWrite = null;
     boolean foundYaml = false;
+
     if (!declaredRuleId.isEmpty()) {
       String classpathYamlPath =
           "/" + packageName.replace(".", "/") + "/" + declaredRuleId + ".yaml";

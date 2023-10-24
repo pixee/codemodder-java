@@ -134,7 +134,7 @@ public final class SemgrepModule extends AbstractModule {
 
               SemgrepScan semgrepScan = param.getAnnotation(SemgrepScan.class);
               SemgrepRule rule =
-                  semgrepRuleFactory.createYaml(codemodType, semgrepScan, packageName);
+                  semgrepRuleFactory.createRule(codemodType, semgrepScan, packageName);
               rules.add(rule);
             });
 
