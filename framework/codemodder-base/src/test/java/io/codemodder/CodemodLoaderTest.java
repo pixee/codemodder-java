@@ -227,6 +227,7 @@ final class CodemodLoaderTest {
                 JavaParserFacade.from(JavaParser::new),
                 EncodingDetector.create(),
                 -1,
+                -1,
                 -1);
         executor.execute(List.of(file));
       }
@@ -364,6 +365,7 @@ final class CodemodLoaderTest {
               FileCache.createDefault(),
               JavaParserFacade.from(JavaParser::new),
               EncodingDetector.create(),
+              -1,
               -1,
               -1);
       Path p = tmpDir.resolve("foo.txt");
