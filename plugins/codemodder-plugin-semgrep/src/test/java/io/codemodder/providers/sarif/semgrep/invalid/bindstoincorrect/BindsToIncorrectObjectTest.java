@@ -15,12 +15,7 @@ final class BindsToIncorrectObjectTest {
   @Test
   void it_fails_when_injecting_nonsarif_type(@TempDir Path tmpDir) {
     SemgrepModule module =
-        new SemgrepModule(
-            tmpDir, List.of("**"), List.of(), List.of(BindsToIncorrectObject.class), List.of());
-    assertThrows(
-        CreationException.class,
-        () -> {
-          Guice.createInjector(module);
-        });
+        new SemgrepModule(tmpDir, List.of("**"), List.of(), List.of(BindsToIncorrectObject.class));
+    assertThrows(CreationException.class, () -> Guice.createInjector(module));
   }
 }

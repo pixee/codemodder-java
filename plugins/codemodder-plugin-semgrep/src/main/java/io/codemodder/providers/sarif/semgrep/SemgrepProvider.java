@@ -20,7 +20,13 @@ public final class SemgrepProvider implements CodemodProvider {
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs) {
     return Set.of(
-        new SemgrepModule(codeDirectory, includePaths, excludePaths, codemodTypes, sarifs));
+        new SemgrepModule(
+            codeDirectory,
+            includePaths,
+            excludePaths,
+            codemodTypes,
+            sarifs,
+            new DefaultSemgrepRuleFactory()));
   }
 
   @Override

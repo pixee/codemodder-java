@@ -6,14 +6,14 @@ import io.codemodder.RuleSarifFactory;
 import java.nio.file.Path;
 import java.util.Optional;
 
-/** A factory for building {@link SemgrepRuleSarif}s. */
+/** A factory for building {@link SingleSemgrepRuleSarif}s. */
 public class SemgrepRuleSarifFactory implements RuleSarifFactory {
 
   @Override
   public Optional<RuleSarif> build(
       String toolName, String rule, SarifSchema210 sarif, Path repositoryRoot) {
-    if (SemgrepRuleSarif.toolName.equals(toolName)) {
-      return Optional.of(new SemgrepRuleSarif(rule, sarif, repositoryRoot));
+    if (SingleSemgrepRuleSarif.toolName.equals(toolName)) {
+      return Optional.of(new SingleSemgrepRuleSarif(rule, sarif, repositoryRoot));
     }
     return Optional.empty();
   }
