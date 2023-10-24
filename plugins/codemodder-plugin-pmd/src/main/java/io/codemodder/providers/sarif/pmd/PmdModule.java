@@ -37,6 +37,8 @@ public final class PmdModule extends AbstractModule {
   protected void configure() {
     Set<String> packagesScanned = new HashSet<>();
 
+    List<PmdScanTarget> scanTargets = new ArrayList<>();
+
     for (Class<? extends CodeChanger> codemodType : codemodTypes) {
 
       String packageName = codemodType.getPackageName();
@@ -73,48 +75,66 @@ public final class PmdModule extends AbstractModule {
               }
 
               PmdScan pmdScan = param.getAnnotation(PmdScan.class);
-              final String ruleId = pmdScan.ruleId();
-
-              RuleSarif sarif =
-                  new LazyLoadingRuleSarif(
-                      () -> {
-                        LOG.trace("Running pmd for rule: {}", ruleId);
-                        SarifSchema210 rawSarifFromRun =
-                            pmdRunner.run(List.of(ruleId), codeDirectory, includedFiles);
-                        LOG.trace("Finished running pmd for rule: {}", ruleId);
-                        int lastSlash = ruleId.lastIndexOf("/");
-                        if (lastSlash == -1) {
-                          throw new IllegalStateException("unexpected rule id: " + ruleId);
-                        }
-                        String trimmedRuleId = ruleId.substring(lastSlash + 1);
-                        Map<String, List<Result>> resultsByFile = new HashMap<>();
-                        List<Result> allResults = rawSarifFromRun.getRuns().get(0).getResults();
-                        for (Result result : allResults) {
-                          String filePath =
-                              result
-                                  .getLocations()
-                                  .get(0)
-                                  .getPhysicalLocation()
-                                  .getArtifactLocation()
-                                  .getUri();
-                          String normalizedFilePath =
-                              filePath.startsWith("file://") ? filePath.substring(7) : filePath;
-                          List<Result> resultsForFile =
-                              resultsByFile.computeIfAbsent(
-                                  normalizedFilePath, k -> new ArrayList<>());
-                          resultsForFile.add(result);
-                        }
-                        return new PmdRuleSarif(trimmedRuleId, rawSarifFromRun, resultsByFile);
-                      });
-
-              this.bind(RuleSarif.class).annotatedWith(pmdScan).toInstance(sarif);
+              scanTargets.add(new PmdScanTarget(codemodType, pmdScan));
             });
 
         LOG.trace("Finished scanning codemod package: {}", packageName);
         packagesScanned.add(packageName);
       }
     }
+
+    SarifSchema210 allRulesBatchedRun =
+        pmdRunner.run(
+            scanTargets.stream().map(PmdScanTarget::pmdScan).map(PmdScan::ruleId).toList(),
+            codeDirectory,
+            includedFiles);
+
+    List<String> ruleIdsFoundInBatchScan =
+        allRulesBatchedRun.getRuns().get(0).getResults().stream().map(Result::getRuleId).toList();
+
+    for (PmdScanTarget scanTarget : scanTargets) {
+      final String ruleId = scanTarget.pmdScan.ruleId();
+      if (ruleIdsFoundInBatchScan.stream().noneMatch(r -> ruleId.endsWith("/" + r))) {
+        LOG.trace("Rule {} was not found in batch scan, skipping", ruleId);
+        bind(RuleSarif.class).annotatedWith(scanTarget.pmdScan).toInstance(RuleSarif.EMPTY);
+        continue;
+      }
+      RuleSarif sarif =
+          new LazyLoadingRuleSarif(
+              () -> {
+                LOG.trace("Running pmd for rule: {}", ruleId);
+                SarifSchema210 rawSarifFromRun =
+                    pmdRunner.run(List.of(ruleId), codeDirectory, includedFiles);
+                LOG.trace("Finished running pmd for rule: {}", ruleId);
+                int lastSlash = ruleId.lastIndexOf("/");
+                if (lastSlash == -1) {
+                  throw new IllegalStateException("unexpected rule id: " + ruleId);
+                }
+                String trimmedRuleId = ruleId.substring(lastSlash + 1);
+                Map<String, List<Result>> resultsByFile = new HashMap<>();
+                List<Result> allResults = rawSarifFromRun.getRuns().get(0).getResults();
+                for (Result result : allResults) {
+                  String filePath =
+                      result
+                          .getLocations()
+                          .get(0)
+                          .getPhysicalLocation()
+                          .getArtifactLocation()
+                          .getUri();
+                  String normalizedFilePath =
+                      filePath.startsWith("file://") ? filePath.substring(7) : filePath;
+                  List<Result> resultsForFile =
+                      resultsByFile.computeIfAbsent(normalizedFilePath, k -> new ArrayList<>());
+                  resultsForFile.add(result);
+                }
+                return new PmdRuleSarif(trimmedRuleId, rawSarifFromRun, resultsByFile);
+              });
+
+      this.bind(RuleSarif.class).annotatedWith(scanTarget.pmdScan).toInstance(sarif);
+    }
   }
+
+  record PmdScanTarget(Class<? extends CodeChanger> codemodType, PmdScan pmdScan) {}
 
   private static final Logger LOG = LoggerFactory.getLogger(PmdModule.class);
 }
