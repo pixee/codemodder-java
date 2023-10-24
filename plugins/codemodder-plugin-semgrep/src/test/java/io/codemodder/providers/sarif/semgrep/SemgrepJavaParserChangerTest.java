@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.codemodder.*;
@@ -46,12 +47,8 @@ final class SemgrepJavaParserChangerTest {
     SemgrepModule module =
         new SemgrepModule(
             tmpDir, List.of("**"), List.of(), List.of(InvalidUsesBothYamlStrategies.class));
-    Injector injector = Guice.createInjector(module);
-    InvalidUsesBothYamlStrategies instance =
-        injector.getInstance(InvalidUsesBothYamlStrategies.class);
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> instance.sarif.getRegionsFromResultsByRule(Path.of("anything")));
+
+    assertThrows(CreationException.class, () -> Guice.createInjector(module));
   }
 
   private Path writeJavaFile(final Path tmpDir, final String javaCode) throws IOException {
