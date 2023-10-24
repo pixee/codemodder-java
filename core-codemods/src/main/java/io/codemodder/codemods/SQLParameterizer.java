@@ -15,7 +15,6 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.resolution.UnsolvedSymbolException;
 import io.codemodder.Either;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
@@ -69,7 +68,7 @@ final class SQLParameterizer {
                         try {
                           String resolvedType = s.calculateResolvedType().describe();
                           return "java.sql.Statement".equals(resolvedType);
-                        } catch (IllegalArgumentException | UnsolvedSymbolException e) {
+                        } catch (RuntimeException e) {
                           return false;
                         }
                       })
@@ -84,7 +83,7 @@ final class SQLParameterizer {
       return rule1.test(methodCallExpr);
 
       // Thrown by the JavaParser Symbol Solver when it can't resolve types
-    } catch (UnsolvedSymbolException | UnsupportedOperationException e) {
+    } catch (RuntimeException e) {
       return false;
     }
   }
@@ -94,7 +93,7 @@ final class SQLParameterizer {
         e -> {
           try {
             return "java.sql.Connection".equals(e.calculateResolvedType().describe());
-          } catch (IllegalArgumentException | UnsolvedSymbolException ex) {
+          } catch (RuntimeException ex) {
             return false;
           }
         };

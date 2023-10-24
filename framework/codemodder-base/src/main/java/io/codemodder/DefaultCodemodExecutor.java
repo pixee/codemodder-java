@@ -100,6 +100,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             .filter(codemodRunner::supports)
             .sorted()
             .limit(maxFiles != -1 ? maxFiles : Long.MAX_VALUE)
+            .sorted()
             .toList();
 
     /*

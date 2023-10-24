@@ -385,6 +385,7 @@ final class CLI implements Callable<Integer> {
        * is what allows our codemods to act on SARIF-providing tools data accurately over multiple codemods.
        */
       logEnteringPhase(Logs.ExecutionPhase.SCANNING);
+
       Provider<JavaParser> javaParserProvider =
           () -> {
             try {
@@ -411,6 +412,7 @@ final class CLI implements Callable<Integer> {
                 maxFileSize,
                 maxFiles,
                 maxWorkers);
+
         log.info("running codemod: {}", codemod.getId());
         CodeTFResult result = codemodExecutor.execute(filePaths);
         if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {
