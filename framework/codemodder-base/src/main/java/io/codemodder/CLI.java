@@ -74,6 +74,12 @@ final class CLI implements Callable<Integer> {
   private int maxFiles;
 
   @CommandLine.Option(
+      names = {"--max-workers"},
+      description = "the maximum number of workers (threads) to use for parallel processing",
+      defaultValue = "-1")
+  private int maxWorkers;
+
+  @CommandLine.Option(
       names = {"--max-file-size"},
       description = "the maximum file size in bytes that each codemod can scan",
       defaultValue = "-1")
@@ -284,6 +290,11 @@ final class CLI implements Callable<Integer> {
       return ERROR_CANT_READ_PROJECT_DIRECTORY;
     }
 
+    if (maxWorkers < -1) {
+      log.error("Invalid value for workers");
+      return -1;
+    }
+
     logEnteringPhase(Logs.ExecutionPhase.SETUP);
 
     if (dryRun) {
@@ -398,7 +409,8 @@ final class CLI implements Callable<Integer> {
                 javaParserFacade,
                 encodingDetector,
                 maxFileSize,
-                maxFiles);
+                maxFiles,
+                maxWorkers);
         log.info("running codemod: {}", codemod.getId());
         CodeTFResult result = codemodExecutor.execute(filePaths);
         if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {
