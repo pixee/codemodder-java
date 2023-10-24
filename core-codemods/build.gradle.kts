@@ -63,6 +63,10 @@ testing {
     }
 }
 
+tasks.test {
+    filter { excludeTestsMatching("*CodemodIntegrationTest") }
+}
+
 tasks.named("check") {
     @Suppress("UnstableApiUsage")
     dependsOn(testing.suites.named(integrationTestSuiteName))

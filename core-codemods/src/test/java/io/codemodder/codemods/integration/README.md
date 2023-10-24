@@ -26,5 +26,5 @@ docker build -f core-codemods/src/test/java/io/codemodder/codemods/integration/p
 
 #### Running the integration test for a specific codemod
 ```
-./gradlew :core-codemods:test --tests io.codemodder.codemods.integration.tests.MoveSwitchDefaultCaseLastIntegrationTest
+./gradlew :core-codemods:test --tests io.codemodder.codemods.integration.tests.MoveSwitchDefaultCaseLastCodemodIntegrationTest
 ```
