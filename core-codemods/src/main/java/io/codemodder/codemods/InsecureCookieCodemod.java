@@ -8,19 +8,17 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.RegionExtractor;
-import io.codemodder.ReviewGuidance;
-import io.codemodder.RuleSarif;
-import io.codemodder.SarifPluginJavaParserChanger;
+import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import java.util.Optional;
 import javax.inject.Inject;
 
 /** Fixes issues reported under the id "java/insecure-cookie". */
-@Codemod(id = "codeql:java/insecure-cookie", reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+@Codemod(
+    id = "codeql:java/insecure-cookie",
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    executionPriority = CodemodExecutionPriority.HIGH)
 public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject

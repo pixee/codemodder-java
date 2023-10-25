@@ -16,15 +16,7 @@ final class InvalidUsesBothYamlStrategiesTest {
   void it_fails_when_using_both_strategies(@TempDir Path tmpDir) {
     SemgrepModule module =
         new SemgrepModule(
-            tmpDir,
-            List.of("**"),
-            List.of(),
-            List.of(InvalidUsesBothYamlStrategies.class),
-            List.of());
-    assertThrows(
-        CreationException.class,
-        () -> {
-          Guice.createInjector(module);
-        });
+            tmpDir, List.of("**"), List.of(), List.of(InvalidUsesBothYamlStrategies.class));
+    assertThrows(CreationException.class, () -> Guice.createInjector(module));
   }
 }

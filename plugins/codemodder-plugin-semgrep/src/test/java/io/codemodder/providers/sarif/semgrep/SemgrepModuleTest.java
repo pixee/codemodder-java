@@ -196,20 +196,20 @@ final class SemgrepModuleTest {
   }
 
   @Test
-  void it_detects_rule_ids(final @TempDir Path tmpDir) throws IOException {
-    SemgrepModule module = createModule(tmpDir, List.of(UsesImplicitYamlPath.class));
-
-    String id = module.detectSingleRuleFromYaml("rules:\n  - id: foo\n    pattern: bar\n");
+  void it_detects_rule_ids() {
+    String id =
+        DefaultSemgrepRuleFactory.detectSingleRuleFromYaml(
+            "rules:\n  - id: foo\n    pattern: bar\n");
     assertThat(id, is("foo"));
 
     assertThrows(
         IllegalArgumentException.class,
         () ->
-            module.detectSingleRuleFromYaml(
+            DefaultSemgrepRuleFactory.detectSingleRuleFromYaml(
                 "rules:\n  - id: foo\n  - id: bar\n    pattern: baz\n"));
     assertThrows(
         IllegalArgumentException.class,
-        () -> module.detectSingleRuleFromYaml("rules:\n  - pattern: baz\n"));
+        () -> DefaultSemgrepRuleFactory.detectSingleRuleFromYaml("rules:\n  - pattern: baz\n"));
   }
 
   private SemgrepModule createModule(
@@ -242,7 +242,8 @@ final class SemgrepModuleTest {
             List.of("**"),
             List.of(),
             List.of(UsesOfflineSemgrepCodemod.class),
-            map.entrySet().iterator().next().getValue());
+            map.entrySet().iterator().next().getValue(),
+            new DefaultSemgrepRuleFactory());
     Injector injector = Guice.createInjector(module);
     UsesOfflineSemgrepCodemod instance = injector.getInstance(UsesOfflineSemgrepCodemod.class);
 

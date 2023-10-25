@@ -15,7 +15,7 @@ import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFReport;
 import io.codemodder.codetf.CodeTFReportGenerator;
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaParserFacade;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.inject.Provider;
 import net.logstash.logback.encoder.LogstashEncoder;
 import net.logstash.logback.fieldnames.LogstashCommonFieldNames;
 import net.logstash.logback.fieldnames.LogstashFieldNames;
@@ -71,6 +72,12 @@ final class CLI implements Callable<Integer> {
       description = "the number of files each codemod can scan",
       defaultValue = "-1")
   private int maxFiles;
+
+  @CommandLine.Option(
+      names = {"--max-workers"},
+      description = "the maximum number of workers (threads) to use for parallel processing",
+      defaultValue = "-1")
+  private int maxWorkers;
 
   @CommandLine.Option(
       names = {"--max-file-size"},
@@ -283,6 +290,11 @@ final class CLI implements Callable<Integer> {
       return ERROR_CANT_READ_PROJECT_DIRECTORY;
     }
 
+    if (maxWorkers < -1) {
+      log.error("Invalid value for workers");
+      return -1;
+    }
+
     logEnteringPhase(Logs.ExecutionPhase.SETUP);
 
     if (dryRun) {
@@ -373,8 +385,16 @@ final class CLI implements Callable<Integer> {
        * is what allows our codemods to act on SARIF-providing tools data accurately over multiple codemods.
        */
       logEnteringPhase(Logs.ExecutionPhase.SCANNING);
-      JavaParser javaParser = javaParserFactory.create(sourceDirectories);
-      CachingJavaParser cachingJavaParser = CachingJavaParser.from(javaParser);
+
+      Provider<JavaParser> javaParserProvider =
+          () -> {
+            try {
+              return javaParserFactory.create(sourceDirectories);
+            } catch (IOException e) {
+              throw new UncheckedIOException(e);
+            }
+          };
+      JavaParserFacade javaParserFacade = JavaParserFacade.from(javaParserProvider);
       int maxFileCacheSize = 10_000;
       FileCache fileCache = FileCache.createDefault(maxFileCacheSize);
 
@@ -387,10 +407,12 @@ final class CLI implements Callable<Integer> {
                 projectProviders,
                 codeTFProviders,
                 fileCache,
-                cachingJavaParser,
+                javaParserFacade,
                 encodingDetector,
                 maxFileSize,
-                maxFiles);
+                maxFiles,
+                maxWorkers);
+
         log.info("running codemod: {}", codemod.getId());
         CodeTFResult result = codemodExecutor.execute(filePaths);
         if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {

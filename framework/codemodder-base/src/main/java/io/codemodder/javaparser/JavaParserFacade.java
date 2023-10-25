@@ -2,13 +2,15 @@ package io.codemodder.javaparser;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import java.io.IOException;
 import java.nio.file.Path;
+import javax.inject.Provider;
 
 /**
  * Responsible for parsing Java files and maintaining the compilation units across different
  * accesses.
  */
-public interface CachingJavaParser {
+public interface JavaParserFacade {
 
   /**
    * Return the {@link CompilationUnit} for the given Java file. If the given file has not been seen
@@ -16,13 +18,13 @@ public interface CachingJavaParser {
    * CompilationUnit}.
    *
    * @param file a Java file path
-   * @param contents the contents of the file
+   * @throws IOException if the file cannot be read
    * @return a {@link CompilationUnit} for the given file
    */
-  CompilationUnit parseJavaFile(Path file, String contents);
+  CompilationUnit parseJavaFile(Path file) throws IOException;
 
-  /** Return a simple implementation of the {@link CachingJavaParser} interface. */
-  static CachingJavaParser from(final JavaParser parser) {
-    return new DefaultCachingJavaParser(parser);
+  /** Return a simple implementation of the {@link JavaParserFacade} interface. */
+  static JavaParserFacade from(final Provider<JavaParser> parser) {
+    return new DefaultJavaParserFacade(parser);
   }
 }

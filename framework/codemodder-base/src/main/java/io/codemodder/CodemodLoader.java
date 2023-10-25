@@ -20,7 +20,7 @@ public final class CodemodLoader {
   private final List<CodemodIdPair> codemods;
 
   public CodemodLoader(
-      final List<Class<? extends CodeChanger>> codemodTypes,
+      final List<Class<? extends CodeChanger>> unorderedCodemodTypes,
       final CodemodRegulator codemodRegulator,
       final Path repositoryDir,
       final List<String> pathIncludes,
@@ -36,10 +36,21 @@ public final class CodemodLoader {
             .toList();
     final Set<AbstractModule> allModules = new HashSet<>();
 
+    // sort the codemods according to their priority
+    List<Class<? extends CodeChanger>> orderedCodemodTypes = new ArrayList<>(unorderedCodemodTypes);
+
+    // sort according to the codemod execution priority of each codemod type
+    orderedCodemodTypes.sort(
+        (c1, c2) -> {
+          CodemodExecutionPriority p1 = c1.getAnnotation(Codemod.class).executionPriority();
+          CodemodExecutionPriority p2 = c2.getAnnotation(Codemod.class).executionPriority();
+          return CodemodExecutionPriority.priorityOrderComparator.compare(p1, p2);
+        });
+
     // get all the injectable parameters
     Set<String> packagesScanned = new HashSet<>();
     List<Parameter> injectableParameters = new ArrayList<>();
-    for (Class<? extends CodeChanger> codemodType : codemodTypes) {
+    for (Class<? extends CodeChanger> codemodType : orderedCodemodTypes) {
       String packageName = codemodType.getPackageName();
       if (!packagesScanned.contains(packageName)) {
         packagesScanned.add(packageName);
@@ -84,7 +95,7 @@ public final class CodemodLoader {
               includedFiles,
               pathIncludes,
               pathExcludes,
-              codemodTypes,
+              orderedCodemodTypes,
               allWantedSarifs);
       allModules.addAll(modules);
     }
@@ -95,7 +106,7 @@ public final class CodemodLoader {
     // validate and instantiate the codemods
     final Injector injector = Guice.createInjector(allModules);
     final Set<String> codemodIds = new HashSet<>();
-    for (final Class<? extends CodeChanger> type : codemodTypes) {
+    for (final Class<? extends CodeChanger> type : orderedCodemodTypes) {
       final Codemod codemodAnnotation = type.getAnnotation(Codemod.class);
       validateRequiredFields(codemodAnnotation);
       final CodeChanger codeChanger = injector.getInstance(type);

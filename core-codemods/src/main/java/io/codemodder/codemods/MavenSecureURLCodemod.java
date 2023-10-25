@@ -26,7 +26,8 @@ import org.xml.sax.SAXException;
 /** Fixes issues reported under the id "java/maven/non-https-url". */
 @Codemod(
     id = "codeql:java/maven/non-https-url",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    executionPriority = CodemodExecutionPriority.HIGH)
 public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
 
   private final XPathStreamProcessor processor;

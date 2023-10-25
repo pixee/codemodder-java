@@ -47,6 +47,7 @@ final class SemgrepJavaParserChangerTest {
     SemgrepModule module =
         new SemgrepModule(
             tmpDir, List.of("**"), List.of(), List.of(InvalidUsesBothYamlStrategies.class));
+
     assertThrows(CreationException.class, () -> Guice.createInjector(module));
   }
 

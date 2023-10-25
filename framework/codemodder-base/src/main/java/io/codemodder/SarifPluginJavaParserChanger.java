@@ -2,6 +2,7 @@ package io.codemodder;
 
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
+import com.contrastsecurity.sarif.Run;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -130,6 +131,12 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
       }
     }
     return codemodChanges;
+  }
+
+  @Override
+  public boolean shouldRun() {
+    List<Run> runs = sarif.rawDocument().getRuns();
+    return runs != null && runs.size() > 0 && !runs.get(0).getResults().isEmpty();
   }
 
   /**
