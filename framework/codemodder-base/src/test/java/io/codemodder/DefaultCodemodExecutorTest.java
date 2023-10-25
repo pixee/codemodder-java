@@ -261,8 +261,8 @@ final class DefaultCodemodExecutorTest {
             fileCache,
             javaParserFacade,
             encodingDetector,
-            -1,
             500,
+            -1,
             -1);
 
     // make javaFile1 too big to scan
