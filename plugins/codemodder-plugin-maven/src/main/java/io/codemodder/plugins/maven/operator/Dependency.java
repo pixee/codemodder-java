@@ -70,7 +70,15 @@ public class Dependency {
 
   @Override
   public int hashCode() {
+    return Objects.hash(groupId, artifactId, version, classifier, packaging, scope);
+  }
+
+  public int hashWithoutVersion() {
     return Objects.hash(groupId, artifactId, classifier, packaging, scope);
+  }
+
+  public boolean matchesWithoutConsideringVersion(final Dependency dependency) {
+    return hashWithoutVersion() == dependency.hashWithoutVersion();
   }
 
   public String getGroupId() {

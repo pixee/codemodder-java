@@ -1,5 +1,8 @@
 package io.codemodder.plugins.maven.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,14 +15,17 @@ import kotlin.Pair;
 import kotlin.TuplesKt;
 import kotlin.collections.MapsKt;
 import kotlin.jvm.internal.Intrinsics;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 final class POMOperatorMultipomTest extends AbstractTestBase {
 
+  /**
+   * Test case for a scenario where a parent and child project have missing packaging information.
+   * This test checks if an exception of type WrongDependencyTypeException is thrown.
+   */
   @Test
   void testWithParentAndChildMissingPackaging() {
-    Assertions.assertThatThrownBy(
+    assertThatThrownBy(
             () -> {
               File parentResource = getResource("parent-and-child-parent-broken.xml");
 
@@ -36,9 +42,13 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
         .isInstanceOf(WrongDependencyTypeException.class);
   }
 
+  /**
+   * Test case for a scenario where a parent-child project has an incorrect dependency type. This
+   * test checks if an exception of type WrongDependencyTypeException is thrown.
+   */
   @Test
   void testWithParentAndChildWrongType() {
-    Assertions.assertThatThrownBy(
+    assertThatThrownBy(
             () -> {
               File parentResource = getResource("parent-and-child-child-broken.xml");
 
@@ -57,6 +67,14 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
         .isInstanceOf(WrongDependencyTypeException.class);
   }
 
+  /**
+   * Test case for a scenario with multiple POMs where the child POM does not have a version
+   * property, and properties are not used. This test validates dependency resolution and checks if
+   * the resulting POM document (pom-multiple-pom-basic-no-version-property-result.xml) is marked as
+   * dirty.
+   *
+   * @throws Exception If there is an exception during the test.
+   */
   @Test
   void testWithMultiplePomsBasicNoVersionProperty() throws Exception {
     File parentPomFile = getResource("sample-parent/pom.xml");
@@ -73,10 +91,18 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
 
     validateDepsFrom(result);
 
-    Assertions.assertThat(result.allPomFiles().size()).isEqualTo(2);
-    Assertions.assertThat(result.allPomFiles().stream().allMatch(POMDocument::isDirty)).isTrue();
+    assertThat(result.allPomFiles().size()).isEqualTo(2);
+    assertThat(result.allPomFiles().stream().allMatch(POMDocument::isDirty)).isTrue();
   }
 
+  /**
+   * Test case for a scenario with multiple POMs where the child POM has a version property, and
+   * properties are used. This test validates dependency resolution, property usage, and checks if
+   * the resulting POM document (pom-multiple-pom-basic-with-version-property-result.xml) is marked
+   * as dirty.
+   *
+   * @throws Exception If there is an exception during the test.
+   */
   @Test
   void testWithMultiplePomsBasicWithVersionProperty() throws Exception {
     File parentPomFile = getResource("sample-parent/pom.xml");
@@ -95,8 +121,8 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
 
     validateDepsFrom(result);
 
-    Assertions.assertThat(result.allPomFiles().size()).isEqualTo(2);
-    Assertions.assertThat(result.allPomFiles().stream().allMatch(POMDocument::isDirty)).isTrue();
+    assertThat(result.allPomFiles().size()).isEqualTo(2);
+    assertThat(result.allPomFiles().stream().allMatch(POMDocument::isDirty)).isTrue();
 
     String parentPomString =
         new String(result.getParentPomFiles().get(0).getResultPomBytes(), StandardCharsets.UTF_8);
@@ -104,8 +130,8 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
 
     String version = result.getDependency().getVersion();
 
-    Assertions.assertThat(parentPomString).contains("versions.dom4j>" + version);
-    Assertions.assertThat(pomString).doesNotContain(version);
+    assertThat(parentPomString).contains("versions.dom4j>" + version);
+    assertThat(pomString).doesNotContain(version);
   }
 
   void validateDepsFrom(ProjectModel context) throws Exception {
@@ -126,9 +152,13 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
 
     Collection<Dependency> dependencies = POMOperator.queryDependency(projectModel);
 
-    boolean foundDependency = dependencies.contains(context.getDependency());
+    Optional<Dependency> optionalDependency =
+        dependencies.stream()
+            .filter(
+                dependency -> dependency.matchesWithoutConsideringVersion(context.getDependency()))
+            .findFirst();
 
-    Assertions.assertThat(foundDependency).isTrue();
+    assertThat(optionalDependency).isNotEmpty();
   }
 
   Map<POMDocument, File> copyFiles(ProjectModel context) throws IOException, URISyntaxException {
