@@ -70,7 +70,7 @@ public class Dependency {
 
   @Override
   public int hashCode() {
-    return Objects.hash(groupId, artifactId, version, classifier, packaging, scope);
+    return Objects.hash(groupId, artifactId, classifier, packaging, scope);
   }
 
   public String getGroupId() {
