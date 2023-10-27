@@ -164,7 +164,6 @@ class CommandChain {
   static final List<Pair<QueryType, String>> AVAILABLE_DEPENDENCY_QUERY_COMMANDS =
       new ArrayList<>(
           Arrays.asList(
-              new Pair<>(QueryType.SAFE, "QueryByResolver"),
               new Pair<>(QueryType.SAFE, "QueryByParsing")));
 
   /** List of Commands for Version Query */
