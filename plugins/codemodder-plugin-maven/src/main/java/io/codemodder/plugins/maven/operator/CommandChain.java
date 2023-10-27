@@ -165,9 +165,7 @@ class CommandChain {
       new ArrayList<>(
           Arrays.asList(
               new Pair<>(QueryType.SAFE, "QueryByResolver"),
-              new Pair<>(QueryType.SAFE, "QueryByParsing"),
-              new Pair<>(QueryType.UNSAFE, "QueryByEmbedder"),
-              new Pair<>(QueryType.UNSAFE, "QueryByInvoker")));
+              new Pair<>(QueryType.SAFE, "QueryByParsing")));
 
   /** List of Commands for Version Query */
   private static final List<Pair<QueryType, String>> AVAILABLE_QUERY_VERSION_COMMANDS =

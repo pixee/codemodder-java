@@ -147,7 +147,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
     File pomFile = resultFiles.entrySet().iterator().next().getValue();
 
     ProjectModelFactory factory = ProjectModelFactory.load(pomFile);
-    factory.withQueryType(QueryType.UNSAFE);
+    factory.withQueryType(QueryType.SAFE);
     ProjectModel projectModel = factory.build();
 
     Collection<Dependency> dependencies = POMOperator.queryDependency(projectModel);

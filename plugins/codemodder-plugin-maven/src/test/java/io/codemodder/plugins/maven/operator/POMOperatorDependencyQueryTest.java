@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 import org.dom4j.DocumentException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,7 @@ final class POMOperatorDependencyQueryTest {
 
         LOGGER.debug("Dependencies found: {}", dependencies);
 
-        assertTrue("Dependencies are not empty", !dependencies.isEmpty());
+        assertTrue("Dependencies are not empty", dependencies != null && !dependencies.isEmpty());
       }
     }
   }
@@ -48,22 +47,6 @@ final class POMOperatorDependencyQueryTest {
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
     assertTrue("Dependencies are empty", dependencies.isEmpty());
-  }
-
-  @Test
-  void testFailedUnsafeQuery()
-      throws DocumentException, IOException, URISyntaxException, XMLStreamException {
-    Assertions.assertThrows(
-        IllegalStateException.class,
-        () -> {
-          ProjectModelFactory context =
-              ProjectModelFactory.load(getClass().getResource("pom-broken.xml"));
-          context.withQueryType(QueryType.UNSAFE);
-
-          Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
-
-          assertTrue("Dependencies are empty", dependencies.isEmpty());
-        });
   }
 
   @Test
@@ -83,7 +66,7 @@ final class POMOperatorDependencyQueryTest {
         }
 
         ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource(pomFile));
-        context.withQueryType(QueryType.UNSAFE);
+        context.withQueryType(QueryType.SAFE);
 
         Collection<Dependency> dependencies =
             POMOperator.queryDependency(context.build(), commandListOverride);
@@ -118,7 +101,7 @@ final class POMOperatorDependencyQueryTest {
 
         LOGGER.debug("Dependencies found: " + dependencies);
 
-        assertTrue("Dependencies are not empty", !dependencies.isEmpty());
+        assertTrue("Dependencies are not empty", dependencies != null && !dependencies.isEmpty());
 
         assertTrue("Temp Directory ends up existing", tempDirectory.exists());
         assertTrue("Temp Directory is a directory", tempDirectory.isDirectory());
