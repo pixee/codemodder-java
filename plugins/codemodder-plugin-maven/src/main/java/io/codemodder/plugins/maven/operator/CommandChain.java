@@ -168,7 +168,6 @@ class CommandChain {
   private static final List<Pair<QueryType, String>> AVAILABLE_QUERY_VERSION_COMMANDS =
       new ArrayList<>(
           Arrays.asList(
-              new Pair<>(QueryType.NONE, "UnwrapEffectivePom"),
               new Pair<>(QueryType.SAFE, "VersionByCompilerDefinition"),
               new Pair<>(QueryType.SAFE, "VersionByProperty")));
 
