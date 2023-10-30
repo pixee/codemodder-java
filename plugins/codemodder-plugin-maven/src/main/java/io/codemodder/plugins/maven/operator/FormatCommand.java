@@ -1,5 +1,6 @@
 package io.codemodder.plugins.maven.operator;
 
+import static io.github.pixee.security.XMLInputFactorySecurity.hardenFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +36,7 @@ class FormatCommand extends AbstractCommand {
   private static final Logger LOGGER = LoggerFactory.getLogger(FormatCommand.class);
 
   /** StAX InputFactory */
-  private XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+  private XMLInputFactory inputFactory = hardenFactory(XMLInputFactory.newInstance());
 
   /** StAX OutputFactory */
   private XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
@@ -529,7 +530,7 @@ class FormatCommand extends AbstractCommand {
      *
      * <p>Grab the same initial offset from the formatted element like we did
      */
-    XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+    XMLInputFactory inputFactory = hardenFactory(XMLInputFactory.newInstance());
     XMLEventReader eventReader =
         inputFactory.createXMLEventReader(
             new ByteArrayInputStream(xmlRepresentation.getBytes(pom.getCharset())));
