@@ -19,7 +19,7 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.apache.httpcomponents:httpclient:4.5.14")
-	implementation("org.json:json:20210307")
+	implementation("org.json:json:20231013")
 }
 
 tasks.withType<Test> {
