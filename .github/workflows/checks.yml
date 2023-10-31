@@ -36,6 +36,6 @@ jobs:
           file: core-codemods/src/test/java/io/codemodder/codemods/integration/projectimage/Dockerfile
           push: true
           build-args: |
-            CODEMODDER_BASE_IMAGE=${{ github.event.inputs.codemodder-base-image }}
+            CODEMODDER_BASE_IMAGE=arturoiwa/${{ github.event.inputs.codemodder-base-image }}
             CODEMOD_ID=${{ github.event.inputs.codemod-id }}
           tags: arturoiwa/${{ github.event.inputs.codemod-id }}:latest
