@@ -11,6 +11,7 @@ on:
         description: Codemod ID
         type: string
         required: true
+  push:
 
 jobs:
   build-and-push:
