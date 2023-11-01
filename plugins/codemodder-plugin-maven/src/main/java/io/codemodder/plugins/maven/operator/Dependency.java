@@ -73,10 +73,28 @@ public class Dependency {
     return Objects.hash(groupId, artifactId, version, classifier, packaging, scope);
   }
 
+  /**
+   * Computes the hash code of this object without considering the version.
+   *
+   * This method calculates the hash code based on the values of the group ID, artifact ID,
+   * classifier, packaging, and scope fields, while ignoring the version field.
+   *
+   * @return The computed hash code without the version.
+   */
   public int hashWithoutVersion() {
     return Objects.hash(groupId, artifactId, classifier, packaging, scope);
   }
 
+  /**
+   * Checks if this Dependency object matches another Dependency without considering the version.
+   *
+   * This method compares the hash code of this Dependency with the hash code of another
+   * Dependency, excluding the version information. If the hash codes are equal, the two
+   * dependencies are considered a match without taking version into account.
+   *
+   * @param dependency The Dependency object to compare with this one.
+   * @return true if the dependencies match without considering the version, false otherwise.
+   */
   public boolean matchesWithoutConsideringVersion(final Dependency dependency) {
     return hashWithoutVersion() == dependency.hashWithoutVersion();
   }

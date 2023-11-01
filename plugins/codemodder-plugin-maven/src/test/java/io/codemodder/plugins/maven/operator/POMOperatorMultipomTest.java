@@ -72,8 +72,6 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
    * property, and properties are not used. This test validates dependency resolution and checks if
    * the resulting POM document (pom-multiple-pom-basic-no-version-property-result.xml) is marked as
    * dirty.
-   *
-   * @throws Exception If there is an exception during the test.
    */
   @Test
   void testWithMultiplePomsBasicNoVersionProperty() throws Exception {
@@ -100,8 +98,6 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
    * properties are used. This test validates dependency resolution, property usage, and checks if
    * the resulting POM document (pom-multiple-pom-basic-with-version-property-result.xml) is marked
    * as dirty.
-   *
-   * @throws Exception If there is an exception during the test.
    */
   @Test
   void testWithMultiplePomsBasicWithVersionProperty() throws Exception {
