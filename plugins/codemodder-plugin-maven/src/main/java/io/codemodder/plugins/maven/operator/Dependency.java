@@ -76,7 +76,7 @@ public class Dependency {
   /**
    * Computes the hash code of this object without considering the version.
    *
-   * This method calculates the hash code based on the values of the group ID, artifact ID,
+   * <p>This method calculates the hash code based on the values of the group ID, artifact ID,
    * classifier, packaging, and scope fields, while ignoring the version field.
    *
    * @return The computed hash code without the version.
@@ -88,7 +88,7 @@ public class Dependency {
   /**
    * Checks if this Dependency object matches another Dependency without considering the version.
    *
-   * This method compares the hash code of this Dependency with the hash code of another
+   * <p>This method compares the hash code of this Dependency with the hash code of another
    * Dependency, excluding the version information. If the hash codes are equal, the two
    * dependencies are considered a match without taking version into account.
    *
