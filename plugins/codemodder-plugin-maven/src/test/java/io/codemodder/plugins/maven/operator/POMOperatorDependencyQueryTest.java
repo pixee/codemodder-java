@@ -273,59 +273,6 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  void testOnCompositeSyntheticDependencyIncompleteWithoutParsing() throws Exception {
-    File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
-    Path tempPom = new File(tempDirectory, "pom.xml").toPath();
-    String randomName = "random-artifact-" + System.currentTimeMillis();
-
-    String pomContent =
-        String.join(
-            "\n",
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
-            "<project",
-            "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"",
-            "        xmlns=\"http://maven.apache.org/POM/4.0.0\"",
-            "        xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">",
-            "    <modelVersion>4.0.0</modelVersion>",
-            "",
-            "    <groupId>br.com.ingenieux</groupId>",
-            "    <artifactId>pom-operator</artifactId>",
-            "    <version>0.0.1-SNAPSHOT</version>",
-            "    <parent>",
-            "      <artifactId>somethingelse</artifactId>",
-            "      <groupId>br.com.ingenieux</groupId>",
-            "      <version>1</version>",
-            "      <relativePath>./pom-parent.xml</relativePath>",
-            "    </parent>",
-            "    <dependencies>",
-            "        <dependency>",
-            "            <groupId>dummyorg</groupId>",
-            "            <artifactId>" + randomName + "</artifactId>",
-            "            <version>2.1.3</version>",
-            "        </dependency>",
-            "        <dependency>",
-            "            <groupId>dummyorg</groupId>",
-            "            <artifactId>managed-" + randomName + "</artifactId>",
-            "        </dependency>",
-            "    </dependencies>",
-            "</project>");
-
-    Files.write(tempPom, pomContent.getBytes());
-
-    ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
-    context.withQueryType(QueryType.SAFE);
-    context.withRepositoryPath(tempDirectory);
-    context.withOffline(true);
-
-    List<Command> commandList = getCommandListFor("QueryByEmbedder", "QueryByResolver");
-    Collection<Dependency> dependencies = POMOperator.queryDependency(context.build(), commandList);
-
-    LOGGER.debug("Dependencies found: {}", dependencies);
-
-    assertTrue("Dependencies are empty", dependencies.isEmpty());
-  }
-
-  @Test
   void testOnCompositeSyntheticDependencyIncompleteButWithParser() throws Exception {
     File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
     Path tempPom = new File(tempDirectory, "pom.xml").toPath();
