@@ -8,9 +8,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.maven.shared.invoker.DefaultInvocationRequest;
-import org.apache.maven.shared.invoker.InvocationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +16,6 @@ import org.slf4j.LoggerFactory;
  * relying on dependency:tree mojo outputting into a text file - which might be cached.
  */
 abstract class AbstractQueryCommand extends AbstractCommand {
-
-  private static final String DEPENDENCY_TREE_MOJO_REFERENCE =
-      "org.apache.maven.plugins:maven-dependency-plugin:3.3.0:tree";
 
   protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractQueryCommand.class);
 
@@ -180,82 +174,6 @@ abstract class AbstractQueryCommand extends AbstractCommand {
       }
     }
     return false;
-  }
-
-  protected InvocationRequest buildInvocationRequest(
-      File outputPath, File pomFilePath, ProjectModel c) {
-    Properties props = new Properties(System.getProperties());
-    props.setProperty("outputFile", outputPath.getAbsolutePath());
-
-    String localRepositoryPath = getLocalRepositoryPath(c).getAbsolutePath();
-    props.setProperty("maven.repo.local", localRepositoryPath);
-
-    InvocationRequest request = new DefaultInvocationRequest();
-    findMaven(request);
-
-    request.setPomFile(pomFilePath);
-    request.setShellEnvironmentInherited(true);
-    request.setNoTransferProgress(true);
-    request.setBatchMode(true);
-    request.setRecursive(false);
-    request.setProfiles(Arrays.asList(c.getActiveProfiles().toArray(new String[0])));
-    request.setDebug(true);
-    request.setOffline(c.isOffline());
-    request.setProperties(props);
-
-    List<String> goals = new ArrayList<>();
-    goals.add(AbstractQueryCommand.DEPENDENCY_TREE_MOJO_REFERENCE);
-    request.setGoals(goals);
-
-    return request;
-  }
-
-  /**
-   * Locates where Maven is at - HOME var and main launcher script.
-   *
-   * @param invocationRequest InvocationRequest to be filled up
-   */
-  private void findMaven(InvocationRequest invocationRequest) {
-    /*
-     * Step 1: Locate Maven Home
-     */
-    String m2homeEnvVar = System.getenv("M2_HOME");
-
-    if (m2homeEnvVar != null) {
-      File m2HomeDir = new File(m2homeEnvVar);
-
-      if (m2HomeDir.isDirectory()) {
-        invocationRequest.setMavenHome(m2HomeDir);
-      }
-    }
-
-    /** Step 1.1: Try to guess if that's the case */
-    if (invocationRequest.getMavenHome() == null) {
-      File inferredHome = new File(SystemUtils.getUserHome(), ".m2");
-
-      if (!(inferredHome.exists() && inferredHome.isDirectory())) {
-        LOGGER.warn(
-            "Inferred User Home - which does not exist or not a directory: {}", inferredHome);
-      }
-
-      invocationRequest.setMavenHome(inferredHome);
-    }
-
-    /** Step 2: Find Maven Executable given the operating system and PATH variable contents */
-    List<String> possibleExecutables = Arrays.asList("mvn", "mvnw");
-
-    File foundExecutable =
-        possibleExecutables.stream()
-            .map(Util::which)
-            .filter(exec -> exec != null)
-            .findFirst()
-            .orElse(null);
-
-    if (foundExecutable != null) {
-      invocationRequest.setMavenExecutable(foundExecutable);
-    } else {
-      throw new IllegalStateException("Missing Maven Home / Executable");
-    }
   }
 
   @Override

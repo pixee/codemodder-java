@@ -17,7 +17,6 @@ final class MassRepoIT {
     private String pomPath;
     private boolean useProperties;
     private boolean useScanner;
-    private boolean offline;
     private String commitId;
 
     TestRepo(
@@ -26,14 +25,12 @@ final class MassRepoIT {
         String branch,
         boolean useScanner,
         String commitId,
-        boolean offline,
         String pomPath) {
       this.slug = slug;
       this.useProperties = useProperties;
       this.branch = branch != null ? branch : "master";
       this.useScanner = useScanner;
       this.commitId = commitId;
-      this.offline = offline;
       this.pomPath = pomPath != null ? pomPath : "pom.xml";
     }
 
@@ -56,30 +53,28 @@ final class MassRepoIT {
                   "main",
                   false,
                   "e75cfbeb110e3d3a2ca3c8fee2754992d89c419d",
-                  false,
                   "webgoat-lessons/xxe/pom.xml"),
               "io.github.pixee:java-security-toolkit:1.0.2"),
           new Pair(
               new TestRepo(
-                  "WebGoat/WebGoat", true, "main", true, null, true, "webgoat-container/pom.xml"),
+                  "WebGoat/WebGoat", true, "main", true, null, "webgoat-container/pom.xml"),
               "io.github.pixee:java-security-toolkit:1.0.2"),
           new Pair(
               new TestRepo(
-                  "WebGoat/WebGoat", true, "main", false, null, false, "webgoat-container/pom.xml"),
+                  "WebGoat/WebGoat", true, "main", false, null, "webgoat-container/pom.xml"),
               "io.github.pixee:java-security-toolkit:1.0.2"),
           new Pair(
               new TestRepo(
-                  "WebGoat/WebGoat", true, "main", false, null, false, "webgoat-container/pom.xml"),
+                  "WebGoat/WebGoat", true, "main", false, null, "webgoat-container/pom.xml"),
               "io.github.pixee:java-security-toolkit:1.0.2"),
           new Pair(
-              new TestRepo("CRRogo/vert.x", true, null, false, null, false, null),
+              new TestRepo("CRRogo/vert.x", true, null, false, null, null),
               "io.github.pixee:java-security-toolkit:1.0.2"),
           new Pair(
-              new TestRepo(
-                  "apache/pulsar", false, null, false, null, false, "pulsar-broker/pom.xml"),
+              new TestRepo("apache/pulsar", false, null, false, null, "pulsar-broker/pom.xml"),
               "commons-codec:commons-codec:1.14"),
           new Pair(
-              new TestRepo("apache/rocketmq", false, null, false, null, false, "common/pom.xml"),
+              new TestRepo("apache/rocketmq", false, null, false, null, "common/pom.xml"),
               "commons-codec:commons-codec:1.15"),
           new Pair(
               new TestRepo(
@@ -88,14 +83,13 @@ final class MassRepoIT {
                   null,
                   false,
                   null,
-                  false,
                   "modules/openapi-generator-core/pom.xml"),
               "com.google.guava:guava:31.0-jre"),
           new Pair(
-              new TestRepo("casbin/jcasbin", false, null, false, null, false, null),
+              new TestRepo("casbin/jcasbin", false, null, false, null, null),
               "com.google.code.gson:gson:2.8.0"),
           new Pair(
-              new TestRepo("bytedeco/javacv", false, null, false, null, false, null),
+              new TestRepo("bytedeco/javacv", false, null, false, null, null),
               "org.jogamp.jocl:jocl-main:2.3.1"));
 
   private void checkoutOrResetCachedRepo(TestRepo repo) throws IOException, InterruptedException {
@@ -151,7 +145,6 @@ final class MassRepoIT {
           POMOperator.queryDependency(
               POMScanner.scanFrom(pomFile, repo.cacheDir())
                   .withRepositoryPath(repo.cacheDir())
-                  .withOffline(false)
                   .build());
 
       StringBuilder result = new StringBuilder();
@@ -270,7 +263,6 @@ final class MassRepoIT {
             .withDependency(dependencyToUpgrade)
             .withSkipIfNewer(false)
             .withUseProperties(sampleRepo.useProperties)
-            .withOffline(sampleRepo.offline)
             .build();
 
     boolean result = POMOperator.modify(context);

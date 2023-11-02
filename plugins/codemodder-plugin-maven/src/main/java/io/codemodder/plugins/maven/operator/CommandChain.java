@@ -162,18 +162,12 @@ class CommandChain {
    * and report issues creating
    */
   static final List<Pair<QueryType, String>> AVAILABLE_DEPENDENCY_QUERY_COMMANDS =
-      new ArrayList<>(
-          Arrays.asList(
-              new Pair<>(QueryType.SAFE, "QueryByResolver"),
-              new Pair<>(QueryType.SAFE, "QueryByParsing"),
-              new Pair<>(QueryType.UNSAFE, "QueryByEmbedder"),
-              new Pair<>(QueryType.UNSAFE, "QueryByInvoker")));
+      new ArrayList<>(Arrays.asList(new Pair<>(QueryType.SAFE, "QueryByParsing")));
 
   /** List of Commands for Version Query */
   private static final List<Pair<QueryType, String>> AVAILABLE_QUERY_VERSION_COMMANDS =
       new ArrayList<>(
           Arrays.asList(
-              new Pair<>(QueryType.NONE, "UnwrapEffectivePom"),
               new Pair<>(QueryType.SAFE, "VersionByCompilerDefinition"),
               new Pair<>(QueryType.SAFE, "VersionByProperty")));
 

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 import org.dom4j.DocumentException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,7 @@ final class POMOperatorDependencyQueryTest {
 
         LOGGER.debug("Dependencies found: {}", dependencies);
 
-        assertTrue("Dependencies are not empty", !dependencies.isEmpty());
+        assertTrue("Dependencies are not empty", dependencies != null && !dependencies.isEmpty());
       }
     }
   }
@@ -48,22 +47,6 @@ final class POMOperatorDependencyQueryTest {
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
     assertTrue("Dependencies are empty", dependencies.isEmpty());
-  }
-
-  @Test
-  void testFailedUnsafeQuery()
-      throws DocumentException, IOException, URISyntaxException, XMLStreamException {
-    Assertions.assertThrows(
-        IllegalStateException.class,
-        () -> {
-          ProjectModelFactory context =
-              ProjectModelFactory.load(getClass().getResource("pom-broken.xml"));
-          context.withQueryType(QueryType.UNSAFE);
-
-          Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
-
-          assertTrue("Dependencies are empty", dependencies.isEmpty());
-        });
   }
 
   @Test
@@ -83,7 +66,7 @@ final class POMOperatorDependencyQueryTest {
         }
 
         ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource(pomFile));
-        context.withQueryType(QueryType.UNSAFE);
+        context.withQueryType(QueryType.SAFE);
 
         Collection<Dependency> dependencies =
             POMOperator.queryDependency(context.build(), commandListOverride);
@@ -118,7 +101,7 @@ final class POMOperatorDependencyQueryTest {
 
         LOGGER.debug("Dependencies found: " + dependencies);
 
-        assertTrue("Dependencies are not empty", !dependencies.isEmpty());
+        assertTrue("Dependencies are not empty", dependencies != null && !dependencies.isEmpty());
 
         assertTrue("Temp Directory ends up existing", tempDirectory.exists());
         assertTrue("Temp Directory is a directory", tempDirectory.isDirectory());
@@ -136,7 +119,6 @@ final class POMOperatorDependencyQueryTest {
         ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource("pom-1.xml"));
         context.withQueryType(queryType);
         context.withRepositoryPath(tempDirectory);
-        context.withOffline(true);
 
         Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
@@ -183,7 +165,6 @@ final class POMOperatorDependencyQueryTest {
     ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
     context.withQueryType(QueryType.SAFE);
     context.withRepositoryPath(tempDirectory);
-    context.withOffline(true);
 
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
@@ -272,7 +253,6 @@ final class POMOperatorDependencyQueryTest {
     ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
     context.withQueryType(QueryType.SAFE);
     context.withRepositoryPath(tempDirectory);
-    context.withOffline(true);
 
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
@@ -287,59 +267,6 @@ final class POMOperatorDependencyQueryTest {
             .get(0)
             .getArtifactId()
             .equals(randomName));
-  }
-
-  @Test
-  void testOnCompositeSyntheticDependencyIncompleteWithoutParsing() throws Exception {
-    File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
-    Path tempPom = new File(tempDirectory, "pom.xml").toPath();
-    String randomName = "random-artifact-" + System.currentTimeMillis();
-
-    String pomContent =
-        String.join(
-            "\n",
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
-            "<project",
-            "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"",
-            "        xmlns=\"http://maven.apache.org/POM/4.0.0\"",
-            "        xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">",
-            "    <modelVersion>4.0.0</modelVersion>",
-            "",
-            "    <groupId>br.com.ingenieux</groupId>",
-            "    <artifactId>pom-operator</artifactId>",
-            "    <version>0.0.1-SNAPSHOT</version>",
-            "    <parent>",
-            "      <artifactId>somethingelse</artifactId>",
-            "      <groupId>br.com.ingenieux</groupId>",
-            "      <version>1</version>",
-            "      <relativePath>./pom-parent.xml</relativePath>",
-            "    </parent>",
-            "    <dependencies>",
-            "        <dependency>",
-            "            <groupId>dummyorg</groupId>",
-            "            <artifactId>" + randomName + "</artifactId>",
-            "            <version>2.1.3</version>",
-            "        </dependency>",
-            "        <dependency>",
-            "            <groupId>dummyorg</groupId>",
-            "            <artifactId>managed-" + randomName + "</artifactId>",
-            "        </dependency>",
-            "    </dependencies>",
-            "</project>");
-
-    Files.write(tempPom, pomContent.getBytes());
-
-    ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
-    context.withQueryType(QueryType.SAFE);
-    context.withRepositoryPath(tempDirectory);
-    context.withOffline(true);
-
-    List<Command> commandList = getCommandListFor("QueryByEmbedder", "QueryByResolver");
-    Collection<Dependency> dependencies = POMOperator.queryDependency(context.build(), commandList);
-
-    LOGGER.debug("Dependencies found: {}", dependencies);
-
-    assertTrue("Dependencies are empty", dependencies.isEmpty());
   }
 
   @Test
@@ -394,7 +321,6 @@ final class POMOperatorDependencyQueryTest {
     ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
     context.withQueryType(QueryType.SAFE);
     context.withRepositoryPath(tempDirectory);
-    context.withOffline(true);
 
     List<Command> commandList = getCommandListFor("QueryByParsing");
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build(), commandList);
@@ -441,7 +367,6 @@ final class POMOperatorDependencyQueryTest {
     ProjectModelFactory context = ProjectModelFactory.load(pomFile);
     context.withQueryType(QueryType.SAFE);
     context.withRepositoryPath(tempDirectory);
-    context.withOffline(true);
 
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
