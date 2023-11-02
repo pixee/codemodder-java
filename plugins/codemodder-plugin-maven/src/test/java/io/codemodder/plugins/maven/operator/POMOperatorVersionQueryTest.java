@@ -26,7 +26,7 @@ final class POMOperatorVersionQueryTest {
             queryType -> {
               Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
               try {
-                optionalVersionQueryResponse = versionDefinitions(pomFile, queryType, false);
+                optionalVersionQueryResponse = versionDefinitions(pomFile, queryType);
               } catch (DocumentException e) {
                 throw new RuntimeException(e);
               } catch (IOException e) {
@@ -58,7 +58,7 @@ final class POMOperatorVersionQueryTest {
             queryType -> {
               Optional<VersionQueryResponse> optionalVersionResponse = null;
               try {
-                optionalVersionResponse = versionDefinitions("pom-version-0.xml", queryType, false);
+                optionalVersionResponse = versionDefinitions("pom-version-0.xml", queryType);
               } catch (DocumentException e) {
                 throw new RuntimeException(e);
               } catch (IOException e) {
@@ -90,8 +90,7 @@ final class POMOperatorVersionQueryTest {
 
                         Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
                         try {
-                          optionalVersionQueryResponse =
-                              versionDefinitions(pomFile, queryType, false);
+                          optionalVersionQueryResponse = versionDefinitions(pomFile, queryType);
                         } catch (DocumentException e) {
                           throw new RuntimeException(e);
                         } catch (IOException e) {
@@ -133,8 +132,7 @@ final class POMOperatorVersionQueryTest {
 
                         Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
                         try {
-                          optionalVersionQueryResponse =
-                              versionDefinitions(pomFile, queryType, true);
+                          optionalVersionQueryResponse = versionDefinitions(pomFile, queryType);
                         } catch (DocumentException e) {
                           throw new RuntimeException(e);
                         } catch (IOException e) {
@@ -173,7 +171,7 @@ final class POMOperatorVersionQueryTest {
 
               Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
               try {
-                optionalVersionQueryResponse = versionDefinitions(pomFile, queryType, false);
+                optionalVersionQueryResponse = versionDefinitions(pomFile, queryType);
               } catch (DocumentException e) {
                 throw new RuntimeException(e);
               } catch (IOException e) {
@@ -205,7 +203,7 @@ final class POMOperatorVersionQueryTest {
             queryType -> {
               Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
               try {
-                optionalVersionQueryResponse = versionDefinitions(pomFile, queryType, false);
+                optionalVersionQueryResponse = versionDefinitions(pomFile, queryType);
               } catch (DocumentException e) {
                 throw new RuntimeException(e);
               } catch (IOException e) {
@@ -229,13 +227,11 @@ final class POMOperatorVersionQueryTest {
             });
   }
 
-  Optional<VersionQueryResponse> versionDefinitions(
-      String pomFile, QueryType queryType, boolean offline)
+  Optional<VersionQueryResponse> versionDefinitions(String pomFile, QueryType queryType)
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModel context =
         ProjectModelFactory.load(this.getClass().getResource(pomFile))
             .withQueryType(queryType)
-            .withOffline(offline)
             .build();
 
     return POMOperator.queryVersions(context);

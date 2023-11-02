@@ -23,7 +23,6 @@ public class ProjectModelFactory {
   private boolean overrideIfAlreadyExists;
   private QueryType queryType;
   private File repositoryPath;
-  private boolean offline;
 
   private ProjectModelFactory() {
     parentPomFiles = new ArrayList<>();
@@ -108,16 +107,6 @@ public class ProjectModelFactory {
   }
 
   /**
-   * Fluent Setter
-   *
-   * @param offline Offline
-   */
-  public ProjectModelFactory withOffline(boolean offline) {
-    this.offline = offline;
-    return this;
-  }
-
-  /**
    * Creates a new instance of ProjectModelFactory.
    *
    * @return A new ProjectModelFactory instance.
@@ -191,7 +180,6 @@ public class ProjectModelFactory {
         overrideIfAlreadyExists,
         queryType,
         repositoryPath,
-        null,
-        offline);
+        null);
   }
 }

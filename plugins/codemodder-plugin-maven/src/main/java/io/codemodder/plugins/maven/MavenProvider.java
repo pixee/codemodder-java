@@ -77,8 +77,6 @@ public final class MavenProvider implements ProjectProvider {
     }
   }
 
-  private final boolean offline;
-
   private final PomModifier pomModifier;
   private final PomFileFinder pomFileFinder;
   private final ArtifactInjectionPositionFinder positionFinder;
@@ -87,13 +85,11 @@ public final class MavenProvider implements ProjectProvider {
       final PomModifier pomModifier,
       final PomFileFinder pomFileFinder,
       final DependencyDescriptor dependencyDescriptor,
-      final ArtifactInjectionPositionFinder positionFinder,
-      final boolean offline) {
+      final ArtifactInjectionPositionFinder positionFinder) {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
     this.pomModifier = pomModifier;
     this.pomFileFinder = pomFileFinder;
-    this.offline = offline;
     this.dependencyDescriptor = Objects.requireNonNull(dependencyDescriptor);
     this.positionFinder = Objects.requireNonNull(positionFinder);
   }
@@ -101,14 +97,12 @@ public final class MavenProvider implements ProjectProvider {
   MavenProvider(
       final PomModifier pomModifier,
       final PomFileFinder pomFileFinder,
-      final DependencyDescriptor dependencyDescriptor,
-      final boolean offline) {
+      final DependencyDescriptor dependencyDescriptor) {
     this(
         pomModifier,
         pomFileFinder,
         dependencyDescriptor,
-        new DefaultArtifactInjectionPositionFinder(),
-        offline);
+        new DefaultArtifactInjectionPositionFinder());
   }
 
   MavenProvider(final PomModifier pomModifier) {
@@ -116,8 +110,7 @@ public final class MavenProvider implements ProjectProvider {
         pomModifier,
         new DefaultPomFileFinder(),
         DependencyDescriptor.createMarkdownDescriptor(),
-        new DefaultArtifactInjectionPositionFinder(),
-        true);
+        new DefaultArtifactInjectionPositionFinder());
   }
 
   public MavenProvider() {
@@ -125,8 +118,7 @@ public final class MavenProvider implements ProjectProvider {
         new DefaultPomModifier(),
         new DefaultPomFileFinder(),
         DependencyDescriptor.createMarkdownDescriptor(),
-        new DefaultArtifactInjectionPositionFinder(),
-        true);
+        new DefaultArtifactInjectionPositionFinder());
   }
 
   @VisibleForTesting
@@ -210,8 +202,7 @@ public final class MavenProvider implements ProjectProvider {
                 POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
                     .withDependency(newDependency)
                     .withSkipIfNewer(true)
-                    .withUseProperties(true)
-                    .withOffline(this.offline);
+                    .withUseProperties(true);
           } catch (DocumentException e) {
             throw new RuntimeException(e);
           } catch (IOException e) {
@@ -220,13 +211,11 @@ public final class MavenProvider implements ProjectProvider {
             throw new RuntimeException(e);
           }
 
-          if (this.offline) {
-            try {
-              projectModelFactory =
-                  projectModelFactory.withRepositoryPath(Files.createTempDirectory(null).toFile());
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
+          try {
+            projectModelFactory =
+                projectModelFactory.withRepositoryPath(Files.createTempDirectory(null).toFile());
+          } catch (IOException e) {
+            throw new RuntimeException(e);
           }
 
           ProjectModel projectModel = projectModelFactory.build();
@@ -348,16 +337,13 @@ public final class MavenProvider implements ProjectProvider {
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModelFactory projectModelFactory =
         POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
-            .withQueryType(QueryType.SAFE)
-            .withOffline(true);
+            .withQueryType(QueryType.SAFE);
 
-    if (this.offline) {
-      try {
-        projectModelFactory =
-            projectModelFactory.withRepositoryPath(Files.createTempDirectory(null).toFile());
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+    try {
+      projectModelFactory =
+          projectModelFactory.withRepositoryPath(Files.createTempDirectory(null).toFile());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
 
     ProjectModel originalProjectModel = projectModelFactory.build();

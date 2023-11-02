@@ -119,7 +119,6 @@ final class POMOperatorDependencyQueryTest {
         ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource("pom-1.xml"));
         context.withQueryType(queryType);
         context.withRepositoryPath(tempDirectory);
-        context.withOffline(true);
 
         Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
@@ -166,7 +165,6 @@ final class POMOperatorDependencyQueryTest {
     ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
     context.withQueryType(QueryType.SAFE);
     context.withRepositoryPath(tempDirectory);
-    context.withOffline(true);
 
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
@@ -255,7 +253,6 @@ final class POMOperatorDependencyQueryTest {
     ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
     context.withQueryType(QueryType.SAFE);
     context.withRepositoryPath(tempDirectory);
-    context.withOffline(true);
 
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
@@ -324,7 +321,6 @@ final class POMOperatorDependencyQueryTest {
     ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
     context.withQueryType(QueryType.SAFE);
     context.withRepositoryPath(tempDirectory);
-    context.withOffline(true);
 
     List<Command> commandList = getCommandListFor("QueryByParsing");
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build(), commandList);
@@ -371,7 +367,6 @@ final class POMOperatorDependencyQueryTest {
     ProjectModelFactory context = ProjectModelFactory.load(pomFile);
     context.withQueryType(QueryType.SAFE);
     context.withRepositoryPath(tempDirectory);
-    context.withOffline(true);
 
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 

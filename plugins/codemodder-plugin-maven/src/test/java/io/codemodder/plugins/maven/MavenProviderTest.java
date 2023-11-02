@@ -138,8 +138,7 @@ final class MavenProviderTest {
         new MavenProvider(
             new MavenProvider.DefaultPomModifier(),
             new MavenProvider.DefaultPomFileFinder(),
-            defaultDescriptor,
-            false);
+            defaultDescriptor);
 
     DependencyUpdateResult result =
         provider.updateDependencies(
@@ -189,8 +188,7 @@ final class MavenProviderTest {
         new MavenProvider(
             new MavenProvider.DefaultPomModifier(),
             new MavenProvider.DefaultPomFileFinder(),
-            defaultDescriptor,
-            false);
+            defaultDescriptor);
 
     DependencyUpdateResult result =
         provider.updateDependencies(
@@ -230,8 +228,7 @@ final class MavenProviderTest {
         new MavenProvider(
             new MavenProvider.DefaultPomModifier(),
             new MavenProvider.DefaultPomFileFinder(),
-            defaultDescriptor,
-            true);
+            defaultDescriptor);
 
     DependencyUpdateResult result =
         provider.updateDependencies(
@@ -284,8 +281,7 @@ final class MavenProviderTest {
         new MavenProvider(
             new MavenProvider.DefaultPomModifier(),
             new MavenProvider.DefaultPomFileFinder(),
-            defaultDescriptor,
-            false);
+            defaultDescriptor);
 
     DependencyUpdateResult result =
         provider.updateDependencies(
@@ -319,8 +315,7 @@ final class MavenProviderTest {
   void it_returns_empty_when_no_pom() throws IOException {
     when(pomFileFinder.findForFile(any(), any())).thenReturn(Optional.empty());
 
-    MavenProvider provider =
-        new MavenProvider(pomModifier, pomFileFinder, defaultDescriptor, false);
+    MavenProvider provider = new MavenProvider(pomModifier, pomFileFinder, defaultDescriptor);
 
     DependencyUpdateResult result =
         provider.updateDependencies(projectDir, marsJavaFile, List.of(marsDependency1));
