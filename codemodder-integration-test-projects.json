@@ -1,0 +1,10 @@
+{
+    "include": [
+    {
+        "project-name": "move-switch-default-last"
+    },
+    {
+        "project-name": "verbose-request-mapping"
+    }
+    ]
+}

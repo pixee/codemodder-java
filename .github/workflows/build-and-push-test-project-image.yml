@@ -25,15 +25,14 @@ jobs:
       - name: setup test list
         id: matrix-property
         run: |
-          run: echo "::set-output name=matrix_values::$(cat codemodder-integration-test-projects.txt | jq -R -s -c 'split("\n")[:-1]')"
+          echo "matrix_values=$(jq -c . < ./codemodder-integration-test-projects.json)" >> $GITHUB_OUTPUT
 
   build_and_push:
     name: Build and Push
     needs: setup
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        project: ${{ fromJson(needs.setup.outputs.test-projects)}}
+      matrix: ${{ fromJson(needs.setup.outputs.test-projects)}}
     steps:
       - name: print values
         run: |
