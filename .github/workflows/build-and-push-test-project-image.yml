@@ -25,7 +25,8 @@ jobs:
       - name: setup test list
         id: matrix-property
         run: |
-          echo "matrixProperty=$( jq -c . < codemodder-integration-test-projects.json)" >> $GITHUB_OUTPUT
+          echo "matrixProperty=$( jq -c . < codemodder-integration-test-projects.json )" >> $GITHUB_OUTPUT
+          echo $matrixProperty
 
   build_and_push:
     name: Build and Push
@@ -33,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: ${{ fromJson(needs.setup.outputs.test-projects) }}
+        project: ${{ fromJSON(needs.setup.outputs.test-projects) }}
     steps:
       - name: print values
         run: |
