@@ -26,11 +26,12 @@ jobs:
 
   build_and_push:
     name: Build and Push
+    needs: setup
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: ${{ setup.steps.matrix-property.outputs.matrixProperty }}
+        project: ${{ steps.matrix-property.outputs.matrixProperty }}
     steps:
       - name: print values
         run: |
-          echo "Using Matrix Item: ${{ matrix.property }}"
+          echo "Using Matrix Item: ${{ matrix.project }}"
