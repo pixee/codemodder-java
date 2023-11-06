@@ -36,4 +36,4 @@ jobs:
     steps:
       - name: print values
         run: |
-          echo "Using Matrix Item: ${{ matrix.project }}"
+          echo "Using Matrix Item: ${{ matrix.project-name }}"
