@@ -25,9 +25,7 @@ jobs:
       - name: setup test list
         id: matrix-property
         run: |
-          matrix_values="$(cat codemodder-integration-test-projects.txt)"
-          IFS=',' read -ra values <<< "$matrix_values"
-          echo "::set-output name=matrix_values::${values[*]}"
+          run: echo "::set-output name=matrix_values::$(cat codemodder-integration-test-projects.txt | jq -R -s -c 'split("\n")[:-1]')"
 
   build_and_push:
     name: Build and Push
@@ -35,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: ${{needs.setup.outputs.test-projects}}
+        project: ${{ fromJson(needs.setup.outputs.test-projects)}}
     steps:
       - name: print values
         run: |

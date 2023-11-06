@@ -1,1 +1,1 @@
-move-switch-default-last,verbose-request-mapping
+move-switch-default-last verbose-request-mapping
