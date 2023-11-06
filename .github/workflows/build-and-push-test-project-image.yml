@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: ${{ steps.matrix-property.outputs.matrixProperty }}
+        project: ${{ needs.setup.outputs.matrixProperty }}
     steps:
       - name: print values
         run: |
