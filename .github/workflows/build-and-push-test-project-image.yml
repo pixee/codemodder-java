@@ -25,7 +25,7 @@ jobs:
       - name: setup test list
         id: matrix-property
         run: |
-          echo "matrixProperty=$(jq -c . < codemodder-integration-test-projects.json) >> $GITHUB_OUTPUT
+          echo "matrixProperty=$( jq -c . < codemodder-integration-test-projects.json)" >> $GITHUB_OUTPUT
 
   build_and_push:
     name: Build and Push
