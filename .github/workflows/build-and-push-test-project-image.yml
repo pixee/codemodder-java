@@ -34,6 +34,13 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.setup.outputs.test-projects)}}
     steps:
-      - name: print values
-        run: |
-          echo "Using Matrix Item: ${{ matrix.project-name }}"
+      - name: build_and_push
+        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        with:
+          context: .
+          file: core-codemods/src/test/java/io/codemodder/codemods/integration/projectimage/Dockerfile
+          push: false
+          build-args: |
+            CODEMODDER_BASE_IMAGE=arturoiwa/codemodder-base
+            CODEMOD_ID=${{ matrix.project-name }}
+          tags: arturoiwa/${{ github.event.inputs.codemod-id }}:latest
