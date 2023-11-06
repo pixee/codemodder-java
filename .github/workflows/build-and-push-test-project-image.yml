@@ -25,7 +25,7 @@ jobs:
       - name: setup test list
         id: matrix-property
         run: |
-          matrix_values=$(cat codemodder-integration-test-projects.txt)"
+          matrix_values="$(cat codemodder-integration-test-projects.txt)"
           IFS=',' read -ra values <<< "$matrix_values"
           echo "::set-output name=matrix_values::${values[*]}"
 
