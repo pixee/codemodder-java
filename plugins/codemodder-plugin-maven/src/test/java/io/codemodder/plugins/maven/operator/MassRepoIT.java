@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 final class MassRepoIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(MassRepoIT.class);
 
+  private static final POMOperator pomOperator = POMOperator.forTesting();
+
   private static class TestRepo {
     private String slug;
     private String branch;
@@ -142,7 +144,7 @@ final class MassRepoIT {
       File pomFile = new File(repo.cacheDir(), repo.pomPath);
 
       Collection<Dependency> dependencies =
-          POMOperator.queryDependency(
+          pomOperator.queryDependency(
               POMScanner.scanFrom(pomFile, repo.cacheDir())
                   .withRepositoryPath(repo.cacheDir())
                   .build());
@@ -265,7 +267,7 @@ final class MassRepoIT {
             .withUseProperties(sampleRepo.useProperties)
             .build();
 
-    boolean result = POMOperator.modify(context);
+    boolean result = pomOperator.modify(context);
 
     context.allPomFiles().stream()
         .filter(pomFile -> pomFile.getDirty())

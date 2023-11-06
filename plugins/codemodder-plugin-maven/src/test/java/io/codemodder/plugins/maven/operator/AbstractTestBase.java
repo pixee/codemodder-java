@@ -24,6 +24,8 @@ import org.xmlunit.diff.Diff;
 class AbstractTestBase {
   protected static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 
+  protected static final POMOperator pomOperator = POMOperator.forTesting();
+
   protected File getResource(String name) throws URISyntaxException {
     return new File(this.getClass().getResource(name).toURI());
   }
@@ -44,7 +46,7 @@ class AbstractTestBase {
 
     if (resource != null) {
       Document outcome = new SAXReader().read(resource);
-      POMOperator.modify(context);
+      pomOperator.modify(context);
 
       Assert.assertFalse(
           "Expected and outcome have differences",
@@ -56,7 +58,7 @@ class AbstractTestBase {
               AbstractTestBase.class.getPackage().getName().replace(".", "/"),
               resultFile);
 
-      POMOperator.modify(context);
+      pomOperator.modify(context);
 
       byte[] resultPomBytes = context.getPomFile().getResultPomBytes();
 

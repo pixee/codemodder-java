@@ -13,7 +13,7 @@ import org.dom4j.DocumentException;
  * Builder Object for creating instances of the ProjectModel class, which represent the input
  * parameters for chain operations.
  */
-public class ProjectModelFactory {
+class ProjectModelFactory {
   private POMDocument pomFile;
   private List<POMDocument> parentPomFiles;
   private Dependency dependency;

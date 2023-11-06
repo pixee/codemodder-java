@@ -7,12 +7,9 @@ import com.github.difflib.patch.Patch;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
-import io.codemodder.plugins.maven.operator.Dependency;
 import io.codemodder.plugins.maven.operator.POMDocument;
 import io.codemodder.plugins.maven.operator.POMOperator;
-import io.codemodder.plugins.maven.operator.POMScanner;
 import io.codemodder.plugins.maven.operator.ProjectModel;
-import io.codemodder.plugins.maven.operator.ProjectModelFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -163,121 +160,76 @@ public final class MavenProvider implements ProjectProvider {
       return DependencyUpdateResult.EMPTY_UPDATE;
     }
 
-    Path pomFile = maybePomFile.get();
-    List<CodeTFChangesetEntry> changesets = new ArrayList<>();
+    final Path pomFile = maybePomFile.get();
+    final List<CodeTFChangesetEntry> changesets = new ArrayList<>();
 
     final List<DependencyGAV> skippedDependencies = new ArrayList<>();
     final List<DependencyGAV> injectedDependencies = new ArrayList<>();
     final Set<Path> erroredFiles = new LinkedHashSet<>();
+    final POMOperator pomOperator = new POMOperator(pomFile, projectDir);
 
-    AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
-        new AtomicReference<>(getDependenciesFrom(pomFile, projectDir));
+    final AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
+        new AtomicReference<>(pomOperator.getAllFoundDependencies());
     LOG.trace("Beginning dependency set size: {}", foundDependenciesMapped.get().size());
 
     dependencies.forEach(
         newDependencyGAV -> {
-          LOG.trace("Looking at injecting new dependency: {}", newDependencyGAV);
-          boolean foundIt =
-              foundDependenciesMapped.get().stream().anyMatch(newDependencyGAV::equals);
-
-          if (foundIt) {
-            LOG.trace("Found it -- skipping");
-            skippedDependencies.add(newDependencyGAV);
-            return;
-          }
-
-          LOG.trace("Need to inject it...");
-          Dependency newDependency =
-              new Dependency(
-                  newDependencyGAV.group(),
-                  newDependencyGAV.artifact(),
-                  newDependencyGAV.version(),
-                  null,
-                  null,
-                  null);
-          ProjectModelFactory projectModelFactory = null;
           try {
-            projectModelFactory =
-                POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
-                    .withDependency(newDependency)
-                    .withSkipIfNewer(true)
-                    .withUseProperties(true);
-          } catch (DocumentException e) {
-            throw new RuntimeException(e);
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-          }
+            LOG.trace("Looking at injecting new dependency: {}", newDependencyGAV);
+            final boolean foundIt =
+                foundDependenciesMapped.get().stream().anyMatch(newDependencyGAV::equals);
 
-          try {
-            projectModelFactory =
-                projectModelFactory.withRepositoryPath(Files.createTempDirectory(null).toFile());
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
+            if (foundIt) {
+              LOG.trace("Found it -- skipping");
+              skippedDependencies.add(newDependencyGAV);
+              return;
+            }
 
-          ProjectModel projectModel = projectModelFactory.build();
+            final ProjectModel modifiedProjectModel =
+                pomOperator.modifyAndGetProjectModel(newDependencyGAV);
 
-          boolean result = false;
-          try {
-            result = POMOperator.modify(projectModel);
-          } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          } catch (XMLStreamException e) {
-            throw new RuntimeException(e);
-          }
-
-          if (result) {
-            LOG.trace("Modified the pom -- writing it back");
-            Collection<POMDocument> allPomFiles = projectModel.allPomFiles();
-            LOG.trace("Found " + allPomFiles.size() + " pom files -- " + allPomFiles);
-            for (POMDocument aPomFile : allPomFiles) {
-              URI uri;
-              try {
-                uri = aPomFile.getPomPath().toURI();
-              } catch (URISyntaxException ex) {
-                ex.printStackTrace();
-                throw new DependencyUpdateException("Failure parsing URL: " + aPomFile, ex);
-              }
-
-              Path path = Path.of(uri);
-
-              if (aPomFile.getDirty()) {
-                LOG.trace("POM file {} was dirty", path);
+            if (modifiedProjectModel != null) {
+              LOG.trace("Modified the pom -- writing it back");
+              Collection<POMDocument> allPomFiles = modifiedProjectModel.allPomFiles();
+              LOG.trace("Found " + allPomFiles.size() + " pom files -- " + allPomFiles);
+              for (POMDocument aPomFile : allPomFiles) {
+                URI uri;
                 try {
-                  CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile, newDependencyGAV);
-                  pomModifier.modify(path, aPomFile.getResultPomBytes());
-                  LOG.trace("POM written!");
-                  injectedDependencies.add(newDependencyGAV);
-                  changesets.add(entry);
-                } catch (IOException | UncheckedIOException exc) {
-                  LOG.error("Failed to write pom", exc);
-                  erroredFiles.add(path);
+                  uri = aPomFile.getPomPath().toURI();
+                } catch (URISyntaxException ex) {
+                  ex.printStackTrace();
+                  throw new DependencyUpdateException("Failure parsing URL: " + aPomFile, ex);
                 }
-              } else {
-                LOG.trace("POM file {} wasn't dirty", path);
-              }
-            }
 
-            Collection<DependencyGAV> newDependencySet = null;
-            try {
-              newDependencySet = getDependenciesFrom(pomFile, projectDir);
-            } catch (DocumentException e) {
-              throw new RuntimeException(e);
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            } catch (URISyntaxException e) {
-              throw new RuntimeException(e);
-            } catch (XMLStreamException e) {
-              throw new RuntimeException(e);
+                Path path = Path.of(uri);
+
+                if (aPomFile.getDirty()) {
+                  LOG.trace("POM file {} was dirty", path);
+                  try {
+                    CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile, newDependencyGAV);
+                    pomModifier.modify(path, aPomFile.getResultPomBytes());
+                    LOG.trace("POM written!");
+                    injectedDependencies.add(newDependencyGAV);
+                    changesets.add(entry);
+                  } catch (IOException | UncheckedIOException exc) {
+                    LOG.error("Failed to write pom", exc);
+                    erroredFiles.add(path);
+                  }
+                } else {
+                  LOG.trace("POM file {} wasn't dirty", path);
+                }
+              }
+
+              final Collection<DependencyGAV> newDependencySet =
+                  pomOperator.getAllFoundDependencies();
+
+              LOG.trace("New dependency set size: {}", newDependencySet.size());
+              foundDependenciesMapped.set(newDependencySet);
+            } else {
+              LOG.trace("POM file didn't need modification or it failed?");
             }
-            LOG.trace("New dependency set size: {}", newDependencySet.size());
-            foundDependenciesMapped.set(newDependencySet);
-          } else {
-            LOG.trace("POM file didn't need modification or it failed?");
+          } catch (DocumentException | IOException | URISyntaxException | XMLStreamException e) {
+            throw new RuntimeException(e);
           }
         });
 
@@ -329,31 +281,6 @@ public final class MavenProvider implements ProjectProvider {
     String diff = String.join(pomDocument.getEndl(), patchDiff);
 
     return new CodeTFChangesetEntry(relativePomPath, diff, List.of(change));
-  }
-
-  @NotNull
-  private Collection<DependencyGAV> getDependenciesFrom(final Path pomFile, final Path projectDir)
-      throws DocumentException, IOException, URISyntaxException, XMLStreamException {
-    ProjectModelFactory projectModelFactory =
-        POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile()).withSafeQueryType();
-
-    try {
-      projectModelFactory =
-          projectModelFactory.withRepositoryPath(Files.createTempDirectory(null).toFile());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    ProjectModel originalProjectModel = projectModelFactory.build();
-
-    Collection<Dependency> foundDependencies = POMOperator.queryDependency(originalProjectModel);
-
-    return foundDependencies.stream()
-        .map(
-            dependency ->
-                DependencyGAV.createDefault(
-                    dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()))
-        .collect(Collectors.toList());
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(MavenProvider.class);
