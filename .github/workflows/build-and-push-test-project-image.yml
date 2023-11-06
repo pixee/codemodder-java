@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: ${{fromJSON(needs.setup.outputs.test-projects)}}
+        project: ${{needs.setup.outputs.test-projects}}
     steps:
       - name: print values
         run: |
