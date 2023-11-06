@@ -26,7 +26,7 @@ jobs:
         id: matrix-property
         run: |
           matrixProperty=$(cat codemodder-integration-test-projects.txt)
-          echo "::set-output name=matrixProperty::$matrixProperty"
+          echo "::set-output name=matrixProperty::${matrixProperty[@]}"
 
   build_and_push:
     name: Build and Push
