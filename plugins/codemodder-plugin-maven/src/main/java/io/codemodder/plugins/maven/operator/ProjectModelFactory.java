@@ -86,13 +86,9 @@ public class ProjectModelFactory {
     return this;
   }
 
-  /**
-   * Fluent Setter
-   *
-   * @param queryType query type
-   */
-  public ProjectModelFactory withQueryType(QueryType queryType) {
-    this.queryType = queryType;
+  /** Fluent Setter */
+  public ProjectModelFactory withSafeQueryType() {
+    this.queryType = QueryType.SAFE;
     return this;
   }
 

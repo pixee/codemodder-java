@@ -27,19 +27,6 @@ public class POMScanner {
   private static final Logger LOGGER = LoggerFactory.getLogger(POMScanner.class);
 
   /**
-   * Scans a POM file and its parent POMs, if any, and creates a ProjectModelFactory.
-   *
-   * @param originalFile The original POM file to scan.
-   * @param topLevelDirectory The top-level directory containing the POM files.
-   * @return A ProjectModelFactory representing the scanned POMs.
-   * @throws Exception If an error occurs during the scanning process.
-   */
-  public static ProjectModelFactory scanFrom(File originalFile, File topLevelDirectory)
-      throws Exception {
-    return legacyScanFrom(originalFile, topLevelDirectory);
-  }
-
-  /**
    * Scans a POM file and its parent POMs using the legacy method and creates a ProjectModelFactory.
    *
    * @param originalFile The original POM file to scan.
@@ -49,7 +36,7 @@ public class POMScanner {
    * @throws IOException If an I/O error occurs.
    * @throws URISyntaxException If there is an issue with the URI syntax.
    */
-  public static ProjectModelFactory legacyScanFrom(File originalFile, File topLevelDirectory)
+  public static ProjectModelFactory scanFrom(File originalFile, File topLevelDirectory)
       throws DocumentException, IOException, URISyntaxException {
     POMDocument pomFile = POMDocumentFactory.load(originalFile);
     List<POMDocument> parentPomFiles = new ArrayList<>();

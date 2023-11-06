@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 import javax.xml.stream.XMLStreamException;
 
 /** Represents a Command in a Chain of Responsibility Pattern */
-public interface Command {
+interface Command {
   /**
    * Given a context, performs an operation
    *
