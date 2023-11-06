@@ -8,7 +8,7 @@ jobs:
     name: Setup
     runs-on: ubuntu-latest
     outputs:
-      test-projects: ${{ steps.matrix-property.outputs.matrixProperty }}
+      test-projects: ${{ steps.matrix-property.outputs.matrix_values }}
     steps:
       - name: Clone repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -25,7 +25,9 @@ jobs:
       - name: setup test list
         id: matrix-property
         run: |
-          echo "matrixProperty=$( jq -c . < codemodder-integration-test-projects.json )" >> $GITHUB_OUTPUT
+          matrix_values=$(cat codemodder-integration-test-projects.txt)"
+          IFS=',' read -ra values <<< "$matrix_values"
+          echo "::set-output name=matrix_values::${values[*]}"
 
   build_and_push:
     name: Build and Push
