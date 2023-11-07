@@ -32,6 +32,16 @@ public class POMOperator {
     this.projectDir = null;
   }
 
+  /**
+   * Modifies and retrieves the ProjectModel with a new dependency.
+   *
+   * @param newDependencyGAV The new DependencyGAV to add to the POM.
+   * @return The modified ProjectModel, or null if the modification was unsuccessful.
+   * @throws XMLStreamException If an error occurs during XML stream processing.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws IOException If an I/O error occurs.
+   * @throws DocumentException If an error occurs while parsing the document.
+   */
   public ProjectModel modifyAndGetProjectModel(final DependencyGAV newDependencyGAV)
       throws XMLStreamException, URISyntaxException, IOException, DocumentException {
     final Dependency newDependency = new Dependency(newDependencyGAV);
@@ -46,6 +56,15 @@ public class POMOperator {
     return modify(projectModel) ? projectModel : null;
   }
 
+  /**
+   * Retrieves all found dependencies in the POM.
+   *
+   * @return A collection of DependencyGAV objects representing the found dependencies.
+   * @throws DocumentException If an error occurs while parsing the document.
+   * @throws IOException If an I/O error occurs.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws XMLStreamException If an error occurs during XML stream processing.
+   */
   @NotNull
   public Collection<DependencyGAV> getAllFoundDependencies()
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
