@@ -20,24 +20,31 @@ import org.slf4j.LoggerFactory;
  * including the original POM and its parent POMs, to create a ProjectModelFactory. This class
  * offers both modern and legacy scanning methods for flexibility.
  */
-class POMScanner {
+public class POMScanner {
 
   private static final Pattern RE_WINDOWS_PATH = Pattern.compile("^[A-Za-z]:");
 
   private static final Logger LOGGER = LoggerFactory.getLogger(POMScanner.class);
 
+  private final File originalFile;
+  private final File topLevelDirectory;
+
+  private File lastFile;
+
+  public POMScanner(final File originalFile, final File topLevelDirectory) {
+    this.originalFile = originalFile;
+    this.topLevelDirectory = topLevelDirectory;
+  }
+
   /**
    * Scans a POM file and its parent POMs using the legacy method and creates a ProjectModelFactory.
    *
-   * @param originalFile The original POM file to scan.
-   * @param topLevelDirectory The top-level directory containing the POM files.
    * @return A ProjectModelFactory representing the scanned POMs.
    * @throws DocumentException If a document error occurs.
    * @throws IOException If an I/O error occurs.
    * @throws URISyntaxException If there is an issue with the URI syntax.
    */
-  public static ProjectModelFactory scanFrom(File originalFile, File topLevelDirectory)
-      throws DocumentException, IOException, URISyntaxException {
+  public ProjectModelFactory scanFrom() throws DocumentException, IOException, URISyntaxException {
     POMDocument pomFile = POMDocumentFactory.load(originalFile);
     List<POMDocument> parentPomFiles = new ArrayList<>();
 
@@ -87,7 +94,7 @@ class POMScanner {
         prevPaths.add(relativePath);
       }
 
-      Path newPath = POMScanner.resolvePath(lastFile, relativePath);
+      Path newPath = resolvePath(lastFile, relativePath);
 
       if (Files.notExists(newPath)) {
         LOGGER.warn("new path does not exist: " + newPath);
@@ -174,9 +181,7 @@ class POMScanner {
     return ProjectModelFactory.loadFor(pomFile, parentPomFiles);
   }
 
-  private static File lastFile;
-
-  private static Path resolvePath(File baseFile, String relativePath) {
+  private Path resolvePath(final File baseFile, final String relativePath) {
     File parentDir = baseFile;
 
     if (parentDir.isFile()) {
@@ -190,7 +195,7 @@ class POMScanner {
     return Paths.get(result.getAbsolutePath());
   }
 
-  private static String fixPomRelativePath(String text) {
+  private String fixPomRelativePath(final String text) {
     if (text == null) {
       return "";
     }
@@ -204,7 +209,7 @@ class POMScanner {
     return text;
   }
 
-  private static boolean isRelative(String path) {
+  private boolean isRelative(final String path) {
     if (RE_WINDOWS_PATH.matcher(path).matches()) {
       return false;
     }

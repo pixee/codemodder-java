@@ -2,10 +2,10 @@ package io.codemodder.plugins.maven.operator;
 
 import com.github.zafarkhaja.semver.Version;
 import io.codemodder.DependencyGAV;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
@@ -14,13 +14,10 @@ import org.jetbrains.annotations.NotNull;
 
 /** Facade for the POM Operator, providing methods for modifying and querying POM files. */
 public class POMOperator {
+  private final POMScanner pomScanner;
 
-  private final Path pomFile;
-  private final Path projectDir;
-
-  public POMOperator(final Path pomFile, final Path projectDir) {
-    this.pomFile = pomFile;
-    this.projectDir = projectDir;
+  public POMOperator(final File originalFile, final File topLevelDirectory) {
+    this.pomScanner = new POMScanner(originalFile, topLevelDirectory);
   }
 
   public static POMOperator forTesting() {
@@ -28,15 +25,19 @@ public class POMOperator {
   }
 
   private POMOperator() {
-    this.pomFile = null;
-    this.projectDir = null;
+    this.pomScanner = null;
+  }
+
+  public POMScanner getPomScanner() {
+    return pomScanner;
   }
 
   public ProjectModel modifyAndGetProjectModel(final DependencyGAV newDependencyGAV)
       throws XMLStreamException, URISyntaxException, IOException, DocumentException {
     final Dependency newDependency = new Dependency(newDependencyGAV);
     final ProjectModel projectModel =
-        POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
+        pomScanner
+            .scanFrom()
             .withDependency(newDependency)
             .withSkipIfNewer(true)
             .withUseProperties(true)
@@ -51,7 +52,8 @@ public class POMOperator {
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
 
     final ProjectModel originalProjectModel =
-        POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
+        pomScanner
+            .scanFrom()
             .withSafeQueryType()
             .withRepositoryPath(Files.createTempDirectory(null).toFile())
             .build();
