@@ -43,4 +43,4 @@ jobs:
           build-args: |
             CODEMODDER_BASE_IMAGE=arturoiwa/codemodder-base
             CODEMOD_ID=${{ matrix.project-name }}
-          tags: arturoiwa/${{ github.event.inputs.codemod-id }}:latest
+          tags: arturoiwa/${{ matrix.project-name }}:latest
