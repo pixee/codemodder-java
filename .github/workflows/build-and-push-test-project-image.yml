@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       test-projects: ${{ steps.matrix-property.outputs.matrix_values }}
+      image_tag: ${{ steps.resolve-tag.outputs.image_tag }}
     steps:
       - name: Clone repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -36,10 +37,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: setup test list
+      - name: Setup test projects list
         id: matrix-property
         run: |
           echo "matrix_values=$(jq -c . < codemodder-integration-test-projects.json)" >> $GITHUB_OUTPUT
+
+      - name: Resolve image tag
+        id: resolve-tag
+        run: |
+          if ${{ inputs.PUSH_IMAGE }} == 'true'; then
+          echo "image_tag=arturoiwa/" >> $GITHUB_OUTPUT
+          else
+           echo "image_tag=" >> $GITHUB_OUTPUT
+          fi
 
   build_and_push:
     name: Build and Push
@@ -55,6 +65,6 @@ jobs:
           file: core-codemods/src/test/java/io/codemodder/codemods/integration/projectimage/Dockerfile
           push: ${{ inputs.PUSH_IMAGE }}
           build-args: |
-            CODEMODDER_BASE_IMAGE=arturoiwa/codemodder-base
+            CODEMODDER_BASE_IMAGE=${{ inputs.CODEMODDER_BASE_IMAGE }}
             CODEMOD_ID=${{ matrix.project-name }}
-          tags: arturoiwa/${{ matrix.project-name }}:latest
+          tags: ${{ needs.setup.outputs.image_tag }}${{ matrix.project-name }}:latest
