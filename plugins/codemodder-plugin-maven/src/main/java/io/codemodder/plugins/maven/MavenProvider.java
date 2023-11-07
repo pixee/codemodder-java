@@ -1,16 +1,10 @@
 package io.codemodder.plugins.maven;
 
-import com.github.difflib.DiffUtils;
-import com.github.difflib.UnifiedDiffUtils;
-import com.github.difflib.patch.AbstractDelta;
-import com.github.difflib.patch.Patch;
 import io.codemodder.*;
-import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.plugins.maven.operator.POMDocument;
 import io.codemodder.plugins.maven.operator.POMOperator;
 import io.codemodder.plugins.maven.operator.ProjectModel;
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
@@ -19,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 import org.dom4j.DocumentException;
@@ -44,11 +37,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class MavenProvider implements ProjectProvider {
 
-  private final DependencyDescriptor dependencyDescriptor;
-
   /** Represents a failure when doing a dependency update. */
   static class DependencyUpdateException extends RuntimeException {
-    private DependencyUpdateException(String message, Throwable cause) {
+    public DependencyUpdateException(String message, Throwable cause) {
       super(message, cause);
     }
   }
@@ -75,7 +66,7 @@ public final class MavenProvider implements ProjectProvider {
 
   private final PomModifier pomModifier;
   private final PomFileFinder pomFileFinder;
-  private final ArtifactInjectionPositionFinder positionFinder;
+  private final CodeTFGenerator codeTFGenerator;
 
   MavenProvider(
       final PomModifier pomModifier,
@@ -86,8 +77,7 @@ public final class MavenProvider implements ProjectProvider {
     Objects.requireNonNull(pomFileFinder);
     this.pomModifier = pomModifier;
     this.pomFileFinder = pomFileFinder;
-    this.dependencyDescriptor = Objects.requireNonNull(dependencyDescriptor);
-    this.positionFinder = Objects.requireNonNull(positionFinder);
+    this.codeTFGenerator = new CodeTFGenerator(positionFinder, dependencyDescriptor);
   }
 
   MavenProvider(
@@ -206,7 +196,8 @@ public final class MavenProvider implements ProjectProvider {
                 if (aPomFile.getDirty()) {
                   LOG.trace("POM file {} was dirty", path);
                   try {
-                    CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile, newDependencyGAV);
+                    CodeTFChangesetEntry entry =
+                        codeTFGenerator.getChanges(projectDir, aPomFile, newDependencyGAV);
                     pomModifier.modify(path, aPomFile.getResultPomBytes());
                     LOG.trace("POM written!");
                     injectedDependencies.add(newDependencyGAV);
@@ -235,52 +226,6 @@ public final class MavenProvider implements ProjectProvider {
 
     return DependencyUpdateResult.create(
         injectedDependencies, skippedDependencies, changesets, erroredFiles);
-  }
-
-  private List<String> getLinesFrom(final POMDocument doc, final byte[] byteArray) {
-    return Arrays.asList(
-        new String(byteArray, doc.getCharset()).split(Pattern.quote(doc.getEndl())));
-  }
-
-  private CodeTFChangesetEntry getChanges(
-      final Path projectDir, final POMDocument pomDocument, final DependencyGAV newDependency) {
-    List<String> originalPomContents = getLinesFrom(pomDocument, pomDocument.getOriginalPom());
-    List<String> finalPomContents = getLinesFrom(pomDocument, pomDocument.getResultPomBytes());
-
-    Patch<String> patch = DiffUtils.diff(originalPomContents, finalPomContents);
-
-    List<AbstractDelta<String>> deltas = patch.getDeltas();
-    int position = positionFinder.find(deltas, newDependency.artifact());
-
-    Path pomDocumentPath;
-
-    try {
-      pomDocumentPath = new File(pomDocument.getPomPath().toURI()).toPath();
-    } catch (URISyntaxException e) {
-      throw new DependencyUpdateException("Failure on URI for " + pomDocument.getPomPath(), e);
-    }
-
-    String relativePomPath = projectDir.relativize(pomDocumentPath).toString();
-
-    String description = dependencyDescriptor.create(newDependency);
-    final Map<String, String> properties;
-    if (description != null && !description.isBlank()) {
-      /*
-       * Tell downstream consumers that this is a change based on surrounding context.
-       */
-      properties = Map.of("contextual_description", "true");
-    } else {
-      properties = Collections.emptyMap();
-    }
-    CodeTFChange change = new CodeTFChange(position, properties, description, List.of(), List.of());
-
-    List<String> patchDiff =
-        UnifiedDiffUtils.generateUnifiedDiff(
-            relativePomPath, relativePomPath, originalPomContents, patch, 3);
-
-    String diff = String.join(pomDocument.getEndl(), patchDiff);
-
-    return new CodeTFChangesetEntry(relativePomPath, diff, List.of(change));
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(MavenProvider.class);
