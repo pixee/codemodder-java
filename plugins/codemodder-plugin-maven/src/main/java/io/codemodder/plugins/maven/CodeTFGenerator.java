@@ -15,12 +15,20 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
 
+/** CodeTFGenerator is responsible for generating CodeTFChangesetEntry for Maven POM updates. */
 public class CodeTFGenerator {
 
   private final ArtifactInjectionPositionFinder positionFinder;
 
   private final DependencyDescriptor dependencyDescriptor;
 
+  /**
+   * Constructs a CodeTFGenerator with the specified artifact injection position finder and
+   * dependency descriptor.
+   *
+   * @param positionFinder The ArtifactInjectionPositionFinder for finding artifact positions.
+   * @param dependencyDescriptor The DependencyDescriptor for generating dependency descriptions.
+   */
   public CodeTFGenerator(
       final ArtifactInjectionPositionFinder positionFinder,
       final DependencyDescriptor dependencyDescriptor) {
@@ -28,6 +36,14 @@ public class CodeTFGenerator {
     this.positionFinder = Objects.requireNonNull(positionFinder);
   }
 
+  /**
+   * Get CodeTFChangesetEntry for Maven POM updates.
+   *
+   * @param projectDir The project directory where the POM is located.
+   * @param pomDocument The POMDocument representing the POM to be updated.
+   * @param newDependency The new dependency to be added to the POM.
+   * @return CodeTFChangesetEntry representing the POM update.
+   */
   public CodeTFChangesetEntry getChanges(
       final Path projectDir, final POMDocument pomDocument, final DependencyGAV newDependency) {
     final List<String> originalPomContents =
