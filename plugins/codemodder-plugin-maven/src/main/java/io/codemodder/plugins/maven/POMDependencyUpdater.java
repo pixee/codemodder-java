@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** POMDependencyUpdater is responsible for updating Maven POM files with new dependencies. */
 public class POMDependencyUpdater {
   private final PomFileFinder pomFileFinder;
 
@@ -38,6 +39,14 @@ public class POMDependencyUpdater {
 
   private static final Logger LOG = LoggerFactory.getLogger(POMDependencyUpdater.class);
 
+  /**
+   * Constructs a POMDependencyUpdater with the specified CodeTFGenerator, PomFileFinder, and
+   * PomModifier.
+   *
+   * @param codeTFGenerator The CodeTFGenerator for generating CodeTFChangesetEntries.
+   * @param pomFileFinder The PomFileFinder for locating POM files.
+   * @param pomModifier The MavenProvider.PomModifier for modifying POM files.
+   */
   public POMDependencyUpdater(
       final CodeTFGenerator codeTFGenerator,
       final PomFileFinder pomFileFinder,
@@ -47,6 +56,18 @@ public class POMDependencyUpdater {
     this.codeTFGenerator = codeTFGenerator;
   }
 
+  /**
+   * Execute the dependency update process for a specific project directory and set of dependencies.
+   *
+   * @param projectDir The project directory where the POM files are located.
+   * @param file The specific POM file to update.
+   * @param dependencies The list of new dependencies to be added.
+   * @return A DependencyUpdateResult containing information about the update process.
+   * @throws IOException If an I/O error occurs.
+   * @throws XMLStreamException If an error occurs during XML stream processing.
+   * @throws DocumentException If an error occurs while parsing the document.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   */
   @NotNull
   public DependencyUpdateResult execute(
       final Path projectDir, final Path file, final List<DependencyGAV> dependencies)
