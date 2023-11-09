@@ -93,6 +93,16 @@ class CommandChain {
         SimpleInsert.getInstance());
   }
 
+  public static CommandChain createForAddDependency() {
+    return new CommandChain(
+        CheckDependencyPresent.getInstance(),
+        CheckParentPackaging.getInstance(),
+        new FormatCommand(),
+        new DiscardFormatCommand(),
+        new CompositeDependencyManagement(),
+        SimpleInsert.getInstance());
+  }
+
   private static CommandChain filterByQueryType(
       List<Pair<QueryType, String>> commandList,
       QueryType queryType,

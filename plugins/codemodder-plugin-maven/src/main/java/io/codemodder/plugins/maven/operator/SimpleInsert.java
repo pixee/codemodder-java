@@ -35,6 +35,16 @@ class SimpleInsert implements Command {
     List<Node> dependencyManagementNodeList =
         Util.selectXPathNodes(pm.getPomFile().getResultPom(), "/m:project/m:dependencyManagement");
 
+    String lookupExpressionForDependency =
+        Util.buildLookupExpressionForDependency(pm.getDependency());
+
+    List<Node> dependencies =
+        Util.selectXPathNodes(pm.getPomFile().getResultPom(), lookupExpressionForDependency);
+
+    if (dependencies.size() > 0) {
+      return false;
+    }
+
     Element dependenciesNode;
     if (dependencyManagementNodeList.isEmpty()) {
       Element newDependencyManagementNode =
