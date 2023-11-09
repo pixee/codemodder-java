@@ -141,11 +141,11 @@ final class MassRepoIT {
     } catch (Exception e) {
       File pomFile = new File(repo.cacheDir(), repo.pomPath);
 
+      final POMOperator pomOperator = new POMOperator(pomFile, repo.cacheDir());
+
       Collection<Dependency> dependencies =
-          POMOperator.queryDependency(
-              POMScanner.scanFrom(pomFile, repo.cacheDir())
-                  .withRepositoryPath(repo.cacheDir())
-                  .build());
+          pomOperator.queryDependency(
+              pomOperator.getPomScanner().scanFrom().withRepositoryPath(repo.cacheDir()).build());
 
       StringBuilder result = new StringBuilder();
 
@@ -252,10 +252,14 @@ final class MassRepoIT {
 
     Dependency dependencyToUpgrade = Dependency.fromString(dependencyToUpgradeString);
 
+    final POMOperator pomOperator =
+        new POMOperator(new File(sampleRepo.cacheDir(), sampleRepo.pomPath), sampleRepo.cacheDir());
+
+    final POMScanner pomScanner = pomOperator.getPomScanner();
+
     ProjectModelFactory projectModelFactory =
         sampleRepo.useScanner
-            ? POMScanner.scanFrom(
-                new File(sampleRepo.cacheDir(), sampleRepo.pomPath), sampleRepo.cacheDir())
+            ? pomScanner.scanFrom()
             : ProjectModelFactory.load(new File(sampleRepo.cacheDir(), sampleRepo.pomPath));
 
     ProjectModel context =
@@ -265,7 +269,7 @@ final class MassRepoIT {
             .withUseProperties(sampleRepo.useProperties)
             .build();
 
-    boolean result = POMOperator.modify(context);
+    boolean result = pomOperator.modify(context);
 
     context.allPomFiles().stream()
         .filter(pomFile -> pomFile.getDirty())
