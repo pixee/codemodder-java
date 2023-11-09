@@ -10,6 +10,15 @@ import org.dom4j.Node;
  */
 class CompositeDependencyManagement extends AbstractCommand {
 
+    private Boolean isUpdating;
+
+    public CompositeDependencyManagement(final Boolean isUpdating){
+        this.isUpdating = isUpdating;
+    }
+
+    public CompositeDependencyManagement(){
+    }
+
   /**
    * Executes the CompositeDependencyManagement command to manage dependencies in a composite POM.
    *
@@ -81,41 +90,61 @@ class CompositeDependencyManagement extends AbstractCommand {
     List<Node> dependencyNodes =
         Util.selectXPathNodes(pomFileToModify.getResultPom(), lookupExpressionForDependency);
 
-    if (dependencyNodes.size() == 1) {
+    if(isUpdating == null){
+        if (dependencyNodes.size() == 1) {
+            return updateDependency(dependencyNodes, pomFileToModify);
+        } else {
+            return addDependency(pomFileToModify, c, parentElement, dependencyManagementNode);
+        }
+    }
+
+    if(isUpdating){
+        return updateDependency(dependencyNodes, pomFileToModify);
+    }
+
+    return addDependency(pomFileToModify, c, parentElement, dependencyManagementNode);
+
+
+  }
+
+  private Element updateDependency(final List<Node> dependencyNodes, final POMDocument pomFileToModify){
       List<Node> versionNodes = Util.selectXPathNodes(dependencyNodes.get(0), "./m:version");
 
       if (versionNodes.size() == 1) {
-        Element versionNode = (Element) versionNodes.get(0);
-        versionNode.getParent().content().remove(versionNode);
-        pomFileToModify.setDirty(true);
+          Element versionNode = (Element) versionNodes.get(0);
+          versionNode.getParent().content().remove(versionNode);
+          pomFileToModify.setDirty(true);
       }
 
       return (Element) dependencyNodes.get(0);
-    } else {
+  }
+
+  private Element addDependency(final POMDocument pomFileToModify, final ProjectModel c,
+                                final Element parentElement,
+                                final boolean dependencyManagementNode){
       Element dependenciesNode;
       if (parentElement.element("dependencies") != null) {
-        dependenciesNode = parentElement.element("dependencies");
+          dependenciesNode = parentElement.element("dependencies");
       } else {
-        dependenciesNode = Util.addIndentedElement(parentElement, pomFileToModify, "dependencies");
+          dependenciesNode = Util.addIndentedElement(parentElement, pomFileToModify, "dependencies");
       }
 
       Element dependencyNode =
-          Util.addIndentedElement(dependenciesNode, pomFileToModify, "dependency");
+              Util.addIndentedElement(dependenciesNode, pomFileToModify, "dependency");
       Util.addIndentedElement(dependencyNode, pomFileToModify, "groupId")
-          .setText(c.getDependency().getGroupId());
+              .setText(c.getDependency().getGroupId());
       Util.addIndentedElement(dependencyNode, pomFileToModify, "artifactId")
-          .setText(c.getDependency().getArtifactId());
+              .setText(c.getDependency().getArtifactId());
 
       if (dependencyManagementNode) {
-        if (!c.isUseProperties()) {
-          Util.addIndentedElement(dependencyNode, pomFileToModify, "version")
-              .setText(c.getDependency().getVersion());
-        }
+          if (!c.isUseProperties()) {
+              Util.addIndentedElement(dependencyNode, pomFileToModify, "version")
+                      .setText(c.getDependency().getVersion());
+          }
       }
 
       pomFileToModify.setDirty(true);
 
       return dependencyNode;
-    }
   }
 }
