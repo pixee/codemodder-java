@@ -46,7 +46,7 @@ public class POMOperator {
       throws XMLStreamException, URISyntaxException, IOException, DocumentException {
     final Dependency newDependency = new Dependency(newDependencyGAV);
     final ProjectModel projectModel =
-        POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
+        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
             .withDependency(newDependency)
             .withSkipIfNewer(true)
             .withUseProperties(true)
@@ -70,7 +70,7 @@ public class POMOperator {
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
 
     final ProjectModel originalProjectModel =
-        POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
+        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
             .withSafeQueryType()
             .withRepositoryPath(Files.createTempDirectory(null).toFile())
             .build();

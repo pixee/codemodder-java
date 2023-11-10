@@ -45,6 +45,7 @@ final class POMOperatorVersionQueryTest {
 
   @Test
   void testPomVersionZero() {
+
     Optional<VersionQueryResponse> optionalVersionResponse = null;
     try {
       optionalVersionResponse = versionDefinitions("pom-version-0.xml");
@@ -186,7 +187,7 @@ final class POMOperatorVersionQueryTest {
   Optional<VersionQueryResponse> versionDefinitions(String pomFile)
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModel context =
-        ProjectModelFactory.load(this.getClass().getResource(pomFile)).withSafeQueryType().build();
+        ProjectModelFactory.load(this.getClass().getResource(pomFile)).withQuerySafeType().build();
 
     return pomOperator.queryVersions(context);
   }

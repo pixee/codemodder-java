@@ -59,7 +59,7 @@ final class POMScannerTest extends AbstractTestBase {
     for (int index = 1; index <= 3; index++) {
       File pomFile = getResourceAsFile("nested/child/pom/pom-" + index + "-child.xml");
 
-      ProjectModel pm = POMScanner.scanFrom(pomFile, currentDirectory).build();
+      ProjectModel pm = POMScanner.legacyScanFrom(pomFile, currentDirectory).build();
 
       assertTrue("There must be at least one parent pom file", pm.getParentPomFiles().size() > 0);
 
@@ -88,7 +88,7 @@ final class POMScannerTest extends AbstractTestBase {
       throws DocumentException, IOException, URISyntaxException {
     File pomFile = getResourceAsFile("nested/child/pom/pom-demo.xml");
 
-    ProjectModel pm = POMScanner.scanFrom(pomFile, currentDirectory).build();
+    ProjectModel pm = POMScanner.legacyScanFrom(pomFile, currentDirectory).build();
 
     assertTrue("There must be a single parent pom file", pm.getParentPomFiles().size() == 1);
   }
@@ -100,7 +100,7 @@ final class POMScannerTest extends AbstractTestBase {
       String name = "sample-child-with-broken-path-" + index + ".xml";
       File pomFile = getResourceAsFile(name);
 
-      ProjectModelFactory pmf = POMScanner.scanFrom(pomFile, currentDirectory);
+      ProjectModelFactory pmf = POMScanner.legacyScanFrom(pomFile, currentDirectory);
 
       assert pmf.build().getParentPomFiles().isEmpty();
     }
@@ -132,7 +132,7 @@ final class POMScannerTest extends AbstractTestBase {
     File pomFile =
         getResourceAsFile("sample-parent/sample-child/pom-multiple-pom-parent-level-6.xml");
 
-    ProjectModelFactory pmf = POMScanner.scanFrom(pomFile, currentDirectory);
+    ProjectModelFactory pmf = POMScanner.legacyScanFrom(pomFile, currentDirectory);
 
     assertTrue(pmf.build().getParentPomFiles().size() > 0);
   }
