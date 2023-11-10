@@ -41,8 +41,8 @@ class SimpleInsert implements Command {
     List<Node> dependencies =
         Util.selectXPathNodes(pm.getPomFile().getResultPom(), lookupExpressionForDependency);
 
-    if (dependencies.size() > 0) {
-      return false;
+    if (!dependencies.isEmpty()) {
+      return true;
     }
 
     Element dependenciesNode;
