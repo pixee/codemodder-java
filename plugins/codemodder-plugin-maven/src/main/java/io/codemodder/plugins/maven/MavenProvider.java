@@ -193,28 +193,19 @@ public final class MavenProvider implements ProjectProvider {
               Collection<POMDocument> allPomFiles = modifiedProjectModel.allPomFiles();
               LOG.trace("Found " + allPomFiles.size() + " pom files -- " + allPomFiles);
               for (POMDocument aPomFile : allPomFiles) {
-                URI uri;
-                try {
-                  uri = aPomFile.getPomPath().toURI();
-                } catch (URISyntaxException ex) {
-                  ex.printStackTrace();
-                  throw new DependencyUpdateException("Failure parsing URL: " + aPomFile, ex);
-                }
+                final URI uri = getPomFileURI(aPomFile);
 
                 Path path = Path.of(uri);
 
                 if (aPomFile.getDirty()) {
-                  LOG.trace("POM file {} was dirty", path);
-                  try {
-                    CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile, newDependencyGAV);
-                    pomModifier.modify(path, aPomFile.getResultPomBytes());
-                    LOG.trace("POM written!");
-                    injectedDependencies.add(newDependencyGAV);
-                    changesets.add(entry);
-                  } catch (IOException | UncheckedIOException exc) {
-                    LOG.error("Failed to write pom", exc);
-                    erroredFiles.add(path);
-                  }
+                  modifyDirtyPomFile(
+                      projectDir,
+                      path,
+                      aPomFile,
+                      newDependencyGAV,
+                      changesets,
+                      injectedDependencies,
+                      erroredFiles);
                 } else {
                   LOG.trace("POM file {} wasn't dirty", path);
                 }
@@ -235,6 +226,36 @@ public final class MavenProvider implements ProjectProvider {
 
     return DependencyUpdateResult.create(
         injectedDependencies, skippedDependencies, changesets, erroredFiles);
+  }
+
+  private void modifyDirtyPomFile(
+      final Path projectDir,
+      final Path path,
+      final POMDocument aPomFile,
+      final DependencyGAV newDependencyGAV,
+      final List<CodeTFChangesetEntry> changesets,
+      final List<DependencyGAV> injectedDependencies,
+      final Set<Path> erroredFiles) {
+    LOG.trace("POM file {} was dirty", path);
+    try {
+      CodeTFChangesetEntry entry = getChanges(projectDir, aPomFile, newDependencyGAV);
+      pomModifier.modify(path, aPomFile.getResultPomBytes());
+      LOG.trace("POM written!");
+      injectedDependencies.add(newDependencyGAV);
+      changesets.add(entry);
+    } catch (IOException | UncheckedIOException exc) {
+      LOG.error("Failed to write pom", exc);
+      erroredFiles.add(path);
+    }
+  }
+
+  private URI getPomFileURI(final POMDocument aPomFile) {
+    try {
+      return aPomFile.getPomPath().toURI();
+    } catch (URISyntaxException ex) {
+      ex.printStackTrace();
+      throw new MavenProvider.DependencyUpdateException("Failure parsing URL: " + aPomFile, ex);
+    }
   }
 
   private List<String> getLinesFrom(final POMDocument doc, final byte[] byteArray) {

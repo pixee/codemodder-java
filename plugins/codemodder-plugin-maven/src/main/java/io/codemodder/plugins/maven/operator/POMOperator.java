@@ -4,7 +4,6 @@ import com.github.zafarkhaja.semver.Version;
 import io.codemodder.DependencyGAV;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,7 +49,7 @@ public class POMOperator {
             .withDependency(newDependency)
             .withSkipIfNewer(true)
             .withUseProperties(true)
-            .withRepositoryPath(Files.createTempDirectory(null).toFile())
+            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions().toFile())
             .build();
 
     return modify(projectModel) ? projectModel : null;
@@ -72,7 +71,7 @@ public class POMOperator {
     final ProjectModel originalProjectModel =
         POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
             .withSafeQueryType()
-            .withRepositoryPath(Files.createTempDirectory(null).toFile())
+            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions().toFile())
             .build();
 
     final Collection<Dependency> foundDependencies = queryDependency(originalProjectModel);
