@@ -335,7 +335,7 @@ public final class MavenProvider implements ProjectProvider {
   private Collection<DependencyGAV> getDependenciesFrom(final Path pomFile, final Path projectDir)
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModelFactory projectModelFactory =
-        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile()).withQuerySafeType();
+        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile()).withSafeQueryType();
 
     try {
       projectModelFactory =
