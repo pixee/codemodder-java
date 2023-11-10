@@ -17,21 +17,11 @@ final class POMOperatorVersionQueryTest {
   private final POMOperator pomOperator = POMOperator.forTesting();
 
   @Test
-  void testBasicQuery() {
+  void testBasicQuery()
+      throws XMLStreamException, DocumentException, IOException, URISyntaxException {
     String pomFile = "pom-1.xml";
 
-    Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
-    try {
-      optionalVersionQueryResponse = versionDefinitions(pomFile);
-    } catch (DocumentException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    } catch (XMLStreamException e) {
-      throw new RuntimeException(e);
-    }
+    Optional<VersionQueryResponse> optionalVersionQueryResponse = versionDefinitions(pomFile);
 
     LOGGER.debug("Versions found: {}", optionalVersionQueryResponse);
 
@@ -44,20 +34,12 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  void testPomVersionZero() {
+  void testPomVersionZero()
+      throws XMLStreamException, DocumentException, IOException, URISyntaxException {
 
-    Optional<VersionQueryResponse> optionalVersionResponse = null;
-    try {
-      optionalVersionResponse = versionDefinitions("pom-version-0.xml");
-    } catch (DocumentException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    } catch (XMLStreamException e) {
-      throw new RuntimeException(e);
-    }
+    Optional<VersionQueryResponse> optionalVersionResponse =
+        versionDefinitions("pom-version-0.xml");
+
     Assert.assertFalse(
         "No versions defined (queryType: " + QueryType.SAFE + ")",
         optionalVersionResponse.isPresent());
@@ -74,13 +56,10 @@ final class POMOperatorVersionQueryTest {
               Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
               try {
                 optionalVersionQueryResponse = versionDefinitions(pomFile);
-              } catch (DocumentException e) {
-                throw new RuntimeException(e);
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
-              } catch (XMLStreamException e) {
+              } catch (DocumentException
+                  | IOException
+                  | URISyntaxException
+                  | XMLStreamException e) {
                 throw new RuntimeException(e);
               }
 
@@ -108,13 +87,10 @@ final class POMOperatorVersionQueryTest {
               Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
               try {
                 optionalVersionQueryResponse = versionDefinitions(pomFile);
-              } catch (DocumentException e) {
-                throw new RuntimeException(e);
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
-              } catch (XMLStreamException e) {
+              } catch (DocumentException
+                  | IOException
+                  | URISyntaxException
+                  | XMLStreamException e) {
                 throw new RuntimeException(e);
               }
 
@@ -132,22 +108,12 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  void testPomVersion3() {
+  void testPomVersion3()
+      throws XMLStreamException, DocumentException, IOException, URISyntaxException {
     String pomFile = "pom-version-3.xml";
     LOGGER.info("Using file: " + pomFile);
 
-    Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
-    try {
-      optionalVersionQueryResponse = versionDefinitions(pomFile);
-    } catch (DocumentException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    } catch (XMLStreamException e) {
-      throw new RuntimeException(e);
-    }
+    Optional<VersionQueryResponse> optionalVersionQueryResponse = versionDefinitions(pomFile);
 
     LOGGER.debug("Versions found: {}", optionalVersionQueryResponse);
 
@@ -158,21 +124,11 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  void testPomVersionsMismatching() {
+  void testPomVersionsMismatching()
+      throws XMLStreamException, DocumentException, IOException, URISyntaxException {
     String pomFile = "pom-version-7.xml";
 
-    Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
-    try {
-      optionalVersionQueryResponse = versionDefinitions(pomFile);
-    } catch (DocumentException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    } catch (XMLStreamException e) {
-      throw new RuntimeException(e);
-    }
+    Optional<VersionQueryResponse> optionalVersionQueryResponse = versionDefinitions(pomFile);
 
     LOGGER.debug("Versions found: {}", optionalVersionQueryResponse);
 
