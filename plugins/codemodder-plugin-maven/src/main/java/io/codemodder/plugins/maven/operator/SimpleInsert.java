@@ -42,7 +42,18 @@ class SimpleInsert implements Command {
         Util.selectXPathNodes(pm.getPomFile().getResultPom(), lookupExpressionForDependency);
 
     if (!dependencies.isEmpty()) {
-      return true;
+
+      List<Node> versionNodes = Util.selectXPathNodes(dependencies.get(0), "./m:version");
+
+      final boolean withVersionMatch =
+          versionNodes.stream()
+                  .filter(a -> a.getText().equals(pm.getDependency().getVersion()))
+                  .count()
+              > 0;
+
+      if (withVersionMatch) {
+        return true;
+      }
     }
 
     Element dependenciesNode;

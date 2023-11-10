@@ -77,9 +77,9 @@ final class MassRepoIT {
           Original: commons-codec:commons-codec:jar:1.15
           Updated: commons-codec:commons-codec:jar:1.14
            */
-          /*new Pair(
-          new TestRepo("apache/pulsar", false, null, false, null, "pulsar-broker/pom.xml"),
-          "commons-codec:commons-codec:1.14"),*/
+          new Pair(
+              new TestRepo("apache/pulsar", false, null, false, null, "pulsar-broker/pom.xml"),
+              "commons-codec:commons-codec:1.14"),
           /*
           Ref: https://github.com/apache/rocketmq/blob/develop/common/pom.xml
           It is not inserting a dependency because commons-codec:commons-codec already exists...
@@ -87,9 +87,9 @@ final class MassRepoIT {
           original: commons-codec:commons-codec:jar:1.13
           updated: commons-codec:commons-codec:jar:1.15
            */
-          /*new Pair(
-          new TestRepo("apache/rocketmq", false, null, false, null, "common/pom.xml"),
-          "commons-codec:commons-codec:1.15"),*/
+          new Pair(
+              new TestRepo("apache/rocketmq", false, null, false, null, "common/pom.xml"),
+              "commons-codec:commons-codec:1.15"),
           new Pair(
               new TestRepo(
                   "OpenAPITools/openapi-generator",
