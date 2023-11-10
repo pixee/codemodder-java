@@ -45,18 +45,17 @@ class SimpleInsert implements Command {
 
       List<Node> versionNodes = Util.selectXPathNodes(dependencies.get(0), "./m:version");
 
-      if(!versionNodes.isEmpty()){
-          final boolean withVersionMatch =
-                  versionNodes.stream()
-                          .filter(a -> a.getText().equals(pm.getDependency().getVersion()))
-                          .count()
-                          > 0;
+      if (!versionNodes.isEmpty()) {
+        final boolean withVersionMatch =
+            versionNodes.stream()
+                    .filter(a -> a.getText().equals(pm.getDependency().getVersion()))
+                    .count()
+                > 0;
 
-          if (withVersionMatch) {
-              return true;
-          }
+        if (withVersionMatch) {
+          return true;
+        }
       }
-
     }
 
     Element dependenciesNode;
