@@ -198,7 +198,7 @@ public final class MavenProvider implements ProjectProvider {
           ProjectModelFactory projectModelFactory = null;
           try {
             projectModelFactory =
-                POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile())
+                POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
                     .withDependency(newDependency)
                     .withSkipIfNewer(true)
                     .withUseProperties(true);
@@ -335,7 +335,7 @@ public final class MavenProvider implements ProjectProvider {
   private Collection<DependencyGAV> getDependenciesFrom(final Path pomFile, final Path projectDir)
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModelFactory projectModelFactory =
-        POMScanner.scanFrom(pomFile.toFile(), projectDir.toFile()).withSafeQueryType();
+        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile()).withQuerySafeType();
 
     try {
       projectModelFactory =

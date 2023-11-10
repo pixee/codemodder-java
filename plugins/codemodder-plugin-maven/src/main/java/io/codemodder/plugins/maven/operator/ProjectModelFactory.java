@@ -87,7 +87,7 @@ public class ProjectModelFactory {
   }
 
   /** Fluent Setter */
-  public ProjectModelFactory withSafeQueryType() {
+  public ProjectModelFactory withQuerySafeType() {
     this.queryType = QueryType.SAFE;
     return this;
   }
