@@ -25,7 +25,7 @@ final class POMOperatorDependencyQueryTest {
   void testBasicQuery()
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource("pom-1.xml"));
-    context.withQuerySafeType();
+    context.withSafeQueryType();
 
     Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
 
@@ -39,7 +39,7 @@ final class POMOperatorDependencyQueryTest {
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModelFactory context =
         ProjectModelFactory.load(getClass().getResource("pom-broken.xml"));
-    context.withQuerySafeType();
+    context.withSafeQueryType();
 
     Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
 
@@ -63,7 +63,7 @@ final class POMOperatorDependencyQueryTest {
         }
 
         ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource(pomFile));
-        context.withQuerySafeType();
+        context.withSafeQueryType();
 
         Collection<Dependency> dependencies =
             pomOperator.queryDependency(context.build(), commandListOverride);
@@ -88,7 +88,7 @@ final class POMOperatorDependencyQueryTest {
         0);
 
     ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource("pom-1.xml"));
-    context.withQuerySafeType();
+    context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
     Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
@@ -108,7 +108,7 @@ final class POMOperatorDependencyQueryTest {
     File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
 
     ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource("pom-1.xml"));
-    context.withQuerySafeType();
+    context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
     Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
@@ -152,7 +152,7 @@ final class POMOperatorDependencyQueryTest {
             .getBytes());
 
     ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
-    context.withQuerySafeType();
+    context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
     Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
@@ -240,7 +240,7 @@ final class POMOperatorDependencyQueryTest {
     Files.write(tempPom, pomContent.getBytes());
 
     ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
-    context.withQuerySafeType();
+    context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
     Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
@@ -308,7 +308,7 @@ final class POMOperatorDependencyQueryTest {
     Files.write(tempPom, pomContent.getBytes());
 
     ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
-    context.withQuerySafeType();
+    context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
     List<Command> commandList = getCommandListFor("QueryByParsing");
@@ -354,7 +354,7 @@ final class POMOperatorDependencyQueryTest {
     File pomFile = new File(getClass().getResource("nested/child/pom/pom-3-child.xml").getFile());
 
     ProjectModelFactory context = ProjectModelFactory.load(pomFile);
-    context.withQuerySafeType();
+    context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
     Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());

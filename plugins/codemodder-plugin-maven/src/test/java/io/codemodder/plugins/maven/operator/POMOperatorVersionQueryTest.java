@@ -187,7 +187,7 @@ final class POMOperatorVersionQueryTest {
   Optional<VersionQueryResponse> versionDefinitions(String pomFile)
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModel context =
-        ProjectModelFactory.load(this.getClass().getResource(pomFile)).withQuerySafeType().build();
+        ProjectModelFactory.load(this.getClass().getResource(pomFile)).withSafeQueryType().build();
 
     return pomOperator.queryVersions(context);
   }
