@@ -15,8 +15,6 @@ jobs:
     environment: Public Release
     runs-on: "ubuntu-latest"
     env:
-      ORG_GRADLE_PROJECT_pixeeArtifactoryUsername: ${{ vars.PIXEE_ARTIFACTORY_USERNAME }}
-      ORG_GRADLE_PROJECT_pixeeArtifactoryPassword: ${{ secrets.PIXEE_ARTIFACTORY_PASSWORD }}
       ORG_GRADLE_PROJECT_signingKey: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
       ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSPHRASE }}
       ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
