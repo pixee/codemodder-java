@@ -45,6 +45,7 @@ final class POMOperatorVersionQueryTest {
 
   @Test
   void testPomVersionZero() {
+
     Optional<VersionQueryResponse> optionalVersionResponse = null;
     try {
       optionalVersionResponse = versionDefinitions("pom-version-0.xml");
