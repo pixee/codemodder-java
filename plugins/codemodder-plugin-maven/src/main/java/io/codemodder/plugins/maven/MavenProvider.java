@@ -166,7 +166,7 @@ public final class MavenProvider implements ProjectProvider {
     final List<DependencyGAV> skippedDependencies = new ArrayList<>();
     final List<DependencyGAV> injectedDependencies = new ArrayList<>();
     final Set<Path> erroredFiles = new LinkedHashSet<>();
-    final POMOperator pomOperator = new POMOperator(pomFile.toFile(), projectDir.toFile());
+    final POMOperator pomOperator = new POMOperator(pomFile, projectDir);
 
     final AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped =
         new AtomicReference<>(pomOperator.getAllFoundDependencies());

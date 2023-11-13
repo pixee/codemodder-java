@@ -141,7 +141,7 @@ final class MassRepoIT {
     } catch (Exception e) {
       File pomFile = new File(repo.cacheDir(), repo.pomPath);
 
-      final POMOperator pomOperator = new POMOperator(pomFile, repo.cacheDir());
+      final POMOperator pomOperator = new POMOperator(pomFile.toPath(), repo.cacheDir().toPath());
 
       Collection<Dependency> dependencies =
           pomOperator.queryDependency(
@@ -253,7 +253,9 @@ final class MassRepoIT {
     Dependency dependencyToUpgrade = Dependency.fromString(dependencyToUpgradeString);
 
     final POMOperator pomOperator =
-        new POMOperator(new File(sampleRepo.cacheDir(), sampleRepo.pomPath), sampleRepo.cacheDir());
+        new POMOperator(
+            new File(sampleRepo.cacheDir(), sampleRepo.pomPath).toPath(),
+            sampleRepo.cacheDir().toPath());
 
     final POMScanner pomScanner = pomOperator.getPomScanner();
 
