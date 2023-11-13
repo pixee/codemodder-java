@@ -13,7 +13,6 @@ import io.codemodder.plugins.maven.operator.POMOperator;
 import io.codemodder.plugins.maven.operator.POMScanner;
 import io.codemodder.plugins.maven.operator.ProjectModel;
 import io.codemodder.plugins.maven.operator.ProjectModelFactory;
-import io.codemodder.plugins.maven.operator.QueryType;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -336,8 +335,7 @@ public final class MavenProvider implements ProjectProvider {
   private Collection<DependencyGAV> getDependenciesFrom(final Path pomFile, final Path projectDir)
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModelFactory projectModelFactory =
-        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
-            .withQueryType(QueryType.SAFE);
+        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile()).withSafeQueryType();
 
     try {
       projectModelFactory =

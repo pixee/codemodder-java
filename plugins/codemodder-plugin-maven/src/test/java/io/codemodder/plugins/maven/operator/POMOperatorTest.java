@@ -87,8 +87,7 @@ final class POMOperatorTest extends AbstractTestBase {
     }
 
     Collection<Dependency> resolvedDeps =
-        POMOperator.queryDependency(
-            ProjectModelFactory.load(testPom).withQueryType(QueryType.SAFE).build());
+        POMOperator.queryDependency(ProjectModelFactory.load(testPom).withSafeQueryType().build());
 
     String testPomContents =
         new String(Files.readAllBytes(testPom.toPath()), Charset.defaultCharset());

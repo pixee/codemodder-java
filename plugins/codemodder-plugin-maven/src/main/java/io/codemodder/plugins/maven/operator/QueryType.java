@@ -1,6 +1,6 @@
 package io.codemodder.plugins.maven.operator;
 
-public enum QueryType {
+enum QueryType {
   NONE,
   SAFE
 }
