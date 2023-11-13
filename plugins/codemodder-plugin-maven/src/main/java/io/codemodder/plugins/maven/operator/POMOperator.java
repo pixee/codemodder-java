@@ -2,9 +2,9 @@ package io.codemodder.plugins.maven.operator;
 
 import com.github.zafarkhaja.semver.Version;
 import io.codemodder.DependencyGAV;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
@@ -15,8 +15,8 @@ import org.jetbrains.annotations.NotNull;
 public class POMOperator {
   private final POMScanner pomScanner;
 
-  public POMOperator(final File originalFile, final File topLevelDirectory) {
-    this.pomScanner = new POMScanner(originalFile, topLevelDirectory);
+  public POMOperator(final Path pomFile, final Path projectDir) {
+    this.pomScanner = new POMScanner(pomFile.toFile(), projectDir.toFile());
   }
 
   public static POMOperator forTesting() {

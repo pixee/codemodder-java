@@ -78,7 +78,7 @@ public class POMDependencyUpdater {
     }
 
     final Path pomFile = maybePomFile.get();
-    final POMOperator pomOperator = new POMOperator(pomFile.toFile(), projectDir.toFile());
+    final POMOperator pomOperator = new POMOperator(pomFile, projectDir);
 
     changesets = new ArrayList<>();
     skippedDependencies = new ArrayList<>();
