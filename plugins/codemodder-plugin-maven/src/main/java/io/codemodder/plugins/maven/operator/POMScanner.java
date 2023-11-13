@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * including the original POM and its parent POMs, to create a ProjectModelFactory. This class
  * offers both modern and legacy scanning methods for flexibility.
  */
-public class POMScanner {
+class POMScanner {
 
   private static final Pattern RE_WINDOWS_PATH = Pattern.compile("^[A-Za-z]:");
 
