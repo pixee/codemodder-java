@@ -146,7 +146,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
     factory.withSafeQueryType();
     ProjectModel projectModel = factory.build();
 
-    Collection<Dependency> dependencies = POMOperator.queryDependency(projectModel);
+    Collection<Dependency> dependencies = pomOperator.queryDependency(projectModel);
 
     Optional<Dependency> optionalDependency =
         dependencies.stream()

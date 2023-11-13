@@ -1,14 +1,88 @@
 package io.codemodder.plugins.maven.operator;
 
 import com.github.zafarkhaja.semver.Version;
+import io.codemodder.DependencyGAV;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
+import org.dom4j.DocumentException;
+import org.jetbrains.annotations.NotNull;
 
 /** Facade for the POM Operator, providing methods for modifying and querying POM files. */
 public class POMOperator {
+
+  private final Path pomFile;
+  private final Path projectDir;
+
+  public POMOperator(final Path pomFile, final Path projectDir) {
+    this.pomFile = pomFile;
+    this.projectDir = projectDir;
+  }
+
+  public static POMOperator forTesting() {
+    return new POMOperator();
+  }
+
+  private POMOperator() {
+    this.pomFile = null;
+    this.projectDir = null;
+  }
+
+  /**
+   * Modifies and retrieves the ProjectModel with a new dependency.
+   *
+   * @param newDependencyGAV The new DependencyGAV to add to the POM.
+   * @return The modified ProjectModel, or null if the modification was unsuccessful.
+   * @throws XMLStreamException If an error occurs during XML stream processing.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws IOException If an I/O error occurs.
+   * @throws DocumentException If an error occurs while parsing the document.
+   */
+  public ProjectModel addDependency(final DependencyGAV newDependencyGAV)
+      throws XMLStreamException, URISyntaxException, IOException, DocumentException {
+    final Dependency newDependency = new Dependency(newDependencyGAV);
+    final ProjectModel projectModel =
+        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
+            .withDependency(newDependency)
+            .withSkipIfNewer(true)
+            .withUseProperties(true)
+            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions().toFile())
+            .build();
+
+    return modify(projectModel) ? projectModel : null;
+  }
+
+  /**
+   * Retrieves all found dependencies in the POM.
+   *
+   * @return A collection of DependencyGAV objects representing the found dependencies.
+   * @throws DocumentException If an error occurs while parsing the document.
+   * @throws IOException If an I/O error occurs.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws XMLStreamException If an error occurs during XML stream processing.
+   */
+  @NotNull
+  public Collection<DependencyGAV> getAllFoundDependencies()
+      throws DocumentException, IOException, URISyntaxException, XMLStreamException {
+
+    final ProjectModel originalProjectModel =
+        POMScanner.legacyScanFrom(pomFile.toFile(), projectDir.toFile())
+            .withSafeQueryType()
+            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions().toFile())
+            .build();
+
+    final Collection<Dependency> foundDependencies = queryDependency(originalProjectModel);
+
+    return foundDependencies.stream()
+        .map(
+            dependency ->
+                DependencyGAV.createDefault(
+                    dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()))
+        .toList();
+  }
 
   /**
    * Bump a Dependency Version on a POM.
@@ -19,7 +93,7 @@ public class POMOperator {
    * @throws IOException If an I/O error occurs.
    * @throws XMLStreamException If an error occurs while handling XML streams.
    */
-  public static boolean modify(ProjectModel projectModel)
+  boolean modify(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     return CommandChain.createForModify().execute(projectModel);
   }
@@ -33,7 +107,7 @@ public class POMOperator {
    * @throws IOException If an I/O error occurs.
    * @throws XMLStreamException If an error occurs while handling XML streams.
    */
-  public static Collection<Dependency> queryDependency(ProjectModel projectModel)
+  Collection<Dependency> queryDependency(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     return queryDependency(projectModel, Collections.emptyList());
   }
@@ -48,7 +122,7 @@ public class POMOperator {
    * @throws IOException If an I/O error occurs.
    * @throws XMLStreamException If an error occurs while handling XML streams.
    */
-  public static Optional<VersionQueryResponse> queryVersions(ProjectModel projectModel)
+  Optional<VersionQueryResponse> queryVersions(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     Set<VersionDefinition> queryVersionResult =
         queryVersions(projectModel, Collections.emptyList());
@@ -109,7 +183,7 @@ public class POMOperator {
    * @param version The version string to map.
    * @return the mapped semantic version.
    */
-  public static Version mapVersion(String version) {
+  private Version mapVersion(String version) {
     String fixedVersion = version + (version.startsWith("1.") ? ".0" : ".0.0");
     return Version.valueOf(fixedVersion);
   }
@@ -120,8 +194,7 @@ public class POMOperator {
    * @param projectModel Project Model (Context) class
    * @param commandList do not use (required for tests)
    */
-  static Collection<Dependency> queryDependency(
-      ProjectModel projectModel, List<Command> commandList)
+  Collection<Dependency> queryDependency(ProjectModel projectModel, List<Command> commandList)
       throws URISyntaxException, IOException, XMLStreamException {
     CommandChain chain = CommandChain.createForDependencyQuery(projectModel.getQueryType());
 
@@ -150,7 +223,7 @@ public class POMOperator {
    * @param projectModel Project Model (Context) class
    * @param commandList do not use (required for tests)
    */
-  static Set<VersionDefinition> queryVersions(ProjectModel projectModel, List<Command> commandList)
+  Set<VersionDefinition> queryVersions(ProjectModel projectModel, List<Command> commandList)
       throws URISyntaxException, IOException, XMLStreamException {
     CommandChain chain = CommandChain.createForVersionQuery(projectModel.getQueryType());
 
@@ -173,7 +246,7 @@ public class POMOperator {
     return lastCommand.result;
   }
 
-  private static void executeChain(
+  private void executeChain(
       List<Command> commandList, CommandChain chain, ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     if (!commandList.isEmpty()) {

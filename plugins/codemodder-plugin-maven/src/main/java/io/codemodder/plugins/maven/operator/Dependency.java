@@ -1,12 +1,13 @@
 package io.codemodder.plugins.maven.operator;
 
+import io.codemodder.DependencyGAV;
 import java.util.Objects;
 
 /**
  * Represents a dependency in a Maven POM. A dependency consists of a group ID, artifact ID,
  * version, classifier, packaging, and scope.
  */
-public class Dependency {
+class Dependency {
   private String groupId;
   private String artifactId;
   private String version;
@@ -24,7 +25,7 @@ public class Dependency {
    * @param packaging The packaging type of the dependency (default is "jar" if null).
    * @param scope The scope of the dependency (default is "compile" if null).
    */
-  public Dependency(
+  Dependency(
       String groupId,
       String artifactId,
       String version,
@@ -37,6 +38,16 @@ public class Dependency {
     this.classifier = classifier;
     this.packaging = packaging != null ? packaging : "jar";
     this.scope = scope != null ? scope : "compile";
+  }
+
+  Dependency(final DependencyGAV newDependencyGAV) {
+    this(
+        newDependencyGAV.group(),
+        newDependencyGAV.artifact(),
+        newDependencyGAV.version(),
+        null,
+        null,
+        null);
   }
 
   @Override
