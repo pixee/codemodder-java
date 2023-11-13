@@ -253,7 +253,7 @@ public final class MavenProvider implements ProjectProvider {
     try {
       return aPomFile.getPomPath().toURI();
     } catch (URISyntaxException ex) {
-      ex.printStackTrace();
+      LOG.error("Unexpected problem getting pom URI", ex);
       throw new MavenProvider.DependencyUpdateException("Failure parsing URL: " + aPomFile, ex);
     }
   }
