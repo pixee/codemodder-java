@@ -96,8 +96,7 @@ public class POMDependencyUpdater {
               return;
             }
 
-            final ProjectModel modifiedProjectModel =
-                pomOperator.modifyAndGetProjectModel(newDependencyGAV);
+            final ProjectModel modifiedProjectModel = pomOperator.addDependency(newDependencyGAV);
 
             if (modifiedProjectModel == null) {
               LOG.trace("POM file didn't need modification or it failed?");
@@ -115,7 +114,9 @@ public class POMDependencyUpdater {
 
             foundDependenciesMapped.set(newDependencySet);
           } catch (DocumentException | IOException | URISyntaxException | XMLStreamException e) {
-            throw new RuntimeException(e);
+            LOG.error("Unexpected problem getting on pom operator", e);
+            throw new MavenProvider.DependencyUpdateException(
+                "Failure while executing pom operator: ", e);
           }
         });
 
@@ -174,7 +175,7 @@ public class POMDependencyUpdater {
     try {
       return aPomFile.getPomPath().toURI();
     } catch (URISyntaxException ex) {
-      ex.printStackTrace();
+      LOG.error("Unexpected problem getting pom URI", ex);
       throw new MavenProvider.DependencyUpdateException("Failure parsing URL: " + aPomFile, ex);
     }
   }
