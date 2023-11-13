@@ -186,7 +186,7 @@ public final class MavenProvider implements ProjectProvider {
             }
 
             final ProjectModel modifiedProjectModel =
-                pomOperator.modifyAndGetProjectModel(newDependencyGAV);
+                pomOperator.addDependency(newDependencyGAV);
 
             if (modifiedProjectModel != null) {
               LOG.trace("Modified the pom -- writing it back");

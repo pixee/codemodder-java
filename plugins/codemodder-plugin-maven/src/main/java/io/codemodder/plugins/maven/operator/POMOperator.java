@@ -41,7 +41,7 @@ public class POMOperator {
    * @throws IOException If an I/O error occurs.
    * @throws DocumentException If an error occurs while parsing the document.
    */
-  public ProjectModel modifyAndGetProjectModel(final DependencyGAV newDependencyGAV)
+  public ProjectModel addDependency(final DependencyGAV newDependencyGAV)
       throws XMLStreamException, URISyntaxException, IOException, DocumentException {
     final Dependency newDependency = new Dependency(newDependencyGAV);
     final ProjectModel projectModel =
