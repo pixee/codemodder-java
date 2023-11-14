@@ -63,7 +63,7 @@ public final class MavenProvider implements ProjectProvider {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
     this.pomDependencyUpdater =
-        new POMDependencyUpdater(
+        new POMDependencyUpdaterImpl(
             new CodeTFGenerator(positionFinder, dependencyDescriptor), pomFileFinder, pomModifier);
   }
 
