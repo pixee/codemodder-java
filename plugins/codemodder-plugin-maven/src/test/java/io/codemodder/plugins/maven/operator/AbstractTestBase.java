@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
+import javax.xml.stream.XMLStreamException;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 import org.junit.Assert;
@@ -24,6 +25,11 @@ import org.xmlunit.diff.Diff;
 class AbstractTestBase {
   protected static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 
+  static enum OperationType {
+    MODIFY,
+    INSERT
+  }
+
   protected File getResource(String name) throws URISyntaxException {
     return new File(this.getClass().getResource(name).toURI());
   }
@@ -34,17 +40,22 @@ class AbstractTestBase {
   }
 
   protected ProjectModel gwt(String name, ProjectModelFactory pmf) throws Exception {
-    return gwt(name, pmf.build());
+    return gwt(name, pmf.build(), OperationType.MODIFY);
   }
 
-  protected ProjectModel gwt(String testName, ProjectModel context) throws Exception {
+  protected ProjectModel performInsert(String name, ProjectModelFactory pmf) throws Exception {
+    return gwt(name, pmf.build(), OperationType.INSERT);
+  }
+
+  protected ProjectModel gwt(
+      String testName, ProjectModel context, final OperationType operationType) throws Exception {
 
     String resultFile = "pom-" + testName + "-result.xml";
     URL resource = AbstractTestBase.class.getClass().getResource(resultFile);
 
     if (resource != null) {
       Document outcome = new SAXReader().read(resource);
-      POMOperator.modify(context);
+      performPomOperation(operationType, context);
 
       Assert.assertFalse(
           "Expected and outcome have differences",
@@ -56,7 +67,7 @@ class AbstractTestBase {
               AbstractTestBase.class.getPackage().getName().replace(".", "/"),
               resultFile);
 
-      POMOperator.modify(context);
+      performPomOperation(operationType, context);
 
       byte[] resultPomBytes = context.getPomFile().getResultPomBytes();
 
@@ -67,6 +78,16 @@ class AbstractTestBase {
       }
     }
     return context;
+  }
+
+  private void performPomOperation(
+      final OperationType operationType, final ProjectModel projectModel)
+      throws XMLStreamException, URISyntaxException, IOException {
+    switch (operationType) {
+      case INSERT -> POMOperator.insert(projectModel);
+      case MODIFY -> POMOperator.modify(projectModel);
+      default -> throw new IllegalArgumentException("Invalid operation type: " + operationType);
+    }
   }
 
   static Diff getXmlDifferences(Document original, Document modified) {

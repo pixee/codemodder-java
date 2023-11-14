@@ -92,9 +92,8 @@ class CommandChain {
    *
    * @return A pre-configured Chain for modifying a POM.
    */
-  public static CommandChain createForModify() {
-    final List<Command> modifyCommands = new ArrayList<>();
-    modifyCommands.addAll(COMMON_COMMANDS);
+  public static CommandChain modifyDependency() {
+    final List<Command> modifyCommands = new ArrayList<>(COMMON_COMMANDS);
     modifyCommands.addAll(
         List.of(
             SimpleUpgrade.getInstance(),
@@ -103,9 +102,14 @@ class CommandChain {
     return new CommandChain(modifyCommands);
   }
 
+  /**
+   * Creates a pre-configured Chain with default commands for only inserting a dependency onto a
+   * POM.
+   *
+   * @return A pre-configured Chain.
+   */
   public static CommandChain insertDependency() {
-    final List<Command> insertCommands = new ArrayList<>();
-    insertCommands.addAll(COMMON_COMMANDS);
+    final List<Command> insertCommands = new ArrayList<>(COMMON_COMMANDS);
     insertCommands.add(SimpleInsert.getInstance());
     return new CommandChain(insertCommands);
   }

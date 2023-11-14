@@ -519,4 +519,56 @@ final class POMOperatorTest extends AbstractTestBase {
         resultPomAsString.contains(
             "                <DependencyConvergence></DependencyConvergence>"));
   }
+
+  @Test
+  void insert_should_fail_because_dependency_exists() throws Exception {
+    Dependency dependencyToUpgrade =
+        new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
+
+    ProjectModel context =
+        performInsert(
+            "pom-case-3-insert-fails",
+            ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-3.xml"))
+                .withDependency(dependencyToUpgrade)
+                .withSkipIfNewer(true));
+
+    Diff diff =
+        getXmlDifferences(
+            context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
+
+    Assert.assertFalse("Document has no differences", !diff.hasDifferences());
+    Assert.assertFalse("Original POM File is not Dirty", !context.getPomFile().getDirty());
+  }
+
+  @Test
+  void insert_should_perform_gracefully() throws Exception {
+    Dependency dependencyToUpgrade =
+        new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
+
+    ProjectModel context =
+        performInsert(
+            "inserts-dependency",
+            ProjectModelFactory.load(
+                    POMOperatorTest.class.getResource("pom-without-dependencies.xml"))
+                .withDependency(dependencyToUpgrade)
+                .withUseProperties(true)
+                .withSkipIfNewer(true));
+
+    Assert.assertTrue("Original POM File is Dirty", context.getPomFile().getDirty());
+
+    List<Dependency> resolvedDeps =
+        POMOperator.queryDependency(
+                ProjectModelFactory.load(
+                        POMOperatorTest.class.getResource("pom-inserts-dependency-result.xml"))
+                    .withSafeQueryType()
+                    .build())
+            .stream()
+            .toList();
+
+    System.out.println(resolvedDeps);
+
+    Assert.assertTrue("Must have one dependencies", 1 == resolvedDeps.size());
+    Assert.assertTrue(
+        "dom4j is the desired dependency", resolvedDeps.get(0).equals(dependencyToUpgrade));
+  }
 }

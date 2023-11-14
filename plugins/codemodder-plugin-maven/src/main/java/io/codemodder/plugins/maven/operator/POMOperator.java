@@ -89,7 +89,12 @@ public class POMOperator {
    */
   static boolean modify(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
-    return CommandChain.createForModify().execute(projectModel);
+    return CommandChain.modifyDependency().execute(projectModel);
+  }
+
+  static boolean insert(ProjectModel projectModel)
+      throws URISyntaxException, IOException, XMLStreamException {
+    return CommandChain.insertDependency().execute(projectModel);
   }
 
   /**
