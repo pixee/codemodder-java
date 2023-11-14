@@ -19,14 +19,6 @@ public class POMOperator {
     this.pomScanner = new POMScanner(pomFile.toFile(), projectDir.toFile());
   }
 
-  public static POMOperator forTesting() {
-    return new POMOperator();
-  }
-
-  private POMOperator() {
-    this.pomScanner = null;
-  }
-
   public POMScanner getPomScanner() {
     return pomScanner;
   }
