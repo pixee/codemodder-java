@@ -95,7 +95,7 @@ public class POMOperator {
    * @throws IOException If an I/O error occurs.
    * @throws XMLStreamException If an error occurs while handling XML streams.
    */
-  boolean modify(ProjectModel projectModel)
+  static boolean modify(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     return CommandChain.createForModify().execute(projectModel);
   }
@@ -109,7 +109,7 @@ public class POMOperator {
    * @throws IOException If an I/O error occurs.
    * @throws XMLStreamException If an error occurs while handling XML streams.
    */
-  Collection<Dependency> queryDependency(ProjectModel projectModel)
+  static Collection<Dependency> queryDependency(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     return queryDependency(projectModel, Collections.emptyList());
   }
@@ -124,7 +124,7 @@ public class POMOperator {
    * @throws IOException If an I/O error occurs.
    * @throws XMLStreamException If an error occurs while handling XML streams.
    */
-  Optional<VersionQueryResponse> queryVersions(ProjectModel projectModel)
+  static Optional<VersionQueryResponse> queryVersions(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     Set<VersionDefinition> queryVersionResult =
         queryVersions(projectModel, Collections.emptyList());
@@ -185,7 +185,7 @@ public class POMOperator {
    * @param version The version string to map.
    * @return the mapped semantic version.
    */
-  private Version mapVersion(String version) {
+  private static Version mapVersion(String version) {
     String fixedVersion = version + (version.startsWith("1.") ? ".0" : ".0.0");
     return Version.valueOf(fixedVersion);
   }
@@ -196,7 +196,8 @@ public class POMOperator {
    * @param projectModel Project Model (Context) class
    * @param commandList do not use (required for tests)
    */
-  Collection<Dependency> queryDependency(ProjectModel projectModel, List<Command> commandList)
+  static Collection<Dependency> queryDependency(
+      ProjectModel projectModel, List<Command> commandList)
       throws URISyntaxException, IOException, XMLStreamException {
     CommandChain chain = CommandChain.createForDependencyQuery(projectModel.getQueryType());
 
@@ -225,7 +226,7 @@ public class POMOperator {
    * @param projectModel Project Model (Context) class
    * @param commandList do not use (required for tests)
    */
-  Set<VersionDefinition> queryVersions(ProjectModel projectModel, List<Command> commandList)
+  static Set<VersionDefinition> queryVersions(ProjectModel projectModel, List<Command> commandList)
       throws URISyntaxException, IOException, XMLStreamException {
     CommandChain chain = CommandChain.createForVersionQuery(projectModel.getQueryType());
 
@@ -248,7 +249,7 @@ public class POMOperator {
     return lastCommand.result;
   }
 
-  private void executeChain(
+  private static void executeChain(
       List<Command> commandList, CommandChain chain, ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     if (!commandList.isEmpty()) {

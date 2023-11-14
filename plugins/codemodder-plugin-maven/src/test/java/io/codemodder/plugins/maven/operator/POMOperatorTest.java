@@ -65,7 +65,7 @@ final class POMOperatorTest extends AbstractTestBase {
               .withOverrideIfAlreadyExists(true)
               .build();
 
-      if (pomOperator.modify(projectModelFactory)) {
+      if (POMOperator.modify(projectModelFactory)) {
         Assert.assertTrue(
             "Original POM File is Dirty", projectModelFactory.getPomFile().getDirty());
 
@@ -87,7 +87,7 @@ final class POMOperatorTest extends AbstractTestBase {
     }
 
     Collection<Dependency> resolvedDeps =
-        pomOperator.queryDependency(ProjectModelFactory.load(testPom).withSafeQueryType().build());
+        POMOperator.queryDependency(ProjectModelFactory.load(testPom).withSafeQueryType().build());
 
     String testPomContents =
         new String(Files.readAllBytes(testPom.toPath()), Charset.defaultCharset());
@@ -398,7 +398,7 @@ final class POMOperatorTest extends AbstractTestBase {
                   .withOverrideIfAlreadyExists(false)
                   .build();
 
-          pomOperator.modify(context);
+          POMOperator.modify(context);
         });
   }
 
@@ -436,7 +436,7 @@ final class POMOperatorTest extends AbstractTestBase {
             .withSkipIfNewer(true)
             .build();
 
-    pomOperator.modify(context);
+    POMOperator.modify(context);
 
     Assert.assertTrue(context.getPomFile().getDirty());
 
@@ -473,7 +473,7 @@ final class POMOperatorTest extends AbstractTestBase {
             .withSkipIfNewer(true)
             .build();
 
-    pomOperator.modify(context);
+    POMOperator.modify(context);
 
     Assert.assertTrue(context.getPomFile().getDirty());
 

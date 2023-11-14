@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 final class POMOperatorDependencyQueryTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
-  private static final POMOperator pomOperator = POMOperator.forTesting();
 
   @Test
   void testBasicQuery()
@@ -27,7 +26,7 @@ final class POMOperatorDependencyQueryTest {
     ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource("pom-1.xml"));
     context.withSafeQueryType();
 
-    Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
+    Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
     LOGGER.debug("Dependencies found: {}", dependencies);
 
@@ -41,7 +40,7 @@ final class POMOperatorDependencyQueryTest {
         ProjectModelFactory.load(getClass().getResource("pom-broken.xml"));
     context.withSafeQueryType();
 
-    Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
+    Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
     assertTrue("Dependencies are empty", dependencies.isEmpty());
   }
@@ -66,7 +65,7 @@ final class POMOperatorDependencyQueryTest {
         context.withSafeQueryType();
 
         Collection<Dependency> dependencies =
-            pomOperator.queryDependency(context.build(), commandListOverride);
+            POMOperator.queryDependency(context.build(), commandListOverride);
 
         assertTrue("Dependencies are not empty", !dependencies.isEmpty());
       }
@@ -91,7 +90,7 @@ final class POMOperatorDependencyQueryTest {
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
-    Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
+    Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
     LOGGER.debug("Dependencies found: " + dependencies);
 
@@ -111,7 +110,7 @@ final class POMOperatorDependencyQueryTest {
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
-    Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
+    Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
     LOGGER.debug("Dependencies found: " + dependencies);
 
@@ -155,7 +154,7 @@ final class POMOperatorDependencyQueryTest {
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
-    Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
+    Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
     LOGGER.debug("Dependencies found: " + dependencies);
 
@@ -243,7 +242,7 @@ final class POMOperatorDependencyQueryTest {
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
-    Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
+    Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
     LOGGER.debug("Dependencies found: " + dependencies);
 
@@ -312,7 +311,7 @@ final class POMOperatorDependencyQueryTest {
     context.withRepositoryPath(tempDirectory);
 
     List<Command> commandList = getCommandListFor("QueryByParsing");
-    Collection<Dependency> dependencies = pomOperator.queryDependency(context.build(), commandList);
+    Collection<Dependency> dependencies = POMOperator.queryDependency(context.build(), commandList);
 
     LOGGER.debug("Dependencies found: {}", dependencies);
 
@@ -357,7 +356,7 @@ final class POMOperatorDependencyQueryTest {
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
-    Collection<Dependency> dependencies = pomOperator.queryDependency(context.build());
+    Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
     LOGGER.debug("Dependencies found: {}", dependencies);
 
