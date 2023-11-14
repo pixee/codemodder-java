@@ -15,8 +15,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
 
-/** CodeTFGenerator is responsible for generating CodeTFChangesetEntry for Maven POM updates. */
-public class CodeTFGenerator {
+/** CodeTFGenerator is responsible for generating {@link CodeTFChangesetEntry} for Maven POM updates. */
+final class CodeTFGenerator {
 
   private final ArtifactInjectionPositionFinder positionFinder;
 
