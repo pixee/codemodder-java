@@ -1,6 +1,7 @@
 package io.codemodder.plugins.maven.operator;
 
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
@@ -45,7 +46,10 @@ class SimpleInsert implements Command {
 
       List<Node> versionNodes = Util.selectXPathNodes(dependencies.get(0), "./m:version");
 
-      if (!versionNodes.isEmpty()) {
+      // TODO not sure about those last two conditions
+      if (!versionNodes.isEmpty()
+          && StringUtils.isNotBlank(pm.getDependency().getVersion())
+          && !pm.getDependency().getVersion().equals("UNKNOWN")) {
         final boolean withVersionMatch =
             versionNodes.stream()
                     .filter(a -> a.getText().equals(pm.getDependency().getVersion()))
