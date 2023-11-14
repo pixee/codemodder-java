@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 final class POMOperatorVersionQueryTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorVersionQueryTest.class);
-  private final POMOperator pomOperator = POMOperator.forTesting();
 
   @Test
   void testBasicQuery()
@@ -145,6 +144,6 @@ final class POMOperatorVersionQueryTest {
     ProjectModel context =
         ProjectModelFactory.load(this.getClass().getResource(pomFile)).withSafeQueryType().build();
 
-    return pomOperator.queryVersions(context);
+    return POMOperator.queryVersions(context);
   }
 }
