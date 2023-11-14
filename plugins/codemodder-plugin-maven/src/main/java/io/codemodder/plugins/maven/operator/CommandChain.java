@@ -98,7 +98,7 @@ class CommandChain {
         List.of(
             SimpleUpgrade.getInstance(),
             SimpleDependencyManagement.getInstance(),
-            SimpleInsert.getInstance()));
+            new SimpleInsert(false)));
     return new CommandChain(modifyCommands);
   }
 
@@ -110,7 +110,7 @@ class CommandChain {
    */
   public static CommandChain insertDependency() {
     final List<Command> insertCommands = new ArrayList<>(COMMON_COMMANDS);
-    insertCommands.add(SimpleInsert.getInstance());
+    insertCommands.add(new SimpleInsert(true));
     return new CommandChain(insertCommands);
   }
 

@@ -1,7 +1,6 @@
 package io.codemodder.plugins.maven.operator;
 
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
@@ -11,17 +10,14 @@ import org.dom4j.Node;
  */
 class SimpleInsert implements Command {
 
-  private static final SimpleInsert INSTANCE = new SimpleInsert();
-
-  private SimpleInsert() {}
+  private final boolean validateDependencyExistence;
 
   /**
-   * Gets the singleton instance of SimpleInsert.
-   *
-   * @return The singleton instance of SimpleInsert.
+   * @param validateDependencyExistence is true when we only want to this command alone to insert
+   *     dependencies in a CommandChain for dependency existence validations
    */
-  public static SimpleInsert getInstance() {
-    return INSTANCE;
+  SimpleInsert(final boolean validateDependencyExistence) {
+    this.validateDependencyExistence = validateDependencyExistence;
   }
 
   /**
@@ -33,34 +29,13 @@ class SimpleInsert implements Command {
    */
   @Override
   public boolean execute(ProjectModel pm) {
+
+    if (validateDependencyExistence && checkDependencyExists(pm)) {
+      return true;
+    }
+
     List<Node> dependencyManagementNodeList =
         Util.selectXPathNodes(pm.getPomFile().getResultPom(), "/m:project/m:dependencyManagement");
-
-    String lookupExpressionForDependency =
-        Util.buildLookupExpressionForDependency(pm.getDependency());
-
-    List<Node> dependencies =
-        Util.selectXPathNodes(pm.getPomFile().getResultPom(), lookupExpressionForDependency);
-
-    if (!dependencies.isEmpty()) {
-
-      List<Node> versionNodes = Util.selectXPathNodes(dependencies.get(0), "./m:version");
-
-      // TODO not sure about those last two conditions
-      if (!versionNodes.isEmpty()
-          && StringUtils.isNotBlank(pm.getDependency().getVersion())
-          && !pm.getDependency().getVersion().equals("UNKNOWN")) {
-        final boolean withVersionMatch =
-            versionNodes.stream()
-                    .filter(a -> a.getText().equals(pm.getDependency().getVersion()))
-                    .count()
-                > 0;
-
-        if (withVersionMatch) {
-          return true;
-        }
-      }
-    }
 
     Element dependenciesNode;
     if (dependencyManagementNodeList.isEmpty()) {
@@ -99,6 +74,16 @@ class SimpleInsert implements Command {
     appendCoordinates(rootDependencyNode, pm);
 
     return true;
+  }
+
+  private boolean checkDependencyExists(final ProjectModel pm) {
+    String lookupExpressionForDependency =
+        Util.buildLookupExpressionForDependency(pm.getDependency());
+
+    List<Node> matchedDependencies =
+        Util.selectXPathNodes(pm.getPomFile().getResultPom(), lookupExpressionForDependency);
+
+    return !matchedDependencies.isEmpty();
   }
 
   /** Creates the XML Elements for a given dependency */

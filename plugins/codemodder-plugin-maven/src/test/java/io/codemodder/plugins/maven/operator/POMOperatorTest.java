@@ -532,12 +532,26 @@ final class POMOperatorTest extends AbstractTestBase {
                 .withDependency(dependencyToUpgrade)
                 .withSkipIfNewer(true));
 
-    Diff diff =
-        getXmlDifferences(
-            context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
+    Assert.assertTrue("Original POM File is Dirty", !context.getPomFile().getDirty());
 
-    Assert.assertFalse("Document has no differences", !diff.hasDifferences());
-    Assert.assertFalse("Original POM File is not Dirty", !context.getPomFile().getDirty());
+    List<Dependency> resolvedDeps =
+        POMOperator.queryDependency(
+                ProjectModelFactory.load(
+                        POMOperatorTest.class.getResource("pom-pom-case-3-insert-fails-result.xml"))
+                    .withSafeQueryType()
+                    .build())
+            .stream()
+            .toList();
+
+    final List<Dependency> dom4jDependency =
+        resolvedDeps.stream()
+            .filter(dependency -> dependency.matchesWithoutConsideringVersion(dependencyToUpgrade))
+            .toList();
+
+    Assert.assertTrue("only one dom4j dependency exists", dom4jDependency.size() == 1);
+    Assert.assertTrue(
+        "dependency doesn't match because of version",
+        !dom4jDependency.get(0).equals(dependencyToUpgrade));
   }
 
   @Test
@@ -564,8 +578,6 @@ final class POMOperatorTest extends AbstractTestBase {
                     .build())
             .stream()
             .toList();
-
-    System.out.println(resolvedDeps);
 
     Assert.assertTrue("Must have one dependencies", 1 == resolvedDeps.size());
     Assert.assertTrue(
