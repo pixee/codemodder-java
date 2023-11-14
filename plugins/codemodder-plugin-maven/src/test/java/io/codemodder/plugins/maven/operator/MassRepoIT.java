@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 final class MassRepoIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(MassRepoIT.class);
 
-  private static final POMOperator pomOperator = POMOperator.forTesting();
-
   private static class TestRepo {
     private String slug;
     private String branch;
@@ -143,11 +141,11 @@ final class MassRepoIT {
     } catch (Exception e) {
       File pomFile = new File(repo.cacheDir(), repo.pomPath);
 
+      final POMOperator pomOperator = new POMOperator(pomFile.toPath(), repo.cacheDir().toPath());
+
       Collection<Dependency> dependencies =
           pomOperator.queryDependency(
-              POMScanner.scanFrom(pomFile, repo.cacheDir())
-                  .withRepositoryPath(repo.cacheDir())
-                  .build());
+              pomOperator.getPomScanner().scanFrom().withRepositoryPath(repo.cacheDir()).build());
 
       StringBuilder result = new StringBuilder();
 
@@ -254,10 +252,16 @@ final class MassRepoIT {
 
     Dependency dependencyToUpgrade = Dependency.fromString(dependencyToUpgradeString);
 
+    final POMOperator pomOperator =
+        new POMOperator(
+            new File(sampleRepo.cacheDir(), sampleRepo.pomPath).toPath(),
+            sampleRepo.cacheDir().toPath());
+
+    final POMScanner pomScanner = pomOperator.getPomScanner();
+
     ProjectModelFactory projectModelFactory =
         sampleRepo.useScanner
-            ? POMScanner.scanFrom(
-                new File(sampleRepo.cacheDir(), sampleRepo.pomPath), sampleRepo.cacheDir())
+            ? pomScanner.scanFrom()
             : ProjectModelFactory.load(new File(sampleRepo.cacheDir(), sampleRepo.pomPath));
 
     ProjectModel context =

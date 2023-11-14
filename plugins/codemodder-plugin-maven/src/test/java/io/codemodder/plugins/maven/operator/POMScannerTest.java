@@ -13,25 +13,30 @@ import org.junit.jupiter.api.Test;
 final class POMScannerTest extends AbstractTestBase {
   private final File currentDirectory = new File(System.getProperty("user.dir"));
 
+  private ProjectModelFactory buildProjectModelFactory(final File pomFile)
+      throws DocumentException, IOException, URISyntaxException {
+    return new POMScanner(pomFile, currentDirectory).scanFrom();
+  }
+
   @Test
   void testBasic() throws Exception {
     File pomFile = getResourceAsFile("sample-child-with-relativepath.xml");
 
-    ProjectModel pmf = POMScanner.scanFrom(pomFile, currentDirectory).build();
+    ProjectModel pmf = buildProjectModelFactory(pomFile).build();
   }
 
   @Test
   void testTwoLevelsWithLoop() throws Exception {
     File pomFile = getResourceAsFile("sample-child-with-relativepath-and-two-levels.xml");
 
-    ProjectModel pmf = POMScanner.scanFrom(pomFile, currentDirectory).build();
+    ProjectModel pmf = buildProjectModelFactory(pomFile).build();
   }
 
   @Test
   void testTwoLevelsWithoutLoop() throws Exception {
     File pomFile = getResourceAsFile("sample-child-with-relativepath-and-two-levels-nonloop.xml");
 
-    ProjectModel pmf = POMScanner.scanFrom(pomFile, currentDirectory).build();
+    ProjectModel pmf = buildProjectModelFactory(pomFile).build();
 
     assertTrue("There must be two parent pom files", pmf.getParentPomFiles().size() == 2);
 
@@ -59,7 +64,7 @@ final class POMScannerTest extends AbstractTestBase {
     for (int index = 1; index <= 3; index++) {
       File pomFile = getResourceAsFile("nested/child/pom/pom-" + index + "-child.xml");
 
-      ProjectModel pm = POMScanner.legacyScanFrom(pomFile, currentDirectory).build();
+      ProjectModel pm = buildProjectModelFactory(pomFile).build();
 
       assertTrue("There must be at least one parent pom file", pm.getParentPomFiles().size() > 0);
 
@@ -88,7 +93,7 @@ final class POMScannerTest extends AbstractTestBase {
       throws DocumentException, IOException, URISyntaxException {
     File pomFile = getResourceAsFile("nested/child/pom/pom-demo.xml");
 
-    ProjectModel pm = POMScanner.legacyScanFrom(pomFile, currentDirectory).build();
+    ProjectModel pm = buildProjectModelFactory(pomFile).build();
 
     assertTrue("There must be a single parent pom file", pm.getParentPomFiles().size() == 1);
   }
@@ -100,7 +105,7 @@ final class POMScannerTest extends AbstractTestBase {
       String name = "sample-child-with-broken-path-" + index + ".xml";
       File pomFile = getResourceAsFile(name);
 
-      ProjectModelFactory pmf = POMScanner.legacyScanFrom(pomFile, currentDirectory);
+      ProjectModelFactory pmf = buildProjectModelFactory(pomFile);
 
       assert pmf.build().getParentPomFiles().isEmpty();
     }
@@ -112,7 +117,7 @@ final class POMScannerTest extends AbstractTestBase {
       File pomFile = getResourceAsFile("pom-multiple-pom-parent-level-" + index + ".xml");
 
       try {
-        ProjectModelFactory pmf = POMScanner.scanFrom(pomFile, currentDirectory);
+        ProjectModelFactory pmf = buildProjectModelFactory(pomFile);
 
         assertTrue(pmf.build().getParentPomFiles().size() > 0);
       } catch (Exception e) {
@@ -132,7 +137,7 @@ final class POMScannerTest extends AbstractTestBase {
     File pomFile =
         getResourceAsFile("sample-parent/sample-child/pom-multiple-pom-parent-level-6.xml");
 
-    ProjectModelFactory pmf = POMScanner.legacyScanFrom(pomFile, currentDirectory);
+    ProjectModelFactory pmf = buildProjectModelFactory(pomFile);
 
     assertTrue(pmf.build().getParentPomFiles().size() > 0);
   }
