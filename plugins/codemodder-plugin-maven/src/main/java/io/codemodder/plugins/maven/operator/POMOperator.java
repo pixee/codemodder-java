@@ -196,7 +196,8 @@ public class POMOperator {
    * @param projectModel Project Model (Context) class
    * @param commandList do not use (required for tests)
    */
-  static Collection<Dependency> queryDependency(ProjectModel projectModel, List<Command> commandList)
+  static Collection<Dependency> queryDependency(
+      ProjectModel projectModel, List<Command> commandList)
       throws URISyntaxException, IOException, XMLStreamException {
     CommandChain chain = CommandChain.createForDependencyQuery(projectModel.getQueryType());
 

@@ -44,7 +44,7 @@ class AbstractTestBase {
 
     if (resource != null) {
       Document outcome = new SAXReader().read(resource);
-        POMOperator.modify(context);
+      POMOperator.modify(context);
 
       Assert.assertFalse(
           "Expected and outcome have differences",
@@ -56,7 +56,7 @@ class AbstractTestBase {
               AbstractTestBase.class.getPackage().getName().replace(".", "/"),
               resultFile);
 
-        POMOperator.modify(context);
+      POMOperator.modify(context);
 
       byte[] resultPomBytes = context.getPomFile().getResultPomBytes();
 
