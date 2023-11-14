@@ -28,7 +28,7 @@ public final class MavenProvider implements ProjectProvider {
 
   /** Represents a failure when doing a dependency update. */
   static class DependencyUpdateException extends RuntimeException {
-    public DependencyUpdateException(String message, Throwable cause) {
+    DependencyUpdateException(String message, Throwable cause) {
       super(message, cause);
     }
   }
@@ -63,7 +63,7 @@ public final class MavenProvider implements ProjectProvider {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
     this.pomDependencyUpdater =
-        new POMDependencyUpdaterImpl(
+        new DefaultPOMDependencyUpdater(
             new CodeTFGenerator(positionFinder, dependencyDescriptor), pomFileFinder, pomModifier);
   }
 

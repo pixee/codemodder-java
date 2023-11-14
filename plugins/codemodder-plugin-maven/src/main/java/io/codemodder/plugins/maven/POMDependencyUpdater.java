@@ -9,7 +9,7 @@ import java.util.List;
 import javax.xml.stream.XMLStreamException;
 import org.dom4j.DocumentException;
 
-public interface POMDependencyUpdater {
+interface POMDependencyUpdater {
 
   DependencyUpdateResult execute(Path projectDir, Path file, List<DependencyGAV> dependencies)
       throws IOException, XMLStreamException, DocumentException, URISyntaxException;

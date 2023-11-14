@@ -31,7 +31,7 @@ final class CodeTFGenerator {
    * @param positionFinder The ArtifactInjectionPositionFinder for finding artifact positions.
    * @param dependencyDescriptor The DependencyDescriptor for generating dependency descriptions.
    */
-  public CodeTFGenerator(
+  CodeTFGenerator(
       final ArtifactInjectionPositionFinder positionFinder,
       final DependencyDescriptor dependencyDescriptor) {
     this.dependencyDescriptor = Objects.requireNonNull(dependencyDescriptor);
@@ -46,7 +46,7 @@ final class CodeTFGenerator {
    * @param newDependency The new dependency to be added to the POM.
    * @return CodeTFChangesetEntry representing the POM update.
    */
-  public CodeTFChangesetEntry getChanges(
+  CodeTFChangesetEntry getChanges(
       final Path projectDir, final POMDocument pomDocument, final DependencyGAV newDependency) {
     final List<String> originalPomContents =
         getLinesFrom(pomDocument, pomDocument.getOriginalPom());

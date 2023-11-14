@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** POMDependencyUpdater is responsible for updating Maven POM files with new dependencies. */
-public class POMDependencyUpdaterImpl implements POMDependencyUpdater {
+class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
   private final PomFileFinder pomFileFinder;
 
   private Optional<Path> maybePomFile;
@@ -37,7 +37,7 @@ public class POMDependencyUpdaterImpl implements POMDependencyUpdater {
 
   private AtomicReference<Collection<DependencyGAV>> foundDependenciesMapped;
 
-  private static final Logger LOG = LoggerFactory.getLogger(POMDependencyUpdaterImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultPOMDependencyUpdater.class);
 
   /**
    * Constructs a POMDependencyUpdater with the specified CodeTFGenerator, PomFileFinder, and
@@ -47,13 +47,13 @@ public class POMDependencyUpdaterImpl implements POMDependencyUpdater {
    * @param pomFileFinder The PomFileFinder for locating POM files.
    * @param pomModifier The MavenProvider.PomModifier for modifying POM files.
    */
-  public POMDependencyUpdaterImpl(
+  DefaultPOMDependencyUpdater(
       final CodeTFGenerator codeTFGenerator,
       final PomFileFinder pomFileFinder,
       final MavenProvider.PomModifier pomModifier) {
-    this.pomFileFinder = pomFileFinder;
-    this.pomModifier = pomModifier;
-    this.codeTFGenerator = codeTFGenerator;
+    this.pomFileFinder = Objects.requireNonNull(pomFileFinder);
+    this.pomModifier = Objects.requireNonNull(pomModifier);
+    this.codeTFGenerator = Objects.requireNonNull(codeTFGenerator);
   }
 
   /**
