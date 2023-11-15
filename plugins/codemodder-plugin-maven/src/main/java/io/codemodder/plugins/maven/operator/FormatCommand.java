@@ -502,12 +502,9 @@ class FormatCommand extends AbstractCommand {
       Integer key = entry.getKey();
       MatchData match = entry.getValue();
 
-      if (elementsToReplace != null && elementsToReplace.size() > 0) {
-        MatchData nextMatch = elementsToReplace.remove(0);
+      MatchData nextMatch = elementsToReplace.remove(0);
 
-        xmlRepresentation =
-            replaceRange(xmlRepresentation, match.getRange(), nextMatch.getContent());
-      }
+      xmlRepresentation = replaceRange(xmlRepresentation, match.getRange(), nextMatch.getContent());
     }
 
     int lastIndex = 0;

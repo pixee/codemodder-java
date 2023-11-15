@@ -532,7 +532,7 @@ final class POMOperatorTest extends AbstractTestBase {
                 .withDependency(dependencyToUpgrade)
                 .withSkipIfNewer(true));
 
-    Assert.assertTrue("Original POM File is Dirty", !context.getPomFile().getDirty());
+    Assert.assertFalse("Original POM File is Dirty", context.getPomFile().getDirty());
 
     List<Dependency> resolvedDeps =
         POMOperator.queryDependency(
