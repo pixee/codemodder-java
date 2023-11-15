@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>br.com.ingenieux</groupId>
+    <artifactId>pom-operator</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <properties>
+        <sample.version>0.0.1-SNAPSHOT</sample.version>
+        <versions.dom4j>1.0.0</versions.dom4j>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>test-profile</id>
+            <properties>
+                <sample.version>1.0.1</sample.version>
+            </properties>
+        </profile>
+    </profiles>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+                <version>${versions.dom4j}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+        </dependency>
+    </dependencies>
+</project>

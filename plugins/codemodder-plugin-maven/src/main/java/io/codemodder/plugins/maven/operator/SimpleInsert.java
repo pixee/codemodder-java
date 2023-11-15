@@ -10,17 +10,14 @@ import org.dom4j.Node;
  */
 class SimpleInsert implements Command {
 
-  private static final SimpleInsert INSTANCE = new SimpleInsert();
-
-  private SimpleInsert() {}
+  private final boolean validateDependencyExistence;
 
   /**
-   * Gets the singleton instance of SimpleInsert.
-   *
-   * @return The singleton instance of SimpleInsert.
+   * @param validateDependencyExistence is true when we only want to this command alone to insert
+   *     dependencies in a CommandChain for dependency existence validations
    */
-  public static SimpleInsert getInstance() {
-    return INSTANCE;
+  SimpleInsert(final boolean validateDependencyExistence) {
+    this.validateDependencyExistence = validateDependencyExistence;
   }
 
   /**
@@ -32,6 +29,11 @@ class SimpleInsert implements Command {
    */
   @Override
   public boolean execute(ProjectModel pm) {
+
+    if (validateDependencyExistence && checkDependencyExists(pm)) {
+      return true;
+    }
+
     List<Node> dependencyManagementNodeList =
         Util.selectXPathNodes(pm.getPomFile().getResultPom(), "/m:project/m:dependencyManagement");
 
@@ -72,6 +74,16 @@ class SimpleInsert implements Command {
     appendCoordinates(rootDependencyNode, pm);
 
     return true;
+  }
+
+  private boolean checkDependencyExists(final ProjectModel pm) {
+    String lookupExpressionForDependency =
+        Util.buildLookupExpressionForDependency(pm.getDependency());
+
+    List<Node> matchedDependencies =
+        Util.selectXPathNodes(pm.getPomFile().getResultPom(), lookupExpressionForDependency);
+
+    return !matchedDependencies.isEmpty();
   }
 
   /** Creates the XML Elements for a given dependency */
