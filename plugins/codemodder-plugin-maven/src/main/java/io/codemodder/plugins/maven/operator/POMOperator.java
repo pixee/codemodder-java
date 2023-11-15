@@ -42,7 +42,7 @@ public class POMOperator {
             .withDependency(newDependency)
             .withSkipIfNewer(true)
             .withUseProperties(true)
-            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions().toFile())
+            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions())
             .build();
 
     return modify(projectModel) ? projectModel : null;
@@ -65,7 +65,7 @@ public class POMOperator {
         pomScanner
             .scanFrom()
             .withSafeQueryType()
-            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions().toFile())
+            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions())
             .build();
 
     final Collection<Dependency> foundDependencies = queryDependency(originalProjectModel);

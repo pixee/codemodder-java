@@ -1,6 +1,5 @@
 package io.codemodder.plugins.maven.operator;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -23,7 +22,7 @@ class ProjectModelFactory {
   private Set<String> activeProfiles;
   private boolean overrideIfAlreadyExists;
   private QueryType queryType;
-  private File repositoryPath;
+  private Path repositoryPath;
 
   private ProjectModelFactory() {
     parentPomFiles = new ArrayList<>();
@@ -98,7 +97,7 @@ class ProjectModelFactory {
    *
    * @param repositoryPath Repository Path
    */
-  public ProjectModelFactory withRepositoryPath(File repositoryPath) {
+  public ProjectModelFactory withRepositoryPath(Path repositoryPath) {
     this.repositoryPath = repositoryPath;
     return this;
   }

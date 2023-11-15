@@ -1,6 +1,9 @@
 package io.codemodder.plugins.maven.operator;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /** Commands for checking and creating the local repository directory if it doesn't exist. */
 class CheckLocalRepositoryDirCommand {
@@ -42,11 +45,11 @@ class CheckLocalRepositoryDirCommand {
      *     errors.
      */
     @Override
-    public boolean execute(ProjectModel c) {
-      File localRepositoryPath = getLocalRepositoryPath(c);
+    public boolean execute(ProjectModel c) throws IOException {
+      Path localRepositoryPath = getLocalRepositoryPath(c);
 
-      if (!localRepositoryPath.exists()) {
-        localRepositoryPath.mkdirs();
+      if (Files.notExists(localRepositoryPath)) {
+        Files.createDirectories(localRepositoryPath);
       }
 
       return false;

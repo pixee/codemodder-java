@@ -1,6 +1,8 @@
 package io.codemodder.plugins.maven.operator;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import org.apache.commons.lang3.SystemUtils;
@@ -35,10 +37,10 @@ final class MassRepoIT {
       this.pomPath = pomPath != null ? pomPath : "pom.xml";
     }
 
-    File cacheDir() {
+    Path cacheDir() {
       String cacheDirName =
           BASE_CACHE_DIR + File.separator + "repo-" + String.format("%08X", slug.hashCode());
-      return new File(cacheDirName);
+      return Paths.get(cacheDirName);
     }
 
     static final File BASE_CACHE_DIR =
@@ -96,14 +98,14 @@ final class MassRepoIT {
   private void checkoutOrResetCachedRepo(TestRepo repo) throws IOException, InterruptedException {
     LOGGER.info("Checkout out {} into {}", repo.slug, repo.cacheDir());
 
-    if (!repo.cacheDir().exists()) {
+    if (Files.notExists(repo.cacheDir())) {
       String[] command = {
         "git",
         "clone",
         "-b",
         repo.branch,
         "https://github.com/" + repo.slug + ".git",
-        repo.cacheDir().getCanonicalPath()
+        repo.cacheDir().toRealPath().toString()
       };
 
       LOGGER.debug("Running command: " + String.join(" ", command));
@@ -120,7 +122,8 @@ final class MassRepoIT {
 
       LOGGER.debug("Running command: " + String.join(" ", command));
 
-      Process process = new ProcessBuilder(command).directory(repo.cacheDir()).inheritIO().start();
+      Process process =
+          new ProcessBuilder(command).directory(repo.cacheDir().toFile()).inheritIO().start();
 
       process.waitFor();
     }
@@ -130,7 +133,8 @@ final class MassRepoIT {
 
       LOGGER.debug("Running command: " + String.join(" ", command));
 
-      Process process = new ProcessBuilder(command).directory(repo.cacheDir()).inheritIO().start();
+      Process process =
+          new ProcessBuilder(command).directory(repo.cacheDir().toFile()).inheritIO().start();
 
       process.waitFor();
     }
@@ -140,9 +144,9 @@ final class MassRepoIT {
     try {
       return getDependenciesFrom(repo.pomPath, repo.cacheDir());
     } catch (Exception e) {
-      File pomFile = new File(repo.cacheDir(), repo.pomPath);
+      Path pomFile = repo.cacheDir().resolve(repo.pomPath);
 
-      final POMOperator pomOperator = new POMOperator(pomFile.toPath(), repo.cacheDir().toPath());
+      final POMOperator pomOperator = new POMOperator(pomFile, repo.cacheDir());
 
       Collection<Dependency> dependencies =
           pomOperator.queryDependency(
@@ -158,7 +162,7 @@ final class MassRepoIT {
     }
   }
 
-  private String getDependenciesFrom(String pomPath, File dir)
+  private String getDependenciesFrom(String pomPath, Path dir)
       throws IOException, InterruptedException {
     File outputFile = File.createTempFile("tmp-pom", ".txt");
 
@@ -190,7 +194,7 @@ final class MassRepoIT {
     LOGGER.debug("Running: " + String.join(" ", commandList));
     LOGGER.debug("Dir: " + dir);
 
-    Process process = new ProcessBuilder(commandList).directory(dir).inheritIO().start();
+    Process process = new ProcessBuilder(commandList).directory(dir.toFile()).inheritIO().start();
 
     process.waitFor();
 
@@ -254,9 +258,7 @@ final class MassRepoIT {
     Dependency dependencyToUpgrade = Dependency.fromString(dependencyToUpgradeString);
 
     final POMOperator pomOperator =
-        new POMOperator(
-            new File(sampleRepo.cacheDir(), sampleRepo.pomPath).toPath(),
-            sampleRepo.cacheDir().toPath());
+        new POMOperator(sampleRepo.cacheDir().resolve(sampleRepo.pomPath), sampleRepo.cacheDir());
 
     final POMScanner pomScanner = pomOperator.getPomScanner();
 
