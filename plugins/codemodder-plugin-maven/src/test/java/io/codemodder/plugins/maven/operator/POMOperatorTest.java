@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -45,10 +46,10 @@ final class POMOperatorTest extends AbstractTestBase {
     deps.add(Dependency.fromString("io.github.pixee:java-code-security-toolkit:1.0.2"));
     deps.add(Dependency.fromString("org.owasp.encoder:encoder:1.2.3"));
 
-    File testPom = File.createTempFile("pom", ".xml");
+    Path testPomPath = Files.createTempFile("pom", ".xml");
 
     try (InputStream inputStream = POMOperatorTest.class.getResourceAsStream("sample-bad-pom.xml");
-        OutputStream outputStream = new FileOutputStream(testPom)) {
+        OutputStream outputStream = Files.newOutputStream(testPomPath)) {
       byte[] buffer = new byte[1024];
       int bytesRead;
       while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -59,7 +60,7 @@ final class POMOperatorTest extends AbstractTestBase {
     for (Dependency d : deps) {
 
       ProjectModel projectModelFactory =
-          ProjectModelFactory.load(testPom)
+          ProjectModelFactory.load(testPomPath)
               .withDependency(d)
               .withUseProperties(true)
               .withOverrideIfAlreadyExists(true)
@@ -75,7 +76,7 @@ final class POMOperatorTest extends AbstractTestBase {
 
         LOGGER.debug("resultPomAsXml: {}", resultPomAsXml);
 
-        try (FileOutputStream outputStream = new FileOutputStream(testPom)) {
+        try (OutputStream outputStream = Files.newOutputStream(testPomPath)) {
           outputStream.write(projectModelFactory.getPomFile().getResultPomBytes());
         } catch (IOException e) {
           // Handle the IOException
@@ -87,10 +88,10 @@ final class POMOperatorTest extends AbstractTestBase {
     }
 
     Collection<Dependency> resolvedDeps =
-        POMOperator.queryDependency(ProjectModelFactory.load(testPom).withSafeQueryType().build());
+        POMOperator.queryDependency(
+            ProjectModelFactory.load(testPomPath).withSafeQueryType().build());
 
-    String testPomContents =
-        new String(Files.readAllBytes(testPom.toPath()), Charset.defaultCharset());
+    String testPomContents = new String(Files.readAllBytes(testPomPath), Charset.defaultCharset());
 
     Assert.assertTrue("Must have three dependencies", 3 == resolvedDeps.size());
     Assert.assertTrue("Must have a comment inside", testPomContents.contains("<!--"));

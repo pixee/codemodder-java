@@ -1,8 +1,9 @@
 package io.codemodder.plugins.maven.operator;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import javax.xml.stream.XMLStreamException;
 import org.dom4j.Element;
@@ -63,17 +64,17 @@ abstract class AbstractCommand implements Command {
    * @param pm The ProjectModel containing information about the project.
    * @return A File object representing the local repository path.
    */
-  protected File getLocalRepositoryPath(ProjectModel pm) {
-    File localRepositoryPath = null;
+  protected Path getLocalRepositoryPath(ProjectModel pm) {
+    Path localRepositoryPath = null;
 
     if (pm.getRepositoryPath() != null) {
       localRepositoryPath = pm.getRepositoryPath();
     } else if (System.getenv("M2_REPO") != null) {
-      localRepositoryPath = new File(System.getenv("M2_REPO"));
+      localRepositoryPath = Paths.get(System.getenv("M2_REPO"));
     } else if (System.getProperty("maven.repo.local") != null) {
-      localRepositoryPath = new File(System.getProperty("maven.repo.local"));
+      localRepositoryPath = Paths.get(System.getProperty("maven.repo.local"));
     } else {
-      localRepositoryPath = new File(System.getProperty("user.home"), ".m2/repository");
+      localRepositoryPath = Paths.get(System.getProperty("user.home"), ".m2/repository");
     }
 
     return localRepositoryPath;

@@ -145,7 +145,11 @@ final class MassRepoIT {
 
       Collection<Dependency> dependencies =
           pomOperator.queryDependency(
-              pomOperator.getPomScanner().scanFrom().withRepositoryPath(repo.cacheDir()).build());
+              pomOperator
+                  .getPomScanner()
+                  .scanFrom()
+                  .withRepositoryPath(repo.cacheDir().toPath())
+                  .build());
 
       StringBuilder result = new StringBuilder();
 
@@ -262,7 +266,8 @@ final class MassRepoIT {
     ProjectModelFactory projectModelFactory =
         sampleRepo.useScanner
             ? pomScanner.scanFrom()
-            : ProjectModelFactory.load(new File(sampleRepo.cacheDir(), sampleRepo.pomPath));
+            : ProjectModelFactory.load(
+                new File(sampleRepo.cacheDir(), sampleRepo.pomPath).toPath());
 
     ProjectModel context =
         projectModelFactory
@@ -277,7 +282,7 @@ final class MassRepoIT {
         .filter(pomFile -> pomFile.getDirty())
         .forEach(
             pomFile -> {
-              try (FileOutputStream fos = new FileOutputStream(pomFile.getFile())) {
+              try (FileOutputStream fos = new FileOutputStream(pomFile.getPath().toFile())) {
                 fos.write(pomFile.getResultPomBytes());
               } catch (IOException e) {
                 // Handle any IOException that may occur during writing

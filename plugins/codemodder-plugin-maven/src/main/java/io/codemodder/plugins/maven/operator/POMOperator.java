@@ -16,7 +16,7 @@ public class POMOperator {
   private final POMScanner pomScanner;
 
   public POMOperator(final Path pomFile, final Path projectDir) {
-    this.pomScanner = new POMScanner(pomFile.toFile(), projectDir.toFile());
+    this.pomScanner = new POMScanner(pomFile, projectDir);
   }
 
   public POMScanner getPomScanner() {
@@ -42,7 +42,7 @@ public class POMOperator {
             .withDependency(newDependency)
             .withSkipIfNewer(true)
             .withUseProperties(true)
-            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions().toFile())
+            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions())
             .build();
 
     return modify(projectModel) ? projectModel : null;
@@ -65,7 +65,7 @@ public class POMOperator {
         pomScanner
             .scanFrom()
             .withSafeQueryType()
-            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions().toFile())
+            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions())
             .build();
 
     final Collection<Dependency> foundDependencies = queryDependency(originalProjectModel);

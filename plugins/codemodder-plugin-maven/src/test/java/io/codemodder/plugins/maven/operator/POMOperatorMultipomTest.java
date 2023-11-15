@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.*;
 import kotlin.Pair;
 import kotlin.TuplesKt;
@@ -27,7 +28,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
   void testWithParentAndChildMissingPackaging() {
     assertThatThrownBy(
             () -> {
-              File parentResource = getResource("parent-and-child-parent-broken.xml");
+              Path parentResource = getResource("parent-and-child-parent-broken.xml");
 
               List<POMDocument> parentPomFiles =
                   Arrays.asList(POMDocumentFactory.load(parentResource));
@@ -50,7 +51,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
   void testWithParentAndChildWrongType() {
     assertThatThrownBy(
             () -> {
-              File parentResource = getResource("parent-and-child-child-broken.xml");
+              Path parentResource = getResource("parent-and-child-child-broken.xml");
 
               POMDocument parentPomFile =
                   POMDocumentFactory.load(getResource("parent-and-child-parent.xml"));
@@ -75,7 +76,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
    */
   @Test
   void testWithMultiplePomsBasicNoVersionProperty() throws Exception {
-    File parentPomFile = getResource("sample-parent/pom.xml");
+    Path parentPomFile = getResource("sample-parent/pom.xml");
 
     ProjectModelFactory projectModelFactory =
         ProjectModelFactory.load(getResource("sample-child-with-relativepath.xml"))
@@ -101,9 +102,9 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
    */
   @Test
   void testWithMultiplePomsBasicWithVersionProperty() throws Exception {
-    File parentPomFile = getResource("sample-parent/pom.xml");
+    Path parentPomFile = getResource("sample-parent/pom.xml");
 
-    File sampleChild = getResource("sample-child-with-relativepath.xml");
+    Path sampleChild = getResource("sample-child-with-relativepath.xml");
 
     ProjectModelFactory parentPom =
         ProjectModelFactory.load(sampleChild)
@@ -142,7 +143,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
 
     File pomFile = resultFiles.entrySet().iterator().next().getValue();
 
-    ProjectModelFactory factory = ProjectModelFactory.load(pomFile);
+    ProjectModelFactory factory = ProjectModelFactory.load(pomFile.toPath());
     factory.withSafeQueryType();
     ProjectModel projectModel = factory.build();
 

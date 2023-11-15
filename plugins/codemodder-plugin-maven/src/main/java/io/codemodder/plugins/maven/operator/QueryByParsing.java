@@ -1,6 +1,6 @@
 package io.codemodder.plugins.maven.operator;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,7 +39,7 @@ class QueryByParsing extends AbstractQueryCommand {
   private final StrSubstitutor strSubstitutor = new StrSubstitutor(properties);
 
   @Override
-  public void extractDependencyTree(File outputPath, File pomFilePath, ProjectModel c) {
+  public void extractDependencyTree(Path outputPath, Path pomFilePath, ProjectModel c) {
     // Not implemented
   }
 

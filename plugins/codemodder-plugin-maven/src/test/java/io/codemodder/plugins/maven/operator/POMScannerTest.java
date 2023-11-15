@@ -2,41 +2,44 @@ package io.codemodder.plugins.maven.operator;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.dom4j.DocumentException;
 import org.junit.jupiter.api.Test;
 
 final class POMScannerTest extends AbstractTestBase {
-  private final File currentDirectory = new File(System.getProperty("user.dir"));
+  private final Path currentDirectory = Paths.get(System.getProperty("user.dir"));
 
-  private ProjectModelFactory buildProjectModelFactory(final File pomFile)
+  private ProjectModelFactory buildProjectModelFactory(final Path pomFile)
       throws DocumentException, IOException, URISyntaxException {
     return new POMScanner(pomFile, currentDirectory).scanFrom();
   }
 
   @Test
   void testBasic() throws Exception {
-    File pomFile = getResourceAsFile("sample-child-with-relativepath.xml");
+    Path pomFile = getResourceAsPath("sample-child-with-relativepath.xml");
 
     ProjectModel pmf = buildProjectModelFactory(pomFile).build();
   }
 
   @Test
   void testTwoLevelsWithLoop() throws Exception {
-    File pomFile = getResourceAsFile("sample-child-with-relativepath-and-two-levels.xml");
+    Path pomFile = getResourceAsPath("sample-child-with-relativepath-and-two-levels.xml");
 
     ProjectModel pmf = buildProjectModelFactory(pomFile).build();
   }
 
   @Test
   void testTwoLevelsWithoutLoop() throws Exception {
-    File pomFile = getResourceAsFile("sample-child-with-relativepath-and-two-levels-nonloop.xml");
+    Path pomFile = getResourceAsPath("sample-child-with-relativepath-and-two-levels-nonloop.xml");
 
     ProjectModel pmf = buildProjectModelFactory(pomFile).build();
+
+    System.out.println(pmf.getParentPomFiles().size());
 
     assertTrue("There must be two parent pom files", pmf.getParentPomFiles().size() == 2);
 
@@ -56,13 +59,14 @@ final class POMScannerTest extends AbstractTestBase {
 
     // LOGGER.info("uniquePathsAsString: " + uniquePathsAsString);
 
+    System.out.println(uniquePaths.size());
     assertTrue("There must be three unique pom files referenced", uniquePaths.size() == 3);
   }
 
   @Test
   void testMultipleChildren() throws DocumentException, IOException, URISyntaxException {
     for (int index = 1; index <= 3; index++) {
-      File pomFile = getResourceAsFile("nested/child/pom/pom-" + index + "-child.xml");
+      Path pomFile = getResourceAsPath("nested/child/pom/pom-" + index + "-child.xml");
 
       ProjectModel pm = buildProjectModelFactory(pomFile).build();
 
@@ -91,7 +95,7 @@ final class POMScannerTest extends AbstractTestBase {
   @Test
   void testMissingRelativeParentElement()
       throws DocumentException, IOException, URISyntaxException {
-    File pomFile = getResourceAsFile("nested/child/pom/pom-demo.xml");
+    Path pomFile = getResourceAsPath("nested/child/pom/pom-demo.xml");
 
     ProjectModel pm = buildProjectModelFactory(pomFile).build();
 
@@ -103,7 +107,7 @@ final class POMScannerTest extends AbstractTestBase {
       throws DocumentException, IOException, URISyntaxException {
     for (int index = 1; index <= 3; index++) {
       String name = "sample-child-with-broken-path-" + index + ".xml";
-      File pomFile = getResourceAsFile(name);
+      Path pomFile = getResourceAsPath(name);
 
       ProjectModelFactory pmf = buildProjectModelFactory(pomFile);
 
@@ -114,7 +118,7 @@ final class POMScannerTest extends AbstractTestBase {
   @Test
   void testWithRelativePathEmpty() throws Exception {
     for (int index = 3; index <= 4; index++) {
-      File pomFile = getResourceAsFile("pom-multiple-pom-parent-level-" + index + ".xml");
+      Path pomFile = getResourceAsPath("pom-multiple-pom-parent-level-" + index + ".xml");
 
       try {
         ProjectModelFactory pmf = buildProjectModelFactory(pomFile);
@@ -134,8 +138,8 @@ final class POMScannerTest extends AbstractTestBase {
 
   @Test
   void testWithMissingRelativePath() throws DocumentException, IOException, URISyntaxException {
-    File pomFile =
-        getResourceAsFile("sample-parent/sample-child/pom-multiple-pom-parent-level-6.xml");
+    Path pomFile =
+        getResourceAsPath("sample-parent/sample-child/pom-multiple-pom-parent-level-6.xml");
 
     ProjectModelFactory pmf = buildProjectModelFactory(pomFile);
 

@@ -1,6 +1,6 @@
 package io.codemodder.plugins.maven.operator;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -15,7 +15,7 @@ public class ProjectModel {
   private Set<String> activeProfiles;
   private boolean overrideIfAlreadyExists;
   private QueryType queryType;
-  private File repositoryPath;
+  private Path repositoryPath;
   private String finishedByClass;
   private boolean modifiedByCommand;
 
@@ -42,7 +42,7 @@ public class ProjectModel {
       Set<String> activeProfiles,
       boolean overrideIfAlreadyExists,
       QueryType queryType,
-      File repositoryPath,
+      Path repositoryPath,
       String finishedByClass) {
     this.pomFile = pomFile;
     this.parentPomFiles = parentPomFiles != null ? parentPomFiles : Collections.emptyList();
@@ -249,11 +249,11 @@ public class ProjectModel {
     this.queryType = queryType;
   }
 
-  public File getRepositoryPath() {
+  public Path getRepositoryPath() {
     return repositoryPath;
   }
 
-  public void setRepositoryPath(File repositoryPath) {
+  public void setRepositoryPath(Path repositoryPath) {
     this.repositoryPath = repositoryPath;
   }
 

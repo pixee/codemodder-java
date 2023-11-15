@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -88,7 +89,7 @@ final class POMOperatorDependencyQueryTest {
 
     ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource("pom-1.xml"));
     context.withSafeQueryType();
-    context.withRepositoryPath(tempDirectory);
+    context.withRepositoryPath(tempDirectory.toPath());
 
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
@@ -104,7 +105,7 @@ final class POMOperatorDependencyQueryTest {
   void testTemporaryDirectoryAndFullyOffline()
       throws IOException, DocumentException, URISyntaxException, XMLStreamException {
 
-    File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
+    Path tempDirectory = Files.createTempDirectory("mvn-repo");
 
     ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource("pom-1.xml"));
     context.withSafeQueryType();
@@ -119,9 +120,9 @@ final class POMOperatorDependencyQueryTest {
 
   @Test
   void testOnSyntheticDependency() throws Exception {
-    File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
+    Path tempDirectory = Files.createTempDirectory("mvn-repo");
 
-    Path tempPom = new File(tempDirectory, "pom.xml").toPath();
+    Path tempPom = tempDirectory.resolve("pom.xml");
 
     String randomName = "random-artifact-" + System.currentTimeMillis();
 
@@ -150,7 +151,7 @@ final class POMOperatorDependencyQueryTest {
                 "</project>")
             .getBytes());
 
-    ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
+    ProjectModelFactory context = ProjectModelFactory.load(tempPom);
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
@@ -171,10 +172,10 @@ final class POMOperatorDependencyQueryTest {
 
   @Test
   void testOnCompositeSyntheticDependency() throws Exception {
-    File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
+    Path tempDirectory = Files.createTempDirectory("mvn-repo");
 
-    Path tempParentPom = new File(tempDirectory, "pom-parent.xml").toPath();
-    Path tempPom = new File(tempDirectory, "pom.xml").toPath();
+    Path tempParentPom = tempDirectory.resolve("pom-parent.xml");
+    Path tempPom = tempDirectory.resolve("pom.xml");
 
     String randomName = "random-artifact-" + System.currentTimeMillis();
 
@@ -238,7 +239,7 @@ final class POMOperatorDependencyQueryTest {
     Files.write(tempParentPom, parentPomContent.getBytes());
     Files.write(tempPom, pomContent.getBytes());
 
-    ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
+    ProjectModelFactory context = ProjectModelFactory.load(tempPom);
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
@@ -259,8 +260,8 @@ final class POMOperatorDependencyQueryTest {
 
   @Test
   void testOnCompositeSyntheticDependencyIncompleteButWithParser() throws Exception {
-    File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
-    Path tempPom = new File(tempDirectory, "pom.xml").toPath();
+    Path tempDirectory = Files.createTempDirectory("mvn-repo");
+    Path tempPom = tempDirectory.resolve("pom.xml");
     String randomName = "random-artifact-" + System.currentTimeMillis();
 
     String pomContent =
@@ -306,7 +307,7 @@ final class POMOperatorDependencyQueryTest {
 
     Files.write(tempPom, pomContent.getBytes());
 
-    ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
+    ProjectModelFactory context = ProjectModelFactory.load(tempPom);
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
@@ -349,10 +350,11 @@ final class POMOperatorDependencyQueryTest {
 
   @Test
   void testOfflineQueryResolution() throws Exception {
-    File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
-    File pomFile = new File(getClass().getResource("nested/child/pom/pom-3-child.xml").getFile());
+    Path tempDirectory = Files.createTempDirectory("mvn-repo");
+    Path pomFilePath =
+        Paths.get(getClass().getResource("nested/child/pom/pom-3-child.xml").toURI());
 
-    ProjectModelFactory context = ProjectModelFactory.load(pomFile);
+    ProjectModelFactory context = ProjectModelFactory.load(pomFilePath);
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 

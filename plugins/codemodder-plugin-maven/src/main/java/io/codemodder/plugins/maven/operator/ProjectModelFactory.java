@@ -1,10 +1,10 @@
 package io.codemodder.plugins.maven.operator;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.dom4j.DocumentException;
@@ -22,7 +22,7 @@ class ProjectModelFactory {
   private Set<String> activeProfiles;
   private boolean overrideIfAlreadyExists;
   private QueryType queryType;
-  private File repositoryPath;
+  private Path repositoryPath;
 
   private ProjectModelFactory() {
     parentPomFiles = new ArrayList<>();
@@ -97,7 +97,7 @@ class ProjectModelFactory {
    *
    * @param repositoryPath Repository Path
    */
-  public ProjectModelFactory withRepositoryPath(File repositoryPath) {
+  public ProjectModelFactory withRepositoryPath(Path repositoryPath) {
     this.repositoryPath = repositoryPath;
     return this;
   }
@@ -129,12 +129,12 @@ class ProjectModelFactory {
   /**
    * Load a ProjectModelFactory instance from a File.
    *
-   * @param f The File to load from.
+   * @param filePath The File to load from.
    * @return A ProjectModelFactory instance with the specified POMDocument.
    * @throws Exception If there is an issue with loading the POMDocument.
    */
-  static ProjectModelFactory load(File f) throws Exception {
-    URL fileUrl = f.toURI().toURL();
+  static ProjectModelFactory load(Path filePath) throws Exception {
+    URL fileUrl = filePath.toUri().toURL();
     return load(fileUrl);
   }
 

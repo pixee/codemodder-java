@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -28,13 +27,13 @@ class POMScanner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(POMScanner.class);
 
-  private final File originalFile;
-  private final File topLevelDirectory;
+  private final Path originalPath;
+  private final Path topLevelDirectory;
 
-  private File lastFile;
+  private Path lastPath;
 
-  public POMScanner(final File originalFile, final File topLevelDirectory) {
-    this.originalFile = originalFile;
+  public POMScanner(final Path originalPath, final Path topLevelDirectory) {
+    this.originalPath = originalPath;
     this.topLevelDirectory = topLevelDirectory;
   }
 
@@ -47,7 +46,7 @@ class POMScanner {
    * @throws URISyntaxException If there is an issue with the URI syntax.
    */
   public ProjectModelFactory scanFrom() throws DocumentException, IOException, URISyntaxException {
-    POMDocument pomFile = POMDocumentFactory.load(originalFile);
+    POMDocument pomFile = POMDocumentFactory.load(originalPath);
     List<POMDocument> parentPomFiles = new ArrayList<>();
 
     Queue<Element> pomFileQueue = new LinkedList<>();
@@ -57,9 +56,9 @@ class POMScanner {
     Element parentElement = getParentElement(pomFile);
 
     processRelativePathElement(
-        relativePathElement, parentElement, originalFile, topLevelDirectory, pomFileQueue);
+        relativePathElement, parentElement, originalPath, topLevelDirectory, pomFileQueue);
 
-    lastFile = originalFile;
+    lastPath = originalPath;
 
     Set<String> prevPaths = new HashSet<>();
     POMDocument prevPOMDocument = pomFile;
@@ -89,13 +88,13 @@ class POMScanner {
         break;
       }
 
-      Path newPath = resolvePath(lastFile, relativePath);
+      Path newPath = resolvePath(lastPath, relativePath);
 
       if (!validateNewPath(newPath, topLevelDirectory)) {
         break;
       }
 
-      POMDocument newPomFile = POMDocumentFactory.load(newPath.toFile());
+      POMDocument newPomFile = POMDocumentFactory.load(newPath);
 
       processParentAndRelativePathElements(newPomFile);
 
@@ -131,20 +130,20 @@ class POMScanner {
   private void processRelativePathElement(
       Element relativePathElement,
       Element parentElement,
-      File originalFile,
-      File topLevelDirectory,
+      Path originalPath,
+      Path topLevelDirectory,
       Queue<Element> pomFileQueue) {
     if (relativePathElement != null && StringUtils.isNotEmpty(relativePathElement.getTextTrim())) {
       pomFileQueue.add(relativePathElement);
     } else if (relativePathElement == null
         && parentElement != null
-        && isNotRoot(originalFile, topLevelDirectory)) {
+        && isNotRoot(originalPath, topLevelDirectory)) {
       addDefaultRelativePathElement(pomFileQueue);
     }
   }
 
-  private boolean isNotRoot(File originalFile, File topLevelDirectory) {
-    return !originalFile.getParentFile().equals(topLevelDirectory);
+  private boolean isNotRoot(Path originalPath, Path topLevelDirectory) {
+    return !originalPath.getParent().equals(topLevelDirectory);
   }
 
   private DefaultElement createRelativePathElement() {
@@ -178,7 +177,7 @@ class POMScanner {
     }
 
     if (prevPaths.contains(relativePath)) {
-      LOGGER.warn("loop: " + pomFile.getFile() + ", relativePath: " + relativePath);
+      LOGGER.warn("loop: " + pomFile.getPath() + ", relativePath: " + relativePath);
       return false;
     } else {
       prevPaths.add(relativePath);
@@ -187,24 +186,29 @@ class POMScanner {
     return true;
   }
 
-  private boolean validateNewPath(Path newPath, File topLevelDirectory) {
-    if (Files.notExists(newPath)) {
-      LOGGER.warn("new path does not exist: " + newPath);
+  private boolean validateNewPath(Path newPath, Path topLevelDirectory) {
+    try {
+      if (Files.notExists(newPath)) {
+        LOGGER.warn("new path does not exist: " + newPath);
+        return false;
+      }
+
+      if (Files.size(newPath) == 0) {
+        LOGGER.warn("File has zero length: " + newPath);
+        return false;
+      }
+
+      if (!newPath.startsWith(topLevelDirectory)) {
+        LOGGER.warn(
+            "Not a child: " + newPath + " (absolute: " + topLevelDirectory.toAbsolutePath() + ")");
+        return false;
+      }
+
+      return true;
+    } catch (IOException e) {
+      LOGGER.error("Error while validating path: " + newPath, e);
       return false;
     }
-
-    if (newPath.toFile().length() == 0) {
-      LOGGER.warn("File has zero length: " + newPath);
-      return false;
-    }
-
-    if (!newPath.startsWith(topLevelDirectory.getAbsolutePath())) {
-      LOGGER.warn(
-          "Not a child: " + newPath + " (absolute: " + topLevelDirectory.getAbsolutePath() + ")");
-      return false;
-    }
-
-    return true;
   }
 
   private boolean checkArtifactIdMatch(POMDocument newPomFile, POMDocument prevPOMDocument) {
@@ -230,18 +234,19 @@ class POMScanner {
     return true;
   }
 
-  private Path resolvePath(final File baseFile, final String relativePath) {
-    File parentDir = baseFile;
+  private Path resolvePath(final Path baseFile, final String relativePath) {
+    Path parentDir = baseFile;
 
-    if (parentDir.isFile()) {
-      parentDir = parentDir.getParentFile();
+    if (parentDir != null && !Files.isDirectory(parentDir)) {
+      parentDir = parentDir.getParent();
     }
 
-    File result = new File(new File(parentDir, relativePath).toURI().normalize().getPath());
+    assert parentDir != null;
+    Path result = parentDir.resolve(relativePath).normalize().toAbsolutePath();
 
-    lastFile = result.isDirectory() ? result : result.getParentFile();
+    lastPath = Files.isDirectory(result) ? result : result.getParent();
 
-    return Paths.get(result.getAbsolutePath());
+    return result;
   }
 
   private String fixPomRelativePath(final String text) {
