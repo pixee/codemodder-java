@@ -1,6 +1,7 @@
 package io.codemodder.plugins.maven.operator;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.*;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
@@ -262,7 +263,8 @@ final class MassRepoIT {
     ProjectModelFactory projectModelFactory =
         sampleRepo.useScanner
             ? pomScanner.scanFrom()
-            : ProjectModelFactory.load(new File(sampleRepo.cacheDir(), sampleRepo.pomPath));
+            : ProjectModelFactory.load(
+                Paths.get(sampleRepo.cacheDir().toString(), sampleRepo.pomPath));
 
     ProjectModel context =
         projectModelFactory

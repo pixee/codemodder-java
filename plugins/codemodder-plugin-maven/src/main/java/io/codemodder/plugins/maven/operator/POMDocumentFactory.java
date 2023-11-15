@@ -1,11 +1,11 @@
 package io.codemodder.plugins.maven.operator;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import org.apache.commons.io.IOUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -41,15 +41,15 @@ class POMDocumentFactory {
   /**
    * Loads a POM document from the provided file.
    *
-   * @param f The file representing the POM document.
+   * @param filePath The file representing the POM document.
    * @return A new instance of {@link POMDocument} representing the loaded POM.
    * @throws IOException If an I/O error occurs while reading the file.
    * @throws DocumentException If an error occurs while parsing the POM document.
    * @throws URISyntaxException If there is an issue with the URI syntax.
    */
-  public static POMDocument load(File f) throws IOException, DocumentException, URISyntaxException {
-
-    URL fileUrl = f.toURI().toURL();
+  public static POMDocument load(Path filePath)
+      throws IOException, DocumentException, URISyntaxException {
+    URL fileUrl = filePath.toUri().toURL();
     return load(fileUrl);
   }
 

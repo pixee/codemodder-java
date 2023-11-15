@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -150,7 +151,7 @@ final class POMOperatorDependencyQueryTest {
                 "</project>")
             .getBytes());
 
-    ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
+    ProjectModelFactory context = ProjectModelFactory.load(tempPom);
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
@@ -238,7 +239,7 @@ final class POMOperatorDependencyQueryTest {
     Files.write(tempParentPom, parentPomContent.getBytes());
     Files.write(tempPom, pomContent.getBytes());
 
-    ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
+    ProjectModelFactory context = ProjectModelFactory.load(tempPom);
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
@@ -306,7 +307,7 @@ final class POMOperatorDependencyQueryTest {
 
     Files.write(tempPom, pomContent.getBytes());
 
-    ProjectModelFactory context = ProjectModelFactory.load(tempPom.toFile());
+    ProjectModelFactory context = ProjectModelFactory.load(tempPom);
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 
@@ -350,9 +351,10 @@ final class POMOperatorDependencyQueryTest {
   @Test
   void testOfflineQueryResolution() throws Exception {
     File tempDirectory = Files.createTempDirectory("mvn-repo").toFile();
-    File pomFile = new File(getClass().getResource("nested/child/pom/pom-3-child.xml").getFile());
+    Path pomFilePath =
+        Paths.get(getClass().getResource("nested/child/pom/pom-3-child.xml").toURI());
 
-    ProjectModelFactory context = ProjectModelFactory.load(pomFile);
+    ProjectModelFactory context = ProjectModelFactory.load(pomFilePath);
     context.withSafeQueryType();
     context.withRepositoryPath(tempDirectory);
 

@@ -2,7 +2,6 @@ package io.codemodder.plugins.maven.operator;
 
 import fun.mike.dmp.DiffMatchPatch;
 import fun.mike.dmp.Patch;
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
@@ -30,13 +29,13 @@ class AbstractTestBase {
     INSERT
   }
 
-  protected File getResource(String name) throws URISyntaxException {
-    return new File(this.getClass().getResource(name).toURI());
+  protected Path getResource(String name) throws URISyntaxException {
+    return Paths.get(this.getClass().getResource(name).toURI());
   }
 
-  File getResourceAsFile(String name) throws URISyntaxException {
-    File resourceUrl = getResource(name);
-    return new File(resourceUrl.toURI());
+  Path getResourceAsPath(String name) throws URISyntaxException {
+    Path resourceUrl = getResource(name);
+    return resourceUrl;
   }
 
   protected ProjectModel gwt(String name, ProjectModelFactory pmf) throws Exception {

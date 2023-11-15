@@ -16,7 +16,7 @@ public class POMOperator {
   private final POMScanner pomScanner;
 
   public POMOperator(final Path pomFile, final Path projectDir) {
-    this.pomScanner = new POMScanner(pomFile.toFile(), projectDir.toFile());
+    this.pomScanner = new POMScanner(pomFile, projectDir);
   }
 
   public POMScanner getPomScanner() {
