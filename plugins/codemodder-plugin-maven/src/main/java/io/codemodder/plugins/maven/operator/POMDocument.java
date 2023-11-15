@@ -25,7 +25,7 @@ public class POMDocument {
   private Document pomDocument;
 
   private Document resultPom;
-  private Path file;
+  private Path path;
   private Charset charset;
   private String endl;
   private String indent;
@@ -55,7 +55,7 @@ public class POMDocument {
     this.pomPath = pomPath;
     this.pomDocument = pomDocument;
     this.resultPom = (Document) pomDocument.clone();
-    this.file = this.pomPath != null ? Paths.get(this.pomPath.toURI()) : null;
+    this.path = this.pomPath != null ? Paths.get(this.pomPath.toURI()) : null;
     this.charset = Charset.defaultCharset();
     this.endl = "\n";
     this.indent = "  ";
@@ -118,12 +118,12 @@ public class POMDocument {
     this.resultPom = resultPom;
   }
 
-  public Path getFile() {
-    return file;
+  public Path getPath() {
+    return path;
   }
 
-  public void setFile(Path file) {
-    this.file = file;
+  public void setPath(Path file) {
+    this.path = file;
   }
 
   public Charset getCharset() {

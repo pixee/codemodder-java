@@ -177,7 +177,7 @@ class POMScanner {
     }
 
     if (prevPaths.contains(relativePath)) {
-      LOGGER.warn("loop: " + pomFile.getFile() + ", relativePath: " + relativePath);
+      LOGGER.warn("loop: " + pomFile.getPath() + ", relativePath: " + relativePath);
       return false;
     } else {
       prevPaths.add(relativePath);
