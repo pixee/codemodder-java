@@ -68,7 +68,6 @@ tasks.named("check") {
     dependsOn(testing.suites.named(integrationTestSuiteName))
 }
 
-
 val getTestProjectNames by tasks.registering {
     group = "custom"
     description = "Extracts codemodIds from IntegrationTestMetadata"
@@ -79,16 +78,16 @@ val getTestProjectNames by tasks.registering {
     doLast {
         val codemodIds = mutableListOf<String>()
         sourceDir
-                .walkTopDown()
-                .filter { it.isFile && it.name.endsWith(".java") }
-                .forEach { file ->
-                    val content = file.readText()
-                    val matchResult = codemodIdRegex.find(content)
+            .walkTopDown()
+            .filter { it.isFile && it.name.endsWith(".java") }
+            .forEach { file ->
+                val content = file.readText()
+                val matchResult = codemodIdRegex.find(content)
 
-                    if (matchResult != null) {
-                        codemodIds.add(matchResult.groupValues[1])
-                    }
+                if (matchResult != null) {
+                    codemodIds.add(matchResult.groupValues[1])
                 }
+            }
 
         println(codemodIds.joinToString(" "))
     }

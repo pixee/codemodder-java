@@ -46,7 +46,7 @@ jobs:
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
           context: .
-          file: ${{ env.DOCKERFILE_PATH }}/baseimage/Dockerfile
+          file: ${{ env.TEST_FRAMEWORK_PATH }}/baseimage/Dockerfile
           tags: codemodder-base:latest
 
       - name: Setup test project names
@@ -60,7 +60,7 @@ jobs:
         run: |
           for CODMOD_ID in ${{ env.CODEMOD_IDS }}; do
             docker build \
-              -f ${{ env.DOCKERFILE_PATH }}/projectimage/Dockerfile \
+              -f ${{ env.TEST_FRAMEWORK_PATH }}/projectimage/Dockerfile \
               --build-arg CODEMODDER_BASE_IMAGE=codemodder-base \
               --build-arg CODEMOD_ID=${CODMOD_ID} \
               -t ${CODMOD_ID}:latest \
