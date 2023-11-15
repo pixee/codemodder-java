@@ -281,7 +281,7 @@ final class MassRepoIT {
         .filter(pomFile -> pomFile.getDirty())
         .forEach(
             pomFile -> {
-              try (FileOutputStream fos = new FileOutputStream(pomFile.getFile())) {
+              try (OutputStream fos = Files.newOutputStream(pomFile.getFile())) {
                 fos.write(pomFile.getResultPomBytes());
               } catch (IOException e) {
                 // Handle any IOException that may occur during writing

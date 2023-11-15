@@ -2,10 +2,9 @@ package io.codemodder.plugins.maven.operator;
 
 import io.github.pixee.security.BoundedLineReader;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -29,14 +28,12 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    *
    * @param pomFilePath POM Original File Path
    */
-  private File getOutputPath(File pomFilePath) {
-    File basePath = pomFilePath.getParentFile();
+  private Path getOutputPath(Path pomFilePath) {
+    Path basePath = pomFilePath.getParent();
 
     String outputBasename = String.format("output-%08X.txt", pomFilePath.hashCode());
 
-    File outputPath = new File(basePath, outputBasename);
-
-    return outputPath;
+    return basePath.resolve(outputBasename);
   }
 
   /**
@@ -44,9 +41,8 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    *
    * @param d POMDocument
    */
-  private File getPomFilePath(POMDocument d) throws URISyntaxException {
-    Path pomPath = Paths.get(d.getPomPath().toURI());
-    return pomPath.toFile();
+  private Path getPomFilePath(POMDocument d) throws URISyntaxException {
+    return Paths.get(d.getPomPath().toURI());
   }
 
   /**
@@ -56,7 +52,7 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    * @param pomFilePath Input Pom Path
    * @param c Project Model
    */
-  protected abstract void extractDependencyTree(File outputPath, File pomFilePath, ProjectModel c);
+  protected abstract void extractDependencyTree(Path outputPath, Path pomFilePath, ProjectModel c);
 
   /**
    * Internal Holder Variable
@@ -85,11 +81,11 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    */
   @Override
   public boolean execute(ProjectModel pm) throws URISyntaxException, IOException {
-    File pomFilePath = getPomFilePath(pm.getPomFile());
-    File outputPath = getOutputPath(pomFilePath);
+    Path pomFilePath = getPomFilePath(pm.getPomFile());
+    Path outputPath = getOutputPath(pomFilePath);
 
-    if (outputPath.exists()) {
-      outputPath.delete();
+    if (Files.exists(outputPath)) {
+      Files.delete(outputPath);
     }
 
     try {
@@ -118,9 +114,9 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    *
    * @param outputPath file to read
    */
-  private Map<String, Dependency> extractDependencies(File outputPath) throws IOException {
+  private Map<String, Dependency> extractDependencies(Path outputPath) throws IOException {
     Map<String, Dependency> dependencyMap = new HashMap<>();
-    try (BufferedReader reader = new BufferedReader(new FileReader(outputPath))) {
+    try (BufferedReader reader = Files.newBufferedReader(outputPath)) {
       String line;
       boolean skipFirstLine = true;
       while ((line = BoundedLineReader.readLine(reader, 5_000_000)) != null) {
