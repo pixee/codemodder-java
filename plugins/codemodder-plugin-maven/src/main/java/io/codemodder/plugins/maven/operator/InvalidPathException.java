@@ -5,9 +5,7 @@ import java.nio.file.Path;
 
 /** Exception class for handling invalid file paths. */
 class InvalidPathException extends IOException {
-  private final Path parentPath;
   private final String relativePath;
-  private final boolean loop;
 
   /**
    * Constructs an InvalidPathException with the specified details.
@@ -25,9 +23,7 @@ class InvalidPathException extends IOException {
             + ") (loops? "
             + loop
             + ")");
-    this.parentPath = parentPath;
     this.relativePath = relativePath;
-    this.loop = loop;
   }
 
   public String getRelativePath() {

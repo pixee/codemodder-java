@@ -241,6 +241,7 @@ class POMScanner {
       parentDir = parentDir.getParent();
     }
 
+    assert parentDir != null;
     Path result = parentDir.resolve(relativePath).normalize().toAbsolutePath();
 
     lastPath = Files.isDirectory(result) ? result : result.getParent();
