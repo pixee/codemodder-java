@@ -16,11 +16,11 @@ final class POMOperatorVersionQueryTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorVersionQueryTest.class);
 
   @Test
-  void testBasicQuery()
+  void queryVersions_reads_version_from_mavenCompilerProperties()
       throws XMLStreamException, DocumentException, IOException, URISyntaxException {
     String pomFile = "pom-1.xml";
 
-    Optional<VersionQueryResponse> optionalVersionQueryResponse = versionDefinitions(pomFile);
+    Optional<VersionQueryResponse> optionalVersionQueryResponse = getPomFileVersionsQuery(pomFile);
 
     LOGGER.debug("Versions found: {}", optionalVersionQueryResponse);
 
@@ -33,11 +33,11 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  void testPomVersionZero()
+  void queryVersions_handles_no_version()
       throws XMLStreamException, DocumentException, IOException, URISyntaxException {
 
     Optional<VersionQueryResponse> optionalVersionResponse =
-        versionDefinitions("pom-version-0.xml");
+        getPomFileVersionsQuery("pom-version-0.xml");
 
     Assert.assertFalse(
         "No versions defined (queryType: " + QueryType.SAFE + ")",
@@ -45,7 +45,7 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  void testPomVersion1and2() {
+  void queryVersions_reads_version_from_mavenPlugin() {
     IntStream.rangeClosed(1, 2)
         .forEach(
             index -> {
@@ -54,7 +54,7 @@ final class POMOperatorVersionQueryTest {
 
               Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
               try {
-                optionalVersionQueryResponse = versionDefinitions(pomFile);
+                optionalVersionQueryResponse = getPomFileVersionsQuery(pomFile);
               } catch (DocumentException
                   | IOException
                   | URISyntaxException
@@ -76,7 +76,7 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  void testPomVersion4and5and6Offline() {
+  void queryVersions_reads_version_from_mavenPlugin_usingSafeQuery() {
     IntStream.rangeClosed(4, 6)
         .forEach(
             index -> {
@@ -85,7 +85,7 @@ final class POMOperatorVersionQueryTest {
 
               Optional<VersionQueryResponse> optionalVersionQueryResponse = null;
               try {
-                optionalVersionQueryResponse = versionDefinitions(pomFile);
+                optionalVersionQueryResponse = getPomFileVersionsQuery(pomFile);
               } catch (DocumentException
                   | IOException
                   | URISyntaxException
@@ -107,12 +107,12 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  void testPomVersion3()
+  void queryVersions_reads_version_from_mavenCompilerRelease()
       throws XMLStreamException, DocumentException, IOException, URISyntaxException {
     String pomFile = "pom-version-3.xml";
     LOGGER.info("Using file: " + pomFile);
 
-    Optional<VersionQueryResponse> optionalVersionQueryResponse = versionDefinitions(pomFile);
+    Optional<VersionQueryResponse> optionalVersionQueryResponse = getPomFileVersionsQuery(pomFile);
 
     LOGGER.debug("Versions found: {}", optionalVersionQueryResponse);
 
@@ -123,11 +123,11 @@ final class POMOperatorVersionQueryTest {
   }
 
   @Test
-  void testPomVersionsMismatching()
+  void queryVersions_source_and_target_versions_mismatch()
       throws XMLStreamException, DocumentException, IOException, URISyntaxException {
     String pomFile = "pom-version-7.xml";
 
-    Optional<VersionQueryResponse> optionalVersionQueryResponse = versionDefinitions(pomFile);
+    Optional<VersionQueryResponse> optionalVersionQueryResponse = getPomFileVersionsQuery(pomFile);
 
     LOGGER.debug("Versions found: {}", optionalVersionQueryResponse);
 
@@ -139,7 +139,7 @@ final class POMOperatorVersionQueryTest {
         "Version defined is 1.8 as target", versionQueryResponse.getTarget().satisfies("=1.8.0"));
   }
 
-  Optional<VersionQueryResponse> versionDefinitions(String pomFile)
+  Optional<VersionQueryResponse> getPomFileVersionsQuery(String pomFile)
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModel context =
         ProjectModelFactory.load(this.getClass().getResource(pomFile)).withSafeQueryType().build();

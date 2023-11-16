@@ -22,7 +22,7 @@ final class POMOperatorDependencyQueryTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 
   @Test
-  void testBasicQuery()
+  void queryDependency_uses_safe_query_type_successfully()
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource("pom-1.xml"));
     context.withSafeQueryType();
@@ -35,7 +35,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  void testFailedSafeQuery()
+  void queryDependency_for_broken_pom_returns_no_dependencies()
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
     ProjectModelFactory context =
         ProjectModelFactory.load(getClass().getResource("pom-broken.xml"));
@@ -47,20 +47,23 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  void testAllQueryTypes()
-      throws DocumentException, IOException, URISyntaxException, XMLStreamException {
+  void queryDependency_uses_available_dependency_query_commands_successfully()
+      throws DocumentException,
+          IOException,
+          URISyntaxException,
+          XMLStreamException,
+          ClassNotFoundException,
+          InstantiationException,
+          IllegalAccessException {
     String[] pomFiles = {"pom-1.xml", "pom-3.xml"};
     for (String pomFile : pomFiles) {
       for (Pair<QueryType, String> chain : CommandChain.AVAILABLE_DEPENDENCY_QUERY_COMMANDS) {
         String commandClassName = "io.codemodder.plugins.maven.operator." + chain.getSecond();
 
         List<Command> commandListOverride = new ArrayList<>();
-        try {
-          Command command = (Command) Class.forName(commandClassName).newInstance();
-          commandListOverride.add(command);
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-          e.printStackTrace();
-        }
+
+        Command command = (Command) Class.forName(commandClassName).newInstance();
+        commandListOverride.add(command);
 
         ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource(pomFile));
         context.withSafeQueryType();
@@ -74,7 +77,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  void testTemporaryDirectory()
+  void queryDependency_uses_temporary_directory_successfully()
       throws IOException, DocumentException, URISyntaxException, XMLStreamException {
 
     File tempDirectory = new File("/tmp/mvn-repo-" + System.currentTimeMillis() + ".dir");
@@ -102,7 +105,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  void testTemporaryDirectoryAndFullyOffline()
+  void queryDependency_uses_temporary_directory_and_offline_mode_successfully()
       throws IOException, DocumentException, URISyntaxException, XMLStreamException {
 
     Path tempDirectory = Files.createTempDirectory("mvn-repo");
@@ -119,7 +122,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  void testOnSyntheticDependency() throws Exception {
+  void queryDependency_handles_synthetic_dependency() throws Exception {
     Path tempDirectory = Files.createTempDirectory("mvn-repo");
 
     Path tempPom = tempDirectory.resolve("pom.xml");
@@ -171,7 +174,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  void testOnCompositeSyntheticDependency() throws Exception {
+  void queryDependency_handles_composite_synthetic_dependency() throws Exception {
     Path tempDirectory = Files.createTempDirectory("mvn-repo");
 
     Path tempParentPom = tempDirectory.resolve("pom-parent.xml");
@@ -259,7 +262,8 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  void testOnCompositeSyntheticDependencyIncompleteButWithParser() throws Exception {
+  void queryDependency_handles_composite_incomplete_synthetic_dependency_but_with_parser()
+      throws Exception {
     Path tempDirectory = Files.createTempDirectory("mvn-repo");
     Path tempPom = tempDirectory.resolve("pom.xml");
     String randomName = "random-artifact-" + System.currentTimeMillis();
@@ -349,7 +353,7 @@ final class POMOperatorDependencyQueryTest {
   }
 
   @Test
-  void testOfflineQueryResolution() throws Exception {
+  void queryDependency_handles_offline_mode() throws Exception {
     Path tempDirectory = Files.createTempDirectory("mvn-repo");
     Path pomFilePath =
         Paths.get(getClass().getResource("nested/child/pom/pom-3-child.xml").toURI());

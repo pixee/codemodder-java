@@ -38,15 +38,17 @@ class AbstractTestBase {
     return resourceUrl;
   }
 
-  protected ProjectModel gwt(String name, ProjectModelFactory pmf) throws Exception {
-    return gwt(name, pmf.build(), OperationType.MODIFY);
+  protected ProjectModel performAndAssertModifyPomOperation(String name, ProjectModelFactory pmf)
+      throws Exception {
+    return performAndAssertPomOperation(name, pmf.build(), OperationType.MODIFY);
   }
 
-  protected ProjectModel performInsert(String name, ProjectModelFactory pmf) throws Exception {
-    return gwt(name, pmf.build(), OperationType.INSERT);
+  protected ProjectModel performAndAssertInsertPomOperation(String name, ProjectModelFactory pmf)
+      throws Exception {
+    return performAndAssertPomOperation(name, pmf.build(), OperationType.INSERT);
   }
 
-  protected ProjectModel gwt(
+  protected ProjectModel performAndAssertPomOperation(
       String testName, ProjectModel context, final OperationType operationType) throws Exception {
 
     String resultFile = "pom-" + testName + "-result.xml";

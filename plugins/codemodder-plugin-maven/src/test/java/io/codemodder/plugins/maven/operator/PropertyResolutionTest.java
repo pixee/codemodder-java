@@ -16,7 +16,7 @@ final class PropertyResolutionTest extends TestCase {
   private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolutionTest.class);
 
   @Test
-  void testPropertyResolutionWhenProfileIsDeactivatedForcefully()
+  void it_resolves_property_when_profile_is_deactivated_forcefully()
       throws DocumentException, IOException, URISyntaxException {
     Map<String, String> resolvedProperties = resolveWithProfiles("!test-profile");
 
@@ -24,7 +24,7 @@ final class PropertyResolutionTest extends TestCase {
   }
 
   @Test
-  void testPropertyResolutionWhenProfileIsMissing()
+  void it_resolves_property_when_profile_is_missing()
       throws DocumentException, IOException, URISyntaxException {
     Map<String, String> resolvedProperties = resolveWithProfiles();
 
@@ -32,7 +32,7 @@ final class PropertyResolutionTest extends TestCase {
   }
 
   @Test
-  void testPropertyResolutionWhenProfileIsActivated()
+  void it_resolves_property_when_profile_is_activated()
       throws DocumentException, IOException, URISyntaxException {
     Map<String, String> resolvedProperties = resolveWithProfiles("test-profile");
 

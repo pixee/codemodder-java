@@ -135,9 +135,9 @@ final class MassRepoIT {
     }
   }
 
-  private String getDependenciesFrom(TestRepo repo) throws Exception {
+  private String getTestRepoDependencies(TestRepo repo) throws Exception {
     try {
-      return getDependenciesFrom(repo.pomPath, repo.cacheDir());
+      return getPomPathDependencies(repo.pomPath, repo.cacheDir());
     } catch (Exception e) {
       File pomFile = new File(repo.cacheDir(), repo.pomPath);
 
@@ -161,7 +161,7 @@ final class MassRepoIT {
     }
   }
 
-  private String getDependenciesFrom(String pomPath, File dir)
+  private String getPomPathDependencies(String pomPath, File dir)
       throws IOException, InterruptedException {
     File outputFile = File.createTempFile("tmp-pom", ".txt");
 
@@ -222,25 +222,26 @@ final class MassRepoIT {
   }
 
   @Test
-  void testBasic() throws Exception {
+  void it_modifies_first_testRepo() throws Exception {
     Pair<TestRepo, String> firstCase = repos.get(0);
 
-    testOnRepo(firstCase.first, firstCase.second);
+    modifyTestRepoDependency(firstCase.first, firstCase.second);
   }
 
   @Test
-  void testAllOthers() {
+  void it_modifies_all_testRepos() {
     for (int n = 0; n < repos.size(); n++) {
       Pair<TestRepo, String> pair = repos.get(n);
       try {
-        testOnRepo(pair.first, pair.second);
+        modifyTestRepoDependency(pair.first, pair.second);
       } catch (Throwable e) {
         throw new AssertionError("while trying example " + n + " of " + pair, e);
       }
     }
   }
 
-  private void testOnRepo(TestRepo sampleRepo, String dependencyToUpgradeString) throws Exception {
+  private void modifyTestRepoDependency(TestRepo sampleRepo, String dependencyToUpgradeString)
+      throws Exception {
     LOGGER.info(
         "Testing on repo {}, branch {} with dependency {} ({})",
         sampleRepo.slug,
@@ -250,7 +251,7 @@ final class MassRepoIT {
 
     checkoutOrResetCachedRepo(sampleRepo);
 
-    String originalDependencies = getDependenciesFrom(sampleRepo);
+    String originalDependencies = getTestRepoDependencies(sampleRepo);
 
     LOGGER.info("dependencies: {}", originalDependencies);
 
@@ -290,7 +291,7 @@ final class MassRepoIT {
               }
             });
 
-    String finalDependencies = getDependenciesFrom(sampleRepo);
+    String finalDependencies = getTestRepoDependencies(sampleRepo);
 
     LOGGER.info("dependencies: {}", finalDependencies);
 

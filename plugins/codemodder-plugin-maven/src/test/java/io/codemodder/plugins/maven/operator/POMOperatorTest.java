@@ -32,7 +32,7 @@ final class POMOperatorTest extends AbstractTestBase {
     Assertions.assertThrows(
         DocumentException.class,
         () -> {
-          gwt(
+          performAndAssertModifyPomOperation(
               "broken-pom",
               ProjectModelFactory.load(POMOperatorTest.class.getResource("broken-pom.xml"))
                   .withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3")));
@@ -106,7 +106,7 @@ final class POMOperatorTest extends AbstractTestBase {
     Assertions.assertThrows(
         MissingDependencyException.class,
         () -> {
-          gwt(
+          performAndAssertModifyPomOperation(
               "case-dependency-missing",
               ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-1.xml")));
         });
@@ -118,7 +118,7 @@ final class POMOperatorTest extends AbstractTestBase {
     ProjectModelFactory projectModelFactory =
         ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-1.xml"))
             .withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"));
-    ProjectModel context = gwt("case-1", projectModelFactory);
+    ProjectModel context = performAndAssertModifyPomOperation("case-1", projectModelFactory);
 
     Assert.assertTrue("Original POM File is Dirty", context.getPomFile().getDirty());
 
@@ -153,7 +153,7 @@ final class POMOperatorTest extends AbstractTestBase {
         ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-3.xml"))
             .withDependency(dependencyToUpgradeOnCaseThree)
             .withSkipIfNewer(false);
-    ProjectModel context = gwt("case-3", projectModelFactory);
+    ProjectModel context = performAndAssertModifyPomOperation("case-3", projectModelFactory);
 
     Diff diff =
         getXmlDifferences(
@@ -188,7 +188,7 @@ final class POMOperatorTest extends AbstractTestBase {
         new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "pom-case-three-with-lower-version",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-3.xml"))
                 .withDependency(dependencyToUpgrade)
@@ -229,7 +229,7 @@ final class POMOperatorTest extends AbstractTestBase {
         new Dependency("org.apache.activemq", "activemq-amqp", "5.16.2", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "case-4",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-4.xml"))
                 .withDependency(dependencyToUpgrade));
@@ -256,7 +256,7 @@ final class POMOperatorTest extends AbstractTestBase {
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "case-5",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-5.xml"))
                 .withDependency(dependencyToUpgrade)
@@ -290,7 +290,7 @@ final class POMOperatorTest extends AbstractTestBase {
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "case-6",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-6.xml"))
                 .withDependency(dependencyToUpgrade)
@@ -317,7 +317,7 @@ final class POMOperatorTest extends AbstractTestBase {
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "case-with-property",
             ProjectModelFactory.load(
                     POMOperatorTest.class.getResource("pom-with-property-simple.xml"))
@@ -496,7 +496,7 @@ final class POMOperatorTest extends AbstractTestBase {
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "hack23-cia",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-hack23-cia.xml"))
                 .withDependency(dependencyToUpgrade)
@@ -527,7 +527,7 @@ final class POMOperatorTest extends AbstractTestBase {
         new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
 
     ProjectModel context =
-        performInsert(
+        performAndAssertInsertPomOperation(
             "pom-case-3-insert-fails",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-3.xml"))
                 .withDependency(dependencyToUpgrade)
@@ -561,7 +561,7 @@ final class POMOperatorTest extends AbstractTestBase {
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
 
     ProjectModel context =
-        performInsert(
+        performAndAssertInsertPomOperation(
             "inserts-dependency",
             ProjectModelFactory.load(
                     POMOperatorTest.class.getResource("pom-without-dependencies.xml"))
