@@ -20,11 +20,6 @@ final class POMOperatorVersionQueryTest {
    *
    * <p>Verifies if the versions are properly read from mavenCompilerProperties in the specified POM
    * file.
-   *
-   * @throws XMLStreamException if an error occurs while reading XML using StAX
-   * @throws DocumentException if an error occurs while processing XML documents using DOM4J
-   * @throws IOException if an I/O error occurs
-   * @throws URISyntaxException if a syntax error occurs in a URI
    */
   @Test
   void queryVersions_reads_version_from_mavenCompilerProperties()
@@ -48,11 +43,6 @@ final class POMOperatorVersionQueryTest {
    *
    * <p>Ensures handling of scenarios where no versions are defined in the POM file using SAFE
    * query.
-   *
-   * @throws XMLStreamException if an error occurs while reading XML using StAX
-   * @throws DocumentException if an error occurs while processing XML documents using DOM4J
-   * @throws IOException if an I/O error occurs
-   * @throws URISyntaxException if a syntax error occurs in a URI
    */
   @Test
   void queryVersions_handles_no_version()
@@ -142,11 +132,6 @@ final class POMOperatorVersionQueryTest {
    * Tests the functionality to read versions from the Maven Compiler Release. This test ensures
    * that the system accurately extracts and validates versions specified within the Maven Compiler
    * Release configuration.
-   *
-   * @throws XMLStreamException If an error occurs during XML processing.
-   * @throws DocumentException If an error occurs in processing documents.
-   * @throws IOException If an I/O error occurs.
-   * @throws URISyntaxException If the URI syntax is incorrect.
    */
   @Test
   void queryVersions_reads_version_from_mavenCompilerRelease()
@@ -168,11 +153,6 @@ final class POMOperatorVersionQueryTest {
    * Tests scenarios where source and target versions mismatch. This test ensures that the system
    * correctly identifies cases where the source and target versions specified in the configuration
    * files do not match.
-   *
-   * @throws XMLStreamException If an error occurs during XML processing.
-   * @throws DocumentException If an error occurs in processing documents.
-   * @throws IOException If an I/O error occurs.
-   * @throws URISyntaxException If the URI syntax is incorrect.
    */
   @Test
   void queryVersions_source_and_target_versions_mismatch()

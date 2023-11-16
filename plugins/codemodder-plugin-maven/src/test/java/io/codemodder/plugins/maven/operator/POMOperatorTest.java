@@ -49,8 +49,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test adds multiple dependencies to a POM, writes it to a temporary file, performs
    * modifications, and validates the resulting POM's contents and structure.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void modify_with_multiples_dependencies_successfully() throws Exception {
@@ -136,8 +134,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test applies modifications related to a specific case and validates the resulting POM
    * structure and content changes.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void modify_adds_dependencies_to_pom_without_dependencies() throws Exception {
@@ -172,8 +168,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test applies modifications related to a specific case and validates the resulting POM
    * structure and content changes.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void modify_downgrades_dependency_version_successfully() throws Exception {
@@ -218,8 +212,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test applies modifications related to a specific case with a lower version and
    * validates the resulting POM structure and content changes.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void modify_does_not_downgrade_version_because_keeps_newer() throws Exception {
@@ -246,8 +238,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test applies modifications related to a specific case and validates the resulting POM
    * structure, content changes, and dependencies.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void installs_pom_and_modify_adds_new_dependency() throws Exception {
@@ -303,8 +293,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test applies modifications related to an empty element scenario and validates the
    * resulting POM structure.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void modify_adds_dependency_to_pom_with_email_empty_element_successfully() throws Exception {
@@ -346,8 +334,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test applies modifications related to an empty element hidden within a comment and
    * validates the resulting POM structure.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void modify_add_dependency_to_pom_with_comments_inside() throws Exception {
@@ -381,8 +367,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test applies modifications related to a property change and validates the resulting POM
    * structure.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void modify_updates_version_in_properties_successfully() throws Exception {
@@ -487,8 +471,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test verifies the behavior when a property is missing but defined, expecting
    * differences in the POM structure.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void modify_creates_properties_and_adds_version_successfully()
@@ -549,8 +531,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test verifies the behavior when the POM contains tab-based formatting, ensuring proper
    * handling and expected tab-based structure.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void modify_adds_dependency_to_file_with_tabs()
@@ -591,8 +571,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test applies modifications related to an empty element from a customer's POM and
    * validates the resulting POM structure.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void modify_adds_dependency_to_pom_with_empty_elements_from_customer() throws Exception {
@@ -630,8 +608,6 @@ final class POMOperatorTest extends AbstractTestBase {
    *
    * <p>This test verifies the behavior when attempting to insert a dependency that already exists,
    * expecting a failure scenario.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void insert_should_fail_because_dependency_exists() throws Exception {
@@ -671,8 +647,6 @@ final class POMOperatorTest extends AbstractTestBase {
    * Tests the scenario where an insert operation performs successfully.
    *
    * <p>This test verifies the successful insertion of a dependency into the POM.
-   *
-   * @throws Exception if an error occurs during the test.
    */
   @Test
   void insert_should_perform_gracefully() throws Exception {

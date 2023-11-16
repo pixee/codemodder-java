@@ -22,8 +22,6 @@ final class POMScannerTest extends AbstractTestBase {
   /**
    * Tests scanning a child with a relative path in the POM file. Verifies the correct parsing of a
    * sample child with a relative path.
-   *
-   * @throws Exception if an error occurs during the test execution.
    */
   @Test
   void scans_child_with_relative_path() throws Exception {
@@ -35,8 +33,6 @@ final class POMScannerTest extends AbstractTestBase {
   /**
    * Tests scanning a POM with two levels and a loop. Verifies the correct handling of a sample POM
    * with two levels and a loop.
-   *
-   * @throws Exception if an error occurs during the test execution.
    */
   @Test
   void scans_two_level_pom_with_loop() throws Exception {
@@ -48,8 +44,6 @@ final class POMScannerTest extends AbstractTestBase {
   /**
    * Tests scanning a two-level POM without a loop. Verifies the correct handling of a POM with two
    * levels and no loop.
-   *
-   * @throws Exception if an error occurs during the test execution.
    */
   @Test
   void scans_two_level_pom_without_loop() throws Exception {
@@ -81,10 +75,6 @@ final class POMScannerTest extends AbstractTestBase {
   /**
    * Tests scanning multiple children POMs. Verifies handling of multiple child POMs and their
    * relationships.
-   *
-   * @throws DocumentException if an error occurs during XML document handling.
-   * @throws IOException if an I/O error occurs.
-   * @throws URISyntaxException if a URI syntax error occurs.
    */
   @Test
   void scans_multiple_children_pom() throws DocumentException, IOException, URISyntaxException {
@@ -118,8 +108,6 @@ final class POMScannerTest extends AbstractTestBase {
   /**
    * Tests scanning a POM with missing relative parent elements. Verifies handling a POM where the
    * relative parent elements are missing.
-   *
-   * @throws Exception if an error occurs during the test execution.
    */
   @Test
   void scans_pom_with_missing_relative_parent_element()
@@ -134,8 +122,6 @@ final class POMScannerTest extends AbstractTestBase {
   /**
    * Tests scanning a POM with invalid relative paths. Verifies handling a POM with broken or
    * invalid relative paths.
-   *
-   * @throws Exception if an error occurs during the test execution.
    */
   @Test
   void scans_pom_with_invalid_relative_paths()
@@ -153,8 +139,6 @@ final class POMScannerTest extends AbstractTestBase {
   /**
    * Tests scanning a POM with empty relative paths. Verifies handling a POM with empty relative
    * paths.
-   *
-   * @throws Exception if an error occurs during the test execution.
    */
   @Test
   void scans_pom_with_empty_relative_path() throws Exception {
@@ -180,8 +164,6 @@ final class POMScannerTest extends AbstractTestBase {
   /**
    * Tests scanning a POM with missing relative paths. Verifies handling a POM with missing relative
    * paths.
-   *
-   * @throws Exception if an error occurs during the test execution.
    */
   @Test
   void scans_pom_with_missing_relative_path()

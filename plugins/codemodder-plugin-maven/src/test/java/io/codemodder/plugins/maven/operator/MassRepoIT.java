@@ -221,11 +221,7 @@ final class MassRepoIT {
     return result;
   }
 
-  /**
-   * Tests the POMOperator::modify of the first TestRepo instance.
-   *
-   * @throws Exception if an error occurs during modification.
-   */
+  /** Tests the POMOperator::modify of the first TestRepo instance. */
   @Test
   void it_modifies_first_testRepo() throws Exception {
     Pair<TestRepo, String> firstCase = repos.get(0);
