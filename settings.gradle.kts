@@ -38,7 +38,7 @@ gradleEnterprise {
 }
 
 include("core-codemods")
-include("examples")
+include("community-codemods")
 include("framework:codemodder-base")
 include("framework:codemodder-testutils")
 include("framework:codemodder-testutils-llm")
