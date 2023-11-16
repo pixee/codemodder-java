@@ -58,12 +58,12 @@ jobs:
 
       - name: Build test projects images
         run: |
-          for CODMOD_ID in ${{ env.CODEMOD_IDS }}; do
+          for CODEMOD_ID in ${{ env.CODEMOD_IDS }}; do
             docker build \
               -f ${{ env.TEST_FRAMEWORK_PATH }}/projectimage/Dockerfile \
               --build-arg CODEMODDER_BASE_IMAGE=codemodder/codemodder-base \
-              --build-arg CODEMOD_ID=${CODMOD_ID} \
-              -t codemodder/${CODMOD_ID}:latest \
+              --build-arg CODEMOD_ID=${CODEMOD_ID} \
+              -t codemodder/${CODEMOD_ID}:latest \
               .
           done
 
