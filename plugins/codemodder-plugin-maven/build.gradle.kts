@@ -40,7 +40,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("com.github.zafarkhaja:java-semver:$javaSemverVersion")
     implementation("com.github.albfernandez:juniversalchardet:$juniversalchardetVersion")
-    implementation("io.github.pixee:java-security-toolkit:1.0.7")
+    implementation(libs.java.security.toolkit)
     testImplementation("fun.mike:diff-match-patch:$diffMatchPatchVersion")
     testImplementation("org.slf4j:slf4j-simple:$slf4jSimpleVersion")
     testImplementation("org.hamcrest:hamcrest-all:$hamcrestVersion")
