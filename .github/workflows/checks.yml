@@ -47,7 +47,7 @@ jobs:
         with:
           context: .
           file: ${{ env.TEST_FRAMEWORK_PATH }}/baseimage/Dockerfile
-          tags: codemodder-base:latest
+          tags: codemodder/codemodder-base:latest
 
       - name: Setup test project names
         run: |
@@ -61,9 +61,9 @@ jobs:
           for CODMOD_ID in ${{ env.CODEMOD_IDS }}; do
             docker build \
               -f ${{ env.TEST_FRAMEWORK_PATH }}/projectimage/Dockerfile \
-              --build-arg CODEMODDER_BASE_IMAGE=codemodder-base \
+              --build-arg CODEMODDER_BASE_IMAGE=codemodder/codemodder-base \
               --build-arg CODEMOD_ID=${CODMOD_ID} \
-              -t ${CODMOD_ID}:latest \
+              -t codemodder/${CODMOD_ID}:latest \
               .
           done
 
