@@ -1,9 +1,11 @@
 plugins {
     id("io.codemodder.java-library")
     id("io.codemodder.runner")
+    id("com.netflix.nebula.maven-apache-license")
+    id("io.codemodder.maven-publish")
 }
 
-description = "Example codemods"
+description = "Community codemods"
 
 dependencies {
     implementation(project(":framework:codemodder-base"))
