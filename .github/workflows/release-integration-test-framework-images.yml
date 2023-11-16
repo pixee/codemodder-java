@@ -1,3 +1,5 @@
+# After each commit to main, this action will be triggered in order to build and push the images into the public registry.
+# the images from the public registry will be pulled and used during the execution of the integration test locally
 name: Release integration test framework
 
 on:
@@ -23,6 +25,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+ #     Caching gradle dependencies in order to speed up the tar file generation in the next step
       - name: Cache gradle and java dependencies
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
@@ -34,6 +37,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-java-
 
+#     tar file generation, tar file contains codemodder executable file to be used in the codemodder-base image
       - name: Generate distribution
         uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a # v2.9.0
         with:
@@ -58,6 +62,7 @@ jobs:
           push: true
           tags: codemodder/codemodder-base:latest
 
+#     defining the list of test projects for which an image will be generated
       - name: Setup test project names
         run: |
           CODEMOD_IDS=$(./gradlew core-codemods:getTestProjectNames -q)
