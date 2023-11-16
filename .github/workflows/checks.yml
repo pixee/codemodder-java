@@ -22,7 +22,7 @@ jobs:
           java-version: '17'
 
       - name: Cache gradle and java dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: |
             ~/.gradle/caches
@@ -74,11 +74,9 @@ jobs:
 
       - name: Install Semgrep
         run: python3 -m pip install semgrep==1.15.0
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - uses: gradle/gradle-build-action@v2
+
+      - name: Run Check task
+        uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a # v2.9.0
         with:
           arguments: check --stacktrace
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
