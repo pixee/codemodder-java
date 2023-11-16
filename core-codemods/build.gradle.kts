@@ -67,3 +67,32 @@ tasks.named("check") {
     @Suppress("UnstableApiUsage")
     dependsOn(testing.suites.named(integrationTestSuiteName))
 }
+
+val getTestProjectNames by tasks.registering {
+    group = "custom"
+    description = "Extracts codemodIds from IntegrationTestMetadata"
+
+    val sourceDir = file("src/test/java/io/codemodder/codemods/integration/tests")
+    val codemodIdRegex = """codemodId\s*=\s*["']([^"']+)["']""".toRegex()
+
+    doLast {
+        val codemodIds = mutableListOf<String>()
+        sourceDir
+            .walkTopDown()
+            .filter { it.isFile && it.name.endsWith(".java") }
+            .forEach { file ->
+                val content = file.readText()
+                val matchResult = codemodIdRegex.find(content)
+
+                if (matchResult != null) {
+                    codemodIds.add(matchResult.groupValues[1])
+                }
+            }
+
+        println(codemodIds.joinToString(" "))
+    }
+}
+
+tasks.withType(JavaCompile::class) {
+    dependsOn(getTestProjectNames)
+}
