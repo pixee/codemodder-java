@@ -15,6 +15,14 @@ final class PropertyResolutionTest extends TestCase {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolutionTest.class);
 
+  /**
+   * Tests property resolution when a profile is deactivated forcefully. Verifies that the 'foo'
+   * property is not present when a specific profile is deactivated.
+   *
+   * @throws DocumentException if an error occurs during XML document handling.
+   * @throws IOException if an I/O error occurs.
+   * @throws URISyntaxException if a URI syntax error occurs.
+   */
   @Test
   void it_resolves_property_when_profile_is_deactivated_forcefully()
       throws DocumentException, IOException, URISyntaxException {
@@ -23,6 +31,14 @@ final class PropertyResolutionTest extends TestCase {
     assertFalse("foo property must not be there", resolvedProperties.containsKey("foo"));
   }
 
+  /**
+   * Tests property resolution when a profile is missing. Verifies that the 'foo' property is not
+   * present when no profile is provided.
+   *
+   * @throws DocumentException if an error occurs during XML document handling.
+   * @throws IOException if an I/O error occurs.
+   * @throws URISyntaxException if a URI syntax error occurs.
+   */
   @Test
   void it_resolves_property_when_profile_is_missing()
       throws DocumentException, IOException, URISyntaxException {
@@ -31,6 +47,14 @@ final class PropertyResolutionTest extends TestCase {
     assertFalse("foo property must not be there", resolvedProperties.containsKey("foo"));
   }
 
+  /**
+   * Tests property resolution when a profile is activated. Verifies that the 'foo' property is
+   * present and has the expected value when a specific profile is activated.
+   *
+   * @throws DocumentException if an error occurs during XML document handling.
+   * @throws IOException if an I/O error occurs.
+   * @throws URISyntaxException if a URI syntax error occurs.
+   */
   @Test
   void it_resolves_property_when_profile_is_activated()
       throws DocumentException, IOException, URISyntaxException {

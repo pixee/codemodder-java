@@ -11,7 +11,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
-class UtilForTests {
+class POMTestHelper {
   static Document getEffectivePom(ProjectModel projectModel) throws IOException {
     File tmpInputFile = File.createTempFile("tmp-pom-orig", ".xml");
     File tmpOutputFile = File.createTempFile("tmp-pom", ".xml");

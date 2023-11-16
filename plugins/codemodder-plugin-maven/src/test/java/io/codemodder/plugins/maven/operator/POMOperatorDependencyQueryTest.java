@@ -21,6 +21,15 @@ import org.slf4j.LoggerFactory;
 final class POMOperatorDependencyQueryTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 
+  /**
+   * Tests whether queryDependency uses the safe query type and retrieves dependencies successfully.
+   * Ensures that dependencies are retrieved when a safe query type is used.
+   *
+   * @throws DocumentException if there's an issue with the document.
+   * @throws IOException if an I/O error occurs.
+   * @throws URISyntaxException if there's an issue with URI syntax.
+   * @throws XMLStreamException if there's an error in XML stream processing.
+   */
   @Test
   void queryDependency_uses_safe_query_type_successfully()
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
@@ -34,6 +43,15 @@ final class POMOperatorDependencyQueryTest {
     assertTrue("Dependencies are not empty", dependencies != null && !dependencies.isEmpty());
   }
 
+  /**
+   * Tests queryDependency for a broken POM, expecting no dependencies. Verifies that the query for
+   * a broken POM returns an empty list of dependencies.
+   *
+   * @throws DocumentException if a document error occurs.
+   * @throws IOException if an I/O error occurs.
+   * @throws URISyntaxException if a URI syntax error occurs.
+   * @throws XMLStreamException if an XML stream error occurs.
+   */
   @Test
   void queryDependency_for_broken_pom_returns_no_dependencies()
       throws DocumentException, IOException, URISyntaxException, XMLStreamException {
@@ -46,6 +64,18 @@ final class POMOperatorDependencyQueryTest {
     assertTrue("Dependencies are empty", dependencies.isEmpty());
   }
 
+  /**
+   * Tests whether queryDependency uses available dependency query commands successfully. Verifies
+   * that the query uses available dependency query commands and returns non-empty dependencies.
+   *
+   * @throws DocumentException if a document error occurs.
+   * @throws IOException if an I/O error occurs.
+   * @throws URISyntaxException if a URI syntax error occurs.
+   * @throws XMLStreamException if an XML stream error occurs.
+   * @throws ClassNotFoundException if a class is not found during instantiation.
+   * @throws InstantiationException if an instantiation error occurs.
+   * @throws IllegalAccessException if an illegal access error occurs.
+   */
   @Test
   void queryDependency_uses_available_dependency_query_commands_successfully()
       throws DocumentException,
@@ -76,6 +106,15 @@ final class POMOperatorDependencyQueryTest {
     }
   }
 
+  /**
+   * Tests whether queryDependency uses a temporary directory successfully. Verifies that the query
+   * uses a temporary directory and returns non-empty dependencies.
+   *
+   * @throws IOException if an I/O error occurs.
+   * @throws DocumentException if a document error occurs.
+   * @throws URISyntaxException if a URI syntax error occurs.
+   * @throws XMLStreamException if an XML stream error occurs.
+   */
   @Test
   void queryDependency_uses_temporary_directory_successfully()
       throws IOException, DocumentException, URISyntaxException, XMLStreamException {
@@ -104,6 +143,16 @@ final class POMOperatorDependencyQueryTest {
     assertTrue("Temp Directory is a directory", tempDirectory.isDirectory());
   }
 
+  /**
+   * Tests whether queryDependency uses a temporary directory and offline mode successfully.
+   * Verifies that the query uses a temporary directory and offline mode, returning non-empty
+   * dependencies.
+   *
+   * @throws IOException if an I/O error occurs.
+   * @throws DocumentException if a document error occurs.
+   * @throws URISyntaxException if a URI syntax error occurs.
+   * @throws XMLStreamException if an XML stream error occurs.
+   */
   @Test
   void queryDependency_uses_temporary_directory_and_offline_mode_successfully()
       throws IOException, DocumentException, URISyntaxException, XMLStreamException {
@@ -121,6 +170,12 @@ final class POMOperatorDependencyQueryTest {
     assertTrue("Dependencies are not empty", !dependencies.isEmpty());
   }
 
+  /**
+   * Tests whether queryDependency handles a synthetic dependency. Verifies the handling of
+   * synthetic dependencies in the query.
+   *
+   * @throws Exception if any error occurs during the test.
+   */
   @Test
   void queryDependency_handles_synthetic_dependency() throws Exception {
     Path tempDirectory = Files.createTempDirectory("mvn-repo");
@@ -173,6 +228,12 @@ final class POMOperatorDependencyQueryTest {
             .equals(randomName));
   }
 
+  /**
+   * Tests queryDependency handles a composite synthetic dependency. Verifies the handling of
+   * composite synthetic dependencies in the query.
+   *
+   * @throws Exception if any error occurs during the test.
+   */
   @Test
   void queryDependency_handles_composite_synthetic_dependency() throws Exception {
     Path tempDirectory = Files.createTempDirectory("mvn-repo");
@@ -261,6 +322,13 @@ final class POMOperatorDependencyQueryTest {
             .equals(randomName));
   }
 
+  /**
+   * Tests queryDependency handles composite incomplete synthetic dependency but with a parser.
+   * Verifies the handling of composite incomplete synthetic dependencies with a parser in the
+   * query.
+   *
+   * @throws Exception if any error occurs during the test.
+   */
   @Test
   void queryDependency_handles_composite_incomplete_synthetic_dependency_but_with_parser()
       throws Exception {
@@ -352,6 +420,12 @@ final class POMOperatorDependencyQueryTest {
     return commandList;
   }
 
+  /**
+   * Tests queryDependency handles offline mode. Verifies the behavior of dependency retrieval in
+   * offline mode.
+   *
+   * @throws Exception if any error occurs during the test.
+   */
   @Test
   void queryDependency_handles_offline_mode() throws Exception {
     Path tempDirectory = Files.createTempDirectory("mvn-repo");

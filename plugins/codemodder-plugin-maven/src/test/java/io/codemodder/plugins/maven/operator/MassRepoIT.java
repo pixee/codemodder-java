@@ -221,6 +221,11 @@ final class MassRepoIT {
     return result;
   }
 
+  /**
+   * Tests the POMOperator::modify of the first TestRepo instance.
+   *
+   * @throws Exception if an error occurs during modification.
+   */
   @Test
   void it_modifies_first_testRepo() throws Exception {
     Pair<TestRepo, String> firstCase = repos.get(0);
@@ -228,6 +233,7 @@ final class MassRepoIT {
     modifyTestRepoDependency(firstCase.first, firstCase.second);
   }
 
+  /** Tests the POMOperator::modify of all TestRepo instances. */
   @Test
   void it_modifies_all_testRepos() {
     for (int n = 0; n < repos.size(); n++) {

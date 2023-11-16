@@ -27,8 +27,13 @@ final class POMOperatorTest extends AbstractTestBase {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 
+  /**
+   * Tests the behavior with a broken POM.
+   *
+   * <p>Expects a {@code DocumentException} to be thrown when attempting to modify a broken POM.
+   */
   @Test
-  void testWithBrokenPom() {
+  void modify_expects_document_exception_for_broken_pom() {
     Assertions.assertThrows(
         DocumentException.class,
         () -> {
@@ -39,8 +44,16 @@ final class POMOperatorTest extends AbstractTestBase {
         });
   }
 
+  /**
+   * Tests modification with multiple dependencies and validates the resultant POM.
+   *
+   * <p>This test adds multiple dependencies to a POM, writes it to a temporary file, performs
+   * modifications, and validates the resulting POM's contents and structure.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testWithMultipleDependencies() throws Exception {
+  void modify_with_multiples_dependencies_successfully() throws Exception {
     List<Dependency> deps = new ArrayList<>();
     deps.add(Dependency.fromString("org.slf4j:slf4j-api:1.7.25"));
     deps.add(Dependency.fromString("io.github.pixee:java-code-security-toolkit:1.0.2"));
@@ -101,8 +114,14 @@ final class POMOperatorTest extends AbstractTestBase {
             "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"));
   }
 
+  /**
+   * Tests modification with a missing dependency.
+   *
+   * <p>Expects a {@code MissingDependencyException} to be thrown when attempting to modify a POM
+   * with a missing dependency.
+   */
   @Test
-  void testWithDependencyMissing() {
+  void modify_throws_missing_dependency_exception() {
     Assertions.assertThrows(
         MissingDependencyException.class,
         () -> {
@@ -112,8 +131,16 @@ final class POMOperatorTest extends AbstractTestBase {
         });
   }
 
+  /**
+   * Tests a specific scenario (Case One) without any dependency and validates the resultant POM.
+   *
+   * <p>This test applies modifications related to a specific case and validates the resulting POM
+   * structure and content changes.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testCaseOne() throws Exception {
+  void modify_adds_dependencies_to_pom_without_dependencies() throws Exception {
 
     ProjectModelFactory projectModelFactory =
         ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-1.xml"))
@@ -138,14 +165,18 @@ final class POMOperatorTest extends AbstractTestBase {
     Assert.assertTrue(
         "diff contains a <dependencyManagement> tag", textDiff.contains("<dependencyManagement>"));
     Assert.assertTrue("diff contains a <dependency> tag", textDiff.contains("<dependency>"));
-
-    Document effectivePom = UtilForTests.getEffectivePom(context);
-
-    System.out.println("effectivePom: " + effectivePom.asXML());
   }
 
+  /**
+   * Updates version to existing dependency and validates the resultant POM.
+   *
+   * <p>This test applies modifications related to a specific case and validates the resulting POM
+   * structure and content changes.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testCaseThree() throws Exception {
+  void modify_downgrades_dependency_version_successfully() throws Exception {
     Dependency dependencyToUpgradeOnCaseThree =
         new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
 
@@ -182,8 +213,16 @@ final class POMOperatorTest extends AbstractTestBase {
         difference.getComparison().getTestDetails().getValue());
   }
 
+  /**
+   * It keeps the same version since it is newer than the one to add
+   *
+   * <p>This test applies modifications related to a specific case with a lower version and
+   * validates the resulting POM structure and content changes.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testCaseThreeButWithLowerVersion() throws Exception {
+  void modify_does_not_downgrade_version_because_keeps_newer() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
 
@@ -202,8 +241,16 @@ final class POMOperatorTest extends AbstractTestBase {
     Assert.assertFalse("Original POM File is not Dirty", context.getPomFile().getDirty());
   }
 
+  /**
+   * It installs POM file and modify adds a new dependency
+   *
+   * <p>This test applies modifications related to a specific case and validates the resulting POM
+   * structure, content changes, and dependencies.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testCase4() throws Exception {
+  void installs_pom_and_modify_adds_new_dependency() throws Exception {
     File pomPath = new File(POMOperatorTest.class.getResource("webgoat-parent.xml").toURI());
 
     List<String> args = new ArrayList<>();
@@ -241,7 +288,7 @@ final class POMOperatorTest extends AbstractTestBase {
     Assert.assertTrue("Document has differences", diff.hasDifferences());
     Assert.assertTrue("Original POM File is Dirty", context.getPomFile().getDirty());
 
-    Document effectivePom = UtilForTests.getEffectivePom(context);
+    Document effectivePom = POMTestHelper.getEffectivePom(context);
 
     Assert.assertFalse(
         "Dependencies Section did change",
@@ -250,8 +297,17 @@ final class POMOperatorTest extends AbstractTestBase {
             .isEmpty());
   }
 
+  /**
+   * Modify adds a dependency in a scenario with an empty element (<email />) and validates the
+   * resultant POM structure.
+   *
+   * <p>This test applies modifications related to an empty element scenario and validates the
+   * resulting POM structure.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testCaseWithEmptyElement() throws Exception {
+  void modify_adds_dependency_to_pom_with_email_empty_element_successfully() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
@@ -284,8 +340,17 @@ final class POMOperatorTest extends AbstractTestBase {
         "There must be an empty element with one space", resultPomAsString.contains("<email />"));
   }
 
+  /**
+   * Tests a scenario with an empty element hidden in a comment and validates the resultant POM
+   * structure.
+   *
+   * <p>This test applies modifications related to an empty element hidden within a comment and
+   * validates the resulting POM structure.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testCaseWithEmptyElementHiddenInComment() throws Exception {
+  void modify_add_dependency_to_pom_with_comments_inside() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
@@ -311,8 +376,16 @@ final class POMOperatorTest extends AbstractTestBase {
         resultPomAsString.contains("<email   /> -->"));
   }
 
+  /**
+   * Tests a scenario with a property change and validates the resultant POM structure.
+   *
+   * <p>This test applies modifications related to a property change and validates the resulting POM
+   * structure.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testCaseWithProperty() throws Exception {
+  void modify_updates_version_in_properties_successfully() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
 
@@ -353,8 +426,14 @@ final class POMOperatorTest extends AbstractTestBase {
         "/project[1]/properties[1]/sample.version[1]/text()[1]");
   }
 
+  /**
+   * Tests a scenario where a property is defined twice, expecting an {@code IllegalStateException}.
+   *
+   * <p>This test verifies the behavior when a property is defined twice in the POM and expects an
+   * {@code IllegalStateException} to be thrown.
+   */
   @Test
-  void testCaseWithPropertyDefinedTwice() {
+  void modify_throws_exception_when_dependency_is_defined_twice() {
     Assertions.assertThrows(
         IllegalStateException.class,
         () -> {
@@ -403,8 +482,16 @@ final class POMOperatorTest extends AbstractTestBase {
         });
   }
 
+  /**
+   * Tests a scenario without a property but defining one, expecting differences in the POM.
+   *
+   * <p>This test verifies the behavior when a property is missing but defined, expecting
+   * differences in the POM structure.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testCaseWithoutPropertyButDefiningOne()
+  void modify_creates_properties_and_adds_version_successfully()
       throws XMLStreamException, URISyntaxException, IOException, DocumentException {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
@@ -457,8 +544,16 @@ final class POMOperatorTest extends AbstractTestBase {
     MatcherAssert.assertThat("Document has several differences", differenceList.size() > 1);
   }
 
+  /**
+   * Tests a scenario with a file containing tabs, ensuring proper handling of tab-based formatting.
+   *
+   * <p>This test verifies the behavior when the POM contains tab-based formatting, ensuring proper
+   * handling and expected tab-based structure.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testFileWithTabs()
+  void modify_adds_dependency_to_file_with_tabs()
       throws XMLStreamException, URISyntaxException, IOException, DocumentException {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
@@ -490,8 +585,17 @@ final class POMOperatorTest extends AbstractTestBase {
             "\n\t\t<dependency>\n\t\t\t<groupId>org.dom4j</groupId>\n\t\t\t<artifactId>dom4j</artifactId>\n\t\t</dependency>\n"));
   }
 
+  /**
+   * Tests a scenario with an empty element from a customer's POM file and validates the resultant
+   * POM.
+   *
+   * <p>This test applies modifications related to an empty element from a customer's POM and
+   * validates the resulting POM structure.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
-  void testCaseWithEmptyElementFromCustomer() throws Exception {
+  void modify_adds_dependency_to_pom_with_empty_elements_from_customer() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
@@ -521,6 +625,14 @@ final class POMOperatorTest extends AbstractTestBase {
             "                <DependencyConvergence></DependencyConvergence>"));
   }
 
+  /**
+   * Tests the scenario where an insert operation should fail due to an existing dependency.
+   *
+   * <p>This test verifies the behavior when attempting to insert a dependency that already exists,
+   * expecting a failure scenario.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
   void insert_should_fail_because_dependency_exists() throws Exception {
     Dependency dependencyToUpgrade =
@@ -555,6 +667,13 @@ final class POMOperatorTest extends AbstractTestBase {
         !dom4jDependency.get(0).equals(dependencyToUpgrade));
   }
 
+  /**
+   * Tests the scenario where an insert operation performs successfully.
+   *
+   * <p>This test verifies the successful insertion of a dependency into the POM.
+   *
+   * @throws Exception if an error occurs during the test.
+   */
   @Test
   void insert_should_perform_gracefully() throws Exception {
     Dependency dependencyToUpgrade =

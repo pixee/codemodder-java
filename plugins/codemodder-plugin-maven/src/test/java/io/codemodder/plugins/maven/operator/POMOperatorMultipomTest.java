@@ -22,7 +22,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
 
   /**
    * Test case for a scenario where a parent and child project have missing packaging information.
-   * This test checks if an exception of type WrongDependencyTypeException is thrown.
+   * This test checks if an exception of type {@code WrongDependencyTypeException} is thrown.
    */
   @Test
   void it_expects_exception_when_parent_and_child_miss_packaging() {
