@@ -20,7 +20,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
+#     Caching gradle dependencies in order to speed up the tar file generation in the next step
       - name: Cache gradle and java dependencies
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
@@ -32,6 +32,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-java-
 
+#     tar file generation, tar file contains codemodder executable file to be used in the codemodder-base image
       - name: Generate distribution
         uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a # v2.9.0
         with:
@@ -49,21 +50,22 @@ jobs:
           file: ${{ env.TEST_FRAMEWORK_PATH }}/baseimage/Dockerfile
           tags: codemodder/codemodder-base:latest
 
+#     defining the list of test projects for which an image will be generated
       - name: Setup test project names
         run: |
-          CODEMOD_IDS=$(./gradlew core-codemods:getTestProjectNames -q)
-          echo "CODEMOD_IDS<<EOF">> $GITHUB_ENV
-          echo $CODEMOD_IDS >> $GITHUB_ENV
+          TEST_PROJECT_NAMES=$(./gradlew core-codemods:getTestProjectNames -q)
+          echo "TEST_PROJECT_NAMES<<EOF">> $GITHUB_ENV
+          echo $TEST_PROJECT_NAMES >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Build test projects images
         run: |
-          for CODEMOD_ID in ${{ env.CODEMOD_IDS }}; do
+          for TEST_PROJECT_NAME in ${{ env.TEST_PROJECT_NAMES }}; do
             docker build \
               -f ${{ env.TEST_FRAMEWORK_PATH }}/projectimage/Dockerfile \
               --build-arg CODEMODDER_BASE_IMAGE=codemodder/codemodder-base \
-              --build-arg CODEMOD_ID=${CODEMOD_ID} \
-              -t codemodder/${CODEMOD_ID}:latest \
+              --build-arg CODEMOD_ID=${TEST_PROJECT_NAME} \
+              -t codemodder/${TEST_PROJECT_NAME}:latest \
               .
           done
 
