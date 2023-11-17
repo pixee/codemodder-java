@@ -1,5 +1,7 @@
 package io.codemodder.plugins.maven.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import fun.mike.dmp.DiffMatchPatch;
 import fun.mike.dmp.Patch;
 import java.io.IOException;
@@ -14,7 +16,6 @@ import java.util.LinkedList;
 import javax.xml.stream.XMLStreamException;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmlunit.builder.DiffBuilder;
@@ -57,10 +58,9 @@ class AbstractTestBase {
     if (resource != null) {
       Document outcome = new SAXReader().read(resource);
       performPomOperation(operationType, context);
-
-      Assert.assertFalse(
-          "Expected and outcome have differences",
-          getXmlDifferences(context.getPomFile().getResultPom(), outcome).hasDifferences());
+      // "Expected and outcome have differences"
+      assertThat(getXmlDifferences(context.getPomFile().getResultPom(), outcome).hasDifferences())
+          .isFalse();
     } else {
       Path resultFilePath =
           Paths.get(

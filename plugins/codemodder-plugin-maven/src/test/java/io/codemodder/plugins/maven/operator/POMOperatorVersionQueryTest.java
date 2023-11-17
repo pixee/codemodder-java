@@ -1,12 +1,13 @@
 package io.codemodder.plugins.maven.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import javax.xml.stream.XMLStreamException;
 import org.dom4j.DocumentException;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +33,8 @@ final class POMOperatorVersionQueryTest {
 
     VersionQueryResponse versionQueryResponse = optionalVersionQueryResponse.get();
 
-    Assert.assertTrue(
-        "Version defined is 1.8 as source", versionQueryResponse.getSource().satisfies("=1.8.0"));
-    Assert.assertTrue(
-        "Version defined is 1.8 as target", versionQueryResponse.getTarget().satisfies("=1.8.0"));
+    assertThat(versionQueryResponse.getSource().satisfies("=1.8.0")).isTrue();
+    assertThat(versionQueryResponse.getTarget().satisfies("=1.8.0")).isTrue();
   }
 
   /**
@@ -51,9 +50,7 @@ final class POMOperatorVersionQueryTest {
     Optional<VersionQueryResponse> optionalVersionResponse =
         getPomFileVersionsQuery("pom-version-0.xml");
 
-    Assert.assertFalse(
-        "No versions defined (queryType: " + QueryType.SAFE + ")",
-        optionalVersionResponse.isPresent());
+    assertThat(optionalVersionResponse).isNotPresent();
   }
 
   /**
@@ -83,12 +80,8 @@ final class POMOperatorVersionQueryTest {
 
               VersionQueryResponse versionQueryResponse = optionalVersionQueryResponse.get();
 
-              Assert.assertTrue(
-                  "Version defined is 1.8 as source",
-                  versionQueryResponse.getSource().satisfies("=1.8.0"));
-              Assert.assertTrue(
-                  "Version defined is 1.8 as target",
-                  versionQueryResponse.getTarget().satisfies("=1.8.0"));
+              assertThat(versionQueryResponse.getSource().satisfies("=1.8.0")).isTrue();
+              assertThat(versionQueryResponse.getTarget().satisfies("=1.8.0")).isTrue();
             });
   }
 
@@ -119,12 +112,8 @@ final class POMOperatorVersionQueryTest {
 
               VersionQueryResponse versionQueryResponse = optionalVersionQueryResponse.get();
 
-              Assert.assertTrue(
-                  "Version defined is 1.8 as source",
-                  versionQueryResponse.getSource().satisfies("=1.8.0"));
-              Assert.assertTrue(
-                  "Version defined is 1.8 as target",
-                  versionQueryResponse.getTarget().satisfies("=1.8.0"));
+              assertThat(versionQueryResponse.getSource().satisfies("=1.8.0")).isTrue();
+              assertThat(versionQueryResponse.getTarget().satisfies("=1.8.0")).isTrue();
             });
   }
 
@@ -145,8 +134,8 @@ final class POMOperatorVersionQueryTest {
 
     VersionQueryResponse versionQueryResponse = optionalVersionQueryResponse.get();
 
-    Assert.assertTrue("Version defined is 9", versionQueryResponse.getSource().satisfies("=9.0.0"));
-    Assert.assertTrue("Version defined is 9", versionQueryResponse.getTarget().satisfies("=9.0.0"));
+    assertThat(versionQueryResponse.getSource().satisfies("=9.0.0")).isTrue();
+    assertThat(versionQueryResponse.getTarget().satisfies("=9.0.0")).isTrue();
   }
 
   /**
@@ -165,10 +154,8 @@ final class POMOperatorVersionQueryTest {
 
     VersionQueryResponse versionQueryResponse = optionalVersionQueryResponse.get();
 
-    Assert.assertTrue(
-        "Version defined is 1.7 as source", versionQueryResponse.getSource().satisfies("=1.7.0"));
-    Assert.assertTrue(
-        "Version defined is 1.8 as target", versionQueryResponse.getTarget().satisfies("=1.8.0"));
+    assertThat(versionQueryResponse.getSource().satisfies("=1.7.0")).isTrue();
+    assertThat(versionQueryResponse.getTarget().satisfies("=1.8.0")).isTrue();
   }
 
   Optional<VersionQueryResponse> getPomFileVersionsQuery(String pomFile)

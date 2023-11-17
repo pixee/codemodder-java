@@ -1,6 +1,6 @@
 package io.codemodder.plugins.maven.operator;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -51,7 +51,7 @@ final class POMScannerTest extends AbstractTestBase {
 
     ProjectModel pmf = buildProjectModelFactory(pomFile).build();
 
-    assertTrue("There must be two parent pom files", pmf.getParentPomFiles().size() == 2);
+    assertThat(pmf.getParentPomFiles()).hasSize(2);
 
     List<String> uniquePaths =
         pmf.allPomFiles().stream()
@@ -69,7 +69,7 @@ final class POMScannerTest extends AbstractTestBase {
 
     // LOGGER.info("uniquePathsAsString: " + uniquePathsAsString);
 
-    assertTrue("There must be three unique pom files referenced", uniquePaths.size() == 3);
+    assertThat(uniquePaths).hasSize(3);
   }
 
   /**
@@ -83,7 +83,7 @@ final class POMScannerTest extends AbstractTestBase {
 
       ProjectModel pm = buildProjectModelFactory(pomFile).build();
 
-      assertTrue("There must be at least one parent pom file", pm.getParentPomFiles().size() > 0);
+      assertThat(pm.getParentPomFiles()).isNotEmpty();
 
       List<String> uniquePaths =
           pm.allPomFiles().stream()
@@ -101,7 +101,7 @@ final class POMScannerTest extends AbstractTestBase {
 
       // LOGGER.info("uniquePathsAsString: " + uniquePathsAsString);
 
-      assertTrue("There must be at least two unique pom files referenced", uniquePaths.size() >= 2);
+      assertThat(uniquePaths).hasSizeGreaterThanOrEqualTo(2);
     }
   }
 
@@ -116,7 +116,7 @@ final class POMScannerTest extends AbstractTestBase {
 
     ProjectModel pm = buildProjectModelFactory(pomFile).build();
 
-    assertTrue("There must be a single parent pom file", pm.getParentPomFiles().size() == 1);
+    assertThat(pm.getParentPomFiles()).hasSize(1);
   }
 
   /**
@@ -148,7 +148,7 @@ final class POMScannerTest extends AbstractTestBase {
       try {
         ProjectModelFactory pmf = buildProjectModelFactory(pomFile);
 
-        assertTrue(pmf.build().getParentPomFiles().size() > 0);
+        assertThat(pmf.build().getParentPomFiles()).isNotEmpty();
       } catch (Exception e) {
         // LOGGER.info("Exception thrown: " + e);
 
@@ -173,6 +173,6 @@ final class POMScannerTest extends AbstractTestBase {
 
     ProjectModelFactory pmf = buildProjectModelFactory(pomFile);
 
-    assertTrue(pmf.build().getParentPomFiles().size() > 0);
+    assertThat(pmf.build().getParentPomFiles()).isNotEmpty();
   }
 }

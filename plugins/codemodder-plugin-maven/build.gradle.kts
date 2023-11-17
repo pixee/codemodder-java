@@ -15,7 +15,6 @@ dependencies {
     val javaSemverVersion = "0.9.0"
     val slf4jSimpleVersion = "2.0.0"
     val hamcrestVersion = "1.3"
-    val junitVersion = "4.13.2"
     val kotlinTestVersion = "1.7.10"
     val slf4jApiVersion = "2.0.0"
     val juniversalchardetVersion = "2.4.0"
@@ -44,7 +43,6 @@ dependencies {
     testImplementation("fun.mike:diff-match-patch:$diffMatchPatchVersion")
     testImplementation("org.slf4j:slf4j-simple:$slf4jSimpleVersion")
     testImplementation("org.hamcrest:hamcrest-all:$hamcrestVersion")
-    testImplementation("junit:junit:$junitVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinTestVersion")
     compileOnly("org.slf4j:slf4j-api:$slf4jApiVersion")
 }

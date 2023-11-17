@@ -1,5 +1,7 @@
 package io.codemodder.plugins.maven.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -24,7 +26,7 @@ final class PropertyResolutionTest extends TestCase {
       throws DocumentException, IOException, URISyntaxException {
     Map<String, String> resolvedProperties = resolveWithProfiles("!test-profile");
 
-    assertFalse("foo property must not be there", resolvedProperties.containsKey("foo"));
+    assertThat(resolvedProperties.containsKey("foo")).isFalse();
   }
 
   /**
@@ -36,7 +38,7 @@ final class PropertyResolutionTest extends TestCase {
       throws DocumentException, IOException, URISyntaxException {
     Map<String, String> resolvedProperties = resolveWithProfiles();
 
-    assertFalse("foo property must not be there", resolvedProperties.containsKey("foo"));
+    assertThat(resolvedProperties.containsKey("foo")).isFalse();
   }
 
   /**
@@ -48,8 +50,8 @@ final class PropertyResolutionTest extends TestCase {
       throws DocumentException, IOException, URISyntaxException {
     Map<String, String> resolvedProperties = resolveWithProfiles("test-profile");
 
-    assertTrue("foo property must be there", resolvedProperties.containsKey("foo"));
-    assertEquals("foo property must be equal to 'bar'", resolvedProperties.get("foo"), "bar");
+    assertThat(resolvedProperties).containsKey("foo");
+    assertThat(resolvedProperties).containsEntry("foo", "bar");
   }
 
   private Map<String, String> resolveWithProfiles(String... profilesToUse)

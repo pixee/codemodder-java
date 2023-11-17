@@ -1,15 +1,17 @@
 package io.codemodder.plugins.maven.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.*;
 import java.util.*;
 import org.apache.commons.lang3.SystemUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class MassRepoIT {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MassRepoIT.class);
+final class RemoteRepositoriesIntegrationTest {
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(RemoteRepositoriesIntegrationTest.class);
 
   private static class TestRepo {
     private String slug;
@@ -300,16 +302,14 @@ final class MassRepoIT {
     boolean queryFailed = originalDependencies.isEmpty() && finalDependencies.isEmpty();
 
     if (queryFailed) {
-      Assert.assertTrue("Must be modified even when query failed", result);
+      // "Must be modified even when query failed"
+      assertThat(result).isTrue();
     } else {
       String dependencyAsStringWithPackaging = dependencyToUpgrade.toString();
-
-      Assert.assertFalse(
-          "Dependency should be originally missing",
-          originalDependencies.contains(dependencyAsStringWithPackaging));
-      Assert.assertTrue(
-          "New Dependency should be appearing",
-          finalDependencies.contains(dependencyAsStringWithPackaging));
+      // "Dependency should be originally missing"
+      assertThat(originalDependencies).doesNotContain(dependencyAsStringWithPackaging);
+      // "New Dependency should be appearing"
+      assertThat(finalDependencies).contains(dependencyAsStringWithPackaging);
     }
   }
 

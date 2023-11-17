@@ -1,6 +1,6 @@
 package io.codemodder.plugins.maven.operator;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 import org.dom4j.DocumentException;
 import org.junit.jupiter.api.Test;
@@ -35,7 +34,8 @@ final class POMOperatorDependencyQueryTest {
 
     LOGGER.debug("Dependencies found: {}", dependencies);
 
-    assertTrue("Dependencies are not empty", dependencies != null && !dependencies.isEmpty());
+    // "Dependencies are not empty"
+    assertThat(dependencies != null && !dependencies.isEmpty()).isTrue();
   }
 
   /**
@@ -51,7 +51,8 @@ final class POMOperatorDependencyQueryTest {
 
     Collection<Dependency> dependencies = POMOperator.queryDependency(context.build());
 
-    assertTrue("Dependencies are empty", dependencies.isEmpty());
+    // "Dependencies are empty"
+    assertThat(dependencies).isEmpty();
   }
 
   /**
@@ -83,7 +84,8 @@ final class POMOperatorDependencyQueryTest {
         Collection<Dependency> dependencies =
             POMOperator.queryDependency(context.build(), commandListOverride);
 
-        assertTrue("Dependencies are not empty", !dependencies.isEmpty());
+        // "Dependencies are not empty"
+        assertThat(!dependencies.isEmpty()).isTrue();
       }
     }
   }
@@ -98,13 +100,14 @@ final class POMOperatorDependencyQueryTest {
 
     File tempDirectory = new File("/tmp/mvn-repo-" + System.currentTimeMillis() + ".dir");
 
-    assertFalse("Temp Directory does not exist initially", tempDirectory.exists());
-    assertEquals(
-        "There must be no files",
-        tempDirectory.list() != null
-            ? (int) Files.list(tempDirectory.toPath()).filter(Files::isDirectory).count()
-            : 0,
-        0);
+    // "Temp Directory does not exist initially"
+    assertThat(tempDirectory).doesNotExist();
+    // "There must be no files"
+    assertThat(
+            tempDirectory.list() != null
+                ? (int) Files.list(tempDirectory.toPath()).filter(Files::isDirectory).count()
+                : 0)
+        .isZero();
 
     ProjectModelFactory context = ProjectModelFactory.load(getClass().getResource("pom-1.xml"));
     context.withSafeQueryType();
@@ -114,10 +117,13 @@ final class POMOperatorDependencyQueryTest {
 
     LOGGER.debug("Dependencies found: " + dependencies);
 
-    assertTrue("Dependencies are not empty", dependencies != null && !dependencies.isEmpty());
+    // "Dependencies are not empty"
+    assertThat(dependencies != null && !dependencies.isEmpty()).isTrue();
 
-    assertTrue("Temp Directory ends up existing", tempDirectory.exists());
-    assertTrue("Temp Directory is a directory", tempDirectory.isDirectory());
+    // "Temp Directory ends up existing"
+    assertThat(tempDirectory).exists();
+    // "Temp Directory is a directory"
+    assertThat(tempDirectory).isDirectory();
   }
 
   /**
@@ -139,7 +145,8 @@ final class POMOperatorDependencyQueryTest {
 
     LOGGER.debug("Dependencies found: " + dependencies);
 
-    assertTrue("Dependencies are not empty", !dependencies.isEmpty());
+    // "Dependencies are not empty"
+    assertThat(!dependencies.isEmpty()).isTrue();
   }
 
   /**
@@ -187,15 +194,11 @@ final class POMOperatorDependencyQueryTest {
 
     LOGGER.debug("Dependencies found: " + dependencies);
 
-    assertTrue("Dependencies are not empty", !dependencies.isEmpty());
+    // "Dependencies are not empty"
+    assertThat(!dependencies.isEmpty()).isTrue();
 
-    assertTrue(
-        "Random name matches",
-        dependencies.stream()
-            .collect(Collectors.toList())
-            .get(0)
-            .getArtifactId()
-            .equals(randomName));
+    // "Random name matches"
+    assertThat(dependencies.stream().toList().get(0).getArtifactId()).isEqualTo(randomName);
   }
 
   /**
@@ -279,15 +282,11 @@ final class POMOperatorDependencyQueryTest {
 
     LOGGER.debug("Dependencies found: " + dependencies);
 
-    assertTrue("Dependencies are not empty", !dependencies.isEmpty());
+    // "Dependencies are not empty"
+    assertThat(!dependencies.isEmpty()).isTrue();
 
-    assertTrue(
-        "Random name matches",
-        dependencies.stream()
-            .collect(Collectors.toList())
-            .get(0)
-            .getArtifactId()
-            .equals(randomName));
+    // "Random name matches"
+    assertThat(dependencies.stream().toList().get(0).getArtifactId()).isEqualTo(randomName);
   }
 
   /**
@@ -354,7 +353,8 @@ final class POMOperatorDependencyQueryTest {
 
     LOGGER.debug("Dependencies found: {}", dependencies);
 
-    assertTrue("Dependencies are empty", !dependencies.isEmpty());
+    // "Dependencies are empty"
+    assertThat(!dependencies.isEmpty()).isTrue();
 
     Dependency foundDependency =
         dependencies.stream()
@@ -365,7 +365,8 @@ final class POMOperatorDependencyQueryTest {
             .findAny()
             .orElse(null);
 
-    assertTrue("There's a dependency with managed-version", foundDependency != null);
+    // "There's a dependency with managed-version",
+    assertThat(foundDependency).isNotNull();
   }
 
   private List<Command> getCommandListFor(String... names) {
@@ -404,6 +405,7 @@ final class POMOperatorDependencyQueryTest {
 
     LOGGER.debug("Dependencies found: {}", dependencies);
 
-    assertTrue("Dependencies are empty", dependencies.isEmpty());
+    // "Dependencies are empty"
+    assertThat(dependencies).isEmpty();
   }
 }
