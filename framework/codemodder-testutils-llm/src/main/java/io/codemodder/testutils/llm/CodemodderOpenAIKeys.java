@@ -13,6 +13,13 @@ public final class CodemodderOpenAIKeys {
    */
   public static boolean isAvailable() {
     String key = System.getenv("CODEMODDER_OPENAI_API_KEY");
-    return key != null && !key.isBlank();
+    //return key != null && !key.isBlank();
+    if(key == null || key.isBlank()){
+      // Log a warning or throw an exception
+      System.out.println("WARNING: CODEMODDER_OPENAI_API_KEY is missing or empty.")
+        // or throw new IllegalStateException("CODEMODDER_OPENAI_API_KEY is missing or empty."
+        return false;
+  }
+    return true;
   }
 }
