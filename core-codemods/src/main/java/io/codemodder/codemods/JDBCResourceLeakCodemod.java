@@ -20,7 +20,7 @@ public final class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<
   @Inject
   public JDBCResourceLeakCodemod(
       @ProvidedCodeQLScan(ruleId = "java/database-resource-leak") final RuleSarif sarif) {
-    super(sarif, MethodCallExpr.class, RegionExtractor.FROM_FIRST_LOCATION);
+    super(sarif, MethodCallExpr.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
   @Override

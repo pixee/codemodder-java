@@ -59,7 +59,8 @@ final class VerbTamperingCodemodTest {
             List.of(),
             List.of(webxml),
             Map.of(),
-            List.of());
+            List.of(),
+            null);
 
     CodemodExecutor executor =
         CodemodExecutorFactory.from(

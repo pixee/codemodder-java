@@ -1,4 +1,4 @@
-package io.codemodder.providers.sarif.codeql;
+package io.codemodder.providers.sonar;
 
 import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
@@ -8,23 +8,18 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
-/** Provides codemods that act on CodeQL results. */
-public final class CodeQLProvider implements CodemodProvider {
+/** Provides Sonar functionality to codemodder. */
+public final class SonarProvider implements CodemodProvider {
 
   @Override
   public Set<AbstractModule> getModules(
       final Path repository,
       final List<Path> includedFiles,
-      final List<String> includePaths,
-      final List<String> excludePaths,
+      final List<String> pathIncludes,
+      final List<String> pathExcludes,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs,
       final Path sonarIssuesJsonFile) {
-    return Set.of(new CodeQLModule(codemodTypes, sarifs));
-  }
-
-  @Override
-  public List<String> wantsSarifToolNames() {
-    return List.of("CodeQL");
+    return sonarIssuesJsonFile == null ? Set.of() : Set.of(new SonarModule(sonarIssuesJsonFile));
   }
 }

@@ -27,7 +27,8 @@ public final class CodemodLoader {
       final List<String> pathExcludes,
       final List<Path> includedFiles,
       final Map<String, List<RuleSarif>> ruleSarifByTool,
-      final List<ParameterArgument> codemodParameters) {
+      final List<ParameterArgument> codemodParameters,
+      final Path sonarIssuesJsonFile) {
 
     // get all the providers ready for dependency injection & codemod instantiation
     final List<CodemodProvider> providers =
@@ -96,7 +97,8 @@ public final class CodemodLoader {
               pathIncludes,
               pathExcludes,
               orderedCodemodTypes,
-              allWantedSarifs);
+              allWantedSarifs,
+              sonarIssuesJsonFile);
       allModules.addAll(modules);
     }
 

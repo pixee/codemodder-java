@@ -22,6 +22,8 @@ public interface CodemodProvider {
    *     their own analysis)
    * @param pathExcludes the path excludes provided to the CLI (which could inform the providers on
    *     their own analysis)
+   * @param sonarIssuesJsonPath the path to a Sonar issues JSON file retrieved from their web API --
+   *     may be null
    * @return a set of modules that perform dependency injection
    */
   Set<AbstractModule> getModules(
@@ -30,13 +32,14 @@ public interface CodemodProvider {
       List<String> pathIncludes,
       List<String> pathExcludes,
       List<Class<? extends CodeChanger>> codemodTypes,
-      List<RuleSarif> sarifs);
+      List<RuleSarif> sarifs,
+      Path sonarIssuesJsonPath);
 
   /**
    * Tools this provider is interested in processing the SARIF output of. Codemodder CLI will look
    * for the SARIF outputted by tools in this list in the repository root and then provide the
-   * results to {@link #getModules(Path, List, List, List, List, List)} as a {@link List} of {@link
-   * RuleSarif}s.
+   * results to {@link #getModules(Path, List, List, List, List, List, Path)} as a {@link List} of
+   * {@link RuleSarif}s.
    *
    * <p>By default, this returns an empty list.
    *
