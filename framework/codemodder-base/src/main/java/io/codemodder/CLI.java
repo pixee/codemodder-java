@@ -116,7 +116,7 @@ final class CLI implements Callable<Integer> {
   private String projectName;
 
   @CommandLine.Option(
-      names = {"--sonar-issues-json-file"},
+      names = {"--sonar-issues-json"},
       description =
           "a path to a file containing the result of a call to the Sonar Web API Issues endpoint")
   private Path sonarIssuesJsonFilePath;
