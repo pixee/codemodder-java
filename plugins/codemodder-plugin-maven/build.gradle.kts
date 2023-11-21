@@ -24,7 +24,7 @@ dependencies {
     implementation(libs.jaxen)
     implementation(libs.xerces.impl)
     implementation(libs.xmlunit.core)
-    implementation(libs.xmlunit.assertj3)
+    implementation(testlibs.xmlunit.assertj3)
     implementation(libs.java.semver)
     implementation(libs.juniversalchardet)
     implementation(libs.java.security.toolkit)
