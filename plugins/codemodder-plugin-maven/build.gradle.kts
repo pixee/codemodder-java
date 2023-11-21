@@ -6,43 +6,29 @@ plugins {
 description = "Plugin for providing Maven dependency management functions to codemods."
 
 dependencies {
-    val commonsLangVersion = "3.12.0"
-    val dom4jVersion = "2.1.3"
-    val jaxenVersion = "1.2.0"
-    val xercesImplVersion = "2.12.2"
-    val xmlUnitVersion = "2.9.0"
-    val kotlinVersion = "1.7.10"
-    val javaSemverVersion = "0.9.0"
-    val slf4jSimpleVersion = "2.0.0"
-    val hamcrestVersion = "1.3"
-    val kotlinTestVersion = "1.7.10"
-    val slf4jApiVersion = "2.0.0"
-    val juniversalchardetVersion = "2.4.0"
-    val diffMatchPatchVersion = "0.0.2"
 
     compileOnly(libs.jetbrains.annotations)
     implementation(project(":framework:codemodder-base"))
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
+    testImplementation(testlibs.hamcrest.all)
     testImplementation(testlibs.assertj)
     testImplementation(testlibs.jgit)
     testImplementation(testlibs.mockito)
     testRuntimeOnly(testlibs.junit.jupiter.engine)
 
-    implementation("org.apache.commons:commons-lang3:$commonsLangVersion")
-    implementation("org.dom4j:dom4j:$dom4jVersion")
-    implementation("jaxen:jaxen:$jaxenVersion")
-    implementation("xerces:xercesImpl:$xercesImplVersion")
-    implementation("org.xmlunit:xmlunit-core:$xmlUnitVersion")
-    implementation("org.xmlunit:xmlunit-assertj3:$xmlUnitVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    implementation("com.github.zafarkhaja:java-semver:$javaSemverVersion")
-    implementation("com.github.albfernandez:juniversalchardet:$juniversalchardetVersion")
+    implementation(libs.commons.lang3)
+    implementation(libs.kotlinStdlibJdk8)
+    implementation(libs.dom4j)
+    implementation(libs.jaxen)
+    implementation(libs.xerces.impl)
+    implementation(libs.xmlunit.core)
+    implementation(libs.xmlunit.assertj3)
+    implementation(libs.java.semver)
+    implementation(libs.juniversalchardet)
     implementation(libs.java.security.toolkit)
-    testImplementation("fun.mike:diff-match-patch:$diffMatchPatchVersion")
-    testImplementation("org.slf4j:slf4j-simple:$slf4jSimpleVersion")
-    testImplementation("org.hamcrest:hamcrest-all:$hamcrestVersion")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinTestVersion")
-    compileOnly("org.slf4j:slf4j-api:$slf4jApiVersion")
+    implementation(libs.diff.match.patch)
+    implementation(libs.slf4j.simple)
+    implementation(libs.slf4j.api)
 }
