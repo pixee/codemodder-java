@@ -141,7 +141,7 @@ class CommandChain {
           Class<?> commandClass = Class.forName(commandClassName);
           Command command = (Command) commandClass.newInstance();
           filteredCommands.add(command);
-        } catch (Throwable e) {
+        } catch (final Exception e) {
           LOGGER.warn("Creating class '{}': ", commandClassName, e);
         }
       }
