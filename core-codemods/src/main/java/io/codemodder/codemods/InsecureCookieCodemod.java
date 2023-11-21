@@ -24,7 +24,7 @@ public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCa
   @Inject
   public InsecureCookieCodemod(
       @ProvidedCodeQLScan(ruleId = "java/insecure-cookie") final RuleSarif sarif) {
-    super(sarif, MethodCallExpr.class, RegionExtractor.FROM_FIRST_LOCATION);
+    super(sarif, MethodCallExpr.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
   @Override

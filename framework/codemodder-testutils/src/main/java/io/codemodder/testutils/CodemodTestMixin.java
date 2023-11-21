@@ -102,6 +102,9 @@ public interface CodemodTestMixin {
       pathToJavaFile = newPathToJavaFile;
     }
 
+    // add the sonar JSON if one exists
+    Path sonarJson = testResourceDir.resolve("sonar-issues.json");
+
     // run the codemod
     CodemodLoader loader =
         new CodemodLoader(
@@ -112,7 +115,8 @@ public interface CodemodTestMixin {
             List.of(),
             List.of(pathToJavaFile),
             map,
-            List.of());
+            List.of(),
+            Files.exists(sonarJson) ? sonarJson : null);
 
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat(codemods.size(), equalTo(1));
@@ -188,7 +192,8 @@ public interface CodemodTestMixin {
             List.of(),
             List.of(pathToJavaFile),
             map,
-            List.of());
+            List.of(),
+            null);
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
     CodemodExecutor executor2 =
         CodemodExecutorFactory.from(
