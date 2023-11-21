@@ -98,5 +98,5 @@ final class SonarModule extends AbstractModule {
     }
   }
 
-  private static final RuleIssues EMPTY = (p) -> List.of();
+  private static final RuleIssues EMPTY = new DefaultRuleIssues(Map.of());
 }

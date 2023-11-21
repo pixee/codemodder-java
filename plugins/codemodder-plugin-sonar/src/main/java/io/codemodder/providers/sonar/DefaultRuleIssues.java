@@ -18,4 +18,9 @@ final class DefaultRuleIssues implements RuleIssues {
   public List<Issue> getResultsByPath(final Path path) {
     return issues.get(path.toString());
   }
+
+  @Override
+  public boolean hasResults() {
+    return !issues.isEmpty();
+  }
 }
