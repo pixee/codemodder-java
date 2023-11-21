@@ -18,10 +18,12 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   private final RegionNodeMatcher regionNodeMatcher;
 
   protected SonarPluginJavaParserChanger(
-      final RuleIssues ruleIssues, final Class<? extends Node> nodeType) {
+      final RuleIssues ruleIssues,
+      final Class<? extends Node> nodeType,
+      final RegionNodeMatcher regionNodeMatcher) {
     this.ruleIssues = Objects.requireNonNull(ruleIssues);
     this.nodeType = Objects.requireNonNull(nodeType);
-    this.regionNodeMatcher = RegionNodeMatcher.EXACT_MATCH;
+    this.regionNodeMatcher = regionNodeMatcher;
   }
 
   @Override
@@ -36,31 +38,15 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
 
     List<? extends Node> allNodes = cu.findAll(nodeType);
 
-    /*
-     * We have an interesting scenario we have to handle whereby we could accidentally feed two results that should be
-     * applied only once. Consider this real-world example where a SARIF says we have 1 problem on line 101, column 3:
-     *
-     * 100. public void foo() {
-     * 101.   Runtime.getRuntime().exec(...);
-     * 102. }
-     *
-     * There are actually 2 different JavaParser nodes that match the position reported in SARIF:
-     * - getRuntime()
-     * - exec(...)
-     *
-     * If we apply the change to both nodes, we'll end up with a broken AST. So we need to keep track of the nodes we've
-     * already applied changes to, and skip them if we encounter them again. Deciding which of the nodes we want to act
-     * on is unfortunately a job for the subclass -- they should just "return false" if the event didn't make sense, but
-     * we should invest into a general solution if this doesn't scale.
-     */
     List<CodemodChange> codemodChanges = new ArrayList<>();
     for (Issue issue : issues) {
       for (Node node : allNodes) {
         Position start =
             new Position(
-                issue.getTextRange().getStartLine(), issue.getTextRange().getStartOffset());
+                issue.getTextRange().getStartLine(), issue.getTextRange().getStartOffset() + 1);
         Position end =
-            new Position(issue.getTextRange().getEndLine(), issue.getTextRange().getEndOffset());
+            new Position(
+                issue.getTextRange().getEndLine(), issue.getTextRange().getEndOffset() + 1);
         SourceCodeRegion region = new SourceCodeRegion(start, end);
         if (!nodeType.isAssignableFrom(node.getClass())) {
           continue;

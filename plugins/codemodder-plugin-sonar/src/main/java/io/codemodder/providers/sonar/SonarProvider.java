@@ -20,6 +20,6 @@ public final class SonarProvider implements CodemodProvider {
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs,
       final Path sonarIssuesJsonFile) {
-    return sonarIssuesJsonFile == null ? Set.of() : Set.of(new SonarModule(sonarIssuesJsonFile));
+    return Set.of(new SonarModule(codemodTypes, repository, sonarIssuesJsonFile));
   }
 }

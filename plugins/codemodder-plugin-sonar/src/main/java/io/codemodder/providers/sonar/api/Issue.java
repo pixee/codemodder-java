@@ -70,7 +70,7 @@ public class Issue {
   }
 
   /** Returns the file path section of the component. */
-  Optional<String> componentFileName() {
+  public Optional<String> componentFileName() {
     if (component == null || component.isEmpty()) {
       return Optional.empty();
     }
