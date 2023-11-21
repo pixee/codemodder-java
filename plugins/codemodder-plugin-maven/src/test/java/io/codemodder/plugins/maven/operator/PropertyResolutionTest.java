@@ -7,13 +7,12 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.TestCase;
 import org.dom4j.DocumentException;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class PropertyResolutionTest extends TestCase {
+final class PropertyResolutionTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolutionTest.class);
 

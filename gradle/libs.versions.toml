@@ -50,3 +50,11 @@ picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "pico
 progressbar = "me.tongfei:progressbar:0.9.3"
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 tuples = "org.javatuples:javatuples:1.2"
+kotlinStdlibJdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version = "1.7.10" }
+jaxen = { module = "jaxen:jaxen", version = "1.2.0" }
+xerces-impl = { module = "xerces:xercesImpl", version = "2.12.2" }
+xmlunit-core = { module = "org.xmlunit:xmlunit-core", version = "2.9.0" }
+xmlunit-assertj3 = { module = "org.xmlunit:xmlunit-assertj3", version = "2.9.0" }
+java-semver = { module = "com.github.zafarkhaja:java-semver", version = "0.9.0" }
+diff-match-patch = { module = "fun.mike:diff-match-patch", version = "0.0.2" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
