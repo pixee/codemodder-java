@@ -27,7 +27,8 @@ class AbstractTestBase {
 
   static enum OperationType {
     MODIFY,
-    INSERT
+    INSERT,
+    UPDATE
   }
 
   protected Path getResource(String name) throws URISyntaxException {
@@ -47,6 +48,11 @@ class AbstractTestBase {
   protected ProjectModel performAndAssertInsertPomOperation(String name, ProjectModelFactory pmf)
       throws Exception {
     return performAndAssertPomOperation(name, pmf.build(), OperationType.INSERT);
+  }
+
+  protected ProjectModel performAndAssertUpdatePomOperation(String name, ProjectModelFactory pmf)
+      throws Exception {
+    return performAndAssertPomOperation(name, pmf.build(), OperationType.UPDATE);
   }
 
   protected ProjectModel performAndAssertPomOperation(
@@ -85,8 +91,9 @@ class AbstractTestBase {
       final OperationType operationType, final ProjectModel projectModel)
       throws XMLStreamException, URISyntaxException, IOException {
     switch (operationType) {
-      case INSERT -> POMOperator.insert(projectModel);
+      case INSERT -> POMOperator.insertOnly(projectModel);
       case MODIFY -> POMOperator.modify(projectModel);
+      case UPDATE -> POMOperator.updateOnly(projectModel);
       default -> throw new IllegalArgumentException("Invalid operation type: " + operationType);
     }
   }

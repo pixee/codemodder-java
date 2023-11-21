@@ -114,6 +114,19 @@ class CommandChain {
     return new CommandChain(insertCommands);
   }
 
+  /**
+   * Creates a pre-configured Chain with default commands for only updating a dependency onto a POM.
+   *
+   * @return A pre-configured Chain.
+   */
+  public static CommandChain updateDependency() {
+    final List<Command> insertCommands = new ArrayList<>(COMMON_COMMANDS);
+    insertCommands.addAll(
+        List.of(SimpleUpgrade.getInstance(), SimpleDependencyManagement.getInstance()));
+
+    return new CommandChain(insertCommands);
+  }
+
   private static CommandChain filterByQueryType(
       List<Pair<QueryType, String>> commandList,
       QueryType queryType,
