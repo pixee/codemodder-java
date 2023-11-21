@@ -6,7 +6,6 @@ import com.github.javaparser.ast.Node;
 import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -73,7 +72,6 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   public boolean shouldRun() {
     return ruleIssues.hasResults();
   }
-
 
   /**
    * Creates a visitor for the given context and locations.
