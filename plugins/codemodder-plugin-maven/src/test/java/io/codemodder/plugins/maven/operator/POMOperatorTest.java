@@ -709,11 +709,9 @@ final class POMOperatorTest extends AbstractTestBase {
 
     // "Original POM File is Dirty"
     assertThat(context.getPomFile().getDirty()).isTrue();
-    ;
 
     // "Document has differences"
     assertThat(diff.hasDifferences()).isTrue();
-    ;
 
     Iterable<Difference> differences = diff.getDifferences();
     List<Difference> differenceList = new ArrayList<>();
@@ -750,7 +748,6 @@ final class POMOperatorTest extends AbstractTestBase {
 
     // "Original POM File is Dirty"
     assertThat(context.getPomFile().getDirty()).isTrue();
-    ;
 
     Diff diff =
         getXmlDifferences(
@@ -758,7 +755,6 @@ final class POMOperatorTest extends AbstractTestBase {
 
     // "Document has differences"
     assertThat(diff.hasDifferences()).isTrue();
-    ;
 
     List<Difference> differenceList = new ArrayList<>();
     for (Difference difference : diff.getDifferences()) {
@@ -795,7 +791,6 @@ final class POMOperatorTest extends AbstractTestBase {
 
     // "Original POM File is Dirty"
     assertThat(context.getPomFile().getDirty()).isFalse();
-    ;
 
     // "Document has differences"
     assertThat(diff.hasDifferences()).isFalse();
