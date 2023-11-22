@@ -1,0 +1,93 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 1
+  },
+  "effortTotal": 2,
+  "debtTotal": 2,
+  "issues": [
+    {
+      "key": "AYv0acY3pMuQdcUNcsKX",
+      "rule": "java:S2786",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:Test.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 4,
+      "hash": "f7cdce57b37926f1061e0ab664b60dbd",
+      "textRange": {
+        "startLine": 4,
+        "endLine": 4,
+        "startOffset": 2,
+        "endOffset": 8
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:Test.java",
+              "textRange": {
+                "startLine": 4,
+                "endLine": 4,
+                "startOffset": 9,
+                "endOffset": 13
+              }
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Remove this redundant \"static\" qualifier; nested enum types are implicitly static.",
+      "effort": "2min",
+      "debt": "2min",
+      "assignee": "nahsra@github",
+      "author": "arshan.dabirsiaghi@gmail.com",
+      "tags": [
+        "redundant"
+      ],
+      "creationDate": "2023-11-22T01:21:06+0100",
+      "updateDate": "2023-11-22T01:21:29+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23",
+      "uuid": "AYvtqxxxzY4Rr5NHn4Om",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "WebGoat_10_23",
+      "longName": "WebGoat_10_23"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23:webgoat-lessons/vulnerable-components/src/main/java/org/owasp/webgoat/vulnerable_components/EnumThing.java",
+      "uuid": "AYv0abClpMuQdcUNcsKV",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "EnumThing.java",
+      "longName": "webgoat-lessons/vulnerable-components/src/main/java/org/owasp/webgoat/vulnerable_components/EnumThing.java",
+      "path": "webgoat-lessons/vulnerable-components/src/main/java/org/owasp/webgoat/vulnerable_components/EnumThing.java"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "nahsra",
+      "name": "Arshan Dabirsiaghi"
+    }
+  ],
+  "facets": []
+}
