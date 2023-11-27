@@ -25,18 +25,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
- #     Caching gradle dependencies in order to speed up the tar file generation in the next step
-      - name: Cache gradle and java dependencies
-        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.m2/repository
-          key: ${{ runner.os }}-gradle-java-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/*.java') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-java-
-
 #     tar file generation, tar file contains codemodder executable file to be used in the codemodder-base image
       - name: Generate distribution
         uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a # v2.9.0
@@ -79,5 +67,5 @@ jobs:
               --build-arg CODEMOD_ID=${TEST_PROJECT_NAME} \
               -t codemodder/${TEST_PROJECT_NAME}:latest \
               .
-            docker push codemodder/${CODEMOD_ID}:latest
+            docker push codemodder/${TEST_PROJECT_NAME}:latest
           done
