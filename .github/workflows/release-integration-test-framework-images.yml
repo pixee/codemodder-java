@@ -65,19 +65,19 @@ jobs:
 #     defining the list of test projects for which an image will be generated
       - name: Setup test project names
         run: |
-          CODEMOD_IDS=$(./gradlew core-codemods:getTestProjectNames -q)
-          echo "CODEMOD_IDS<<EOF">> $GITHUB_ENV
-          echo $CODEMOD_IDS >> $GITHUB_ENV
+          TEST_PROJECT_NAMES=$(./gradlew core-codemods:getTestProjectNames -q)
+          echo "TEST_PROJECT_NAMES<<EOF">> $GITHUB_ENV
+          echo $TEST_PROJECT_NAMES >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Build test projects images
         run: |
-          for CODEMOD_ID in ${{ env.CODEMOD_IDS }}; do>
+          for TEST_PROJECT_NAME in ${{ env.TEST_PROJECT_NAMES }}; do
             docker build \
               -f ${{ env.TEST_FRAMEWORK_PATH }}/projectimage/Dockerfile \
               --build-arg CODEMODDER_BASE_IMAGE=codemodder/codemodder-base \
-              --build-arg CODEMOD_ID=${CODEMOD_ID} \
-              -t codemodder/${CODEMOD_ID}:latest \
+              --build-arg CODEMOD_ID=${TEST_PROJECT_NAME} \
+              -t codemodder/${TEST_PROJECT_NAME}:latest \
               .
             docker push codemodder/${CODEMOD_ID}:latest
           done
