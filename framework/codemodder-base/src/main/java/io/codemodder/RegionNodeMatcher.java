@@ -11,7 +11,7 @@ import com.github.javaparser.ast.Node;
 public interface RegionNodeMatcher {
 
   /** Return true if the given {@link Region} matches the given {@link Range}. */
-  boolean matches(Region region, Range range);
+  boolean matches(SourceCodeRegion region, Range range);
 
   /**
    * Return true if the {@link Node} and {@link Region} start and end at the same location. Some
@@ -20,16 +20,16 @@ public interface RegionNodeMatcher {
    */
   RegionNodeMatcher EXACT_MATCH =
       (region, range) ->
-          region.getStartLine() == range.begin.line
-              && region.getStartColumn() == range.begin.column
-              && (region.getEndLine() != null ? region.getEndLine() : region.getStartLine())
+          region.start().line() == range.begin.line
+              && region.start().column() == range.begin.column
+              && (region.end().line() != null ? region.end().line() : region.start().line())
                   == range.end.line
-              && (region.getEndColumn() == range.end.column + 1
-                  || region.getEndColumn() == range.end.column);
+              && (region.end().column() == range.end.column + 1
+                  || region.end().column() == range.end.column);
 
   /** Return true if the {@link Node} is {@link Region} start at the same location. */
   RegionNodeMatcher MATCHES_START =
       (region, range) ->
-          region.getStartLine() == range.begin.line
-              && region.getStartColumn() == range.begin.column;
+          region.start().line() == range.begin.line
+              && region.start().column() == range.begin.column;
 }

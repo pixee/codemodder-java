@@ -1,6 +1,5 @@
 package io.codemodder;
 
-import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.github.javaparser.Range;
@@ -20,18 +19,22 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
 
   @VisibleForTesting public final RuleSarif sarif;
   private final Class<? extends Node> nodeType;
-  private final RegionExtractor regionExtractor;
+  private final SourceCodeRegionExtractor<Result> regionExtractor;
   private final RegionNodeMatcher regionNodeMatcher;
 
   protected SarifPluginJavaParserChanger(
       final RuleSarif sarif, final Class<? extends Node> nodeType) {
-    this(sarif, nodeType, RegionExtractor.FROM_FIRST_LOCATION, RegionNodeMatcher.EXACT_MATCH);
+    this(
+        sarif,
+        nodeType,
+        SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION,
+        RegionNodeMatcher.EXACT_MATCH);
   }
 
   protected SarifPluginJavaParserChanger(
       final RuleSarif sarif,
       final Class<? extends Node> nodeType,
-      final RegionExtractor regionExtractor) {
+      final SourceCodeRegionExtractor<Result> regionExtractor) {
     this(sarif, nodeType, regionExtractor, RegionNodeMatcher.EXACT_MATCH);
   }
 
@@ -46,7 +49,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
       final RuleSarif sarif,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher) {
-    this(sarif, nodeType, RegionExtractor.FROM_FIRST_LOCATION, regionNodeMatcher);
+    this(sarif, nodeType, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION, regionNodeMatcher);
   }
 
   protected SarifPluginJavaParserChanger(
@@ -54,13 +57,18 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher,
       final CodemodReporterStrategy reporterStrategy) {
-    this(sarif, nodeType, RegionExtractor.FROM_FIRST_LOCATION, regionNodeMatcher, reporterStrategy);
+    this(
+        sarif,
+        nodeType,
+        SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION,
+        regionNodeMatcher,
+        reporterStrategy);
   }
 
   protected SarifPluginJavaParserChanger(
       final RuleSarif sarif,
       final Class<? extends Node> nodeType,
-      final RegionExtractor regionExtractor,
+      final SourceCodeRegionExtractor<Result> regionExtractor,
       final RegionNodeMatcher regionNodeMatcher) {
     this.sarif = Objects.requireNonNull(sarif);
     this.nodeType = Objects.requireNonNull(nodeType);
@@ -71,7 +79,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
   protected SarifPluginJavaParserChanger(
       final RuleSarif sarif,
       final Class<? extends Node> nodeType,
-      final RegionExtractor regionExtractor,
+      final SourceCodeRegionExtractor<Result> regionExtractor,
       final RegionNodeMatcher regionNodeMatcher,
       final CodemodReporterStrategy reporter) {
     super(reporter);
@@ -112,18 +120,18 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     List<CodemodChange> codemodChanges = new ArrayList<>();
     for (Result result : results) {
       for (Node node : allNodes) {
-        Region region = regionExtractor.from(result);
+        SourceCodeRegion region = regionExtractor.from(result);
         if (!nodeType.isAssignableFrom(node.getClass())) {
           continue;
         }
-        if (context.lineIncludesExcludes().matches(region.getStartLine())) {
+        if (context.lineIncludesExcludes().matches(region.start().line())) {
           if (node.getRange().isPresent()) {
             Range range = node.getRange().get();
             if (regionNodeMatcher.matches(region, range)) {
               boolean changeSuccessful = onResultFound(context, cu, (T) node, result);
               if (changeSuccessful) {
                 codemodChanges.add(
-                    CodemodChange.from(region.getStartLine(), dependenciesRequired()));
+                    CodemodChange.from(region.start().line(), dependenciesRequired()));
               }
             }
           }

@@ -38,7 +38,7 @@ gradleEnterprise {
 }
 
 include("core-codemods")
-include("examples")
+include("community-codemods")
 include("framework:codemodder-base")
 include("framework:codemodder-testutils")
 include("framework:codemodder-testutils-llm")
@@ -47,4 +47,5 @@ include("plugins:codemodder-plugin-codeql")
 include("plugins:codemodder-plugin-llm")
 include("plugins:codemodder-plugin-maven")
 include("plugins:codemodder-plugin-pmd")
+include("plugins:codemodder-plugin-sonar")
 include("plugins:codemodder-plugin-semgrep")

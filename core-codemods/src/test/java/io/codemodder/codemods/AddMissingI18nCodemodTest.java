@@ -253,7 +253,8 @@ final class AddMissingI18nCodemodTest {
         List.of(),
         Files.list(dir).toList(),
         Map.of(),
-        List.of());
+        List.of(),
+        null);
   }
 
   /** If we can't connect to AWS, skip the test. */

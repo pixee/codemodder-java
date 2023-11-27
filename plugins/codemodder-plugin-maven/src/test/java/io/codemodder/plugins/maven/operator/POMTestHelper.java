@@ -5,29 +5,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.SystemUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
-import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-class UtilForTests {
-  static Map<String, String> getRuntimeResolvedProperties(ProjectModel projectModel)
-      throws IOException {
-    Document effectivePom = getEffectivePom(projectModel);
-    List<Element> propertyElements = effectivePom.getRootElement().element("properties").elements();
-    Map<String, String> propertiesMap = new HashMap<>();
-
-    for (Element propertyElement : propertyElements) {
-      propertiesMap.put(propertyElement.getName(), propertyElement.getText());
-    }
-
-    return propertiesMap;
-  }
-
+class POMTestHelper {
   static Document getEffectivePom(ProjectModel projectModel) throws IOException {
     File tmpInputFile = File.createTempFile("tmp-pom-orig", ".xml");
     File tmpOutputFile = File.createTempFile("tmp-pom", ".xml");

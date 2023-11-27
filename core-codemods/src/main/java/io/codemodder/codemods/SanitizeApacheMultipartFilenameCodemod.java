@@ -21,7 +21,10 @@ public final class SanitizeApacheMultipartFilenameCodemod
   @Inject
   public SanitizeApacheMultipartFilenameCodemod(
       @SemgrepScan(ruleId = "sanitize-apache-multipart-filename") RuleSarif semgrepSarif) {
-    super(semgrepSarif, MethodCallExpr.class, RegionExtractor.FROM_FIRST_THREADFLOW_EVENT);
+    super(
+        semgrepSarif,
+        MethodCallExpr.class,
+        SourceCodeRegionExtractor.FROM_SARIF_FIRST_THREADFLOW_EVENT);
   }
 
   @Override

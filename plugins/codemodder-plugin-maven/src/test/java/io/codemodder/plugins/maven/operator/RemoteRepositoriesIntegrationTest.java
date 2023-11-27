@@ -1,15 +1,17 @@
 package io.codemodder.plugins.maven.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.*;
 import java.util.*;
 import org.apache.commons.lang3.SystemUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class MassRepoIT {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MassRepoIT.class);
+final class RemoteRepositoriesIntegrationTest {
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(RemoteRepositoriesIntegrationTest.class);
 
   private static class TestRepo {
     private String slug;
@@ -135,9 +137,9 @@ final class MassRepoIT {
     }
   }
 
-  private String getDependenciesFrom(TestRepo repo) throws Exception {
+  private String getTestRepoDependencies(TestRepo repo) throws Exception {
     try {
-      return getDependenciesFrom(repo.pomPath, repo.cacheDir());
+      return getPomPathDependencies(repo.pomPath, repo.cacheDir());
     } catch (Exception e) {
       File pomFile = new File(repo.cacheDir(), repo.pomPath);
 
@@ -161,7 +163,7 @@ final class MassRepoIT {
     }
   }
 
-  private String getDependenciesFrom(String pomPath, File dir)
+  private String getPomPathDependencies(String pomPath, File dir)
       throws IOException, InterruptedException {
     File outputFile = File.createTempFile("tmp-pom", ".txt");
 
@@ -221,26 +223,29 @@ final class MassRepoIT {
     return result;
   }
 
+  /** Tests the POMOperator::modify of the first TestRepo instance. */
   @Test
-  void testBasic() throws Exception {
+  void it_modifies_first_testRepo() throws Exception {
     Pair<TestRepo, String> firstCase = repos.get(0);
 
-    testOnRepo(firstCase.first, firstCase.second);
+    modifyTestRepoDependency(firstCase.first, firstCase.second);
   }
 
+  /** Tests the POMOperator::modify of all TestRepo instances. */
   @Test
-  void testAllOthers() {
+  void it_modifies_all_testRepos() {
     for (int n = 0; n < repos.size(); n++) {
       Pair<TestRepo, String> pair = repos.get(n);
       try {
-        testOnRepo(pair.first, pair.second);
+        modifyTestRepoDependency(pair.first, pair.second);
       } catch (Throwable e) {
         throw new AssertionError("while trying example " + n + " of " + pair, e);
       }
     }
   }
 
-  private void testOnRepo(TestRepo sampleRepo, String dependencyToUpgradeString) throws Exception {
+  private void modifyTestRepoDependency(TestRepo sampleRepo, String dependencyToUpgradeString)
+      throws Exception {
     LOGGER.info(
         "Testing on repo {}, branch {} with dependency {} ({})",
         sampleRepo.slug,
@@ -250,7 +255,7 @@ final class MassRepoIT {
 
     checkoutOrResetCachedRepo(sampleRepo);
 
-    String originalDependencies = getDependenciesFrom(sampleRepo);
+    String originalDependencies = getTestRepoDependencies(sampleRepo);
 
     LOGGER.info("dependencies: {}", originalDependencies);
 
@@ -290,23 +295,21 @@ final class MassRepoIT {
               }
             });
 
-    String finalDependencies = getDependenciesFrom(sampleRepo);
+    String finalDependencies = getTestRepoDependencies(sampleRepo);
 
     LOGGER.info("dependencies: {}", finalDependencies);
 
     boolean queryFailed = originalDependencies.isEmpty() && finalDependencies.isEmpty();
 
     if (queryFailed) {
-      Assert.assertTrue("Must be modified even when query failed", result);
+      // "Must be modified even when query failed"
+      assertThat(result).isTrue();
     } else {
       String dependencyAsStringWithPackaging = dependencyToUpgrade.toString();
-
-      Assert.assertFalse(
-          "Dependency should be originally missing",
-          originalDependencies.contains(dependencyAsStringWithPackaging));
-      Assert.assertTrue(
-          "New Dependency should be appearing",
-          finalDependencies.contains(dependencyAsStringWithPackaging));
+      // "Dependency should be originally missing"
+      assertThat(originalDependencies).doesNotContain(dependencyAsStringWithPackaging);
+      // "New Dependency should be appearing"
+      assertThat(finalDependencies).contains(dependencyAsStringWithPackaging);
     }
   }
 
