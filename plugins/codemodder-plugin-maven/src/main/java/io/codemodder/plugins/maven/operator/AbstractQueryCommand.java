@@ -1,16 +1,13 @@
 package io.codemodder.plugins.maven.operator;
 
+import io.github.pixee.security.BoundedLineReader;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.maven.shared.invoker.DefaultInvocationRequest;
-import org.apache.maven.shared.invoker.InvocationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +16,6 @@ import org.slf4j.LoggerFactory;
  * relying on dependency:tree mojo outputting into a text file - which might be cached.
  */
 abstract class AbstractQueryCommand extends AbstractCommand {
-
-  private static final String DEPENDENCY_TREE_MOJO_REFERENCE =
-      "org.apache.maven.plugins:maven-dependency-plugin:3.3.0:tree";
 
   protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractQueryCommand.class);
 
@@ -34,14 +28,12 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    *
    * @param pomFilePath POM Original File Path
    */
-  private File getOutputPath(File pomFilePath) {
-    File basePath = pomFilePath.getParentFile();
+  private Path getOutputPath(Path pomFilePath) {
+    Path basePath = pomFilePath.getParent();
 
     String outputBasename = String.format("output-%08X.txt", pomFilePath.hashCode());
 
-    File outputPath = new File(basePath, outputBasename);
-
-    return outputPath;
+    return basePath.resolve(outputBasename);
   }
 
   /**
@@ -49,9 +41,8 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    *
    * @param d POMDocument
    */
-  private File getPomFilePath(POMDocument d) throws URISyntaxException {
-    Path pomPath = Paths.get(d.getPomPath().toURI());
-    return pomPath.toFile();
+  private Path getPomFilePath(POMDocument d) throws URISyntaxException {
+    return Paths.get(d.getPomPath().toURI());
   }
 
   /**
@@ -61,7 +52,7 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    * @param pomFilePath Input Pom Path
    * @param c Project Model
    */
-  protected abstract void extractDependencyTree(File outputPath, File pomFilePath, ProjectModel c);
+  protected abstract void extractDependencyTree(Path outputPath, Path pomFilePath, ProjectModel c);
 
   /**
    * Internal Holder Variable
@@ -90,11 +81,11 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    */
   @Override
   public boolean execute(ProjectModel pm) throws URISyntaxException, IOException {
-    File pomFilePath = getPomFilePath(pm.getPomFile());
-    File outputPath = getOutputPath(pomFilePath);
+    Path pomFilePath = getPomFilePath(pm.getPomFile());
+    Path outputPath = getOutputPath(pomFilePath);
 
-    if (outputPath.exists()) {
-      outputPath.delete();
+    if (Files.exists(outputPath)) {
+      Files.delete(outputPath);
     }
 
     try {
@@ -123,12 +114,12 @@ abstract class AbstractQueryCommand extends AbstractCommand {
    *
    * @param outputPath file to read
    */
-  private Map<String, Dependency> extractDependencies(File outputPath) throws IOException {
+  private Map<String, Dependency> extractDependencies(Path outputPath) throws IOException {
     Map<String, Dependency> dependencyMap = new HashMap<>();
-    try (BufferedReader reader = new BufferedReader(new FileReader(outputPath))) {
+    try (BufferedReader reader = Files.newBufferedReader(outputPath)) {
       String line;
       boolean skipFirstLine = true;
-      while ((line = reader.readLine()) != null) {
+      while ((line = BoundedLineReader.readLine(reader, 5_000_000)) != null) {
         if (skipFirstLine) {
           skipFirstLine = false;
           continue;
@@ -180,82 +171,6 @@ abstract class AbstractQueryCommand extends AbstractCommand {
       }
     }
     return false;
-  }
-
-  protected InvocationRequest buildInvocationRequest(
-      File outputPath, File pomFilePath, ProjectModel c) {
-    Properties props = new Properties(System.getProperties());
-    props.setProperty("outputFile", outputPath.getAbsolutePath());
-
-    String localRepositoryPath = getLocalRepositoryPath(c).getAbsolutePath();
-    props.setProperty("maven.repo.local", localRepositoryPath);
-
-    InvocationRequest request = new DefaultInvocationRequest();
-    findMaven(request);
-
-    request.setPomFile(pomFilePath);
-    request.setShellEnvironmentInherited(true);
-    request.setNoTransferProgress(true);
-    request.setBatchMode(true);
-    request.setRecursive(false);
-    request.setProfiles(Arrays.asList(c.getActiveProfiles().toArray(new String[0])));
-    request.setDebug(true);
-    request.setOffline(c.isOffline());
-    request.setProperties(props);
-
-    List<String> goals = new ArrayList<>();
-    goals.add(AbstractQueryCommand.DEPENDENCY_TREE_MOJO_REFERENCE);
-    request.setGoals(goals);
-
-    return request;
-  }
-
-  /**
-   * Locates where Maven is at - HOME var and main launcher script.
-   *
-   * @param invocationRequest InvocationRequest to be filled up
-   */
-  private void findMaven(InvocationRequest invocationRequest) {
-    /*
-     * Step 1: Locate Maven Home
-     */
-    String m2homeEnvVar = System.getenv("M2_HOME");
-
-    if (m2homeEnvVar != null) {
-      File m2HomeDir = new File(m2homeEnvVar);
-
-      if (m2HomeDir.isDirectory()) {
-        invocationRequest.setMavenHome(m2HomeDir);
-      }
-    }
-
-    /** Step 1.1: Try to guess if that's the case */
-    if (invocationRequest.getMavenHome() == null) {
-      File inferredHome = new File(SystemUtils.getUserHome(), ".m2");
-
-      if (!(inferredHome.exists() && inferredHome.isDirectory())) {
-        LOGGER.warn(
-            "Inferred User Home - which does not exist or not a directory: {}", inferredHome);
-      }
-
-      invocationRequest.setMavenHome(inferredHome);
-    }
-
-    /** Step 2: Find Maven Executable given the operating system and PATH variable contents */
-    List<String> possibleExecutables = Arrays.asList("mvn", "mvnw");
-
-    File foundExecutable =
-        possibleExecutables.stream()
-            .map(Util::which)
-            .filter(exec -> exec != null)
-            .findFirst()
-            .orElse(null);
-
-    if (foundExecutable != null) {
-      invocationRequest.setMavenExecutable(foundExecutable);
-    } else {
-      throw new IllegalStateException("Missing Maven Home / Executable");
-    }
   }
 
   @Override

@@ -16,11 +16,7 @@ final class UsesImplicitButHasMultipleRulesTest {
   void it_fails_when_implicit_rule_but_multiple_specified(@TempDir Path tmpDir) {
     SemgrepModule module =
         new SemgrepModule(
-            tmpDir,
-            List.of("**"),
-            List.of(),
-            List.of(UsesImplicitButHasMultipleRules.class),
-            List.of());
+            tmpDir, List.of("**"), List.of(), List.of(UsesImplicitButHasMultipleRules.class));
     assertThrows(CreationException.class, () -> Guice.createInjector(module));
   }
 }

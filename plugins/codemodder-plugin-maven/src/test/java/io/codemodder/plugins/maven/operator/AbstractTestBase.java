@@ -1,8 +1,9 @@
 package io.codemodder.plugins.maven.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import fun.mike.dmp.DiffMatchPatch;
 import fun.mike.dmp.Patch;
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
@@ -12,9 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
+import javax.xml.stream.XMLStreamException;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmlunit.builder.DiffBuilder;
@@ -24,31 +25,48 @@ import org.xmlunit.diff.Diff;
 class AbstractTestBase {
   protected static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 
-  protected File getResource(String name) throws URISyntaxException {
-    return new File(this.getClass().getResource(name).toURI());
+  static enum OperationType {
+    MODIFY,
+    INSERT,
+    UPDATE
   }
 
-  File getResourceAsFile(String name) throws URISyntaxException {
-    File resourceUrl = getResource(name);
-    return new File(resourceUrl.toURI());
+  protected Path getResource(String name) throws URISyntaxException {
+    return Paths.get(this.getClass().getResource(name).toURI());
   }
 
-  protected ProjectModel gwt(String name, ProjectModelFactory pmf) throws Exception {
-    return gwt(name, pmf.build());
+  Path getResourceAsPath(String name) throws URISyntaxException {
+    Path resourceUrl = getResource(name);
+    return resourceUrl;
   }
 
-  protected ProjectModel gwt(String testName, ProjectModel context) throws Exception {
+  protected ProjectModel performAndAssertModifyPomOperation(String name, ProjectModelFactory pmf)
+      throws Exception {
+    return performAndAssertPomOperation(name, pmf.build(), OperationType.MODIFY);
+  }
+
+  protected ProjectModel performAndAssertInsertPomOperation(String name, ProjectModelFactory pmf)
+      throws Exception {
+    return performAndAssertPomOperation(name, pmf.build(), OperationType.INSERT);
+  }
+
+  protected ProjectModel performAndAssertUpdatePomOperation(String name, ProjectModelFactory pmf)
+      throws Exception {
+    return performAndAssertPomOperation(name, pmf.build(), OperationType.UPDATE);
+  }
+
+  protected ProjectModel performAndAssertPomOperation(
+      String testName, ProjectModel context, final OperationType operationType) throws Exception {
 
     String resultFile = "pom-" + testName + "-result.xml";
     URL resource = AbstractTestBase.class.getClass().getResource(resultFile);
 
     if (resource != null) {
       Document outcome = new SAXReader().read(resource);
-      POMOperator.modify(context);
-
-      Assert.assertFalse(
-          "Expected and outcome have differences",
-          getXmlDifferences(context.getPomFile().getResultPom(), outcome).hasDifferences());
+      performPomOperation(operationType, context);
+      // "Expected and outcome have differences"
+      assertThat(getXmlDifferences(context.getPomFile().getResultPom(), outcome).hasDifferences())
+          .isFalse();
     } else {
       Path resultFilePath =
           Paths.get(
@@ -56,7 +74,7 @@ class AbstractTestBase {
               AbstractTestBase.class.getPackage().getName().replace(".", "/"),
               resultFile);
 
-      POMOperator.modify(context);
+      performPomOperation(operationType, context);
 
       byte[] resultPomBytes = context.getPomFile().getResultPomBytes();
 
@@ -67,6 +85,17 @@ class AbstractTestBase {
       }
     }
     return context;
+  }
+
+  private void performPomOperation(
+      final OperationType operationType, final ProjectModel projectModel)
+      throws XMLStreamException, URISyntaxException, IOException {
+    switch (operationType) {
+      case INSERT -> POMOperator.insertOnly(projectModel);
+      case MODIFY -> POMOperator.modify(projectModel);
+      case UPDATE -> POMOperator.updateOnly(projectModel);
+      default -> throw new IllegalArgumentException("Invalid operation type: " + operationType);
+    }
   }
 
   static Diff getXmlDifferences(Document original, Document modified) {

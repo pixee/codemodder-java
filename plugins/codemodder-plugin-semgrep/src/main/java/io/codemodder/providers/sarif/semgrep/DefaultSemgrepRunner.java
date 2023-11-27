@@ -48,10 +48,11 @@ final class DefaultSemgrepRunner implements SemgrepRunner {
       args.add(excludedFilePath);
     }
 
-    for (Path ruleYamlPath : ruleYamls) {
+    for (Path ruleYaml : ruleYamls) {
       args.add("--config");
-      args.add(ruleYamlPath.toString());
+      args.add(ruleYaml.toString());
     }
+
     args.add(repositoryPath.toString());
 
     LOG.trace("Process arguments: {}", args);

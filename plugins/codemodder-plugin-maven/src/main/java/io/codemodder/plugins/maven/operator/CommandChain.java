@@ -18,8 +18,19 @@ class CommandChain {
   /** Internal ArrayList of the Commands */
   private List<Command> commandList;
 
-  private CommandChain(Command... commands) {
-    this.commandList = new ArrayList<>(Arrays.asList(commands));
+  private static List<Command> COMMON_COMMANDS =
+      List.of(
+          // Validation commands
+          CheckDependencyPresent.getInstance(),
+          CheckParentPackaging.getInstance(),
+          // Format commands
+          new FormatCommand(),
+          new DiscardFormatCommand(),
+          // Multipom command
+          new CompositeDependencyManagement());
+
+  private CommandChain(List<Command> commands) {
+    this.commandList = commands;
   }
 
   /**
@@ -81,16 +92,39 @@ class CommandChain {
    *
    * @return A pre-configured Chain for modifying a POM.
    */
-  public static CommandChain createForModify() {
-    return new CommandChain(
-        CheckDependencyPresent.getInstance(),
-        CheckParentPackaging.getInstance(),
-        new FormatCommand(),
-        new DiscardFormatCommand(),
-        new CompositeDependencyManagement(),
-        SimpleUpgrade.getInstance(),
-        SimpleDependencyManagement.getInstance(),
-        SimpleInsert.getInstance());
+  public static CommandChain modifyDependency() {
+    final List<Command> modifyCommands = new ArrayList<>(COMMON_COMMANDS);
+    modifyCommands.addAll(
+        List.of(
+            SimpleUpgrade.getInstance(),
+            SimpleDependencyManagement.getInstance(),
+            new SimpleInsert(false)));
+    return new CommandChain(modifyCommands);
+  }
+
+  /**
+   * Creates a pre-configured Chain with default commands for only inserting a dependency onto a
+   * POM.
+   *
+   * @return A pre-configured Chain.
+   */
+  public static CommandChain insertDependency() {
+    final List<Command> insertCommands = new ArrayList<>(COMMON_COMMANDS);
+    insertCommands.add(new SimpleInsert(true));
+    return new CommandChain(insertCommands);
+  }
+
+  /**
+   * Creates a pre-configured Chain with default commands for only updating a dependency onto a POM.
+   *
+   * @return A pre-configured Chain.
+   */
+  public static CommandChain updateDependency() {
+    final List<Command> insertCommands = new ArrayList<>(COMMON_COMMANDS);
+    insertCommands.addAll(
+        List.of(SimpleUpgrade.getInstance(), SimpleDependencyManagement.getInstance()));
+
+    return new CommandChain(insertCommands);
   }
 
   private static CommandChain filterByQueryType(
@@ -107,7 +141,7 @@ class CommandChain {
           Class<?> commandClass = Class.forName(commandClassName);
           Command command = (Command) commandClass.newInstance();
           filteredCommands.add(command);
-        } catch (Throwable e) {
+        } catch (final Exception e) {
           LOGGER.warn("Creating class '{}': ", commandClassName, e);
         }
       }
@@ -122,7 +156,7 @@ class CommandChain {
           "Unable to load any available strategy for " + queryType.name());
     }
 
-    return new CommandChain(commands.toArray(new Command[0]));
+    return new CommandChain(commands);
   }
 
   /**
@@ -162,18 +196,12 @@ class CommandChain {
    * and report issues creating
    */
   static final List<Pair<QueryType, String>> AVAILABLE_DEPENDENCY_QUERY_COMMANDS =
-      new ArrayList<>(
-          Arrays.asList(
-              new Pair<>(QueryType.SAFE, "QueryByResolver"),
-              new Pair<>(QueryType.SAFE, "QueryByParsing"),
-              new Pair<>(QueryType.UNSAFE, "QueryByEmbedder"),
-              new Pair<>(QueryType.UNSAFE, "QueryByInvoker")));
+      new ArrayList<>(Arrays.asList(new Pair<>(QueryType.SAFE, "QueryByParsing")));
 
   /** List of Commands for Version Query */
   private static final List<Pair<QueryType, String>> AVAILABLE_QUERY_VERSION_COMMANDS =
       new ArrayList<>(
           Arrays.asList(
-              new Pair<>(QueryType.NONE, "UnwrapEffectivePom"),
               new Pair<>(QueryType.SAFE, "VersionByCompilerDefinition"),
               new Pair<>(QueryType.SAFE, "VersionByProperty")));
 

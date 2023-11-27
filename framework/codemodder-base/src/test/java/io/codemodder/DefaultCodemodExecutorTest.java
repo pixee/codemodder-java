@@ -15,12 +15,13 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import io.codemodder.codetf.*;
-import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserChanger;
+import io.codemodder.javaparser.JavaParserFacade;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ final class DefaultCodemodExecutorTest {
   private Path javaFile3;
   private Path javaFile4;
   private EncodingDetector encodingDetector;
-  private CachingJavaParser cachingJavaParser;
+  private JavaParserFacade javaParserFacade;
   private IncludesExcludes includesEverything;
   private BeforeToAfterChanger beforeToAfterChanger;
   private CodemodIdPair beforeAfterCodemod;
@@ -47,7 +48,7 @@ final class DefaultCodemodExecutorTest {
     this.repoDir = tmpDir;
     beforeToAfterChanger = new BeforeToAfterChanger();
     beforeAfterCodemod = new CodemodIdPair("codemodder:java/id", beforeToAfterChanger);
-    cachingJavaParser = CachingJavaParser.from(new JavaParser());
+    javaParserFacade = JavaParserFacade.from(JavaParser::new);
     encodingDetector = EncodingDetector.create();
     includesEverything = IncludesExcludes.any();
     fileCache = FileCache.createDefault();
@@ -59,8 +60,9 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             List.of(),
             fileCache,
-            cachingJavaParser,
+            javaParserFacade,
             encodingDetector,
+            -1,
             -1,
             -1);
 
@@ -185,8 +187,9 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             List.of(addsPrefixProvider),
             fileCache,
-            cachingJavaParser,
+            javaParserFacade,
             encodingDetector,
+            -1,
             -1,
             -1);
 
@@ -231,10 +234,11 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             List.of(),
             fileCache,
-            cachingJavaParser,
+            javaParserFacade,
             encodingDetector,
             -1,
-            1);
+            1,
+            -1);
 
     CodeTFResult result = executor.execute(List.of(javaFile1, javaFile2, javaFile3));
     assertThat(result).satisfies(DefaultCodemodExecutorTest::hasBeforeAfterCodemodMetadata);
@@ -255,9 +259,10 @@ final class DefaultCodemodExecutorTest {
             List.of(),
             List.of(),
             fileCache,
-            cachingJavaParser,
+            javaParserFacade,
             encodingDetector,
             500,
+            -1,
             -1);
 
     // make javaFile1 too big to scan
@@ -306,8 +311,9 @@ final class DefaultCodemodExecutorTest {
               List.of(depsProvider),
               List.of(),
               fileCache,
-              CachingJavaParser.from(new JavaParser()),
+              JavaParserFacade.from(JavaParser::new),
               EncodingDetector.create(),
+              -1,
               -1,
               -1);
       CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
@@ -434,8 +440,9 @@ final class DefaultCodemodExecutorTest {
             List.of(badProvider),
             List.of(),
             fileCache,
-            CachingJavaParser.from(new JavaParser()),
+            JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create(),
+            -1,
             -1,
             -1);
     CodeTFResult result = executor.execute(List.of(javaFile2, javaFile4));
@@ -489,8 +496,9 @@ final class DefaultCodemodExecutorTest {
             List.of(skippingProvider),
             List.of(),
             fileCache,
-            CachingJavaParser.from(new JavaParser()),
+            JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create(),
+            -1,
             -1,
             -1);
     CodeTFResult result = executor.execute(List.of(javaFile2));

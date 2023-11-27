@@ -32,13 +32,14 @@ import org.apache.commons.jexl3.JexlExpression;
  */
 @Codemod(
     id = "codeql:java/jexl-expression-injection",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    executionPriority = CodemodExecutionPriority.HIGH)
 public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expression> {
 
   @Inject
   public JEXLInjectionCodemod(
       @ProvidedCodeQLScan(ruleId = "java/jexl-expression-injection") final RuleSarif sarif) {
-    super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
+    super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
   @Override

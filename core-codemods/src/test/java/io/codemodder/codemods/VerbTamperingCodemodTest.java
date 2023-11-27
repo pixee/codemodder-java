@@ -10,7 +10,7 @@ import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaParserFacade;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,7 +59,8 @@ final class VerbTamperingCodemodTest {
             List.of(),
             List.of(webxml),
             Map.of(),
-            List.of());
+            List.of(),
+            null);
 
     CodemodExecutor executor =
         CodemodExecutorFactory.from(
@@ -69,7 +70,7 @@ final class VerbTamperingCodemodTest {
             List.of(),
             List.of(),
             FileCache.createDefault(),
-            CachingJavaParser.from(new JavaParser()),
+            JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create());
     CodeTFResult result = executor.execute(List.of(webxml));
     assertThat(result.getChangeset().isEmpty(), is(!expectChange));

@@ -1,6 +1,6 @@
 package io.codemodder.plugins.maven.operator;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -15,9 +15,8 @@ public class ProjectModel {
   private Set<String> activeProfiles;
   private boolean overrideIfAlreadyExists;
   private QueryType queryType;
-  private File repositoryPath;
+  private Path repositoryPath;
   private String finishedByClass;
-  private boolean offline;
   private boolean modifiedByCommand;
 
   /**
@@ -33,7 +32,6 @@ public class ProjectModel {
    * @param queryType The type of query operation to perform.
    * @param repositoryPath The path to the repository.
    * @param finishedByClass The name of the class that finished the operation.
-   * @param offline Whether to perform the operation in offline mode.
    */
   public ProjectModel(
       POMDocument pomFile,
@@ -44,9 +42,8 @@ public class ProjectModel {
       Set<String> activeProfiles,
       boolean overrideIfAlreadyExists,
       QueryType queryType,
-      File repositoryPath,
-      String finishedByClass,
-      boolean offline) {
+      Path repositoryPath,
+      String finishedByClass) {
     this.pomFile = pomFile;
     this.parentPomFiles = parentPomFiles != null ? parentPomFiles : Collections.emptyList();
     this.dependency = dependency;
@@ -57,7 +54,6 @@ public class ProjectModel {
     this.queryType = queryType != null ? queryType : QueryType.NONE;
     this.repositoryPath = repositoryPath;
     this.finishedByClass = finishedByClass;
-    this.offline = offline;
     this.modifiedByCommand = false;
   }
 
@@ -253,11 +249,11 @@ public class ProjectModel {
     this.queryType = queryType;
   }
 
-  public File getRepositoryPath() {
+  public Path getRepositoryPath() {
     return repositoryPath;
   }
 
-  public void setRepositoryPath(File repositoryPath) {
+  public void setRepositoryPath(Path repositoryPath) {
     this.repositoryPath = repositoryPath;
   }
 
@@ -267,14 +263,6 @@ public class ProjectModel {
 
   public void setFinishedByClass(String finishedByClass) {
     this.finishedByClass = finishedByClass;
-  }
-
-  public boolean isOffline() {
-    return offline;
-  }
-
-  public void setOffline(boolean offline) {
-    this.offline = offline;
   }
 
   public boolean isModifiedByCommand() {

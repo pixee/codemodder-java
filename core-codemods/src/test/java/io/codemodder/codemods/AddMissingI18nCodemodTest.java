@@ -10,7 +10,7 @@ import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.CachingJavaParser;
+import io.codemodder.javaparser.JavaParserFacade;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -234,7 +234,7 @@ final class AddMissingI18nCodemodTest {
             List.of(),
             List.of(),
             FileCache.createDefault(),
-            CachingJavaParser.from(new JavaParser()),
+            JavaParserFacade.from(JavaParser::new),
             EncodingDetector.create());
     return executor.execute(
         List.of(
@@ -253,7 +253,8 @@ final class AddMissingI18nCodemodTest {
         List.of(),
         Files.list(dir).toList(),
         Map.of(),
-        List.of());
+        List.of(),
+        null);
   }
 
   /** If we can't connect to AWS, skip the test. */

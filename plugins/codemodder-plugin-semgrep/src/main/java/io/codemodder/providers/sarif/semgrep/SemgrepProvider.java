@@ -18,9 +18,16 @@ public final class SemgrepProvider implements CodemodProvider {
       final List<String> includePaths,
       final List<String> excludePaths,
       final List<Class<? extends CodeChanger>> codemodTypes,
-      final List<RuleSarif> sarifs) {
+      final List<RuleSarif> sarifs,
+      final Path sonarIssuesJsonFile) {
     return Set.of(
-        new SemgrepModule(codeDirectory, includePaths, excludePaths, codemodTypes, sarifs));
+        new SemgrepModule(
+            codeDirectory,
+            includePaths,
+            excludePaths,
+            codemodTypes,
+            sarifs,
+            new DefaultSemgrepRuleFactory()));
   }
 
   @Override

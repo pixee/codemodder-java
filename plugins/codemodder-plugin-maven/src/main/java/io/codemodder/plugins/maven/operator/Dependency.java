@@ -1,12 +1,13 @@
 package io.codemodder.plugins.maven.operator;
 
+import io.codemodder.DependencyGAV;
 import java.util.Objects;
 
 /**
  * Represents a dependency in a Maven POM. A dependency consists of a group ID, artifact ID,
  * version, classifier, packaging, and scope.
  */
-public class Dependency {
+class Dependency {
   private String groupId;
   private String artifactId;
   private String version;
@@ -24,7 +25,7 @@ public class Dependency {
    * @param packaging The packaging type of the dependency (default is "jar" if null).
    * @param scope The scope of the dependency (default is "compile" if null).
    */
-  public Dependency(
+  Dependency(
       String groupId,
       String artifactId,
       String version,
@@ -37,6 +38,16 @@ public class Dependency {
     this.classifier = classifier;
     this.packaging = packaging != null ? packaging : "jar";
     this.scope = scope != null ? scope : "compile";
+  }
+
+  Dependency(final DependencyGAV newDependencyGAV) {
+    this(
+        newDependencyGAV.group(),
+        newDependencyGAV.artifact(),
+        newDependencyGAV.version(),
+        null,
+        null,
+        null);
   }
 
   @Override
@@ -71,6 +82,32 @@ public class Dependency {
   @Override
   public int hashCode() {
     return Objects.hash(groupId, artifactId, version, classifier, packaging, scope);
+  }
+
+  /**
+   * Computes the hash code of this object without considering the version.
+   *
+   * <p>This method calculates the hash code based on the values of the group ID, artifact ID,
+   * classifier, packaging, and scope fields, while ignoring the version field.
+   *
+   * @return The computed hash code without the version.
+   */
+  public int hashWithoutVersion() {
+    return Objects.hash(groupId, artifactId, classifier, packaging, scope);
+  }
+
+  /**
+   * Checks if this Dependency object matches another Dependency without considering the version.
+   *
+   * <p>This method compares the hash code of this Dependency with the hash code of another
+   * Dependency, excluding the version information. If the hash codes are equal, the two
+   * dependencies are considered a match without taking version into account.
+   *
+   * @param dependency The Dependency object to compare with this one.
+   * @return true if the dependencies match without considering the version, false otherwise.
+   */
+  public boolean matchesWithoutConsideringVersion(final Dependency dependency) {
+    return hashWithoutVersion() == dependency.hashWithoutVersion();
   }
 
   public String getGroupId() {

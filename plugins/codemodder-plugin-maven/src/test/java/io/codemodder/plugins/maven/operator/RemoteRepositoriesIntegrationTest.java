@@ -1,15 +1,17 @@
 package io.codemodder.plugins.maven.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.*;
 import java.util.*;
 import org.apache.commons.lang3.SystemUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class MassRepoIT {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MassRepoIT.class);
+final class RemoteRepositoriesIntegrationTest {
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(RemoteRepositoriesIntegrationTest.class);
 
   private static class TestRepo {
     private String slug;
@@ -17,7 +19,6 @@ final class MassRepoIT {
     private String pomPath;
     private boolean useProperties;
     private boolean useScanner;
-    private boolean offline;
     private String commitId;
 
     TestRepo(
@@ -26,14 +27,12 @@ final class MassRepoIT {
         String branch,
         boolean useScanner,
         String commitId,
-        boolean offline,
         String pomPath) {
       this.slug = slug;
       this.useProperties = useProperties;
       this.branch = branch != null ? branch : "master";
       this.useScanner = useScanner;
       this.commitId = commitId;
-      this.offline = offline;
       this.pomPath = pomPath != null ? pomPath : "pom.xml";
     }
 
@@ -56,30 +55,28 @@ final class MassRepoIT {
                   "main",
                   false,
                   "e75cfbeb110e3d3a2ca3c8fee2754992d89c419d",
-                  false,
                   "webgoat-lessons/xxe/pom.xml"),
               "io.github.pixee:java-security-toolkit:1.0.2"),
           new Pair(
               new TestRepo(
-                  "WebGoat/WebGoat", true, "main", true, null, true, "webgoat-container/pom.xml"),
+                  "WebGoat/WebGoat", true, "main", true, null, "webgoat-container/pom.xml"),
               "io.github.pixee:java-security-toolkit:1.0.2"),
           new Pair(
               new TestRepo(
-                  "WebGoat/WebGoat", true, "main", false, null, false, "webgoat-container/pom.xml"),
+                  "WebGoat/WebGoat", true, "main", false, null, "webgoat-container/pom.xml"),
               "io.github.pixee:java-security-toolkit:1.0.2"),
           new Pair(
               new TestRepo(
-                  "WebGoat/WebGoat", true, "main", false, null, false, "webgoat-container/pom.xml"),
+                  "WebGoat/WebGoat", true, "main", false, null, "webgoat-container/pom.xml"),
               "io.github.pixee:java-security-toolkit:1.0.2"),
           new Pair(
-              new TestRepo("CRRogo/vert.x", true, null, false, null, false, null),
+              new TestRepo("CRRogo/vert.x", true, null, false, null, null),
               "io.github.pixee:java-security-toolkit:1.0.2"),
           new Pair(
-              new TestRepo(
-                  "apache/pulsar", false, null, false, null, false, "pulsar-broker/pom.xml"),
+              new TestRepo("apache/pulsar", false, null, false, null, "pulsar-broker/pom.xml"),
               "commons-codec:commons-codec:1.14"),
           new Pair(
-              new TestRepo("apache/rocketmq", false, null, false, null, false, "common/pom.xml"),
+              new TestRepo("apache/rocketmq", false, null, false, null, "common/pom.xml"),
               "commons-codec:commons-codec:1.15"),
           new Pair(
               new TestRepo(
@@ -88,14 +85,13 @@ final class MassRepoIT {
                   null,
                   false,
                   null,
-                  false,
                   "modules/openapi-generator-core/pom.xml"),
               "com.google.guava:guava:31.0-jre"),
           new Pair(
-              new TestRepo("casbin/jcasbin", false, null, false, null, false, null),
+              new TestRepo("casbin/jcasbin", false, null, false, null, null),
               "com.google.code.gson:gson:2.8.0"),
           new Pair(
-              new TestRepo("bytedeco/javacv", false, null, false, null, false, null),
+              new TestRepo("bytedeco/javacv", false, null, false, null, null),
               "org.jogamp.jocl:jocl-main:2.3.1"));
 
   private void checkoutOrResetCachedRepo(TestRepo repo) throws IOException, InterruptedException {
@@ -141,17 +137,20 @@ final class MassRepoIT {
     }
   }
 
-  private String getDependenciesFrom(TestRepo repo) throws Exception {
+  private String getTestRepoDependencies(TestRepo repo) throws Exception {
     try {
-      return getDependenciesFrom(repo.pomPath, repo.cacheDir());
+      return getPomPathDependencies(repo.pomPath, repo.cacheDir());
     } catch (Exception e) {
       File pomFile = new File(repo.cacheDir(), repo.pomPath);
 
+      final POMOperator pomOperator = new POMOperator(pomFile.toPath(), repo.cacheDir().toPath());
+
       Collection<Dependency> dependencies =
-          POMOperator.queryDependency(
-              POMScanner.scanFrom(pomFile, repo.cacheDir())
-                  .withRepositoryPath(repo.cacheDir())
-                  .withOffline(false)
+          pomOperator.queryDependency(
+              pomOperator
+                  .getPomScanner()
+                  .scanFrom()
+                  .withRepositoryPath(repo.cacheDir().toPath())
                   .build());
 
       StringBuilder result = new StringBuilder();
@@ -164,7 +163,7 @@ final class MassRepoIT {
     }
   }
 
-  private String getDependenciesFrom(String pomPath, File dir)
+  private String getPomPathDependencies(String pomPath, File dir)
       throws IOException, InterruptedException {
     File outputFile = File.createTempFile("tmp-pom", ".txt");
 
@@ -224,26 +223,29 @@ final class MassRepoIT {
     return result;
   }
 
+  /** Tests the POMOperator::modify of the first TestRepo instance. */
   @Test
-  void testBasic() throws Exception {
+  void it_modifies_first_testRepo() throws Exception {
     Pair<TestRepo, String> firstCase = repos.get(0);
 
-    testOnRepo(firstCase.first, firstCase.second);
+    modifyTestRepoDependency(firstCase.first, firstCase.second);
   }
 
+  /** Tests the POMOperator::modify of all TestRepo instances. */
   @Test
-  void testAllOthers() {
+  void it_modifies_all_testRepos() {
     for (int n = 0; n < repos.size(); n++) {
       Pair<TestRepo, String> pair = repos.get(n);
       try {
-        testOnRepo(pair.first, pair.second);
+        modifyTestRepoDependency(pair.first, pair.second);
       } catch (Throwable e) {
         throw new AssertionError("while trying example " + n + " of " + pair, e);
       }
     }
   }
 
-  private void testOnRepo(TestRepo sampleRepo, String dependencyToUpgradeString) throws Exception {
+  private void modifyTestRepoDependency(TestRepo sampleRepo, String dependencyToUpgradeString)
+      throws Exception {
     LOGGER.info(
         "Testing on repo {}, branch {} with dependency {} ({})",
         sampleRepo.slug,
@@ -253,33 +255,39 @@ final class MassRepoIT {
 
     checkoutOrResetCachedRepo(sampleRepo);
 
-    String originalDependencies = getDependenciesFrom(sampleRepo);
+    String originalDependencies = getTestRepoDependencies(sampleRepo);
 
     LOGGER.info("dependencies: {}", originalDependencies);
 
     Dependency dependencyToUpgrade = Dependency.fromString(dependencyToUpgradeString);
 
+    final POMOperator pomOperator =
+        new POMOperator(
+            new File(sampleRepo.cacheDir(), sampleRepo.pomPath).toPath(),
+            sampleRepo.cacheDir().toPath());
+
+    final POMScanner pomScanner = pomOperator.getPomScanner();
+
     ProjectModelFactory projectModelFactory =
         sampleRepo.useScanner
-            ? POMScanner.scanFrom(
-                new File(sampleRepo.cacheDir(), sampleRepo.pomPath), sampleRepo.cacheDir())
-            : ProjectModelFactory.load(new File(sampleRepo.cacheDir(), sampleRepo.pomPath));
+            ? pomScanner.scanFrom()
+            : ProjectModelFactory.load(
+                new File(sampleRepo.cacheDir(), sampleRepo.pomPath).toPath());
 
     ProjectModel context =
         projectModelFactory
             .withDependency(dependencyToUpgrade)
             .withSkipIfNewer(false)
             .withUseProperties(sampleRepo.useProperties)
-            .withOffline(sampleRepo.offline)
             .build();
 
-    boolean result = POMOperator.modify(context);
+    boolean result = pomOperator.modify(context);
 
     context.allPomFiles().stream()
         .filter(pomFile -> pomFile.getDirty())
         .forEach(
             pomFile -> {
-              try (FileOutputStream fos = new FileOutputStream(pomFile.getFile())) {
+              try (FileOutputStream fos = new FileOutputStream(pomFile.getPath().toFile())) {
                 fos.write(pomFile.getResultPomBytes());
               } catch (IOException e) {
                 // Handle any IOException that may occur during writing
@@ -287,23 +295,21 @@ final class MassRepoIT {
               }
             });
 
-    String finalDependencies = getDependenciesFrom(sampleRepo);
+    String finalDependencies = getTestRepoDependencies(sampleRepo);
 
     LOGGER.info("dependencies: {}", finalDependencies);
 
     boolean queryFailed = originalDependencies.isEmpty() && finalDependencies.isEmpty();
 
     if (queryFailed) {
-      Assert.assertTrue("Must be modified even when query failed", result);
+      // "Must be modified even when query failed"
+      assertThat(result).isTrue();
     } else {
       String dependencyAsStringWithPackaging = dependencyToUpgrade.toString();
-
-      Assert.assertFalse(
-          "Dependency should be originally missing",
-          originalDependencies.contains(dependencyAsStringWithPackaging));
-      Assert.assertTrue(
-          "New Dependency should be appearing",
-          finalDependencies.contains(dependencyAsStringWithPackaging));
+      // "Dependency should be originally missing"
+      assertThat(originalDependencies).doesNotContain(dependencyAsStringWithPackaging);
+      // "New Dependency should be appearing"
+      assertThat(finalDependencies).contains(dependencyAsStringWithPackaging);
     }
   }
 

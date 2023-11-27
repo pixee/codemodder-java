@@ -5,14 +5,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.building.ModelBuildingException;
-import org.apache.maven.model.building.ModelBuildingResult;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
@@ -24,98 +19,62 @@ import org.slf4j.LoggerFactory;
  * including the original POM and its parent POMs, to create a ProjectModelFactory. This class
  * offers both modern and legacy scanning methods for flexibility.
  */
-public class POMScanner {
+class POMScanner {
 
   private static final Pattern RE_WINDOWS_PATH = Pattern.compile("^[A-Za-z]:");
 
+  private static final String ARTIFACT_ID = "artifactId";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(POMScanner.class);
 
-  /**
-   * Scans a POM file and its parent POMs, if any, and creates a ProjectModelFactory.
-   *
-   * @param originalFile The original POM file to scan.
-   * @param topLevelDirectory The top-level directory containing the POM files.
-   * @return A ProjectModelFactory representing the scanned POMs.
-   * @throws Exception If an error occurs during the scanning process.
-   */
-  public static ProjectModelFactory scanFrom(File originalFile, File topLevelDirectory)
-      throws Exception {
-    ProjectModelFactory originalDocument = ProjectModelFactory.load(originalFile);
+  private final Path originalPath;
+  private final Path topLevelDirectory;
 
-    List<File> parentPoms;
-    try {
-      parentPoms = getParentPoms(originalFile);
-    } catch (Exception e) {
-      if (e instanceof ModelBuildingException) {
-        Ignorable.LOGGER.debug("mbe (you can ignore): ", e);
-      } else {
-        LOGGER.warn("While trying embedder: ", e);
-      }
-      return legacyScanFrom(originalFile, topLevelDirectory);
-    }
+  private Path lastPath;
 
-    try {
-      List<POMDocument> parentPomDocuments =
-          parentPoms.stream()
-              .map(
-                  file -> {
-                    try {
-                      return POMDocumentFactory.load(file);
-                    } catch (IOException | URISyntaxException | DocumentException e) {
-
-                      return null;
-                    }
-                  })
-              .filter(Objects::nonNull)
-              .collect(Collectors.toList());
-
-      return originalDocument.withParentPomFiles(parentPomDocuments);
-    } catch (Exception e) {
-
-      return originalDocument;
-    }
+  public POMScanner(final Path originalPath, final Path topLevelDirectory) {
+    this.originalPath = originalPath;
+    this.topLevelDirectory = topLevelDirectory;
   }
 
   /**
    * Scans a POM file and its parent POMs using the legacy method and creates a ProjectModelFactory.
    *
-   * @param originalFile The original POM file to scan.
-   * @param topLevelDirectory The top-level directory containing the POM files.
    * @return A ProjectModelFactory representing the scanned POMs.
    * @throws DocumentException If a document error occurs.
    * @throws IOException If an I/O error occurs.
    * @throws URISyntaxException If there is an issue with the URI syntax.
    */
-  public static ProjectModelFactory legacyScanFrom(File originalFile, File topLevelDirectory)
-      throws DocumentException, IOException, URISyntaxException {
-    POMDocument pomFile = POMDocumentFactory.load(originalFile);
+  public ProjectModelFactory scanFrom() throws DocumentException, IOException, URISyntaxException {
+    POMDocument pomFile = POMDocumentFactory.load(originalPath);
     List<POMDocument> parentPomFiles = new ArrayList<>();
 
     Queue<Element> pomFileQueue = new LinkedList<>();
 
-    Element relativePathElement =
-        pomFile.getPomDocument().getRootElement().element("parent") != null
-            ? pomFile.getPomDocument().getRootElement().element("parent").element("relativePath")
-            : null;
+    Element relativePathElement = getRelativePathElement(pomFile);
 
-    Element parentElement = pomFile.getPomDocument().getRootElement().element("parent");
+    Element parentElement = getParentElement(pomFile);
 
-    if (relativePathElement != null && StringUtils.isNotEmpty(relativePathElement.getTextTrim())) {
-      pomFileQueue.add(relativePathElement);
-    } else if (relativePathElement == null && parentElement != null) {
-      // Skip trying to find a parent if we are at the root
-      if (!originalFile.getParentFile().equals(topLevelDirectory)) {
-        DefaultElement newRelativePathElement = new DefaultElement("relativePath");
-        newRelativePathElement.setText("../pom.xml");
-        pomFileQueue.add(newRelativePathElement);
-      }
-    }
+    processRelativePathElement(
+        relativePathElement, parentElement, originalPath, topLevelDirectory, pomFileQueue);
 
-    lastFile = originalFile;
+    lastPath = originalPath;
 
     Set<String> prevPaths = new HashSet<>();
     POMDocument prevPOMDocument = pomFile;
 
+    processPOMFileQueue(pomFileQueue, prevPaths, parentPomFiles, prevPOMDocument, pomFile);
+
+    return ProjectModelFactory.loadFor(pomFile, parentPomFiles);
+  }
+
+  private void processPOMFileQueue(
+      Queue<Element> pomFileQueue,
+      Set<String> prevPaths,
+      List<POMDocument> parentPomFiles,
+      POMDocument prevPOMDocument,
+      POMDocument pomFile)
+      throws DocumentException, IOException, URISyntaxException {
     while (!pomFileQueue.isEmpty()) {
       Element currentRelativePathElement = pomFileQueue.poll();
 
@@ -125,122 +84,172 @@ public class POMScanner {
 
       String relativePath = fixPomRelativePath(currentRelativePathElement.getText());
 
-      if (!isRelative(relativePath)) {
-        LOGGER.warn("not relative: " + relativePath);
+      if (!processRelativePath(relativePath, prevPaths, pomFile)) {
         break;
       }
 
-      if (prevPaths.contains(relativePath)) {
-        LOGGER.warn("loop: " + pomFile.getFile() + ", relativePath: " + relativePath);
-        break;
-      } else {
-        prevPaths.add(relativePath);
-      }
+      Path newPath = resolvePath(lastPath, relativePath);
 
-      Path newPath = POMScanner.resolvePath(lastFile, relativePath);
-
-      if (Files.notExists(newPath)) {
-        LOGGER.warn("new path does not exist: " + newPath);
+      if (!validateNewPath(newPath, topLevelDirectory)) {
         break;
       }
 
-      if (newPath.toFile().length() == 0) {
-        LOGGER.warn("File has zero length: " + newPath);
-        break;
-      }
+      POMDocument newPomFile = POMDocumentFactory.load(newPath);
 
-      if (!newPath.startsWith(topLevelDirectory.getAbsolutePath())) {
-        LOGGER.warn(
-            "Not a child: " + newPath + " (absolute: " + topLevelDirectory.getAbsolutePath() + ")");
-        break;
-      }
+      processParentAndRelativePathElements(newPomFile);
 
-      POMDocument newPomFile = POMDocumentFactory.load(newPath.toFile());
-
-      boolean hasParent = newPomFile.getPomDocument().getRootElement().element("parent") != null;
-      boolean hasRelativePath =
-          newPomFile.getPomDocument().getRootElement().element("parent") != null
-              && newPomFile
-                      .getPomDocument()
-                      .getRootElement()
-                      .element("parent")
-                      .element("relativePath")
-                  != null;
-
-      if (!hasRelativePath && hasParent) {
-        Element parentElement2 = newPomFile.getPomDocument().getRootElement().element("parent");
-        DefaultElement newRelativePathElement = new DefaultElement("relativePath");
-        newRelativePathElement.setText("../pom.xml");
-        parentElement2.add(newRelativePathElement);
-      }
-
-      // One Last Test - Does the previous mention at least ArtifactId equals to parent declared at
-      // previous?
-      // If not break and warn
-
-      String myArtifactId =
-          newPomFile.getPomDocument().getRootElement().element("artifactId") != null
-              ? newPomFile.getPomDocument().getRootElement().element("artifactId").getText()
-              : null;
-
-      String prevParentArtifactId =
-          prevPOMDocument.getPomDocument().getRootElement().element("parent") != null
-              ? prevPOMDocument
-                  .getPomDocument()
-                  .getRootElement()
-                  .element("parent")
-                  .element("artifactId")
-                  .getText()
-              : null;
-
-      if (myArtifactId == null || prevParentArtifactId == null) {
-        LOGGER.warn(
-            "Missing previous mine or parent: " + myArtifactId + " / " + prevParentArtifactId);
-        break;
-      }
-
-      if (!myArtifactId.equals(prevParentArtifactId)) {
-        LOGGER.warn("Previous doesn't match: " + myArtifactId + " / " + prevParentArtifactId);
+      if (!checkArtifactIdMatch(newPomFile, prevPOMDocument)) {
         break;
       }
 
       parentPomFiles.add(newPomFile);
       prevPOMDocument = newPomFile;
 
-      Element newRelativePathElement =
-          newPomFile.getPomDocument().getRootElement().element("parent") != null
-              ? newPomFile
-                  .getPomDocument()
-                  .getRootElement()
-                  .element("parent")
-                  .element("relativePath")
-              : null;
+      Element newRelativePathElement = getRelativePathElement(newPomFile);
 
       if (newRelativePathElement != null) {
         pomFileQueue.add(newRelativePathElement);
       }
     }
-
-    return ProjectModelFactory.loadFor(pomFile, parentPomFiles);
   }
 
-  private static File lastFile;
+  private Element getParentElement(POMDocument pomFile) {
+    return pomFile.getPomDocument().getRootElement().element("parent");
+  }
 
-  private static Path resolvePath(File baseFile, String relativePath) {
-    File parentDir = baseFile;
+  private Element getRelativePathElement(POMDocument pomFile) {
+    Element parentElement = getParentElement(pomFile);
+    return (parentElement != null) ? parentElement.element("relativePath") : null;
+  }
 
-    if (parentDir.isFile()) {
-      parentDir = parentDir.getParentFile();
+  private String getParentArtifactId(POMDocument prevPOMDocument) {
+    Element parentElement = getParentElement(prevPOMDocument);
+    return (parentElement != null) ? parentElement.element(ARTIFACT_ID).getText() : null;
+  }
+
+  private void processRelativePathElement(
+      Element relativePathElement,
+      Element parentElement,
+      Path originalPath,
+      Path topLevelDirectory,
+      Queue<Element> pomFileQueue) {
+    if (relativePathElement != null && StringUtils.isNotEmpty(relativePathElement.getTextTrim())) {
+      pomFileQueue.add(relativePathElement);
+    } else if (relativePathElement == null
+        && parentElement != null
+        && isNotRoot(originalPath, topLevelDirectory)) {
+      addDefaultRelativePathElement(pomFileQueue);
+    }
+  }
+
+  private boolean isNotRoot(Path originalPath, Path topLevelDirectory) {
+    return !originalPath.getParent().equals(topLevelDirectory);
+  }
+
+  private DefaultElement createRelativePathElement() {
+    DefaultElement newRelativePathElement = new DefaultElement("relativePath");
+    newRelativePathElement.setText("../pom.xml");
+    return newRelativePathElement;
+  }
+
+  private void addDefaultRelativePathElement(Queue<Element> pomFileQueue) {
+    DefaultElement newRelativePathElement = createRelativePathElement();
+    pomFileQueue.add(newRelativePathElement);
+  }
+
+  private void processParentAndRelativePathElements(POMDocument newPomFile) {
+    boolean hasParent = getParentElement(newPomFile) != null;
+    boolean hasRelativePath = getRelativePathElement(newPomFile) != null;
+
+    if (!hasRelativePath && hasParent) {
+      Element parentElement = newPomFile.getPomDocument().getRootElement().element("parent");
+      DefaultElement newRelativePathElement = createRelativePathElement();
+      parentElement.add(newRelativePathElement);
+    }
+  }
+
+  private boolean processRelativePath(
+      String relativePath, Set<String> prevPaths, POMDocument pomFile) {
+
+    if (!isRelative(relativePath)) {
+      LOGGER.warn("not relative: " + relativePath);
+      return false;
     }
 
-    File result = new File(new File(parentDir, relativePath).toURI().normalize().getPath());
+    if (prevPaths.contains(relativePath)) {
+      LOGGER.warn("loop: " + pomFile.getPath() + ", relativePath: " + relativePath);
+      return false;
+    } else {
+      prevPaths.add(relativePath);
+    }
 
-    lastFile = result.isDirectory() ? result : result.getParentFile();
-
-    return Paths.get(result.getAbsolutePath());
+    return true;
   }
 
-  private static String fixPomRelativePath(String text) {
+  private boolean validateNewPath(Path newPath, Path topLevelDirectory) {
+    try {
+      if (Files.notExists(newPath)) {
+        LOGGER.warn("new path does not exist: " + newPath);
+        return false;
+      }
+
+      if (Files.size(newPath) == 0) {
+        LOGGER.warn("File has zero length: " + newPath);
+        return false;
+      }
+
+      if (!newPath.startsWith(topLevelDirectory)) {
+        LOGGER.warn(
+            "Not a child: " + newPath + " (absolute: " + topLevelDirectory.toAbsolutePath() + ")");
+        return false;
+      }
+
+      return true;
+    } catch (IOException e) {
+      LOGGER.error("Error while validating path: " + newPath, e);
+      return false;
+    }
+  }
+
+  private boolean checkArtifactIdMatch(POMDocument newPomFile, POMDocument prevPOMDocument) {
+
+    String myArtifactId =
+        newPomFile.getPomDocument().getRootElement().element(ARTIFACT_ID) != null
+            ? newPomFile.getPomDocument().getRootElement().element(ARTIFACT_ID).getText()
+            : null;
+
+    String prevParentArtifactId = getParentArtifactId(prevPOMDocument);
+
+    if (myArtifactId == null || prevParentArtifactId == null) {
+      LOGGER.warn(
+          "Missing previous mine or parent: " + myArtifactId + " / " + prevParentArtifactId);
+      return false;
+    }
+
+    if (!myArtifactId.equals(prevParentArtifactId)) {
+      LOGGER.warn("Previous doesn't match: " + myArtifactId + " / " + prevParentArtifactId);
+      return false;
+    }
+
+    return true;
+  }
+
+  private Path resolvePath(final Path baseFile, final String relativePath) {
+    Path parentDir = baseFile;
+
+    if (parentDir != null && !Files.isDirectory(parentDir)) {
+      parentDir = parentDir.getParent();
+    }
+
+    assert parentDir != null;
+    Path result = parentDir.resolve(relativePath).normalize().toAbsolutePath();
+
+    lastPath = Files.isDirectory(result) ? result : result.getParent();
+
+    return result;
+  }
+
+  private String fixPomRelativePath(final String text) {
     if (text == null) {
       return "";
     }
@@ -254,42 +263,11 @@ public class POMScanner {
     return text;
   }
 
-  private static boolean isRelative(String path) {
+  private boolean isRelative(final String path) {
     if (RE_WINDOWS_PATH.matcher(path).matches()) {
       return false;
     }
 
     return !(path.startsWith("/") || path.startsWith("~"));
-  }
-
-  private static List<File> getParentPoms(File originalFile) throws ModelBuildingException {
-    EmbedderFacade.EmbedderFacadeResponse embedderFacadeResponse =
-        EmbedderFacade.invokeEmbedder(
-            new EmbedderFacade.EmbedderFacadeRequest(true, null, originalFile, null, null));
-
-    ModelBuildingResult res = embedderFacadeResponse.getModelBuildingResult();
-
-    List<Model> rawModels = new ArrayList<>();
-    for (String modelId : res.getModelIds()) {
-      Model rawModel = res.getRawModel(modelId);
-      if (rawModel != null) {
-        rawModels.add(rawModel);
-      }
-    }
-
-    List<File> parentPoms = new ArrayList<>();
-    if (rawModels.size() > 1) {
-      for (int i = 1; i < rawModels.size(); i++) {
-        Model rawModel = rawModels.get(i);
-        if (rawModel != null) {
-          File pomFile = rawModel.getPomFile();
-          if (pomFile != null) {
-            parentPoms.add(pomFile);
-          }
-        }
-      }
-    }
-
-    return parentPoms;
   }
 }

@@ -11,7 +11,7 @@ public interface SemgrepRunner {
   /**
    * Execute semgrep.
    *
-   * @param yamls the directory/file(s) where the rule(s) are stored
+   * @param yamls the file(s) where the rule(s) are stored
    * @param codeDir the directory containing the code to be run on
    * @return the resulting SARIF
    */

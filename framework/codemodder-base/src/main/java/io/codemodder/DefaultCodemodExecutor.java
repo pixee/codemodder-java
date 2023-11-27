@@ -8,13 +8,14 @@ import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
 import io.codemodder.codetf.CodeTFPackageAction;
 import io.codemodder.codetf.CodeTFResult;
-import io.codemodder.javaparser.CachingJavaParser;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.javaparser.JavaParserCodemodRunner;
+import io.codemodder.javaparser.JavaParserFacade;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -26,7 +27,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
   private final CodemodIdPair codemod;
   private final List<ProjectProvider> projectProviders;
   private final List<CodeTFProvider> codetfProviders;
-  private final CachingJavaParser cachingJavaParser;
+  private final JavaParserFacade javaParserFacade;
   private final Path projectDir;
   private final IncludesExcludes includesExcludes;
   private final EncodingDetector encodingDetector;
@@ -41,6 +42,9 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
    */
   private final int maxFiles;
 
+  /** The max number of workers we'll use to scan files. */
+  private final int maxWorkers;
+
   DefaultCodemodExecutor(
       final Path projectDir,
       final IncludesExcludes includesExcludes,
@@ -48,26 +52,28 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       final List<ProjectProvider> projectProviders,
       final List<CodeTFProvider> codetfProviders,
       final FileCache fileCache,
-      final CachingJavaParser cachingJavaParser,
+      final JavaParserFacade javaParserFacade,
       final EncodingDetector encodingDetector,
       final int maxFileSize,
-      final int maxFiles) {
+      final int maxFiles,
+      final int maxWorkers) {
     this.projectDir = Objects.requireNonNull(projectDir);
     this.includesExcludes = Objects.requireNonNull(includesExcludes);
     this.codemod = Objects.requireNonNull(codemod);
     this.codetfProviders = Objects.requireNonNull(codetfProviders);
     this.projectProviders = Objects.requireNonNull(projectProviders);
-    this.cachingJavaParser = Objects.requireNonNull(cachingJavaParser);
+    this.javaParserFacade = Objects.requireNonNull(javaParserFacade);
     this.fileCache = Objects.requireNonNull(fileCache);
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
     this.maxFileSize = maxFileSize;
     this.maxFiles = maxFiles;
+    this.maxWorkers = maxWorkers;
   }
 
   @Override
   public CodeTFResult execute(final List<Path> filePaths) {
-    List<CodeTFChangesetEntry> changeset = new ArrayList<>();
-    Set<Path> unscannableFiles = new HashSet<>();
+
+    Set<Path> unscannableFiles = new ConcurrentSkipListSet<>();
     DefaultCodeDirectory codeDirectory = new DefaultCodeDirectory(projectDir);
     CodeChanger codeChanger = codemod.getChanger();
 
@@ -78,7 +84,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     if (codeChanger instanceof JavaParserChanger) {
       codemodRunner =
           new JavaParserCodemodRunner(
-              cachingJavaParser, (JavaParserChanger) codeChanger, encodingDetector);
+              javaParserFacade, (JavaParserChanger) codeChanger, encodingDetector);
     } else if (codeChanger instanceof RawFileChanger) {
       codemodRunner = new RawFileCodemodRunner((RawFileChanger) codeChanger);
     } else {
@@ -92,84 +98,79 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     List<Path> codemodTargetFiles =
         filePaths.stream()
             .filter(codemodRunner::supports)
+            .sorted()
             .limit(maxFiles != -1 ? maxFiles : Long.MAX_VALUE)
             .sorted()
             .toList();
 
+    /*
+     * The changeset doesn't need to be thread-safe because it's only added to within a synchronized block.
+     */
+    List<CodeTFChangesetEntry> changeset = new ArrayList<>();
+
+    int workers = maxWorkers != -1 ? maxWorkers : 1;
+    ExecutorService executor = Executors.newFixedThreadPool(workers);
+    CompletionService<String> service = new ExecutorCompletionService<>(executor);
+
+    // for each file, add a task to the completion service
     for (Path filePath : codemodTargetFiles) {
 
-      // create the context necessary for the codemod to run
-      LineIncludesExcludes lineIncludesExcludes =
-          includesExcludes.getIncludesExcludesForFile(filePath.toFile());
+      executor.submit(
+          () -> {
+            // create the context necessary for the codemod to run
+            LineIncludesExcludes lineIncludesExcludes =
+                includesExcludes.getIncludesExcludesForFile(filePath.toFile());
 
-      try {
-        if (maxFileSize != -1) {
-          long size = Files.size(filePath);
-          if (size > maxFileSize) {
-            unscannableFiles.add(filePath);
-            continue;
-          }
+            try {
+
+              if (maxFileSize != -1) {
+                long size = Files.size(filePath);
+                if (size > maxFileSize) {
+                  unscannableFiles.add(filePath);
+                  return;
+                }
+              }
+
+              String beforeFileContents = fileCache.get(filePath);
+              CodemodInvocationContext context =
+                  new DefaultCodemodInvocationContext(
+                      codeDirectory,
+                      filePath,
+                      beforeFileContents,
+                      codemod.getId(),
+                      lineIncludesExcludes);
+
+              // run the codemod on the file
+              List<CodemodChange> codemodChanges = codemodRunner.run(context);
+
+              if (!codemodChanges.isEmpty()) {
+                synchronized (this) {
+                  FilesUpdateResult updateResult =
+                      updateFiles(codeChanger, filePath, beforeFileContents, codemodChanges);
+                  unscannableFiles.addAll(updateResult.filesFailedToChange());
+                  changeset.addAll(updateResult.changeset());
+                }
+              }
+
+            } catch (Exception e) {
+              unscannableFiles.add(filePath);
+              e.printStackTrace();
+            }
+          });
+    }
+
+    executor.shutdown();
+    try {
+      boolean success = executor.awaitTermination(15, TimeUnit.MINUTES);
+      log.trace("Success running codemod: {}", success);
+      while (!executor.isTerminated()) {
+        final Future<String> future = service.poll();
+        if (future != null) {
+          log.trace("Finished: {}", future.get());
         }
-
-        String fileContents = fileCache.get(filePath);
-        CodemodInvocationContext context =
-            new DefaultCodemodInvocationContext(
-                codeDirectory, filePath, fileContents, codemod.getId(), lineIncludesExcludes);
-
-        // run the codemod on the file
-        List<CodemodChange> codemodChanges = codemodRunner.run(context);
-
-        if (!codemodChanges.isEmpty()) {
-          // update the dependencies in the manifest file if needed
-          List<DependencyGAV> dependencies =
-              codemodChanges.stream()
-                  .map(CodemodChange::getDependenciesNeeded)
-                  .flatMap(Collection::stream)
-                  .distinct()
-                  .collect(Collectors.toList());
-          List<CodeTFPackageAction> pkgActions;
-          List<CodeTFChangesetEntry> dependencyChangesetEntries = Collections.emptyList();
-          if (!dependencies.isEmpty()) {
-            CodemodPackageUpdateResult packageAddResult = addPackages(filePath, dependencies);
-            unscannableFiles.addAll(packageAddResult.filesFailedToChange());
-            pkgActions = packageAddResult.packageActions();
-            dependencyChangesetEntries = packageAddResult.manifestChanges();
-          } else {
-            pkgActions = Collections.emptyList();
-          }
-
-          // record the change for the file
-          List<CodeTFChange> changes =
-              codemodChanges.stream()
-                  .map(
-                      change ->
-                          translateCodemodChangetoCodeTFChange(
-                              codeChanger, filePath, change, pkgActions))
-                  .collect(Collectors.toList());
-
-          // make sure we add the file's entry first, then the dependency entries, so the causality
-          // is clear
-          List<String> beforeFile = fileContents.lines().toList();
-          String afterContents = Files.readString(filePath);
-          List<String> afterFile = afterContents.lines().toList();
-          List<String> patchDiff =
-              UnifiedDiffUtils.generateUnifiedDiff(
-                  filePath.getFileName().toString(),
-                  filePath.getFileName().toString(),
-                  beforeFile,
-                  DiffUtils.diff(beforeFile, afterFile),
-                  3);
-
-          String diff = String.join("\n", patchDiff);
-          changeset.add(
-              new CodeTFChangesetEntry(getRelativePath(projectDir, filePath), diff, changes));
-          changeset.addAll(dependencyChangesetEntries);
-          fileCache.overrideEntry(filePath, afterContents);
-        }
-      } catch (Exception e) {
-        unscannableFiles.add(filePath);
-        e.printStackTrace();
       }
+    } catch (Exception e) {
+      log.error("Problem waiting for scanning threads to exit", e);
     }
 
     CodeTFResult result =
@@ -188,6 +189,74 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       result = provider.onResultCreated(result);
     }
     return result;
+  }
+
+  /**
+   * This file method does the hard work of updating files, based on a list of codemod changes
+   * reported to have occurred.
+   */
+  private FilesUpdateResult updateFiles(
+      final CodeChanger codeChanger,
+      final Path filePath,
+      final String beforeFileContents,
+      final List<CodemodChange> codemodChanges)
+      throws IOException {
+
+    List<Path> filesFailedToChange = List.of();
+
+    // update the dependencies in the manifest file if needed
+    List<DependencyGAV> dependencies =
+        codemodChanges.stream()
+            .map(CodemodChange::getDependenciesNeeded)
+            .flatMap(Collection::stream)
+            .distinct()
+            .collect(Collectors.toList());
+
+    List<CodeTFPackageAction> pkgActions;
+    List<CodeTFChangesetEntry> dependencyChangesetEntries = Collections.emptyList();
+    if (!dependencies.isEmpty()) {
+      CodemodPackageUpdateResult packageAddResult = addPackages(filePath, dependencies);
+      filesFailedToChange = new ArrayList<>(packageAddResult.filesFailedToChange());
+      pkgActions = packageAddResult.packageActions();
+      dependencyChangesetEntries = packageAddResult.manifestChanges();
+    } else {
+      pkgActions = Collections.emptyList();
+    }
+
+    // record the change for the file
+    List<CodeTFChange> changes =
+        codemodChanges.stream()
+            .map(
+                change ->
+                    translateCodemodChangetoCodeTFChange(codeChanger, filePath, change, pkgActions))
+            .collect(Collectors.toList());
+
+    // make sure we add the file's entry first, then the dependency entries, so the causality
+    // is clear
+    List<String> beforeFile = beforeFileContents.lines().toList();
+    String afterContents = Files.readString(filePath);
+    List<String> afterFile = afterContents.lines().toList();
+    List<String> patchDiff =
+        UnifiedDiffUtils.generateUnifiedDiff(
+            filePath.getFileName().toString(),
+            filePath.getFileName().toString(),
+            beforeFile,
+            DiffUtils.diff(beforeFile, afterFile),
+            3);
+
+    String diff = String.join("\n", patchDiff);
+
+    // create a changeset for this file change + its downstream dependency changes
+    List<CodeTFChangesetEntry> changeset = new ArrayList<>();
+    changeset.add(new CodeTFChangesetEntry(getRelativePath(projectDir, filePath), diff, changes));
+    changeset.addAll(dependencyChangesetEntries);
+
+    // update the cache
+    fileCache.overrideEntry(filePath, afterContents);
+    dependencyChangesetEntries.forEach(
+        entry -> fileCache.removeEntry(projectDir.resolve(entry.getPath())));
+
+    return new FilesUpdateResult(changeset, filesFailedToChange);
   }
 
   @NotNull
@@ -281,6 +350,10 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     }
     return path;
   }
+
+  /** Describes the results of updating files after a codemod execution. */
+  private record FilesUpdateResult(
+      List<CodeTFChangesetEntry> changeset, List<Path> filesFailedToChange) {}
 
   private static final Logger log = LoggerFactory.getLogger(DefaultCodemodExecutor.class);
 }

@@ -5,12 +5,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.RegionExtractor;
-import io.codemodder.ReviewGuidance;
-import io.codemodder.RuleSarif;
-import io.codemodder.SarifPluginJavaParserChanger;
+import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
@@ -20,13 +15,14 @@ import javax.inject.Inject;
 /** Fixes issues reported under the id "missing-jwt-signature-check". */
 @Codemod(
     id = "codeql:java/missing-jwt-signature-check",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    executionPriority = CodemodExecutionPriority.HIGH)
 public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expression> {
 
   @Inject
   public UnverifiedJwtCodemod(
       @ProvidedCodeQLScan(ruleId = "java/missing-jwt-signature-check") final RuleSarif sarif) {
-    super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
+    super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
   private boolean fix(MethodCallExpr parseCall) {

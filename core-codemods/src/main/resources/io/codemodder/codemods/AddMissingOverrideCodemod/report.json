@@ -1,0 +1,7 @@
+{
+  "summary" : "Added missing @Override parameter (Sonar)",
+  "change" : "Added missing @Override parameter",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-1161/"
+  ]
+}

@@ -47,6 +47,7 @@ final class SemgrepJavaParserChangerTest {
     SemgrepModule module =
         new SemgrepModule(
             tmpDir, List.of("**"), List.of(), List.of(InvalidUsesBothYamlStrategies.class));
+
     assertThrows(CreationException.class, () -> Guice.createInjector(module));
   }
 
@@ -68,7 +69,7 @@ final class SemgrepJavaParserChangerTest {
       super(
           ruleSarif,
           ObjectCreationExpr.class,
-          RegionExtractor.FROM_FIRST_LOCATION,
+          SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION,
           RegionNodeMatcher.EXACT_MATCH,
           CodemodReporterStrategy.empty());
     }

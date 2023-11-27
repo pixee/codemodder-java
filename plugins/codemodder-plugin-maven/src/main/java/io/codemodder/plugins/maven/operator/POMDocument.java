@@ -1,9 +1,10 @@
 package io.codemodder.plugins.maven.operator;
 
-import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.dom4j.Document;
 
 /**
@@ -24,7 +25,7 @@ public class POMDocument {
   private Document pomDocument;
 
   private Document resultPom;
-  private File file;
+  private Path path;
   private Charset charset;
   private String endl;
   private String indent;
@@ -54,7 +55,7 @@ public class POMDocument {
     this.pomPath = pomPath;
     this.pomDocument = pomDocument;
     this.resultPom = (Document) pomDocument.clone();
-    this.file = this.pomPath != null ? new File(this.pomPath.toURI()) : null;
+    this.path = this.pomPath != null ? Paths.get(this.pomPath.toURI()) : null;
     this.charset = Charset.defaultCharset();
     this.endl = "\n";
     this.indent = "  ";
@@ -117,12 +118,12 @@ public class POMDocument {
     this.resultPom = resultPom;
   }
 
-  public File getFile() {
-    return file;
+  public Path getPath() {
+    return path;
   }
 
-  public void setFile(File file) {
-    this.file = file;
+  public void setPath(Path file) {
+    this.path = file;
   }
 
   public Charset getCharset() {

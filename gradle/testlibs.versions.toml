@@ -6,11 +6,13 @@ junit-jupiter = "5.8.2"
 assertj = "org.assertj:assertj-core:3.24.0"
 hamcrest-core = { module = "org.hamcrest:hamcrest-core", version.ref = "hamcrest" }
 hamcrest-library = { module = "org.hamcrest:hamcrest-library", version.ref = "hamcrest" }
+hamcrest-all = { module = "org.hamcrest:hamcrest-all", version = "1.3" }
 jgit = "org.eclipse.jgit:org.eclipse.jgit:3.5.0.201409260305-r"
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 mockito = "org.mockito:mockito-core:4.3.1"
+xmlunit-assertj3 = { module = "org.xmlunit:xmlunit-assertj3", version = "2.9.0" }
 
 [bundles]
 hamcrest = ["hamcrest-core", "hamcrest-library"]

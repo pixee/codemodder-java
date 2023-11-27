@@ -13,13 +13,14 @@ import javax.inject.Inject;
 /** Fixes issues reported under the id "java/stack-trace-exposure" */
 @Codemod(
     id = "codeql:java/stack-trace-exposure",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    executionPriority = CodemodExecutionPriority.HIGH)
 public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expression> {
 
   @Inject
   public StackTraceExposureCodemod(
       @ProvidedCodeQLScan(ruleId = "java/stack-trace-exposure") final RuleSarif sarif) {
-    super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
+    super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
   @Override

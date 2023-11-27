@@ -1,14 +1,82 @@
 package io.codemodder.plugins.maven.operator;
 
 import com.github.zafarkhaja.semver.Version;
+import io.codemodder.DependencyGAV;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
+import org.dom4j.DocumentException;
+import org.jetbrains.annotations.NotNull;
 
 /** Facade for the POM Operator, providing methods for modifying and querying POM files. */
 public class POMOperator {
+  private final POMScanner pomScanner;
+
+  public POMOperator(final Path pomFile, final Path projectDir) {
+    this.pomScanner = new POMScanner(pomFile, projectDir);
+  }
+
+  public POMScanner getPomScanner() {
+    return pomScanner;
+  }
+
+  /**
+   * Modifies and retrieves the ProjectModel with a new dependency.
+   *
+   * @param newDependencyGAV The new DependencyGAV to add to the POM.
+   * @return The modified ProjectModel, or null if the modification was unsuccessful.
+   * @throws XMLStreamException If an error occurs during XML stream processing.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws IOException If an I/O error occurs.
+   * @throws DocumentException If an error occurs while parsing the document.
+   */
+  public ProjectModel addDependency(final DependencyGAV newDependencyGAV)
+      throws XMLStreamException, URISyntaxException, IOException, DocumentException {
+    final Dependency newDependency = new Dependency(newDependencyGAV);
+    final ProjectModel projectModel =
+        pomScanner
+            .scanFrom()
+            .withDependency(newDependency)
+            .withSkipIfNewer(true)
+            .withUseProperties(true)
+            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions())
+            .build();
+
+    return modify(projectModel) ? projectModel : null;
+  }
+
+  /**
+   * Retrieves all found dependencies in the POM.
+   *
+   * @return A collection of DependencyGAV objects representing the found dependencies.
+   * @throws DocumentException If an error occurs while parsing the document.
+   * @throws IOException If an I/O error occurs.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws XMLStreamException If an error occurs during XML stream processing.
+   */
+  @NotNull
+  public Collection<DependencyGAV> getAllFoundDependencies()
+      throws DocumentException, IOException, URISyntaxException, XMLStreamException {
+
+    final ProjectModel originalProjectModel =
+        pomScanner
+            .scanFrom()
+            .withSafeQueryType()
+            .withRepositoryPath(FileUtils.createTempDirectoryWithPermissions())
+            .build();
+
+    final Collection<Dependency> foundDependencies = queryDependency(originalProjectModel);
+
+    return foundDependencies.stream()
+        .map(
+            dependency ->
+                DependencyGAV.createDefault(
+                    dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()))
+        .toList();
+  }
 
   /**
    * Bump a Dependency Version on a POM.
@@ -19,9 +87,37 @@ public class POMOperator {
    * @throws IOException If an I/O error occurs.
    * @throws XMLStreamException If an error occurs while handling XML streams.
    */
-  public static boolean modify(ProjectModel projectModel)
+  static boolean modify(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
-    return CommandChain.createForModify().execute(projectModel);
+    return CommandChain.modifyDependency().execute(projectModel);
+  }
+
+  /**
+   * Method to insert only a dependency onto a POM
+   *
+   * @param projectModel Project Model (Context) class
+   * @return true if the modification was successful; otherwise, false.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws IOException If an I/O error occurs.
+   * @throws XMLStreamException If an error occurs while handling XML streams.
+   */
+  static boolean insertOnly(ProjectModel projectModel)
+      throws URISyntaxException, IOException, XMLStreamException {
+    return CommandChain.insertDependency().execute(projectModel);
+  }
+
+  /**
+   * Method to update only a dependency (its version) onto a POM
+   *
+   * @param projectModel Project Model (Context) class
+   * @return true if the modification was successful; otherwise, false.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws IOException If an I/O error occurs.
+   * @throws XMLStreamException If an error occurs while handling XML streams.
+   */
+  static boolean updateOnly(ProjectModel projectModel)
+      throws URISyntaxException, IOException, XMLStreamException {
+    return CommandChain.updateDependency().execute(projectModel);
   }
 
   /**
@@ -33,7 +129,7 @@ public class POMOperator {
    * @throws IOException If an I/O error occurs.
    * @throws XMLStreamException If an error occurs while handling XML streams.
    */
-  public static Collection<Dependency> queryDependency(ProjectModel projectModel)
+  static Collection<Dependency> queryDependency(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     return queryDependency(projectModel, Collections.emptyList());
   }
@@ -48,7 +144,7 @@ public class POMOperator {
    * @throws IOException If an I/O error occurs.
    * @throws XMLStreamException If an error occurs while handling XML streams.
    */
-  public static Optional<VersionQueryResponse> queryVersions(ProjectModel projectModel)
+  static Optional<VersionQueryResponse> queryVersions(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     Set<VersionDefinition> queryVersionResult =
         queryVersions(projectModel, Collections.emptyList());
@@ -109,7 +205,7 @@ public class POMOperator {
    * @param version The version string to map.
    * @return the mapped semantic version.
    */
-  public static Version mapVersion(String version) {
+  private static Version mapVersion(String version) {
     String fixedVersion = version + (version.startsWith("1.") ? ".0" : ".0.0");
     return Version.valueOf(fixedVersion);
   }

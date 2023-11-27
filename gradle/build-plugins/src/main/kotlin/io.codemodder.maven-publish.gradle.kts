@@ -31,14 +31,6 @@ signing {
 }
 
 publishing {
-    repositories {
-        maven {
-            name = "pixeeArtifactory"
-            url = uri("https://pixee.jfrog.io/artifactory/default-maven-virtual")
-            credentials(PasswordCredentials::class)
-        }
-    }
-
     publications {
         named<MavenPublication>(publicationName) {
             versionMapping {
@@ -50,10 +42,12 @@ publishing {
                 }
             }
             pom {
-                licenses {
-                    license {
-                        name.set("GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (AGPL-3.0)")
-                        url.set("https://opensource.org/licenses/AGPL-3.0")
+                if (!pluginManager.hasPlugin("com.netflix.nebula.maven-apache-license")) {
+                    licenses {
+                        license {
+                            name.set("GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (AGPL-3.0)")
+                            url.set("https://opensource.org/licenses/AGPL-3.0")
+                        }
                     }
                 }
                 val scmHost = "github.com"

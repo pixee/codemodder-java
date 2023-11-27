@@ -1,10 +1,14 @@
 package io.codemodder.plugins.maven.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,8 +17,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.hamcrest.MatcherAssert;
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,29 +28,40 @@ final class POMOperatorTest extends AbstractTestBase {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
 
+  /**
+   * Tests the behavior with a broken POM.
+   *
+   * <p>Expects a {@code DocumentException} to be thrown when attempting to modify a broken POM.
+   */
   @Test
-  void testWithBrokenPom() {
-    Assertions.assertThrows(
-        DocumentException.class,
-        () -> {
-          gwt(
-              "broken-pom",
-              ProjectModelFactory.load(POMOperatorTest.class.getResource("broken-pom.xml"))
-                  .withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3")));
-        });
+  void modify_expects_document_exception_for_broken_pom() {
+    assertThatThrownBy(
+            () -> {
+              performAndAssertModifyPomOperation(
+                  "broken-pom",
+                  ProjectModelFactory.load(POMOperatorTest.class.getResource("broken-pom.xml"))
+                      .withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3")));
+            })
+        .isInstanceOf(DocumentException.class);
   }
 
+  /**
+   * Tests modification with multiple dependencies and validates the resultant POM.
+   *
+   * <p>This test adds multiple dependencies to a POM, writes it to a temporary file, performs
+   * modifications, and validates the resulting POM's contents and structure.
+   */
   @Test
-  void testWithMultipleDependencies() throws Exception {
+  void modify_with_multiples_dependencies_successfully() throws Exception {
     List<Dependency> deps = new ArrayList<>();
     deps.add(Dependency.fromString("org.slf4j:slf4j-api:1.7.25"));
     deps.add(Dependency.fromString("io.github.pixee:java-code-security-toolkit:1.0.2"));
     deps.add(Dependency.fromString("org.owasp.encoder:encoder:1.2.3"));
 
-    File testPom = File.createTempFile("pom", ".xml");
+    Path testPomPath = Files.createTempFile("pom", ".xml");
 
     try (InputStream inputStream = POMOperatorTest.class.getResourceAsStream("sample-bad-pom.xml");
-        OutputStream outputStream = new FileOutputStream(testPom)) {
+        OutputStream outputStream = Files.newOutputStream(testPomPath)) {
       byte[] buffer = new byte[1024];
       int bytesRead;
       while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -59,15 +72,15 @@ final class POMOperatorTest extends AbstractTestBase {
     for (Dependency d : deps) {
 
       ProjectModel projectModelFactory =
-          ProjectModelFactory.load(testPom)
+          ProjectModelFactory.load(testPomPath)
               .withDependency(d)
               .withUseProperties(true)
               .withOverrideIfAlreadyExists(true)
               .build();
 
       if (POMOperator.modify(projectModelFactory)) {
-        Assert.assertTrue(
-            "Original POM File is Dirty", projectModelFactory.getPomFile().getDirty());
+        // "Original POM File is Dirty"
+        assertThat(projectModelFactory.getPomFile().getDirty()).isTrue();
 
         String resultPomAsXml =
             new String(
@@ -75,7 +88,7 @@ final class POMOperatorTest extends AbstractTestBase {
 
         LOGGER.debug("resultPomAsXml: {}", resultPomAsXml);
 
-        try (FileOutputStream outputStream = new FileOutputStream(testPom)) {
+        try (OutputStream outputStream = Files.newOutputStream(testPomPath)) {
           outputStream.write(projectModelFactory.getPomFile().getResultPomBytes());
         } catch (IOException e) {
           // Handle the IOException
@@ -88,64 +101,80 @@ final class POMOperatorTest extends AbstractTestBase {
 
     Collection<Dependency> resolvedDeps =
         POMOperator.queryDependency(
-            ProjectModelFactory.load(testPom).withQueryType(QueryType.SAFE).build());
+            ProjectModelFactory.load(testPomPath).withSafeQueryType().build());
 
-    String testPomContents =
-        new String(Files.readAllBytes(testPom.toPath()), Charset.defaultCharset());
+    String testPomContents = new String(Files.readAllBytes(testPomPath), Charset.defaultCharset());
 
-    Assert.assertTrue("Must have three dependencies", 3 == resolvedDeps.size());
-    Assert.assertTrue("Must have a comment inside", testPomContents.contains("<!--"));
-    Assert.assertTrue(
-        "Must have a formatted attribute spanning a whole line inside",
-        testPomContents.contains(
-            "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"));
+    // "Must have three dependencies"
+    assertThat(resolvedDeps.size()).isEqualTo(3);
+    // "Must have a comment inside"
+    assertThat(testPomContents).contains("<!--");
+    // "Must have a formatted attribute spanning a whole line inside"
+    assertThat(testPomContents)
+        .contains(
+            "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n");
   }
 
+  /**
+   * Tests modification with a missing dependency.
+   *
+   * <p>Expects a {@code MissingDependencyException} to be thrown when attempting to modify a POM
+   * with a missing dependency.
+   */
   @Test
-  void testWithDependencyMissing() {
-    Assertions.assertThrows(
-        MissingDependencyException.class,
-        () -> {
-          gwt(
-              "case-dependency-missing",
-              ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-1.xml")));
-        });
+  void modify_throws_missing_dependency_exception() {
+    assertThatThrownBy(
+            () -> {
+              performAndAssertModifyPomOperation(
+                  "case-dependency-missing",
+                  ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-1.xml")));
+            })
+        .isInstanceOf(MissingDependencyException.class);
   }
 
+  /**
+   * Tests a specific scenario (Case One) without any dependency and validates the resultant POM.
+   *
+   * <p>This test applies modifications related to a specific case and validates the resulting POM
+   * structure and content changes.
+   */
   @Test
-  void testCaseOne() throws Exception {
+  void modify_adds_dependencies_to_pom_without_dependencies() throws Exception {
 
     ProjectModelFactory projectModelFactory =
         ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-1.xml"))
             .withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3"));
-    ProjectModel context = gwt("case-1", projectModelFactory);
+    ProjectModel context = performAndAssertModifyPomOperation("case-1", projectModelFactory);
 
-    Assert.assertTrue("Original POM File is Dirty", context.getPomFile().getDirty());
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isTrue();
 
     Diff diff =
         getXmlDifferences(
             context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
 
-    Assert.assertTrue("Document has differences", diff.hasDifferences());
+    // "Document has differences"
+    assertThat(diff.hasDifferences()).isTrue();
 
     String textDiff =
         (String)
             getTextDifferences(
                 context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
 
-    System.out.println("textDiff: " + textDiff);
-
-    Assert.assertTrue(
-        "diff contains a <dependencyManagement> tag", textDiff.contains("<dependencyManagement>"));
-    Assert.assertTrue("diff contains a <dependency> tag", textDiff.contains("<dependency>"));
-
-    Document effectivePom = UtilForTests.getEffectivePom(context);
-
-    System.out.println("effectivePom: " + effectivePom.asXML());
+    // "diff contains a <dependencyManagement> tag"
+    assertThat(textDiff).contains("<dependencyManagement>");
+    // "diff contains a <dependency> tag"
+    assertThat(textDiff).contains("<dependency>");
   }
 
+  /**
+   * Updates version to existing dependency and validates the resultant POM.
+   *
+   * <p>This test applies modifications related to a specific case and validates the resulting POM
+   * structure and content changes.
+   */
   @Test
-  void testCaseThree() throws Exception {
+  void modify_downgrades_dependency_version_successfully() throws Exception {
     Dependency dependencyToUpgradeOnCaseThree =
         new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
 
@@ -153,15 +182,19 @@ final class POMOperatorTest extends AbstractTestBase {
         ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-3.xml"))
             .withDependency(dependencyToUpgradeOnCaseThree)
             .withSkipIfNewer(false);
-    ProjectModel context = gwt("case-3", projectModelFactory);
+    ProjectModel context = performAndAssertModifyPomOperation("case-3", projectModelFactory);
 
     Diff diff =
         getXmlDifferences(
             context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
 
-    Assert.assertTrue("Original POM File is Dirty", context.getPomFile().getDirty());
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isTrue();
+    ;
 
-    Assert.assertTrue("Document has differences", diff.hasDifferences());
+    // "Document has differences"
+    assertThat(diff.hasDifferences()).isTrue();
+    ;
 
     Iterable<Difference> differences = diff.getDifferences();
     List<Difference> differenceList = new ArrayList<>();
@@ -169,26 +202,31 @@ final class POMOperatorTest extends AbstractTestBase {
       differenceList.add(difference);
     }
 
-    Assert.assertEquals("Document has a single difference", 1, differenceList.size());
+    // "Document has a single difference"
+    assertThat(differenceList.size()).isOne();
 
     Difference difference = diff.getDifferences().iterator().next();
-    Assert.assertEquals(
-        "Document has different versions",
-        ComparisonType.TEXT_VALUE,
-        difference.getComparison().getType());
-    Assert.assertEquals(
-        "Document has changed version set to " + dependencyToUpgradeOnCaseThree.getVersion(),
-        dependencyToUpgradeOnCaseThree.getVersion(),
-        difference.getComparison().getTestDetails().getValue());
+
+    // "Document has different versions"
+    assertThat(ComparisonType.TEXT_VALUE).isEqualTo(difference.getComparison().getType());
+    // "Document has changed version set to " + dependencyToUpgradeOnCaseThree.getVersion()
+    assertThat(dependencyToUpgradeOnCaseThree.getVersion())
+        .isEqualTo(difference.getComparison().getTestDetails().getValue());
   }
 
+  /**
+   * It keeps the same version since it is newer than the one to add
+   *
+   * <p>This test applies modifications related to a specific case with a lower version and
+   * validates the resulting POM structure and content changes.
+   */
   @Test
-  void testCaseThreeButWithLowerVersion() throws Exception {
+  void modify_does_not_downgrade_version_because_keeps_newer() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "pom-case-three-with-lower-version",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-3.xml"))
                 .withDependency(dependencyToUpgrade)
@@ -198,12 +236,20 @@ final class POMOperatorTest extends AbstractTestBase {
         getXmlDifferences(
             context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
 
-    Assert.assertFalse("Document has no differences", diff.hasDifferences());
-    Assert.assertFalse("Original POM File is not Dirty", context.getPomFile().getDirty());
+    // "Document has no differences"
+    assertThat(diff.hasDifferences()).isFalse();
+    // "Original POM File is not Dirty"
+    assertThat(context.getPomFile().getDirty()).isFalse();
   }
 
+  /**
+   * It installs POM file and modify adds a new dependency
+   *
+   * <p>This test applies modifications related to a specific case and validates the resulting POM
+   * structure, content changes, and dependencies.
+   */
   @Test
-  void testCase4() throws Exception {
+  void installs_pom_and_modify_adds_new_dependency() throws Exception {
     File pomPath = new File(POMOperatorTest.class.getResource("webgoat-parent.xml").toURI());
 
     List<String> args = new ArrayList<>();
@@ -223,13 +269,14 @@ final class POMOperatorTest extends AbstractTestBase {
     ProcessBuilder processBuilder = new ProcessBuilder(args.toArray(new String[0]));
     int exitCode = processBuilder.start().waitFor();
 
-    Assert.assertEquals("POM install was successful", 0, exitCode);
+    // "POM install was successful"
+    assertThat(exitCode).isZero();
 
     Dependency dependencyToUpgrade =
         new Dependency("org.apache.activemq", "activemq-amqp", "5.16.2", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "case-4",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-4.xml"))
                 .withDependency(dependencyToUpgrade));
@@ -238,86 +285,112 @@ final class POMOperatorTest extends AbstractTestBase {
         getXmlDifferences(
             context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
 
-    Assert.assertTrue("Document has differences", diff.hasDifferences());
-    Assert.assertTrue("Original POM File is Dirty", context.getPomFile().getDirty());
+    // "Document has differences"
+    assertThat(diff.hasDifferences()).isTrue();
+    ;
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isTrue();
+    ;
 
-    Document effectivePom = UtilForTests.getEffectivePom(context);
+    Document effectivePom = POMTestHelper.getEffectivePom(context);
 
-    Assert.assertFalse(
-        "Dependencies Section did change",
-        Util.selectXPathNodes(
-                effectivePom, Util.buildLookupExpressionForDependency(dependencyToUpgrade))
-            .isEmpty());
+    // "Dependencies Section did change"
+    assertThat(
+            Util.selectXPathNodes(
+                effectivePom, Util.buildLookupExpressionForDependency(dependencyToUpgrade)))
+        .isNotEmpty();
   }
 
+  /**
+   * Modify adds a dependency in a scenario with an empty element (<email />) and validates the
+   * resultant POM structure.
+   *
+   * <p>This test applies modifications related to an empty element scenario and validates the
+   * resulting POM structure.
+   */
   @Test
-  void testCaseWithEmptyElement() throws Exception {
+  void modify_adds_dependency_to_pom_with_email_empty_element_successfully() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "case-5",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-5.xml"))
                 .withDependency(dependencyToUpgrade)
                 .withUseProperties(true));
 
-    Assert.assertTrue("Original POM File is Dirty", context.getPomFile().getDirty());
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isTrue();
+    ;
 
     String resultPomAsString = new String(context.getPomFile().getResultPomBytes());
 
-    Assert.assertTrue(
-        "There must be an unformatted preamble first line",
-        resultPomAsString.contains("<project\n"));
+    // "There must be an unformatted preamble first line"
+    assertThat(resultPomAsString).contains("<project\n");
 
-    Assert.assertTrue(
-        "There must be an unformatted preamble last line",
-        resultPomAsString.contains(
-            "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">"));
+    // "There must be an unformatted preamble last line"
+    assertThat(resultPomAsString)
+        .contains(
+            "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">");
 
-    Assert.assertTrue(
-        "There must be a dumb empty element", resultPomAsString.contains("<email></email>"));
+    // "There must be a dumb empty element"
+    assertThat(resultPomAsString).contains("<email></email>");
 
-    Assert.assertTrue(
-        "There must be an empty element with zero spaces", resultPomAsString.contains("<email/>"));
-    Assert.assertTrue(
-        "There must be an empty element with one space", resultPomAsString.contains("<email />"));
+    // "There must be an empty element with zero spaces"
+    assertThat(resultPomAsString).contains("<email/>");
+    // "There must be an empty element with one space"
+    assertThat(resultPomAsString).contains("<email />");
   }
 
+  /**
+   * Tests a scenario with an empty element hidden in a comment and validates the resultant POM
+   * structure.
+   *
+   * <p>This test applies modifications related to an empty element hidden within a comment and
+   * validates the resulting POM structure.
+   */
   @Test
-  void testCaseWithEmptyElementHiddenInComment() throws Exception {
+  void modify_add_dependency_to_pom_with_comments_inside() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "case-6",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-6.xml"))
                 .withDependency(dependencyToUpgrade)
                 .withUseProperties(true));
 
-    Assert.assertTrue("Original POM File is Dirty", context.getPomFile().getDirty());
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isTrue();
+    ;
 
     String resultPomAsString = new String(context.getPomFile().getResultPomBytes());
 
-    Assert.assertTrue(
-        "There must be a dumb empty element", resultPomAsString.contains("<email></email>"));
-    Assert.assertTrue(
-        "There must be an empty element with zero spaces", resultPomAsString.contains("<email/>"));
-    Assert.assertTrue(
-        "There must be an empty element with one space", resultPomAsString.contains("<email />"));
-    Assert.assertTrue(
-        "There must be an empty element with three spaces inside a comment",
-        resultPomAsString.contains("<email   /> -->"));
+    // "There must be a dumb empty element"
+    assertThat(resultPomAsString).contains("<email></email>");
+    // "There must be an empty element with zero spaces"
+    assertThat(resultPomAsString).contains("<email/>");
+    // "There must be an empty element with one space"
+    assertThat(resultPomAsString).contains("<email />");
+    // "There must be an empty element with three spaces inside a comment"
+    assertThat(resultPomAsString).contains("<email   /> -->");
   }
 
+  /**
+   * Tests a scenario with a property change and validates the resultant POM structure.
+   *
+   * <p>This test applies modifications related to a property change and validates the resulting POM
+   * structure.
+   */
   @Test
-  void testCaseWithProperty() throws Exception {
+  void modify_updates_version_in_properties_successfully() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "case-with-property",
             ProjectModelFactory.load(
                     POMOperatorTest.class.getResource("pom-with-property-simple.xml"))
@@ -325,86 +398,98 @@ final class POMOperatorTest extends AbstractTestBase {
                 .withUseProperties(true)
                 .withSkipIfNewer(true));
 
-    Assert.assertTrue("Original POM File is Dirty", context.getPomFile().getDirty());
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isTrue();
+    ;
 
     Diff diff =
         getXmlDifferences(
             context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
 
-    Assert.assertTrue("Document has differences", diff.hasDifferences());
+    // "Document has differences"
+    assertThat(diff.hasDifferences()).isTrue();
+    ;
 
     List<Difference> differenceList = new ArrayList<>();
     for (Difference difference : diff.getDifferences()) {
       differenceList.add(difference);
     }
 
-    Assert.assertEquals("Document has one difference", 1, differenceList.size());
+    assertThat(differenceList.size()).isOne();
 
-    Assert.assertTrue(
-        "Document changes a single version",
-        differenceList
-            .get(0)
-            .toString()
-            .startsWith("Expected text value '0.0.1-SNAPSHOT' but was '1.0.0'"));
+    // "Document changes a single version"
+    assertThat(differenceList.get(0).toString())
+        .startsWith("Expected text value '0.0.1-SNAPSHOT' but was '1.0.0'");
 
-    Assert.assertEquals(
-        "Document changes a property called 'sample.version'",
-        differenceList.get(0).getComparison().getTestDetails().getXPath(),
-        "/project[1]/properties[1]/sample.version[1]/text()[1]");
+    // "Document changes a property called 'sample.version'"
+    assertThat(differenceList.get(0).getComparison().getTestDetails().getXPath())
+        .isEqualTo("/project[1]/properties[1]/sample.version[1]/text()[1]");
   }
 
+  /**
+   * Tests a scenario where a property is defined twice, expecting an {@code IllegalStateException}.
+   *
+   * <p>This test verifies the behavior when a property is defined twice in the POM and expects an
+   * {@code IllegalStateException} to be thrown.
+   */
   @Test
-  void testCaseWithPropertyDefinedTwice() {
-    Assertions.assertThrows(
-        IllegalStateException.class,
-        () -> {
-          Dependency dependencyToUpgrade =
-              new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
+  void modify_throws_exception_when_dependency_is_defined_twice() {
+    assertThatThrownBy(
+            () -> {
+              Dependency dependencyToUpgrade =
+                  new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
 
-          String originalPom =
-              "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                  + "<project\n"
-                  + "        xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
-                  + "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-                  + "        xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
-                  + "    <modelVersion>4.0.0</modelVersion>\n"
-                  + "\n"
-                  + "    <groupId>br.com.ingenieux</groupId>\n"
-                  + "    <artifactId>pom-operator</artifactId>\n"
-                  + "    <version>0.0.1-SNAPSHOT</version>\n"
-                  + "\n"
-                  + "    <properties>\n"
-                  + "      <dom4j.version>0.0.1</dom4j.version>\n"
-                  + "    </properties>\n"
-                  + "\n"
-                  + "    <dependencies>\n"
-                  + "        <dependency>\n"
-                  + "            <groupId>org.dom4j</groupId>\n"
-                  + "            <artifactId>dom4j</artifactId>\n"
-                  + "            <version>${dom4j.version}</version>\n"
-                  + "        </dependency>\n"
-                  + "        <dependency>\n"
-                  + "            <groupId>org.dom4j</groupId>\n"
-                  + "            <artifactId>dom4j-other</artifactId>\n"
-                  + "            <version>${dom4j.version}</version>\n"
-                  + "        </dependency>\n"
-                  + "    </dependencies>\n"
-                  + "</project>";
+              String originalPom =
+                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                      + "<project\n"
+                      + "        xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
+                      + "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+                      + "        xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
+                      + "    <modelVersion>4.0.0</modelVersion>\n"
+                      + "\n"
+                      + "    <groupId>br.com.ingenieux</groupId>\n"
+                      + "    <artifactId>pom-operator</artifactId>\n"
+                      + "    <version>0.0.1-SNAPSHOT</version>\n"
+                      + "\n"
+                      + "    <properties>\n"
+                      + "      <dom4j.version>0.0.1</dom4j.version>\n"
+                      + "    </properties>\n"
+                      + "\n"
+                      + "    <dependencies>\n"
+                      + "        <dependency>\n"
+                      + "            <groupId>org.dom4j</groupId>\n"
+                      + "            <artifactId>dom4j</artifactId>\n"
+                      + "            <version>${dom4j.version}</version>\n"
+                      + "        </dependency>\n"
+                      + "        <dependency>\n"
+                      + "            <groupId>org.dom4j</groupId>\n"
+                      + "            <artifactId>dom4j-other</artifactId>\n"
+                      + "            <version>${dom4j.version}</version>\n"
+                      + "        </dependency>\n"
+                      + "    </dependencies>\n"
+                      + "</project>";
 
-          ProjectModel context =
-              ProjectModelFactory.load(
-                      new ByteArrayInputStream(originalPom.getBytes(StandardCharsets.UTF_8)))
-                  .withDependency(dependencyToUpgrade)
-                  .withUseProperties(true)
-                  .withOverrideIfAlreadyExists(false)
-                  .build();
+              ProjectModel context =
+                  ProjectModelFactory.load(
+                          new ByteArrayInputStream(originalPom.getBytes(StandardCharsets.UTF_8)))
+                      .withDependency(dependencyToUpgrade)
+                      .withUseProperties(true)
+                      .withOverrideIfAlreadyExists(false)
+                      .build();
 
-          POMOperator.modify(context);
-        });
+              POMOperator.modify(context);
+            })
+        .isInstanceOf(IllegalStateException.class);
   }
 
+  /**
+   * Tests a scenario without a property but defining one, expecting differences in the POM.
+   *
+   * <p>This test verifies the behavior when a property is missing but defined, expecting
+   * differences in the POM structure.
+   */
   @Test
-  void testCaseWithoutPropertyButDefiningOne()
+  void modify_creates_properties_and_adds_version_successfully()
       throws XMLStreamException, URISyntaxException, IOException, DocumentException {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
@@ -439,7 +524,7 @@ final class POMOperatorTest extends AbstractTestBase {
 
     POMOperator.modify(context);
 
-    Assert.assertTrue(context.getPomFile().getDirty());
+    //    assertThat(context.getPomFile().getDirty()).isTrue();
 
     Document originalDocument = context.getPomFile().getPomDocument();
     Document modifiedDocument = context.getPomFile().getResultPom();
@@ -457,8 +542,14 @@ final class POMOperatorTest extends AbstractTestBase {
     MatcherAssert.assertThat("Document has several differences", differenceList.size() > 1);
   }
 
+  /**
+   * Tests a scenario with a file containing tabs, ensuring proper handling of tab-based formatting.
+   *
+   * <p>This test verifies the behavior when the POM contains tab-based formatting, ensuring proper
+   * handling and expected tab-based structure.
+   */
   @Test
-  void testFileWithTabs()
+  void modify_adds_dependency_to_file_with_tabs()
       throws XMLStreamException, URISyntaxException, IOException, DocumentException {
     Dependency dependencyToUpgrade =
         new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
@@ -476,7 +567,7 @@ final class POMOperatorTest extends AbstractTestBase {
 
     POMOperator.modify(context);
 
-    Assert.assertTrue(context.getPomFile().getDirty());
+    assertThat(context.getPomFile().getDirty()).isTrue();
 
     String resultPom =
         new String(context.getPomFile().getResultPomBytes(), Charset.defaultCharset());
@@ -484,40 +575,250 @@ final class POMOperatorTest extends AbstractTestBase {
     // aldrin: uncomment this to check out formatting - useful for the next section
     // System.out.println(resultPom);
 
-    Assert.assertTrue(
-        "Document should have a tab-based string",
-        resultPom.contains(
-            "\n\t\t<dependency>\n\t\t\t<groupId>org.dom4j</groupId>\n\t\t\t<artifactId>dom4j</artifactId>\n\t\t</dependency>\n"));
+    // "Document should have a tab-based string"
+    assertThat(resultPom)
+        .contains(
+            "\n\t\t<dependency>\n\t\t\t<groupId>org.dom4j</groupId>\n\t\t\t<artifactId>dom4j</artifactId>\n\t\t</dependency>\n");
   }
 
+  /**
+   * Tests a scenario with an empty element from a customer's POM file and validates the resultant
+   * POM.
+   *
+   * <p>This test applies modifications related to an empty element from a customer's POM and
+   * validates the resulting POM structure.
+   */
   @Test
-  void testCaseWithEmptyElementFromCustomer() throws Exception {
+  void modify_adds_dependency_to_pom_with_empty_elements_from_customer() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
 
     ProjectModel context =
-        gwt(
+        performAndAssertModifyPomOperation(
             "hack23-cia",
             ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-hack23-cia.xml"))
                 .withDependency(dependencyToUpgrade)
                 .withUseProperties(true));
 
-    Assert.assertTrue(context.getPomFile().getDirty());
+    assertThat(context.getPomFile().getDirty()).isTrue();
 
     String resultPomAsString = new String(context.getPomFile().getResultPomBytes());
 
-    Assert.assertTrue(
-        "There must be an untouched empty element",
-        resultPomAsString.contains("<sonar.zaproxy.reportPath></sonar.zaproxy.reportPath>"));
+    // "There must be an untouched empty element"
+    assertThat(resultPomAsString).contains("<sonar.zaproxy.reportPath></sonar.zaproxy.reportPath>");
 
-    Assert.assertTrue(
-        "There must be an untouched element with attributes",
-        resultPomAsString.contains(
-            "<mkdir dir=\"${project.build.directory}/dependency\"></mkdir>"));
+    // "There must be an untouched element with attributes"
+    assertThat(resultPomAsString)
+        .contains("<mkdir dir=\"${project.build.directory}/dependency\"></mkdir>");
 
-    Assert.assertTrue(
-        "The <DependencyConvergence> tag must be untouched by test.",
-        resultPomAsString.contains(
-            "                <DependencyConvergence></DependencyConvergence>"));
+    // "The <DependencyConvergence> tag must be untouched by test."
+    assertThat(resultPomAsString)
+        .contains("                <DependencyConvergence></DependencyConvergence>");
+  }
+
+  /**
+   * Tests the scenario where an insert operation should fail due to an existing dependency.
+   *
+   * <p>This test verifies the behavior when attempting to insert a dependency that already exists,
+   * expecting a failure scenario.
+   */
+  @Test
+  void insert_should_fail_because_dependency_exists() throws Exception {
+    Dependency dependencyToUpgrade =
+        new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
+
+    ProjectModel context =
+        performAndAssertInsertPomOperation(
+            "pom-case-3-insert-fails",
+            ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-3.xml"))
+                .withDependency(dependencyToUpgrade)
+                .withSkipIfNewer(true));
+
+    assertThat(context.getPomFile().getDirty()).isFalse();
+
+    List<Dependency> resolvedDeps =
+        POMOperator.queryDependency(
+                ProjectModelFactory.load(
+                        POMOperatorTest.class.getResource("pom-pom-case-3-insert-fails-result.xml"))
+                    .withSafeQueryType()
+                    .build())
+            .stream()
+            .toList();
+
+    final List<Dependency> dom4jDependency =
+        resolvedDeps.stream()
+            .filter(dependency -> dependency.matchesWithoutConsideringVersion(dependencyToUpgrade))
+            .toList();
+
+    assertThat(dom4jDependency.size()).isOne();
+    // "dependency doesn't match because of version"
+    assertThat(dom4jDependency.get(0)).isNotEqualTo(dependencyToUpgrade);
+  }
+
+  /**
+   * Tests the scenario where an insert operation performs successfully.
+   *
+   * <p>This test verifies the successful insertion of a dependency into the POM.
+   */
+  @Test
+  void insert_should_perform_gracefully() throws Exception {
+    Dependency dependencyToUpgrade =
+        new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
+
+    ProjectModel context =
+        performAndAssertInsertPomOperation(
+            "inserts-dependency",
+            ProjectModelFactory.load(
+                    POMOperatorTest.class.getResource("pom-without-dependencies.xml"))
+                .withDependency(dependencyToUpgrade)
+                .withUseProperties(true)
+                .withSkipIfNewer(true));
+
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isTrue();
+    ;
+
+    List<Dependency> resolvedDeps =
+        POMOperator.queryDependency(
+                ProjectModelFactory.load(
+                        POMOperatorTest.class.getResource("pom-inserts-dependency-result.xml"))
+                    .withSafeQueryType()
+                    .build())
+            .stream()
+            .toList();
+
+    assertThat(resolvedDeps.size()).isOne();
+    assertThat(resolvedDeps.get(0)).isEqualTo(dependencyToUpgrade);
+  }
+
+  /** Update method downgrades dependency version */
+  @Test
+  void update_downgrades_dependency_version_successfully() throws Exception {
+    Dependency dependencyToUpgradeOnCaseThree =
+        new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
+
+    ProjectModelFactory projectModelFactory =
+        ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-3.xml"))
+            .withDependency(dependencyToUpgradeOnCaseThree)
+            .withSkipIfNewer(false);
+    ProjectModel context = performAndAssertUpdatePomOperation("case-3-update", projectModelFactory);
+
+    Diff diff =
+        getXmlDifferences(
+            context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
+
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isTrue();
+
+    // "Document has differences"
+    assertThat(diff.hasDifferences()).isTrue();
+
+    Iterable<Difference> differences = diff.getDifferences();
+    List<Difference> differenceList = new ArrayList<>();
+    for (Difference difference : differences) {
+      differenceList.add(difference);
+    }
+
+    // "Document has a single difference"
+    assertThat(differenceList.size()).isOne();
+
+    Difference difference = diff.getDifferences().iterator().next();
+
+    // "Document has different versions"
+    assertThat(ComparisonType.TEXT_VALUE).isEqualTo(difference.getComparison().getType());
+    // "Document has changed version set to " + dependencyToUpgradeOnCaseThree.getVersion()
+    assertThat(dependencyToUpgradeOnCaseThree.getVersion())
+        .isEqualTo(difference.getComparison().getTestDetails().getValue());
+  }
+
+  /** Update method sets version in properties element */
+  @Test
+  void update_sets_version_in_properties_successfully() throws Exception {
+    Dependency dependencyToUpgrade =
+        new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
+
+    ProjectModel context =
+        performAndAssertUpdatePomOperation(
+            "case-with-property-update",
+            ProjectModelFactory.load(
+                    POMOperatorTest.class.getResource("pom-with-property-simple.xml"))
+                .withDependency(dependencyToUpgrade)
+                .withUseProperties(true)
+                .withSkipIfNewer(true));
+
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isTrue();
+
+    Diff diff =
+        getXmlDifferences(
+            context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
+
+    // "Document has differences"
+    assertThat(diff.hasDifferences()).isTrue();
+
+    List<Difference> differenceList = new ArrayList<>();
+    for (Difference difference : diff.getDifferences()) {
+      differenceList.add(difference);
+    }
+
+    assertThat(differenceList.size()).isOne();
+
+    // "Document changes a single version"
+    assertThat(differenceList.get(0).toString())
+        .startsWith("Expected text value '0.0.1-SNAPSHOT' but was '1.0.0'");
+
+    // "Document changes a property called 'sample.version'"
+    assertThat(differenceList.get(0).getComparison().getTestDetails().getXPath())
+        .isEqualTo("/project[1]/properties[1]/sample.version[1]/text()[1]");
+  }
+
+  /** Update method can't downgrade dependency version because it doesn't exist */
+  @Test
+  void update_fails_to_downgrade_dependency_version() throws Exception {
+    Dependency dependencyToUpgradeOnCaseThree =
+        new Dependency("org.dom4j", "dom4j", "2.0.2", null, null, null);
+
+    ProjectModelFactory projectModelFactory =
+        ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-case-3-no-dependency.xml"))
+            .withDependency(dependencyToUpgradeOnCaseThree)
+            .withSkipIfNewer(false);
+    ProjectModel context =
+        performAndAssertUpdatePomOperation("case-3-no-dependency-update", projectModelFactory);
+
+    Diff diff =
+        getXmlDifferences(
+            context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
+
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isFalse();
+
+    // "Document has differences"
+    assertThat(diff.hasDifferences()).isFalse();
+  }
+
+  /** Update method fails to set version because dependency doesn't exist */
+  @Test
+  void update_fails_set_version_in_properties() throws Exception {
+    Dependency dependencyToUpgrade =
+        new Dependency("org.dom4j", "dom4j", "1.0.0", null, null, null);
+
+    ProjectModel context =
+        performAndAssertUpdatePomOperation(
+            "case-with-property-update-failing",
+            ProjectModelFactory.load(
+                    POMOperatorTest.class.getResource("pom-with-property-update.xml"))
+                .withDependency(dependencyToUpgrade)
+                .withUseProperties(true)
+                .withSkipIfNewer(true));
+
+    // "Original POM File is Dirty"
+    assertThat(context.getPomFile().getDirty()).isFalse();
+
+    Diff diff =
+        getXmlDifferences(
+            context.getPomFile().getPomDocument(), context.getPomFile().getResultPom());
+
+    // "Document has differences"
+    assertThat(diff.hasDifferences()).isFalse();
   }
 }

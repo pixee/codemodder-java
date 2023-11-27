@@ -18,7 +18,8 @@ import javax.inject.Inject;
 @Codemod(
     id =
         "semgrep:java/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission",
-    reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+    executionPriority = CodemodExecutionPriority.HIGH)
 public final class SemgrepOverlyPermissiveFilePermissionsCodemod
     extends CompositeJavaParserChanger {
 

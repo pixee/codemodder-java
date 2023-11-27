@@ -31,7 +31,7 @@ public class UsesImplicitButHasMultipleRules
     super(
         ruleSarif,
         ObjectCreationExpr.class,
-        RegionExtractor.FROM_FIRST_LOCATION,
+        SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION,
         RegionNodeMatcher.EXACT_MATCH,
         CodemodReporterStrategy.empty());
   }
