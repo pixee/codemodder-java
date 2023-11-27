@@ -20,7 +20,7 @@ public final class OutputResourceLeakCodemod extends SarifPluginJavaParserChange
   @Inject
   public OutputResourceLeakCodemod(
       @ProvidedCodeQLScan(ruleId = "java/output-resource-leak") final RuleSarif sarif) {
-    super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
+    super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
   @Override

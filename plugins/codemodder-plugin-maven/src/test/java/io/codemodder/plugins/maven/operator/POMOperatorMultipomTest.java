@@ -22,10 +22,10 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
 
   /**
    * Test case for a scenario where a parent and child project have missing packaging information.
-   * This test checks if an exception of type WrongDependencyTypeException is thrown.
+   * This test checks if an exception of type {@code WrongDependencyTypeException} is thrown.
    */
   @Test
-  void testWithParentAndChildMissingPackaging() {
+  void it_expects_exception_when_parent_and_child_miss_packaging() {
     assertThatThrownBy(
             () -> {
               Path parentResource = getResource("parent-and-child-parent-broken.xml");
@@ -36,7 +36,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
               ProjectModelFactory parentPom =
                   ProjectModelFactory.load(parentResource).withParentPomFiles(parentPomFiles);
 
-              gwt(
+              performAndAssertModifyPomOperation(
                   "parent-and-child",
                   parentPom.withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3")));
             })
@@ -48,7 +48,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
    * test checks if an exception of type WrongDependencyTypeException is thrown.
    */
   @Test
-  void testWithParentAndChildWrongType() {
+  void it_expects_exception_when_parent_and_child_have_wrong_dependency_type() {
     assertThatThrownBy(
             () -> {
               Path parentResource = getResource("parent-and-child-child-broken.xml");
@@ -61,7 +61,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
               ProjectModelFactory parentPom =
                   ProjectModelFactory.load(parentResource).withParentPomFiles(parentPomFiles);
 
-              gwt(
+              performAndAssertModifyPomOperation(
                   "parent-and-child-wrong-type",
                   parentPom.withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3")));
             })
@@ -75,7 +75,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
    * dirty.
    */
   @Test
-  void testWithMultiplePomsBasicNoVersionProperty() throws Exception {
+  void it_handles_multiple_poms_with_no_version() throws Exception {
     Path parentPomFile = getResource("sample-parent/pom.xml");
 
     ProjectModelFactory projectModelFactory =
@@ -84,11 +84,11 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
             .withUseProperties(false);
 
     ProjectModel result =
-        gwt(
+        performAndAssertModifyPomOperation(
             "multiple-pom-basic-no-version-property",
             projectModelFactory.withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3")));
 
-    validateDepsFrom(result);
+    validateProjectModelDependencies(result);
 
     assertThat(result.allPomFiles().size()).isEqualTo(2);
     assertThat(result.allPomFiles().stream().allMatch(POMDocument::isDirty)).isTrue();
@@ -101,7 +101,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
    * as dirty.
    */
   @Test
-  void testWithMultiplePomsBasicWithVersionProperty() throws Exception {
+  void it_handles_multiple_poms_with_version() throws Exception {
     Path parentPomFile = getResource("sample-parent/pom.xml");
 
     Path sampleChild = getResource("sample-child-with-relativepath.xml");
@@ -112,11 +112,11 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
             .withUseProperties(true);
 
     ProjectModel result =
-        gwt(
+        performAndAssertModifyPomOperation(
             "multiple-pom-basic-with-version-property",
             parentPom.withDependency(Dependency.fromString("org.dom4j:dom4j:2.0.3")));
 
-    validateDepsFrom(result);
+    validateProjectModelDependencies(result);
 
     assertThat(result.allPomFiles().size()).isEqualTo(2);
     assertThat(result.allPomFiles().stream().allMatch(POMDocument::isDirty)).isTrue();
@@ -131,7 +131,7 @@ final class POMOperatorMultipomTest extends AbstractTestBase {
     assertThat(pomString).doesNotContain(version);
   }
 
-  void validateDepsFrom(ProjectModel context) throws Exception {
+  void validateProjectModelDependencies(ProjectModel context) throws Exception {
     Map<POMDocument, File> resultFiles = copyFiles(context);
 
     resultFiles

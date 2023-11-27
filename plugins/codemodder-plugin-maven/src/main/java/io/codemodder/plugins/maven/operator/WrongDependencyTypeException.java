@@ -1,6 +1,8 @@
 package io.codemodder.plugins.maven.operator;
 
-/** An exception that indicates a wrong dependency type was encountered. */
+/**
+ * An exception that indicates the packaging type is incorrect for parent POMs or the main POM file.
+ */
 class WrongDependencyTypeException extends RuntimeException {
 
   /**

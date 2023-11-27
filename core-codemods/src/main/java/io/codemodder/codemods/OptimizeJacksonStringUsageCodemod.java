@@ -25,7 +25,10 @@ public final class OptimizeJacksonStringUsageCodemod
   @Inject
   public OptimizeJacksonStringUsageCodemod(
       @SemgrepScan(ruleId = "optimize-jackson-string-usage") RuleSarif semgrepSarif) {
-    super(semgrepSarif, ExpressionStmt.class, RegionExtractor.FROM_FIRST_THREADFLOW_EVENT);
+    super(
+        semgrepSarif,
+        ExpressionStmt.class,
+        SourceCodeRegionExtractor.FROM_SARIF_FIRST_THREADFLOW_EVENT);
   }
 
   /**
@@ -38,8 +41,8 @@ public final class OptimizeJacksonStringUsageCodemod
    *   <li>The resulting String is used nowhere else besides the readValue() call.
    * </ol>
    *
-   * We've configured the {@link RegionExtractor} to pull the first data flow event, which is the
-   * IOUtils#toString() call.
+   * We've configured the {@link SourceCodeRegionExtractor} to pull the first data flow event, which
+   * is the IOUtils#toString() call.
    */
   @Override
   public boolean onResultFound(
@@ -71,7 +74,10 @@ public final class OptimizeJacksonStringUsageCodemod
     Optional<MethodCallExpr> readValueCallOpt =
         ASTs.findMethodBodyFrom(varDeclStmt).get().findAll(ExpressionStmt.class).stream()
             .filter(stmt -> stmt.getRange().isPresent())
-            .filter(stmt -> EXACT_MATCH.matches(lastRegion, stmt.getRange().get()))
+            .filter(
+                stmt ->
+                    EXACT_MATCH.matches(
+                        SourceCodeRegion.fromSarif(lastRegion), stmt.getRange().get()))
             .map(stmt -> stmt.getExpression().asVariableDeclarationExpr())
             .map(vde -> vde.getVariable(0).getInitializer().get().asMethodCallExpr())
             .findFirst();

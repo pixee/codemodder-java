@@ -22,7 +22,7 @@ public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expressio
   @Inject
   public UnverifiedJwtCodemod(
       @ProvidedCodeQLScan(ruleId = "java/missing-jwt-signature-check") final RuleSarif sarif) {
-    super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
+    super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
   private boolean fix(MethodCallExpr parseCall) {

@@ -18,7 +18,7 @@ public final class DisableAutomaticDirContextDeserializationCodemod
   @Inject
   public DisableAutomaticDirContextDeserializationCodemod(
       @SemgrepScan(ruleId = "disable-dircontext-deserialization") final RuleSarif sarif) {
-    super(sarif, ObjectCreationExpr.class, RegionExtractor.FROM_FIRST_LOCATION);
+    super(sarif, ObjectCreationExpr.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
   @Override

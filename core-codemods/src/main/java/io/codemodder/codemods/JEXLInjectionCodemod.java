@@ -39,7 +39,7 @@ public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Exp
   @Inject
   public JEXLInjectionCodemod(
       @ProvidedCodeQLScan(ruleId = "java/jexl-expression-injection") final RuleSarif sarif) {
-    super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
+    super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
   @Override

@@ -20,7 +20,7 @@ public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expr
   @Inject
   public StackTraceExposureCodemod(
       @ProvidedCodeQLScan(ruleId = "java/stack-trace-exposure") final RuleSarif sarif) {
-    super(sarif, Expression.class, RegionExtractor.FROM_FIRST_LOCATION);
+    super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
   @Override

@@ -396,7 +396,8 @@ final class CodemodLoaderTest {
         List.of(),
         Files.list(dir).toList(),
         Map.of(),
-        List.of());
+        List.of(),
+        null);
   }
 
   private CodemodLoader createLoader(
@@ -409,7 +410,8 @@ final class CodemodLoaderTest {
         List.of(),
         Files.list(dir).toList(),
         Map.of(),
-        List.of());
+        List.of(),
+        null);
   }
 
   private CodemodLoader createLoader(
@@ -425,6 +427,7 @@ final class CodemodLoaderTest {
         List.of(),
         Files.list(dir).toList(),
         Map.of(),
-        params);
+        params,
+        null);
   }
 }

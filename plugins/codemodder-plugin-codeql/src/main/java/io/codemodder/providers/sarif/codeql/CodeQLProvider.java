@@ -18,7 +18,8 @@ public final class CodeQLProvider implements CodemodProvider {
       final List<String> includePaths,
       final List<String> excludePaths,
       final List<Class<? extends CodeChanger>> codemodTypes,
-      final List<RuleSarif> sarifs) {
+      final List<RuleSarif> sarifs,
+      final Path sonarIssuesJsonFile) {
     return Set.of(new CodeQLModule(codemodTypes, sarifs));
   }
 
