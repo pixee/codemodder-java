@@ -92,9 +92,32 @@ public class POMOperator {
     return CommandChain.modifyDependency().execute(projectModel);
   }
 
-  static boolean insert(ProjectModel projectModel)
+  /**
+   * Method to insert only a dependency onto a POM
+   *
+   * @param projectModel Project Model (Context) class
+   * @return true if the modification was successful; otherwise, false.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws IOException If an I/O error occurs.
+   * @throws XMLStreamException If an error occurs while handling XML streams.
+   */
+  static boolean insertOnly(ProjectModel projectModel)
       throws URISyntaxException, IOException, XMLStreamException {
     return CommandChain.insertDependency().execute(projectModel);
+  }
+
+  /**
+   * Method to update only a dependency (its version) onto a POM
+   *
+   * @param projectModel Project Model (Context) class
+   * @return true if the modification was successful; otherwise, false.
+   * @throws URISyntaxException If there is an issue with the URI syntax.
+   * @throws IOException If an I/O error occurs.
+   * @throws XMLStreamException If an error occurs while handling XML streams.
+   */
+  static boolean updateOnly(ProjectModel projectModel)
+      throws URISyntaxException, IOException, XMLStreamException {
+    return CommandChain.updateDependency().execute(projectModel);
   }
 
   /**
