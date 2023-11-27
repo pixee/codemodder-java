@@ -1,0 +1,7 @@
+package acme.test;
+
+public class Response {
+  enum Status {
+    SUCCESS, FAILURE, ERROR
+  }
+}
