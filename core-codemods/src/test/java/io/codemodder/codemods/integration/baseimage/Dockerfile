@@ -20,7 +20,7 @@ RUN ln -s /usr/bin/python3 /usr/bin/python && \
     java -version && \
     python --version && \
     gradle --version && \
-    pip install semgrep
+    python3 -m pip install semgrep==1.15.0
 
 # Generate tool executable
 WORKDIR /codemodder-java
