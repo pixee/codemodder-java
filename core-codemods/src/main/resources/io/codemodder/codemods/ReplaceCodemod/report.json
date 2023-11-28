@@ -1,0 +1,7 @@
+{
+  "summary" : "Replace usage of String#replaceAll to String#replace (Sonar)",
+  "change" : "Replace usage of String#replaceAll to String#replace",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-5361/"
+  ]
+}
