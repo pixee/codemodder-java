@@ -43,7 +43,29 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: --console=plain --quiet --no-configuration-cache build publishNebulaPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+          arguments: --console=plain --quiet --no-configuration-cache build distZip publishNebulaPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ inputs.version }}
+          release_name: Release ${{ inputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Core Codemods Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./core-codemods/build/distributions/core-codemods-${{ inputs.version }}.zip
+          asset_name: codemodder-java-codemods-${{ inputs.version }}.zip
+          asset_content_type: application/zip
+
 
       # share version bump
       - run: |
