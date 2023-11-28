@@ -1,0 +1,67 @@
+name: Release to GitHub
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: a stable version to set in version.txt before publishing
+
+jobs:
+  release:
+    name: Build & Release
+    permissions:
+      contents: write
+      id-token: write
+    environment: Public Release
+    runs-on: "ubuntu-latest"
+    env:
+      ORG_GRADLE_PROJECT_signingKey: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
+      ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSPHRASE }}
+      ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
+      ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Semgrep
+        run: python3 -m pip install semgrep
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          arguments: --quiet --no-configuration-cache setVersion -PnewVersion=${{ inputs.version }}
+
+      - uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          arguments: --console=plain --quiet --no-configuration-cache build distZip
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ inputs.version }}
+          release_name: Release ${{ inputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./core-codemods/build/distributions/core-codemods-${{ inputs.version }}.zip
+          asset_name: codemodder-java-codemods-${{ inputs.version }}.zip
+          asset_content_type: application/zip
