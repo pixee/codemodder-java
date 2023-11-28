@@ -4,6 +4,8 @@ name: Release integration test framework
 
 on:
   push:
+    branches:
+      - 'main'
 
 
 env:
