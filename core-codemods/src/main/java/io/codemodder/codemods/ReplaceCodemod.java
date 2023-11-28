@@ -26,7 +26,7 @@ public class ReplaceCodemod extends SonarPluginJavaParserChanger<MethodCallExpr>
     @Override
     public boolean onIssueFound(final CodemodInvocationContext context, final CompilationUnit cu, final MethodCallExpr node, final Issue issue) {
         String methodName = node.getNameAsString();
-        if (methodName.equals("replaceAll")) {
+        if ("replaceAll".equals(methodName)) {
             node.setName("replace");
             return true;
         }
