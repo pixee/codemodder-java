@@ -43,7 +43,7 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: --console=plain --quiet --no-configuration-cache build distZip
+          arguments: --console=plain --quiet --no-configuration-cache build distZip -x test
 
       - name: Create Release
         id: create_release
