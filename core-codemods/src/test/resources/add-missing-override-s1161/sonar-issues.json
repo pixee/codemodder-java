@@ -14,7 +14,7 @@
       "key": "AYvtrjy0LCzGLicz7Ajy",
       "rule": "java:S1161",
       "severity": "MAJOR",
-      "component": "nahsra_WebGoat_10_23:Test.java",
+      "component": "nahsra_WebGoat_10_23:src/main/java/SqlInjectionLesson10b.java",
       "project": "nahsra_WebGoat_10_23",
       "line": 143,
       "hash": "e4d44f915becc09c0ce386b304b7621b",
