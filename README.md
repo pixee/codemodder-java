@@ -48,6 +48,15 @@ python -m site
 ```
 
 ### Run the Core Codemods
+You can download and run the latest release from this repository in order to run the core codemods as a CLI:
+
+```bash
+$ unzip codemodder-java-codemods-<VERSION>.zip
+$ sh core-codemods-<VERSION>/bin/core-codemods
+```
+
+In order to run them during active development from Gradle, you can use the `run` task:
+
 ```shell
 ./gradlew :core-codemods:run --args='--output /path/to/my.codetf --dry-run /path/to/project/'
 ```
