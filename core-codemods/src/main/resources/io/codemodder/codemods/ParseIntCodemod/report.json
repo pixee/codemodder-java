@@ -1,0 +1,7 @@
+{
+  "summary" : "Making sure the correct Integer parsing is used",
+  "change" : "Making sure the correct Integer parsing is used",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-2130/"
+  ]
+}
