@@ -11,13 +11,14 @@ import javax.inject.Inject;
 
 /** A codemod for automatically replacing replaceAll() calls to replace() . */
 @Codemod(
-    id = "sonar:java/replace-s5361",
+    id = "sonar:java/substitute-replaceAll-s5361",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
-public class ReplaceCodemod extends SonarPluginJavaParserChanger<SimpleName> {
+public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChanger<SimpleName> {
 
   @Inject
-  public ReplaceCodemod(@ProvidedSonarScan(ruleId = "java:S5361") final RuleIssues issues) {
+  public SubstituteReplaceAllCodemod(
+      @ProvidedSonarScan(ruleId = "java:S5361") final RuleIssues issues) {
     super(issues, SimpleName.class, RegionNodeMatcher.MATCHES_START);
   }
 
