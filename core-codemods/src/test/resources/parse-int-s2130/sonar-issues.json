@@ -1,0 +1,77 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 1
+  },
+  "effortTotal": 5,
+  "debtTotal": 5,
+  "issues": [
+    {
+      "key": "AYvtrj1GLCzGLicz7AmJ",
+      "rule": "java:S2130",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/challenges/Flags.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 20,
+      "hash": "cbafde9811eb463095f5199eca8b23f9",
+      "textRange": {
+        "startLine": 20,
+        "endLine": 20,
+        "startOffset": 26,
+        "endOffset": 88
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Use \"Integer.parseInt\" for this string-to-int conversion.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "performance"
+      ],
+      "creationDate": "2023-02-22T11:01:34+0100",
+      "updateDate": "2023-11-20T17:58:54+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23",
+      "uuid": "AYvtqxxxzY4Rr5NHn4Om",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "WebGoat_10_23",
+      "longName": "WebGoat_10_23"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/challenges/Flags.java",
+      "uuid": "AYvtrjqILCzGLicz7AY_",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "Flags.java",
+      "longName": "src/main/java/org/owasp/webgoat/lessons/challenges/Flags.java",
+      "path": "src/main/java/org/owasp/webgoat/lessons/challenges/Flags.java"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "nahsra",
+      "name": "Arshan Dabirsiaghi"
+    }
+  ],
+  "facets": []
+}
