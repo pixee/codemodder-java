@@ -71,11 +71,14 @@ final class DefaultSarifParser implements SarifParser {
         ServiceLoader.load(RuleSarifFactory.class).stream()
             .map(ServiceLoader.Provider::get)
             .collect(Collectors.toUnmodifiableList());
+    final var runResults = run.getResults();
     final var allResults =
-        run.getResults().stream()
-            .map(result -> extractRuleId(result, run))
-            .filter(Objects::nonNull)
-            .distinct();
+        runResults != null
+            ? runResults.stream()
+                .map(result -> extractRuleId(result, run))
+                .filter(Objects::nonNull)
+                .distinct()
+            : Stream.<String>empty();
 
     return allResults.flatMap(
         rule -> tryToBuild(toolName, rule, sarif, repositoryRoot, factories).stream());
