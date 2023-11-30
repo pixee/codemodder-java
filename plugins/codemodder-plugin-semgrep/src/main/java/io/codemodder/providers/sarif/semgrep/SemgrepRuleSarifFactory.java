@@ -12,7 +12,7 @@ public class SemgrepRuleSarifFactory implements RuleSarifFactory {
   @Override
   public Optional<RuleSarif> build(
       String toolName, String rule, SarifSchema210 sarif, Path repositoryRoot) {
-    if (SingleSemgrepRuleSarif.toolName.equals(toolName)) {
+    if (SingleSemgrepRuleSarif.toolName.equalsIgnoreCase(toolName)) {
       return Optional.of(new SingleSemgrepRuleSarif(rule, sarif, repositoryRoot));
     }
     return Optional.empty();
