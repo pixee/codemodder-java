@@ -1,6 +1,6 @@
 {
-  "summary" : "This change substitutes the usage of `String#replaceAll()` to `String#replace()` (Sonar).",
-  "change" : "This change substitutes the usage of `String#replaceAll()` to `String#replace()`.",
+  "summary" : "Fixed inefficient usage of `String#replaceAll()` (Sonar).",
+  "change" : "Fixed inefficient usage of `String#replaceAll()`.",
   "references" : [
     "https://rules.sonarsource.com/java/RSPEC-5361/"
   ]
