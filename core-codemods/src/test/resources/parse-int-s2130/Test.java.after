@@ -16,6 +16,9 @@ public class Flags {
   }
 
   public Flag getFlag(Lesson forLesson) {
+    String myNum = "42.0";
+    float myFloat = Float.parseFloat(myNum);
+
     String lessonName = forLesson.getName();
     int challengeNumber = Integer.parseInt(lessonName.substring(lessonName.length() - 1));
     return FLAGS.get(challengeNumber);
