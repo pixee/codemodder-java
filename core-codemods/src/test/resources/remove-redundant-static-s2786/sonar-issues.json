@@ -14,7 +14,7 @@
       "key": "AYv0acY3pMuQdcUNcsKX",
       "rule": "java:S2786",
       "severity": "MINOR",
-      "component": "nahsra_WebGoat_10_23:Test.java",
+      "component": "nahsra_WebGoat_10_23:src/main/java/Response.java",
       "project": "nahsra_WebGoat_10_23",
       "line": 4,
       "hash": "f7cdce57b37926f1061e0ab664b60dbd",
