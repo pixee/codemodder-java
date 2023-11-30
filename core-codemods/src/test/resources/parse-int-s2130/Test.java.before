@@ -21,6 +21,10 @@ public class Flags {
 
     String lessonName = forLesson.getName();
     int challengeNumber = Integer.valueOf(lessonName.substring(lessonName.length() - 1));
+    float floatNumber = Float.valueOf(myNum);
+    float floatValue = Float.valueOf(myNum).floatValue();
+    float intValue = Integer.valueOf(myNum).intValue();
+    System.out.println(myFloat + floatValue + intValue + floatNumber);
     return FLAGS.get(challengeNumber);
   }
 

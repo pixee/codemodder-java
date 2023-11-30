@@ -1,15 +1,120 @@
 {
-  "total": 2,
+  "total": 5,
   "p": 1,
   "ps": 500,
   "paging": {
     "pageIndex": 1,
     "pageSize": 500,
-    "total": 2
+    "total": 5
   },
-  "effortTotal": 5,
-  "debtTotal": 5,
+  "effortTotal": 25,
+  "debtTotal": 25,
   "issues": [
+    {
+      "key": "AYwihbvytTDRswqzoUqo",
+      "rule": "java:S2130",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/challenges/Flags.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 24,
+      "hash": "70346575dc1bb5b846a714b1b96a468c",
+      "textRange": {
+        "startLine": 24,
+        "endLine": 24,
+        "startOffset": 24,
+        "endOffset": 44
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Use \"Float.parseFloat\" for this string-to-float conversion.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "performance"
+      ],
+      "creationDate": "2023-12-01T00:13:16+0100",
+      "updateDate": "2023-12-01T00:13:16+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYwihbvytTDRswqzoUqp",
+      "rule": "java:S2130",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/challenges/Flags.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 25,
+      "hash": "35991af55c7d6247862ffa616edee0a7",
+      "textRange": {
+        "startLine": 25,
+        "endLine": 25,
+        "startOffset": 23,
+        "endOffset": 43
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Use \"Float.parseFloat\" for this string-to-float conversion.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "performance"
+      ],
+      "creationDate": "2023-12-01T00:13:16+0100",
+      "updateDate": "2023-12-01T00:13:16+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYwihbvytTDRswqzoUqq",
+      "rule": "java:S2130",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/challenges/Flags.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 26,
+      "hash": "343c4aecf5d5e2d930e07757fc1c7d39",
+      "textRange": {
+        "startLine": 26,
+        "endLine": 26,
+        "startOffset": 21,
+        "endOffset": 43
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Use \"Integer.parseInt\" for this string-to-int conversion.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "performance"
+      ],
+      "creationDate": "2023-12-01T00:13:16+0100",
+      "updateDate": "2023-12-01T00:13:16+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
     {
       "key": "AYwhpcZtDQKrKTw7ZvF-",
       "rule": "java:S2130",

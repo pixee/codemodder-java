@@ -17,10 +17,14 @@ public class Flags {
 
   public Flag getFlag(Lesson forLesson) {
     String myNum = "42.0";
-    float myFloat = Float.parseFloat(myNum);
+    float myFloat = new Float(myNum);
 
     String lessonName = forLesson.getName();
     int challengeNumber = Integer.parseInt(lessonName.substring(lessonName.length() - 1));
+    float floatNumber = Float.parseFloat(myNum);
+    float floatValue = Float.parseFloat(myNum);
+    float intValue = Integer.parseInt(myNum);
+    System.out.println(myFloat + floatValue + intValue + floatNumber);
     return FLAGS.get(challengeNumber);
   }
 
