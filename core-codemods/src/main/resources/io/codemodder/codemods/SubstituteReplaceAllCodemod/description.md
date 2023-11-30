@@ -1,10 +1,12 @@
-This change replaces the usage of `String#replaceAll()` to `String#replace()` when the first argument is not a regular expression. It does exactly the same thing as `String#replaceAll()` without the performance drawback of the regex.
+This change replaces `String#replaceAll()` with `String#replace()` to enhance performance and avoid confusion.
 
-Changes:
+The `String#replaceAll()` call takes a regular expression for the first argument, which is then compiled and used to replace string subsections. However, the argument being passed to it doesn't actually appear to be a regular expression. Therefore, the `replace()` [API](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#replace-java.lang.CharSequence-java.lang.CharSequence-) appears to be a better fit.
+
+Our changes look something like this:
 
 ```diff
-    String init = "Bob is a Bird... Bob is a Plane... Bob is Superman!";
+    String init = "my string\n";
 
--   String changed = init.replaceAll("Bob is", "It's");
-+   String changed = init.replaceAll("\\w*\\sis", "It's");
+-   String changed = init.replaceAll("\n", "<br>");
++   String changed = init.replace("\n", "<br>");
 ```
