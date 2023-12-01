@@ -19,7 +19,7 @@ import javax.inject.Inject;
  * types in the codebase.
  */
 @Codemod(
-    id = "sonar:java/parse-int-s2130",
+    id = "sonar:java/harden-string-parse-to-primitives-s2130",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaParserChanger {
