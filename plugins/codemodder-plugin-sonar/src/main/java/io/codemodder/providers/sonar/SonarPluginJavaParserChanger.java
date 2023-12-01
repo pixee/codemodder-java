@@ -26,6 +26,17 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     this.regionNodeMatcher = regionNodeMatcher;
   }
 
+    protected SonarPluginJavaParserChanger(
+            final RuleIssues ruleIssues,
+            final Class<? extends Node> nodeType,
+            final RegionNodeMatcher regionNodeMatcher,
+            final CodemodReporterStrategy codemodReporterStrategy) {
+      super(codemodReporterStrategy);
+        this.ruleIssues = Objects.requireNonNull(ruleIssues);
+        this.nodeType = Objects.requireNonNull(nodeType);
+        this.regionNodeMatcher = regionNodeMatcher;
+    }
+
   @Override
   public List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
