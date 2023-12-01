@@ -5,6 +5,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.type.Type;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
@@ -30,6 +31,29 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
   public HardenStringParseToPrimitivesCodemod(
       final HardenParseForValueOfChanger parseMethodCallExprChanger) {
     super(parseMethodCallExprChanger);
+  }
+
+  private static final class HardenParseForConstructorChanger extends SonarPluginJavaParserChanger<ObjectCreationExpr> {
+
+      @Inject
+      public HardenParseForConstructorChanger(
+              @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssues issues) {
+          super(
+                  issues,
+                  ObjectCreationExpr.class,
+                  RegionNodeMatcher.MATCHES_START,
+                  CodemodReporterStrategy.empty());
+      }
+
+      @Override
+      public boolean onIssueFound(
+              final CodemodInvocationContext context,
+              final CompilationUnit cu,
+              final ObjectCreationExpr objectCreationExpr,
+              final Issue issue) {
+
+          return false;
+      }
   }
 
   private static final class HardenParseForValueOfChanger
