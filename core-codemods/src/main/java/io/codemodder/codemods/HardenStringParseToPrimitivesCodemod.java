@@ -66,7 +66,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
         }
       }
 
-      return false; // No change made
+      return false;
     }
 
     private String retrieveTargetTypeFromMethodCallExpr(final MethodCallExpr methodCallExpr) {
@@ -84,7 +84,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
         case "java.lang.Integer" -> "parseInt";
         case "java.lang.Float" -> "parseFloat";
           // Add more cases if needed
-        default -> null; // Handle unsupported cases
+        default -> null;
       };
     }
 
