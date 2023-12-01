@@ -1,6 +1,6 @@
 {
-  "summary" : "Making sure the correct Integer parsing is used",
-  "change" : "Making sure the correct Integer parsing is used",
+  "summary" : "Implemented parsing usage when converting Strings to primitives (Sonar).",
+  "change" : "Implemented parsing usage when converting Strings to primitives.",
   "references" : [
     "https://rules.sonarsource.com/java/RSPEC-2130/"
   ]

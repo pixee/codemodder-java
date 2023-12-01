@@ -1,10 +1,18 @@
-This change uses the correct Integer parse method to make the code more efficient and the intent of the developer clearer
+This update enhances the efficiency of String-to-primitive conversions by leveraging the appropriate parse methods.
 
-Changes:
+This change not only improves code efficiency but also promotes clearer and more concise code expressions for converting Strings to primitive types.
+
+The changes made in the code are as follows:
 
 ```diff
-    String myNum = "42.0";
+    String number = "7.1";
 
--   int myInteger = Integer.valueOf(myNum);
-+   int myInteger = Integer.parseInt(myNum);
+-   int integerNum = Integer.valueOf(number);
++   int integerNum = Integer.parseInt(number);
+
+-   float floatNumVal = Float.valueOf(number).floatValue();
++   float floatNumVal = Float.parseFloat(number);
+
+-   int integerNumber = new Integer(number);
++   int integerNumber = Integer.parseInt(number);
 ```
