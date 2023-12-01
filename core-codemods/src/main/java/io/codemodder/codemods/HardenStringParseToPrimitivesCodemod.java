@@ -2,88 +2,112 @@ package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.type.Type;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
+import java.util.Optional;
 import javax.inject.Inject;
-import java.util.List;
 
-/** A codemod for automatically using the relevant integer parsing method . */
+/**
+ * A codemod that enforces the appropriate parsing technique for converting Strings to primitive
+ * types in the codebase.
+ */
 @Codemod(
     id = "sonar:java/parse-int-s2130",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaParserChanger {
 
+  // TODO create another static sonar java parser changer to handle constructor cases
+  // (ObjectCreationExpr)
   @Inject
   public HardenStringParseToPrimitivesCodemod(
-      final HardenStringParseToPrimitivesCodemod.ParseMethodCallExprChanger parseMethodCallExprChanger) {
+      final HardenParseForValueOfChanger parseMethodCallExprChanger) {
     super(parseMethodCallExprChanger);
   }
 
-  private static class ParseMethodCallExprChanger
+  private static final class HardenParseForValueOfChanger
       extends SonarPluginJavaParserChanger<MethodCallExpr> {
 
     @Inject
-    public ParseMethodCallExprChanger(
+    public HardenParseForValueOfChanger(
         @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssues issues) {
-      super(issues, MethodCallExpr.class, RegionNodeMatcher.MATCHES_START, CodemodReporterStrategy.empty());
+      super(
+          issues,
+          MethodCallExpr.class,
+          RegionNodeMatcher.MATCHES_START,
+          CodemodReporterStrategy.empty());
     }
 
-      @Override
-      public boolean onIssueFound(
-              final CodemodInvocationContext context,
-              final CompilationUnit cu,
-              final MethodCallExpr methodCallExpr,
-              final Issue issue) {
+    @Override
+    public boolean onIssueFound(
+        final CodemodInvocationContext context,
+        final CompilationUnit cu,
+        final MethodCallExpr methodCallExpr,
+        final Issue issue) {
 
-          final String methodName = methodCallExpr.getNameAsString();
+      final String methodName = methodCallExpr.getNameAsString();
 
-          // Checking for method calls that violate the java:S2130 rule
-          if ("valueOf".equals(methodName)) {
-              String targetType = methodCallExpr.getTypeArguments().isEmpty()
-                      ? methodCallExpr.getScope().map(expr -> expr.calculateResolvedType().describe()).orElse("")
-                      : methodCallExpr.getTypeArguments().get().get(0).toString();
+      if ("valueOf".equals(methodName)) {
+        final String targetType = retrieveTargetTypeFromMethodCallExpr(methodCallExpr);
 
-              // Determine the appropriate parsing method based on the type being parsed
-              String replacementMethod;
-              switch (targetType) {
-                  case "java.lang.Integer":
-                      replacementMethod = "parseInt";
-                      break;
-                  case "java.lang.Float":
-                      replacementMethod = "parseFloat";
-                      break;
-                  // Add more cases for other types as needed
-                  default:
-                      replacementMethod = null; // Handle unsupported cases
-                      break;
-              }
+        final String replacementMethod = determineParsingMethodForType(targetType);
 
-              if (replacementMethod != null) {
-                  methodCallExpr.setName(replacementMethod);
+        if (replacementMethod != null) {
+          methodCallExpr.setName(replacementMethod);
 
-                  // Handle method call chains (e.g., intValue, floatValue) after valueOf
-                  if (methodCallExpr.getParentNode().isPresent() &&
-                          methodCallExpr.getParentNode().get() instanceof MethodCallExpr) {
-                      MethodCallExpr parentMethodCall = (MethodCallExpr) methodCallExpr.getParentNode().get();
-                      String parentMethodName = parentMethodCall.getNameAsString();
-
-                      final Expression a = methodCallExpr.getScope().isPresent() ? methodCallExpr.getScope().get() : null;
-                      if (parentMethodName.equals("intValue") || parentMethodName.equals("floatValue")) {
-                          parentMethodCall.replace(parentMethodCall.getScope().get());
-                      }
-                  }
-
-                  return true; // Mark the change as successful
-              }
-          }
-
-          return false; // No change made
+          return handleMethodCallChainsAfterValueOfIfNeeded(methodCallExpr);
+        }
       }
+
+      return false; // No change made
+    }
+
+    private String retrieveTargetTypeFromMethodCallExpr(final MethodCallExpr methodCallExpr) {
+      final Optional<NodeList<Type>> optionalTypeArguments = methodCallExpr.getTypeArguments();
+      return optionalTypeArguments.isEmpty()
+          ? methodCallExpr
+              .getScope()
+              .map(expr -> expr.calculateResolvedType().describe())
+              .orElse("")
+          : optionalTypeArguments.get().get(0).toString();
+    }
+
+    private String determineParsingMethodForType(final String type) {
+      return switch (type) {
+        case "java.lang.Integer" -> "parseInt";
+        case "java.lang.Float" -> "parseFloat";
+          // Add more cases if needed
+        default -> null; // Handle unsupported cases
+      };
+    }
+
+    private boolean handleMethodCallChainsAfterValueOfIfNeeded(
+        final MethodCallExpr methodCallExpr) {
+
+      final Optional<Node> optionalParentNode = methodCallExpr.getParentNode();
+      if (optionalParentNode.isPresent()
+          && optionalParentNode.get() instanceof MethodCallExpr parentMethodCall) {
+
+        final String parentMethodName = parentMethodCall.getNameAsString();
+
+        final Optional<Expression> optionalScope = parentMethodCall.getScope();
+        if (optionalScope.isEmpty()) {
+          return false;
+        }
+
+        if ("intValue".equals(parentMethodName) || "floatValue".equals(parentMethodName)) {
+          parentMethodCall.replace(optionalScope.get());
+        }
+      }
+
+      return true;
+    }
   }
 }
