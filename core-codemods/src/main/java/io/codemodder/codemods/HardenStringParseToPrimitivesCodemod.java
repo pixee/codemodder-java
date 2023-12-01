@@ -3,9 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.Type;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
@@ -29,9 +27,22 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
   // (ObjectCreationExpr)
   @Inject
   public HardenStringParseToPrimitivesCodemod(
-      final HardenParseForValueOfChanger parseMethodCallExprChanger) {
-    super(parseMethodCallExprChanger);
+      final HardenParseForConstructorChanger hardenParseForConstructorChanger) {
+    super(hardenParseForConstructorChanger);
   }
+
+    private static String determineParsingMethodForType(final String type) {
+      if("java.lang.Integer".equals(type) || "Integer".equals(type)){
+          return "parseInt";
+      }
+
+        if("java.lang.Float".equals(type) || "Float".equals(type)){
+            return "parseFloat";
+        }
+
+        return null;
+
+    }
 
   private static final class HardenParseForConstructorChanger extends SonarPluginJavaParserChanger<ObjectCreationExpr> {
 
@@ -52,11 +63,35 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
               final ObjectCreationExpr objectCreationExpr,
               final Issue issue) {
 
-          return false;
+          String type = objectCreationExpr.getType().asString();
+          Expression argumentExpression = objectCreationExpr.getArguments().get(0);
+
+          Expression argument = extractArgumentExpression(argumentExpression);
+
+          String replacementMethod = determineParsingMethodForType(type);
+
+          if (replacementMethod != null && argument != null) {
+              MethodCallExpr replacementExpr = new MethodCallExpr(new NameExpr(type), replacementMethod);
+
+              replacementExpr.addArgument(argument);
+
+              objectCreationExpr.replace(replacementExpr);
+              return true; // Mark the change as successful
+          }
+
+          return false; // No change made
+      }
+
+      private Expression extractArgumentExpression(Expression argumentExpression) {
+          if (argumentExpression instanceof StringLiteralExpr || argumentExpression instanceof NameExpr) {
+              return argumentExpression;
+          }
+          // Handle other cases or return null if unable to extract the argument expression
+          return null;
       }
   }
 
-  private static final class HardenParseForValueOfChanger
+  /*private static final class HardenParseForValueOfChanger
       extends SonarPluginJavaParserChanger<MethodCallExpr> {
 
     @Inject
@@ -103,15 +138,6 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
           : optionalTypeArguments.get().get(0).toString();
     }
 
-    private String determineParsingMethodForType(final String type) {
-      return switch (type) {
-        case "java.lang.Integer" -> "parseInt";
-        case "java.lang.Float" -> "parseFloat";
-          // Add more cases if needed
-        default -> null;
-      };
-    }
-
     private boolean handleMethodCallChainsAfterValueOfIfNeeded(
         final MethodCallExpr methodCallExpr) {
 
@@ -133,5 +159,5 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
 
       return true;
     }
-  }
+  }*/
 }
