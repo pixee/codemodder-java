@@ -17,7 +17,7 @@ public class Flags {
 
   public Flag getFlag(Lesson forLesson) {
     String myNum = "42.0";
-    //fuck
+    //comment
 
     String lessonName = forLesson.getName();
     int challengeNumber = Integer.valueOf(lessonName.substring(lessonName.length() - 1));

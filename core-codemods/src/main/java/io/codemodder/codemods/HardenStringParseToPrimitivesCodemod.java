@@ -42,6 +42,10 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     return null;
   }
 
+  /**
+   * Handles cases where Strings are converted to numbers using constructors like new Integer("24")
+   * or new Float("12").
+   */
   private static final class HardenParseForConstructorChanger
       extends SonarPluginJavaParserChanger<ObjectCreationExpr> {
 
@@ -91,6 +95,10 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
   }
 
+  /**
+   * Handles cases where Strings are converted to numbers using the static method .valueOf() from
+   * Integer or Float classes.
+   */
   private static final class HardenParseForValueOfChanger
       extends SonarPluginJavaParserChanger<MethodCallExpr> {
 
