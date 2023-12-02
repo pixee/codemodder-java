@@ -82,6 +82,9 @@ final class SonarModule extends AbstractModule {
                   .flatMap(Arrays::stream)
                   .toList();
 
+          // Outside the loop, create a map to track already bound ruleIds
+          final Map<String, Boolean> boundRuleIds = new HashMap<>();
+
           injectableParams.forEach(
               param -> {
                 ProvidedSonarScan annotation = param.getAnnotation(ProvidedSonarScan.class);
@@ -93,6 +96,13 @@ final class SonarModule extends AbstractModule {
                       "can't use @ProvidedSonarScan on anything except RuleIssues (see "
                           + param.getDeclaringExecutable().getDeclaringClass().getName()
                           + ")");
+                }
+
+                final String ruleId = annotation.ruleId();
+
+                // Check if the ruleId has already been bound
+                if (boundRuleIds.containsKey(ruleId)) {
+                  return; // Skip binding if already bound
                 }
 
                 // bind from existing scan
@@ -114,6 +124,8 @@ final class SonarModule extends AbstractModule {
                       });
                   RuleIssues ruleIssues = new DefaultRuleIssues(issuesByPath);
                   bind(RuleIssues.class).annotatedWith(annotation).toInstance(ruleIssues);
+                  // Mark the ruleId as bound
+                  boundRuleIds.put(ruleId, true);
                 }
               });
         }
