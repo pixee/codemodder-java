@@ -1,16 +1,12 @@
 package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.type.Type;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
-import java.util.Optional;
 import javax.inject.Inject;
 
 /**
@@ -31,64 +27,65 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     super(hardenParseForConstructorChanger);
   }
 
-    private static String determineParsingMethodForType(final String type) {
-      if("java.lang.Integer".equals(type) || "Integer".equals(type)){
-          return "parseInt";
-      }
-
-        if("java.lang.Float".equals(type) || "Float".equals(type)){
-            return "parseFloat";
-        }
-
-        return null;
-
+  private static String determineParsingMethodForType(final String type) {
+    if ("java.lang.Integer".equals(type) || "Integer".equals(type)) {
+      return "parseInt";
     }
 
-  private static final class HardenParseForConstructorChanger extends SonarPluginJavaParserChanger<ObjectCreationExpr> {
+    if ("java.lang.Float".equals(type) || "Float".equals(type)) {
+      return "parseFloat";
+    }
 
-      @Inject
-      public HardenParseForConstructorChanger(
-              @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssues issues) {
-          super(
-                  issues,
-                  ObjectCreationExpr.class,
-                  RegionNodeMatcher.MATCHES_START,
-                  CodemodReporterStrategy.empty());
+    return null;
+  }
+
+  private static final class HardenParseForConstructorChanger
+      extends SonarPluginJavaParserChanger<ObjectCreationExpr> {
+
+    @Inject
+    public HardenParseForConstructorChanger(
+        @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssues issues) {
+      super(
+          issues,
+          ObjectCreationExpr.class,
+          RegionNodeMatcher.MATCHES_START,
+          CodemodReporterStrategy.empty());
+    }
+
+    @Override
+    public boolean onIssueFound(
+        final CodemodInvocationContext context,
+        final CompilationUnit cu,
+        final ObjectCreationExpr objectCreationExpr,
+        final Issue issue) {
+
+      String type = objectCreationExpr.getType().asString();
+      Expression argumentExpression = objectCreationExpr.getArguments().get(0);
+
+      Expression argument = extractArgumentExpression(argumentExpression);
+
+      String replacementMethod = determineParsingMethodForType(type);
+
+      if (replacementMethod != null && argument != null) {
+        MethodCallExpr replacementExpr = new MethodCallExpr(new NameExpr(type), replacementMethod);
+
+        replacementExpr.addArgument(argument);
+
+        objectCreationExpr.replace(replacementExpr);
+        return true; // Mark the change as successful
       }
 
-      @Override
-      public boolean onIssueFound(
-              final CodemodInvocationContext context,
-              final CompilationUnit cu,
-              final ObjectCreationExpr objectCreationExpr,
-              final Issue issue) {
+      return false; // No change made
+    }
 
-          String type = objectCreationExpr.getType().asString();
-          Expression argumentExpression = objectCreationExpr.getArguments().get(0);
-
-          Expression argument = extractArgumentExpression(argumentExpression);
-
-          String replacementMethod = determineParsingMethodForType(type);
-
-          if (replacementMethod != null && argument != null) {
-              MethodCallExpr replacementExpr = new MethodCallExpr(new NameExpr(type), replacementMethod);
-
-              replacementExpr.addArgument(argument);
-
-              objectCreationExpr.replace(replacementExpr);
-              return true; // Mark the change as successful
-          }
-
-          return false; // No change made
+    private Expression extractArgumentExpression(Expression argumentExpression) {
+      if (argumentExpression instanceof StringLiteralExpr
+          || argumentExpression instanceof NameExpr) {
+        return argumentExpression;
       }
-
-      private Expression extractArgumentExpression(Expression argumentExpression) {
-          if (argumentExpression instanceof StringLiteralExpr || argumentExpression instanceof NameExpr) {
-              return argumentExpression;
-          }
-          // Handle other cases or return null if unable to extract the argument expression
-          return null;
-      }
+      // Handle other cases or return null if unable to extract the argument expression
+      return null;
+    }
   }
 
   /*private static final class HardenParseForValueOfChanger
