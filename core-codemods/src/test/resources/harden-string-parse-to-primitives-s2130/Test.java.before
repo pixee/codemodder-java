@@ -21,12 +21,12 @@ public class Flags {
 
     String lessonName = forLesson.getName();
     int challengeNumber = Integer.valueOf(lessonName.substring(lessonName.length() - 1));
-    float floatNumber = Float.valueOf(myNum);
+    float floatNumber = Float.valueOf("12.1");
     float floatValue = Float.valueOf(myNum).floatValue();
-    float intValue = Integer.valueOf(myNum).intValue();
+    float intValue = Integer.valueOf("12.1").intValue();
 
       float myFloat = new Float(myNum);
-      int myInteger = new Integer(myNum);
+      int myInteger = new Integer("42.0");
       float myFloatValue = (new Float(myNum)).floatValue();
       int myIntValue = (new Integer(myNum)).intValue();
       System.out.println(myFloat + floatValue + intValue + floatNumber + myInteger + myIntValue + myFloatValue + myFloat);

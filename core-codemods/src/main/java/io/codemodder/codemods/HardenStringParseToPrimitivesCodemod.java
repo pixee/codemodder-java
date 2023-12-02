@@ -30,16 +30,16 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     super(hardenParseForConstructorChanger, hardenParseForValueOfChanger);
   }
 
-  private static String determineParsingMethodForType(final String type) {
+  private static Optional<String> determineParsingMethodForType(final String type) {
     if ("java.lang.Integer".equals(type) || "Integer".equals(type)) {
-      return "parseInt";
+      return Optional.of("parseInt");
     }
 
     if ("java.lang.Float".equals(type) || "Float".equals(type)) {
-      return "parseFloat";
+      return Optional.of("parseFloat");
     }
 
-    return null;
+    return Optional.empty();
   }
 
   /**
@@ -69,14 +69,15 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
       final String type = objectCreationExpr.getType().asString();
       final Expression argumentExpression = objectCreationExpr.getArguments().get(0);
 
-      final Expression argument = extractArgumentExpression(argumentExpression);
+      final Optional<Expression> argument = extractArgumentExpression(argumentExpression);
 
-      final String replacementMethod = determineParsingMethodForType(type);
+      final Optional<String> replacementMethod = determineParsingMethodForType(type);
 
-      if (replacementMethod != null && argument != null) {
-        MethodCallExpr replacementExpr = new MethodCallExpr(new NameExpr(type), replacementMethod);
+      if (replacementMethod.isPresent() && argument.isPresent()) {
+        MethodCallExpr replacementExpr =
+            new MethodCallExpr(new NameExpr(type), replacementMethod.get());
 
-        replacementExpr.addArgument(argument);
+        replacementExpr.addArgument(argument.get());
 
         objectCreationExpr.replace(replacementExpr);
         return true;
@@ -85,13 +86,13 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
       return false;
     }
 
-    private Expression extractArgumentExpression(Expression argumentExpression) {
+    private Optional<Expression> extractArgumentExpression(Expression argumentExpression) {
       if (argumentExpression instanceof StringLiteralExpr
           || argumentExpression instanceof NameExpr) {
-        return argumentExpression;
+        return Optional.of(argumentExpression);
       }
       // Handle other cases or return null if unable to extract the argument expression
-      return null;
+      return Optional.empty();
     }
   }
 
@@ -124,10 +125,10 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
       if ("valueOf".equals(methodName)) {
         final String targetType = retrieveTargetTypeFromMethodCallExpr(methodCallExpr);
 
-        final String replacementMethod = determineParsingMethodForType(targetType);
+        final Optional<String> replacementMethod = determineParsingMethodForType(targetType);
 
-        if (replacementMethod != null) {
-          methodCallExpr.setName(replacementMethod);
+        if (replacementMethod.isPresent()) {
+          methodCallExpr.setName(replacementMethod.get());
 
           return handleMethodCallChainsAfterValueOfIfNeeded(methodCallExpr);
         }
