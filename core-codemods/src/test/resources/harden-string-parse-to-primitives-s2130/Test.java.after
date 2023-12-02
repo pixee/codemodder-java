@@ -27,8 +27,8 @@ public class Flags {
 
       float myFloat = Float.parseFloat(myNum);
       int myInteger = Integer.parseInt(myNum);
-      float myFloatValue = Float.parseFloat(myNum);
-      int myIntValue = Integer.parseInt(myNum);
+      float myFloatValue = (new Float(myNum)).floatValue();
+      int myIntValue = (new Integer(myNum)).intValue();
       System.out.println(myFloat + floatValue + intValue + floatNumber + myInteger + myIntValue + myFloatValue + myFloat);
     return FLAGS.get(challengeNumber);
   }
