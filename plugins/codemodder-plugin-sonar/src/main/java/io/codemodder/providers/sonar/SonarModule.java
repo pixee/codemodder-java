@@ -6,13 +6,16 @@ import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
 import io.codemodder.providers.sonar.api.Issue;
 import io.codemodder.providers.sonar.api.SearchIssueResponse;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfoList;
+import io.github.classgraph.ScanResult;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Stream;
+import javax.inject.Inject;
 
 final class SonarModule extends AbstractModule {
 
@@ -55,46 +58,66 @@ final class SonarModule extends AbstractModule {
           perRuleList.add(issue);
         });
 
+    // find all the @ProvidedSemgrepScan annotations and bind them as is
+    Set<String> packagesScanned = new HashSet<>();
     for (final Class<? extends CodeChanger> codemodType : codemodTypes) {
-      final Constructor<?>[] constructors = codemodType.getDeclaredConstructors();
+      String packageName = codemodType.getPackageName();
+      if (!packagesScanned.contains(packageName)) {
+        packagesScanned.add(packageName);
+        try (ScanResult scan =
+            new ClassGraph()
+                .enableAllInfo()
+                .acceptPackagesNonRecursive(packageName)
+                .removeTemporaryFilesAfterScan()
+                .scan()) {
+          ClassInfoList classesWithMethodAnnotation =
+              scan.getClassesWithMethodAnnotation(Inject.class);
+          List<Class<?>> injectableClasses = classesWithMethodAnnotation.loadClasses();
+          List<Parameter> injectableParams =
+              injectableClasses.stream()
+                  .map(Class::getDeclaredConstructors)
+                  .flatMap(Arrays::stream)
+                  .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
+                  .map(Executable::getParameters)
+                  .flatMap(Arrays::stream)
+                  .toList();
 
-      List<Parameter> parameters =
-          Stream.of(constructors)
-              .filter(constructor -> constructor.getAnnotation(javax.inject.Inject.class) != null)
-              .flatMap(constructor -> Stream.of(constructor.getParameters()))
-              .filter(parameter -> parameter.getAnnotation(ProvidedSonarScan.class) != null)
-              .toList();
+          injectableParams.forEach(
+              param -> {
+                ProvidedSonarScan annotation = param.getAnnotation(ProvidedSonarScan.class);
+                if (annotation == null) {
+                  return;
+                }
+                if (!RuleIssues.class.equals(param.getType())) {
+                  throw new IllegalArgumentException(
+                      "can't use @ProvidedSonarScan on anything except RuleIssues (see "
+                          + param.getDeclaringExecutable().getDeclaringClass().getName()
+                          + ")");
+                }
 
-      parameters.forEach(
-          param -> {
-            if (!RuleIssues.class.equals(param.getType())) {
-              throw new IllegalArgumentException(
-                  "can't use @ProvidedSonarScan on anything except RuleIssues (see "
-                      + param.getDeclaringExecutable().getDeclaringClass().getName()
-                      + ")");
-            }
-            // bind from existing scan
-            ProvidedSonarScan annotation = param.getAnnotation(ProvidedSonarScan.class);
-            List<Issue> issues = perRuleBreakdown.get(annotation.ruleId());
+                // bind from existing scan
+                List<Issue> issues = perRuleBreakdown.get(annotation.ruleId());
 
-            if (issues == null || issues.isEmpty()) {
-              bind(RuleIssues.class).annotatedWith(annotation).toInstance(EMPTY);
-            } else {
-              Map<String, List<Issue>> issuesByPath = new HashMap<>();
-              issues.forEach(
-                  issue -> {
-                    Optional<String> filename = issue.componentFileName();
-                    if (filename.isPresent()) {
-                      String fullPath = repository.resolve(filename.get()).toString();
-                      List<Issue> pathIssues =
-                          issuesByPath.computeIfAbsent(fullPath, (f) -> new ArrayList<>());
-                      pathIssues.add(issue);
-                    }
-                  });
-              RuleIssues ruleIssues = new DefaultRuleIssues(issuesByPath);
-              bind(RuleIssues.class).annotatedWith(annotation).toInstance(ruleIssues);
-            }
-          });
+                if (issues == null || issues.isEmpty()) {
+                  bind(RuleIssues.class).annotatedWith(annotation).toInstance(EMPTY);
+                } else {
+                  Map<String, List<Issue>> issuesByPath = new HashMap<>();
+                  issues.forEach(
+                      issue -> {
+                        Optional<String> filename = issue.componentFileName();
+                        if (filename.isPresent()) {
+                          String fullPath = repository.resolve(filename.get()).toString();
+                          List<Issue> pathIssues =
+                              issuesByPath.computeIfAbsent(fullPath, (f) -> new ArrayList<>());
+                          pathIssues.add(issue);
+                        }
+                      });
+                  RuleIssues ruleIssues = new DefaultRuleIssues(issuesByPath);
+                  bind(RuleIssues.class).annotatedWith(annotation).toInstance(ruleIssues);
+                }
+              });
+        }
+      }
     }
   }
 
