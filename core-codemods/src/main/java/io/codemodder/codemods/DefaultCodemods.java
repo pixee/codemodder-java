@@ -38,6 +38,7 @@ public final class DefaultCodemods {
         SanitizeHttpHeaderCodemod.class,
         SanitizeSpringMultipartFilenameCodemod.class,
         SecureRandomCodemod.class,
+        SemgrepOverlyPermissiveFilePermissionsCodemod.class,
         SQLParameterizerCodemod.class,
         SSRFCodemod.class,
         StackTraceExposureCodemod.class,

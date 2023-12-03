@@ -1,8 +1,8 @@
-This update enhances the efficiency of String-to-primitive conversions by leveraging the appropriate parse methods.
+This change updates `String`-to-number conversions by leveraging the intended parse methods.
 
-This change not only improves code efficiency but also promotes clearer and more concise code expressions for converting Strings to primitive types.
+This change makes developer intent clearer, and sometimes with a more concise expression.
 
-The changes made in the code are as follows:
+Our changes look like this:
 
 ```diff
     String number = "7.1";
