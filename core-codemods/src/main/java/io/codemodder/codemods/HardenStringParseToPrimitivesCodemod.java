@@ -3,8 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.Type;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
@@ -24,14 +23,83 @@ import javax.inject.Inject;
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaParserChanger {
 
-  // TODO create another static sonar java parser changer to handle constructor cases
-  // (ObjectCreationExpr)
   @Inject
   public HardenStringParseToPrimitivesCodemod(
-      final HardenParseForValueOfChanger parseMethodCallExprChanger) {
-    super(parseMethodCallExprChanger);
+      final HardenParseForConstructorChanger hardenParseForConstructorChanger,
+      final HardenParseForValueOfChanger hardenParseForValueOfChanger) {
+    super(hardenParseForConstructorChanger, hardenParseForValueOfChanger);
   }
 
+  private static Optional<String> determineParsingMethodForType(final String type) {
+    if ("java.lang.Integer".equals(type) || "Integer".equals(type)) {
+      return Optional.of("parseInt");
+    }
+
+    if ("java.lang.Float".equals(type) || "Float".equals(type)) {
+      return Optional.of("parseFloat");
+    }
+
+    return Optional.empty();
+  }
+
+  /**
+   * Handles cases where Strings are converted to numbers using constructors like new Integer("24")
+   * or new Float("12").
+   */
+  private static final class HardenParseForConstructorChanger
+      extends SonarPluginJavaParserChanger<ObjectCreationExpr> {
+
+    @Inject
+    public HardenParseForConstructorChanger(
+        @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssues issues) {
+      super(
+          issues,
+          ObjectCreationExpr.class,
+          RegionNodeMatcher.MATCHES_START,
+          CodemodReporterStrategy.empty());
+    }
+
+    @Override
+    public boolean onIssueFound(
+        final CodemodInvocationContext context,
+        final CompilationUnit cu,
+        final ObjectCreationExpr objectCreationExpr,
+        final Issue issue) {
+
+      final String type = objectCreationExpr.getType().asString();
+      final Expression argumentExpression = objectCreationExpr.getArguments().get(0);
+
+      final Optional<Expression> argument = extractArgumentExpression(argumentExpression);
+
+      final Optional<String> replacementMethod = determineParsingMethodForType(type);
+
+      if (replacementMethod.isPresent() && argument.isPresent()) {
+        MethodCallExpr replacementExpr =
+            new MethodCallExpr(new NameExpr(type), replacementMethod.get());
+
+        replacementExpr.addArgument(argument.get());
+
+        objectCreationExpr.replace(replacementExpr);
+        return true;
+      }
+
+      return false;
+    }
+
+    private Optional<Expression> extractArgumentExpression(Expression argumentExpression) {
+      if (argumentExpression instanceof StringLiteralExpr
+          || argumentExpression instanceof NameExpr) {
+        return Optional.of(argumentExpression);
+      }
+      // Handle other cases or return null if unable to extract the argument expression
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Handles cases where Strings are converted to numbers using the static method .valueOf() from
+   * Integer or Float classes.
+   */
   private static final class HardenParseForValueOfChanger
       extends SonarPluginJavaParserChanger<MethodCallExpr> {
 
@@ -57,10 +125,10 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
       if ("valueOf".equals(methodName)) {
         final String targetType = retrieveTargetTypeFromMethodCallExpr(methodCallExpr);
 
-        final String replacementMethod = determineParsingMethodForType(targetType);
+        final Optional<String> replacementMethod = determineParsingMethodForType(targetType);
 
-        if (replacementMethod != null) {
-          methodCallExpr.setName(replacementMethod);
+        if (replacementMethod.isPresent()) {
+          methodCallExpr.setName(replacementMethod.get());
 
           return handleMethodCallChainsAfterValueOfIfNeeded(methodCallExpr);
         }
@@ -77,15 +145,6 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
               .map(expr -> expr.calculateResolvedType().describe())
               .orElse("")
           : optionalTypeArguments.get().get(0).toString();
-    }
-
-    private String determineParsingMethodForType(final String type) {
-      return switch (type) {
-        case "java.lang.Integer" -> "parseInt";
-        case "java.lang.Float" -> "parseFloat";
-          // Add more cases if needed
-        default -> null;
-      };
     }
 
     private boolean handleMethodCallChainsAfterValueOfIfNeeded(
