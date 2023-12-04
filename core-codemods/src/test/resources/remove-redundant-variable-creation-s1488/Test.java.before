@@ -232,6 +232,11 @@ public class MvcConfiguration implements WebMvcConfigurer {
     return localeResolver;
   }
 
+  public void doSomething() {
+    RuntimeException myException = new RuntimeException();
+    throw myException;
+  }
+
   @Bean
   public LocaleChangeInterceptor localeChangeInterceptor() {
     LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
