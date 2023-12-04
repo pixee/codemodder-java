@@ -1,7 +1,0 @@
-{
-  "summary" : "Remove redundant variable when is only returned  (Sonar).",
-  "change" : "Remove redundant variable when is only returned.",
-  "references" : [
-    "https://rules.sonarsource.com/java/RSPEC-1488/"
-  ]
-}
