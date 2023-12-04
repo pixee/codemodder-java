@@ -18,59 +18,46 @@ import javax.inject.Inject;
     id = "sonar:java/remove-redundant-variable-creation-s1488",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class RemoveRedundantVariableCreationCodemod extends CompositeJavaParserChanger {
+public final class RemoveRedundantVariableCreationCodemod
+    extends SonarPluginJavaParserChanger<ObjectCreationExpr> {
 
   @Inject
   public RemoveRedundantVariableCreationCodemod(
-      final RemoveRedundantVariableChanger removeVariableReturnChanger) {
-    super(removeVariableReturnChanger);
+      @ProvidedSonarScan(ruleId = "java:S1488") final RuleIssues issues) {
+    super(issues, ObjectCreationExpr.class, RegionNodeMatcher.MATCHES_START);
   }
 
-  private static final class RemoveRedundantVariableChanger
-      extends SonarPluginJavaParserChanger<ObjectCreationExpr> {
+  @Override
+  public boolean onIssueFound(
+      final CodemodInvocationContext context,
+      final CompilationUnit cu,
+      final ObjectCreationExpr objectCreationExpr,
+      final Issue issue) {
 
-    @Inject
-    public RemoveRedundantVariableChanger(
-        @ProvidedSonarScan(ruleId = "java:S1488") final RuleIssues issues) {
-      super(
-          issues,
-          ObjectCreationExpr.class,
-          RegionNodeMatcher.MATCHES_START,
-          CodemodReporterStrategy.empty());
+    // Get full block statement
+    final Optional<BlockStmt> blockStmtOpt = objectCreationExpr.findAncestor(BlockStmt.class);
+    if (blockStmtOpt.isPresent()) {
+      final BlockStmt blockStmt = blockStmtOpt.get();
+
+      // Retrieve return statement to update its expression to objectCreationExpr param
+      final Optional<ReturnStmt> returnStmtOpt =
+          blockStmt.getStatements().stream()
+              .filter(ReturnStmt.class::isInstance)
+              .map(ReturnStmt.class::cast)
+              .findFirst();
+
+      returnStmtOpt.ifPresent(
+          returnStmt -> {
+            final Expression expression = objectCreationExpr.clone();
+            returnStmt.setExpression(expression);
+
+            // Remove the redundant variable creation expression
+            final Optional<ExpressionStmt> exprStmtOpt =
+                objectCreationExpr.findAncestor(ExpressionStmt.class);
+            exprStmtOpt.ifPresent(exprStmt -> blockStmt.getStatements().remove(exprStmt));
+          });
     }
 
-    @Override
-    public boolean onIssueFound(
-        final CodemodInvocationContext context,
-        final CompilationUnit cu,
-        final ObjectCreationExpr objectCreationExpr,
-        final Issue issue) {
-
-      // Get full block statement
-      final Optional<BlockStmt> blockStmtOpt = objectCreationExpr.findAncestor(BlockStmt.class);
-      if (blockStmtOpt.isPresent()) {
-        final BlockStmt blockStmt = blockStmtOpt.get();
-
-        // Retrieve return statement to update its expression to objectCreationExpr param
-        final Optional<ReturnStmt> returnStmtOpt =
-            blockStmt.getStatements().stream()
-                .filter(ReturnStmt.class::isInstance)
-                .map(ReturnStmt.class::cast)
-                .findFirst();
-
-        returnStmtOpt.ifPresent(
-            returnStmt -> {
-              final Expression expression = objectCreationExpr.clone();
-              returnStmt.setExpression(expression);
-
-              // Remove the redundant variable creation expression
-              final Optional<ExpressionStmt> exprStmtOpt =
-                  objectCreationExpr.findAncestor(ExpressionStmt.class);
-              exprStmtOpt.ifPresent(exprStmt -> blockStmt.getStatements().remove(exprStmt));
-            });
-      }
-
-      return true;
-    }
+    return true;
   }
 }
