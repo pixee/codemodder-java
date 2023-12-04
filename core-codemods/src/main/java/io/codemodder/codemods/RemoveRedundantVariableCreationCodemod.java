@@ -2,9 +2,7 @@ package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.ast.stmt.*;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
@@ -39,17 +37,21 @@ public final class RemoveRedundantVariableCreationCodemod
     if (blockStmtOpt.isPresent()) {
       final BlockStmt blockStmt = blockStmtOpt.get();
 
-      // Retrieve return statement to update its expression to objectCreationExpr param
-      final Optional<ReturnStmt> returnStmtOpt =
+      // Retrieve return/throw statement to update its expression to given objectCreationExpr param
+      final Optional<Statement> lastStmtOpt =
           blockStmt.getStatements().stream()
-              .filter(ReturnStmt.class::isInstance)
-              .map(ReturnStmt.class::cast)
+              .filter(stmt -> stmt instanceof ReturnStmt || stmt instanceof ThrowStmt)
               .findFirst();
 
-      returnStmtOpt.ifPresent(
-          returnStmt -> {
+      lastStmtOpt.ifPresent(
+          lastStmt -> {
             final Expression expression = objectCreationExpr.clone();
-            returnStmt.setExpression(expression);
+            if (lastStmt instanceof ReturnStmt returnStmt) {
+              returnStmt.setExpression(expression);
+            }
+            if (lastStmt instanceof ThrowStmt throwStmt) {
+              throwStmt.setExpression(expression);
+            }
 
             // Remove the redundant variable creation expression
             final Optional<ExpressionStmt> exprStmtOpt =
