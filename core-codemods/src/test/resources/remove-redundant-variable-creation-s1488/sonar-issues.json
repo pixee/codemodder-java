@@ -1,15 +1,50 @@
 {
-  "total": 1,
+  "total": 2,
   "p": 1,
   "ps": 500,
   "paging": {
     "pageIndex": 1,
     "pageSize": 500,
-    "total": 1
+    "total": 2
   },
-  "effortTotal": 2,
-  "debtTotal": 2,
+  "effortTotal": 4,
+  "debtTotal": 4,
   "issues": [
+    {
+      "key": "AYw20oU9yE-xQ1mlDtlZ",
+      "rule": "java:S1488",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/MvcConfiguration.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 236,
+      "hash": "a67ab5564bba8704a79a7cd1e0ddb0a9",
+      "textRange": {
+        "startLine": 236,
+        "endLine": 236,
+        "startOffset": 35,
+        "endOffset": 57
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Immediately throw this expression instead of assigning it to the temporary variable \"myException\".",
+      "effort": "2min",
+      "debt": "2min",
+      "tags": [
+        "clumsy"
+      ],
+      "creationDate": "2023-12-04T22:50:38+0100",
+      "updateDate": "2023-12-04T22:50:38+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
     {
       "key": "AYvtrj5QLCzGLicz7AqQ",
       "rule": "java:S1488",
