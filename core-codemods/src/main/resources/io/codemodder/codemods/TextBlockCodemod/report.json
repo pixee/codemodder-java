@@ -1,0 +1,7 @@
+{
+  "summary" : "Remove string concatenation when string is multiline and replace it with Text Blocks (Sonar).",
+  "change" : "Remove string concatenation when string is multiline and replace it with Text Blocks.",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-6126/"
+  ]
+}
