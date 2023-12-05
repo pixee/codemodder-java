@@ -38,28 +38,29 @@ public final class RemoveRedundantVariableCreationCodemod
       final BlockStmt blockStmt = blockStmtOpt.get();
 
       // Retrieve return/throw statement to update its expression to given objectCreationExpr param
-      final Optional<Statement> lastStmtOpt =
-          blockStmt.getStatements().stream()
-              .filter(stmt -> stmt instanceof ReturnStmt || stmt instanceof ThrowStmt)
-              .findFirst();
+      final Optional<Statement> lastStmtOpt = blockStmt.getStatements().getLast();
 
-      lastStmtOpt.ifPresent(
-          lastStmt -> {
-            final Expression expression = objectCreationExpr.clone();
-            if (lastStmt instanceof ReturnStmt returnStmt) {
-              returnStmt.setExpression(expression);
-            }
-            if (lastStmt instanceof ThrowStmt throwStmt) {
-              throwStmt.setExpression(expression);
-            }
+      // Retrieve the redundant variable declaration expression that will be removed
+      final Optional<ExpressionStmt> exprStmtOpt =
+          objectCreationExpr.findAncestor(ExpressionStmt.class);
 
-            // Remove the redundant variable creation expression
-            final Optional<ExpressionStmt> exprStmtOpt =
-                objectCreationExpr.findAncestor(ExpressionStmt.class);
-            exprStmtOpt.ifPresent(exprStmt -> blockStmt.getStatements().remove(exprStmt));
-          });
+      if (lastStmtOpt.isPresent() && exprStmtOpt.isPresent()) {
+        final Statement lastStmt = lastStmtOpt.get();
+        final Expression expression = objectCreationExpr.clone();
+        if (lastStmt instanceof ReturnStmt returnStmt) {
+          returnStmt.setExpression(expression);
+        }
+        if (lastStmt instanceof ThrowStmt throwStmt) {
+          throwStmt.setExpression(expression);
+        }
+
+        // Remove the redundant variable creation expression
+        blockStmt.getStatements().remove(exprStmtOpt.get());
+
+        return true;
+      }
     }
 
-    return true;
+    return false;
   }
 }
