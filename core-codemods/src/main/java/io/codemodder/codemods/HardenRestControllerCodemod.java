@@ -49,10 +49,10 @@ public final class HardenRestControllerCodemod
 
     replaceControllerToRestControllerAnnotation(cu, controllerAnnotationOptional.get());
 
-    final Optional<AnnotationExpr> responseBodyClassOptional =
+    final Optional<AnnotationExpr> responseBodyClassAnnotationOptional =
         classOrInterfaceDeclaration.getAnnotationByName("ResponseBody");
 
-    responseBodyClassOptional.ifPresent(AnnotationExpr::remove);
+    responseBodyClassAnnotationOptional.ifPresent(AnnotationExpr::remove);
 
     removeResponseBodyAnnotationFromClassMethods(classOrInterfaceDeclaration);
 
@@ -75,9 +75,9 @@ public final class HardenRestControllerCodemod
     if (methods != null && !methods.isEmpty()) {
       methods.forEach(
           method -> {
-            final Optional<AnnotationExpr> responseBodyMethodOptional =
+            final Optional<AnnotationExpr> responseBodyMethodAnnotationOptional =
                 method.getAnnotationByName("ResponseBody");
-            responseBodyMethodOptional.ifPresent(AnnotationExpr::remove);
+            responseBodyMethodAnnotationOptional.ifPresent(AnnotationExpr::remove);
           });
     }
   }
