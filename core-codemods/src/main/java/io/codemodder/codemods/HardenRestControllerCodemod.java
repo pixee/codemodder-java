@@ -43,25 +43,22 @@ public final class HardenRestControllerCodemod
     final Optional<AnnotationExpr> controllerAnnotationOptional =
         classOrInterfaceDeclaration.getAnnotationByName("Controller");
 
-    if (controllerAnnotationOptional.isPresent()) {
-      replaceControllerToRestControllerAnnotation(cu, controllerAnnotationOptional.get());
-
-      final Optional<AnnotationExpr> responseBodyClassOptional =
-          classOrInterfaceDeclaration.getAnnotationByName("ResponseBody");
-
-      if (responseBodyClassOptional.isPresent()) {
-        final AnnotationExpr responseBodyClassAnnotation = responseBodyClassOptional.get();
-        responseBodyClassAnnotation.remove();
-      } else {
-        removeResponseBodyAnnotationFromClassMethods(classOrInterfaceDeclaration);
-      }
-
-      removeImportIfUnused(cu, "org.springframework.web.bind.annotation.ResponseBody");
-
-      return true;
+    if (controllerAnnotationOptional.isEmpty()) {
+      return false;
     }
 
-    return false;
+    replaceControllerToRestControllerAnnotation(cu, controllerAnnotationOptional.get());
+
+    final Optional<AnnotationExpr> responseBodyClassOptional =
+        classOrInterfaceDeclaration.getAnnotationByName("ResponseBody");
+
+    responseBodyClassOptional.ifPresent(AnnotationExpr::remove);
+
+    removeResponseBodyAnnotationFromClassMethods(classOrInterfaceDeclaration);
+
+    removeImportIfUnused(cu, "org.springframework.web.bind.annotation.ResponseBody");
+
+    return true;
   }
 
   private void replaceControllerToRestControllerAnnotation(
@@ -80,10 +77,7 @@ public final class HardenRestControllerCodemod
           method -> {
             final Optional<AnnotationExpr> responseBodyMethodOptional =
                 method.getAnnotationByName("ResponseBody");
-            if (responseBodyMethodOptional.isPresent()) {
-              final AnnotationExpr responseBodyMethodAnnotation = responseBodyMethodOptional.get();
-              responseBodyMethodAnnotation.remove();
-            }
+            responseBodyMethodOptional.ifPresent(AnnotationExpr::remove);
           });
     }
   }
