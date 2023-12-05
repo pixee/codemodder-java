@@ -1,24 +1,25 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
+import static io.codemodder.ast.ASTTransforms.removeImportIfUnused;
+
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.stmt.*;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
-
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
+import javax.inject.Inject;
 
-/** A codemod to replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations */
+/**
+ * A codemod to replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations
+ */
 @Codemod(
     id = "sonar:java/rest-controller-s6833",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
@@ -27,8 +28,7 @@ public final class RestControllerCodemod
     extends SonarPluginJavaParserChanger<ClassOrInterfaceDeclaration> {
 
   @Inject
-  public RestControllerCodemod(
-      @ProvidedSonarScan(ruleId = "java:S6833") final RuleIssues issues) {
+  public RestControllerCodemod(@ProvidedSonarScan(ruleId = "java:S6833") final RuleIssues issues) {
     super(issues, ClassOrInterfaceDeclaration.class, RegionNodeMatcher.MATCHES_START);
   }
 
@@ -39,43 +39,51 @@ public final class RestControllerCodemod
       final ClassOrInterfaceDeclaration classOrInterfaceDeclaration,
       final Issue issue) {
 
+    final Optional<AnnotationExpr> controllerAnnotationOptional =
+        classOrInterfaceDeclaration.getAnnotationByName("Controller");
 
-      final Optional<AnnotationExpr> controllerAnnotationOptional = classOrInterfaceDeclaration.getAnnotationByName("Controller");
+    if (controllerAnnotationOptional.isPresent()) {
+      replaceControllerToRestControllerAnnotation(cu, controllerAnnotationOptional.get());
 
-        if(controllerAnnotationOptional.isPresent()){
-            final AnnotationExpr restControllerAnnotation = new MarkerAnnotationExpr("RestController");
-            final AnnotationExpr controllerAnnotation = controllerAnnotationOptional.get();
-            controllerAnnotation.replace(restControllerAnnotation);
+      final Optional<AnnotationExpr> responseBodyClassOptional =
+          classOrInterfaceDeclaration.getAnnotationByName("ResponseBody");
 
-            final Optional<AnnotationExpr> responseBodyClassOptional = classOrInterfaceDeclaration.getAnnotationByName("ResponseBody");
+      if (responseBodyClassOptional.isPresent()) {
+        final AnnotationExpr responseBodyClassAnnotation = responseBodyClassOptional.get();
+        responseBodyClassAnnotation.remove();
+      } else {
+        removeResponseBodyAnnotationFromClassMethods(classOrInterfaceDeclaration);
+      }
 
-            if(responseBodyClassOptional.isPresent()){
-                removeAnnotation(responseBodyClassOptional);
-            } else {
-                removeResponseBodyAnnotationFromClassMethods(classOrInterfaceDeclaration);
-            }
+      removeImportIfUnused(cu, "org.springframework.web.bind.annotation.ResponseBody");
 
-            return true;
-        }
-
+      return true;
+    }
 
     return false;
   }
 
-  private void removeResponseBodyAnnotationFromClassMethods(final ClassOrInterfaceDeclaration classOrInterfaceDeclaration){
-      final List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethods();
-      if(methods != null && !methods.isEmpty()){
-          methods.forEach( method -> {
-              final Optional<AnnotationExpr> responseBodyMethodOptional = method.getAnnotationByName("ResponseBody");
-              if(responseBodyMethodOptional.isPresent()){
-                  removeAnnotation(responseBodyMethodOptional);
-              }
-          });
-      }
+  private void replaceControllerToRestControllerAnnotation(
+      final CompilationUnit cu, final AnnotationExpr controllerAnnotation) {
+    final AnnotationExpr restControllerAnnotation = new MarkerAnnotationExpr("RestController");
+    controllerAnnotation.replace(restControllerAnnotation);
+    removeImportIfUnused(cu, "org.springframework.stereotype.Controller");
+    addImportIfMissing(cu, "org.springframework.web.bind.annotation.RestController");
   }
 
-  private void removeAnnotation(final Optional<AnnotationExpr> annotationExprOptional){
-      final AnnotationExpr annotationExpr = annotationExprOptional.get();
-      annotationExpr.remove();
+  private void removeResponseBodyAnnotationFromClassMethods(
+      final ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+    final List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethods();
+    if (methods != null && !methods.isEmpty()) {
+      methods.forEach(
+          method -> {
+            final Optional<AnnotationExpr> responseBodyMethodOptional =
+                method.getAnnotationByName("ResponseBody");
+            if (responseBodyMethodOptional.isPresent()) {
+              final AnnotationExpr responseBodyMethodAnnotation = responseBodyMethodOptional.get();
+              responseBodyMethodAnnotation.remove();
+            }
+          });
+    }
   }
 }
