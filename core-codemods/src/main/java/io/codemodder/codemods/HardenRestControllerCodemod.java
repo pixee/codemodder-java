@@ -21,14 +21,15 @@ import javax.inject.Inject;
  * A codemod to replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations
  */
 @Codemod(
-    id = "sonar:java/rest-controller-s6833",
+    id = "sonar:java/harden-rest-controller-s6833",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class RestControllerCodemod
+public final class HardenRestControllerCodemod
     extends SonarPluginJavaParserChanger<ClassOrInterfaceDeclaration> {
 
   @Inject
-  public RestControllerCodemod(@ProvidedSonarScan(ruleId = "java:S6833") final RuleIssues issues) {
+  public HardenRestControllerCodemod(
+      @ProvidedSonarScan(ruleId = "java:S6833") final RuleIssues issues) {
     super(issues, ClassOrInterfaceDeclaration.class, RegionNodeMatcher.MATCHES_START);
   }
 
