@@ -5,10 +5,11 @@ codemods with additional context and services. Codemodder plugins inject codemod
 
 Pluggability and the complex transforms they enable distinguish codemodder codemods from traditional codemods.
 
+For directions on how to write your own codemods, visit the [Codemodder documentation site](https://codemodder.io/).
+
 ## Developing
 
-Follow these instructions if you intend to modify and build this project from
-source.
+Follow these instructions if you intend to modify and build this project from source.
 
 ### First Time Set Up
 
