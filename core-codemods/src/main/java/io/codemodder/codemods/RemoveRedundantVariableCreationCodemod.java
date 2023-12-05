@@ -46,12 +46,11 @@ public final class RemoveRedundantVariableCreationCodemod
 
       if (lastStmtOpt.isPresent() && exprStmtOpt.isPresent()) {
         final Statement lastStmt = lastStmtOpt.get();
-        final Expression expression = objectCreationExpr.clone();
         if (lastStmt instanceof ReturnStmt returnStmt) {
-          returnStmt.setExpression(expression);
+          returnStmt.setExpression(objectCreationExpr);
         }
         if (lastStmt instanceof ThrowStmt throwStmt) {
-          throwStmt.setExpression(expression);
+          throwStmt.setExpression(objectCreationExpr);
         }
 
         // Remove the redundant variable creation expression
