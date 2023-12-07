@@ -4,14 +4,14 @@ import java.io.PrintWriter;
 import java.util.List;
 import picocli.CommandLine;
 
-/** An entrypoint for the codemodder framework. */
+/** Provides an entrypoint for CLIs built with the codemodder framework. */
 public final class Runner {
 
   /**
-   * Runs the default, Pixee-developed codemods.
+   * Runs the codemods with a set of customized streams.
    *
-   * @param codemods The codemods to run
-   * @param args The arguments to pass to the codemod runner
+   * @param codemods the codemods to run
+   * @param args the arguments to pass to the codemod runner
    * @param stdout alternate stdout to use, or {@code null} to use the default
    * @param stderr alternate stderr to use, or {@code null} to use the default
    * @return the exit code of the codemodder CLI
@@ -33,6 +33,9 @@ public final class Runner {
   }
 
   /**
+   * 
+   * Runs the given codemods with CLI arguments you get from a main() method. This is the most like entry point you want to use.
+   * 
    * @see #run(List, String[], PrintWriter, PrintWriter)
    */
   public static void run(final List<Class<? extends CodeChanger>> codemods, final String[] args) {
