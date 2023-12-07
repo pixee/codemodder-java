@@ -19,7 +19,7 @@ import javax.inject.Inject;
 /** A codemod for setting a private constructor to hide implicit public constructor (Sonar) */
 @Codemod(
     id = "sonar:java/avoid-implicit-public-constructor-s1118",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class AvoidImplicitPublicConstructorCodemod
     extends SonarPluginJavaParserChanger<SimpleName> {
