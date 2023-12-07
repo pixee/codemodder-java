@@ -33,9 +33,9 @@ public final class Runner {
   }
 
   /**
-   * 
-   * Runs the given codemods with CLI arguments you get from a main() method. This is the most like entry point you want to use.
-   * 
+   * Runs the given codemods with CLI arguments you get from a main() method. This is the most like
+   * entry point you want to use.
+   *
    * @see #run(List, String[], PrintWriter, PrintWriter)
    */
   public static void run(final List<Class<? extends CodeChanger>> codemods, final String[] args) {
