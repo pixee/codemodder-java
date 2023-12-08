@@ -274,20 +274,25 @@ final class CLI implements Callable<Integer> {
     logEnteringPhase(Logs.ExecutionPhase.STARTING);
     log.info("codemodder: java/{}", CLI.class.getPackage().getImplementationVersion());
 
-    if (output == null) {
-      log.error("The output file is required");
-      return ERROR_CANT_WRITE_OUTPUT_FILE;
-    }
-
     if (projectDirectory == null) {
       log.error("No project directory specified");
       return ERROR_CANT_READ_PROJECT_DIRECTORY;
     }
 
-    Path outputPath = output.toPath();
-    if (!Files.isWritable(outputPath) && !Files.isWritable(outputPath.getParent())) {
-      log.error("The output file (or its parent directory) is not writable");
-      return ERROR_CANT_WRITE_OUTPUT_FILE;
+    Path outputPath = null;
+    if (output != null) {
+      outputPath = output.toPath();
+
+      // check if the output file parent directory doesn't exist
+      if (!Files.exists(outputPath.getParent())) {
+        // create it
+        Files.createDirectories(outputPath.getParent());
+      }
+
+      if (!Files.isWritable(outputPath) && !Files.isWritable(outputPath.getParent())) {
+        log.error("The output file (or its parent directory) is not writable");
+        return ERROR_CANT_WRITE_OUTPUT_FILE;
+      }
     }
 
     Path projectPath = projectDirectory.toPath();
@@ -454,23 +459,25 @@ final class CLI implements Callable<Integer> {
       logEnteringPhase(Logs.ExecutionPhase.REPORT);
       logMetrics(results);
 
-      // write out the output
-      if (OutputFormat.CODETF.equals(outputFormat)) {
-        CodeTFReport report =
-            reportGenerator.createReport(
-                projectDirectory.toPath(),
-                String.join(" ", args),
-                sarifs == null
-                    ? List.of()
-                    : sarifs.stream().map(Path::of).collect(Collectors.toList()),
-                results,
-                elapsed);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        Files.writeString(outputPath, mapper.writeValueAsString(report));
-        log.debug("report file: {}", outputPath);
-      } else if (OutputFormat.DIFF.equals(outputFormat)) {
-        throw new UnsupportedOperationException("not supported yet");
+      // write out the output if they want it
+      if (outputPath != null) {
+        if (OutputFormat.CODETF.equals(outputFormat)) {
+          CodeTFReport report =
+              reportGenerator.createReport(
+                  projectDirectory.toPath(),
+                  String.join(" ", args),
+                  sarifs == null
+                      ? List.of()
+                      : sarifs.stream().map(Path::of).collect(Collectors.toList()),
+                  results,
+                  elapsed);
+          ObjectMapper mapper = new ObjectMapper();
+          mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+          Files.writeString(outputPath, mapper.writeValueAsString(report));
+          log.debug("report file: {}", outputPath);
+        } else if (OutputFormat.DIFF.equals(outputFormat)) {
+          throw new UnsupportedOperationException("not supported yet");
+        }
       }
 
       log.debug("elapsed: {}ms", elapsed);
