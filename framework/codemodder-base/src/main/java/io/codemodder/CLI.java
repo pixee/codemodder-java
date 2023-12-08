@@ -282,18 +282,10 @@ final class CLI implements Callable<Integer> {
     Path outputPath = null;
     if (output != null) {
       outputPath = output.getAbsoluteFile().toPath();
-      if(!Files.exists(outputPath)) {
-        Files.createFile(outputPath);
-      }
 
       // check if the output file parent directory doesn't exist or isn't writable
       if (!Files.exists(outputPath.getParent()) || !Files.isWritable(outputPath.getParent())) {
-        log.error("The output file parent directory doesn't exist");
-        return ERROR_CANT_WRITE_OUTPUT_FILE;
-      }
-
-      if (!Files.isWritable(outputPath)) {
-        log.error("The output file is not writable");
+        log.error("The output file parent directory doesn't exist or isn't writable");
         return ERROR_CANT_WRITE_OUTPUT_FILE;
       }
     }
