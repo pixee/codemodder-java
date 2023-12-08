@@ -99,10 +99,12 @@ public final class MavenProvider implements ProjectProvider {
     @Override
     public Optional<Path> findForFile(final Path projectDir, final Path file) throws IOException {
 
-      if (projectDir != null && file != null && projectDir.getParent() != null) {
+      if (projectDir != null && file != null) {
+
         Path parent = file.getParent();
-        while (parent != null && !Files.isSameFile(projectDir.getParent(), parent)) {
-          Path pomPath = parent.resolve("pom.xml");
+
+        while (parent != null && isDifferentFile(projectDir, parent)) {
+          final Path pomPath = parent.resolve("pom.xml");
           if (Files.exists(pomPath)) {
             return Optional.of(pomPath);
           }
@@ -111,6 +113,11 @@ public final class MavenProvider implements ProjectProvider {
       }
 
       return Optional.empty();
+    }
+
+    private boolean isDifferentFile(final Path projectDir, final Path parent) throws IOException {
+      final Path projectDirParent = projectDir.getParent();
+      return projectDirParent == null || !Files.isSameFile(projectDirParent, parent);
     }
   }
 
