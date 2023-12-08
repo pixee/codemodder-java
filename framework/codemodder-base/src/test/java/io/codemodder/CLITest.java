@@ -61,6 +61,23 @@ final class CLITest {
                 List.of(barJavaFile.toAbsolutePath().toString())));
   }
 
+  @Test
+  void it_works_normally() throws IOException {
+    Path outputFile = Files.createTempFile("codetf", ".json");
+    String[] args =
+        new String[] {"--dont-exit", "--output", outputFile.toString(), workingRepoDir.toString()};
+    Runner.run(List.of(Cloud9Changer.class), args);
+    assertThat(Files.readString(fooJavaFile)).contains("cloud9");
+    assertThat(Files.exists(outputFile)).isTrue();
+  }
+
+  @Test
+  void it_works_without_output_file() throws IOException {
+    String[] args = new String[] {"--dont-exit", workingRepoDir.toString()};
+    Runner.run(List.of(Cloud9Changer.class), args);
+    assertThat(Files.readString(fooJavaFile)).contains("cloud9");
+  }
+
   /**
    * Runs the CLI with arguments that we know will cause it to fail, and asserts that the exit code
    * denotes failure and an error message is captured in the alternative stderr stream.
@@ -105,6 +122,17 @@ final class CLITest {
     Logger log = context.getLogger("myRootLogger");
     log.addAppender(appender);
     log.info("this is a test");
+  }
+
+  @Test
+  void output_file_parent_dirs_created() throws IOException {
+    Path normalCodetf = Files.createTempDirectory("exists");
+    Path outputFile = normalCodetf.resolve("doesnt/exist/codetf.json");
+    String[] args =
+        new String[] {"--dont-exit", "--output", outputFile.toString(), workingRepoDir.toString()};
+    Runner.run(List.of(Cloud9Changer.class), args);
+    assertThat(Files.readString(fooJavaFile)).contains("cloud9");
+    assertThat(Files.exists(outputFile)).isTrue();
   }
 
   @Test
