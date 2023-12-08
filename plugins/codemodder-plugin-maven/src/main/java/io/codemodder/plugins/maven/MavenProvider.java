@@ -103,7 +103,7 @@ public final class MavenProvider implements ProjectProvider {
 
         Path parent = file.getParent();
 
-        while (parent != null && isDifferentFile(projectDir, parent)) {
+        while (parent != null && isProjectDirParentNullOrDifferentToParent(projectDir, parent)) {
           final Path pomPath = parent.resolve("pom.xml");
           if (Files.exists(pomPath)) {
             return Optional.of(pomPath);
@@ -115,7 +115,8 @@ public final class MavenProvider implements ProjectProvider {
       return Optional.empty();
     }
 
-    private boolean isDifferentFile(final Path projectDir, final Path parent) throws IOException {
+    private boolean isProjectDirParentNullOrDifferentToParent(
+        final Path projectDir, final Path parent) throws IOException {
       final Path projectDirParent = projectDir.getParent();
       return projectDirParent == null || !Files.isSameFile(projectDirParent, parent);
     }
