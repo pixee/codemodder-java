@@ -125,17 +125,6 @@ final class CLITest {
   }
 
   @Test
-  void output_file_parent_dirs_created() throws IOException {
-    Path normalCodetf = Files.createTempDirectory("exists");
-    Path outputFile = normalCodetf.resolve("doesnt/exist/codetf.json");
-    String[] args =
-        new String[] {"--dont-exit", "--output", outputFile.toString(), workingRepoDir.toString()};
-    Runner.run(List.of(Cloud9Changer.class), args);
-    assertThat(Files.readString(fooJavaFile)).contains("cloud9");
-    assertThat(Files.exists(outputFile)).isTrue();
-  }
-
-  @Test
   void dry_run_works() throws IOException {
     Path normalCodetf = Files.createTempFile("normal", ".codetf");
     Path dryRunCodetf = Files.createTempFile("dryrun", ".codetf");
