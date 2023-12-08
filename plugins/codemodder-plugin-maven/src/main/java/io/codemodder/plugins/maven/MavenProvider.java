@@ -96,18 +96,22 @@ public final class MavenProvider implements ProjectProvider {
 
   @VisibleForTesting
   static class DefaultPomFileFinder implements PomFileFinder {
-    @Override
-    public Optional<Path> findForFile(final Path projectDir, final Path file) throws IOException {
-      Path parent = file.getParent();
-      while (parent != null && !Files.isSameFile(projectDir.getParent(), parent)) {
-        Path pomPath = parent.resolve("pom.xml");
-        if (Files.exists(pomPath)) {
-          return Optional.of(pomPath);
-        }
-        parent = parent.getParent();
+      @Override
+      public Optional<Path> findForFile(final Path projectDir, final Path file) throws IOException {
+
+          if(projectDir != null && file != null && projectDir.getParent() != null){
+              Path parent = file.getParent();
+              while (parent != null && !Files.isSameFile(projectDir.getParent(), parent)) {
+                  Path pomPath = parent.resolve("pom.xml");
+                  if (Files.exists(pomPath)) {
+                      return Optional.of(pomPath);
+                  }
+                  parent = parent.getParent();
+              }
+          }
+
+          return Optional.empty();
       }
-      return Optional.empty();
-    }
   }
 
   @Override
