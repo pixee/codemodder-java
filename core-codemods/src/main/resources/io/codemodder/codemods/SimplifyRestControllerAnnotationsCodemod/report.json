@@ -1,0 +1,7 @@
+{
+  "summary" : "Replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations (Sonar).",
+  "change" : "Replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations.",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-6833/"
+  ]
+}
