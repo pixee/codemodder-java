@@ -1,0 +1,7 @@
+{
+  "summary" : "Set private constructor to hide implicit public constructor (Sonar)",
+  "change" : "Set private constructor to hide implicit public constructor",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-1118/"
+  ]
+}

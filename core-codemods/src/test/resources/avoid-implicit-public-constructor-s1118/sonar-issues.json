@@ -1,0 +1,77 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 1
+  },
+  "effortTotal": 5,
+  "debtTotal": 5,
+  "issues": [
+    {
+      "key": "AYvtrjyZLCzGLicz7AjT",
+      "rule": "java:S1118",
+      "severity": "MAJOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/cryptography/CryptoUtil.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 23,
+      "hash": "0c5e79e80deb3c2f2927f62b4be46553",
+      "textRange": {
+        "startLine": 23,
+        "endLine": 23,
+        "startOffset": 13,
+        "endOffset": 23
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Add a private constructor to hide the implicit public one.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2023-11-20T17:58:54+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/cryptography/CryptoUtil.java",
+      "uuid": "AYvtrjqILCzGLicz7AXv",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "CryptoUtil.java",
+      "longName": "src/main/java/org/owasp/webgoat/lessons/cryptography/CryptoUtil.java",
+      "path": "src/main/java/org/owasp/webgoat/lessons/cryptography/CryptoUtil.java"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23",
+      "uuid": "AYvtqxxxzY4Rr5NHn4Om",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "WebGoat_10_23",
+      "longName": "WebGoat_10_23"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "nahsra",
+      "name": "Arshan Dabirsiaghi"
+    }
+  ],
+  "facets": []
+}
