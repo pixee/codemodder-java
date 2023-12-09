@@ -23,4 +23,20 @@ public class Test
         doNonAdminStuff5();
    }
 
+   void handleEndingDoesntNeedAdjustment() {
+     if(!isAdmin)
+     doNonAdminStuff5();
+   }
+
+   void handleElse() {
+     System.out.println("a");
+     if(isAdmin) {
+       System.out.println("b");
+     }
+     else
+       System.out.println("c");
+       System.out.println("d");
+
+     System.out.println("e");
+   }
 }
