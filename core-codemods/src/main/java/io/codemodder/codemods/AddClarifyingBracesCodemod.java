@@ -38,21 +38,25 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
       final Node node,
       final Result result) {
 
+    // handle the while case
     if (node instanceof WhileStmt) {
-      return handleUnbracedStmt(context, cu, new UnbracedWhileStatement((WhileStmt) node), result);
-    } else if (node.getParentNode().isPresent() && node.getParentNode().get() instanceof IfStmt) {
-      return handleUnbracedStmt(
-          context, cu, new UnbracedIfStatement((IfStmt) node.getParentNode().get()), result);
+      return handleUnbracedStmt(new UnbracedWhileStatement((WhileStmt) node));
+
+      // handle the if case
+    } else if (node.getParentNode().isPresent()
+        && node.getParentNode().get() instanceof IfStmt ifStmt) {
+      if (ifStmt.getThenStmt() == node) {
+        return handleUnbracedStmt(new UnbracedIfStatement(ifStmt));
+        // handle the else case
+      } else if (ifStmt.getElseStmt().isPresent() && ifStmt.getElseStmt().get() == node) {
+        return handleUnbracedStmt(new UnbracedElseStatement(ifStmt));
+      }
     }
     return false;
   }
 
-  /** Handles the case where the {@link Node} is a while statement. */
-  private boolean handleUnbracedStmt(
-      final CodemodInvocationContext context,
-      final CompilationUnit cu,
-      final UnbracedStatement stmt,
-      final Result result) {
+  /** Handles the case where the {@link Node} is a while unbracedStatement. */
+  private boolean handleUnbracedStmt(final UnbracedStatement stmt) {
     Node parentNode = stmt.getParentNode();
     List<Node> childNodes = parentNode.getChildNodes();
     int index = childNodes.indexOf(stmt.getStatement());
@@ -132,6 +136,32 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
     @Override
     public void addBraces() {
       ifStmt.setThenStmt(new BlockStmt(NodeList.nodeList(ifStmt.getThenStmt())));
+    }
+
+    @Override
+    public Statement getStatement() {
+      return ifStmt;
+    }
+  }
+
+  private record UnbracedElseStatement(IfStmt ifStmt) implements UnbracedStatement {
+    private UnbracedElseStatement {
+      Objects.requireNonNull(ifStmt);
+    }
+
+    @Override
+    public Node getParentNode() {
+      return ifStmt.getParentNode().get();
+    }
+
+    @Override
+    public Range getExistingSingleStatementRange() {
+      return ifStmt.getElseStmt().get().getRange().get();
+    }
+
+    @Override
+    public void addBraces() {
+      ifStmt.setElseStmt(new BlockStmt(NodeList.nodeList(ifStmt.getElseStmt().get())));
     }
 
     @Override
