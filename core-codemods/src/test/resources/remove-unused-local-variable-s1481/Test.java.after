@@ -76,7 +76,6 @@ public abstract class AssignmentEndpoint implements Initializeable {
       int intSumMethod = 1 + intMethod(); // operation withMethod
       int intConstant = Integer.SIZE; //constant similar to var
       List<Integer> integerProcess = integers.stream().map(integer -> calculateOffsetAndPrint(integer)).toList(); //lambda
-      AssignmentEndpoint assignmentDup = assignment; // var
       List<Integer> intList = List.of(1, 2, 3, 4, 5); // method ???
       MyClass myClass = new MyClass(10); // constructor
       int y = (ten > 0) ? 10 : intMethod(); // ternary
