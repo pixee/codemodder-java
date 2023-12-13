@@ -20,7 +20,7 @@ public final class FixRedundantStaticOnEnumCodemod
   @Inject
   public FixRedundantStaticOnEnumCodemod(
       @ProvidedSonarScan(ruleId = "java:S2786") final RuleIssues issues) {
-    super(issues, EnumDeclaration.class, RegionNodeMatcher.MATCHES_START);
+    super(issues, EnumDeclaration.class);
   }
 
   @Override

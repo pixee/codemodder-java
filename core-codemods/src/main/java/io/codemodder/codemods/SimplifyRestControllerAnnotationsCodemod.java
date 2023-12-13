@@ -30,7 +30,7 @@ public final class SimplifyRestControllerAnnotationsCodemod
   @Inject
   public SimplifyRestControllerAnnotationsCodemod(
       @ProvidedSonarScan(ruleId = "java:S6833") final RuleIssues issues) {
-    super(issues, ClassOrInterfaceDeclaration.class, RegionNodeMatcher.MATCHES_START);
+    super(issues, ClassOrInterfaceDeclaration.class);
   }
 
   @Override

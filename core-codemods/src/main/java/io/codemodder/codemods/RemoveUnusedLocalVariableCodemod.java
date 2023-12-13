@@ -30,7 +30,7 @@ public final class RemoveUnusedLocalVariableCodemod
   @Inject
   public RemoveUnusedLocalVariableCodemod(
       @ProvidedSonarScan(ruleId = "java:S1481") final RuleIssues issues) {
-    super(issues, VariableDeclarator.class, RegionNodeMatcher.MATCHES_START);
+    super(issues, VariableDeclarator.class);
   }
 
   @Override
@@ -52,10 +52,10 @@ public final class RemoveUnusedLocalVariableCodemod
           final VariableDeclarationExpr variableDeclarationExpr =
               (VariableDeclarationExpr) variableDeclarationExprOptional.get();
           variableDeclarationExpr.removeForced();
+
+          return true;
         }
       }
-
-      return true;
     }
 
     return false;
