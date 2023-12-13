@@ -2,6 +2,7 @@ package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
@@ -10,6 +11,7 @@ import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 /**
@@ -51,7 +53,16 @@ public final class RemoveUnusedLocalVariableCodemod
         if (variableDeclarationExprOptional.isPresent()) {
           final VariableDeclarationExpr variableDeclarationExpr =
               (VariableDeclarationExpr) variableDeclarationExprOptional.get();
-          variableDeclarationExpr.removeForced();
+
+          if (1 == variableDeclarationExpr.getVariables().size()) {
+            variableDeclarationExpr.removeForced();
+          } else {
+            final NodeList<VariableDeclarator> variables =
+                variableDeclarationExpr.getVariables().stream()
+                    .filter(variable -> !variable.equals(variableDeclarator))
+                    .collect(Collectors.toCollection(NodeList::new));
+            variableDeclarationExpr.setVariables(variables);
+          }
 
           return true;
         }
