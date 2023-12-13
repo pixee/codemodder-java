@@ -36,7 +36,7 @@ import org.apache.commons.jexl3.JexlExpression;
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expression> {
 
-    private static final String CREATE_CONSTANT = "create";
+private static final String CREATE_CONSTANT = "create";
 
   @Inject
   public JEXLInjectionCodemod(
