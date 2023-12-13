@@ -1,0 +1,121 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 1
+  },
+  "effortTotal": 8,
+  "debtTotal": 8,
+  "issues": [
+    {
+      "key": "AYu2g5It97lOFaqEjR1c",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/JEXLInjectionCodemod.java",
+      "project": "pixee_codemodder-java",
+      "line": 119,
+      "hash": "4f1d787ecfbbfa095b2062d90cb01d56",
+      "textRange": {
+        "startLine": 119,
+        "endLine": 119,
+        "startOffset": 58,
+        "endOffset": 66
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/JEXLInjectionCodemod.java",
+              "textRange": {
+                "startLine": 119,
+                "endLine": 119,
+                "startOffset": 58,
+                "endOffset": 66
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/JEXLInjectionCodemod.java",
+              "textRange": {
+                "startLine": 162,
+                "endLine": 162,
+                "startOffset": 60,
+                "endOffset": 68
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/JEXLInjectionCodemod.java",
+              "textRange": {
+                "startLine": 175,
+                "endLine": 175,
+                "startOffset": 60,
+                "endOffset": 68
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"create\" 3 times.",
+      "effort": "8min",
+      "debt": "8min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2023-03-04T01:32:43+0100",
+      "updateDate": "2023-11-10T00:55:25+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-java",
+      "uuid": "AYu2gu7gBsP_nwHMid1L",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "codemodder-java",
+      "longName": "codemodder-java"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/JEXLInjectionCodemod.java",
+      "uuid": "AYu2g4-e97lOFaqEjRr1",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "JEXLInjectionCodemod.java",
+      "longName": "core-codemods/src/main/java/io/codemodder/codemods/JEXLInjectionCodemod.java",
+      "path": "core-codemods/src/main/java/io/codemodder/codemods/JEXLInjectionCodemod.java"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "pixee",
+      "name": "Pixee"
+    }
+  ],
+  "facets": []
+}
