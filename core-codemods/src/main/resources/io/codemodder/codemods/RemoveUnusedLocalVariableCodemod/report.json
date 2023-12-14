@@ -1,0 +1,7 @@
+{
+  "summary" : "Removed unused local variable (Sonar)",
+  "change" : "Removed unused local variable",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-1481/"
+  ]
+}

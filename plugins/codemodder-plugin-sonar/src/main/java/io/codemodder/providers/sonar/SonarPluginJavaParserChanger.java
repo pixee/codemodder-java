@@ -27,6 +27,11 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   }
 
   protected SonarPluginJavaParserChanger(
+      final RuleIssues ruleIssues, final Class<? extends Node> nodeType) {
+    this(ruleIssues, nodeType, RegionNodeMatcher.MATCHES_START);
+  }
+
+  protected SonarPluginJavaParserChanger(
       final RuleIssues ruleIssues,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher,

@@ -19,7 +19,7 @@ public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChan
   @Inject
   public SubstituteReplaceAllCodemod(
       @ProvidedSonarScan(ruleId = "java:S5361") final RuleIssues issues) {
-    super(issues, SimpleName.class, RegionNodeMatcher.MATCHES_START);
+    super(issues, SimpleName.class);
   }
 
   @Override

@@ -22,7 +22,7 @@ public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChange
   @Inject
   public AddMissingOverrideCodemod(
       @ProvidedSonarScan(ruleId = "java:S1161") final RuleIssues issues) {
-    super(issues, SimpleName.class, RegionNodeMatcher.MATCHES_START);
+    super(issues, SimpleName.class);
   }
 
   @Override

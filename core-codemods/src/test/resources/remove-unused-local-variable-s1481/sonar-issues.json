@@ -1,0 +1,462 @@
+{
+  "total": 12,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 12
+  },
+  "effortTotal": 60,
+  "debtTotal": 60,
+  "issues": [
+    {
+      "key": "AYxkqUZwlAj1v1V7lso4",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 85,
+      "hash": "87a642a820b265aca0a8f400482b7480",
+      "textRange": {
+        "startLine": 85,
+        "endLine": 85,
+        "startOffset": 20,
+        "endOffset": 26
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"unused\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-13T20:28:16+0100",
+      "updateDate": "2023-12-13T20:28:16+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTk",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 74,
+      "hash": "57b04e72050d5407745f21143852e52c",
+      "textRange": {
+        "startLine": 74,
+        "endLine": 74,
+        "startOffset": 13,
+        "endOffset": 16
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"msg\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-13T21:16:17+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTl",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 75,
+      "hash": "7be5f0f8192dc050a2488c537f79d3ab",
+      "textRange": {
+        "startLine": 75,
+        "endLine": 75,
+        "startOffset": 10,
+        "endOffset": 23
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"integerResult\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-12T21:09:57+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTm",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 76,
+      "hash": "b062111d31d34946982756ffb41ecaa5",
+      "textRange": {
+        "startLine": 76,
+        "endLine": 76,
+        "startOffset": 10,
+        "endOffset": 16
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"intSum\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-12T21:09:57+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTn",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 77,
+      "hash": "9824cb04353e5a14c86e572d1d860e1c",
+      "textRange": {
+        "startLine": 77,
+        "endLine": 77,
+        "startOffset": 10,
+        "endOffset": 22
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"intSumMethod\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-12T21:09:57+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTo",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 78,
+      "hash": "d11b9e1c8550b43b62aa34c26772b1b6",
+      "textRange": {
+        "startLine": 78,
+        "endLine": 78,
+        "startOffset": 10,
+        "endOffset": 14
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"zero\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-12T21:09:57+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTp",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 79,
+      "hash": "1b1a428b2510f91a74b9d7324359912e",
+      "textRange": {
+        "startLine": 79,
+        "endLine": 79,
+        "startOffset": 10,
+        "endOffset": 21
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"intConstant\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-12T21:09:57+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTq",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 80,
+      "hash": "2f4800dcc04342932cdf5df1533d3528",
+      "textRange": {
+        "startLine": 80,
+        "endLine": 80,
+        "startOffset": 20,
+        "endOffset": 34
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"integerProcess\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-12T21:09:57+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTr",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 81,
+      "hash": "0e1a5206955f48bbf7a316c6ad215c0d",
+      "textRange": {
+        "startLine": 81,
+        "endLine": 81,
+        "startOffset": 25,
+        "endOffset": 38
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"assignmentDup\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-12T21:09:57+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTs",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 82,
+      "hash": "37589ec227cf543e3efd9dda0b6c219f",
+      "textRange": {
+        "startLine": 82,
+        "endLine": 82,
+        "startOffset": 20,
+        "endOffset": 27
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"intList\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-12T21:09:57+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTt",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 83,
+      "hash": "a6ab3ea4489f290e435446132430563d",
+      "textRange": {
+        "startLine": 83,
+        "endLine": 83,
+        "startOffset": 14,
+        "endOffset": 21
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"myClass\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-12T21:09:57+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxfqdgz7I9_CfiZFZTu",
+      "rule": "java:S1481",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 84,
+      "hash": "f017a84a6349f059a30ae8c2556df9f2",
+      "textRange": {
+        "startLine": 84,
+        "endLine": 84,
+        "startOffset": 10,
+        "endOffset": 11
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused \"y\" local variable.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-12T21:09:57+0100",
+      "updateDate": "2023-12-12T21:09:57+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "uuid": "AYvtrjqJLCzGLicz7Abq",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "AssignmentEndpoint.java",
+      "longName": "src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "path": "src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23",
+      "uuid": "AYvtqxxxzY4Rr5NHn4Om",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "WebGoat_10_23",
+      "longName": "WebGoat_10_23"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "nahsra",
+      "name": "Arshan Dabirsiaghi"
+    }
+  ],
+  "facets": []
+}
