@@ -3,7 +3,6 @@ This change modernizes the a stream's `List` creation to be driven from the simp
 Our changes look something like this:
 
 ```diff
-     List<CodemodChange> allWeaves =
--        linesAffected.stream().map(CodemodChange::from).collect(Collectors.toList());
-+        linesAffected.stream().map(CodemodChange::from).toList();
+- List<Integer> numbers = someStream.collect(Collectors.toList());
++ List<Integer> numbers = someStream.toList();
 ```
