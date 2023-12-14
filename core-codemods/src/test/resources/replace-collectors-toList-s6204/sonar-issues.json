@@ -1,0 +1,79 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 1
+  },
+  "effortTotal": 5,
+  "debtTotal": 5,
+  "issues": [
+    {
+      "key": "AYu2g5Hn97lOFaqEjR0v",
+      "rule": "java:S6204",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/MavenSecureURLCodemod.java",
+      "project": "pixee_codemodder-java",
+      "line": 72,
+      "hash": "dde477e51d696ed510a0ade800320f23",
+      "textRange": {
+        "startLine": 72,
+        "endLine": 72,
+        "startOffset": 64,
+        "endOffset": 83
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Replace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'",
+      "effort": "5min",
+      "debt": "5min",
+      "assignee": "nahsra@github",
+      "author": "arshan.dabirsiaghi@gmail.com",
+      "tags": [
+        "java16"
+      ],
+      "creationDate": "2023-07-28T17:02:08+0200",
+      "updateDate": "2023-11-10T00:55:25+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-java",
+      "uuid": "AYu2gu7gBsP_nwHMid1L",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "codemodder-java",
+      "longName": "codemodder-java"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/MavenSecureURLCodemod.java",
+      "uuid": "AYu2g4-e97lOFaqEjRrD",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "MavenSecureURLCodemod.java",
+      "longName": "core-codemods/src/main/java/io/codemodder/codemods/MavenSecureURLCodemod.java",
+      "path": "core-codemods/src/main/java/io/codemodder/codemods/MavenSecureURLCodemod.java"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "pixee",
+      "name": "Pixee"
+    }
+  ],
+  "facets": []
+}
