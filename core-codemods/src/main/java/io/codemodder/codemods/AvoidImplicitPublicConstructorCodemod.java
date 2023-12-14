@@ -27,7 +27,7 @@ public final class AvoidImplicitPublicConstructorCodemod
   @Inject
   public AvoidImplicitPublicConstructorCodemod(
       @ProvidedSonarScan(ruleId = "java:S1118") final RuleIssues issues) {
-    super(issues, SimpleName.class, RegionNodeMatcher.MATCHES_START);
+    super(issues, SimpleName.class);
   }
 
   @Override

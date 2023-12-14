@@ -22,7 +22,7 @@ public final class RemoveRedundantVariableCreationCodemod
   @Inject
   public RemoveRedundantVariableCreationCodemod(
       @ProvidedSonarScan(ruleId = "java:S1488") final RuleIssues issues) {
-    super(issues, ObjectCreationExpr.class, RegionNodeMatcher.MATCHES_START);
+    super(issues, ObjectCreationExpr.class);
   }
 
   @Override
