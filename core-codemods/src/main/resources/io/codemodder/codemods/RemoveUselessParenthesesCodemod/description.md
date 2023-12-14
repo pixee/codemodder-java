@@ -1,4 +1,4 @@
-TODO
+This change removes redundant parentheses. These extra parentheses make it harder to understand the code.
 
 Our changes look something like this:
 
