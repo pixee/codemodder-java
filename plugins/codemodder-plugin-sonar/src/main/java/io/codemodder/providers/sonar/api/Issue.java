@@ -1,7 +1,6 @@
 package io.codemodder.providers.sonar.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -38,8 +37,8 @@ public class Issue {
   @JsonProperty("flows")
   private List<Flow> flows;
 
-  public List<Flow> getFlows(){
-      return flows;
+  public List<Flow> getFlows() {
+    return flows;
   }
 
   public int getLine() {
