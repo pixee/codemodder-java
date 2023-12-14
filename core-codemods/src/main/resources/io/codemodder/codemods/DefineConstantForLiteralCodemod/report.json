@@ -1,6 +1,6 @@
 {
-  "summary" : "Define a constant for a literal string that duplicated n times (Sonar)",
-  "change" : "Define a constant for a literal string that duplicated n times",
+  "summary" : "Define a constant for a literal string that is duplicated n times (Sonar)",
+  "change" : "Define a constant for a literal string that is duplicated n times",
   "references" : [
     "https://rules.sonarsource.com/java/RSPEC-1192/"
   ]
