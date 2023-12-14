@@ -1,0 +1,7 @@
+{
+  "summary" : "Remove useless parentheses (Sonar).",
+  "change" : "Remove useless parentheses",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-1110/"
+  ]
+}
