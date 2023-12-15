@@ -7,7 +7,6 @@ import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
 import io.codemodder.providers.sonar.api.TextRange;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -97,16 +96,10 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   public abstract boolean onIssueFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
 
-  protected SourceCodeRegion createSourceCodeRegion(final TextRange textRange){
-      final Position start =
-              new Position(
-                      textRange.getStartLine(),
-                      textRange.getStartOffset() + 1);
-      final Position end =
-              new Position(
-                      textRange.getEndLine(),
-                      textRange.getEndOffset() + 1);
+  protected SourceCodeRegion createSourceCodeRegion(final TextRange textRange) {
+    final Position start = new Position(textRange.getStartLine(), textRange.getStartOffset() + 1);
+    final Position end = new Position(textRange.getEndLine(), textRange.getEndOffset() + 1);
 
-      return new SourceCodeRegion(start, end);
+    return new SourceCodeRegion(start, end);
   }
 }

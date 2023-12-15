@@ -16,6 +16,7 @@ import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Flow;
 import io.codemodder.providers.sonar.api.Issue;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -41,27 +42,36 @@ public final class DefineConstantForLiteralCodemod
       final StringLiteralExpr stringLiteralExpr,
       final Issue issue) {
 
-    if (defineConstant(stringLiteralExpr)) {
+    final Optional<ClassOrInterfaceDeclaration> classOrInterfaceDeclarationOptional =
+        stringLiteralExpr.findAncestor(ClassOrInterfaceDeclaration.class);
 
-      return replaceDuplicateLiteralStrings(context, cu, issue);
+    if (classOrInterfaceDeclarationOptional.isEmpty()) {
+      return false;
     }
-
-    return false;
-  }
-
-  /**
-   * Following almost same logic applied on SonarPluginJavaParserChanger::visit but in this case we
-   * are focusing on the issue's flows that have the locations of the duplicate literal nodes.
-   * Process is successful if all duplicated literals were replaced with the constant expression.
-   */
-  private boolean replaceDuplicateLiteralStrings(
-      final CodemodInvocationContext context, final CompilationUnit cu, final Issue issue) {
-
-    List<? extends Node> allNodes = cu.findAll(StringLiteralExpr.class);
 
     final int numberOfDuplications = issue.getFlows().size();
 
-    int expectedDups = 0;
+    final List<Node> nodesToReplace = findLiteralNodesToReplace(context, cu, issue);
+
+    if (nodesToReplace.size() != numberOfDuplications) {
+      return false;
+    }
+
+    final ClassOrInterfaceDeclaration classOrInterfaceDeclaration =
+        classOrInterfaceDeclarationOptional.get();
+
+    addConstantFieldToClass(classOrInterfaceDeclaration, createConstantField(stringLiteralExpr));
+
+    nodesToReplace.forEach(this::replaceDuplicatedLiteralToConstantExpression);
+
+    return true;
+  }
+
+  private List<Node> findLiteralNodesToReplace(
+      final CodemodInvocationContext context, final CompilationUnit cu, final Issue issue) {
+    List<? extends Node> allNodes = cu.findAll(StringLiteralExpr.class);
+
+    final List<Node> nodesToReplace = new ArrayList<>();
 
     for (Flow flow : issue.getFlows()) {
       for (Node node : allNodes) {
@@ -77,36 +87,19 @@ public final class DefineConstantForLiteralCodemod
             && node.getRange().isPresent()) {
           Range range = node.getRange().get();
           if (RegionNodeMatcher.MATCHES_START.matches(region, range)) {
-            replaceDuplicatedLiteralToConstantExpression(node);
-            expectedDups++;
+            nodesToReplace.add(node);
           }
         }
       }
     }
 
-    return expectedDups == numberOfDuplications;
+    return nodesToReplace;
   }
 
   private void replaceDuplicatedLiteralToConstantExpression(final Node node) {
     StringLiteralExpr stringLiteralExpr = (StringLiteralExpr) node;
     NameExpr nameExpr = new NameExpr(buildConstantName(stringLiteralExpr));
     stringLiteralExpr.replace(nameExpr);
-  }
-
-  private boolean defineConstant(final StringLiteralExpr stringLiteralExpr) {
-    final Optional<ClassOrInterfaceDeclaration> classOrInterfaceDeclarationOptional =
-        stringLiteralExpr.findAncestor(ClassOrInterfaceDeclaration.class);
-
-    if (classOrInterfaceDeclarationOptional.isPresent()) {
-      final ClassOrInterfaceDeclaration classOrInterfaceDeclaration =
-          classOrInterfaceDeclarationOptional.get();
-
-      addConstantFieldToClass(classOrInterfaceDeclaration, createConstantField(stringLiteralExpr));
-
-      return true;
-    }
-
-    return false;
   }
 
   private void addConstantFieldToClass(
