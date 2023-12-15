@@ -66,7 +66,8 @@ public final class DefineConstantForLiteralCodemod
     for (Flow flow : issue.getFlows()) {
       for (Node node : allNodes) {
 
-        final SourceCodeRegion region = findSourceCodeRegion(flow);
+        final SourceCodeRegion region =
+            createSourceCodeRegion(flow.getLocations().get(0).getTextRange());
 
         if (!StringLiteralExpr.class.isAssignableFrom(node.getClass())) {
           continue;
@@ -90,19 +91,6 @@ public final class DefineConstantForLiteralCodemod
     StringLiteralExpr stringLiteralExpr = (StringLiteralExpr) node;
     NameExpr nameExpr = new NameExpr(buildConstantName(stringLiteralExpr));
     stringLiteralExpr.replace(nameExpr);
-  }
-
-  private SourceCodeRegion findSourceCodeRegion(final Flow flow) {
-    final Position start =
-        new Position(
-            flow.getLocations().get(0).getTextRange().getStartLine(),
-            flow.getLocations().get(0).getTextRange().getStartOffset() + 1);
-    final Position end =
-        new Position(
-            flow.getLocations().get(0).getTextRange().getEndLine(),
-            flow.getLocations().get(0).getTextRange().getEndOffset() + 1);
-
-    return new SourceCodeRegion(start, end);
   }
 
   private boolean defineConstant(final StringLiteralExpr stringLiteralExpr) {
