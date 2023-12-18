@@ -1,0 +1,7 @@
+{
+  "summary" : "Declared variable on separate line (Sonar)",
+  "change" : "Declared variable on separate line.",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-1659/"
+  ]
+}
