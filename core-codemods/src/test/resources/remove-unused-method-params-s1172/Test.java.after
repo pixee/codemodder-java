@@ -92,7 +92,23 @@ public class AccountVerificationHelper {
       return false;
     }
 
+    unusedSuccess( 1);
+    unusedFailsOverload(1,2,3);
+    unusedFailsOverload(1, 2);
+
     // else
     return true;
+  }
+
+  private void unusedSuccess(int b){
+      System.out.println(b);
+  }
+
+  private void unusedFailsOverload(Integer a, Integer b, Integer c){
+      System.out.println(a + c);
+  }
+
+  private void unusedFailsOverload(Integer a, Integer b){
+      unusedFailsOverload(a, b, null);
   }
 }
