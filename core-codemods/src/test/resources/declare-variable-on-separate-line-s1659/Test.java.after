@@ -44,7 +44,8 @@ public abstract class AssignmentEndpoint implements Initializeable {
   @Getter @Autowired @Qualifier("mensajes")
   private PluginMessages messages;
 
-  private static final int a = 1, b = 0;
+  private static final int a = 1;
+  private static final int b = 0;
 
   @Autowired
   public AssignmentEndpoint(WebSession webSession){
@@ -86,7 +87,9 @@ public abstract class AssignmentEndpoint implements Initializeable {
       List<Integer> intList = List.of(1, 2, 3, 4, 5); // method ???
       MyClass myClass = new MyClass(10); // constructor
       int y = (ten > 0) ? 10 : intMethod(); // ternary
-      int used = 1, unused = 0, used1 = 10;
+      int used = 1;
+      int unused = 0;
+      int used1 = 10;
 
       System.out.println(ten + used1 + used);
 
