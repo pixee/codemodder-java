@@ -13,7 +13,7 @@ rules:
       - pattern-not-inside: >
           $RETURNTYPE $METHOD(...) {
             ...
-            (io.github.pixee.security.ObjectInputFilters).enableObjectFilterIfUnprotected($OIS);
+            ObjectInputFilters.enableObjectFilterIfUnprotected($OIS);
             ...
           }
       - focus-metavariable: $OIS
