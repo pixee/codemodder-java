@@ -44,6 +44,8 @@ public abstract class AssignmentEndpoint implements Initializeable {
   @Getter @Autowired @Qualifier("mensajes")
   private PluginMessages messages;
 
+  private static final int a = 1, b = 0;
+
   @Autowired
   public AssignmentEndpoint(WebSession webSession){
     this.webSession = webSession;
@@ -68,6 +70,8 @@ public abstract class AssignmentEndpoint implements Initializeable {
    * @param assignment
    */
   protected AttackResult.AttackResultBuilder success(AssignmentEndpoint assignment) {
+
+      System.out.println(a+b);
       List<Integer> integers = List.of(1,2,3);
       int ten = 10;
 
