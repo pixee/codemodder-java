@@ -1,0 +1,8 @@
+{
+  "summary" : "Removed unused private method (Sonar).",
+  "change" : "Removed unused private method.",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-1144/",
+    "https://understandlegacycode.com/blog/delete-unused-code/"
+  ]
+}
