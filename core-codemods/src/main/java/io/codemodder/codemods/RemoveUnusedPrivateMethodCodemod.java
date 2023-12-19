@@ -15,10 +15,10 @@ import io.codemodder.providers.sonar.api.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
 
-/** A codemod for removing unused private method. */
+/** A codemod for removing unused private methods. */
 @Codemod(
     id = "sonar:java/remove-unused-private-method-s1144",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveUnusedPrivateMethodCodemod
     extends SonarPluginJavaParserChanger<SimpleName> {
