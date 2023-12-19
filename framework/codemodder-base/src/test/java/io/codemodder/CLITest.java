@@ -36,6 +36,7 @@ final class CLITest {
   private Path fooJavaFile;
   private Path barJavaFile;
   private Path testFile;
+  private Path testDirFile;
   private List<SourceDirectory> sourceDirectories;
 
   @BeforeEach
@@ -45,14 +46,18 @@ final class CLITest {
         Files.createDirectories(tmpDir.resolve("module1/src/alternateMain/java/com/acme/"));
     Path module2JavaDir =
         Files.createDirectories(tmpDir.resolve("module2/src/main/java/com/acme/util/"));
+    Path moduleTest =
+        Files.createDirectories(tmpDir.resolve("module2/myTest/main/java/com/acme/util/"));
     fooJavaFile = module1JavaDir.resolve("Foo.java");
     barJavaFile = module2JavaDir.resolve("Bar.java");
+    testDirFile = moduleTest.resolve("Foo2.java");
     testFile = module2JavaDir.resolve("MyTest.java");
     Files.write(
         fooJavaFile,
         "import com.acme.util.Bar; class Foo {private var bar = new Bar();}".getBytes());
     Files.write(barJavaFile, "public class Bar {}".getBytes());
     Files.write(testFile, "public class MyTest {}".getBytes());
+    Files.write(testDirFile, "public class Foo2 {}".getBytes());
 
     /*
      * Only add module2 to the discovered source directories. This will help prove that the module1 files can still be seen and changed, even if we couldn't locate it as a "source directory".
@@ -79,6 +84,13 @@ final class CLITest {
     String[] args = new String[] {"--dont-exit", workingRepoDir.toString()};
     Runner.run(List.of(Cloud9Changer.class), args);
     assertThat(Files.readString(testFile)).doesNotContain("cloud9");
+  }
+
+  @Test
+  void it_doesnt_change_file_on_test_dir() throws IOException {
+    String[] args = new String[] {"--dont-exit", workingRepoDir.toString()};
+    Runner.run(List.of(Cloud9Changer.class), args);
+    assertThat(Files.readString(testDirFile)).doesNotContain("cloud9");
   }
 
   @Test
@@ -213,7 +225,7 @@ final class CLITest {
 
     IncludesExcludes all = IncludesExcludes.any();
     List<Path> files = finder.findFiles(workingRepoDir, all);
-    assertThat(files).containsExactly(fooJavaFile, barJavaFile);
+    assertThat(files).containsExactly(fooJavaFile, testDirFile, barJavaFile, testFile);
 
     IncludesExcludes onlyFoo =
         IncludesExcludes.withSettings(workingRepoDir.toFile(), List.of("**/Foo.java"), List.of());
