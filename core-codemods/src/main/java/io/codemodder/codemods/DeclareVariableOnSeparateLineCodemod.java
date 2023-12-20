@@ -63,15 +63,20 @@ public final class DeclareVariableOnSeparateLineCodemod
     final NodeList<AnnotationExpr> annotations =
         isFieldDeclaration ? ((FieldDeclaration) parentNode).getAnnotations() : null;
 
+    // Replace parent's node all inline variables with only the first inline variable
     parentNode.setVariables(new NodeList<>(inlineVariables.get(0)));
 
-    final List<Node> nodesToAdd =
-        createNodesToAdd(isFieldDeclaration, inlineVariables, modifiers, annotations);
+    final List<VariableDeclarator> remainingVariables =
+        inlineVariables.subList(1, inlineVariables.size());
+
+    // Create remaining variables list. Node type will depend on isFieldDeclaration flag
+    final List<Node> newVariableNodes =
+        createVariableNodesToAdd(isFieldDeclaration, remainingVariables, modifiers, annotations);
 
     if (isFieldDeclaration) {
-      handleFieldDeclaration(parentNode, nodesToAdd);
+      addVariablesAsMembersToClassOrInterface(parentNode, newVariableNodes);
     } else {
-      handleVariableDeclarationExpr(parentNode, nodesToAdd);
+      addVariablesAsStatementsToBlockStatement(parentNode, newVariableNodes);
     }
 
     return true;
@@ -84,20 +89,20 @@ public final class DeclareVariableOnSeparateLineCodemod
         : ((VariableDeclarationExpr) parentNode).getModifiers();
   }
 
-  private List<Node> createNodesToAdd(
+  private List<Node> createVariableNodesToAdd(
       final boolean isFieldDeclaration,
       final List<VariableDeclarator> inlineVariables,
       final NodeList<Modifier> modifiers,
       final NodeList<AnnotationExpr> annotations) {
     final List<Node> nodesToAdd = new ArrayList<>();
-    for (int i = 1; i < inlineVariables.size(); i++) {
+    for (VariableDeclarator inlineVariable : inlineVariables) {
       if (isFieldDeclaration) {
         final FieldDeclaration fieldDeclaration =
-            new FieldDeclaration(modifiers, annotations, new NodeList<>(inlineVariables.get(i)));
+            new FieldDeclaration(modifiers, annotations, new NodeList<>(inlineVariable));
         nodesToAdd.add(fieldDeclaration);
       } else {
         final VariableDeclarationExpr variableDeclarationExpr =
-            new VariableDeclarationExpr(modifiers, new NodeList<>(inlineVariables.get(i)));
+            new VariableDeclarationExpr(modifiers, new NodeList<>(inlineVariable));
         final ExpressionStmt expressionStmt = new ExpressionStmt(variableDeclarationExpr);
         nodesToAdd.add(expressionStmt);
       }
@@ -105,51 +110,66 @@ public final class DeclareVariableOnSeparateLineCodemod
     return nodesToAdd;
   }
 
-  private void handleFieldDeclaration(
+  private void addVariablesAsMembersToClassOrInterface(
       final NodeWithVariables<?> parentNode, final List<Node> nodesToAdd) {
-    final Optional<Node> classOrInterfaceDeclarationOptional =
-        ((FieldDeclaration) parentNode).getParentNode();
+    final FieldDeclaration fieldDeclaration = (FieldDeclaration) parentNode;
+    final Optional<Node> classOrInterfaceDeclarationOptional = fieldDeclaration.getParentNode();
     if (classOrInterfaceDeclarationOptional.isPresent()
         && classOrInterfaceDeclarationOptional.get()
             instanceof ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
 
-      final int index = classOrInterfaceDeclaration.getMembers().indexOf(parentNode);
-      final List<BodyDeclaration<?>> originalMembers =
-          classOrInterfaceDeclaration.getMembers().stream().toList();
-
-      final List<BodyDeclaration<?>> membersBefore = originalMembers.subList(0, index + 1);
-      final List<BodyDeclaration<?>> membersAfter =
-          originalMembers.subList(index + 1, originalMembers.size());
-
-      final List<BodyDeclaration<?>> allMembers = new ArrayList<>(membersBefore);
-      nodesToAdd.forEach(node -> allMembers.add((BodyDeclaration<?>) node));
-      allMembers.addAll(membersAfter);
+      final NodesInserter<BodyDeclaration<?>> statementHelper =
+          new NodesInserter<>(
+              classOrInterfaceDeclaration.getMembers().stream().toList(),
+              fieldDeclaration,
+              nodesToAdd);
+      final List<BodyDeclaration<?>> allMembers = statementHelper.retrieveNewNodes();
 
       classOrInterfaceDeclaration.setMembers(new NodeList<>(allMembers));
     }
   }
 
-  private void handleVariableDeclarationExpr(
+  private void addVariablesAsStatementsToBlockStatement(
       final NodeWithVariables<?> parentNode, final List<Node> nodesToAdd) {
-    final Optional<Node> expressionStmtOptional =
-        ((VariableDeclarationExpr) parentNode).getParentNode();
+    final VariableDeclarationExpr variableDeclarationExpr = (VariableDeclarationExpr) parentNode;
+    final Optional<Node> expressionStmtOptional = variableDeclarationExpr.getParentNode();
     if (expressionStmtOptional.isPresent()
         && expressionStmtOptional.get() instanceof ExpressionStmt expressionStmt) {
       final Optional<Node> blockStmtOptional = expressionStmt.getParentNode();
       if (blockStmtOptional.isPresent() && blockStmtOptional.get() instanceof BlockStmt blockStmt) {
 
-        final int index = blockStmt.getStatements().indexOf(expressionStmt);
-        final List<Statement> originalStmts = blockStmt.getStatements().stream().toList();
-
-        final List<Statement> stmtsBefore = originalStmts.subList(0, index + 1);
-        final List<Statement> stmtsAfter = originalStmts.subList(index + 1, originalStmts.size());
-
-        final List<Statement> allStmts = new ArrayList<>(stmtsBefore);
-        nodesToAdd.forEach(node -> allStmts.add((Statement) node));
-        allStmts.addAll(stmtsAfter);
+        final NodesInserter<Statement> statementHelper =
+            new NodesInserter<>(blockStmt.getStatements(), expressionStmt, nodesToAdd);
+        final List<Statement> allStmts = statementHelper.retrieveNewNodes();
 
         blockStmt.setStatements(new NodeList<>(allStmts));
       }
+    }
+  }
+
+  private static final class NodesInserter<T extends Node> {
+    private final List<T> originalNodes;
+    private final Node referenceNode;
+    private final List<Node> nodesToAdd;
+
+    NodesInserter(
+        final List<T> originalNodes, final Node referenceNode, final List<Node> nodesToAdd) {
+      this.originalNodes = originalNodes;
+      this.referenceNode = referenceNode;
+      this.nodesToAdd = nodesToAdd;
+    }
+
+    List<T> retrieveNewNodes() {
+
+      final int referenceIndex = originalNodes.indexOf(referenceNode);
+      final List<T> elementsBefore = originalNodes.subList(0, referenceIndex + 1);
+      final List<T> elementsAfter = originalNodes.subList(referenceIndex + 1, originalNodes.size());
+
+      final List<T> newElements = new ArrayList<>(elementsBefore);
+      nodesToAdd.forEach(node -> newElements.add((T) node));
+      newElements.addAll(elementsAfter);
+
+      return newElements;
     }
   }
 }
