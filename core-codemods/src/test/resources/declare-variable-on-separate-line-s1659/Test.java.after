@@ -45,7 +45,8 @@ public abstract class AssignmentEndpoint implements Initializeable {
   private PluginMessages messages;
 
   private static final int a = 1;
-  private static final int b = 0;
+
+private static final int b = 0;
 
   @Autowired
   public AssignmentEndpoint(WebSession webSession){
