@@ -41,103 +41,115 @@ public final class DeclareVariableOnSeparateLineCodemod
     super(issues, VariableDeclarator.class);
   }
 
-    @Override
-    public boolean onIssueFound(
-            final CodemodInvocationContext context,
-            final CompilationUnit cu,
-            final VariableDeclarator variableDeclarator,
-            final Issue issue) {
+  @Override
+  public boolean onIssueFound(
+      final CodemodInvocationContext context,
+      final CompilationUnit cu,
+      final VariableDeclarator variableDeclarator,
+      final Issue issue) {
 
-        final Optional<Node> parentOptional = variableDeclarator.getParentNode();
+    final Optional<Node> parentOptional = variableDeclarator.getParentNode();
 
-        if (parentOptional.isEmpty()) {
-            return false;
-        }
-
-        final NodeWithVariables<?> parentNode = (NodeWithVariables<?>) parentOptional.get();
-
-        final boolean isFieldDeclaration = parentNode instanceof FieldDeclaration;
-
-        final List<VariableDeclarator> inlineVariables = parentNode.getVariables().stream().toList();
-        final NodeList<Modifier> modifiers = getModifiers(parentNode, isFieldDeclaration);
-        final NodeList<AnnotationExpr> annotations = isFieldDeclaration ? ((FieldDeclaration) parentNode).getAnnotations() : null;
-
-        parentNode.setVariables(new NodeList<>(inlineVariables.get(0)));
-
-        final List<Node> nodesToAdd = createNodesToAdd(isFieldDeclaration, inlineVariables, modifiers, annotations);
-
-        if (isFieldDeclaration) {
-            handleFieldDeclaration(parentNode, nodesToAdd);
-        } else {
-            handleVariableDeclarationExpr(parentNode, nodesToAdd);
-        }
-
-        return true;
+    if (parentOptional.isEmpty()) {
+      return false;
     }
 
-    private NodeList<Modifier> getModifiers(final NodeWithVariables<?> parentNode, final boolean isFieldDeclaration) {
-        return isFieldDeclaration ?
-                ((FieldDeclaration) parentNode).getModifiers() :
-                ((VariableDeclarationExpr) parentNode).getModifiers();
+    final NodeWithVariables<?> parentNode = (NodeWithVariables<?>) parentOptional.get();
+
+    final boolean isFieldDeclaration = parentNode instanceof FieldDeclaration;
+
+    final List<VariableDeclarator> inlineVariables = parentNode.getVariables().stream().toList();
+    final NodeList<Modifier> modifiers = getModifiers(parentNode, isFieldDeclaration);
+    final NodeList<AnnotationExpr> annotations =
+        isFieldDeclaration ? ((FieldDeclaration) parentNode).getAnnotations() : null;
+
+    parentNode.setVariables(new NodeList<>(inlineVariables.get(0)));
+
+    final List<Node> nodesToAdd =
+        createNodesToAdd(isFieldDeclaration, inlineVariables, modifiers, annotations);
+
+    if (isFieldDeclaration) {
+      handleFieldDeclaration(parentNode, nodesToAdd);
+    } else {
+      handleVariableDeclarationExpr(parentNode, nodesToAdd);
     }
 
-    private List<Node> createNodesToAdd(final boolean isFieldDeclaration, final List<VariableDeclarator> inlineVariables,
-                                        final NodeList<Modifier> modifiers, final NodeList<AnnotationExpr> annotations) {
-        final List<Node> nodesToAdd = new ArrayList<>();
-        for (int i = 1; i < inlineVariables.size(); i++) {
-            if (isFieldDeclaration) {
-                final FieldDeclaration fieldDeclaration =
-                        new FieldDeclaration(modifiers, annotations, new NodeList<>(inlineVariables.get(i)));
-                nodesToAdd.add(fieldDeclaration);
-            } else {
-                final VariableDeclarationExpr variableDeclarationExpr =
-                        new VariableDeclarationExpr(modifiers, new NodeList<>(inlineVariables.get(i)));
-                final ExpressionStmt expressionStmt = new ExpressionStmt(variableDeclarationExpr);
-                nodesToAdd.add(expressionStmt);
-            }
-        }
-        return nodesToAdd;
+    return true;
+  }
+
+  private NodeList<Modifier> getModifiers(
+      final NodeWithVariables<?> parentNode, final boolean isFieldDeclaration) {
+    return isFieldDeclaration
+        ? ((FieldDeclaration) parentNode).getModifiers()
+        : ((VariableDeclarationExpr) parentNode).getModifiers();
+  }
+
+  private List<Node> createNodesToAdd(
+      final boolean isFieldDeclaration,
+      final List<VariableDeclarator> inlineVariables,
+      final NodeList<Modifier> modifiers,
+      final NodeList<AnnotationExpr> annotations) {
+    final List<Node> nodesToAdd = new ArrayList<>();
+    for (int i = 1; i < inlineVariables.size(); i++) {
+      if (isFieldDeclaration) {
+        final FieldDeclaration fieldDeclaration =
+            new FieldDeclaration(modifiers, annotations, new NodeList<>(inlineVariables.get(i)));
+        nodesToAdd.add(fieldDeclaration);
+      } else {
+        final VariableDeclarationExpr variableDeclarationExpr =
+            new VariableDeclarationExpr(modifiers, new NodeList<>(inlineVariables.get(i)));
+        final ExpressionStmt expressionStmt = new ExpressionStmt(variableDeclarationExpr);
+        nodesToAdd.add(expressionStmt);
+      }
     }
+    return nodesToAdd;
+  }
 
-    private void handleFieldDeclaration(final NodeWithVariables<?> parentNode, final List<Node> nodesToAdd) {
-        final Optional<Node> classOrInterfaceDeclarationOptional = ((FieldDeclaration) parentNode).getParentNode();
-        if (classOrInterfaceDeclarationOptional.isPresent() &&
-                classOrInterfaceDeclarationOptional.get() instanceof ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+  private void handleFieldDeclaration(
+      final NodeWithVariables<?> parentNode, final List<Node> nodesToAdd) {
+    final Optional<Node> classOrInterfaceDeclarationOptional =
+        ((FieldDeclaration) parentNode).getParentNode();
+    if (classOrInterfaceDeclarationOptional.isPresent()
+        && classOrInterfaceDeclarationOptional.get()
+            instanceof ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
 
-            final int index = classOrInterfaceDeclaration.getMembers().indexOf(parentNode);
-            final List<BodyDeclaration<?>> originalMembers = classOrInterfaceDeclaration.getMembers().stream().toList();
+      final int index = classOrInterfaceDeclaration.getMembers().indexOf(parentNode);
+      final List<BodyDeclaration<?>> originalMembers =
+          classOrInterfaceDeclaration.getMembers().stream().toList();
 
-            final List<BodyDeclaration<?>> membersBefore = originalMembers.subList(0, index + 1);
-            final List<BodyDeclaration<?>> membersAfter = originalMembers.subList(index + 1, originalMembers.size());
+      final List<BodyDeclaration<?>> membersBefore = originalMembers.subList(0, index + 1);
+      final List<BodyDeclaration<?>> membersAfter =
+          originalMembers.subList(index + 1, originalMembers.size());
 
-            final List<BodyDeclaration<?>> allMembers = new ArrayList<>(membersBefore);
-            nodesToAdd.forEach(node -> allMembers.add((BodyDeclaration<?>) node));
-            allMembers.addAll(membersAfter);
+      final List<BodyDeclaration<?>> allMembers = new ArrayList<>(membersBefore);
+      nodesToAdd.forEach(node -> allMembers.add((BodyDeclaration<?>) node));
+      allMembers.addAll(membersAfter);
 
-            classOrInterfaceDeclaration.setMembers(new NodeList<>(allMembers));
-        }
+      classOrInterfaceDeclaration.setMembers(new NodeList<>(allMembers));
     }
+  }
 
-    private void handleVariableDeclarationExpr(final NodeWithVariables<?> parentNode, final List<Node> nodesToAdd) {
-        final Optional<Node> expressionStmtOptional = ((VariableDeclarationExpr) parentNode).getParentNode();
-        if (expressionStmtOptional.isPresent() && expressionStmtOptional.get() instanceof ExpressionStmt expressionStmt) {
-            final Optional<Node> blockStmtOptional = expressionStmt.getParentNode();
-            if (blockStmtOptional.isPresent() && blockStmtOptional.get() instanceof BlockStmt blockStmt) {
+  private void handleVariableDeclarationExpr(
+      final NodeWithVariables<?> parentNode, final List<Node> nodesToAdd) {
+    final Optional<Node> expressionStmtOptional =
+        ((VariableDeclarationExpr) parentNode).getParentNode();
+    if (expressionStmtOptional.isPresent()
+        && expressionStmtOptional.get() instanceof ExpressionStmt expressionStmt) {
+      final Optional<Node> blockStmtOptional = expressionStmt.getParentNode();
+      if (blockStmtOptional.isPresent() && blockStmtOptional.get() instanceof BlockStmt blockStmt) {
 
-                final int index = blockStmt.getStatements().indexOf(expressionStmt);
-                final List<Statement> originalStmts = blockStmt.getStatements().stream().toList();
+        final int index = blockStmt.getStatements().indexOf(expressionStmt);
+        final List<Statement> originalStmts = blockStmt.getStatements().stream().toList();
 
-                final List<Statement> stmtsBefore = originalStmts.subList(0, index + 1);
-                final List<Statement> stmtsAfter = originalStmts.subList(index + 1, originalStmts.size());
+        final List<Statement> stmtsBefore = originalStmts.subList(0, index + 1);
+        final List<Statement> stmtsAfter = originalStmts.subList(index + 1, originalStmts.size());
 
-                final List<Statement> allStmts = new ArrayList<>(stmtsBefore);
-                nodesToAdd.forEach(node -> allStmts.add((Statement) node));
-                allStmts.addAll(stmtsAfter);
+        final List<Statement> allStmts = new ArrayList<>(stmtsBefore);
+        nodesToAdd.forEach(node -> allStmts.add((Statement) node));
+        allStmts.addAll(stmtsAfter);
 
-                blockStmt.setStatements(new NodeList<>(allStmts));
-            }
-        }
+        blockStmt.setStatements(new NodeList<>(allStmts));
+      }
     }
-
-
+  }
 }
