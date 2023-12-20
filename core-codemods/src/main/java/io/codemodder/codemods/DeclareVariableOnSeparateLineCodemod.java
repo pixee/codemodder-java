@@ -59,25 +59,29 @@ public final class DeclareVariableOnSeparateLineCodemod
     final boolean isFieldDeclaration = parentNode instanceof FieldDeclaration;
 
     final List<VariableDeclarator> inlineVariables = parentNode.getVariables().stream().toList();
+
     final NodeList<Modifier> modifiers = getModifiers(parentNode, isFieldDeclaration);
+
     final NodeList<AnnotationExpr> annotations =
         isFieldDeclaration ? ((FieldDeclaration) parentNode).getAnnotations() : null;
 
-    // Replace parent's node all inline variables with only the first inline variable
-    parentNode.setVariables(new NodeList<>(inlineVariables.get(0)));
-
     final List<VariableDeclarator> remainingVariables =
         inlineVariables.subList(1, inlineVariables.size());
-
-    // Create remaining variables list. Node type will depend on isFieldDeclaration flag
     final List<Node> newVariableNodes =
         createVariableNodesToAdd(isFieldDeclaration, remainingVariables, modifiers, annotations);
 
-    if (isFieldDeclaration) {
-      addVariablesAsMembersToClassOrInterface(parentNode, newVariableNodes);
-    } else {
-      addVariablesAsStatementsToBlockStatement(parentNode, newVariableNodes);
+    try {
+      if (isFieldDeclaration) {
+        addVariablesAsMembersToClassOrInterface(parentNode, newVariableNodes);
+      } else {
+        addVariablesAsStatementsToBlockStatement(parentNode, newVariableNodes);
+      }
+    } catch (final NullPointerException nullPointerException) {
+      return false;
     }
+
+    // Replace parent's node all inline variables with only the first inline variable
+    parentNode.setVariables(new NodeList<>(inlineVariables.get(0)));
 
     return true;
   }
@@ -89,6 +93,7 @@ public final class DeclareVariableOnSeparateLineCodemod
         : ((VariableDeclarationExpr) parentNode).getModifiers();
   }
 
+  // Create remaining variables list. Node type will depend on isFieldDeclaration flag
   private List<Node> createVariableNodesToAdd(
       final boolean isFieldDeclaration,
       final List<VariableDeclarator> inlineVariables,
@@ -118,12 +123,12 @@ public final class DeclareVariableOnSeparateLineCodemod
         && classOrInterfaceDeclarationOptional.get()
             instanceof ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
 
-      final NodesInserter<BodyDeclaration<?>> statementHelper =
+      final NodesInserter<BodyDeclaration<?>> memberNodesInserter =
           new NodesInserter<>(
               classOrInterfaceDeclaration.getMembers().stream().toList(),
               fieldDeclaration,
               nodesToAdd);
-      final List<BodyDeclaration<?>> allMembers = statementHelper.retrieveNewNodes();
+      final List<BodyDeclaration<?>> allMembers = memberNodesInserter.retrieveNewNodes();
 
       classOrInterfaceDeclaration.setMembers(new NodeList<>(allMembers));
     }
@@ -138,9 +143,9 @@ public final class DeclareVariableOnSeparateLineCodemod
       final Optional<Node> blockStmtOptional = expressionStmt.getParentNode();
       if (blockStmtOptional.isPresent() && blockStmtOptional.get() instanceof BlockStmt blockStmt) {
 
-        final NodesInserter<Statement> statementHelper =
+        final NodesInserter<Statement> statementNodesInserter =
             new NodesInserter<>(blockStmt.getStatements(), expressionStmt, nodesToAdd);
-        final List<Statement> allStmts = statementHelper.retrieveNewNodes();
+        final List<Statement> allStmts = statementNodesInserter.retrieveNewNodes();
 
         blockStmt.setStatements(new NodeList<>(allStmts));
       }
@@ -154,11 +159,19 @@ public final class DeclareVariableOnSeparateLineCodemod
 
     NodesInserter(
         final List<T> originalNodes, final Node referenceNode, final List<Node> nodesToAdd) {
+      if (originalNodes == null
+          || referenceNode == null
+          || nodesToAdd == null
+          || !originalNodes.contains(referenceNode)) {
+        throw new NullPointerException();
+      }
+
       this.originalNodes = originalNodes;
       this.referenceNode = referenceNode;
       this.nodesToAdd = nodesToAdd;
     }
 
+    // New nodes will be inserted after the reference node position
     List<T> retrieveNewNodes() {
 
       final int referenceIndex = originalNodes.indexOf(referenceNode);
