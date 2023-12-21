@@ -11,7 +11,9 @@ import javax.inject.Inject;
 
 /**
  * A codemod for moving the "default" case to last in switch statements. This codemod is not
- * currently in the default set because it
+ * currently in the default set because it could conceivably change behavior when other case
+ * statements fall through to it. It should be improved to only move if the previous case
+ * does not fall through.
  */
 @Codemod(
     id = "pixee:java/move-switch-default-last",
