@@ -32,9 +32,4 @@ public interface RegionNodeMatcher {
       (region, range) ->
           region.start().line() == range.begin.line
               && region.start().column() == range.begin.column;
-
-  // TODO remove
-    RegionNodeMatcher TEST =
-            (region, range) ->
-                    region.start().line() == range.begin.line;
 }

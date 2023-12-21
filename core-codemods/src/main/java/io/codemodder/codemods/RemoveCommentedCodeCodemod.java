@@ -16,10 +16,16 @@ import javax.inject.Inject;
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChanger<Comment> {
 
+  private static final RegionNodeMatcher regionNodeMatcher =
+      (region, range) ->
+          region.start().line() == range.begin.line
+              && region.start().column() >= range.begin.column;
+
   @Inject
   public RemoveCommentedCodeCodemod(
       @ProvidedSonarScan(ruleId = "java:S125") final RuleIssues issues) {
-    super(issues, Comment.class, RegionNodeMatcher.TEST);
+
+    super(issues, Comment.class, regionNodeMatcher);
   }
 
   @Override

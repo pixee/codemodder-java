@@ -6,7 +6,6 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = RemoveCommentedCodeCodemod.class,
     testResourceDir = "remove-commented-code-s125",
-    renameTestFile =
-        "core-codemods/src/main/java/io/codemodder/codemods/HQLParameterizationCodemod.java",
+    renameTestFile = "src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
     dependencies = {})
 final class RemoveCommentedCodeCodemodTest implements CodemodTestMixin {}
