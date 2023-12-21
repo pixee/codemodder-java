@@ -3,7 +3,6 @@ package io.codemodder.providers.sonar;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.comments.Comment;
 import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
@@ -52,9 +51,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     if (issues.isEmpty()) {
       return List.of();
     }
-
-    List<? extends Node> allNodes =
-        Comment.class.isAssignableFrom(nodeType) ? cu.getAllComments() : cu.findAll(nodeType);
+    final List<? extends Node> allNodes = getAllCompilationUnitNodes(cu);
 
     List<CodemodChange> codemodChanges = new ArrayList<>();
     for (Issue issue : issues) {
@@ -89,6 +86,10 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   @Override
   public boolean shouldRun() {
     return ruleIssues.hasResults();
+  }
+
+  public List<? extends Node> getAllCompilationUnitNodes(final CompilationUnit cu) {
+    return cu.findAll(nodeType);
   }
 
   /**
