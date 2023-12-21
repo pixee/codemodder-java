@@ -7,6 +7,8 @@ Pluggability and the complex transforms they enable distinguish codemodder codem
 
 For directions on how to write your own codemods, visit the [Codemodder documentation site](https://codemodder.io/).
 
+Codemodder is sponsored by [pixee.ai](https://pixee.ai).
+
 ## Developing
 
 Follow these instructions if you intend to modify and build this project from source.
