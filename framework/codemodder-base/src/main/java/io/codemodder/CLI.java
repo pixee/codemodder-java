@@ -618,6 +618,7 @@ final class CLI implements Callable<Integer> {
   private static final List<String> defaultPathExcludes =
       List.of(
           "**/test/**",
+          "**/testFixtures/**",
           "**/*Test.java",
           "**/intTest/**",
           "**/tests/**",
