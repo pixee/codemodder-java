@@ -36,7 +36,7 @@ import org.apache.commons.jexl3.JexlExpression;
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expression> {
 
-private static final String CREATE_CONSTANT = "create";
+private static final String CREATE = "create";
 
   @Inject
   public JEXLInjectionCodemod(
@@ -118,7 +118,7 @@ private static final String CREATE_CONSTANT = "create";
     final var sandboxCall =
         new MethodCallExpr(
             mce.getScope().get(), "sandbox", new NodeList<>(new NameExpr("sandbox")));
-    final var newCreate = new MethodCallExpr(sandboxCall, CREATE_CONSTANT);
+    final var newCreate = new MethodCallExpr(sandboxCall, CREATE);
     ASTTransforms.addImportIfMissing(cu, UnwantedTypes.class.getName());
     ASTTransforms.addImportIfMissing(cu, "org.apache.commons.jexl3.introspection.JexlSandbox");
     mce.replace(newCreate);
@@ -161,7 +161,7 @@ private static final String CREATE_CONSTANT = "create";
     final var scope = mce.getScope().get();
     // immediate call
     if (scope instanceof MethodCallExpr) {
-      if (scope.asMethodCallExpr().getNameAsString().equals(CREATE_CONSTANT))
+      if (scope.asMethodCallExpr().getNameAsString().equals(CREATE))
         return Optional.of(scope.asMethodCallExpr());
     }
 
@@ -174,7 +174,7 @@ private static final String CREATE_CONSTANT = "create";
           .filter(ASTs::isFinalOrNeverAssigned)
           .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
           .map(expr -> expr.isMethodCallExpr() ? expr.asMethodCallExpr() : null)
-          .filter(mcexpr -> mcexpr.getNameAsString().equals(CREATE_CONSTANT));
+          .filter(mcexpr -> mcexpr.getNameAsString().equals(CREATE));
     }
     return Optional.empty();
   }

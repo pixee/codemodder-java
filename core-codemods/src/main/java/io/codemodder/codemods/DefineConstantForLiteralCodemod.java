@@ -129,6 +129,6 @@ public final class DefineConstantForLiteralCodemod
   }
 
   private String buildConstantName(final StringLiteralExpr stringLiteralExpr) {
-    return stringLiteralExpr.getValue().toUpperCase().concat("_CONSTANT");
+    return stringLiteralExpr.getValue().toUpperCase();
   }
 }
