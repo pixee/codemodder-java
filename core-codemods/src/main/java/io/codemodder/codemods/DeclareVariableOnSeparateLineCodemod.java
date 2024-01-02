@@ -70,14 +70,10 @@ public final class DeclareVariableOnSeparateLineCodemod
     final List<Node> newVariableNodes =
         createVariableNodesToAdd(isFieldDeclaration, remainingVariables, modifiers, annotations);
 
-    try {
-      if (isFieldDeclaration) {
-        addVariablesAsMembersToClassOrInterface(parentNode, newVariableNodes);
-      } else {
-        addVariablesAsStatementsToBlockStatement(parentNode, newVariableNodes);
-      }
-    } catch (final NullPointerException nullPointerException) {
-      return false;
+    if (isFieldDeclaration) {
+      addVariablesAsMembersToClassOrInterface(parentNode, newVariableNodes);
+    } else {
+      addVariablesAsStatementsToBlockStatement(parentNode, newVariableNodes);
     }
 
     // Replace parent's node all inline variables with only the first inline variable
@@ -123,12 +119,11 @@ public final class DeclareVariableOnSeparateLineCodemod
         && classOrInterfaceDeclarationOptional.get()
             instanceof ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
 
-      final NodesInserter<BodyDeclaration<?>> memberNodesInserter =
-          new NodesInserter<>(
+      final List<BodyDeclaration<?>> allMembers =
+          NodesInserter.mergeNodes(
               classOrInterfaceDeclaration.getMembers().stream().toList(),
               fieldDeclaration,
               nodesToAdd);
-      final List<BodyDeclaration<?>> allMembers = memberNodesInserter.retrieveNewNodes();
 
       classOrInterfaceDeclaration.setMembers(new NodeList<>(allMembers));
     }
@@ -143,36 +138,19 @@ public final class DeclareVariableOnSeparateLineCodemod
       final Optional<Node> blockStmtOptional = expressionStmt.getParentNode();
       if (blockStmtOptional.isPresent() && blockStmtOptional.get() instanceof BlockStmt blockStmt) {
 
-        final NodesInserter<Statement> statementNodesInserter =
-            new NodesInserter<>(blockStmt.getStatements(), expressionStmt, nodesToAdd);
-        final List<Statement> allStmts = statementNodesInserter.retrieveNewNodes();
+        final List<Statement> allStmts =
+            NodesInserter.mergeNodes(blockStmt.getStatements(), expressionStmt, nodesToAdd);
 
         blockStmt.setStatements(new NodeList<>(allStmts));
       }
     }
   }
 
-  private static final class NodesInserter<T extends Node> {
-    private final List<T> originalNodes;
-    private final Node referenceNode;
-    private final List<Node> nodesToAdd;
-
-    NodesInserter(
-        final List<T> originalNodes, final Node referenceNode, final List<Node> nodesToAdd) {
-      if (originalNodes == null
-          || referenceNode == null
-          || nodesToAdd == null
-          || !originalNodes.contains(referenceNode)) {
-        throw new NullPointerException();
-      }
-
-      this.originalNodes = originalNodes;
-      this.referenceNode = referenceNode;
-      this.nodesToAdd = nodesToAdd;
-    }
+  private static final class NodesInserter {
 
     // New nodes will be inserted after the reference node position
-    List<T> retrieveNewNodes() {
+    static <T> List<T> mergeNodes(
+        final List<T> originalNodes, final Node referenceNode, final List<Node> nodesToAdd) {
 
       final int referenceIndex = originalNodes.indexOf(referenceNode);
       final List<T> elementsBefore = originalNodes.subList(0, referenceIndex + 1);
