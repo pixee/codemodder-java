@@ -148,14 +148,22 @@ public final class DeclareVariableOnSeparateLineCodemod
 
   private static final class NodesInserter {
 
-    // New nodes will be inserted after the reference node position
+    /**
+     * Inserts a list of nodes after a specified reference node within an original list of nodes.
+     * The result of this operation is a new list containing the original nodes with the additional nodes
+     * inserted after the specified reference node while maintaining the original order of elements.
+     */
     static <T> List<T> mergeNodes(
         final List<T> originalNodes, final Node referenceNode, final List<Node> nodesToAdd) {
 
+      // Find the index of the reference node in the original list
       final int referenceIndex = originalNodes.indexOf(referenceNode);
+
+      // Split the original list into elements before and after the reference node
       final List<T> elementsBefore = originalNodes.subList(0, referenceIndex + 1);
       final List<T> elementsAfter = originalNodes.subList(referenceIndex + 1, originalNodes.size());
 
+      // Create a new list with nodes inserted after the reference node
       final List<T> newElements = new ArrayList<>(elementsBefore);
       nodesToAdd.forEach(node -> newElements.add((T) node));
       newElements.addAll(elementsAfter);
