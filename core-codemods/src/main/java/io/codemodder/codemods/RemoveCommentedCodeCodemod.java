@@ -18,6 +18,11 @@ import javax.inject.Inject;
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChanger<Comment> {
 
+  /**
+   * The reason behind this specific region node matcher is that in the reported column by
+   * sonarcloud (range.begin.colum) differs by minus one point that the column reported by the java
+   * parser (region.start().column())
+   */
   private static final RegionNodeMatcher regionNodeMatcher =
       (region, range) ->
           region.start().line() == range.begin.line
