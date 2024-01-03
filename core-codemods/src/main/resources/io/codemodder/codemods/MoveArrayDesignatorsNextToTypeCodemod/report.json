@@ -1,0 +1,7 @@
+{
+  "summary" : "Moved array designators next to the type (Sonar).",
+  "change" : "Moved array designators next to the type.",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-1197/"
+  ]
+}
