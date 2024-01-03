@@ -6,64 +6,64 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithVariables;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public abstract class DeclareVariableOnSeparateLine {
+abstract class DeclareVariableOnSeparateLine {
 
   protected final NodeWithVariables<?> parentNode;
 
   protected DeclareVariableOnSeparateLine(final NodeWithVariables<?> parentNode) {
-    this.parentNode = parentNode;
+    this.parentNode = Objects.requireNonNull(parentNode);
   }
 
   /**
    * Splits multiple inline variables within a parent node into separate variable declaration
    * statements.
    */
-  protected void splitVariablesIntoTheirOwnStatements() {
+  protected boolean splitVariablesIntoTheirOwnStatements() {
 
     final List<VariableDeclarator> inlineVariables = parentNode.getVariables().stream().toList();
-
-    // Replace parent's node all inline variables with only the first inline variable
-    parentNode.setVariables(new NodeList<>(inlineVariables.get(0)));
 
     final List<VariableDeclarator> remainingVariables =
         inlineVariables.subList(1, inlineVariables.size());
 
     final List<Node> newVariableNodes = createVariableNodesToAdd(remainingVariables);
 
-    addNewNodesToParentNode(newVariableNodes);
+    if (!addNewNodesToParentNode(newVariableNodes)) {
+      return false;
+    }
+    // Replace parent's node that has all inline variables with only the first variable
+    parentNode.setVariables(new NodeList<>(inlineVariables.get(0)));
+
+    return true;
   }
 
+  /** Returns a list of nodes created from the list of inline variables. */
   protected abstract List<Node> createVariableNodesToAdd(List<VariableDeclarator> inlineVariables);
 
-  protected abstract void addNewNodesToParentNode(List<Node> nodesToAdd);
+  /** Adds new variable nodes to the parent node. */
+  protected abstract boolean addNewNodesToParentNode(List<Node> nodesToAdd);
 
-  protected static final class NodesInserter {
+  /**
+   * Inserts a list of nodes after a specified reference node within an original list of nodes. The
+   * result of this operation is a new list containing the original nodes with the additional nodes
+   * inserted after the specified reference node while maintaining the original order of elements.
+   */
+  static <T> List<T> mergeNodes(
+      final List<T> originalNodes, final Node referenceNode, final List<Node> nodesToAdd) {
 
-    private NodesInserter() {}
+    // Find the index of the reference node in the original list
+    final int referenceIndex = originalNodes.indexOf(referenceNode);
 
-    /**
-     * Inserts a list of nodes after a specified reference node within an original list of nodes.
-     * The result of this operation is a new list containing the original nodes with the additional
-     * nodes inserted after the specified reference node while maintaining the original order of
-     * elements.
-     */
-    static <T> List<T> mergeNodes(
-        final List<T> originalNodes, final Node referenceNode, final List<Node> nodesToAdd) {
+    // Split the original list into elements before and after the reference node
+    final List<T> elementsBefore = originalNodes.subList(0, referenceIndex + 1);
+    final List<T> elementsAfter = originalNodes.subList(referenceIndex + 1, originalNodes.size());
 
-      // Find the index of the reference node in the original list
-      final int referenceIndex = originalNodes.indexOf(referenceNode);
+    // Create a new list with nodes inserted after the reference node
+    final List<T> newElements = new ArrayList<>(elementsBefore);
+    nodesToAdd.forEach(node -> newElements.add((T) node));
+    newElements.addAll(elementsAfter);
 
-      // Split the original list into elements before and after the reference node
-      final List<T> elementsBefore = originalNodes.subList(0, referenceIndex + 1);
-      final List<T> elementsAfter = originalNodes.subList(referenceIndex + 1, originalNodes.size());
-
-      // Create a new list with nodes inserted after the reference node
-      final List<T> newElements = new ArrayList<>(elementsBefore);
-      nodesToAdd.forEach(node -> newElements.add((T) node));
-      newElements.addAll(elementsAfter);
-
-      return newElements;
-    }
+    return newElements;
   }
 }

@@ -51,8 +51,6 @@ public final class DeclareVariableOnSeparateLineCodemod
           new DeclareVariableOnSeparateLineForVariableDeclarationExpr(parentNode);
     }
 
-    declareVariableOnSeparateLine.splitVariablesIntoTheirOwnStatements();
-
-    return true;
+    return declareVariableOnSeparateLine.splitVariablesIntoTheirOwnStatements();
   }
 }

@@ -10,16 +10,17 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
-public class DeclareVariableOnSeparateLineForVariableDeclarationExpr
+final class DeclareVariableOnSeparateLineForVariableDeclarationExpr
     extends DeclareVariableOnSeparateLine {
 
   private final VariableDeclarationExpr variableDeclarationExpr;
 
   DeclareVariableOnSeparateLineForVariableDeclarationExpr(final NodeWithVariables<?> parentNode) {
     super(parentNode);
-    this.variableDeclarationExpr = (VariableDeclarationExpr) parentNode;
+    this.variableDeclarationExpr = (VariableDeclarationExpr) Objects.requireNonNull(parentNode);
   }
 
   /**
@@ -39,7 +40,7 @@ public class DeclareVariableOnSeparateLineForVariableDeclarationExpr
   }
 
   /** Adds a list of nodes to the parent BlockStmt after the expressionStmt. */
-  protected void addNewNodesToParentNode(List<Node> nodesToAdd) {
+  protected boolean addNewNodesToParentNode(List<Node> nodesToAdd) {
     final Optional<Node> expressionStmtOptional = variableDeclarationExpr.getParentNode();
     if (expressionStmtOptional.isPresent()
         && expressionStmtOptional.get() instanceof ExpressionStmt expressionStmt) {
@@ -47,10 +48,14 @@ public class DeclareVariableOnSeparateLineForVariableDeclarationExpr
       if (blockStmtOptional.isPresent() && blockStmtOptional.get() instanceof BlockStmt blockStmt) {
 
         final List<Statement> allStmts =
-            NodesInserter.mergeNodes(blockStmt.getStatements(), expressionStmt, nodesToAdd);
+            mergeNodes(blockStmt.getStatements(), expressionStmt, nodesToAdd);
 
         blockStmt.setStatements(new NodeList<>(allStmts));
+
+        return true;
       }
     }
+
+    return false;
   }
 }
