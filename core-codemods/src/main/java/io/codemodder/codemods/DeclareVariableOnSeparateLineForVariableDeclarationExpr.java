@@ -18,9 +18,9 @@ final class DeclareVariableOnSeparateLineForVariableDeclarationExpr
 
   private final VariableDeclarationExpr variableDeclarationExpr;
 
-  DeclareVariableOnSeparateLineForVariableDeclarationExpr(final NodeWithVariables<?> parentNode) {
+  DeclareVariableOnSeparateLineForVariableDeclarationExpr(final VariableDeclarationExpr parentNode) {
     super(parentNode);
-    this.variableDeclarationExpr = (VariableDeclarationExpr) Objects.requireNonNull(parentNode);
+    this.variableDeclarationExpr = Objects.requireNonNull(parentNode);
   }
 
   /**
@@ -48,7 +48,7 @@ final class DeclareVariableOnSeparateLineForVariableDeclarationExpr
       if (blockStmtOptional.isPresent() && blockStmtOptional.get() instanceof BlockStmt blockStmt) {
 
         final List<Statement> allStmts =
-            mergeNodes(blockStmt.getStatements(), expressionStmt, nodesToAdd);
+            insertNodesAfterReference(blockStmt.getStatements(), expressionStmt, nodesToAdd);
 
         blockStmt.setStatements(new NodeList<>(allStmts));
 

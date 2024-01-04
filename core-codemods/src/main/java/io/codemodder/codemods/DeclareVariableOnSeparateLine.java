@@ -49,7 +49,7 @@ abstract class DeclareVariableOnSeparateLine {
    * result of this operation is a new list containing the original nodes with the additional nodes
    * inserted after the specified reference node while maintaining the original order of elements.
    */
-  static <T> List<T> mergeNodes(
+  static <T> List<T> insertNodesAfterReference(
       final List<T> originalNodes, final Node referenceNode, final List<Node> nodesToAdd) {
 
     // Find the index of the reference node in the original list

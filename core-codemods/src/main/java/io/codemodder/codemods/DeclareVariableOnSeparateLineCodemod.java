@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithVariables;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
@@ -43,12 +44,12 @@ public final class DeclareVariableOnSeparateLineCodemod
 
     final DeclareVariableOnSeparateLine declareVariableOnSeparateLine;
 
-    if (parentNode instanceof FieldDeclaration) {
+    if (parentNode instanceof FieldDeclaration fieldDeclaration) {
       declareVariableOnSeparateLine =
-          new DeclareVariableOnSeparateLineForFieldDeclaration(parentNode);
+          new DeclareVariableOnSeparateLineForFieldDeclaration(fieldDeclaration);
     } else {
       declareVariableOnSeparateLine =
-          new DeclareVariableOnSeparateLineForVariableDeclarationExpr(parentNode);
+          new DeclareVariableOnSeparateLineForVariableDeclarationExpr((VariableDeclarationExpr) parentNode);
     }
 
     return declareVariableOnSeparateLine.splitVariablesIntoTheirOwnStatements();

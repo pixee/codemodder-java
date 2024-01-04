@@ -16,9 +16,9 @@ final class DeclareVariableOnSeparateLineForFieldDeclaration extends DeclareVari
 
   private final FieldDeclaration fieldDeclaration;
 
-  DeclareVariableOnSeparateLineForFieldDeclaration(final NodeWithVariables<?> parentNode) {
+  DeclareVariableOnSeparateLineForFieldDeclaration(final FieldDeclaration parentNode) {
     super(parentNode);
-    this.fieldDeclaration = (FieldDeclaration) Objects.requireNonNull(parentNode);
+    this.fieldDeclaration = Objects.requireNonNull(parentNode);
   }
 
   /**
@@ -50,7 +50,7 @@ final class DeclareVariableOnSeparateLineForFieldDeclaration extends DeclareVari
             instanceof ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
 
       final List<BodyDeclaration<?>> allMembers =
-          mergeNodes(
+          insertNodesAfterReference(
               classOrInterfaceDeclaration.getMembers().stream().toList(),
               fieldDeclaration,
               nodesToAdd);
