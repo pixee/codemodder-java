@@ -1,0 +1,128 @@
+{
+  "total": 2,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 2
+  },
+  "effortTotal": 4,
+  "debtTotal": 4,
+  "issues": [
+    {
+      "key": "AYx_mPCD-XflmEkdl4LY",
+      "rule": "java:S1659",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 47,
+      "hash": "6dc024d2ef65a5730ecffd59cc880f86",
+      "textRange": {
+        "startLine": 47,
+        "endLine": 47,
+        "startOffset": 34,
+        "endOffset": 35
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Declare \"b\" on a separate line.",
+      "effort": "2min",
+      "debt": "2min",
+      "tags": [
+        "cert",
+        "convention"
+      ],
+      "creationDate": "2023-12-19T02:00:09+0100",
+      "updateDate": "2023-12-19T02:00:09+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "FORMATTED",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    },
+    {
+      "key": "AYxkqUZwlAj1v1V7lso3",
+      "rule": "java:S1659",
+      "severity": "MINOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 89,
+      "hash": "87a642a820b265aca0a8f400482b7480",
+      "textRange": {
+        "startLine": 89,
+        "endLine": 89,
+        "startOffset": 20,
+        "endOffset": 26
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+              "textRange": {
+                "startLine": 89,
+                "endLine": 89,
+                "startOffset": 32,
+                "endOffset": 37
+              }
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Declare \"unused\" and all following declarations on a separate line.",
+      "effort": "2min",
+      "debt": "2min",
+      "tags": [
+        "cert",
+        "convention"
+      ],
+      "creationDate": "2023-12-13T20:28:16+0100",
+      "updateDate": "2023-12-13T20:28:16+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "FORMATTED",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "uuid": "AYvtrjqJLCzGLicz7Abq",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "AssignmentEndpoint.java",
+      "longName": "src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java",
+      "path": "src/main/java/org/owasp/webgoat/container/assignments/AssignmentEndpoint.java"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23",
+      "uuid": "AYvtqxxxzY4Rr5NHn4Om",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "WebGoat_10_23",
+      "longName": "WebGoat_10_23"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "nahsra",
+      "name": "Arshan Dabirsiaghi"
+    }
+  ],
+  "facets": []
+}

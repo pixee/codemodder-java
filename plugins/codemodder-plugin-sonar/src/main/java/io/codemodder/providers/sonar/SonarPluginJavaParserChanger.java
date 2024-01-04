@@ -48,7 +48,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     List<Issue> issues = ruleIssues.getResultsByPath(context.path());
 
     // small shortcut to avoid always executing the expensive findAll
-    if (issues.isEmpty()) {
+    if (issues == null || issues.isEmpty()) {
       return List.of();
     }
 
