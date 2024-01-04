@@ -49,7 +49,8 @@ public final class DeclareVariableOnSeparateLineCodemod
           new DeclareVariableOnSeparateLineForFieldDeclaration(fieldDeclaration);
     } else {
       declareVariableOnSeparateLine =
-          new DeclareVariableOnSeparateLineForVariableDeclarationExpr((VariableDeclarationExpr) parentNode);
+          new DeclareVariableOnSeparateLineForVariableDeclarationExpr(
+              (VariableDeclarationExpr) parentNode);
     }
 
     return declareVariableOnSeparateLine.splitVariablesIntoTheirOwnStatements();

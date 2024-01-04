@@ -4,7 +4,6 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.nodeTypes.NodeWithVariables;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -18,7 +17,8 @@ final class DeclareVariableOnSeparateLineForVariableDeclarationExpr
 
   private final VariableDeclarationExpr variableDeclarationExpr;
 
-  DeclareVariableOnSeparateLineForVariableDeclarationExpr(final VariableDeclarationExpr parentNode) {
+  DeclareVariableOnSeparateLineForVariableDeclarationExpr(
+      final VariableDeclarationExpr parentNode) {
     super(parentNode);
     this.variableDeclarationExpr = Objects.requireNonNull(parentNode);
   }
