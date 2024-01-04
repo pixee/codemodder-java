@@ -17,18 +17,22 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   private final Class<? extends Node> nodeType;
   private final RegionNodeMatcher regionNodeMatcher;
 
+  private final NodeCollector nodeCollector;
+
   protected SonarPluginJavaParserChanger(
       final RuleIssues ruleIssues,
       final Class<? extends Node> nodeType,
-      final RegionNodeMatcher regionNodeMatcher) {
+      final RegionNodeMatcher regionNodeMatcher,
+      final NodeCollector nodeCollector) {
     this.ruleIssues = Objects.requireNonNull(ruleIssues);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
+    this.nodeCollector = nodeCollector;
   }
 
   protected SonarPluginJavaParserChanger(
       final RuleIssues ruleIssues, final Class<? extends Node> nodeType) {
-    this(ruleIssues, nodeType, RegionNodeMatcher.MATCHES_START);
+    this(ruleIssues, nodeType, RegionNodeMatcher.MATCHES_START, NodeCollector.ALL_FROM_TYPE);
   }
 
   protected SonarPluginJavaParserChanger(
@@ -40,6 +44,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     this.ruleIssues = Objects.requireNonNull(ruleIssues);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
+    this.nodeCollector = NodeCollector.ALL_FROM_TYPE;
   }
 
   @Override
@@ -51,7 +56,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     if (issues.isEmpty()) {
       return List.of();
     }
-    final List<? extends Node> allNodes = getAllCompilationUnitNodes(cu);
+    final List<? extends Node> allNodes = nodeCollector.collectNodes(cu, nodeType);
 
     List<CodemodChange> codemodChanges = new ArrayList<>();
     for (Issue issue : issues) {
@@ -86,10 +91,6 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   @Override
   public boolean shouldRun() {
     return ruleIssues.hasResults();
-  }
-
-  public List<? extends Node> getAllCompilationUnitNodes(final CompilationUnit cu) {
-    return cu.findAll(nodeType);
   }
 
   /**

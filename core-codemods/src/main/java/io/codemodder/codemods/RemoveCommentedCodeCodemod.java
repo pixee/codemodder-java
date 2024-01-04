@@ -1,14 +1,12 @@
 package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.comments.Comment;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
-import java.util.List;
 import javax.inject.Inject;
 
 /** A codemod for removing commented-out lines of code. */
@@ -32,7 +30,7 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
   public RemoveCommentedCodeCodemod(
       @ProvidedSonarScan(ruleId = "java:S125") final RuleIssues issues) {
 
-    super(issues, Comment.class, regionNodeMatcher);
+    super(issues, Comment.class, regionNodeMatcher, NodeCollector.ALL_COMMENTS);
   }
 
   @Override
@@ -45,10 +43,5 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
     comment.removeForced();
 
     return true;
-  }
-
-  @Override
-  public List<? extends Node> getAllCompilationUnitNodes(final CompilationUnit cu) {
-    return cu.getAllComments();
   }
 }
