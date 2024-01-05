@@ -45,9 +45,7 @@ public final class MoveArrayDesignatorsNextToTypeCodemod extends SonarPluginJava
       final SimpleName simpleName,
       final Issue issue) {
 
-      final NodeWithType<Node, ArrayType> parentNodeWithType = (NodeWithType<Node, ArrayType>) simpleName.getParentNode().get();
 
-      final ArrayType arrayType = parentNodeWithType.getType();
 
       final SimpleName simpleNameToReplace = new SimpleName(simpleName.getId());
 
@@ -57,7 +55,12 @@ public final class MoveArrayDesignatorsNextToTypeCodemod extends SonarPluginJava
 
       helper.replace(simpleNameToReplace);
 
-      /*final Type baseType = getInnermostType(arrayType);
+      /*
+      final NodeWithType<Node, ArrayType> parentNodeWithType = (NodeWithType<Node, ArrayType>) simpleName.getParentNode().get();
+
+      final ArrayType arrayType = parentNodeWithType.getType();
+      
+      final Type baseType = getInnermostType(arrayType);
 
       final ArrayType arrayTypeToReplace = createArrayType(baseType, arrayType.getArrayLevel());
 
