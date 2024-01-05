@@ -11,6 +11,7 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithType;
 import com.github.javaparser.ast.nodeTypes.NodeWithVariables;
 import com.github.javaparser.ast.type.ArrayType;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodExecutionPriority;
@@ -44,37 +45,34 @@ public final class MoveArrayDesignatorsNextToTypeCodemod extends SonarPluginJava
       final SimpleName simpleName,
       final Issue issue) {
 
+      final NodeWithType<Node, ArrayType> parentNodeWithType = (NodeWithType<Node, ArrayType>) simpleName.getParentNode().get();
 
-      simpleName.setRange(null);
-      simpleName.setTokenRange(null);
+      final ArrayType arrayType = parentNodeWithType.getType();
 
-      final Node parentNode = simpleName.getParentNode().get();
+      final SimpleName simpleNameToReplace = new SimpleName(simpleName.getId());
 
-      parentNode.setRange(null);
-      parentNode.setTokenRange(null);
+      final SimpleName helper = new SimpleName("TODO");
 
-      final NodeWithType<Node, ArrayType> parentNodeWithType = (NodeWithType<Node, ArrayType>) parentNode;
+      simpleName.replace(helper);
 
-       final ArrayType arrayType = parentNodeWithType.getType();
+      helper.replace(simpleNameToReplace);
 
-       Type type = arrayType;
-       while (type instanceof ArrayType){
-           type.setRange(null);
-           type.setTokenRange(null);
-           type = ((ArrayType) type).getComponentType();
-       }
+      /*final Type baseType = getInnermostType(arrayType);
 
-       /*final Type baseType = getInnermostType(arrayType);
+      final ArrayType arrayTypeToReplace = createArrayType(baseType, arrayType.getArrayLevel());
 
-       final int arrayLevel = arrayType.getArrayLevel();
-
-       final ArrayType newArrayType = createArrayType(baseType, arrayLevel);
-
-       arrayType.replace(newArrayType);*/
-
+      parentNodeWithType.getType().replace(arrayTypeToReplace);*/
 
     return true;
   }
+
+    public static Type getInnermostType(Type type) {
+        while (type instanceof ArrayType) {
+            ArrayType arrayType = (ArrayType) type;
+            type = arrayType.getComponentType();
+        }
+        return type;
+    }
 
     public static ArrayType createArrayType(Type baseType, int n) {
         ArrayType arrayType = new ArrayType(baseType);
@@ -86,11 +84,5 @@ public final class MoveArrayDesignatorsNextToTypeCodemod extends SonarPluginJava
         return arrayType;
     }
 
-    public static Type getInnermostType(Type type) {
-        while (type instanceof ArrayType) {
-            ArrayType arrayType = (ArrayType) type;
-            type = arrayType.getComponentType();
-        }
-        return type;
-    }
+
 }
