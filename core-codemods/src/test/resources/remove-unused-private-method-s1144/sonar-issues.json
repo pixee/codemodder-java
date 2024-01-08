@@ -1,0 +1,77 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 1
+  },
+  "effortTotal": 2,
+  "debtTotal": 2,
+  "issues": [
+    {
+      "key": "AYx_HQhaOVCWpCEOKEAO",
+      "rule": "java:S1144",
+      "severity": "MAJOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/authbypass/AccountVerificationHelper.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 115,
+      "hash": "348d2e6ec3d0dd9bf25e47cf7f96c95a",
+      "textRange": {
+        "startLine": 115,
+        "endLine": 115,
+        "startOffset": 15,
+        "endOffset": 27
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused private \"unusedMethod\" method.",
+      "effort": "2min",
+      "debt": "2min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-18T23:44:51+0100",
+      "updateDate": "2023-12-18T23:44:51+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/authbypass/AccountVerificationHelper.java",
+      "uuid": "AYvtrjqILCzGLicz7AZw",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "AccountVerificationHelper.java",
+      "longName": "src/main/java/org/owasp/webgoat/lessons/authbypass/AccountVerificationHelper.java",
+      "path": "src/main/java/org/owasp/webgoat/lessons/authbypass/AccountVerificationHelper.java"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23",
+      "uuid": "AYvtqxxxzY4Rr5NHn4Om",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "WebGoat_10_23",
+      "longName": "WebGoat_10_23"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "nahsra",
+      "name": "Arshan Dabirsiaghi"
+    }
+  ],
+  "facets": []
+}

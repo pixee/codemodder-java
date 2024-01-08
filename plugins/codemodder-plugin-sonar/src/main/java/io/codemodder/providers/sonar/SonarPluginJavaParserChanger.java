@@ -18,18 +18,22 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   private final Class<? extends Node> nodeType;
   private final RegionNodeMatcher regionNodeMatcher;
 
+  private final NodeCollector nodeCollector;
+
   protected SonarPluginJavaParserChanger(
       final RuleIssues ruleIssues,
       final Class<? extends Node> nodeType,
-      final RegionNodeMatcher regionNodeMatcher) {
+      final RegionNodeMatcher regionNodeMatcher,
+      final NodeCollector nodeCollector) {
     this.ruleIssues = Objects.requireNonNull(ruleIssues);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
+    this.nodeCollector = nodeCollector;
   }
 
   protected SonarPluginJavaParserChanger(
       final RuleIssues ruleIssues, final Class<? extends Node> nodeType) {
-    this(ruleIssues, nodeType, RegionNodeMatcher.MATCHES_START);
+    this(ruleIssues, nodeType, RegionNodeMatcher.MATCHES_START, NodeCollector.ALL_FROM_TYPE);
   }
 
   protected SonarPluginJavaParserChanger(
@@ -41,6 +45,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     this.ruleIssues = Objects.requireNonNull(ruleIssues);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
+    this.nodeCollector = NodeCollector.ALL_FROM_TYPE;
   }
 
   @Override
@@ -49,11 +54,10 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     List<Issue> issues = ruleIssues.getResultsByPath(context.path());
 
     // small shortcut to avoid always executing the expensive findAll
-    if (issues.isEmpty()) {
+    if (issues == null || issues.isEmpty()) {
       return List.of();
     }
-
-    List<? extends Node> allNodes = cu.findAll(nodeType);
+    final List<? extends Node> allNodes = nodeCollector.collectNodes(cu, nodeType);
 
     List<CodemodChange> codemodChanges = new ArrayList<>();
     for (Issue issue : issues) {

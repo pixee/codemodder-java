@@ -35,4 +35,9 @@ public abstract class CompositeJavaParserChanger extends JavaParserChanger {
     changers.forEach(changer -> changes.addAll(changer.visit(context, cu)));
     return changes;
   }
+
+  @Override
+  public boolean shouldRun() {
+    return changers.stream().anyMatch(CodeChanger::shouldRun);
+  }
 }

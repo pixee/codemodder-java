@@ -1,0 +1,255 @@
+{
+  "total": 4,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 4
+  },
+  "effortTotal": 20,
+  "debtTotal": 20,
+  "issues": [
+    {
+      "key": "AYyJjHVipy9vsjtnKm8B",
+      "rule": "java:S125",
+      "severity": "MAJOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 74,
+      "hash": "11b2353fbc21fb46e007cb76fde8fb28",
+      "textRange": {
+        "startLine": 74,
+        "endLine": 74,
+        "startOffset": 8,
+        "endOffset": 71
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 75,
+                "endLine": 75,
+                "startOffset": 10,
+                "endOffset": 61
+              },
+              "msg": "Code"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 76,
+                "endLine": 76,
+                "startOffset": 10,
+                "endOffset": 22
+              },
+              "msg": "Code"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 77,
+                "endLine": 77,
+                "startOffset": 6,
+                "endOffset": 7
+              },
+              "msg": "Code"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "This block of commented-out lines of code should be removed.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-21T00:22:47+0100",
+      "updateDate": "2023-12-21T00:22:47+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ]
+    },
+    {
+      "key": "AYyJOO3TJjGCucsaoKgE",
+      "rule": "java:S125",
+      "severity": "MAJOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 53,
+      "hash": "de128a5f0ced8d58dd18f1fa75ccc4c9",
+      "textRange": {
+        "startLine": 53,
+        "endLine": 53,
+        "startOffset": 8,
+        "endOffset": 35
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 54,
+                "endLine": 54,
+                "startOffset": 9,
+                "endOffset": 18
+              },
+              "msg": "Code"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "This block of commented-out lines of code should be removed.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-20T22:50:33+0100",
+      "updateDate": "2023-12-20T22:50:33+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ]
+    },
+    {
+      "key": "AYyJOO3TJjGCucsaoKgG",
+      "rule": "java:S125",
+      "severity": "MAJOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 59,
+      "hash": "102e92aeb0d6d62ee11a78401058154c",
+      "textRange": {
+        "startLine": 59,
+        "endLine": 59,
+        "startOffset": 8,
+        "endOffset": 47
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 60,
+                "endLine": 60,
+                "startOffset": 6,
+                "endOffset": 57
+              },
+              "msg": "Code"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "This block of commented-out lines of code should be removed.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-20T22:50:33+0100",
+      "updateDate": "2023-12-20T22:50:33+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ]
+    },
+    {
+      "key": "AYyJOO3TJjGCucsaoKgH",
+      "rule": "java:S125",
+      "severity": "MAJOR",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 114,
+      "hash": "ea8d9881f27d322f73b8c85ccb2b81a0",
+      "textRange": {
+        "startLine": 114,
+        "endLine": 114,
+        "startOffset": 4,
+        "endOffset": 36
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "This block of commented-out lines of code should be removed.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "unused"
+      ],
+      "creationDate": "2023-12-20T22:50:33+0100",
+      "updateDate": "2023-12-20T22:50:33+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+      "uuid": "AYvtrjqJLCzGLicz7Abr",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "AttackResult.java",
+      "longName": "src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+      "path": "src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoat_10_23",
+      "uuid": "AYvtqxxxzY4Rr5NHn4Om",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "WebGoat_10_23",
+      "longName": "WebGoat_10_23"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "nahsra",
+      "name": "Arshan Dabirsiaghi"
+    }
+  ],
+  "facets": []
+}
