@@ -1,181 +1,128 @@
-package io.codemodder.codemods;
-
-import com.contrastsecurity.sarif.Result;
-import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.BooleanLiteralExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.ForEachStmt;
-import io.codemodder.*;
-import io.codemodder.ast.ASTTransforms;
-import io.codemodder.ast.ASTs;
-import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
-import io.github.pixee.security.UnwantedTypes;
-import java.util.List;
-import java.util.Optional;
-import javax.inject.Inject;
-import org.apache.commons.jexl3.JexlBuilder;
-import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlExpression;
-
-/**
- * A codemod for automatically fixing JEXL injections detected by CodeQL's rule
- * "java/jexl-expression-injection" whenever possible.
+/*
+ * This file is part of WebGoat, an Open Web Application Security Project utility. For details, please see http://www.owasp.org/
+ *
+ * Copyright (c) 2002 - 2019 Bruce Mayhew
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+ * 02111-1307, USA.
+ *
+ * Getting Source ==============
+ *
+ * Source for this application is maintained at https://github.com/WebGoat/WebGoat, a repository for free software projects.
  */
-@Codemod(
-    id = "codeql:java/jexl-expression-injection",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
-    executionPriority = CodemodExecutionPriority.HIGH)
-public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expression> {
 
-private static final String CREATE = "create";
+package org.owasp.webgoat.lessons.sqlinjection.introduction;
 
-  @Inject
-  public JEXLInjectionCodemod(
-      @ProvidedCodeQLScan(ruleId = "java/jexl-expression-injection") final RuleSarif sarif) {
-    super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
+import static org.hsqldb.jdbc.JDBCResultSet.CONCUR_UPDATABLE;
+import static org.hsqldb.jdbc.JDBCResultSet.TYPE_SCROLL_SENSITIVE;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import org.owasp.webgoat.container.LessonDataSource;
+import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
+import org.owasp.webgoat.container.assignments.AssignmentHints;
+import org.owasp.webgoat.container.assignments.AttackResult;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@AssignmentHints(
+    value = {
+      "SqlStringInjectionHint.9.1",
+      "SqlStringInjectionHint.9.2",
+      "SqlStringInjectionHint.9.3",
+      "SqlStringInjectionHint.9.4",
+      "SqlStringInjectionHint.9.5"
+    })
+public class SqlInjectionLesson9 extends AssignmentEndpoint {
+
+  private final LessonDataSource dataSource;
+
+  public SqlInjectionLesson9(LessonDataSource dataSource) {
+    this.dataSource = dataSource;
   }
 
-  @Override
-  public boolean onResultFound(
-      final CodemodInvocationContext context,
-      final CompilationUnit cu,
-      final Expression expression,
-      final Result result) {
-    return checkAndFix(expression).isPresent();
+  @PostMapping("/SqlInjection/attack9")
+  @ResponseBody
+  public AttackResult completed(@RequestParam String name, @RequestParam String auth_tan) {
+    return injectableQueryIntegrity(name, auth_tan);
   }
 
-  @Override
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
-  }
-
-  /**
-   * Detects if a {@link Expression} that is the scope of a {@link
-   * JexlExpression#evaluate(org.apache.commons.jexl3.JexlContext)} can be sandboxed and tries to
-   * fix it. Combines {@code isFixable} and {@code tryToFix}.
-   */
-  static Optional<Integer> checkAndFix(final Expression expr) {
-    return isFixable(expr).flatMap(JEXLInjectionCodemod::tryToFix);
-  }
-
-  /**
-   * Checks if there exists a local {@link JexlBuilder#create()} call used to create and evaluate
-   * the expression of {@code expr} that can be sandboxed.
-   */
-  static Optional<MethodCallExpr> isFixable(final Expression expr) {
-    return findJEXLCreateExpression(expr).flatMap(JEXLInjectionCodemod::findJEXLBuilderCreate);
-  }
-
-  /** Tries to sandbox the {@link JexlBuilder#create()} and returns its line if it does. */
-  static Optional<Integer> tryToFix(final MethodCallExpr mce) {
-    final var cu = mce.findCompilationUnit().get();
-    final var maybeStmt = ASTs.findParentStatementFrom(mce);
-    if (maybeStmt.isEmpty()) {
-      return Optional.empty();
-    }
-    final var sandboxType = StaticJavaParser.parseClassOrInterfaceType("JexlSandbox");
-
-    // JexlSandbox sandbox = new JexlSandbox(true);
-    final var sandboxDecl =
-        new ExpressionStmt(
-            new VariableDeclarationExpr(
-                new VariableDeclarator(
-                    sandboxType,
-                    "sandbox",
-                    new ObjectCreationExpr(
-                        null, sandboxType, new NodeList<>(new BooleanLiteralExpr(true))))));
-
-    // for(String cls : io.github.pixee.security.UnwantedTypes.dangerousClassNameTokens())
-    // 	sandbox.block(cls);
-    final var sandboxFor =
-        new ForEachStmt(
-            new VariableDeclarationExpr(
-                new VariableDeclarator(StaticJavaParser.parseType("String"), "cls")),
-            new MethodCallExpr(
-                new NameExpr(UnwantedTypes.class.getSimpleName()), "dangerousClassNameTokens"),
-            new BlockStmt(
-                new NodeList<>(
-                    new ExpressionStmt(
-                        new MethodCallExpr(
-                            new NameExpr("sandbox"),
-                            "block",
-                            new NodeList<>(new NameExpr("cls")))))));
-
-    final var stmt = maybeStmt.get();
-    ASTTransforms.addStatementBeforeStatement(stmt, sandboxDecl);
-    ASTTransforms.addStatementBeforeStatement(stmt, sandboxFor);
-
-    // always has scope
-    final var sandboxCall =
-        new MethodCallExpr(
-            mce.getScope().get(), "sandbox", new NodeList<>(new NameExpr("sandbox")));
-    final var newCreate = new MethodCallExpr(sandboxCall, CREATE);
-    ASTTransforms.addImportIfMissing(cu, UnwantedTypes.class.getName());
-    ASTTransforms.addImportIfMissing(cu, "org.apache.commons.jexl3.introspection.JexlSandbox");
-    mce.replace(newCreate);
-    return mce.getBegin().map(b -> b.line);
-  }
-
-  /**
-   * Given an expression {@code <expr>} that is the scope of an {@link
-   * JexlExpression#evaluate(org.apache.commons.jexl3.JexlContext)} call, tries to find the {@link
-   * JexlEngine#createExpression(String)} method that spawns it.
-   */
-  private static Optional<MethodCallExpr> findJEXLCreateExpression(final Expression expr) {
-    // Is itself a createExpression
-    if (expr instanceof MethodCallExpr) {
-      if (expr.asMethodCallExpr().getNameAsString().equals("createExpression")) {
-        return Optional.of(expr.asMethodCallExpr());
+  protected AttackResult injectableQueryIntegrity(String name, String auth_tan) {
+    StringBuilder output = new StringBuilder();
+    String query =
+        "SELECT * FROM employees WHERE last_name = '"
+            + name
+            + "' AND auth_tan = '"
+            + auth_tan
+            + "'";
+    try (Connection connection = dataSource.getConnection()) {
+      try {
+        Statement statement = connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
+        SqlInjectionLesson8.log(connection, query);
+        ResultSet results = statement.executeQuery(query);
+        var test = results.getRow() != 0;
+        if (results.getStatement() != null) {
+          if (results.first()) {
+            output.append(SqlInjectionLesson8.generateTable(results));
+          } else {
+            // no results
+            return failed(this).feedback("sql-injection.8.no.results").build();
+          }
+        }
+      } catch (SQLException e) {
+        System.err.println(e.getMessage());
+        return failed(this)
+            .output("<br><span class='feedback-negative'>" + e.getMessage() + "</span>")
+            .build();
       }
-    }
 
-    // is a variable, track its definition
-    if (expr instanceof NameExpr) {
-      final var maybeLVD =
-          ASTs.findEarliestLocalVariableDeclarationOf(
-              expr.asNameExpr(), expr.asNameExpr().getNameAsString());
-      return maybeLVD
-          .filter(ASTs::isFinalOrNeverAssigned)
-          .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
-          .map(e -> e.isMethodCallExpr() ? e.asMethodCallExpr() : null)
-          .filter(mcexpr -> mcexpr.getNameAsString().equals("createExpression"));
+      return checkSalaryRanking(connection, output);
+
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+      return failed(this)
+          .output("<br><span class='feedback-negative'>" + e.getMessage() + "</span>")
+          .build();
     }
-    return Optional.empty();
   }
 
-  /**
-   * Given an {@code <expr>.createExpression()}, where {@code expr} is a {@link JexlEngine} object,
-   * tries to find the {@link JexlBuilder#create()} method that spawns it.
-   */
-  private static Optional<MethodCallExpr> findJEXLBuilderCreate(final MethodCallExpr mce) {
-    // Always has a scope
-    final var scope = mce.getScope().get();
-    // immediate call
-    if (scope instanceof MethodCallExpr) {
-      if (scope.asMethodCallExpr().getNameAsString().equals(CREATE))
-        return Optional.of(scope.asMethodCallExpr());
-    }
+  private AttackResult checkSalaryRanking(Connection connection, StringBuilder output) {
+    try {
+      String query = "SELECT * FROM employees ORDER BY salary DESC";
+      try (Statement statement =
+          connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE); ) {
+        ResultSet results = statement.executeQuery(query);
 
-    // is a variable, track its definition
-    if (scope instanceof NameExpr) {
-      final var maybeLVD =
-          ASTs.findEarliestLocalVariableDeclarationOf(
-              scope.asNameExpr(), scope.asNameExpr().getNameAsString());
-      return maybeLVD
-          .filter(ASTs::isFinalOrNeverAssigned)
-          .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
-          .map(expr -> expr.isMethodCallExpr() ? expr.asMethodCallExpr() : null)
-          .filter(mcexpr -> mcexpr.getNameAsString().equals(CREATE));
+        results.first();
+        // user completes lesson if John Smith is the first in the list
+        if ((results.getString(2).equals("John")) && (results.getString(3).equals("Smith"))) {
+          output.append(SqlInjectionLesson8.generateTable(results));
+          return success(this)
+              .feedback("sql-injection.9.success")
+              .output(output.toString())
+              .build();
+        } else {
+          return failed(this).feedback("sql-injection.9.one").output(output.toString()).build();
+        }
+      }
+    } catch (SQLException e) {
+      return failed(this)
+          .output("<br><span class='feedback-negative'>" + e.getMessage() + "</span>")
+          .build();
     }
-    return Optional.empty();
   }
 }
