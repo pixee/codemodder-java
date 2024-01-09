@@ -10,15 +10,17 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Flow;
 import io.codemodder.providers.sonar.api.Issue;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 /** A codemod for creating a constant for a literal string that is duplicated n times. */
@@ -42,6 +44,10 @@ public final class DefineConstantForLiteralCodemod
       final StringLiteralExpr stringLiteralExpr,
       final Issue issue) {
 
+      if(!issue.getMessage().startsWith("Define a constant")){
+          return false;
+      }
+
     final Optional<ClassOrInterfaceDeclaration> classOrInterfaceDeclarationOptional =
         stringLiteralExpr.findAncestor(ClassOrInterfaceDeclaration.class);
 
@@ -60,9 +66,15 @@ public final class DefineConstantForLiteralCodemod
     final ClassOrInterfaceDeclaration classOrInterfaceDeclaration =
         classOrInterfaceDeclarationOptional.get();
 
-    addConstantFieldToClass(classOrInterfaceDeclaration, createConstantField(stringLiteralExpr));
+      // Collect declared variables using a visitor
+      final VariableCollector variableCollector = new VariableCollector();
+      variableCollector.visit(cu, null);
 
-    nodesToReplace.forEach(this::replaceDuplicatedLiteralToConstantExpression);
+    final String constantName = ConstantNameGenerator.buildConstantName(stringLiteralExpr.getValue(), variableCollector.getDeclaredVariables());
+
+    addConstantFieldToClass(classOrInterfaceDeclaration, createConstantField(stringLiteralExpr, constantName));
+
+    nodesToReplace.forEach(node -> replaceDuplicatedLiteralToConstantExpression(node, constantName));
 
     return true;
   }
@@ -96,9 +108,9 @@ public final class DefineConstantForLiteralCodemod
     return nodesToReplace;
   }
 
-  private void replaceDuplicatedLiteralToConstantExpression(final Node node) {
+  private void replaceDuplicatedLiteralToConstantExpression(final Node node, final String constantName) {
     StringLiteralExpr stringLiteralExpr = (StringLiteralExpr) node;
-    NameExpr nameExpr = new NameExpr(buildConstantName(stringLiteralExpr));
+    NameExpr nameExpr = new NameExpr(constantName);
     stringLiteralExpr.replace(nameExpr);
   }
 
@@ -111,8 +123,7 @@ public final class DefineConstantForLiteralCodemod
     members.addFirst(constantField);
   }
 
-  private FieldDeclaration createConstantField(final StringLiteralExpr stringLiteralExpr) {
-    final String constantName = buildConstantName(stringLiteralExpr);
+  private FieldDeclaration createConstantField(final StringLiteralExpr stringLiteralExpr, final String constantName) {
 
     final NodeList<Modifier> modifiers =
         NodeList.nodeList(
@@ -128,7 +139,65 @@ public final class DefineConstantForLiteralCodemod
     return new FieldDeclaration(modifiers, variableDeclarator);
   }
 
-  private String buildConstantName(final StringLiteralExpr stringLiteralExpr) {
-    return stringLiteralExpr.getValue().toUpperCase();
+
+
+  static final class ConstantNameGenerator{
+
+      private ConstantNameGenerator() {}
+
+      static String buildConstantName(String stringLiteralExprValue, Set<String> declaredVariables) {
+          String originalValue = stringLiteralExprValue;
+          String sanitizedConstantName = sanitizeString(originalValue);
+
+          String constantName = sanitizedConstantName;
+          int counter = 1;
+          while (existsVariable(constantName, declaredVariables)) {
+              // If the constant name already exists, append a counter to make it unique
+              constantName = sanitizedConstantName;
+              if(counter != 0){
+                  constantName += "_" + counter;
+              }
+              counter++;
+          }
+
+          return constantName;
+      }
+      private static String sanitizeString(String input) {
+          // Use a regular expression to keep only alphanumeric characters and underscores
+          Pattern pattern = Pattern.compile("\\W");
+          Matcher matcher = pattern.matcher(input);
+
+          // Replace non-alphanumeric characters with a single space
+          String stringWithSpaces = matcher.replaceAll(" ");
+
+          // Replace consecutive spaces with a single space
+          String stringWithSingleSpaces = stringWithSpaces.replaceAll("\\s+", " ");
+
+          // Replace spaces with underscores
+          return stringWithSingleSpaces.trim().replace(" ", "_").toUpperCase();
+      }
+
+      private static boolean existsVariable(final String constantName, final Set<String> declaredVariables){
+
+          if(declaredVariables == null || declaredVariables.isEmpty()){
+              return false;
+          }
+
+          return declaredVariables.contains(constantName);
+      }
   }
+
+    private static final class VariableCollector extends VoidVisitorAdapter<Void> {
+        private final Set<String> declaredVariables = new HashSet<>();
+
+        public Set<String> getDeclaredVariables() {
+            return declaredVariables;
+        }
+
+        @Override
+        public void visit(VariableDeclarator declarator, Void arg) {
+            declaredVariables.add(declarator.getNameAsString());
+            super.visit(declarator, arg);
+        }
+    }
 }
