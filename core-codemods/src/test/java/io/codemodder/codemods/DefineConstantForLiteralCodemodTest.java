@@ -6,6 +6,7 @@ import io.codemodder.testutils.Metadata;
 @Metadata(
     codemodType = DefineConstantForLiteralCodemod.class,
     testResourceDir = "define-constant-for-duplicate-literal-s1192",
-    renameTestFile = "src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
+    renameTestFile =
+        "src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
     dependencies = {})
 final class DefineConstantForLiteralCodemodTest implements CodemodTestMixin {}
