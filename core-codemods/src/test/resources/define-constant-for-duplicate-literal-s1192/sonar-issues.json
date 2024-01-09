@@ -1,26 +1,104 @@
 {
-  "total": 1,
+  "total": 2,
   "p": 1,
   "ps": 500,
   "paging": {
     "pageIndex": 1,
     "pageSize": 500,
-    "total": 1
+    "total": 2
   },
-  "effortTotal": 8,
-  "debtTotal": 8,
+  "effortTotal": 16,
+  "debtTotal": 16,
   "issues": [
+    {
+      "key": "AYzsyMDCqszSjWIX78TZ",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 66,
+      "hash": "ef8b5cd9b95cf52b88128960a173c2ba",
+      "textRange": {
+        "startLine": 66,
+        "endLine": 66,
+        "startOffset": 23,
+        "endOffset": 33
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
+              "textRange": {
+                "startLine": 66,
+                "endLine": 66,
+                "startOffset": 23,
+                "endOffset": 33
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
+              "textRange": {
+                "startLine": 105,
+                "endLine": 105,
+                "startOffset": 25,
+                "endOffset": 35
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
+              "textRange": {
+                "startLine": 125,
+                "endLine": 125,
+                "startOffset": 27,
+                "endOffset": 37
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"1 2 3...\" 3 times.",
+      "effort": "8min",
+      "debt": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2024-01-09T06:51:02+0100",
+      "updateDate": "2024-01-09T06:51:02+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
     {
       "key": "AYvtrjzcLCzGLicz7AkW",
       "rule": "java:S1192",
       "severity": "CRITICAL",
       "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
       "project": "nahsra_WebGoat_10_23",
-      "line": 89,
+      "line": 90,
       "hash": "d44bf3eb5a074382bb31d1d9471f1162",
       "textRange": {
-        "startLine": 89,
-        "endLine": 89,
+        "startLine": 90,
+        "endLine": 90,
         "startOffset": 20,
         "endOffset": 58
       },
@@ -30,8 +108,8 @@
             {
               "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
               "textRange": {
-                "startLine": 89,
-                "endLine": 89,
+                "startLine": 90,
+                "endLine": 90,
                 "startOffset": 20,
                 "endOffset": 58
               },
@@ -44,8 +122,8 @@
             {
               "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
               "textRange": {
-                "startLine": 98,
-                "endLine": 98,
+                "startLine": 99,
+                "endLine": 99,
                 "startOffset": 18,
                 "endOffset": 56
               },
@@ -58,8 +136,8 @@
             {
               "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
               "textRange": {
-                "startLine": 124,
-                "endLine": 124,
+                "startLine": 127,
+                "endLine": 127,
                 "startOffset": 18,
                 "endOffset": 56
               },
