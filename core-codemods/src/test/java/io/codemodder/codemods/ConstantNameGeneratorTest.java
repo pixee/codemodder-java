@@ -10,63 +10,94 @@ public class ConstantNameGeneratorTest {
 
   @Test
   public void it_tests_basic_alpha_string() {
-    // Given
     String stringLiteralExprValue = "testValue";
     Set<String> declaredVariables = new HashSet<>();
     declaredVariables.add("EXISTING");
 
-    // When
     String constantName =
         DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
             stringLiteralExprValue, declaredVariables);
 
-    // Then
-    assertThat(constantName).isEqualTo("TESTVALUE"); // Expected constant name in upper case
+    assertThat(constantName).isEqualTo("TESTVALUE");
   }
 
   @Test
   public void it_handles_duplicated_value() {
-    // Given
     String stringLiteralExprValue = "testValue";
     Set<String> declaredVariables = new HashSet<>();
     declaredVariables.add("TESTVALUE");
     declaredVariables.add("TESTVALUE_1");
 
-    // When
     String constantName =
         DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
             stringLiteralExprValue, declaredVariables);
 
-    // Then
-    assertThat(constantName).isEqualTo("TESTVALUE_2"); // Expected constant name in upper case
+    assertThat(constantName).isEqualTo("TESTVALUE_2");
   }
 
   @Test
-  public void testBuildConstantNameWithEmptyDeclaredVariables() {
-    // Given
+  public void it_handles_empty_declared_variables() {
     String stringLiteralExprValue = "testValue";
-    Set<String> emptyDeclaredVariables = new HashSet<>();
 
-    // When generating a constant name with an empty declared variables set
     String constantName =
         DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
-            stringLiteralExprValue, emptyDeclaredVariables);
+            stringLiteralExprValue, new HashSet<>());
 
-    // Then, the generated constant name should match the input string in upper case
     assertThat(constantName).isEqualTo("TESTVALUE");
   }
 
   @Test
-  public void testBuildConstantNameWithNullDeclaredVariables() {
-    // Given
+  public void it_handles_null_declared_variables() {
     String stringLiteralExprValue = "testValue";
 
-    // When generating a constant name with null declared variables
     String constantName =
         DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
             stringLiteralExprValue, null);
 
-    // Then, the generated constant name should match the input string in upper case
     assertThat(constantName).isEqualTo("TESTVALUE");
   }
+
+    @Test
+    public void it_handles_any_chars() {
+        String stringLiteralExprValue = "(**my 2nd test value**)";
+
+        String constantName =
+                DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
+                        stringLiteralExprValue, null);
+
+        assertThat(constantName).isEqualTo("MY_2ND_TEST_VALUE");
+    }
+
+    @Test
+    public void it_handles_first_non_alpha_char() {
+        String stringLiteralExprValue = "2 dogs";
+
+        String constantName =
+                DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
+                        stringLiteralExprValue, null);
+
+        assertThat(constantName).isEqualTo("2_DOGS");
+    }
+
+    @Test
+    public void it_handles_first_non_alpha_string() {
+        String stringLiteralExprValue = "2/12/22";
+
+        String constantName =
+                DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
+                        stringLiteralExprValue, null);
+
+        assertThat(constantName).isEqualTo("2_12_22");
+    }
+
+    @Test
+    public void it_handles_first_non_alphanumeric_string() {
+        String stringLiteralExprValue = "(@)";
+
+        String constantName =
+                DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
+                        stringLiteralExprValue, null);
+
+        assertThat(constantName).isEqualTo("");
+    }
 }
