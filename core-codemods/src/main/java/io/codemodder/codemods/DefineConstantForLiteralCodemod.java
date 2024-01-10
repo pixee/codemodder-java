@@ -8,6 +8,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
@@ -69,9 +70,14 @@ public final class DefineConstantForLiteralCodemod
     final VariableCollector variableCollector = new VariableCollector();
     variableCollector.visit(cu, null);
 
+    final NodeWithSimpleName nodeWithSimpleName = findAncestorWithSimpleName(stringLiteralExpr);
+
+    final String parentNodeName =
+        nodeWithSimpleName != null ? nodeWithSimpleName.getNameAsString() : null;
+
     final String constantName =
         ConstantNameGenerator.generateConstantName(
-            stringLiteralExpr.getValue(), variableCollector.getDeclaredVariables());
+            stringLiteralExpr.getValue(), variableCollector.getDeclaredVariables(), parentNodeName);
 
     addConstantFieldToClass(
         classOrInterfaceDeclaration, createConstantField(stringLiteralExpr, constantName));
@@ -144,13 +150,27 @@ public final class DefineConstantForLiteralCodemod
     return new FieldDeclaration(modifiers, variableDeclarator);
   }
 
+  public static NodeWithSimpleName findAncestorWithSimpleName(StringLiteralExpr stringLiteralExpr) {
+    Optional<Node> parentNode = stringLiteralExpr.getParentNode();
+
+    while (parentNode.isPresent() && !(parentNode.get() instanceof NodeWithSimpleName)) {
+      parentNode = parentNode.get().getParentNode();
+    }
+
+    if (parentNode.get() instanceof NodeWithSimpleName) {
+      return (NodeWithSimpleName) parentNode.get();
+    }
+
+    return null;
+  }
+
   static final class ConstantNameGenerator {
 
     private ConstantNameGenerator() {}
 
     static String generateConstantName(
-        String stringLiteralExprValue, Set<String> declaredVariables) {
-      String sanitizedConstantName = formatValue(stringLiteralExprValue);
+        String stringLiteralExprValue, Set<String> declaredVariables, final String parentNodeName) {
+      String sanitizedConstantName = formatValue(stringLiteralExprValue, parentNodeName);
 
       String constantName = sanitizedConstantName;
       int counter = 1;
@@ -166,15 +186,15 @@ public final class DefineConstantForLiteralCodemod
       return constantName;
     }
 
-    private static String formatValue(String stringLiteralExprValue) {
+    private static String formatValue(String stringLiteralExprValue, final String parentNodeName) {
       if (containsOnlyNonAlpha(stringLiteralExprValue)) {
-        return "@";
+        return parentNodeName != null ? parentNodeName.toUpperCase() : "PIXEE";
       }
 
       final String sanitizedString = sanitizeString(stringLiteralExprValue);
 
       final String stringWithoutLeadingNumericCharacters =
-          sanitizedString.replaceAll("^(\\d+|_)+", "");
+          sanitizedString.replaceAll("^\\d*(_)*", "");
 
       return stringWithoutLeadingNumericCharacters.toUpperCase();
     }
