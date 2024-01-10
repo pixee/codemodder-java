@@ -46,10 +46,12 @@ public final class DefineConstantForLiteralCodemod
       final StringLiteralExpr stringLiteralExpr,
       final Issue issue) {
 
+    // Validate if we need to define a constant
     if (!issue.getMessage().startsWith("Define a constant")) {
       return false;
     }
 
+    // Validate ClassOrInterfaceDeclaration node where constant will be defined
     final Optional<ClassOrInterfaceDeclaration> classOrInterfaceDeclarationOptional =
         stringLiteralExpr.findAncestor(ClassOrInterfaceDeclaration.class);
 
@@ -59,7 +61,7 @@ public final class DefineConstantForLiteralCodemod
 
     final int numberOfDuplications = issue.getFlows().size();
 
-    final List<Node> nodesToReplace = findLiteralNodesToReplace(context, cu, issue);
+    final List<Node> nodesToReplace = findStringLiteralNodesToReplace(context, cu, issue);
 
     if (nodesToReplace.size() != numberOfDuplications) {
       LOG.debug(
@@ -92,7 +94,12 @@ public final class DefineConstantForLiteralCodemod
     return true;
   }
 
-  private List<Node> findLiteralNodesToReplace(
+  /**
+   * Finds all reported {@link StringLiteralExpr} nodes by Sonar. It reads source code regions of
+   * the Issue's flows to check if region node matches to collect all {@link StringLiteralExpr}
+   * nodes to replace.
+   */
+  private List<Node> findStringLiteralNodesToReplace(
       final CodemodInvocationContext context, final CompilationUnit cu, final Issue issue) {
     final List<? extends Node> allNodes = cu.findAll(StringLiteralExpr.class);
 
@@ -120,6 +127,7 @@ public final class DefineConstantForLiteralCodemod
     return nodesToReplace;
   }
 
+  /** Replaces given {@link StringLiteralExpr} to a {@link NameExpr} */
   private void replaceDuplicatedLiteralToConstantExpression(
       final Node node, final String constantName) {
     final StringLiteralExpr stringLiteralExpr = (StringLiteralExpr) node;
@@ -127,6 +135,10 @@ public final class DefineConstantForLiteralCodemod
     stringLiteralExpr.replace(nameExpr);
   }
 
+  /**
+   * Adds a {@link FieldDeclaration} as the first member of the provided {@link
+   * ClassOrInterfaceDeclaration}
+   */
   private void addConstantFieldToClass(
       final ClassOrInterfaceDeclaration classOrInterfaceDeclaration,
       final FieldDeclaration constantField) {
@@ -136,6 +148,7 @@ public final class DefineConstantForLiteralCodemod
     members.addFirst(constantField);
   }
 
+  /** Creates a {@link FieldDeclaration} of {@link String} type with the constant name provided */
   private FieldDeclaration createConstantField(
       final StringLiteralExpr stringLiteralExpr, final String constantName) {
 
@@ -145,14 +158,17 @@ public final class DefineConstantForLiteralCodemod
 
     final Type type = new ClassOrInterfaceType(null, "String");
 
-    final VariableDeclarator variableDeclarator = new VariableDeclarator();
-    variableDeclarator.setInitializer(new StringLiteralExpr(stringLiteralExpr.getValue()));
-    variableDeclarator.setType(type);
-    variableDeclarator.setName(constantName);
+    final VariableDeclarator variableDeclarator =
+        new VariableDeclarator(
+            type, constantName, new StringLiteralExpr(stringLiteralExpr.getValue()));
 
     return new FieldDeclaration(modifiers, variableDeclarator);
   }
 
+  /**
+   * Retrieves the first ancestor node that is a {@link NodeWithSimpleName} of a {@link
+   * StringLiteralExpr}
+   */
   private NodeWithSimpleName<?> findAncestorWithSimpleName(
       final StringLiteralExpr stringLiteralExpr) {
     Optional<Node> parentNodeOptional = stringLiteralExpr.getParentNode();
@@ -165,10 +181,16 @@ public final class DefineConstantForLiteralCodemod
     return (NodeWithSimpleName<?>) parentNodeOptional.orElse(null);
   }
 
+  /** This class generates constant names based on given values and parent node name. */
   static final class ConstantNameGenerator {
 
     private ConstantNameGenerator() {}
 
+    /**
+     * Generates a unique constant name based on the provided string literal expression value,
+     * declared variables, and the name of the parent node (if available). If there's a collision, a
+     * suffix counter is added.
+     */
     static String generateConstantName(
         final String stringLiteralExprValue,
         final Set<String> declaredVariables,
@@ -189,6 +211,11 @@ public final class DefineConstantForLiteralCodemod
       return constantName;
     }
 
+    /**
+     * Formats the value to be used in the constant name. The process involves removing leading
+     * numeric characters, special characters, and spaces from the name, and converting it to
+     * uppercase to comply with Java constant naming conventions.
+     */
     private static String formatValue(
         final String stringLiteralExprValue, final String parentNodeName) {
 
@@ -202,6 +229,13 @@ public final class DefineConstantForLiteralCodemod
       return stringWithoutLeadingNumericCharacters.toUpperCase();
     }
 
+    /**
+     * Builds the name to be used in the constant name. It checks if the provided string literal
+     * expression value contains only non-alphabetical characters. If it doesn't, the original value
+     * is returned as is. Otherwise, the method combines the provided string literal expression
+     * value with an optional prefix based on the parent node name (if available) to create a base
+     * name.
+     */
     private static String buildName(
         final String stringLiteralExprValue, final String parentNodeName) {
 
@@ -213,11 +247,13 @@ public final class DefineConstantForLiteralCodemod
       return prefix + " " + stringLiteralExprValue;
     }
 
+    /** Checks if the input contains only non-alpha characters. */
     private static boolean containsOnlyNonAlpha(final String input) {
       // Use a regular expression to check if the string contains only non-alpha characters
       return input.matches("[^a-zA-Z]+");
     }
 
+    /** Sanitizes the input string by keeping only alphanumeric characters and underscores. */
     private static String sanitizeString(final String input) {
       // Use a regular expression to keep only alphanumeric characters and underscores
       final Pattern pattern = Pattern.compile("\\W");
@@ -233,6 +269,10 @@ public final class DefineConstantForLiteralCodemod
       return stringWithSingleSpaces.trim().replace(" ", "_");
     }
 
+    /**
+     * Checks if a variable with the given constant name already exists in the declared variables
+     * set.
+     */
     private static boolean existsVariable(
         final String constantName, final Set<String> declaredVariables) {
 
@@ -244,6 +284,7 @@ public final class DefineConstantForLiteralCodemod
     }
   }
 
+  /** This class collects variables using a visitor pattern. */
   private static final class VariableCollector extends VoidVisitorAdapter<Void> {
     private final Set<String> declaredVariables = new HashSet<>();
 
