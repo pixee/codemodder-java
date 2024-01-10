@@ -90,7 +90,7 @@ public final class DefineConstantForLiteralCodemod
 
   private List<Node> findLiteralNodesToReplace(
       final CodemodInvocationContext context, final CompilationUnit cu, final Issue issue) {
-    List<? extends Node> allNodes = cu.findAll(StringLiteralExpr.class);
+    final List<? extends Node> allNodes = cu.findAll(StringLiteralExpr.class);
 
     final List<Node> nodesToReplace = new ArrayList<>();
 
@@ -106,7 +106,7 @@ public final class DefineConstantForLiteralCodemod
 
         if (context.lineIncludesExcludes().matches(region.start().line())
             && node.getRange().isPresent()) {
-          Range range = node.getRange().get();
+          final Range range = node.getRange().get();
           if (RegionNodeMatcher.MATCHES_START.matches(region, range)) {
             nodesToReplace.add(node);
           }
@@ -119,8 +119,8 @@ public final class DefineConstantForLiteralCodemod
 
   private void replaceDuplicatedLiteralToConstantExpression(
       final Node node, final String constantName) {
-    StringLiteralExpr stringLiteralExpr = (StringLiteralExpr) node;
-    NameExpr nameExpr = new NameExpr(constantName);
+    final StringLiteralExpr stringLiteralExpr = (StringLiteralExpr) node;
+    final NameExpr nameExpr = new NameExpr(constantName);
     stringLiteralExpr.replace(nameExpr);
   }
 
@@ -150,27 +150,27 @@ public final class DefineConstantForLiteralCodemod
     return new FieldDeclaration(modifiers, variableDeclarator);
   }
 
-  public static NodeWithSimpleName findAncestorWithSimpleName(StringLiteralExpr stringLiteralExpr) {
-    Optional<Node> parentNode = stringLiteralExpr.getParentNode();
+  private NodeWithSimpleName<?> findAncestorWithSimpleName(
+      final StringLiteralExpr stringLiteralExpr) {
+    Optional<Node> parentNodeOptional = stringLiteralExpr.getParentNode();
 
-    while (parentNode.isPresent() && !(parentNode.get() instanceof NodeWithSimpleName)) {
-      parentNode = parentNode.get().getParentNode();
+    while (parentNodeOptional.isPresent()
+        && !(parentNodeOptional.get() instanceof NodeWithSimpleName)) {
+      parentNodeOptional = parentNodeOptional.get().getParentNode();
     }
 
-    if (parentNode.get() instanceof NodeWithSimpleName) {
-      return (NodeWithSimpleName) parentNode.get();
-    }
-
-    return null;
+    return (NodeWithSimpleName<?>) parentNodeOptional.orElse(null);
   }
 
   static final class ConstantNameGenerator {
 
     private ConstantNameGenerator() {}
 
-    static String generateConstantName(
-        String stringLiteralExprValue, Set<String> declaredVariables, final String parentNodeName) {
-      String sanitizedConstantName = formatValue(stringLiteralExprValue, parentNodeName);
+    static final String generateConstantName(
+        final String stringLiteralExprValue,
+        final Set<String> declaredVariables,
+        final String parentNodeName) {
+      final String sanitizedConstantName = formatValue(stringLiteralExprValue, parentNodeName);
 
       String constantName = sanitizedConstantName;
       int counter = 1;
@@ -186,12 +186,12 @@ public final class DefineConstantForLiteralCodemod
       return constantName;
     }
 
-    private static String formatValue(String stringLiteralExprValue, final String parentNodeName) {
-      if (containsOnlyNonAlpha(stringLiteralExprValue)) {
-        return parentNodeName != null ? parentNodeName.toUpperCase() : "PIXEE";
-      }
+    private static String formatValue(
+        final String stringLiteralExprValue, final String parentNodeName) {
 
-      final String sanitizedString = sanitizeString(stringLiteralExprValue);
+      final String constName = buildName(stringLiteralExprValue, parentNodeName);
+
+      final String sanitizedString = sanitizeString(constName);
 
       final String stringWithoutLeadingNumericCharacters =
           sanitizedString.replaceAll("^\\d*(_)*", "");
@@ -199,21 +199,32 @@ public final class DefineConstantForLiteralCodemod
       return stringWithoutLeadingNumericCharacters.toUpperCase();
     }
 
-    private static boolean containsOnlyNonAlpha(String input) {
+    private static String buildName(
+        final String stringLiteralExprValue, final String parentNodeName) {
+
+      if (!containsOnlyNonAlpha(stringLiteralExprValue)) {
+        return stringLiteralExprValue;
+      }
+
+      final String preffix = parentNodeName != null ? parentNodeName : "CONST";
+      return preffix + " " + stringLiteralExprValue;
+    }
+
+    private static boolean containsOnlyNonAlpha(final String input) {
       // Use a regular expression to check if the string contains only non-alpha characters
       return input.matches("[^a-zA-Z]+");
     }
 
-    private static String sanitizeString(String input) {
+    private static String sanitizeString(final String input) {
       // Use a regular expression to keep only alphanumeric characters and underscores
-      Pattern pattern = Pattern.compile("\\W");
-      Matcher matcher = pattern.matcher(input);
+      final Pattern pattern = Pattern.compile("\\W");
+      final Matcher matcher = pattern.matcher(input);
 
       // Replace non-alphanumeric characters with a single space
-      String stringWithSpaces = matcher.replaceAll(" ");
+      final String stringWithSpaces = matcher.replaceAll(" ");
 
       // Replace consecutive spaces with a single space
-      String stringWithSingleSpaces = stringWithSpaces.replaceAll("\\s+", " ");
+      final String stringWithSingleSpaces = stringWithSpaces.replaceAll("\\s+", " ");
 
       // Replace spaces with underscores
       return stringWithSingleSpaces.trim().replace(" ", "_");
@@ -233,12 +244,12 @@ public final class DefineConstantForLiteralCodemod
   private static final class VariableCollector extends VoidVisitorAdapter<Void> {
     private final Set<String> declaredVariables = new HashSet<>();
 
-    public Set<String> getDeclaredVariables() {
+    public final Set<String> getDeclaredVariables() {
       return declaredVariables;
     }
 
     @Override
-    public void visit(VariableDeclarator declarator, Void arg) {
+    public final void visit(final VariableDeclarator declarator, final Void arg) {
       declaredVariables.add(declarator.getNameAsString());
       super.visit(declarator, arg);
     }

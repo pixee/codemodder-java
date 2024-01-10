@@ -98,7 +98,7 @@ public class ConstantNameGeneratorTest {
         DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
             stringLiteralExprValue, null, null);
 
-    assertThat(constantName).isEqualTo("2_12_22");
+    assertThat(constantName).isEqualTo("CONST_2_12_22");
   }
 
   @Test
@@ -109,6 +109,6 @@ public class ConstantNameGeneratorTest {
         DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
             stringLiteralExprValue, null, null);
 
-    assertThat(constantName).isEqualTo("");
+    assertThat(constantName).isEqualTo("CONST");
   }
 }
