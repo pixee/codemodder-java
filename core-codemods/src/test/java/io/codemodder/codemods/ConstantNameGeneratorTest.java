@@ -15,7 +15,7 @@ public class ConstantNameGeneratorTest {
     declaredVariables.add("EXISTING");
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
+        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
             stringLiteralExprValue, declaredVariables);
 
     assertThat(constantName).isEqualTo("TESTVALUE");
@@ -29,7 +29,7 @@ public class ConstantNameGeneratorTest {
     declaredVariables.add("TESTVALUE_1");
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
+        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
             stringLiteralExprValue, declaredVariables);
 
     assertThat(constantName).isEqualTo("TESTVALUE_2");
@@ -40,7 +40,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "testValue";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
+        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
             stringLiteralExprValue, new HashSet<>());
 
     assertThat(constantName).isEqualTo("TESTVALUE");
@@ -51,53 +51,53 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "testValue";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
+        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
             stringLiteralExprValue, null);
 
     assertThat(constantName).isEqualTo("TESTVALUE");
   }
 
-    @Test
-    public void it_handles_any_chars() {
-        String stringLiteralExprValue = "(**my 2nd test value**)";
+  @Test
+  public void it_handles_any_chars() {
+    String stringLiteralExprValue = "(**my 2nd test value**)";
 
-        String constantName =
-                DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
-                        stringLiteralExprValue, null);
+    String constantName =
+        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
+            stringLiteralExprValue, null);
 
-        assertThat(constantName).isEqualTo("MY_2ND_TEST_VALUE");
-    }
+    assertThat(constantName).isEqualTo("MY_2ND_TEST_VALUE");
+  }
 
-    @Test
-    public void it_handles_first_non_alpha_char() {
-        String stringLiteralExprValue = "2 dogs";
+  @Test
+  public void it_handles_first_non_alpha_char() {
+    String stringLiteralExprValue = "2 dogs";
 
-        String constantName =
-                DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
-                        stringLiteralExprValue, null);
+    String constantName =
+        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
+            stringLiteralExprValue, null);
 
-        assertThat(constantName).isEqualTo("2_DOGS");
-    }
+    assertThat(constantName).isEqualTo("DOGS");
+  }
 
-    @Test
-    public void it_handles_first_non_alpha_string() {
-        String stringLiteralExprValue = "2/12/22";
+  @Test
+  public void it_handles_first_non_alpha_string() {
+    String stringLiteralExprValue = "2/12/22";
 
-        String constantName =
-                DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
-                        stringLiteralExprValue, null);
+    String constantName =
+        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
+            stringLiteralExprValue, null);
 
-        assertThat(constantName).isEqualTo("2_12_22");
-    }
+    assertThat(constantName).isEqualTo("2_12_22");
+  }
 
-    @Test
-    public void it_handles_first_non_alphanumeric_string() {
-        String stringLiteralExprValue = "(@)";
+  @Test
+  public void it_handles_first_non_alphanumeric_string() {
+    String stringLiteralExprValue = "(@)";
 
-        String constantName =
-                DefineConstantForLiteralCodemod.ConstantNameGenerator.buildConstantName(
-                        stringLiteralExprValue, null);
+    String constantName =
+        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
+            stringLiteralExprValue, null);
 
-        assertThat(constantName).isEqualTo("");
-    }
+    assertThat(constantName).isEqualTo("");
+  }
 }

@@ -70,7 +70,7 @@ public final class DefineConstantForLiteralCodemod
     variableCollector.visit(cu, null);
 
     final String constantName =
-        ConstantNameGenerator.buildConstantName(
+        ConstantNameGenerator.generateConstantName(
             stringLiteralExpr.getValue(), variableCollector.getDeclaredVariables());
 
     addConstantFieldToClass(
@@ -148,9 +148,9 @@ public final class DefineConstantForLiteralCodemod
 
     private ConstantNameGenerator() {}
 
-    static String buildConstantName(String stringLiteralExprValue, Set<String> declaredVariables) {
-      String originalValue = stringLiteralExprValue;
-      String sanitizedConstantName = sanitizeString(originalValue);
+    static String generateConstantName(
+        String stringLiteralExprValue, Set<String> declaredVariables) {
+      String sanitizedConstantName = formatValue(stringLiteralExprValue);
 
       String constantName = sanitizedConstantName;
       int counter = 1;
@@ -166,6 +166,24 @@ public final class DefineConstantForLiteralCodemod
       return constantName;
     }
 
+    private static String formatValue(String stringLiteralExprValue) {
+      if (containsOnlyNonAlpha(stringLiteralExprValue)) {
+        return "@";
+      }
+
+      final String sanitizedString = sanitizeString(stringLiteralExprValue);
+
+      final String stringWithoutLeadingNumericCharacters =
+          sanitizedString.replaceAll("^(\\d+|_)+", "");
+
+      return stringWithoutLeadingNumericCharacters.toUpperCase();
+    }
+
+    private static boolean containsOnlyNonAlpha(String input) {
+      // Use a regular expression to check if the string contains only non-alpha characters
+      return input.matches("[^a-zA-Z]+");
+    }
+
     private static String sanitizeString(String input) {
       // Use a regular expression to keep only alphanumeric characters and underscores
       Pattern pattern = Pattern.compile("\\W");
@@ -178,7 +196,7 @@ public final class DefineConstantForLiteralCodemod
       String stringWithSingleSpaces = stringWithSpaces.replaceAll("\\s+", " ");
 
       // Replace spaces with underscores
-      return stringWithSingleSpaces.trim().replace(" ", "_").toUpperCase();
+      return stringWithSingleSpaces.trim().replace(" ", "_");
     }
 
     private static boolean existsVariable(
