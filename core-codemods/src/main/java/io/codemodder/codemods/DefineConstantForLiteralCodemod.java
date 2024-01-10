@@ -22,6 +22,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** A codemod for creating a constant for a literal string that is duplicated n times. */
 @Codemod(
@@ -60,20 +62,22 @@ public final class DefineConstantForLiteralCodemod
     final List<Node> nodesToReplace = findLiteralNodesToReplace(context, cu, issue);
 
     if (nodesToReplace.size() != numberOfDuplications) {
-      return false;
+      LOG.debug(
+          "Number of duplications {} are not matching nodes to replace {}",
+          numberOfDuplications,
+          nodesToReplace.size());
     }
 
     final ClassOrInterfaceDeclaration classOrInterfaceDeclaration =
         classOrInterfaceDeclarationOptional.get();
 
-    // Collect declared variables using a visitor
-    final VariableCollector variableCollector = new VariableCollector();
-    variableCollector.visit(cu, null);
-
-    final NodeWithSimpleName nodeWithSimpleName = findAncestorWithSimpleName(stringLiteralExpr);
+    final NodeWithSimpleName<?> nodeWithSimpleName = findAncestorWithSimpleName(stringLiteralExpr);
 
     final String parentNodeName =
         nodeWithSimpleName != null ? nodeWithSimpleName.getNameAsString() : null;
+
+    final VariableCollector variableCollector = new VariableCollector();
+    variableCollector.visit(cu, null);
 
     final String constantName =
         ConstantNameGenerator.generateConstantName(
@@ -96,7 +100,6 @@ public final class DefineConstantForLiteralCodemod
 
     for (Flow flow : issue.getFlows()) {
       for (Node node : allNodes) {
-
         final SourceCodeRegion region =
             createSourceCodeRegion(flow.getLocations().get(0).getTextRange());
 
@@ -166,7 +169,7 @@ public final class DefineConstantForLiteralCodemod
 
     private ConstantNameGenerator() {}
 
-    static final String generateConstantName(
+    static String generateConstantName(
         final String stringLiteralExprValue,
         final Set<String> declaredVariables,
         final String parentNodeName) {
@@ -206,8 +209,8 @@ public final class DefineConstantForLiteralCodemod
         return stringLiteralExprValue;
       }
 
-      final String preffix = parentNodeName != null ? parentNodeName : "CONST";
-      return preffix + " " + stringLiteralExprValue;
+      final String prefix = parentNodeName != null ? parentNodeName : "CONST";
+      return prefix + " " + stringLiteralExprValue;
     }
 
     private static boolean containsOnlyNonAlpha(final String input) {
@@ -244,14 +247,16 @@ public final class DefineConstantForLiteralCodemod
   private static final class VariableCollector extends VoidVisitorAdapter<Void> {
     private final Set<String> declaredVariables = new HashSet<>();
 
-    public final Set<String> getDeclaredVariables() {
+    public Set<String> getDeclaredVariables() {
       return declaredVariables;
     }
 
     @Override
-    public final void visit(final VariableDeclarator declarator, final Void arg) {
+    public void visit(final VariableDeclarator declarator, final Void arg) {
       declaredVariables.add(declarator.getNameAsString());
       super.visit(declarator, arg);
     }
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(DefineConstantForLiteralCodemod.class);
 }
