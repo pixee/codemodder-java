@@ -17,7 +17,7 @@ import io.codemodder.providers.sonar.api.Issue;
 import java.util.List;
 import java.util.Optional;
 
-public class CreateConstantForLiteral extends DefineConstantForLiteral {
+class CreateConstantForLiteral extends DefineConstantForLiteral {
 
   CreateConstantForLiteral(
       final CodemodInvocationContext context,

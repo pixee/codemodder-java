@@ -14,7 +14,7 @@ final class VariableCollector extends VoidVisitorAdapter<Void> {
   private final Set<String> declaredVariables = new HashSet<>();
 
   /** Gets the set of declared variables collected by the VariableCollector. */
-  public Set<String> getDeclaredVariables() {
+  Set<String> getDeclaredVariables() {
     return declaredVariables;
   }
 

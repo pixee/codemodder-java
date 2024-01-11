@@ -6,10 +6,10 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
-public class ConstantNameStringGeneratorTest {
+class ConstantNameStringGeneratorTest {
 
   @Test
-  public void it_tests_basic_alpha_string() {
+  void it_tests_basic_alpha_string() {
     String stringLiteralExprValue = "testValue";
     Set<String> declaredVariables = new HashSet<>();
     declaredVariables.add("EXISTING");
@@ -22,7 +22,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_duplicated_value() {
+  void it_handles_duplicated_value() {
     String stringLiteralExprValue = "testValue";
     Set<String> declaredVariables = new HashSet<>();
     declaredVariables.add("TESTVALUE");
@@ -36,7 +36,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_duplicated_value_camel_case() {
+  void it_handles_duplicated_value_camel_case() {
     String stringLiteralExprValue = "testValue";
     Set<String> declaredVariables = new HashSet<>();
     declaredVariables.add("TESTVALUE");
@@ -50,7 +50,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_empty_declared_variables() {
+  void it_handles_empty_declared_variables() {
     String stringLiteralExprValue = "testValue";
 
     String constantName =
@@ -61,7 +61,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_null_declared_variables() {
+  void it_handles_null_declared_variables() {
     String stringLiteralExprValue = "testValue";
 
     String constantName =
@@ -71,7 +71,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_any_chars() {
+  void it_handles_any_chars() {
     String stringLiteralExprValue = "(**my 2nd test value**)";
 
     String constantName =
@@ -81,7 +81,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_any_chars_camelCase() {
+  void it_handles_any_chars_camelCase() {
     String stringLiteralExprValue = "(**my 2nd test value**)";
 
     String constantName =
@@ -91,7 +91,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_first_non_alpha_char() {
+  void it_handles_first_non_alpha_char() {
     String stringLiteralExprValue = "2 dogs";
 
     String constantName =
@@ -101,7 +101,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_first_non_alpha_char_camel_case() {
+  void it_handles_first_non_alpha_char_camel_case() {
     String stringLiteralExprValue = "2 dogs";
 
     String constantName =
@@ -111,7 +111,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_first_non_alpha_char_1() {
+  void it_handles_first_non_alpha_char_1() {
     String stringLiteralExprValue = "31 de octubre";
 
     String constantName =
@@ -121,7 +121,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_first_non_alpha_char_1_camel_case() {
+  void it_handles_first_non_alpha_char_1_camel_case() {
     String stringLiteralExprValue = "31 de octubre";
 
     String constantName =
@@ -131,7 +131,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_first_non_alpha_string_no_parent_node_name_provided() {
+  void it_handles_first_non_alpha_string_no_parent_node_name_provided() {
     String stringLiteralExprValue = "2/12/22";
 
     String constantName =
@@ -141,7 +141,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_first_non_alphanumeric_string_no_parent_node_name_provided() {
+  void it_handles_first_non_alphanumeric_string_no_parent_node_name_provided() {
     String stringLiteralExprValue = "(@)";
 
     String constantName =
@@ -151,7 +151,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_first_non_alpha_string_with_parent_node_name_provided() {
+  void it_handles_first_non_alpha_string_with_parent_node_name_provided() {
     String stringLiteralExprValue = "2/12/22";
 
     String constantName =
@@ -162,7 +162,7 @@ public class ConstantNameStringGeneratorTest {
   }
 
   @Test
-  public void it_handles_first_non_alphanumeric_string_with_parent_node_name_provided() {
+  void it_handles_first_non_alphanumeric_string_with_parent_node_name_provided() {
     String stringLiteralExprValue = "***";
 
     String constantName =

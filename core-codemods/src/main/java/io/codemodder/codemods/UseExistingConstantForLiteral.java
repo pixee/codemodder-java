@@ -5,7 +5,7 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.CodemodInvocationContext;
 import io.codemodder.providers.sonar.api.Issue;
 
-public class UseExistingConstantForLiteral extends DefineConstantForLiteral {
+class UseExistingConstantForLiteral extends DefineConstantForLiteral {
 
   UseExistingConstantForLiteral(
       final CodemodInvocationContext context,
