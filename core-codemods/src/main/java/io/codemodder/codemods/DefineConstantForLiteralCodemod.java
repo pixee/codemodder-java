@@ -30,9 +30,15 @@ public final class DefineConstantForLiteralCodemod
       final StringLiteralExpr stringLiteralExpr,
       final Issue issue) {
 
-    final DefineConstantForLiteral defineConstantForLiteral =
-        issue.getMessage().startsWith("Define a constant") ? new CreateConstantForLiteral() : null;
+      DefineConstantForLiteral defineConstantForLiteral;
 
-    return defineConstantForLiteral.defineConstant(context, cu, stringLiteralExpr, issue);
+      if(issue.getMessage().startsWith("Use already-defined constant") ){
+        defineConstantForLiteral = new UseExistingConstantForLiteral(context, cu, stringLiteralExpr, issue);
+      } else {
+        defineConstantForLiteral = new CreateConstantForLiteral(context, cu, stringLiteralExpr, issue);
+      }
+
+
+    return defineConstantForLiteral.defineConstant();
   }
 }

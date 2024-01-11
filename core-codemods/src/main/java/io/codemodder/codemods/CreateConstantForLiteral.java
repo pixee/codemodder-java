@@ -10,16 +10,25 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import io.codemodder.CodemodInvocationContext;
+import io.codemodder.providers.sonar.api.Issue;
+
 import java.util.List;
 import java.util.Optional;
 
 public class CreateConstantForLiteral extends DefineConstantForLiteral {
 
+    CreateConstantForLiteral(final CodemodInvocationContext context,
+                             final CompilationUnit cu,
+                             final StringLiteralExpr stringLiteralExpr,
+                             final Issue issue){
+        super(context, cu, stringLiteralExpr, issue);
+    }
+
   @Override
-  protected String getConstantName(
-      final StringLiteralExpr stringLiteralExpr, final CompilationUnit cu) {
+  protected String getConstantName() {
     final List<FieldDeclaration> constantFieldDeclarations =
-        findDeclaredConstantsInClassOrInterface(classOrInterfaceDeclaration);
+        findDeclaredConstantsInClassOrInterface();
 
     final NodeWithSimpleName<?> nodeWithSimpleName = findAncestorWithSimpleName(stringLiteralExpr);
 
@@ -58,8 +67,7 @@ public class CreateConstantForLiteral extends DefineConstantForLiteral {
    * select those that are declared as static, final, and have a type of String. The resulting list
    * represents the declared constants in the given class or interface.
    */
-  private List<FieldDeclaration> findDeclaredConstantsInClassOrInterface(
-      final ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+  private List<FieldDeclaration> findDeclaredConstantsInClassOrInterface() {
     return classOrInterfaceDeclaration.getMembers().stream()
         .filter(FieldDeclaration.class::isInstance)
         .map(FieldDeclaration.class::cast)

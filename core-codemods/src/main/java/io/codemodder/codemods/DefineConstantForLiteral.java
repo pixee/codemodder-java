@@ -19,22 +19,32 @@ import io.codemodder.SourceCodeRegion;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Flow;
 import io.codemodder.providers.sonar.api.Issue;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class DefineConstantForLiteral {
 
-  protected List<Node> nodesToReplace;
-  protected ClassOrInterfaceDeclaration classOrInterfaceDeclaration;
+    protected ClassOrInterfaceDeclaration classOrInterfaceDeclaration;
 
-  boolean defineConstant(
-      final CodemodInvocationContext context,
-      final CompilationUnit cu,
-      final StringLiteralExpr stringLiteralExpr,
-      final Issue issue) {
+  protected  final CodemodInvocationContext context;
+  protected  final CompilationUnit cu;
+    protected  final StringLiteralExpr stringLiteralExpr;
+    protected  final Issue issue;
+
+  DefineConstantForLiteral(final CodemodInvocationContext context,
+                           final CompilationUnit cu,
+                           final StringLiteralExpr stringLiteralExpr,
+                           final Issue issue){
+      this.context = context;
+      this.cu = cu;
+      this.stringLiteralExpr = stringLiteralExpr;
+      this.issue = issue;
+  }
+
+  boolean defineConstant() {
 
     // Validate ClassOrInterfaceDeclaration node where constant will be defined
     final Optional<ClassOrInterfaceDeclaration> classOrInterfaceDeclarationOptional =
@@ -46,7 +56,7 @@ abstract class DefineConstantForLiteral {
 
     final int numberOfDuplications = issue.getFlows().size();
 
-    nodesToReplace = findStringLiteralNodesToReplace(context, cu, issue);
+    final List<Node> nodesToReplace = findStringLiteralNodesToReplace();
 
     if (nodesToReplace.size() != numberOfDuplications) {
       LOG.debug(
@@ -57,10 +67,9 @@ abstract class DefineConstantForLiteral {
 
     classOrInterfaceDeclaration = classOrInterfaceDeclarationOptional.get();
 
-    final String constantName = getConstantName(stringLiteralExpr, cu);
+    final String constantName = getConstantName();
 
-    addConstantFieldToClass(
-        classOrInterfaceDeclaration, createConstantField(stringLiteralExpr, constantName));
+    addConstantFieldToClass(createConstantField(stringLiteralExpr, constantName));
 
     nodesToReplace.forEach(
         node -> replaceDuplicatedLiteralToConstantExpression(node, constantName));
@@ -68,19 +77,18 @@ abstract class DefineConstantForLiteral {
     return true;
   }
 
-  protected abstract String getConstantName(
-      final StringLiteralExpr stringLiteralExpr, final CompilationUnit cu);
+  protected abstract String getConstantName();
 
   /**
    * Finds all reported {@link StringLiteralExpr} nodes by Sonar. It reads source code regions of
    * the Issue's flows to check if region node matches to collect all {@link StringLiteralExpr}
    * nodes to replace.
    */
-  private List<Node> findStringLiteralNodesToReplace(
-      final CodemodInvocationContext context, final CompilationUnit cu, final Issue issue) {
+  private List<Node> findStringLiteralNodesToReplace() {
     final List<? extends Node> allNodes = cu.findAll(StringLiteralExpr.class);
 
-    final List<Node> nodesToReplace = new ArrayList<>();
+    final List<Node> matchingNodes = new ArrayList<>();
+    matchingNodes.add(stringLiteralExpr);
 
     for (Flow flow : issue.getFlows()) {
       for (Node node : allNodes) {
@@ -96,13 +104,13 @@ abstract class DefineConstantForLiteral {
             && node.getRange().isPresent()) {
           final Range range = node.getRange().get();
           if (RegionNodeMatcher.MATCHES_START.matches(region, range)) {
-            nodesToReplace.add(node);
+            matchingNodes.add(node);
           }
         }
       }
     }
 
-    return nodesToReplace;
+    return matchingNodes;
   }
 
   /** Creates a {@link FieldDeclaration} of {@link String} type with the constant name provided */
@@ -127,7 +135,6 @@ abstract class DefineConstantForLiteral {
    * ClassOrInterfaceDeclaration}
    */
   protected void addConstantFieldToClass(
-      final ClassOrInterfaceDeclaration classOrInterfaceDeclaration,
       final FieldDeclaration constantField) {
 
     final NodeList<BodyDeclaration<?>> members = classOrInterfaceDeclaration.getMembers();
