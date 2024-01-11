@@ -9,7 +9,7 @@ import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
 import javax.inject.Inject;
 
-/** A codemod for creating a constant for a literal string that is duplicated n times. */
+/** A codemod for defining a constant for a literal string that is duplicated n times. */
 @Codemod(
     id = "sonar:java/define-constant-for-duplicate-literal-s1192",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
