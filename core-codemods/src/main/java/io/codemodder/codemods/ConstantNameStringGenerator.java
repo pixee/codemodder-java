@@ -22,9 +22,8 @@ final class ConstantNameStringGenerator {
     final String snakeCaseConstantName =
         formatStringValueToConstantSnakeCaseNomenclature(stringLiteralExprValue, parentNodeName);
 
-    final String constantName = isSnakeCase
-            ? snakeCaseConstantName
-            : convertSnakeCaseToCamelCase(snakeCaseConstantName);
+    final String constantName =
+        isSnakeCase ? snakeCaseConstantName : convertSnakeCaseToCamelCase(snakeCaseConstantName);
 
     StringBuilder constantNameBuilder = new StringBuilder(constantName);
     int counter = 0;
@@ -33,9 +32,9 @@ final class ConstantNameStringGenerator {
       // If the constant name already exists, append a counter to make it unique
       constantNameBuilder = new StringBuilder(constantName);
       if (counter != 0) {
-          if(isSnakeCase){
-              constantNameBuilder.append("_");
-          }
+        if (isSnakeCase) {
+          constantNameBuilder.append("_");
+        }
         constantNameBuilder.append(counter);
       }
       counter++;
