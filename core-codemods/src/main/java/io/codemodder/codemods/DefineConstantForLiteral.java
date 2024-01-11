@@ -7,11 +7,12 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.CodemodInvocationContext;
+import io.codemodder.Position;
 import io.codemodder.RegionNodeMatcher;
 import io.codemodder.SourceCodeRegion;
-import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Flow;
 import io.codemodder.providers.sonar.api.Issue;
+import io.codemodder.providers.sonar.api.TextRange;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,9 +87,11 @@ abstract class DefineConstantForLiteral {
 
     for (Flow flow : issue.getFlows()) {
       for (Node node : allNodes) {
-        final SourceCodeRegion region =
-            SonarPluginJavaParserChanger.createSourceCodeRegion(
-                flow.getLocations().get(0).getTextRange());
+        final TextRange textRange = flow.getLocations().get(0).getTextRange();
+        final Position start =
+            new Position(textRange.getStartLine(), textRange.getStartOffset() + 1);
+        final Position end = new Position(textRange.getEndLine(), textRange.getEndOffset() + 1);
+        final SourceCodeRegion region = new SourceCodeRegion(start, end);
 
         if (!StringLiteralExpr.class.isAssignableFrom(node.getClass())) {
           continue;
@@ -110,9 +113,9 @@ abstract class DefineConstantForLiteral {
   /** Replaces given {@link StringLiteralExpr} to a {@link NameExpr} */
   private void replaceDuplicatedLiteralToConstantExpression(
       final Node node, final String constantName) {
-    final StringLiteralExpr stringLiteralExpr = (StringLiteralExpr) node;
+    final StringLiteralExpr literalExpr = (StringLiteralExpr) node;
     final NameExpr nameExpr = new NameExpr(constantName);
-    stringLiteralExpr.replace(nameExpr);
+    literalExpr.replace(nameExpr);
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(DefineConstantForLiteral.class);

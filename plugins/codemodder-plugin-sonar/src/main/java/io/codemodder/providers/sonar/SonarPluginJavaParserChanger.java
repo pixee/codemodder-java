@@ -6,7 +6,6 @@ import com.github.javaparser.ast.Node;
 import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
-import io.codemodder.providers.sonar.api.TextRange;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -62,7 +61,13 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     List<CodemodChange> codemodChanges = new ArrayList<>();
     for (Issue issue : issues) {
       for (Node node : allNodes) {
-        final SourceCodeRegion region = createSourceCodeRegion(issue.getTextRange());
+        Position start =
+            new Position(
+                issue.getTextRange().getStartLine(), issue.getTextRange().getStartOffset() + 1);
+        Position end =
+            new Position(
+                issue.getTextRange().getEndLine(), issue.getTextRange().getEndOffset() + 1);
+        SourceCodeRegion region = new SourceCodeRegion(start, end);
         if (!nodeType.isAssignableFrom(node.getClass())) {
           continue;
         }
@@ -99,12 +104,4 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
    */
   public abstract boolean onIssueFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
-
-  // TODO refactor static
-  public static SourceCodeRegion createSourceCodeRegion(final TextRange textRange) {
-    final Position start = new Position(textRange.getStartLine(), textRange.getStartOffset() + 1);
-    final Position end = new Position(textRange.getEndLine(), textRange.getEndOffset() + 1);
-
-    return new SourceCodeRegion(start, end);
-  }
 }

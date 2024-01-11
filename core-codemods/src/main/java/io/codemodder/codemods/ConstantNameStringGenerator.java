@@ -21,18 +21,21 @@ final class ConstantNameStringGenerator {
       final boolean isSnakeCase) {
     final String sanitizedConstantName = formatValue(stringLiteralExprValue, parentNodeName);
 
-    String constantName = sanitizedConstantName;
+    StringBuilder constantNameBuilder = new StringBuilder(sanitizedConstantName);
     int counter = 1;
-    while (existsVariable(constantName, declaredVariables)) {
+
+    while (existsVariable(constantNameBuilder.toString(), declaredVariables)) {
       // If the constant name already exists, append a counter to make it unique
-      constantName = sanitizedConstantName;
+      constantNameBuilder = new StringBuilder(sanitizedConstantName);
       if (counter != 0) {
-        constantName += "_" + counter;
+        constantNameBuilder.append("_").append(counter);
       }
       counter++;
     }
 
-    return isSnakeCase ? constantName : convertSnakeCaseToCamelCase(constantName);
+    return isSnakeCase
+        ? constantNameBuilder.toString()
+        : convertSnakeCaseToCamelCase(constantNameBuilder.toString());
   }
 
   /**
