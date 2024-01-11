@@ -19,14 +19,15 @@ final class ConstantNameStringGenerator {
       final Set<String> declaredVariables,
       final String parentNodeName,
       final boolean isSnakeCase) {
-    final String sanitizedConstantName = formatValue(stringLiteralExprValue, parentNodeName);
+    final String constantName =
+        formatStringValueToConstantSnakeCaseNomenclature(stringLiteralExprValue, parentNodeName);
 
-    StringBuilder constantNameBuilder = new StringBuilder(sanitizedConstantName);
+    StringBuilder constantNameBuilder = new StringBuilder(constantName);
     int counter = 1;
 
     while (existsVariable(constantNameBuilder.toString(), declaredVariables)) {
       // If the constant name already exists, append a counter to make it unique
-      constantNameBuilder = new StringBuilder(sanitizedConstantName);
+      constantNameBuilder = new StringBuilder(constantName);
       if (counter != 0) {
         constantNameBuilder.append("_").append(counter);
       }
@@ -67,12 +68,12 @@ final class ConstantNameStringGenerator {
    * numeric characters, special characters, and spaces from the name, and converting it to
    * uppercase to comply with Java constant naming conventions.
    */
-  private static String formatValue(
+  private static String formatStringValueToConstantSnakeCaseNomenclature(
       final String stringLiteralExprValue, final String parentNodeName) {
 
     final String constName = buildName(stringLiteralExprValue, parentNodeName);
 
-    final String sanitizedString = sanitizeString(constName);
+    final String sanitizedString = sanitizeStringToOnlyAlphaNumericAndUnderscore(constName);
 
     final String stringWithoutLeadingNumericCharacters =
         sanitizedString.replaceAll("^\\d*(_)*", "");
@@ -103,7 +104,7 @@ final class ConstantNameStringGenerator {
   }
 
   /** Sanitizes the input string by keeping only alphanumeric characters and underscores. */
-  private static String sanitizeString(final String input) {
+  private static String sanitizeStringToOnlyAlphaNumericAndUnderscore(final String input) {
     // Use a regular expression to keep only alphanumeric characters and underscores
     final Pattern pattern = Pattern.compile("\\W");
     final Matcher matcher = pattern.matcher(input);
