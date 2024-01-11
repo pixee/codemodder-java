@@ -49,11 +49,8 @@ import org.springframework.web.bind.annotation.RestController;
     })
 public class SqlInjectionLesson9 extends AssignmentEndpoint {
 
-private static final String BR_SPAN_CLASS_FEEDBACK_NEGATIVE = "<br><span class='feedback-negative'>";
-
-private static final String PRINTLN = "1 2 3...";
-
   private final LessonDataSource dataSource;
+  private static final String UTF8 = "UTF-8";
 
   public SqlInjectionLesson9(LessonDataSource dataSource) {
     this.dataSource = dataSource;
@@ -67,7 +64,7 @@ private static final String PRINTLN = "1 2 3...";
 
   protected AttackResult injectableQueryIntegrity(String name, String auth_tan) {
     StringBuilder output = new StringBuilder();
-    System.out.println(PRINTLN);
+    System.out.println("1 2 3..." + UTF8);
     String query =
         "SELECT * FROM employees WHERE last_name = '"
             + name
@@ -91,7 +88,7 @@ private static final String PRINTLN = "1 2 3...";
       } catch (SQLException e) {
         System.err.println(e.getMessage());
         return failed(this)
-            .output(BR_SPAN_CLASS_FEEDBACK_NEGATIVE + e.getMessage() + "</span>")
+            .output("<br><span class='feedback-negative'>" + e.getMessage() + "</span>")
             .build();
       }
 
@@ -100,13 +97,13 @@ private static final String PRINTLN = "1 2 3...";
     } catch (Exception e) {
       System.err.println(e.getMessage());
       return failed(this)
-          .output(BR_SPAN_CLASS_FEEDBACK_NEGATIVE + e.getMessage() + "</span>")
+          .output("<br><span class='feedback-negative'>" + e.getMessage() + "</span>")
           .build();
     }
   }
 
   private AttackResult checkSalaryRanking(Connection connection, StringBuilder output) {
-      System.out.println(PRINTLN);
+      System.out.println("1 2 3...");
     try {
       String query = "SELECT * FROM employees ORDER BY salary DESC";
       try (Statement statement =
@@ -126,9 +123,10 @@ private static final String PRINTLN = "1 2 3...";
         }
       }
     } catch (SQLException e) {
-        System.out.println(PRINTLN);
+        System.out.println("UTF-8");
+        System.out.println("1 2 3...");
       return failed(this)
-          .output(BR_SPAN_CLASS_FEEDBACK_NEGATIVE + e.getMessage() + "</span>")
+          .output("<br><span class='feedback-negative'>" + e.getMessage() + "</span>")
           .build();
     }
   }

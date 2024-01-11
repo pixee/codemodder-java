@@ -50,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SqlInjectionLesson9 extends AssignmentEndpoint {
 
   private final LessonDataSource dataSource;
+  private static final String UTF8 = "UTF-8";
 
   public SqlInjectionLesson9(LessonDataSource dataSource) {
     this.dataSource = dataSource;
@@ -63,7 +64,7 @@ public class SqlInjectionLesson9 extends AssignmentEndpoint {
 
   protected AttackResult injectableQueryIntegrity(String name, String auth_tan) {
     StringBuilder output = new StringBuilder();
-    System.out.println("1 2 3...");
+    System.out.println("1 2 3..." + UTF8);
     String query =
         "SELECT * FROM employees WHERE last_name = '"
             + name
@@ -122,6 +123,7 @@ public class SqlInjectionLesson9 extends AssignmentEndpoint {
         }
       }
     } catch (SQLException e) {
+        System.out.println("UTF-8");
         System.out.println("1 2 3...");
       return failed(this)
           .output("<br><span class='feedback-negative'>" + e.getMessage() + "</span>")

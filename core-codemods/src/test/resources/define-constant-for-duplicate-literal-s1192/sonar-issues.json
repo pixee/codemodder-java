@@ -1,26 +1,26 @@
 {
-  "total": 2,
+  "total": 4,
   "p": 1,
   "ps": 500,
   "paging": {
     "pageIndex": 1,
     "pageSize": 500,
-    "total": 2
+    "total": 4
   },
-  "effortTotal": 16,
-  "debtTotal": 16,
+  "effortTotal": 28,
+  "debtTotal": 28,
   "issues": [
     {
-      "key": "AYzsyMDCqszSjWIX78TZ",
+      "key": "AYz4qSTsr7aM2_b93z-w",
       "rule": "java:S1192",
       "severity": "CRITICAL",
       "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
       "project": "nahsra_WebGoat_10_23",
-      "line": 66,
-      "hash": "ef8b5cd9b95cf52b88128960a173c2ba",
+      "line": 67,
+      "hash": "d76c42c43f65898d3d834021e49a601f",
       "textRange": {
-        "startLine": 66,
-        "endLine": 66,
+        "startLine": 67,
+        "endLine": 67,
         "startOffset": 23,
         "endOffset": 33
       },
@@ -30,8 +30,8 @@
             {
               "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
               "textRange": {
-                "startLine": 66,
-                "endLine": 66,
+                "startLine": 67,
+                "endLine": 67,
                 "startOffset": 23,
                 "endOffset": 33
               },
@@ -44,8 +44,8 @@
             {
               "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
               "textRange": {
-                "startLine": 105,
-                "endLine": 105,
+                "startLine": 106,
+                "endLine": 106,
                 "startOffset": 25,
                 "endOffset": 35
               },
@@ -58,8 +58,8 @@
             {
               "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
               "textRange": {
-                "startLine": 125,
-                "endLine": 125,
+                "startLine": 127,
+                "endLine": 127,
                 "startOffset": 27,
                 "endOffset": 37
               },
@@ -75,8 +75,43 @@
       "tags": [
         "design"
       ],
-      "creationDate": "2024-01-09T06:51:02+0100",
-      "updateDate": "2024-01-09T06:51:02+0100",
+      "creationDate": "2024-01-11T14:11:56+0100",
+      "updateDate": "2024-01-11T14:11:56+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AYz4qSTsr7aM2_b93z-x",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 126,
+      "hash": "1f05ba2b5790b6e6f594790c51b279f9",
+      "textRange": {
+        "startLine": 126,
+        "endLine": 126,
+        "startOffset": 27,
+        "endOffset": 34
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Use already-defined constant 'UTF8' instead of duplicating its value here.",
+      "effort": "4min",
+      "debt": "4min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2024-01-11T14:11:56+0100",
+      "updateDate": "2024-01-11T14:11:56+0100",
       "type": "CODE_SMELL",
       "organization": "nahsra",
       "cleanCodeAttribute": "DISTINCT",
@@ -94,11 +129,11 @@
       "severity": "CRITICAL",
       "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
       "project": "nahsra_WebGoat_10_23",
-      "line": 90,
+      "line": 91,
       "hash": "d44bf3eb5a074382bb31d1d9471f1162",
       "textRange": {
-        "startLine": 90,
-        "endLine": 90,
+        "startLine": 91,
+        "endLine": 91,
         "startOffset": 20,
         "endOffset": 58
       },
@@ -108,8 +143,8 @@
             {
               "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
               "textRange": {
-                "startLine": 90,
-                "endLine": 90,
+                "startLine": 91,
+                "endLine": 91,
                 "startOffset": 20,
                 "endOffset": 58
               },
@@ -122,8 +157,8 @@
             {
               "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
               "textRange": {
-                "startLine": 99,
-                "endLine": 99,
+                "startLine": 100,
+                "endLine": 100,
                 "startOffset": 18,
                 "endOffset": 56
               },
@@ -136,8 +171,8 @@
             {
               "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
               "textRange": {
-                "startLine": 127,
-                "endLine": 127,
+                "startLine": 129,
+                "endLine": 129,
                 "startOffset": 18,
                 "endOffset": 56
               },
@@ -148,6 +183,84 @@
       ],
       "status": "OPEN",
       "message": "Define a constant instead of duplicating this literal \"<br><span class='feedback-negative'>\" 3 times.",
+      "effort": "8min",
+      "debt": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2023-11-20T17:58:54+0100",
+      "type": "CODE_SMELL",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AYvtrjzcLCzGLicz7AkX",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
+      "project": "nahsra_WebGoat_10_23",
+      "line": 91,
+      "hash": "d44bf3eb5a074382bb31d1d9471f1162",
+      "textRange": {
+        "startLine": 91,
+        "endLine": 91,
+        "startOffset": 78,
+        "endOffset": 87
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 78,
+                "endOffset": 87
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
+              "textRange": {
+                "startLine": 100,
+                "endLine": 100,
+                "startOffset": 76,
+                "endOffset": 85
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoat_10_23:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java",
+              "textRange": {
+                "startLine": 129,
+                "endLine": 129,
+                "startOffset": 76,
+                "endOffset": 85
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"</span>\" 3 times.",
       "effort": "8min",
       "debt": "8min",
       "tags": [
