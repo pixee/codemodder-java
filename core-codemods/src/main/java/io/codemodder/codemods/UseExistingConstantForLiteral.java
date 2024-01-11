@@ -21,23 +21,14 @@ public class UseExistingConstantForLiteral extends DefineConstantForLiteral {
   }
 
   @Override
-  protected void defineConstant(String constantName) {
+  protected void defineConstant(final String constantName) {
     // Empty implementation
   }
 
-  // TODO
-  public static String getDefinedConstantValueInMessage(final String message) {
-    // Find the first occurrence of single quote
+  private String getDefinedConstantValueInMessage(final String message) {
     int startIndex = message.indexOf("'");
-    if (startIndex != -1) {
-      // Find the next occurrence of single quote starting from the position after the first quote
-      int endIndex = message.indexOf("'", startIndex + 1);
-      if (endIndex != -1) {
-        // Extract the value between the single quotes
-        return message.substring(startIndex + 1, endIndex);
-      }
-    }
-    // Return an empty string if no single quotes were found
-    return "";
+    int endIndex = message.lastIndexOf("'");
+
+    return message.substring(startIndex + 1, endIndex);
   }
 }
