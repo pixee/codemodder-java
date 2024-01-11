@@ -100,7 +100,8 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   public abstract boolean onIssueFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
 
-  protected SourceCodeRegion createSourceCodeRegion(final TextRange textRange) {
+  // TODO refactor static
+  public static SourceCodeRegion createSourceCodeRegion(final TextRange textRange) {
     final Position start = new Position(textRange.getStartLine(), textRange.getStartOffset() + 1);
     final Position end = new Position(textRange.getEndLine(), textRange.getEndOffset() + 1);
 
