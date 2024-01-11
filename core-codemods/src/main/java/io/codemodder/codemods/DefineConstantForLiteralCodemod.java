@@ -73,6 +73,9 @@ public final class DefineConstantForLiteralCodemod
     final ClassOrInterfaceDeclaration classOrInterfaceDeclaration =
         classOrInterfaceDeclarationOptional.get();
 
+    final List<FieldDeclaration> constantFieldDeclarations =
+        findDeclaredConstantsInClassOrInterface(classOrInterfaceDeclaration);
+
     final NodeWithSimpleName<?> nodeWithSimpleName = findAncestorWithSimpleName(stringLiteralExpr);
 
     final String parentNodeName =
@@ -83,7 +86,10 @@ public final class DefineConstantForLiteralCodemod
 
     final String constantName =
         ConstantNameGenerator.generateConstantName(
-            stringLiteralExpr.getValue(), variableCollector.getDeclaredVariables(), parentNodeName);
+            stringLiteralExpr.getValue(),
+            variableCollector.getDeclaredVariables(),
+            parentNodeName,
+            isUsingSnakeCase(constantFieldDeclarations));
 
     addConstantFieldToClass(
         classOrInterfaceDeclaration, createConstantField(stringLiteralExpr, constantName));
@@ -166,6 +172,52 @@ public final class DefineConstantForLiteralCodemod
   }
 
   /**
+   * This method takes a list of {@link FieldDeclaration} objects representing constant fields. It
+   * checks if the first constant field's name contains an underscore or is entirely in uppercase,
+   * indicating the use of snake case naming convention. If the list is empty, the method returns
+   * true as there are no constant fields to assess.
+   */
+  private boolean isUsingSnakeCase(final List<FieldDeclaration> constantFieldDeclarations) {
+    if (constantFieldDeclarations == null || constantFieldDeclarations.isEmpty()) {
+      return true;
+    }
+
+    final String constantName = constantFieldDeclarations.get(0).getVariable(0).getNameAsString();
+
+    return constantName.contains("_") || constantName.equals(constantName.toUpperCase());
+  }
+
+  /**
+   * This method takes a {@link ClassOrInterfaceDeclaration} as input, filters its members to
+   * include only {@link FieldDeclaration} nodes, and further filters these FieldDeclarations to
+   * select those that are declared as static, final, and have a type of String. The resulting list
+   * represents the declared constants in the given class or interface.
+   */
+  private List<FieldDeclaration> findDeclaredConstantsInClassOrInterface(
+      final ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+    return classOrInterfaceDeclaration.getMembers().stream()
+        .filter(FieldDeclaration.class::isInstance)
+        .map(FieldDeclaration.class::cast)
+        .filter(
+            fieldDeclaration ->
+                fieldDeclaration.getModifiers().contains(Modifier.staticModifier())
+                    && fieldDeclaration.getModifiers().contains(Modifier.finalModifier())
+                    && containsStringType(fieldDeclaration))
+        .toList();
+  }
+
+  private boolean containsStringType(final FieldDeclaration fieldDeclaration) {
+    for (VariableDeclarator variable : fieldDeclaration.getVariables()) {
+      final Type fieldType = variable.getType();
+      if (fieldType instanceof ClassOrInterfaceType classOrInterfaceType
+          && classOrInterfaceType.getNameAsString().equals("String")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Retrieves the first ancestor node that is a {@link NodeWithSimpleName} of a {@link
    * StringLiteralExpr}
    */
@@ -194,7 +246,8 @@ public final class DefineConstantForLiteralCodemod
     static String generateConstantName(
         final String stringLiteralExprValue,
         final Set<String> declaredVariables,
-        final String parentNodeName) {
+        final String parentNodeName,
+        final boolean isSnakeCase) {
       final String sanitizedConstantName = formatValue(stringLiteralExprValue, parentNodeName);
 
       String constantName = sanitizedConstantName;
@@ -208,7 +261,31 @@ public final class DefineConstantForLiteralCodemod
         counter++;
       }
 
-      return constantName;
+      return isSnakeCase ? constantName : convertSnakeCaseToCamelCase(constantName);
+    }
+
+    /**
+     * This method takes a snake-cased string as input and transforms it into a camel-cased string.
+     * It splits the input string by underscores, capitalizes the first letter of each subsequent
+     * word, and concatenates the words to form the camel-cased result.
+     */
+    private static String convertSnakeCaseToCamelCase(String snakeCaseString) {
+      StringBuilder camelCaseBuilder = new StringBuilder();
+
+      // Split the snake case string by underscores
+      String[] words = snakeCaseString.split("_");
+
+      // Append the first word with lowercase
+      camelCaseBuilder.append(words[0].toLowerCase());
+
+      // Capitalize the first letter of each subsequent word and append
+      for (int i = 1; i < words.length; i++) {
+        String capitalizedWord =
+            words[i].substring(0, 1).toUpperCase() + words[i].substring(1).toLowerCase();
+        camelCaseBuilder.append(capitalizedWord);
+      }
+
+      return camelCaseBuilder.toString();
     }
 
     /**
@@ -243,8 +320,7 @@ public final class DefineConstantForLiteralCodemod
         return stringLiteralExprValue;
       }
 
-      final String prefix = parentNodeName != null ? parentNodeName : "CONST";
-      return prefix + " " + stringLiteralExprValue;
+      return parentNodeName != null ? parentNodeName : "CONST";
     }
 
     /** Checks if the input contains only non-alpha characters. */
