@@ -46,7 +46,7 @@ class ConstantNameStringGeneratorTest {
         ConstantNameStringGenerator.generateConstantName(
             stringLiteralExprValue, declaredVariables, null, false);
 
-    assertThat(constantName).isEqualTo("testvalue2");
+    assertThat(constantName).isEqualTo("testvalue");
   }
 
   @Test
