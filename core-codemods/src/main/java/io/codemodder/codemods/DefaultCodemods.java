@@ -17,6 +17,7 @@ public final class DefaultCodemods {
         AddMissingOverrideCodemod.class,
         AvoidImplicitPublicConstructorCodemod.class,
         DeclareVariableOnSeparateLineCodemod.class,
+        DefineConstantForLiteralCodemod.class,
         DisableAutomaticDirContextDeserializationCodemod.class,
         FixRedundantStaticOnEnumCodemod.class,
         HardenJavaDeserializationCodemod.class,
