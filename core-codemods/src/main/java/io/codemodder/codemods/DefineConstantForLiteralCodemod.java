@@ -1,14 +1,12 @@
 package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
-import java.util.*;
 import javax.inject.Inject;
 
 /** A codemod for creating a constant for a literal string that is duplicated n times. */
