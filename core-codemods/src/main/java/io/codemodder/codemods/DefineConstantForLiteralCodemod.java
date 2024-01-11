@@ -11,7 +11,6 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
@@ -229,21 +228,6 @@ public final class DefineConstantForLiteralCodemod
     }
 
     return (NodeWithSimpleName<?>) parentNodeOptional.orElse(null);
-  }
-
-  /** This class collects variables using a visitor pattern. */
-  private static final class VariableCollector extends VoidVisitorAdapter<Void> {
-    private final Set<String> declaredVariables = new HashSet<>();
-
-    public Set<String> getDeclaredVariables() {
-      return declaredVariables;
-    }
-
-    @Override
-    public void visit(final VariableDeclarator declarator, final Void arg) {
-      declaredVariables.add(declarator.getNameAsString());
-      super.visit(declarator, arg);
-    }
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(DefineConstantForLiteralCodemod.class);
