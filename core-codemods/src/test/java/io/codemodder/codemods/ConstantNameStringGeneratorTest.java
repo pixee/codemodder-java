@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
-public class ConstantNameGeneratorTest {
+public class ConstantNameStringGeneratorTest {
 
   @Test
   public void it_tests_basic_alpha_string() {
@@ -15,7 +15,7 @@ public class ConstantNameGeneratorTest {
     declaredVariables.add("EXISTING");
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
+        ConstantNameStringGenerator.generateConstantName(
             stringLiteralExprValue, declaredVariables, null, true);
 
     assertThat(constantName).isEqualTo("TESTVALUE");
@@ -29,7 +29,7 @@ public class ConstantNameGeneratorTest {
     declaredVariables.add("TESTVALUE_1");
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
+        ConstantNameStringGenerator.generateConstantName(
             stringLiteralExprValue, declaredVariables, null, true);
 
     assertThat(constantName).isEqualTo("TESTVALUE_2");
@@ -43,7 +43,7 @@ public class ConstantNameGeneratorTest {
     declaredVariables.add("TESTVALUE_1");
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
+        ConstantNameStringGenerator.generateConstantName(
             stringLiteralExprValue, declaredVariables, null, false);
 
     assertThat(constantName).isEqualTo("testvalue2");
@@ -54,7 +54,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "testValue";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
+        ConstantNameStringGenerator.generateConstantName(
             stringLiteralExprValue, new HashSet<>(), null, true);
 
     assertThat(constantName).isEqualTo("TESTVALUE");
@@ -65,8 +65,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "testValue";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
-            stringLiteralExprValue, null, null, true);
+        ConstantNameStringGenerator.generateConstantName(stringLiteralExprValue, null, null, true);
 
     assertThat(constantName).isEqualTo("TESTVALUE");
   }
@@ -76,8 +75,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "(**my 2nd test value**)";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
-            stringLiteralExprValue, null, null, true);
+        ConstantNameStringGenerator.generateConstantName(stringLiteralExprValue, null, null, true);
 
     assertThat(constantName).isEqualTo("MY_2ND_TEST_VALUE");
   }
@@ -87,8 +85,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "(**my 2nd test value**)";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
-            stringLiteralExprValue, null, null, false);
+        ConstantNameStringGenerator.generateConstantName(stringLiteralExprValue, null, null, false);
 
     assertThat(constantName).isEqualTo("my2ndTestValue");
   }
@@ -98,8 +95,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "2 dogs";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
-            stringLiteralExprValue, null, null, true);
+        ConstantNameStringGenerator.generateConstantName(stringLiteralExprValue, null, null, true);
 
     assertThat(constantName).isEqualTo("DOGS");
   }
@@ -109,8 +105,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "2 dogs";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
-            stringLiteralExprValue, null, null, false);
+        ConstantNameStringGenerator.generateConstantName(stringLiteralExprValue, null, null, false);
 
     assertThat(constantName).isEqualTo("dogs");
   }
@@ -120,8 +115,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "31 de octubre";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
-            stringLiteralExprValue, null, null, true);
+        ConstantNameStringGenerator.generateConstantName(stringLiteralExprValue, null, null, true);
 
     assertThat(constantName).isEqualTo("DE_OCTUBRE");
   }
@@ -131,8 +125,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "31 de octubre";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
-            stringLiteralExprValue, null, null, false);
+        ConstantNameStringGenerator.generateConstantName(stringLiteralExprValue, null, null, false);
 
     assertThat(constantName).isEqualTo("deOctubre");
   }
@@ -142,8 +135,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "2/12/22";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
-            stringLiteralExprValue, null, null, true);
+        ConstantNameStringGenerator.generateConstantName(stringLiteralExprValue, null, null, true);
 
     assertThat(constantName).isEqualTo("CONST");
   }
@@ -153,8 +145,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "(@)";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
-            stringLiteralExprValue, null, null, true);
+        ConstantNameStringGenerator.generateConstantName(stringLiteralExprValue, null, null, true);
 
     assertThat(constantName).isEqualTo("CONST");
   }
@@ -164,7 +155,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "2/12/22";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
+        ConstantNameStringGenerator.generateConstantName(
             stringLiteralExprValue, null, "displayDate", true);
 
     assertThat(constantName).isEqualTo("DISPLAYDATE");
@@ -175,7 +166,7 @@ public class ConstantNameGeneratorTest {
     String stringLiteralExprValue = "***";
 
     String constantName =
-        DefineConstantForLiteralCodemod.ConstantNameGenerator.generateConstantName(
+        ConstantNameStringGenerator.generateConstantName(
             stringLiteralExprValue, null, "setWildcard", true);
 
     assertThat(constantName).isEqualTo("SETWILDCARD");
