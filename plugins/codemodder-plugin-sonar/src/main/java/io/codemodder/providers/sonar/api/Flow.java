@@ -3,7 +3,7 @@ package io.codemodder.providers.sonar.api;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-public class Flow {
+public final class Flow {
   @JsonProperty("locations")
   private List<Location> locations;
 

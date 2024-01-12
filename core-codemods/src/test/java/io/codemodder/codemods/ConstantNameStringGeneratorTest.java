@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
-class ConstantNameStringGeneratorTest {
+final class ConstantNameStringGeneratorTest {
 
   @Test
   void it_tests_basic_alpha_string() {
