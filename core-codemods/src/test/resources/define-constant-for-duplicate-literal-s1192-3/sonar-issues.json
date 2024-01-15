@@ -1,0 +1,301 @@
+{
+  "total": 3,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 3
+  },
+  "effortTotal": 28,
+  "debtTotal": 28,
+  "issues": [
+    {
+      "key": "AX0Kx7w9CNYFDQ0woCl8",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 106,
+      "hash": "553ad0e038f302c08fcebfbf86345585",
+      "textRange": {
+        "startLine": 106,
+        "endLine": 106,
+        "startOffset": 20,
+        "endOffset": 27
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 106,
+                "endLine": 106,
+                "startOffset": 20,
+                "endOffset": 27
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 113,
+                "endLine": 113,
+                "startOffset": 32,
+                "endOffset": 39
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 130,
+                "endLine": 130,
+                "startOffset": 24,
+                "endOffset": 31
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 136,
+                "endLine": 136,
+                "startOffset": 32,
+                "endOffset": 39
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".put(\" 4 times.",
+      "effort": "10min",
+      "debt": "10min",
+      "assignee": "millems@github",
+      "tags": [],
+      "creationDate": "2021-11-10T17:48:10+0100",
+      "updateDate": "2022-01-13T21:22:27+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AX0Kx7w9CNYFDQ0woCl9",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 108,
+      "hash": "8a919e329bdcb29cfdb63a5b70b27787",
+      "textRange": {
+        "startLine": 108,
+        "endLine": 108,
+        "startOffset": 20,
+        "endOffset": 27
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 108,
+                "endLine": 108,
+                "startOffset": 20,
+                "endOffset": 27
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 115,
+                "endLine": 115,
+                "startOffset": 32,
+                "endOffset": 39
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 132,
+                "endLine": 132,
+                "startOffset": 24,
+                "endOffset": 31
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 138,
+                "endLine": 138,
+                "startOffset": 32,
+                "endOffset": 39
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \", $S)\" 4 times.",
+      "effort": "10min",
+      "debt": "10min",
+      "assignee": "millems@github",
+      "tags": [],
+      "creationDate": "2021-11-10T17:48:10+0100",
+      "updateDate": "2022-01-13T21:22:27+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AX0Kx7w9CNYFDQ0woCl7",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 120,
+      "hash": "4547961363cf967550372a5b8673759f",
+      "textRange": {
+        "startLine": 120,
+        "endLine": 120,
+        "startOffset": 27,
+        "endOffset": 37
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 120,
+                "endLine": 120,
+                "startOffset": 27,
+                "endOffset": 37
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 143,
+                "endLine": 143,
+                "startOffset": 27,
+                "endOffset": 37
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+              "textRange": {
+                "startLine": 194,
+                "endLine": 194,
+                "startOffset": 19,
+                "endOffset": 29
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".build()\" 3 times.",
+      "effort": "8min",
+      "debt": "8min",
+      "assignee": "millems@github",
+      "tags": [],
+      "creationDate": "2021-11-10T17:48:10+0100",
+      "updateDate": "2022-01-13T21:22:27+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "aws",
+      "key": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+      "uuid": "AW0dNUxLx-vQs4-GMV8G",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "PartitionMetadataGenerator.java",
+      "longName": "codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java",
+      "path": "codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/PartitionMetadataGenerator.java"
+    },
+    {
+      "organization": "aws",
+      "key": "aws_aws-sdk-java-v2",
+      "uuid": "AW0dGWQnsAr6WERzz6sX",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "AWS Java SDK :: Parent",
+      "longName": "AWS Java SDK :: Parent"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "aws",
+      "name": "Amazon Web Services"
+    }
+  ],
+  "facets": []
+}
