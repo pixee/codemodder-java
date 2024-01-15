@@ -1,0 +1,936 @@
+{
+  "total": 8,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 8
+  },
+  "effortTotal": 104,
+  "debtTotal": 104,
+  "issues": [
+    {
+      "key": "AX0Kx7j-CNYFDQ0woCl4",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 167,
+      "hash": "c483075b4a9965f1cc817d891ca9d660",
+      "textRange": {
+        "startLine": 167,
+        "endLine": 167,
+        "startOffset": 60,
+        "endOffset": 82
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 167,
+                "endLine": 167,
+                "startOffset": 60,
+                "endOffset": 82
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 192,
+                "endLine": 192,
+                "startOffset": 60,
+                "endOffset": 82
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 218,
+                "endLine": 218,
+                "startOffset": 60,
+                "endOffset": 82
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 239,
+                "endLine": 239,
+                "startOffset": 60,
+                "endOffset": 82
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 260,
+                "endLine": 260,
+                "startOffset": 60,
+                "endOffset": 82
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 287,
+                "endLine": 287,
+                "startOffset": 60,
+                "endOffset": 82
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"$T.<$T, $T>builder()\" 6 times.",
+      "effort": "14min",
+      "debt": "14min",
+      "assignee": "millems@github",
+      "tags": [],
+      "creationDate": "2021-11-10T17:48:10+0100",
+      "updateDate": "2022-01-13T21:22:27+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AX0Kx7j-CNYFDQ0woCl3",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 173,
+      "hash": "553ad0e038f302c08fcebfbf86345585",
+      "textRange": {
+        "startLine": 173,
+        "endLine": 173,
+        "startOffset": 32,
+        "endOffset": 39
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 173,
+                "endLine": 173,
+                "startOffset": 32,
+                "endOffset": 39
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 178,
+                "endLine": 178,
+                "startOffset": 36,
+                "endOffset": 43
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 225,
+                "endLine": 225,
+                "startOffset": 36,
+                "endOffset": 43
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 266,
+                "endLine": 266,
+                "startOffset": 32,
+                "endOffset": 39
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 273,
+                "endLine": 273,
+                "startOffset": 36,
+                "endOffset": 43
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".put(\" 5 times.",
+      "effort": "12min",
+      "debt": "12min",
+      "assignee": "millems@github",
+      "tags": [],
+      "creationDate": "2021-11-10T17:48:10+0100",
+      "updateDate": "2022-01-13T21:22:27+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AX0Kx7j-CNYFDQ0woCl2",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 175,
+      "hash": "41179c603b6fc077196826f7f762d73e",
+      "textRange": {
+        "startLine": 175,
+        "endLine": 175,
+        "startOffset": 32,
+        "endOffset": 41
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 175,
+                "endLine": 175,
+                "startOffset": 32,
+                "endOffset": 41
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 180,
+                "endLine": 180,
+                "startOffset": 36,
+                "endOffset": 45
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 227,
+                "endLine": 227,
+                "startOffset": 36,
+                "endOffset": 45
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 268,
+                "endLine": 268,
+                "startOffset": 32,
+                "endOffset": 41
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 275,
+                "endLine": 275,
+                "startOffset": 36,
+                "endOffset": 45
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 295,
+                "endLine": 295,
+                "startOffset": 32,
+                "endOffset": 41
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \", $S)\n\" 6 times.",
+      "effort": "14min",
+      "debt": "14min",
+      "assignee": "millems@github",
+      "tags": [],
+      "creationDate": "2021-11-10T17:48:10+0100",
+      "updateDate": "2022-01-13T21:22:27+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AX0Kx7j-CNYFDQ0woCl5",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 200,
+      "hash": "40b9ff42957076bf52232dae07c4c11d",
+      "textRange": {
+        "startLine": 200,
+        "endLine": 200,
+        "startOffset": 28,
+        "endOffset": 45
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 200,
+                "endLine": 200,
+                "startOffset": 28,
+                "endOffset": 45
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 205,
+                "endLine": 205,
+                "startOffset": 32,
+                "endOffset": 49
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 246,
+                "endLine": 246,
+                "startOffset": 36,
+                "endOffset": 53
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 293,
+                "endLine": 293,
+                "startOffset": 32,
+                "endOffset": 49
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 299,
+                "endLine": 299,
+                "startOffset": 36,
+                "endOffset": 53
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".put($T.of($S, \" 5 times.",
+      "effort": "12min",
+      "debt": "12min",
+      "assignee": "millems@github",
+      "tags": [],
+      "creationDate": "2021-11-10T17:48:10+0100",
+      "updateDate": "2022-01-13T21:22:27+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AX0Kx7j-CNYFDQ0woCl1",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 202,
+      "hash": "109bda36990a7db2b70db30d82c3be0e",
+      "textRange": {
+        "startLine": 202,
+        "endLine": 202,
+        "startOffset": 28,
+        "endOffset": 38
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 202,
+                "endLine": 202,
+                "startOffset": 28,
+                "endOffset": 38
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 207,
+                "endLine": 207,
+                "startOffset": 32,
+                "endOffset": 42
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 248,
+                "endLine": 248,
+                "startOffset": 36,
+                "endOffset": 46
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 301,
+                "endLine": 301,
+                "startOffset": 36,
+                "endOffset": 46
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"), $S)\n\" 4 times.",
+      "effort": "10min",
+      "debt": "10min",
+      "assignee": "millems@github",
+      "tags": [],
+      "creationDate": "2021-11-10T17:48:10+0100",
+      "updateDate": "2022-01-13T21:22:27+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AX0Kx7j-CNYFDQ0woCl6",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 319,
+      "hash": "f8495943f85dda51a9f82180741107a9",
+      "textRange": {
+        "startLine": 319,
+        "endLine": 319,
+        "startOffset": 67,
+        "endOffset": 78
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 319,
+                "endLine": 319,
+                "startOffset": 67,
+                "endOffset": 78
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 335,
+                "endLine": 335,
+                "startOffset": 67,
+                "endOffset": 78
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 357,
+                "endLine": 357,
+                "startOffset": 24,
+                "endOffset": 35
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 396,
+                "endLine": 396,
+                "startOffset": 51,
+                "endOffset": 62
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"$T.of($S)\" 4 times.",
+      "effort": "10min",
+      "debt": "10min",
+      "assignee": "millems@github",
+      "tags": [],
+      "creationDate": "2021-11-10T17:48:10+0100",
+      "updateDate": "2022-01-13T21:22:27+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AW0dNVOlx-vQs4-GMWZe",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 186,
+      "hash": "4547961363cf967550372a5b8673759f",
+      "textRange": {
+        "startLine": 186,
+        "endLine": 186,
+        "startOffset": 27,
+        "endOffset": 37
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 186,
+                "endLine": 186,
+                "startOffset": 27,
+                "endOffset": 37
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 212,
+                "endLine": 212,
+                "startOffset": 27,
+                "endOffset": 37
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 233,
+                "endLine": 233,
+                "startOffset": 27,
+                "endOffset": 37
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 254,
+                "endLine": 254,
+                "startOffset": 27,
+                "endOffset": 37
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 281,
+                "endLine": 281,
+                "startOffset": 27,
+                "endOffset": 37
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 307,
+                "endLine": 307,
+                "startOffset": 27,
+                "endOffset": 37
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 325,
+                "endLine": 325,
+                "startOffset": 19,
+                "endOffset": 29
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 341,
+                "endLine": 341,
+                "startOffset": 19,
+                "endOffset": 29
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".build()\" 8 times.",
+      "effort": "18min",
+      "debt": "18min",
+      "tags": [],
+      "creationDate": "2018-11-09T23:43:43+0100",
+      "updateDate": "2021-11-10T17:48:19+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AW0dNVOlx-vQs4-GMWZf",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 95,
+      "hash": "9db78c9affd87fa86d90fe945666d7ea",
+      "textRange": {
+        "startLine": 95,
+        "endLine": 95,
+        "startOffset": 119,
+        "endOffset": 127
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 95,
+                "endLine": 95,
+                "startOffset": 119,
+                "endOffset": 127
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 346,
+                "endLine": 346,
+                "startOffset": 65,
+                "endOffset": 73
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 388,
+                "endLine": 388,
+                "startOffset": 60,
+                "endOffset": 68
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 401,
+                "endLine": 401,
+                "startOffset": 92,
+                "endOffset": 100
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 430,
+                "endLine": 430,
+                "startOffset": 67,
+                "endOffset": 75
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+              "textRange": {
+                "startLine": 467,
+                "endLine": 467,
+                "startOffset": 48,
+                "endOffset": 56
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"Region\" 6 times.",
+      "effort": "14min",
+      "debt": "14min",
+      "tags": [],
+      "creationDate": "2018-10-23T23:24:09+0200",
+      "updateDate": "2021-11-10T17:48:19+0100",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "aws",
+      "key": "aws_aws-sdk-java-v2",
+      "uuid": "AW0dGWQnsAr6WERzz6sX",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "AWS Java SDK :: Parent",
+      "longName": "AWS Java SDK :: Parent"
+    },
+    {
+      "organization": "aws",
+      "key": "aws_aws-sdk-java-v2:codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+      "uuid": "AW0dNUxLx-vQs4-GMV8D",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "ServiceMetadataGenerator.java",
+      "longName": "codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java",
+      "path": "codegen-lite/src/main/java/software/amazon/awssdk/codegen/lite/regions/ServiceMetadataGenerator.java"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "aws",
+      "name": "Amazon Web Services"
+    }
+  ],
+  "facets": []
+}
