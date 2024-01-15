@@ -13,487 +13,238 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.codegen.lite.regions;
+package software.amazon.awssdk.codegen.docs;
 
-import static java.util.Collections.emptyList;
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
-
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.lang.model.element.Modifier;
-import software.amazon.awssdk.annotations.Generated;
-import software.amazon.awssdk.annotations.SdkPublicApi;
-import software.amazon.awssdk.codegen.lite.PoetClass;
-import software.amazon.awssdk.codegen.lite.Utils;
-import software.amazon.awssdk.codegen.lite.regions.model.Endpoint;
-import software.amazon.awssdk.codegen.lite.regions.model.Partition;
-import software.amazon.awssdk.codegen.lite.regions.model.Partitions;
-import software.amazon.awssdk.codegen.lite.regions.model.Service;
-import software.amazon.awssdk.utils.ImmutableMap;
-import software.amazon.awssdk.utils.Pair;
-import software.amazon.awssdk.utils.Validate;
+import java.util.concurrent.ScheduledExecutorService;
+import software.amazon.awssdk.codegen.model.intermediate.OperationModel;
+import software.amazon.awssdk.codegen.model.service.WaiterDefinition;
+import software.amazon.awssdk.core.waiters.WaiterOverrideConfiguration;
 
-public class ServiceMetadataGenerator implements PoetClass {
-    private static final String REGION = "Region";
-    
-    private static final String BUILD = ".build()";
-    
-    private static final String T_OF_S = "$T.of($S)";
-    
-    private static final String S_N_1 = "), $S)\n";
-    
-    private static final String PUT_T_OF_S = ".put($T.of($S, ";
-    
-    private static final String S_N = ", $S)\n";
-    
-    private static final String PUT = ".put(";
-    
-    private static final String T_T_T_BUILDER = "$T.<$T, $T>builder()";
-    
-    private final Partitions partitions;
-    private final String serviceEndpointPrefix;
-    private final String basePackage;
-    private final String regionBasePackage;
+public final class WaiterDocs {
 
-    public ServiceMetadataGenerator(Partitions partitions,
-                                    String serviceEndpointPrefix,
-                                    String basePackage,
-                                    String regionBasePackage) {
-        this.partitions = partitions;
-        this.serviceEndpointPrefix = serviceEndpointPrefix;
-        this.basePackage = basePackage;
-        this.regionBasePackage = regionBasePackage;
+private static final String A_REFERENCE_TO_THIS_OBJECT_SO_THAT_METHOD_CALLS_CAN_BE_CHAINED_TOGETHER = "a reference to this object so that method calls can be chained together.";
 
-        removeBadRegions();
+private static final String FOR_POLLING = " for polling";
+
+private static final String OR_UNTIL_IT_IS_DETERMINED_THAT_THE_RESOURCE_WILL_NEVER = "or until it is determined that the resource will never ";
+
+private static final String CODE_N_IS_MET = "{@code $N} is met, ";
+
+private static final String POLLS_LINK_T_N_API_UNTIL_THE_DESIRED_CONDITION = "Polls {@link $T#$N} API until the desired condition ";
+
+    private WaiterDocs() {
     }
 
-    private void removeBadRegions() {
-        partitions.getPartitions().forEach(partition -> {
-            partition.getServices().values().forEach(service -> {
-                Iterator<Map.Entry<String, Endpoint>> endpointIterator = service.getEndpoints().entrySet().iterator();
-                while (endpointIterator.hasNext()) {
-                    Map.Entry<String, Endpoint> entry = endpointIterator.next();
-                    String endpointName = entry.getKey();
-                    Endpoint endpoint = entry.getValue();
-
-                    if (!RegionValidationUtil.validRegion(endpointName, partition.getRegionRegex()) ||
-                        !RegionValidationUtil.validEndpoint(endpointName, endpoint)) {
-                        endpointIterator.remove();
-                    }
-
-                }
-            });
-        });
+    public static String waiterInterfaceJavadoc() {
+        return "Waiter utility class that polls a resource until a desired state is reached or until it is "
+               + "determined that the resource will never enter into the desired state. This can be"
+               + " created using the static {@link #builder()} method";
     }
 
-    @Override
-    public TypeSpec poetClass() {
-        TypeName listOfRegions = ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(regionBasePackage, REGION));
-        TypeName mapByServiceEndpointKey = ParameterizedTypeName.get(ClassName.get(Map.class),
-                                                                     serviceEndpointKeyClass(),
-                                                                     ClassName.get(String.class));
-        TypeName mapByPair = ParameterizedTypeName.get(ClassName.get(Map.class),
-                                                       byPartitionKeyClass(),
-                                                       ClassName.get(String.class));
-        TypeName listOfServicePartitionMetadata =
-            ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(regionBasePackage, "ServicePartitionMetadata"));
+    public static CodeBlock waiterOperationJavadoc(ClassName className, Map.Entry<String, WaiterDefinition> waiterDefinition,
+                                                   OperationModel operationModel) {
+        String returnStatement = "WaiterResponse containing either a response or an exception that has matched with the waiter "
+                                 + "success condition";
 
-        return TypeSpec.classBuilder(className())
-                       .addModifiers(Modifier.PUBLIC)
-                       .addAnnotation(AnnotationSpec.builder(Generated.class)
-                                                    .addMember("value", "$S", "software.amazon.awssdk:codegen")
-                                                    .build())
-                       .addAnnotation(SdkPublicApi.class)
-                       .addModifiers(FINAL)
-                       .addSuperinterface(ClassName.get(regionBasePackage, "ServiceMetadata"))
-                       .addField(FieldSpec.builder(String.class, "ENDPOINT_PREFIX")
-                                          .addModifiers(PRIVATE, FINAL, STATIC)
-                                          .initializer("$S", serviceEndpointPrefix)
-                                          .build())
-                       .addField(FieldSpec.builder(listOfRegions, "REGIONS")
-                                          .addModifiers(PRIVATE, FINAL, STATIC)
-                                          .initializer(regionsField(partitions))
-                                          .build())
-                       .addField(FieldSpec.builder(listOfServicePartitionMetadata, "PARTITIONS")
-                                          .addModifiers(PRIVATE, FINAL, STATIC)
-                                          .initializer(servicePartitions(partitions))
-                                          .build())
-                       .addField(FieldSpec.builder(mapByServiceEndpointKey, "SIGNING_REGIONS_BY_REGION")
-                                          .addModifiers(PRIVATE, FINAL, STATIC)
-                                          .initializer(signingRegionsByRegion(partitions))
-                                          .build())
-                       .addField(FieldSpec.builder(mapByPair, "SIGNING_REGIONS_BY_PARTITION")
-                                          .addModifiers(PRIVATE, FINAL, STATIC)
-                                          .initializer(signingRegionsByPartition(partitions))
-                                          .build())
-                       .addField(FieldSpec.builder(mapByServiceEndpointKey, "DNS_SUFFIXES_BY_REGION")
-                                          .addModifiers(PRIVATE, FINAL, STATIC)
-                                          .initializer(dnsSuffixesByRegion(partitions))
-                                          .build())
-                       .addField(FieldSpec.builder(mapByPair, "DNS_SUFFIXES_BY_PARTITION")
-                                          .addModifiers(PRIVATE, FINAL, STATIC)
-                                          .initializer(dnsSuffixesByPartition(partitions))
-                                          .build())
-                       .addField(FieldSpec.builder(mapByServiceEndpointKey, "HOSTNAMES_BY_REGION")
-                                          .addModifiers(PRIVATE, FINAL, STATIC)
-                                          .initializer(hostnamesByRegion(partitions))
-                                          .build())
-                       .addField(FieldSpec.builder(mapByPair, "HOSTNAMES_BY_PARTITION")
-                                          .addModifiers(PRIVATE, FINAL, STATIC)
-                                          .initializer(hostnamesByPartition(partitions))
-                                          .build())
-                       .addMethod(regions())
-                       .addMethod(partitions(listOfServicePartitionMetadata))
-                       .addMethod(endpointFor())
-                       .addMethod(signingRegion())
-                       .build();
-    }
-
-    @Override
-    public ClassName className() {
-        String sanitizedServiceName = serviceEndpointPrefix.replace(".", "-");
-        return ClassName.get(basePackage, Stream.of(sanitizedServiceName.split("-"))
-                                                .map(Utils::capitalize)
-                                                .collect(Collectors.joining()) + "ServiceMetadata");
-    }
-
-    private CodeBlock signingRegionsByRegion(Partitions partitions) {
-        Map<Partition, Service> services = getServiceData(partitions);
-
-        CodeBlock.Builder builder = CodeBlock.builder().add(T_T_T_BUILDER,
-                                                            ImmutableMap.class, serviceEndpointKeyClass(), String.class);
-
-        services.forEach((partition, service) -> {
-            service.getEndpoints().forEach((region, endpoint) -> {
-                if (endpoint.getCredentialScope() != null && endpoint.getCredentialScope().getRegion() != null) {
-                    builder.add(PUT)
-                           .add(serviceEndpointKey(region, emptyList()))
-                           .add(S_N, endpoint.getCredentialScope().getRegion());
-
-                    endpoint.getVariants().forEach(variant -> {
-                        builder.add(PUT)
-                               .add(serviceEndpointKey(region, variant.getTags()))
-                               .add(S_N, endpoint.getCredentialScope().getRegion());
-                    });
-                }
-            });
-        });
-
-        return builder.add(BUILD).build();
-    }
-
-    private CodeBlock signingRegionsByPartition(Partitions partitions) {
-        Map<Partition, Service> services = getServiceData(partitions);
-
-        CodeBlock.Builder builder = CodeBlock.builder().add(T_T_T_BUILDER,
-                                                            ImmutableMap.class, byPartitionKeyClass(), String.class);
-
-        services.forEach((partition, service) -> {
-            Endpoint partitionDefaults = service.getDefaults();
-            if (partitionDefaults != null &&
-                partitionDefaults.getCredentialScope() != null &&
-                partitionDefaults.getCredentialScope().getRegion() != null) {
-                builder.add(PUT_T_OF_S, Pair.class, partition.getPartition())
-                       .add(partitionEndpointKey(emptyList()))
-                       .add(S_N_1, partitionDefaults.getCredentialScope().getRegion());
-
-                partitionDefaults.getVariants().forEach(variant -> {
-                    builder.add(PUT_T_OF_S, Pair.class, partition.getPartition())
-                           .add(partitionEndpointKey(variant.getTags()))
-                           .add(S_N_1, partitionDefaults.getCredentialScope().getRegion());
-                });
-            }
-        });
-
-        return builder.add(BUILD).build();
-    }
-
-    private CodeBlock dnsSuffixesByRegion(Partitions partitions) {
-        Map<Partition, Service> services = getServiceData(partitions);
-
-        CodeBlock.Builder builder = CodeBlock.builder().add(T_T_T_BUILDER,
-                                                            ImmutableMap.class, serviceEndpointKeyClass(), String.class);
-
-        services.forEach((partition, service) -> {
-            service.getEndpoints().forEach((region, endpoint) -> {
-                endpoint.getVariants().forEach(variant -> {
-                    if (variant.getDnsSuffix() != null) {
-                        builder.add(PUT)
-                               .add(serviceEndpointKey(region, variant.getTags()))
-                               .add(S_N, variant.getDnsSuffix());
-                    }
-                });
-            });
-        });
-
-        return builder.add(BUILD).build();
-    }
-
-    private CodeBlock dnsSuffixesByPartition(Partitions partitions) {
-        Map<Partition, Service> services = getServiceData(partitions);
-
-        CodeBlock.Builder builder = CodeBlock.builder().add(T_T_T_BUILDER,
-                                                            ImmutableMap.class, byPartitionKeyClass(), String.class);
-
-        services.forEach((partition, service) -> {
-            if (service.getDefaults() != null) {
-                service.getDefaults().getVariants().forEach(variant -> {
-                    if (variant.getDnsSuffix() != null) {
-                        builder.add(PUT_T_OF_S, Pair.class, partition.getPartition())
-                               .add(partitionEndpointKey(variant.getTags()))
-                               .add(S_N_1, variant.getDnsSuffix());
-                    }
-                });
-            }
-        });
-
-        return builder.add(BUILD).build();
-    }
-
-    private CodeBlock hostnamesByRegion(Partitions partitions) {
-        Map<Partition, Service> services = getServiceData(partitions);
-
-        CodeBlock.Builder builder = CodeBlock.builder().add(T_T_T_BUILDER,
-                                                            ImmutableMap.class, serviceEndpointKeyClass(), String.class);
-
-        services.forEach((partition, service) -> {
-            service.getEndpoints().forEach((region, endpoint) -> {
-                if (endpoint.getHostname() != null) {
-                    builder.add(PUT)
-                           .add(serviceEndpointKey(region, emptyList()))
-                           .add(S_N, endpoint.getHostname());
-                }
-
-                endpoint.getVariants().forEach(variant -> {
-                    if (variant.getHostname() != null) {
-                        builder.add(PUT)
-                               .add(serviceEndpointKey(region, variant.getTags()))
-                               .add(S_N, variant.getHostname());
-                    }
-                });
-            });
-        });
-
-        return builder.add(BUILD).build();
-    }
-
-    private CodeBlock hostnamesByPartition(Partitions partitions) {
-        Map<Partition, Service> services = getServiceData(partitions);
-
-        CodeBlock.Builder builder = CodeBlock.builder().add(T_T_T_BUILDER,
-                                                            ImmutableMap.class, byPartitionKeyClass(), String.class);
-
-        services.forEach((partition, service) -> {
-            if (service.getDefaults() != null) {
-                if (service.getDefaults().getHostname() != null) {
-                    builder.add(PUT_T_OF_S, Pair.class, partition.getPartition())
-                           .add(partitionEndpointKey(emptyList()))
-                           .add(S_N, service.getDefaults().getHostname());
-                }
-                service.getDefaults().getVariants().forEach(variant -> {
-                    if (variant.getHostname() != null) {
-                        builder.add(PUT_T_OF_S, Pair.class, partition.getPartition())
-                               .add(partitionEndpointKey(variant.getTags()))
-                               .add(S_N_1, variant.getHostname());
-                    }
-                });
-            }
-        });
-
-        return builder.add(BUILD).build();
-    }
-
-    private CodeBlock serviceEndpointKey(String region, Collection<String> tags) {
-        Validate.paramNotBlank(region, "region");
-
-        CodeBlock.Builder result = CodeBlock.builder();
-        result.add("$T.builder()", serviceEndpointKeyClass())
-              .add(".region($T.of($S))", regionClass(), region);
-
-        if (!tags.isEmpty()) {
-            CodeBlock tagsParameter = tags.stream()
-                                          .map(tag -> CodeBlock.of(T_OF_S, endpointTagClass(), tag))
-                                          .collect(CodeBlock.joining(", "));
-
-            result.add(".tags(").add(tagsParameter).add(")");
-        }
-
-        result.add(BUILD);
-        return result.build();
-    }
-
-    private CodeBlock partitionEndpointKey(Collection<String> tags) {
-        CodeBlock.Builder result = CodeBlock.builder();
-        result.add("$T.builder()", partitionEndpointKeyClass());
-
-        if (!tags.isEmpty()) {
-            CodeBlock tagsParameter = tags.stream()
-                                          .map(tag -> CodeBlock.of(T_OF_S, endpointTagClass(), tag))
-                                          .collect(CodeBlock.joining(", "));
-
-            result.add(".tags(").add(tagsParameter).add(")");
-        }
-
-        result.add(BUILD);
-        return result.build();
-    }
-
-    private CodeBlock regionsField(Partitions partitions) {
-        ClassName regionClass = ClassName.get(regionBasePackage, REGION);
-        CodeBlock.Builder builder = CodeBlock.builder().add("$T.unmodifiableList($T.asList(", Collections.class, Arrays.class);
-
-        ArrayList<String> regions = new ArrayList<>();
-
-        partitions.getPartitions()
-                  .stream()
-                  .filter(p -> p.getServices().containsKey(serviceEndpointPrefix))
-                  .forEach(p -> regions.addAll(p.getServices().get(serviceEndpointPrefix).getEndpoints().keySet()));
-
-        for (int i = 0; i < regions.size(); i++) {
-            builder.add(T_OF_S, regionClass, regions.get(i));
-            if (i != regions.size() - 1) {
-                builder.add(",");
-            }
-        }
-
-        return builder.add("))").build();
-    }
-
-    private CodeBlock servicePartitions(Partitions partitions) {
+        String asyncReturnStatement = "CompletableFuture containing the WaiterResponse. It completes successfully when the "
+                                      + "resource enters into a desired state or exceptionally when it is determined that the "
+                                      + "resource will never enter into the desired state.";
+        String javadocs = new DocumentationBuilder().description(POLLS_LINK_T_N_API_UNTIL_THE_DESIRED_CONDITION
+                                                                 + CODE_N_IS_MET
+                                                                 + OR_UNTIL_IT_IS_DETERMINED_THAT_THE_RESOURCE_WILL_NEVER
+                                                                 + "enter into the desired state")
+                                                    .param(operationModel.getInput().getVariableName(), "the request to be used"
+                                                                                                        + FOR_POLLING)
+                                                    .returns(className.simpleName().contains("Async") ?
+                                                             asyncReturnStatement :
+                                                             returnStatement)
+                                                    .build();
         return CodeBlock.builder()
-                        .add("$T.unmodifiableList($T.asList(", Collections.class, Arrays.class)
-                        .add(commaSeparatedServicePartitions(partitions))
-                        .add("))")
+                        .add(javadocs, className, operationModel.getMethodName(), waiterDefinition.getKey())
+                        .build();
+
+    }
+
+    public static CodeBlock waiterOperationConsumerBuilderJavadoc(ClassName clientClassName,
+                                                                  ClassName requestClassName,
+                                                                  Map.Entry<String, WaiterDefinition> waiterDefinition,
+                                                                  OperationModel operationModel) {
+        String javadocs = new DocumentationBuilder().description(POLLS_LINK_T_N_API_UNTIL_THE_DESIRED_CONDITION
+                                                                 + CODE_N_IS_MET
+                                                                 + OR_UNTIL_IT_IS_DETERMINED_THAT_THE_RESOURCE_WILL_NEVER
+                                                                 + "enter into the desired state. \n "
+                                                                 + "<p>This is a convenience method to create an instance of "
+                                                                 + "the request builder without the need "
+                                                                 + "to create one manually using {@link $T#builder()} ")
+                                                    .param(operationModel.getInput().getVariableName(), "The consumer that will"
+                                                                                                        + " configure the "
+                                                                                                        + "request to be used"
+                                                                                                        + FOR_POLLING)
+                                                    .returns(clientClassName.simpleName().contains("Async") ?
+                                                             "CompletableFuture of the WaiterResponse containing either a "
+                                                             + "response or an exception that has matched with the waiter "
+                                                             + "success condition"
+                                                             : "WaiterResponse containing either a response or an exception that"
+                                                             + " has matched with the waiter success condition")
+                                                    .build();
+        return CodeBlock.builder()
+                        .add(javadocs, clientClassName, operationModel.getMethodName(), waiterDefinition.getKey(),
+                             requestClassName)
                         .build();
     }
 
-    private CodeBlock commaSeparatedServicePartitions(Partitions partitions) {
-        ClassName defaultServicePartitionMetadata = ClassName.get(regionBasePackage + ".internal",
-                                                                  "DefaultServicePartitionMetadata");
-        return partitions.getPartitions()
-                  .stream()
-                  .filter(p -> p.getServices().containsKey(serviceEndpointPrefix))
-                  .map(p -> CodeBlock.of("new $T($S, $L)",
-                                         defaultServicePartitionMetadata,
-                                         p.getPartition(),
-                                         globalRegion(p)))
-                  .collect(CodeBlock.joining(","));
+    public static CodeBlock waiterBuilderMethodJavadoc(ClassName className) {
+        String javadocs = new DocumentationBuilder()
+            .description("Create a builder that can be used to configure and create a {@link $T}.")
+            .returns("a builder")
+            .build();
+
+        return CodeBlock.builder()
+                        .add(javadocs, className)
+                        .build();
     }
 
-    private CodeBlock globalRegion(Partition partition) {
-        ClassName region = ClassName.get(regionBasePackage, REGION);
-        Service service = partition.getServices().get(this.serviceEndpointPrefix);
-        boolean hasGlobalRegionForPartition = service.isRegionalized() != null &&
-                                              !service.isRegionalized() &&
-                                              service.isPartitionWideEndpointAvailable();
-        String globalRegionForPartition = hasGlobalRegionForPartition ? service.getPartitionEndpoint() : null;
-        return globalRegionForPartition == null
-                                    ? CodeBlock.of("null")
-                                    : CodeBlock.of(T_OF_S, region, globalRegionForPartition);
+    public static CodeBlock waiterCreateMethodJavadoc(ClassName waiterClassName, ClassName clientClassName) {
+        String javadocs = new DocumentationBuilder()
+            .description("Create an instance of {@link $T} with the default configuration. \n"
+                         + "<p><b>A default {@link $T} will be created to poll resources. It is recommended "
+                         + "to share a single instance of the waiter created via this method. If it is not desirable "
+                         + "to share a waiter instance, invoke {@link #close()} to release the resources once the waiter"
+                         + " is not needed.</b>")
+            .returns("an instance of {@link $T}")
+            .build();
+
+        return CodeBlock.builder()
+                        .add(javadocs, waiterClassName, clientClassName, waiterClassName)
+                        .build();
     }
 
-    private MethodSpec regions() {
-        TypeName listOfRegions = ParameterizedTypeName.get(ClassName.get(List.class),
-                                                           ClassName.get(regionBasePackage, REGION));
-        return MethodSpec.methodBuilder("regions")
-                         .addModifiers(Modifier.PUBLIC)
-                         .addAnnotation(Override.class)
-                         .returns(listOfRegions)
-                         .addStatement("return $L", "REGIONS")
-                         .build();
+    public static CodeBlock waiterBuilderPollingStrategy() {
+        String javadocs = new DocumentationBuilder()
+            .description("Defines overrides to the default SDK waiter configuration that should be used for waiters created "
+                         + "from this builder")
+            .param("overrideConfiguration", "the override configuration to set")
+            .returns(A_REFERENCE_TO_THIS_OBJECT_SO_THAT_METHOD_CALLS_CAN_BE_CHAINED_TOGETHER)
+            .build();
+
+        return CodeBlock.builder()
+                        .add(javadocs)
+                        .build();
     }
 
-    private MethodSpec endpointFor() {
-        return MethodSpec.methodBuilder("endpointFor")
-                         .addModifiers(Modifier.PUBLIC)
-                         .addParameter(serviceEndpointKeyClass(), "key")
-                         .addAnnotation(Override.class)
-                         .returns(URI.class)
-                         .addCode("return $T.endpointFor(", serviceMetadataUtilsClass())
-                         .addCode("$T.hostname(key, HOSTNAMES_BY_REGION, HOSTNAMES_BY_PARTITION), ", serviceMetadataUtilsClass())
-                         .addCode("ENDPOINT_PREFIX, ")
-                         .addCode("key.region().id(), ")
-                         .addCode("$T.dnsSuffix(key, DNS_SUFFIXES_BY_REGION, DNS_SUFFIXES_BY_PARTITION));",
-                                  serviceMetadataUtilsClass())
-                         .build();
+    public static CodeBlock waiterBuilderPollingStrategyConsumerBuilder() {
+        String javadocs = new DocumentationBuilder()
+            .description("This is a convenient method to pass the override configuration without the need to "
+                         + "create an instance manually via {@link $T#builder()}")
+            .param("overrideConfiguration", "The consumer that will configure the overrideConfiguration")
+            .see("#overrideConfiguration(WaiterOverrideConfiguration)")
+            .returns(A_REFERENCE_TO_THIS_OBJECT_SO_THAT_METHOD_CALLS_CAN_BE_CHAINED_TOGETHER)
+            .build();
+
+        return CodeBlock.builder()
+                        .add(javadocs, ClassName.get(WaiterOverrideConfiguration.class))
+                        .build();
     }
 
-    private MethodSpec signingRegion() {
-        return MethodSpec.methodBuilder("signingRegion")
-                         .addModifiers(Modifier.PUBLIC)
-                         .addParameter(serviceEndpointKeyClass(), "key")
-                         .addAnnotation(Override.class)
-                         .returns(ClassName.get(regionBasePackage, REGION))
-                         .addStatement("return $T.signingRegion(key, SIGNING_REGIONS_BY_REGION, SIGNING_REGIONS_BY_PARTITION)",
-                                       serviceMetadataUtilsClass())
-                         .build();
+    public static CodeBlock waiterBuilderScheduledExecutorServiceJavadoc() {
+        String javadocs = new DocumentationBuilder()
+            .description("Sets a custom {@link $T} that will be used to schedule async polling attempts \n "
+                         + "<p> This executorService must be closed by the caller when it is ready to be disposed. The"
+                         + " SDK will not close the executorService when the waiter is closed")
+            .param("executorService", "the executorService to set")
+            .returns(A_REFERENCE_TO_THIS_OBJECT_SO_THAT_METHOD_CALLS_CAN_BE_CHAINED_TOGETHER)
+            .build();
+
+        return CodeBlock.builder()
+                        .add(javadocs, ClassName.get(ScheduledExecutorService.class))
+                        .build();
     }
 
-    private MethodSpec partitions(TypeName listOfServicePartitionMetadata) {
-        return MethodSpec.methodBuilder("servicePartitions")
-                         .addModifiers(Modifier.PUBLIC)
-                         .addAnnotation(Override.class)
-                         .returns(listOfServicePartitionMetadata)
-                         .addStatement("return $L", "PARTITIONS")
-                         .build();
+    public static CodeBlock waiterBuilderClientJavadoc(ClassName className) {
+        String javadocs = new DocumentationBuilder()
+            .description("Defines the {@link $T} to use when polling a resource")
+            .description("Sets a custom {@link $T} that will be used to poll the resource \n "
+                         + "<p> This SDK client must be closed by the caller when it is ready to be disposed. The"
+                         + " SDK will not close the client when the waiter is closed")
+            .param("client", "the client to send the request")
+            .returns(A_REFERENCE_TO_THIS_OBJECT_SO_THAT_METHOD_CALLS_CAN_BE_CHAINED_TOGETHER)
+            .build();
+
+        return CodeBlock.builder()
+                        .add(javadocs, className)
+                        .build();
     }
 
-    private Map<Partition, Service> getServiceData(Partitions partitions) {
-        Map<Partition, Service> serviceData = new TreeMap<>(Comparator.comparing(Partition::getPartition));
+    public static CodeBlock waiterBuilderBuildJavadoc(ClassName className) {
+        String javadocs = new DocumentationBuilder()
+            .description("Builds an instance of {@link $T} based on the configurations supplied to this builder ")
+            .returns("An initialized {@link $T}")
+            .build();
 
-        partitions.getPartitions()
-                  .forEach(p -> p.getServices()
-                                 .entrySet()
-                                 .stream()
-                                 .filter(s -> s.getKey().equalsIgnoreCase(serviceEndpointPrefix))
-                                 .forEach(s -> serviceData.put(p, s.getValue())));
-
-        return serviceData;
+        return CodeBlock.builder()
+                        .add(javadocs, className, className)
+                        .build();
     }
 
-    private ClassName serviceEndpointKeyClass() {
-        return ClassName.get(regionBasePackage, "ServiceEndpointKey");
+    public static CodeBlock waiterOperationWithOverrideConfigConsumerBuilder(ClassName clientClassName,
+                                                                             ClassName requestClassName,
+                                                                             Map.Entry<String, WaiterDefinition> waiterDefinition,
+                                                                             OperationModel opModel) {
+        String javadocs = new DocumentationBuilder().description(POLLS_LINK_T_N_API_UNTIL_THE_DESIRED_CONDITION
+                                                                 + CODE_N_IS_MET
+                                                                 + OR_UNTIL_IT_IS_DETERMINED_THAT_THE_RESOURCE_WILL_NEVER
+                                                                 + "enter into the desired state. \n "
+                                                                 + "<p>This is a convenience method to create an instance of "
+                                                                 + "the request builder and instance of the override config "
+                                                                 + "builder")
+                                                    .param(opModel.getInput().getVariableName(),
+                                                           "The consumer that will configure the request to be used for polling")
+                                                    .param("overrideConfig",
+                                                           "The consumer that will configure the per request override "
+                                                           + "configuration for waiters")
+                                                    .returns("WaiterResponse containing either a response or an exception that "
+                                                             + "has matched with the waiter success condition")
+                                                    .build();
+        return CodeBlock.builder()
+                        .add(javadocs, clientClassName, opModel.getMethodName(), waiterDefinition.getKey())
+                        .build();
+
     }
 
-    private ClassName partitionEndpointKeyClass() {
-        return ClassName.get(regionBasePackage, "PartitionEndpointKey");
+    public static CodeBlock waiterOperationWithOverrideConfig(ClassName clientClassName,
+                                                              Map.Entry<String, WaiterDefinition> waiterDefinition,
+                                                              OperationModel opModel) {
+        String javadocs = new DocumentationBuilder().description(POLLS_LINK_T_N_API_UNTIL_THE_DESIRED_CONDITION
+                                                                 + CODE_N_IS_MET
+                                                                 + OR_UNTIL_IT_IS_DETERMINED_THAT_THE_RESOURCE_WILL_NEVER
+                                                                 + "enter into the desired state")
+                                                    .param(opModel.getInput().getVariableName(), "The request to be"
+                                                                                                 + " used"
+                                                                                                 + FOR_POLLING)
+                                                    .param("overrideConfig", "Per request "
+                                                                             + "override configuration for waiters")
+                                                    .returns("WaiterResponse containing either a response or an exception that "
+                                                             + "has matched with the waiter success condition")
+                                                    .build();
+        return CodeBlock.builder()
+                        .add(javadocs, clientClassName, opModel.getMethodName(), waiterDefinition.getKey())
+                        .build();
     }
 
-    private ClassName regionClass() {
-        return ClassName.get(regionBasePackage, REGION);
+    public static CodeBlock waiterMethodInClient(ClassName waiterClassName) {
+        String javadocs = new DocumentationBuilder()
+            .description("Create an instance of {@link $T} using this client. \n"
+                         + "<p>Waiters created via this method are managed by the SDK and resources will be released "
+                         + "when the service client is closed.")
+            .returns("an instance of {@link $T}")
+            .build();
+
+        return CodeBlock.builder()
+                        .add(javadocs, waiterClassName, waiterClassName)
+                        .build();
     }
 
-    private ClassName endpointTagClass() {
-        return ClassName.get(regionBasePackage, "EndpointTag");
-    }
-
-    private TypeName byPartitionKeyClass() {
-        return ParameterizedTypeName.get(ClassName.get(Pair.class),
-                                         ClassName.get(String.class),
-                                         partitionEndpointKeyClass());
-    }
-
-    private ClassName serviceMetadataUtilsClass() {
-        return ClassName.get(regionBasePackage + ".internal.util", "ServiceMetadataUtils");
-    }
 }
