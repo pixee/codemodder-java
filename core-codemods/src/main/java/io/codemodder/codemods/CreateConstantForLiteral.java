@@ -16,6 +16,8 @@ import io.codemodder.CodemodInvocationContext;
 import io.codemodder.providers.sonar.api.Issue;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 final class CreateConstantForLiteral extends DefineConstantForLiteral {
 
@@ -37,14 +39,19 @@ final class CreateConstantForLiteral extends DefineConstantForLiteral {
     final String parentNodeName =
         nodeWithSimpleName != null ? nodeWithSimpleName.getNameAsString() : null;
 
-    final VariableCollector variableCollector = new VariableCollector();
-    variableCollector.visit(cu, null);
-
     return ConstantNameStringGenerator.generateConstantName(
         stringLiteralExpr.getValue(),
-        variableCollector.getDeclaredVariables(),
+        getNamesInCu(),
         parentNodeName,
         isUsingSnakeCase(constantFieldDeclarations));
+  }
+
+  private Set<String> getNamesInCu() {
+    return cu.findAll(Node.class).stream()
+        .filter(node -> node instanceof NodeWithSimpleName<?>)
+        .map(node -> (NodeWithSimpleName<?>) node)
+        .map(NodeWithSimpleName::getNameAsString)
+        .collect(Collectors.toSet());
   }
 
   @Override
