@@ -19,6 +19,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * A class that extends DefineConstantForLiteral and specializes in creating new constants for
+ * string literals in Java code.
+ */
 final class CreateConstantForLiteral extends DefineConstantForLiteral {
 
   CreateConstantForLiteral(
@@ -29,6 +33,12 @@ final class CreateConstantForLiteral extends DefineConstantForLiteral {
     super(context, cu, stringLiteralExpr, issue);
   }
 
+  /**
+   * Retrieves the suggested constant name from the issue's message. The method utilizes a {@link
+   * ConstantNameStringGenerator} to generate a unique constant name based on various factors such
+   * as the string literal value, existing names in the CompilationUnit, parent node name, and
+   * naming conventions.
+   */
   @Override
   protected String getConstantName() {
     final List<FieldDeclaration> constantFieldDeclarations =
@@ -46,6 +56,7 @@ final class CreateConstantForLiteral extends DefineConstantForLiteral {
         isUsingSnakeCase(constantFieldDeclarations));
   }
 
+  /** Retrieves the names of all nodes with simple names in the CompilationUnit. */
   private Set<String> getNamesInCu() {
     return cu.findAll(Node.class).stream()
         .filter(node -> node instanceof NodeWithSimpleName<?>)
@@ -54,6 +65,7 @@ final class CreateConstantForLiteral extends DefineConstantForLiteral {
         .collect(Collectors.toSet());
   }
 
+  /** Defines a new constant by adding a {@link FieldDeclaration} to the class or interface. */
   @Override
   protected void defineConstant(final String constantName) {
     addConstantFieldToClass(createConstantField(constantName));
@@ -136,6 +148,10 @@ final class CreateConstantForLiteral extends DefineConstantForLiteral {
     return constantName.contains("_") || constantName.equals(constantName.toUpperCase());
   }
 
+  /**
+   * Checks if the first constant field's name contains an underscore or is entirely in uppercase,
+   * indicating the use of snake case naming convention.
+   */
   private boolean containsStringType(final FieldDeclaration fieldDeclaration) {
     for (VariableDeclarator variable : fieldDeclaration.getVariables()) {
       final Type fieldType = variable.getType();

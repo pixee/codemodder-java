@@ -5,6 +5,10 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.CodemodInvocationContext;
 import io.codemodder.providers.sonar.api.Issue;
 
+/**
+ * A class that extends DefineConstantForLiteral and specializes in using an existing constant
+ * suggested by an issue to replace string literals in Java code.
+ */
 final class UseExistingConstantForLiteral extends DefineConstantForLiteral {
 
   UseExistingConstantForLiteral(
@@ -29,6 +33,10 @@ final class UseExistingConstantForLiteral extends DefineConstantForLiteral {
     return message.substring(startIndex + 1, endIndex);
   }
 
+  /**
+   * This method is not implemented in this subclass, as it assumes the constant is already defined.
+   * It remains empty in this implementation.
+   */
   @Override
   protected void defineConstant(final String constantName) {
     // Empty implementation

@@ -17,6 +17,10 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * An abstract class for defining constants to replace string literals in Java code. Subclasses must
+ * implement the methods to generate constant names and define constants.
+ */
 abstract class DefineConstantForLiteral {
 
   protected ClassOrInterfaceDeclaration classOrInterfaceDeclaration;
@@ -37,7 +41,12 @@ abstract class DefineConstantForLiteral {
     this.issue = issue;
   }
 
-  boolean execute() {
+  /**
+   * Main method that replaces the literal string expression with a constant in the code.
+   *
+   * @return true if the replacement is successful, false otherwise.
+   */
+  boolean replaceLiteralStringExpressionWithConstant() {
 
     // Validate ClassOrInterfaceDeclaration node where constant will be defined
     final Optional<ClassOrInterfaceDeclaration> classOrInterfaceDeclarationOptional =
@@ -70,8 +79,13 @@ abstract class DefineConstantForLiteral {
     return true;
   }
 
+  /** This method should be implemented by subclasses to generate the constant name to use. */
   protected abstract String getConstantName();
 
+  /**
+   * This method should be implemented by subclasses to define a new constant, if needed, to the
+   * class.
+   */
   protected abstract void defineConstant(final String constantName);
 
   /**

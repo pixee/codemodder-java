@@ -40,6 +40,6 @@ public final class DefineConstantForLiteralCodemod
           new CreateConstantForLiteral(context, cu, stringLiteralExpr, issue);
     }
 
-    return defineConstantForLiteral.execute();
+    return defineConstantForLiteral.replaceLiteralStringExpressionWithConstant();
   }
 }
