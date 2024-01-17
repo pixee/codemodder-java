@@ -12,7 +12,7 @@ import javax.inject.Inject;
 /** A codemod for defining a constant for a literal string that is duplicated n times. */
 @Codemod(
     id = "sonar:java/define-constant-for-duplicate-literal-s1192",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class DefineConstantForLiteralCodemod
     extends SonarPluginJavaParserChanger<StringLiteralExpr> {
