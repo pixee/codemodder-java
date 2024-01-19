@@ -1,0 +1,483 @@
+{
+  "total": 5,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 5
+  },
+  "effortTotal": 48,
+  "debtTotal": 48,
+  "issues": [
+    {
+      "key": "AXTgAeuwlrCNccw21zVv",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 45,
+      "hash": "dd6c1d12179c94927aa737c793460768",
+      "textRange": {
+        "startLine": 45,
+        "endLine": 45,
+        "startOffset": 65,
+        "endOffset": 119
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 45,
+                "endLine": 45,
+                "startOffset": 65,
+                "endOffset": 119
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 65,
+                "endLine": 65,
+                "startOffset": 65,
+                "endOffset": 119
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 186,
+                "endLine": 186,
+                "startOffset": 65,
+                "endOffset": 119
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 210,
+                "endLine": 210,
+                "startOffset": 65,
+                "endOffset": 119
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"Polls {@link $T#$N} API until the desired condition \" 4 times.",
+      "effort": "10min",
+      "debt": "10min",
+      "assignee": "zoewangg@github",
+      "tags": [],
+      "creationDate": "2020-09-30T19:09:20+0200",
+      "updateDate": "2021-08-13T21:11:24+0200",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AXTgAeuwlrCNccw21zVw",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 46,
+      "hash": "bf3299ea39175320c524f765f6a8844a",
+      "textRange": {
+        "startLine": 46,
+        "endLine": 46,
+        "startOffset": 67,
+        "endOffset": 88
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 46,
+                "endLine": 46,
+                "startOffset": 67,
+                "endOffset": 88
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 66,
+                "endLine": 66,
+                "startOffset": 67,
+                "endOffset": 88
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 187,
+                "endLine": 187,
+                "startOffset": 67,
+                "endOffset": 88
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 211,
+                "endLine": 211,
+                "startOffset": 67,
+                "endOffset": 88
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"{@code $N} is met, \" 4 times.",
+      "effort": "10min",
+      "debt": "10min",
+      "assignee": "zoewangg@github",
+      "tags": [],
+      "creationDate": "2020-09-30T19:09:20+0200",
+      "updateDate": "2021-08-13T21:11:24+0200",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AXTgAeuwlrCNccw21zVs",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 47,
+      "hash": "ccbd1000729825e2bf039a7b73ae7963",
+      "textRange": {
+        "startLine": 47,
+        "endLine": 47,
+        "startOffset": 67,
+        "endOffset": 124
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 47,
+                "endLine": 47,
+                "startOffset": 67,
+                "endOffset": 124
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 67,
+                "endLine": 67,
+                "startOffset": 67,
+                "endOffset": 124
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 188,
+                "endLine": 188,
+                "startOffset": 67,
+                "endOffset": 124
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 212,
+                "endLine": 212,
+                "startOffset": 67,
+                "endOffset": 124
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"or until it is determined that the resource will never \" 4 times.",
+      "effort": "10min",
+      "debt": "10min",
+      "assignee": "zoewangg@github",
+      "tags": [],
+      "creationDate": "2020-09-30T19:09:20+0200",
+      "updateDate": "2021-08-13T21:11:24+0200",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AXTgAeuwlrCNccw21zVt",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 50,
+      "hash": "cc3a04750e135a490607fc17ddfd696e",
+      "textRange": {
+        "startLine": 50,
+        "endLine": 50,
+        "startOffset": 106,
+        "endOffset": 120
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 50,
+                "endLine": 50,
+                "startOffset": 106,
+                "endOffset": 120
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 75,
+                "endLine": 75,
+                "startOffset": 106,
+                "endOffset": 120
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 216,
+                "endLine": 216,
+                "startOffset": 99,
+                "endOffset": 113
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \" for polling\" 3 times.",
+      "effort": "8min",
+      "debt": "8min",
+      "assignee": "zoewangg@github",
+      "tags": [],
+      "creationDate": "2020-09-30T19:09:20+0200",
+      "updateDate": "2021-08-13T21:11:24+0200",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AXTgAeuwlrCNccw21zVu",
+      "rule": "java:S1192",
+      "severity": "CRITICAL",
+      "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+      "project": "aws_aws-sdk-java-v2",
+      "line": 120,
+      "hash": "bb757f467a7c2c3a51070df2f7659fb6",
+      "textRange": {
+        "startLine": 120,
+        "endLine": 120,
+        "startOffset": 21,
+        "endOffset": 95
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 120,
+                "endLine": 120,
+                "startOffset": 21,
+                "endOffset": 95
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 134,
+                "endLine": 134,
+                "startOffset": 21,
+                "endOffset": 95
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 148,
+                "endLine": 148,
+                "startOffset": 21,
+                "endOffset": 95
+              },
+              "msg": "Duplication"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+              "textRange": {
+                "startLine": 163,
+                "endLine": 163,
+                "startOffset": 21,
+                "endOffset": 95
+              },
+              "msg": "Duplication"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"a reference to this object so that method calls can be chained together.\" 4 times.",
+      "effort": "10min",
+      "debt": "10min",
+      "assignee": "zoewangg@github",
+      "tags": [],
+      "creationDate": "2020-09-30T19:09:20+0200",
+      "updateDate": "2021-08-13T21:11:24+0200",
+      "type": "CODE_SMELL",
+      "organization": "aws",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "aws",
+      "key": "aws_aws-sdk-java-v2",
+      "uuid": "AW0dGWQnsAr6WERzz6sX",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "AWS Java SDK :: Parent",
+      "longName": "AWS Java SDK :: Parent"
+    },
+    {
+      "organization": "aws",
+      "key": "aws_aws-sdk-java-v2:codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+      "uuid": "AXTgAW6KlrCNccw21zUg",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "WaiterDocs.java",
+      "longName": "codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java",
+      "path": "codegen/src/main/java/software/amazon/awssdk/codegen/docs/WaiterDocs.java"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "aws",
+      "name": "Amazon Web Services"
+    }
+  ],
+  "facets": []
+}
