@@ -1,0 +1,8 @@
+{
+  "summary" : "Added missing synchronized keyword (Sonar)",
+  "change" : "Added missing synchronized keyword",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-3551/",
+    "https://wiki.sei.cmu.edu/confluence/display/java/TSM00-J.+Do+not+override+thread-safe+methods+with+methods+that+are+not+thread-safe"
+  ]
+}
