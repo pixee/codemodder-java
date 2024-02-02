@@ -1,0 +1,78 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 100,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 1
+  },
+  "effortTotal": 20,
+  "debtTotal": 20,
+  "issues": [
+    {
+      "key": "AY1dB4shvPDDaVG8j_3J",
+      "rule": "java:S3551",
+      "severity": "MAJOR",
+      "component": "ryandens_auto-delegate:auto-delegate-processor/src/main/java/com/ryandens/delegation/AutoDelegateProcessor.java",
+      "project": "ryandens_auto-delegate",
+      "line": 45,
+      "hash": "ae2df0725fe09af9ab12c9b3021a1490",
+      "textRange": {
+        "startLine": 45,
+        "endLine": 45,
+        "startOffset": 14,
+        "endOffset": 18
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Make this method \"synchronized\" to match the parent class implementation.",
+      "effort": "20min",
+      "debt": "20min",
+      "tags": [
+        "cert",
+        "multi-threading"
+      ],
+      "creationDate": "2021-01-25T14:24:08+0100",
+      "updateDate": "2024-01-31T01:59:39+0100",
+      "type": "BUG",
+      "organization": "ryandens",
+      "cleanCodeAttribute": "MODULAR",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "ryandens",
+      "key": "ryandens_auto-delegate:auto-delegate-processor/src/main/java/com/ryandens/delegation/AutoDelegateProcessor.java",
+      "uuid": "AY1dB4kuvPDDaVG8j_20",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "AutoDelegateProcessor.java",
+      "longName": "auto-delegate-processor/src/main/java/com/ryandens/delegation/AutoDelegateProcessor.java",
+      "path": "auto-delegate-processor/src/main/java/com/ryandens/delegation/AutoDelegateProcessor.java"
+    },
+    {
+      "organization": "ryandens",
+      "key": "ryandens_auto-delegate",
+      "uuid": "AY1dB0WakBHpMyc9x3B0",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "auto-delegate",
+      "longName": "auto-delegate"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "ryandens",
+      "name": "Ryan Dens"
+    }
+  ],
+  "facets": []
+}
