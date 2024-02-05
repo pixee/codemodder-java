@@ -8,6 +8,7 @@ import io.codemodder.DependencyDescriptor;
 import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
+import io.codemodder.codetf.CodeTFDiffSide;
 import io.codemodder.plugins.maven.operator.POMDocument;
 import java.io.File;
 import java.net.URISyntaxException;
@@ -64,8 +65,10 @@ final class CodeTFGenerator {
 
     final String description = dependencyDescriptor.create(newDependency);
     final Map<String, String> properties = buildPropertiesMap(description);
+    // Use RIGHT side as the diff side for now, as we are only adding dependencies.
     final CodeTFChange change =
-        new CodeTFChange(position, properties, description, List.of(), List.of());
+        new CodeTFChange(
+            position, properties, description, CodeTFDiffSide.RIGHT, List.of(), List.of());
 
     final List<String> patchDiff =
         UnifiedDiffUtils.generateUnifiedDiff(
