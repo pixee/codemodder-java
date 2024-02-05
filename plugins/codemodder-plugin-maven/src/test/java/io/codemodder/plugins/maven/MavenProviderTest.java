@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
+import io.codemodder.codetf.CodeTFDiffSide;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -244,18 +245,22 @@ final class MavenProviderTest {
     // module1/pom.xml adding mars1 to dependencies
     assertThat(changes.get(0).getPath()).isEqualTo("module1/pom.xml");
     assertThat(changes.get(0).getChanges().get(0).getLineNumber()).isEqualTo(19);
+    assertThat(changes.get(0).getChanges().get(0).getDiffSide()).isEqualTo(CodeTFDiffSide.RIGHT);
 
     // pom.xml adding mars1 to dependency management
     assertThat(changes.get(1).getPath()).isEqualTo("pom.xml");
     assertThat(changes.get(1).getChanges().get(0).getLineNumber()).isEqualTo(15);
+    assertThat(changes.get(1).getChanges().get(0).getDiffSide()).isEqualTo(CodeTFDiffSide.RIGHT);
 
     // module1/pom.xml adding mars2 to dependencies
     assertThat(changes.get(2).getPath()).isEqualTo("module1/pom.xml");
     assertThat(changes.get(2).getChanges().get(0).getLineNumber()).isEqualTo(23);
+    assertThat(changes.get(2).getChanges().get(0).getDiffSide()).isEqualTo(CodeTFDiffSide.RIGHT);
 
     // pom.xml adding mars2 to dependency management
     assertThat(changes.get(3).getPath()).isEqualTo("pom.xml");
     assertThat(changes.get(3).getChanges().get(0).getLineNumber()).isEqualTo(20);
+    assertThat(changes.get(3).getChanges().get(0).getDiffSide()).isEqualTo(CodeTFDiffSide.RIGHT);
 
     // we don't have license facts for these dependencies, so we should be silent on their license!
     boolean matchedLicenseFacts =

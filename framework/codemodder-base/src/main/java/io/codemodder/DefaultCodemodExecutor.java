@@ -6,6 +6,7 @@ import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import io.codemodder.codetf.CodeTFChange;
 import io.codemodder.codetf.CodeTFChangesetEntry;
+import io.codemodder.codetf.CodeTFDiffSide;
 import io.codemodder.codetf.CodeTFPackageAction;
 import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.JavaParserChanger;
@@ -274,6 +275,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             codemodChange.lineNumber(),
             emptyMap(),
             changeDescription,
+            CodeTFDiffSide.LEFT,
             pkgActions,
             codemodChange.getParameters());
 

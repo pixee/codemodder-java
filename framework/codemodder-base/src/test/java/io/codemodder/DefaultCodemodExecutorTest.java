@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -135,6 +134,7 @@ final class DefaultCodemodExecutorTest {
               oldDeps.size() + 1,
               Collections.emptyMap(),
               "updated deps",
+              CodeTFDiffSide.LEFT,
               List.of(packageAddResult),
               List.of());
       CodeTFChangesetEntry entry = new CodeTFChangesetEntry("deps.txt", diff, List.of(change));
