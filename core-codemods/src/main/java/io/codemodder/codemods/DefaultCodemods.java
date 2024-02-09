@@ -36,6 +36,7 @@ public final class DefaultCodemods {
         LimitReadlineCodemod.class,
         MavenSecureURLCodemod.class,
         OutputResourceLeakCodemod.class,
+        OverridesMatchParentSynchronizationCodemod.class,
         PreventFileWriterLeakWithFilesCodemod.class,
         RandomizeSeedCodemod.class,
         RemoveCommentedCodeCodemod.class,
