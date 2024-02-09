@@ -56,6 +56,7 @@ public final class DefaultCodemods {
         SSRFCodemod.class,
         StackTraceExposureCodemod.class,
         SwitchLiteralFirstComparisonsCodemod.class,
+        SwitchToStandardCharsetsCodemod.class,
         UnverifiedJwtCodemod.class,
         UpgradeSSLContextTLSCodemod.class,
         UpgradeSSLEngineTLSCodemod.class,
