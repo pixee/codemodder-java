@@ -25,6 +25,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/remove-unused-local-variable-s1481",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveUnusedLocalVariableCodemod
     extends SonarPluginJavaParserChanger<VariableDeclarator> {

@@ -14,6 +14,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "codeql:java/database-resource-leak",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 

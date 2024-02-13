@@ -1,6 +1,7 @@
 {
   "summary" : "Refactored to use parameterized SQL APIs",
   "change": "Parameterized SQL usage to prevent any bugs or vulnerabilities",
+  "reviewGuidanceIJustification" : "Although there should be no functional differences, the rewrite here is complex and should be verified by a human.",
   "references" : [
     "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html",
     "https://cwe.mitre.org/data/definitions/89.html"

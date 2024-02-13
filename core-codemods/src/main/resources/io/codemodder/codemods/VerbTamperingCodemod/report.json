@@ -1,5 +1,6 @@
 {
   "summary" : "Introduced protections against verb tampering attacks (authN/authZ bypass)",
   "change" : "Removed <http-methods> from the <security-constraint> definition which paradoxically remove the authentication from endpoints with any methods not listed",
+  "reviewGuidanceJustification" : "This is an incredibly unintuitive situation and in our professional experience have never seen any time developers intended to grant access to \"all other\" HTTP methods by specifically listing others.",
   "references": ["https://dl.packetstormsecurity.net/papers/web/Bypassing_VBAAC_with_HTTP_Verb_Tampering.pdf","https://vulncat.fortify.com/en/detail?id=desc.config.java.http_verb_tampering", "https://capec.mitre.org/data/definitions/274.html"]
 }

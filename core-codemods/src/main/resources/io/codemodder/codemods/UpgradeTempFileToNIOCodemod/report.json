@@ -1,6 +1,7 @@
 {
   "summary" : "Modernize and secure temp file creation",
   "change": "Modernize and secure temp file creation",
+  "reviewGuidanceJustification" : "Unless the temporary files created by this code are intended to be read and edited by other applications on the system, and are intended to be in a predictable directory, this change should be merged. It's difficult to conceive of a situation where this would be by design and these changes would cause an issue.",
   "references" : [
     "https://cwe.mitre.org/data/definitions/378.html",
     "https://docs.fluidattacks.com/criteria/vulnerabilities/160/",

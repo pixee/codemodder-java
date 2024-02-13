@@ -2,6 +2,7 @@
   "summary" : "Introduced protections against user-controlled internal request forwarding",
   "change": "Added a call that prevents internal forwards from being tricked into serving sensitive files",
   "control" : "https://github.com/pixee/java-code-security-toolkit/blob/main/src/main/java/io/github/pixee/security/Jakarta.java",
+  "reviewGuidanceJustification" : "There is no reason an application should be forwarding to inner resources like `/WEB-INF/web.xml`.",
   "references" : [
     "https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html#dangerous-forward-example"
   ]

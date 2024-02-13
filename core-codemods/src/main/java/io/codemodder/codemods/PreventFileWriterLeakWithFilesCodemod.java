@@ -23,6 +23,7 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/prevent-filewriter-leak-with-nio",
+    importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class PreventFileWriterLeakWithFilesCodemod
     extends SarifPluginJavaParserChanger<ObjectCreationExpr> {

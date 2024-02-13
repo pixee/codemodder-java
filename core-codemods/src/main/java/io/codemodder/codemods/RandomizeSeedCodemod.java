@@ -13,6 +13,7 @@ import javax.inject.Inject;
 /** Turns hardcoded seeds for PRNGs to be more random. */
 @Codemod(
     id = "pixee:java/make-prng-seed-unpredictable",
+    importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class RandomizeSeedCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 

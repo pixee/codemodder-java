@@ -21,7 +21,8 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/add-clarifying-braces",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.HIGH)
 public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChanger<Node> {
 
   @Inject

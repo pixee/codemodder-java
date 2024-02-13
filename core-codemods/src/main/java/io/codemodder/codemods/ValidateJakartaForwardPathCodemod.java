@@ -16,6 +16,7 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/validate-jakarta-forward-path",
+    importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class ValidateJakartaForwardPathCodemod
     extends SarifPluginJavaParserChanger<Expression> {

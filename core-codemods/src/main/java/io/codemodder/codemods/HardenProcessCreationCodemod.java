@@ -17,6 +17,7 @@ import javax.inject.Inject;
 /** Harden new process creation. */
 @Codemod(
     id = "pixee:java/harden-process-creation",
+    importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenProcessCreationCodemod
     extends SarifPluginJavaParserChanger<MethodCallExpr> {

@@ -1,6 +1,7 @@
 {
   "summary" : "Removed block of commented-out lines of code (Sonar)",
   "change" : "Removed block of commented-out lines of code",
+  "reviewGuidanceJustification" : "There is no functional difference after the change, but the source code will be easier to understand.",
   "references" : [
     "https://rules.sonarsource.com/java/RSPEC-125/"
   ]

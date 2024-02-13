@@ -11,6 +11,7 @@ import javax.inject.Inject;
 /** Disables automatic return of objects in {@code javax.naming.DirContext#search}. */
 @Codemod(
     id = "pixee:java/disable-dircontext-deserialization",
+        importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class DisableAutomaticDirContextDeserializationCodemod
     extends SarifPluginJavaParserChanger<ObjectCreationExpr> {

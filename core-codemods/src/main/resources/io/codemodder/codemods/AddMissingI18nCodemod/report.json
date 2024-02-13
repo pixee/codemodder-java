@@ -1,5 +1,6 @@
 {
   "summary" : "Added missing resource keys in internationalization files",
   "change" : "Added missing resource key",
+  "reviewGuidanceIJustification": "The resource keys were missing from the internationalization files",
   "references" : []
 }

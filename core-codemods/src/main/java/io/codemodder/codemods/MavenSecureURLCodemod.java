@@ -27,6 +27,7 @@ import org.xml.sax.SAXException;
 @Codemod(
     id = "codeql:java/maven/non-https-url",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
 

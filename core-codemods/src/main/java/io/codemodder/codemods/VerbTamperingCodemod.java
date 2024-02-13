@@ -20,7 +20,7 @@ import org.dom4j.DocumentException;
 import org.xml.sax.SAXException;
 
 /** Removes all {@code <http-method>} XML elements from files named web.xml. */
-@Codemod(id = "pixee:java/fix-verb-tampering", reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+@Codemod(id = "pixee:java/fix-verb-tampering", importance = Importance.HIGH, reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class VerbTamperingCodemod extends RawFileChanger {
 
   private final XPathStreamProcessor processor;

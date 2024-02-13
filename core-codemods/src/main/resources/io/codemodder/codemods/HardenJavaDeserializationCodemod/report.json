@@ -2,5 +2,11 @@
   "summary" : "Introduced protections against deserialization attacks",
   "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/ObjectInputFilters.java",
   "change" : "Hardened the deserialization call by introducing a filter that prevents known malicious gadgets from executing arbitrary code",
-  "references" : ["https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html", "https://portswigger.net/web-security/deserialization/exploiting"]
+  "references" : ["https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html", "https://portswigger.net/web-security/deserialization/exploiting"],
+  "faqs" :  [
+    {
+      "question" : "Why does this codemod require a Pixee dependency?",
+      "answer" : "We always prefer to use existing controls built into Java, or a control from a well-known and trusted community dependency. However, older versions of Java don't support fine-grained deserialization filter controls, and there are no community-trusted controls."
+    }
+  ]
 }

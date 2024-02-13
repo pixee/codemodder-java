@@ -1,6 +1,7 @@
 {
   "summary" : "Migrated Apache `commons-io` APIs to Java's NIO",
   "change" : "Migrated Apache commons-io APIs to Java's NIO",
+  "reviewGuidanceJustification" : "We believe these changes present no risk and are straightforward.",
   "references" : [
     "https://itsallbinary.com/reading-file-to-string-in-java-with-performance-io-nio-apache-commons-io-google-guava/",
     "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html"

@@ -19,6 +19,8 @@ tasks.check {
 }
 
 dependencies {
+    implementation(libs.javaparser.core)
+    implementation(libs.gson)
     implementation(buildlibs.fileversioning)
     implementation(buildlibs.spotless)
     implementation(buildlibs.nebula.publish.plugin)

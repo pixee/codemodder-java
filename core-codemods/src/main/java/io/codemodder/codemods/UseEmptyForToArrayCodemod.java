@@ -17,6 +17,7 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/use-empty-for-toarray",
+    importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class UseEmptyForToArrayCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 

@@ -1,6 +1,7 @@
 {
   "summary" : "Add clarifying braces to misleading code",
   "change": "Add clarifying braces to misleading code",
+  "reviewGuidanceIJustification": "The intention of the changes introduced by this codemod is to illuminate situations where they may be bugs and format the code to make it more clear. Therefore, we invite review of this codemod's output not to double check the changed logic, but to see if any bugs have been found.",
   "references" : [
     "https://cwe.mitre.org/data/definitions/483.html",
     "https://www.synopsys.com/blogs/software-security/understanding-apple-goto-fail-vulnerability-2/"

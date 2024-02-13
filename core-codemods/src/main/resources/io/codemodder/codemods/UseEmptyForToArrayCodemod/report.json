@@ -1,6 +1,7 @@
 {
   "summary" : "Use empty for Collection#toArray([])",
   "change": "Use empty for Collection#toArray([])",
+  "reviewGuidanceJustification" : "There should be no difference to code flow if the literal is first except in cases where the behavior is now fixed where a bug previously existed.",
   "references" : [
     "https://docs.pmd-code.org/latest/pmd_rules_java_performance.html#optimizabletoarraycall",
     "https://shipilev.net/blog/2016/arrays-wisdom-ancients/#_conclusion"

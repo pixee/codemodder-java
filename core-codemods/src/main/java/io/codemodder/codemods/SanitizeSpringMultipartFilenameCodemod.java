@@ -14,6 +14,7 @@ import javax.inject.Inject;
 /** Sanitizes multipart filename inputs from HTTP requests. */
 @Codemod(
     id = "pixee:java/sanitize-spring-multipart-filename",
+    importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SanitizeSpringMultipartFilenameCodemod
     extends SarifPluginJavaParserChanger<MethodCallExpr> {

@@ -4,10 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodExecutionPriority;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.ReviewGuidance;
+import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -19,6 +16,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/remove-unused-private-method-s1144",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
+    importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveUnusedPrivateMethodCodemod
     extends SonarPluginJavaParserChanger<SimpleName> {

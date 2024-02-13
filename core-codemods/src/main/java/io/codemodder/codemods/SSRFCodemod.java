@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 @Codemod(
     id = "pixee:java/sandbox-url-creation",
+    importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SSRFCodemod extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 

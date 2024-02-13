@@ -4,10 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodExecutionPriority;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.ReviewGuidance;
+import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -19,6 +16,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/replace-stream-collectors-to-list-s6204",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class ReplaceStreamCollectorsToListCodemod
     extends SonarPluginJavaParserChanger<MethodCallExpr> {

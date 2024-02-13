@@ -20,6 +20,7 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/migrate-files-commons-io-to-nio",
+    importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class MigrateFilesCommonsIOToNIOCodemod extends CompositeJavaParserChanger {
 

@@ -1,5 +1,6 @@
 {
   "summary" : "Introduced protections against predictable RNG abuse",
   "change" : "Replaced the weak pseudo-random number generator with a strong one",
+  "reviewGuidanceJustification" : "We believe this change is safe, effective, and very unlikely to be noticeably slower.",
   "references" : ["https://owasp.org/www-community/vulnerabilities/Insecure_Randomness", "https://metebalci.com/blog/everything-about-javas-securerandom/", "https://cwe.mitre.org/data/definitions/330.html"]
 }

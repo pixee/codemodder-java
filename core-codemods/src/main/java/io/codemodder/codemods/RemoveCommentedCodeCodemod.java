@@ -13,6 +13,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/remove-commented-code-s125",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChanger<Comment> {
 

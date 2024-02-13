@@ -1,6 +1,7 @@
 {
   "summary" : "Switch to StandardCharsets fields instead of strings",
   "change": "Switched to pointers instead of String lookups for charset retrieval",
+  "reviewGuidanceJustification" : "Because the `String`-based lookup this code replaces throws `IOException`, and the new code doesn't, it may be necessary to make a linter happy by removing the `throws` clause from the method signature in some situations.",
   "references" : [
     "https://community.sonarsource.com/t/use-standardcharsets-instead-of-charset-names/638",
     "https://github.com/pmd/pmd/issues/3190"

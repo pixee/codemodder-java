@@ -18,6 +18,7 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/upgrade-sslsocket-tls",
+    importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class UpgradeSSLSocketProtocolsTLSCodemod
     extends SarifPluginJavaParserChanger<MethodCallExpr> {

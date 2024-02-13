@@ -1,6 +1,7 @@
 {
   "summary" : "Replaced `Stream.collect(Collectors.toList())` with `Stream.toList()` (Sonar)",
   "change" : "Replaced `Stream.collect(Collectors.toList())` with `Stream.toList()`.",
+  "reviewGuidanceJustification" : "There should be no functional changes after this change, but the code should be easier to read.",
   "references" : [
     "https://rules.sonarsource.com/java/RSPEC-6204/"
   ]

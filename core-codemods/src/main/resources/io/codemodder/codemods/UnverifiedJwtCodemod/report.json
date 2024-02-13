@@ -1,6 +1,7 @@
 {
   "summary" : "Switch JWT calls to versions that enforce signature validity (CodeQL)",
   "change": "Switched to a secure API for parsing JSON Web Tokens (JWT) that actually validates the signature",
+  "reviewGuidanceJustification" : "This code may cause issues if the application is using tokens that can't be validated. This may happen if you're using this code anywhere you use self-signed JWTs. If you expect your tokens to be correctly generated and expect signature validation to be performed when processing JWTs, this change only reduces risk. However, one should be careful to ensure that CI, pre-production, and production are watched closely as this change moves towards deployment.",
   "references" : [
     "https://codeql.github.com/codeql-query-help/java/java-missing-jwt-signature-check/",
     "https://cwe.mitre.org/data/definitions/347.html"

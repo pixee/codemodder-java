@@ -16,6 +16,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/add-missing-override-s1161",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChanger<SimpleName> {
 

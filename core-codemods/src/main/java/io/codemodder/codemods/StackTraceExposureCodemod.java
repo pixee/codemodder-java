@@ -14,6 +14,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "codeql:java/stack-trace-exposure",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
 public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expression> {
 

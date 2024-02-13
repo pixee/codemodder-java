@@ -21,6 +21,7 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/upgrade-tempfile-to-nio",
+    importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class UpgradeTempFileToNIOCodemod
     extends SarifPluginJavaParserChanger<MethodCallExpr> {

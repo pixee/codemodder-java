@@ -15,6 +15,7 @@ import javax.inject.Inject;
 /** Adds gadget filtering logic to {@link java.beans.XMLDecoder} streams. */
 @Codemod(
     id = "pixee:java/harden-xmldecoder-stream",
+    importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenXMLDecoderCodemod
     extends SarifPluginJavaParserChanger<ObjectCreationExpr> {

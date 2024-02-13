@@ -3,10 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodExecutionPriority;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.ReviewGuidance;
+import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -17,6 +14,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/remove-useless-parentheses-s1110",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveUselessParenthesesCodemod
     extends SonarPluginJavaParserChanger<EnclosedExpr> {

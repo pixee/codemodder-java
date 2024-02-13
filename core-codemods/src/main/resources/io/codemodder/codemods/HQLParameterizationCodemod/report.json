@@ -1,6 +1,7 @@
 {
   "summary" : "Refactored to use parameterized HQL APIs",
   "change": "Parameterized HQL usage to prevent any bugs or vulnerabilities",
+  "reviewGuidanceIJustification" : "Although there should be no functional differences, the rewrite here is complex and should be verified by a human.",
   "references" : [
     "https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html#using-java-with-hibernate",
     "https://cwe.mitre.org/data/definitions/564.html"

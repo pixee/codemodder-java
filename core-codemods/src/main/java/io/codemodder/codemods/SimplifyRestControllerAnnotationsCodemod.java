@@ -22,6 +22,7 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "sonar:java/simplify-rest-controller-annotations-s6833",
+    importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class SimplifyRestControllerAnnotationsCodemod

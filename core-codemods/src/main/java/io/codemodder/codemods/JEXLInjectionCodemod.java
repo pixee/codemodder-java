@@ -33,6 +33,7 @@ import org.apache.commons.jexl3.JexlExpression;
 @Codemod(
     id = "codeql:java/jexl-expression-injection",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expression> {
 

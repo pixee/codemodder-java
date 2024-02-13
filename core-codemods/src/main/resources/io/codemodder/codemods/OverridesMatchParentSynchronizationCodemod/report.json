@@ -1,6 +1,12 @@
 {
   "summary" : "Added missing synchronized keyword (Sonar)",
   "change" : "Added missing synchronized keyword",
+  "faqs" : [ {
+      "question" : "Are there other ways to implement this?",
+      "answer" : "There are a number of different ways to fix this, but essentially we need to make this code thread-safe. This is important when the parent interface implies something is synchronized, signaling an expectation of thread-safety, when an implementation is not."
+    }
+  ],
+  "reviewGuidanceJustification" : "Although the new change will work as expected after integrating, we believe a human should be reminded of the concurrency contract inherited from the superclass.",
   "references" : [
     "https://rules.sonarsource.com/java/RSPEC-3551/",
     "https://wiki.sei.cmu.edu/confluence/display/java/TSM00-J.+Do+not+override+thread-safe+methods+with+methods+that+are+not+thread-safe"

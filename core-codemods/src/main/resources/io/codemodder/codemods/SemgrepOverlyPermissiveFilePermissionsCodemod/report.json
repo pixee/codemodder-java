@@ -1,6 +1,7 @@
 {
   "summary" : "Fixed overly permissive file permissions (issue discovered by Semgrep)",
   "change" : "Reduced permissions to disable world read/write/execute privileges",
+  "reviewGuidanceJustification": "Although there is very little reason to limiting the file permissions as stated would have any effect, it conceivable that the weak permissions are incidentally taken advantage of during pre-production development practices or through file aggregation tools (e.g., Splunk.)",
   "references" : [
     "https://find-sec-bugs.github.io/bugs.htm#OVERLY_PERMISSIVE_FILE_PERMISSION",
     "https://registry.semgrep.dev/rule/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission",

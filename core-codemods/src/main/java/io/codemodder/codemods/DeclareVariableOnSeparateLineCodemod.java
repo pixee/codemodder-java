@@ -18,6 +18,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/declare-variable-on-separate-line-s1659",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class DeclareVariableOnSeparateLineCodemod
     extends SonarPluginJavaParserChanger<VariableDeclarator> {

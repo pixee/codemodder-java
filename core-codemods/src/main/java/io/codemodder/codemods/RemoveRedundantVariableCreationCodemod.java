@@ -15,6 +15,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/remove-redundant-variable-creation-s1488",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveRedundantVariableCreationCodemod
     extends SonarPluginJavaParserChanger<ObjectCreationExpr> {

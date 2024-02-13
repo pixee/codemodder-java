@@ -1,6 +1,7 @@
 {
   "summary" : "Expression language injection (JEXL) (CodeQL)",
   "change": "Added a sandbox to prevent this expression from ever accessing well-known exploitation types",
+  "reviewGuidanceJustification" : "This codemod prevents JEXL expressions from accessing dangerous types like `java.lang.Runtime`, so the risk of this change interrupting expected application activity is estimated to be very low.",
   "references" : [
     "https://codeql.github.com/codeql-query-help/java/java-jexl-expression-injection/",
     "https://commons.apache.org/proper/commons-jexl/apidocs/org/apache/commons/jexl3/introspection/JexlSandbox.html",

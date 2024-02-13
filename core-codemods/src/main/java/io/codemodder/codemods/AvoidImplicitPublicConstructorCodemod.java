@@ -20,6 +20,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/avoid-implicit-public-constructor-s1118",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
+    importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class AvoidImplicitPublicConstructorCodemod
     extends SonarPluginJavaParserChanger<SimpleName> {

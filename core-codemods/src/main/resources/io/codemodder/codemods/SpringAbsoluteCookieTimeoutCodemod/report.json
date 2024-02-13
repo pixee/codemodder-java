@@ -1,5 +1,6 @@
 {
   "summary" : "Reduced absolute session timeout",
   "change" : "Reduced absolute session timeout to a reasonable timeframe",
+  "reviewGuidanceJustification" : "It is possible that this would cause a disruptive experience for users who expect to be able to remain logged in for longer periods of time.",
   "references" : ["https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#absolute-timeout", "http://projects.webappsec.org/w/page/13246944/Insufficient%20Session%20Expiration", "https://cwe.mitre.org/data/definitions/613.html"]
 }
