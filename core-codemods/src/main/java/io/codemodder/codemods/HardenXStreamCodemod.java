@@ -16,7 +16,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 /** Adds gadget filtering logic to XStream deserialization. */
-@Codemod(id = "pixee:java/harden-xstream", importance = Importance.HIGH, reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+@Codemod(
+    id = "pixee:java/harden-xstream",
+    importance = Importance.HIGH,
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<VariableDeclarator> {
 
   @Inject
