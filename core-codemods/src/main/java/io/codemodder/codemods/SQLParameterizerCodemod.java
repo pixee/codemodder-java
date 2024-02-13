@@ -9,9 +9,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /** Parameterizes SQL statements in the java JDBC api. */
-@Codemod(id = "pixee:java/sql-parameterizer",
-        importance = Importance.HIGH,
-        reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
+@Codemod(
+    id = "pixee:java/sql-parameterizer",
+    importance = Importance.HIGH,
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
 public final class SQLParameterizerCodemod extends JavaParserChanger {
 
   private Optional<CodemodChange> onNodeFound(

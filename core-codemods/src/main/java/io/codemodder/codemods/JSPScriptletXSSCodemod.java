@@ -1,7 +1,6 @@
 package io.codemodder.codemods;
 
 import io.codemodder.*;
-
 import java.util.List;
 import java.util.regex.Pattern;
 
