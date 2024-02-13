@@ -2,6 +2,13 @@
   "summary" : "Protect `readLine()` against DoS",
   "change": "Replaced with a call that offers an upper bound on the number of characters that will be read before giving up and throwing a security exception",
   "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/BoundedLineReader.java",
+  "reviewGuidanceJustification" : "This codemod sets a maximum of 5MB allowed per line read by default. It is unlikely but possible that your code may receive lines that are greater than 5MB and you'd still be interested in reading them, so there is some nominal risk of exceptional cases. If you want to customize the behavior of the codemod to have a higher default for your repository, you can change its settings.",
+  "faqs" :  [
+    {
+      "question" : "Why does this codemod require a Pixee dependency?",
+      "answer" : "We always prefer to use existing controls built into Java, or a control from a well-known and trusted community dependency. However, we cannot find any such control. If you know of one, please let us know."
+    }
+  ],
   "references" : [
     "https://vulncat.fortify.com/en/detail?id=desc.dataflow.abap.denial_of_service",
     "https://cwe.mitre.org/data/definitions/400.html"

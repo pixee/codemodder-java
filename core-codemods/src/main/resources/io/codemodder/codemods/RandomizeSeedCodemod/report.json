@@ -1,6 +1,7 @@
 {
   "summary" : "Strengthened cipher seed with more unpredictable value",
   "change" : "Added a better seed to the pseudorandom number generation to make numbers in successive runs more random",
+  "reviewGuidanceJustification" : "There should be no difference to the code what random numbers are generated. If there is, this change will surface that issue. This case could indicate a serious security weakness.",
   "references" : [
     "https://wiki.sei.cmu.edu/confluence/display/c/MSC32-C.+Properly+seed+pseudorandom+number+generators",
     "https://wiki.sei.cmu.edu/confluence/display/cplusplus/MSC51-CPP.+Ensure+your+random+number+generator+is+properly+seeded",

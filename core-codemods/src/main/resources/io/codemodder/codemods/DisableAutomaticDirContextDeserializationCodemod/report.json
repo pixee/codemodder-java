@@ -1,5 +1,6 @@
 {
   "summary" : "Hardened LDAP call against deserialization attacks",
   "change" : "Made the `retobj` field true so LDAP API responses won't be deserialized",
+  "reviewGuidanceIJustification" : "The protection works by denying deserialization during processing of an LDAP query which we're confident is intentional in a vanishingly small percentage of usage.",
   "references" : ["https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf", "https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html"]
 }

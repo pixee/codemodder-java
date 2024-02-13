@@ -1,6 +1,7 @@
 {
   "summary" : "Introduced protections against XSS attacks in JSP scriptlets",
   "change" : "Inserted an HTML encoding call around the user input that will render HTML control characters insert and prevent code execution -- other protections may offer better functionality, depending on where in the HTTP response and HTML document the input occurs",
+  "reviewGuidanceJustification" : "This change is safe and effective in almost all situations. However, depending on the context in which the scriptlet is rendered (e.g., inside an HTML tag, in JavaScript, unquoted contexts, etc.), you may need to use another encoding method. Check out the [OWASP XSS Prevention CheatSheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html) to learn more about these cases and other controls you may need in exceptional cases. The security control introduced from OWASP used has `forHtml()` variants for all situations (e.g., `forJavaScript()`, `forCssString()`).",
   "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/HtmlEncoder.java",
   "references" : ["https://portswigger.net/web-security/cross-site-scripting", "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html", "https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html"]
 }

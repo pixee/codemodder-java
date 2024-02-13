@@ -17,6 +17,7 @@ import javax.inject.Inject;
 /** Moves strings to {@link StandardCharsets} fields. */
 @Codemod(
     id = "pixee:java/switch-to-standard-charsets",
+    importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
 public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserChanger {
 

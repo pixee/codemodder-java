@@ -8,10 +8,7 @@ import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodChange;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.ReviewGuidance;
+import io.codemodder.*;
 import io.codemodder.ast.ASTs;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.ArrayList;
@@ -25,7 +22,8 @@ import org.javatuples.Pair;
 /** Parameterize possible injections for Hibernate queries. */
 @Codemod(
     id = "pixee:java/hql-parameterizer",
-    reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
+    importance = Importance.HIGH,
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
 public final class HQLParameterizationCodemod extends JavaParserChanger {
 
   private Optional<CodemodChange> onNodeFound(
@@ -42,6 +40,7 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
     return Optional.empty();
   }
 
+  @Override
   public List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     return cu.findAll(MethodCallExpr.class).stream()

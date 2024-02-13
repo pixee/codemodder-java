@@ -1,6 +1,7 @@
 {
   "summary" : "Replaced deprecated and insecure Apache HTTP client",
   "change" : "Replaces the deprecated and insecure Apache HTTP client with a client that supports TLS 1.2",
+  "reviewGuidanceJustification" : "Although there very little chance that this change will have any functional consequences, we believe this change should be reviewed.",
   "references" : [
     "https://find-sec-bugs.github.io/bugs.htm#DEFAULT_HTTP_CLIENT",
     "https://www.ibm.com/support/pages/im-using-apache-httpclient-make-outbound-call-my-web-application-running-websphere-application-server-traditional-and-im-getting-ssl-handshake-error-how-can-i-debug",

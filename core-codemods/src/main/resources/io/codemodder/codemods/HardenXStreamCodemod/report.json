@@ -1,6 +1,7 @@
 {
   "summary" : "Hardened XStream with a converter to prevent exploitation",
   "change": "Added an XStream [Converter](https://x-stream.github.io/converter-tutorial.html) which prevents common exploits",
+  "reviewGuidanceIJustification" : "We believe this change is safe and effective. The behavior of hardened XStream instances will only be different if the types being deserialized are involved in code execution, which is extremely unlikely to in normal operation.",
   "references" : [
     "https://x-stream.github.io/security.html",
     "http://diniscruz.blogspot.com/2013/12/xstream-remote-code-execution-exploit.html",

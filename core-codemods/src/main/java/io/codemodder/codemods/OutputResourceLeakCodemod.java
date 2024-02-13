@@ -14,6 +14,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "codeql:java/output-resource-leak",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class OutputResourceLeakCodemod extends SarifPluginJavaParserChanger<Expression> {
 

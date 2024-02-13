@@ -1,6 +1,7 @@
 {
   "summary" : "Failure to use HTTPS or SFTP URL in Maven artifact upload/download (CodeQL)",
   "change" : "Replaced insecure HTTP URL with HTTPS URL to prevent man-in-the-middle attacks",
+  "reviewGuidanceJustification" : "This codemod replaces URLs to repositories that are insecure. Most repositories, including from the most popular services, are available through HTTPS. Some may even attempt to force HTTPS by redirection, though that would still be vulnerable to man-in-the-middle attacks because the initial request could be intercepted. The only realistic chance for this causing issues is if users are referencing an internal repository that wasn't setup to also serve HTTPS. This seems unlikely, but it may be worth checking before making this change permanent.",
   "references" : [
     "https://codeql.github.com/codeql-query-help/java/java-maven-non-https-url",
     "https://cwe.mitre.org/data/definitions/494.html",

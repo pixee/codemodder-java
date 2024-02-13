@@ -1,6 +1,7 @@
 {
   "summary" : "Removed redundant static flag on enum (Sonar)",
   "change" : "Removed redundant static flag on enum",
+  "reviewGuidanceIJustification" : "There are no functional changes after this change, but the code will be easier to understand.",
   "references" : [
     "https://sonarsource.github.io/rspec/#/rspec/S2786/java"
   ]

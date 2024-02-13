@@ -4,10 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodExecutionPriority;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.ReviewGuidance;
+import io.codemodder.*;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -21,7 +18,8 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "sonar:java/overrides-match-synchronization-s3551",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+    importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class OverridesMatchParentSynchronizationCodemod
     extends SonarPluginJavaParserChanger<SimpleName> {

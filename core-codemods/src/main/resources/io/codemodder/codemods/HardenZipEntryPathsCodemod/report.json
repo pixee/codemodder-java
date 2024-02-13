@@ -1,6 +1,7 @@
 {
-  "summary" : "Introduced protections against \"zip slip\"  attacks",
+  "summary" : "Introduced protections against \"zip slip\" attacks",
   "change" : "Created a hardened `java.io.ZipInputStream` wrapper type that prevents files from being written that escape the target directory",
+  "reviewGuidanceIJustification" : "We believe this change is safe and effective. The behavior of hardened `ZipInputStream` instances will only be different if malicious zip entries are encountered.",
   "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/ZipSecurity.java",
   "references": ["https://snyk.io/research/zip-slip-vulnerability", "https://github.com/snyk/zip-slip-vulnerability", "https://wiki.sei.cmu.edu/confluence/display/java/IDS04-J.+Safely+extract+files+from+ZipInputStream", "https://vulncat.fortify.com/en/detail?id=desc.dataflow.java.path_manipulation_zip_entry_overwrite"]
 }

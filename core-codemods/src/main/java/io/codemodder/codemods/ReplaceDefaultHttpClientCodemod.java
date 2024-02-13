@@ -18,6 +18,7 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/replace-apache-defaulthttpclient",
+    importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class ReplaceDefaultHttpClientCodemod
     extends SarifPluginJavaParserChanger<ObjectCreationExpr> {

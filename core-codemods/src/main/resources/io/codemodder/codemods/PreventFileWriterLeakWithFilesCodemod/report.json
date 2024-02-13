@@ -1,6 +1,7 @@
 {
   "summary" : "Prevent file descriptor leak and modernize BufferedWriter creation",
   "change" : "Prevent file descriptor leak and modernize BufferedWriter creation",
+  "reviewGuidanceJustification" : "The replaced method calls are functionally equivalent, without the file descriptor leak.",
   "references" : [
     "https://cwe.mitre.org/data/definitions/775.html"
   ]

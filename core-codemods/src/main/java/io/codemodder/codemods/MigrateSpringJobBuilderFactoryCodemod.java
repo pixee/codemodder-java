@@ -24,6 +24,7 @@ import javax.inject.Inject;
 /** Migrates Spring code from using JobBuilderFactory to directly using JobBuilder. */
 @Codemod(
     id = "pixee:java/migrate-spring-job-builder-factory",
+    importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class MigrateSpringJobBuilderFactoryCodemod
     extends SarifPluginJavaParserChanger<MethodCallExpr> {

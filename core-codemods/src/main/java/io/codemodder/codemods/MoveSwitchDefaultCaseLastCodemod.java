@@ -17,6 +17,7 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee:java/move-switch-default-last",
+    importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class MoveSwitchDefaultCaseLastCodemod
     extends SarifPluginJavaParserChanger<SwitchEntry> {

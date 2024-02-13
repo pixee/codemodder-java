@@ -1,6 +1,7 @@
 {
   "summary" : "Hardened XMLDecoder usage to prevent common attacks",
   "change": "Wrapped the XMLDecoder input with one that detects if some well-known exploit types are deserialized -- but this operation is difficult to protect and should be removed when possible",
+  "reviewGuidanceIJustification" : "We believe this change is safe and effective. The behavior of hardened `XMLDecoder` instances will only throw `SecurityException` if they see types being deserialized are involved in code execution, which is extremely unlikely to in normal operation.",
   "references": [
     "https://github.com/mgeeky/Penetration-Testing-Tools/blob/master/web/java-XMLDecoder-RCE.md",
     "http://diniscruz.blogspot.com/2013/08/using-xmldecoder-to-execute-server-side.html"

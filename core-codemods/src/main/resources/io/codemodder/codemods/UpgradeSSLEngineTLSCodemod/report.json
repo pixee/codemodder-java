@@ -1,6 +1,7 @@
 {
   "summary" : "Upgraded SSLEngine#setEnabledProtocols() TLS versions to match current best practices",
   "change": "Removed the ability to communicate over anything except TLS 1.2 as no others are safe",
+  "reviewGuidanceJustification" : "There is only a risk of this codemod introducing issues if the other party in the communication doesn't support modern versions of TLS. This should be extremely rare as those older versions are no longer honored by browsers or supported by most server software.",
   "references" : [
     "https://datatracker.ietf.org/doc/rfc8996/",
     "https://www.digicert.com/blog/depreciating-tls-1-0-and-1-1"

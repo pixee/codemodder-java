@@ -2,6 +2,7 @@ plugins {
     id("io.codemodder.java-library")
     id("io.codemodder.runner")
     id("io.codemodder.maven-publish")
+    id("io.codemodder.core-codemods-docs")
     `jvm-test-suite`
 }
 

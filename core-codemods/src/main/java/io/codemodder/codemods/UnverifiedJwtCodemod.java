@@ -16,6 +16,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "codeql:java/missing-jwt-signature-check",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
 public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expression> {
 

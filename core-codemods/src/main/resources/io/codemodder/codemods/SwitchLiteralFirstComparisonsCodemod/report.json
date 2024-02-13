@@ -1,8 +1,9 @@
 {
   "summary" : "Switch order of literals to prevent NullPointerException",
   "change": "Switch order of literals to prevent NullPointerException",
+  "reviewGuidanceJustification" : "There should be no difference to code flow if the literal is first except in cases where the behavior is now fixed where a bug previously existed.",
   "references" : [
-    "http://cwe.mitre.org/data/definitions/476.html",
+    "https://cwe.mitre.org/data/definitions/476.html",
     "https://en.wikibooks.org/wiki/Java_Programming/Preventing_NullPointerException",
     "https://rules.sonarsource.com/java/RSPEC-1132/"
   ]

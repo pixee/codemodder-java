@@ -11,4 +11,8 @@ dependencyResolutionManagement {
     versionCatalogs.create("buildlibs") {
         from(files("../buildlibs.versions.toml"))
     }
+
+    versionCatalogs.create("libs") {
+        from(files("../libs.versions.toml"))
+    }
 }

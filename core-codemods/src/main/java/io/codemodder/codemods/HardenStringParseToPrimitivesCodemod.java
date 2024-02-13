@@ -20,6 +20,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/harden-string-parse-to-primitives-s2130",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaParserChanger {
 

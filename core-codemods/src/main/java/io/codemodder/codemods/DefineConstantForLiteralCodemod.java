@@ -13,6 +13,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/define-constant-for-duplicate-literal-s1192",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
+    importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class DefineConstantForLiteralCodemod
     extends SonarPluginJavaParserChanger<StringLiteralExpr> {

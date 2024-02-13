@@ -35,4 +35,8 @@ public @interface Codemod {
 
   /** How important it is that this codemod execute sooner in the list of codemods being run. */
   CodemodExecutionPriority executionPriority() default CodemodExecutionPriority.NORMAL;
+
+  /** How important this codemod's changes are. Maybe a stand-in for a severity value that we may want to replace this with someday. May be unused locally, but is needed for documentation. */
+  @SuppressWarnings("unused")
+  Importance importance() default Importance.MEDIUM;
 }

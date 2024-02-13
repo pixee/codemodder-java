@@ -14,7 +14,8 @@ import javax.inject.Inject;
 /** Fix unsafe NIO path comparison. */
 @Codemod(
     id = "pixee:java/fix-unsafe-nio-path-comparison",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    importance = Importance.MEDIUM,
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class FixUnsafeNIOPathComparisonCodemod
     extends SarifPluginJavaParserChanger<MethodCallExpr> {
 

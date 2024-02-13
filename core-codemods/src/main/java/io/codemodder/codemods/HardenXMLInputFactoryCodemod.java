@@ -15,6 +15,7 @@ import javax.inject.Inject;
 /** Disables external entity resolution in {@link javax.xml.stream.XMLInputFactory} use. */
 @Codemod(
     id = "pixee:java/harden-xmlinputfactory",
+    importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenXMLInputFactoryCodemod
     extends SarifPluginJavaParserChanger<VariableDeclarator> {

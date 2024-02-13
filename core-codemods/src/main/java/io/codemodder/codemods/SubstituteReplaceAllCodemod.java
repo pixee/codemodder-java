@@ -13,6 +13,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/substitute-replaceAll-s5361",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChanger<SimpleName> {
 

@@ -2,6 +2,9 @@
   "summary" : "Sandboxed URL creation to prevent SSRF attacks",
   "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/Urls.java",
   "change": "Wrapped the URL creation with a method that forces the caller to pick allowed protocols and domains that this URL can reach",
+
+  "reviewGuidanceJustification" : "By default, the protection only weaves in 2 checks, which we believe will not cause any issues with the vast majority of code:\n* The given URL must be HTTP/HTTPS.\n* The given URL must not point to a \"well-known infrastructure target\", which includes things like AWS Metadata Service endpoints, and internal routers (e.g., 192.168.1.1) which are common targets of attacks.\n\nHowever, on rare occasions an application may use a URL protocol like \"file://\" or \"classpath://\" in backend or middleware code.\n\nIf you want to allow those protocols, change the incoming PR to look more like this and get the best security possible:\n\n```\n-URL u = new URL(url);\n+Set<UrlProtocol> fileProtocols = Set.of(UrlProtocol.FILE, UrlProtocol.CLASSPATH);\n+URL u = Urls.create(url, fileProtocols);\n```",
+
   "references": [
     "https://www.hacksplaining.com/prevention/ssrf",
     "https://portswigger.net/web-security/ssrf",

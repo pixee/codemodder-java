@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 @Codemod(
     id = "pixee:java/verbose-request-mapping",
+    importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class VerboseRequestMappingCodemod
     extends SarifPluginJavaParserChanger<NormalAnnotationExpr> {

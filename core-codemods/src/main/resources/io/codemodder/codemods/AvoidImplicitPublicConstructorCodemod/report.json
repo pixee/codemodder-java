@@ -1,6 +1,7 @@
 {
   "summary" : "Set private constructor to hide implicit public constructor (Sonar)",
   "change" : "Set private constructor to hide implicit public constructor",
+  "reviewGuidanceIJustification" : "This change depends completely on Sonar's accuracy about in identifying types that are meant to only offer static utilities. Our testing shows this generally works as expected, but correctness can't be guaranteed in all situations.",
   "references" : [
     "https://rules.sonarsource.com/java/RSPEC-1118/"
   ]

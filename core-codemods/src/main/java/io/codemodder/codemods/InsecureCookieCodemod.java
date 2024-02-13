@@ -18,6 +18,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "codeql:java/insecure-cookie",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
 

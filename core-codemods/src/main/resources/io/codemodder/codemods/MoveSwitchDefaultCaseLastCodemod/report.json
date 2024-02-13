@@ -1,6 +1,7 @@
 {
   "summary" : "Moved default case in switch to last entry",
   "change": "Moved default case to last to make the code more readable",
+  "reviewGuidanceJustification" : "This codemod is currently disabled by default because it doesn't check if there are fall-through cases before the default before moving it. Therefore, changes should be reviewed intently.",
   "references" : [
     "https://cwe.mitre.org/data/definitions/670.html",
     "https://pmd.github.io/pmd/pmd_rules_java_bestpractices.html#defaultlabelnotlastinswitchstmt",

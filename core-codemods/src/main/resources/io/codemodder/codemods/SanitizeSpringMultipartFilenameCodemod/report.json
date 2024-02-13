@@ -2,6 +2,7 @@
   "summary" : "Sanitized user-provided file names in HTTP multipart uploads",
   "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/Filenames.java",
   "change": "Wrapped the file name with a sanitizer call that takes out path escaping characters",
+  "reviewGuidanceJustification" : "This change presents effectively no risk. However, we believe a human should review the change.",
   "references" : [
     "https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload",
     "https://portswigger.net/web-security/file-upload",

@@ -25,7 +25,7 @@ import software.amazon.awssdk.services.translate.model.*;
  * This codemod finds missing i18n keys in property files and adds them to the file, using an LLM to
  * generate the missing values.
  */
-@Codemod(id = "pixee:java/missing-i18n", reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
+@Codemod(id = "pixee:java/missing-i18n", importance = Importance.MEDIUM, reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class AddMissingI18nCodemod extends RawFileChanger {
 
   private final TranslateClient translateClient;

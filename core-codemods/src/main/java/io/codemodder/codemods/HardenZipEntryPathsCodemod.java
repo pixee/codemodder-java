@@ -14,6 +14,7 @@ import javax.inject.Inject;
 /** Adds path escaping detection to {@link java.util.zip.ZipInputStream}. */
 @Codemod(
     id = "pixee:java/harden-zip-entry-paths",
+    importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenZipEntryPathsCodemod
     extends SarifPluginJavaParserChanger<VariableDeclarator> {

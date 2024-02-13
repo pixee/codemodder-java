@@ -1,9 +1,7 @@
 package io.codemodder.codemods;
 
-import io.codemodder.Codemod;
-import io.codemodder.DependencyGAV;
-import io.codemodder.RegexFileChanger;
-import io.codemodder.ReviewGuidance;
+import io.codemodder.*;
+
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -18,6 +16,7 @@ import java.util.regex.Pattern;
  */
 @Codemod(
     id = "pixee:java/encode-jsp-scriptlet",
+    importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class JSPScriptletXSSCodemod extends RegexFileChanger {
 

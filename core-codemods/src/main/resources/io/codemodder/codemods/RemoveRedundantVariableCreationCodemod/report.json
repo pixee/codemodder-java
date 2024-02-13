@@ -1,6 +1,7 @@
 {
-  "summary" : "Remove redundant variable creation expression when it is only returned/thrown (Sonar).",
+  "summary" : "Remove redundant variable creation expression when it is only returned/thrown (Sonar)",
   "change" : "Remove redundant variable creation expression when it is only returned/thrown.",
+  "reviewGuidanceJustification" : "There are no functional changes after this change, but the code will be easier to understand.",
   "references" : [
     "https://rules.sonarsource.com/java/RSPEC-1488/"
   ]

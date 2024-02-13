@@ -1,6 +1,7 @@
 {
   "summary" : "Prevent database resource leaks (CodeQL)",
   "change": "Added a try-with-resources statement to automatically close database resources",
+  "reviewGuidanceIJustification" : "This codemod causes database resources to be cleaned up immediately after use instead of at garbage collection time, and we don't believe this change entails any risk.\n\n",
   "references" : [
     "https://codeql.github.com/codeql-query-help/java/java-database-resource-leak/",
     "https://cwe.mitre.org/data/definitions/404.html",

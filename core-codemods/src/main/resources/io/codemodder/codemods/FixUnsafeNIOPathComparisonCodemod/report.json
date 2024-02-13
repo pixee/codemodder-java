@@ -1,5 +1,6 @@
 {
   "summary" : "Fix unsafe NIO path comparison",
   "change" : "Changed APIs to prevent string path comparison errors",
+  "reviewGuidanceIJustification" : "The code may have been able to write to sibling directories that weren't intended, so there has been some functional changes. These changes shouldn't interrupt typical execution, but we think the change should be reviewed.",
   "references" : ["https://codeql.github.com/codeql-query-help/java/java-partial-path-traversal-from-remote/","https://cwe.mitre.org/data/definitions/22.html"]
 }

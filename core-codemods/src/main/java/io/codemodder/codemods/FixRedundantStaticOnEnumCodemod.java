@@ -13,6 +13,7 @@ import javax.inject.Inject;
 @Codemod(
     id = "sonar:java/remove-redundant-static-s2786",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class FixRedundantStaticOnEnumCodemod
     extends SonarPluginJavaParserChanger<EnumDeclaration> {

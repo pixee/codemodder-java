@@ -1,6 +1,7 @@
 {
   "summary": "Replaced @RequestMapping annotation with shortcut annotation for requested HTTP Method",
   "change": "Replaced @RequestMapping annotation with shortcut annotation for requested HTTP Method",
+  "reviewGuidanceJustification" : "Although the readability and clarity has been increased, there is no functional difference between the code before, and code after.",
   "references": [
     "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html",
     "https://dzone.com/articles/using-the-spring-requestmapping-annotation"
