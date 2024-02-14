@@ -41,5 +41,5 @@ public @interface Codemod {
    * want to replace this with someday. May be unused locally, but is needed for documentation.
    */
   @SuppressWarnings("unused")
-  Importance importance() default Importance.MEDIUM;
+  Importance importance();
 }
