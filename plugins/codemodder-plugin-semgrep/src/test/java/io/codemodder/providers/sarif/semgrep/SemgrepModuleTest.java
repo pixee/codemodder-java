@@ -38,6 +38,7 @@ final class SemgrepModuleTest {
 
   @Codemod(
       id = "pixee-test:java/implicit-yaml",
+      importance = Importance.LOW,
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class UsesImplicitYamlPath implements CodeChanger {
     private final RuleSarif ruleSarif;
@@ -70,6 +71,7 @@ final class SemgrepModuleTest {
 
   @Codemod(
       id = "pixee-test:java/explicit-yaml-test",
+      importance = Importance.LOW,
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class UsesExplicitYamlPath extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
@@ -99,6 +101,7 @@ final class SemgrepModuleTest {
 
   @Codemod(
       id = "pixee-test:java/missing-properties-test",
+      importance = Importance.LOW,
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class MissingYamlPropertiesPath extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
@@ -133,6 +136,7 @@ final class SemgrepModuleTest {
 
   @Codemod(
       id = "pixee-test:java/uses-implicit-rule",
+      importance = Importance.LOW,
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class UsesImplicitRule extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
 
@@ -263,6 +267,7 @@ final class SemgrepModuleTest {
 
   @Codemod(
       id = "pixee-test:java/offline-semgrep",
+      importance = Importance.LOW,
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class UsesOfflineSemgrepCodemod implements CodeChanger {
 

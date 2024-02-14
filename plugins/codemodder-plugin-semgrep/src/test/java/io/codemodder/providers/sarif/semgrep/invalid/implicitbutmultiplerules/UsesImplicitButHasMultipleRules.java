@@ -13,6 +13,7 @@ import javax.inject.Inject;
  */
 @Codemod(
     id = "pixee-test:java/uses-implicit-rule",
+    importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public class UsesImplicitButHasMultipleRules
     extends SarifPluginJavaParserChanger<ObjectCreationExpr> {

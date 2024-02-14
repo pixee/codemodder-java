@@ -22,10 +22,16 @@ import org.junit.jupiter.api.io.TempDir;
 
 final class CodemodLoaderTest {
 
-  @Codemod(id = "test_mod", reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
+  @Codemod(
+      id = "test_mod",
+      importance = Importance.LOW,
+      reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class InvalidCodemodName extends NoReportChanger {}
 
-  @Codemod(id = "pixee:java/id", reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
+  @Codemod(
+      id = "pixee:java/id",
+      importance = Importance.LOW,
+      reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class ValidCodemod extends NoReportChanger {}
 
   private static class NoReportChanger implements CodeChanger {
@@ -72,6 +78,7 @@ final class CodemodLoaderTest {
   @Codemod(
       id = "test:java/changes-file",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+      importance = Importance.LOW,
       executionPriority = CodemodExecutionPriority.HIGH)
   static class ChangesFile extends RawFileChanger {
     ChangesFile() {
@@ -110,6 +117,7 @@ final class CodemodLoaderTest {
 
   @Codemod(
       id = "test:java/changes-file-again",
+      importance = Importance.LOW,
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class ChangesFileAgain extends RawFileChanger {
 
@@ -150,6 +158,7 @@ final class CodemodLoaderTest {
   @Codemod(
       id = "test:java/changes-file-yet-again",
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+      importance = Importance.LOW,
       executionPriority = CodemodExecutionPriority.LOW)
   static class ChangesFileYetAgain extends RawFileChanger {
 
@@ -239,6 +248,7 @@ final class CodemodLoaderTest {
 
   @Codemod(
       id = "pixee:java/parameterized",
+      importance = Importance.LOW,
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class ParameterizedCodemod extends RawFileChanger {
     private final Parameter parameter;
