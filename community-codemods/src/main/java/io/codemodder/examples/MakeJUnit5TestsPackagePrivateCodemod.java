@@ -14,7 +14,8 @@ import javax.inject.Inject;
 /** A codemod that makes JUnit 5 tests package private. */
 @Codemod(
     id = "codemodder:java/make-junit5-tests-package-private",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW)
 public final class MakeJUnit5TestsPackagePrivateCodemod
     extends SarifPluginJavaParserChanger<ClassOrInterfaceDeclaration> {
 

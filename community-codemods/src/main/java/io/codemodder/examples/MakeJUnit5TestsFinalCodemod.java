@@ -14,7 +14,8 @@ import javax.inject.Inject;
 /** A codemod that adds final modifiers to JUnit 5 tests. */
 @Codemod(
     id = "codemodder:java/make-junit5-tests-final",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.LOW)
 public final class MakeJUnit5TestsFinalCodemod
     extends SarifPluginJavaParserChanger<ClassOrInterfaceDeclaration> {
 
