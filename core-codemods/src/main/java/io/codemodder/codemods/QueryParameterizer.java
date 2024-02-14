@@ -54,7 +54,7 @@ final class QueryParameterizer {
     return injections;
   }
 
-  private Optional<ResolvedType> calculateResolvedType(Expression e) {
+  private final Optional<ResolvedType> calculateResolvedType(Expression e) {
     try {
       return Optional.of(e.calculateResolvedType());
     } catch (final UnsolvedSymbolException exception) {
@@ -171,17 +171,18 @@ final class QueryParameterizer {
     // See
     // https://download.oracle.com/otn-pub/jcp/jdbc-4_2-mrel2-spec/jdbc4.2-fr-spec.pdf
     // for type conversions by setObject
-    final var type = calculateResolvedType(exp);
-    if (type.isEmpty()) {
+    final var typeRef = calculateResolvedType(exp);
+    if (typeRef.isEmpty()) {
       return false;
     }
+    final var type = typeRef.get();
 
     // primitive type?
-    if (type.get().isPrimitive()) return false;
+    if (type.isPrimitive()) return false;
     // byte[] or Byte[]?
-    if (type.get().isArray()
-        && (type.get().asArrayType().getComponentType().describe().equals("byte")
-            || type.get().asArrayType().getComponentType().describe().equals("java.lang.Byte")))
+    if (type.isArray()
+        && (type.asArrayType().getComponentType().describe().equals("byte")
+            || type.asArrayType().getComponentType().describe().equals("java.lang.Byte")))
       return false;
 
     final var blacklist =
@@ -208,7 +209,7 @@ final class QueryParameterizer {
             "java.time.OffsetDateTime",
             "java.net.URL");
     for (final var t : blacklist) {
-      if (type.get().describe().equals(t)) {
+      if (type.describe().equals(t)) {
         return false;
       }
     }
