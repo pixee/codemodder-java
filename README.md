@@ -50,6 +50,8 @@ python -m site
 ./gradlew check
 ```
 
+You need to be able to run [Docker](https://www.docker.com/) for some tests. Make sure you have it installed and have the necessary permissions to run with your user.
+
 ### Run the Core Codemods
 You can download and run the latest release from this repository in order to run the core codemods as a CLI:
 

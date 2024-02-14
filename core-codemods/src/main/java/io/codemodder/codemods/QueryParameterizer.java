@@ -5,12 +5,14 @@ import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,6 +53,14 @@ final class QueryParameterizer {
     return injections;
   }
 
+  private Optional<ResolvedType> calculateResolvedType(final Expression e) {
+    try {
+      return Optional.of(e.calculateResolvedType());
+    } catch (final RuntimeException exception) {
+      return Optional.empty();
+    }
+  }
+
   /**
    * Finds the leaves of an expression tree whose internal nodes are BinaryExpr, EnclosedExpr and
    * NameExpr. Anything else is considered a leaf. Returns a Stream containing the leaves in
@@ -59,9 +69,11 @@ final class QueryParameterizer {
   private Stream<Expression> findLeaves(final Expression e) {
     // EnclosedExpr and BinaryExpr are considered as internal nodes, so we recurse
     if (e instanceof EnclosedExpr) {
-      if (e.calculateResolvedType().describe().equals("java.lang.String"))
+      if (calculateResolvedType(e)
+          .filter(rt -> rt.describe().equals("java.lang.String"))
+          .isPresent()) {
         return findLeaves(e.asEnclosedExpr().getInner());
-      else {
+      } else {
         return Stream.of(e);
       }
     }
@@ -74,7 +86,9 @@ final class QueryParameterizer {
     }
     // NameExpr of String types should be recursively searched for more expressions.
     else if (e instanceof NameExpr
-        && e.calculateResolvedType().describe().equals("java.lang.String")) {
+        && calculateResolvedType(e)
+            .filter(rt -> rt.describe().equals("java.lang.String"))
+            .isPresent()) {
       // TODO consider fields and extract inits if any
       final var maybeSourceLVD =
           ASTs.findEarliestLocalVariableDeclarationOf(e, e.asNameExpr().getNameAsString())
@@ -152,7 +166,11 @@ final class QueryParameterizer {
     // See
     // https://download.oracle.com/otn-pub/jcp/jdbc-4_2-mrel2-spec/jdbc4.2-fr-spec.pdf
     // for type conversions by setObject
-    final var type = exp.calculateResolvedType();
+    final var typeRef = calculateResolvedType(exp);
+    if (typeRef.isEmpty()) {
+      return false;
+    }
+    final var type = typeRef.get();
 
     // primitive type?
     if (type.isPrimitive()) return false;
