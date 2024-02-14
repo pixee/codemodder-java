@@ -46,6 +46,7 @@ final class PmdModuleTest {
 
   @Codemod(
       id = "pmd-test:java/my-pmd-codemod",
+      importance = Importance.HIGH,
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class UsesPmdCodemod extends SarifPluginJavaParserChanger<VariableDeclarator> {
     private final RuleSarif ruleSarif;
