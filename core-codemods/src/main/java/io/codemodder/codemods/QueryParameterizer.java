@@ -53,7 +53,7 @@ final class QueryParameterizer {
     return injections;
   }
 
-  private final Optional<ResolvedType> calculateResolvedType(Expression e) {
+  private Optional<ResolvedType> calculateResolvedType(final Expression e) {
     try {
       return Optional.of(e.calculateResolvedType());
     } catch (final RuntimeException exception) {
