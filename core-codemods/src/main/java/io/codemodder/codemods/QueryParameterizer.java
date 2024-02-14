@@ -5,7 +5,6 @@ import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
@@ -57,7 +56,7 @@ final class QueryParameterizer {
   private final Optional<ResolvedType> calculateResolvedType(Expression e) {
     try {
       return Optional.of(e.calculateResolvedType());
-    } catch (final UnsolvedSymbolException exception) {
+    } catch (final RuntimeException exception) {
       return Optional.empty();
     }
   }
@@ -70,15 +69,11 @@ final class QueryParameterizer {
   private Stream<Expression> findLeaves(final Expression e) {
     // EnclosedExpr and BinaryExpr are considered as internal nodes, so we recurse
     if (e instanceof EnclosedExpr) {
-      try {
-        if (calculateResolvedType(e)
-            .filter(rt -> rt.describe().equals("java.lang.String"))
-            .isPresent()) {
-          return findLeaves(e.asEnclosedExpr().getInner());
-        } else {
-          return Stream.of(e);
-        }
-      } catch (final UnsolvedSymbolException exception) {
+      if (calculateResolvedType(e)
+          .filter(rt -> rt.describe().equals("java.lang.String"))
+          .isPresent()) {
+        return findLeaves(e.asEnclosedExpr().getInner());
+      } else {
         return Stream.of(e);
       }
     }
