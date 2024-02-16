@@ -75,8 +75,9 @@ final class CreateConstantForLiteral extends DefineConstantForLiteral {
    * Adds a {@link FieldDeclaration} as the first member of the provided {@link
    * ClassOrInterfaceDeclaration}
    */
-  protected void addConstantFieldToClass(final FieldDeclaration constantField) {
+  private void addConstantFieldToClass(final FieldDeclaration constantField) {
 
+    // TODO: Add the constant field to the end, and get better indent?
     final NodeList<BodyDeclaration<?>> members = classOrInterfaceDeclaration.getMembers();
 
     members.addFirst(constantField);
