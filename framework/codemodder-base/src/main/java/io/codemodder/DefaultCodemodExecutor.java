@@ -155,16 +155,17 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
             } catch (Exception e) {
               unscannableFiles.add(filePath);
-              e.printStackTrace();
+              log.error("Problem scanning file", e);
             }
           });
     }
 
     executor.shutdown();
     try {
-      boolean success = executor.awaitTermination(15, TimeUnit.MINUTES);
+      boolean success = executor.awaitTermination(5, TimeUnit.MINUTES);
       log.trace("Success running codemod: {}", success);
       while (!executor.isTerminated()) {
+        executor.shutdownNow();
         final Future<String> future = service.poll();
         if (future != null) {
           log.trace("Finished: {}", future.get());
