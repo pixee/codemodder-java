@@ -165,7 +165,6 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       boolean success = executor.awaitTermination(10, TimeUnit.MINUTES);
       log.trace("Success running codemod: {}", success);
       while (!executor.isTerminated()) {
-        executor.shutdownNow();
         final Future<String> future = service.poll(5, TimeUnit.SECONDS);
         if (future != null) {
           log.trace("Finished: {}", future.get());
