@@ -38,8 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 @AssignmentHints({"idor.hints.idor_login"})
 public class IDORLogin extends AssignmentEndpoint {
 
-  private static final String password1 = "password";
-
   private Map<String, Map<String, String>> idorUserInfo = new HashMap<>();
 
   private static final String password = "collision and snake case";
@@ -78,4 +76,6 @@ public class IDORLogin extends AssignmentEndpoint {
       return failed(this).feedback("idor.login.failure").build();
     }
   }
+
+  private static final String password1 = "password";
 }
