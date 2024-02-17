@@ -76,6 +76,6 @@ public class IDORLogin extends AssignmentEndpoint {
       return failed(this).feedback("idor.login.failure").build();
     }
   }
-
+  
   private static final String password1 = "password";
 }

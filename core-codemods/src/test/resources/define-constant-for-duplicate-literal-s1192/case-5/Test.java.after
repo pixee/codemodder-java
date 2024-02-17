@@ -246,4 +246,5 @@ public final class WaiterDocs {
     private static final String FOR_POLLING = " for polling";
     
     private static final String A_REFERENCE_TO_THIS_OBJECT_SO_THAT_METHOD_CALLS_CAN_BE_CHAINED_TOGETHER = "a reference to this object so that method calls can be chained together.";
+
 }
