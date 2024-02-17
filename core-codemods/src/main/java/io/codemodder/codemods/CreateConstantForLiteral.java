@@ -73,8 +73,10 @@ final class CreateConstantForLiteral extends DefineConstantForLiteral {
 
   /**
    * Adds a {@link FieldDeclaration} as the last member of the provided {@link
-   * ClassOrInterfaceDeclaration}. Adding last seems like it would be <a href="https://github.com/pixee/codemodder-java/issues/288">preferred by users and better for JavaParser to match the existing indentation</a>.
-      */
+   * ClassOrInterfaceDeclaration}. Adding last seems like it would be <a
+   * href="https://github.com/pixee/codemodder-java/issues/288">preferred by users and better for
+   * JavaParser to match the existing indentation</a>.
+   */
   private void addConstantFieldToClass(final FieldDeclaration constantField) {
     final NodeList<BodyDeclaration<?>> members = classOrInterfaceDeclaration.getMembers();
     members.addLast(constantField);
