@@ -54,22 +54,6 @@ import software.amazon.awssdk.utils.Pair;
 import software.amazon.awssdk.utils.Validate;
 
 public class ServiceMetadataGenerator implements PoetClass {
-    private static final String REGION = "Region";
-    
-    private static final String BUILD = ".build()";
-    
-    private static final String T_OF_S = "$T.of($S)";
-    
-    private static final String S_N_1 = "), $S)\n";
-    
-    private static final String PUT_T_OF_S = ".put($T.of($S, ";
-    
-    private static final String S_N = ", $S)\n";
-    
-    private static final String PUT = ".put(";
-    
-    private static final String T_T_T_BUILDER = "$T.<$T, $T>builder()";
-    
     private final Partitions partitions;
     private final String serviceEndpointPrefix;
     private final String basePackage;
@@ -496,4 +480,20 @@ public class ServiceMetadataGenerator implements PoetClass {
     private ClassName serviceMetadataUtilsClass() {
         return ClassName.get(regionBasePackage + ".internal.util", "ServiceMetadataUtils");
     }
+    
+    private static final String T_T_T_BUILDER = "$T.<$T, $T>builder()";
+    
+    private static final String PUT = ".put(";
+    
+    private static final String S_N = ", $S)\n";
+    
+    private static final String PUT_T_OF_S = ".put($T.of($S, ";
+    
+    private static final String S_N_1 = "), $S)\n";
+    
+    private static final String T_OF_S = "$T.of($S)";
+    
+    private static final String BUILD = ".build()";
+    
+    private static final String REGION = "Region";
 }
