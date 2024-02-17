@@ -43,12 +43,6 @@ import software.amazon.awssdk.utils.ImmutableMap;
 
 public class PartitionMetadataGenerator implements PoetClass {
 
-private static final String BUILD = ".build()";
-
-private static final String S = ", $S)";
-
-private static final String PUT = ".put(";
-
     private final Partition partition;
     private final String basePackage;
     private final String regionBasePackage;
@@ -208,4 +202,10 @@ private static final String PUT = ".put(";
     private ClassName partitionEndpointKeyClass() {
         return ClassName.get(regionBasePackage, "PartitionEndpointKey");
     }
+    
+    private static final String PUT = ".put(";
+    
+    private static final String S = ", $S)";
+    
+    private static final String BUILD = ".build()";
 }

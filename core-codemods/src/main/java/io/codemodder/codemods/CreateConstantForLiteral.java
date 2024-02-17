@@ -72,15 +72,12 @@ final class CreateConstantForLiteral extends DefineConstantForLiteral {
   }
 
   /**
-   * Adds a {@link FieldDeclaration} as the first member of the provided {@link
-   * ClassOrInterfaceDeclaration}
-   */
+   * Adds a {@link FieldDeclaration} as the last member of the provided {@link
+   * ClassOrInterfaceDeclaration}. Adding last seems like it would be <a href="https://github.com/pixee/codemodder-java/issues/288">preferred by users and better for JavaParser to match the existing indentation</a>.
+      */
   private void addConstantFieldToClass(final FieldDeclaration constantField) {
-
-    // TODO: Add the constant field to the end, and get better indent?
     final NodeList<BodyDeclaration<?>> members = classOrInterfaceDeclaration.getMembers();
-
-    members.addFirst(constantField);
+    members.addLast(constantField);
   }
 
   /** Creates a {@link FieldDeclaration} of {@link String} type with the constant name provided */

@@ -25,16 +25,6 @@ import software.amazon.awssdk.core.waiters.WaiterOverrideConfiguration;
 
 public final class WaiterDocs {
 
-private static final String A_REFERENCE_TO_THIS_OBJECT_SO_THAT_METHOD_CALLS_CAN_BE_CHAINED_TOGETHER = "a reference to this object so that method calls can be chained together.";
-
-private static final String FOR_POLLING = " for polling";
-
-private static final String OR_UNTIL_IT_IS_DETERMINED_THAT_THE_RESOURCE_WILL_NEVER = "or until it is determined that the resource will never ";
-
-private static final String CODE_N_IS_MET = "{@code $N} is met, ";
-
-private static final String POLLS_LINK_T_N_API_UNTIL_THE_DESIRED_CONDITION = "Polls {@link $T#$N} API until the desired condition ";
-
     private WaiterDocs() {
     }
 
@@ -246,5 +236,14 @@ private static final String POLLS_LINK_T_N_API_UNTIL_THE_DESIRED_CONDITION = "Po
                         .add(javadocs, waiterClassName, waiterClassName)
                         .build();
     }
-
+    
+    private static final String POLLS_LINK_T_N_API_UNTIL_THE_DESIRED_CONDITION = "Polls {@link $T#$N} API until the desired condition ";
+    
+    private static final String CODE_N_IS_MET = "{@code $N} is met, ";
+    
+    private static final String OR_UNTIL_IT_IS_DETERMINED_THAT_THE_RESOURCE_WILL_NEVER = "or until it is determined that the resource will never ";
+    
+    private static final String FOR_POLLING = " for polling";
+    
+    private static final String A_REFERENCE_TO_THIS_OBJECT_SO_THAT_METHOD_CALLS_CAN_BE_CHAINED_TOGETHER = "a reference to this object so that method calls can be chained together.";
 }

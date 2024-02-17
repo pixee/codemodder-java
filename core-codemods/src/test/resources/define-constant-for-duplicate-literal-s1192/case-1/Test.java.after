@@ -49,12 +49,6 @@ import org.springframework.web.bind.annotation.RestController;
     })
 public class SqlInjectionLesson9 extends AssignmentEndpoint {
 
-private static final String SPAN = "</span>";
-
-private static final String BR_SPAN_CLASS_FEEDBACK_NEGATIVE = "<br><span class='feedback-negative'>";
-
-private static final String PRINTLN = "1 2 3...";
-
   private final LessonDataSource dataSource;
   private static final String UTF8 = "UTF-8";
 
@@ -136,4 +130,10 @@ private static final String PRINTLN = "1 2 3...";
           .build();
     }
   }
+  
+  private static final String PRINTLN = "1 2 3...";
+  
+  private static final String BR_SPAN_CLASS_FEEDBACK_NEGATIVE = "<br><span class='feedback-negative'>";
+  
+  private static final String SPAN = "</span>";
 }
