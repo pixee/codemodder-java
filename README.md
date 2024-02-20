@@ -1,4 +1,10 @@
-# Codemodder
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="img/codemodder-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="img/codemodder-light.png">
+  <img alt="Pixee Logo" src="https://github.com/pixee/pixee-cli/raw/main/img/codemodder.png">
+</picture>
+
+# codemodder-java
 
 This is the Java version of the [Codemodder Framework](https://codemodder.io/), which builds on traditional codemod frameworks by providing
 codemods with additional context and services. Codemodder plugins inject codemods with the context and services they need to perform complex transforms.
