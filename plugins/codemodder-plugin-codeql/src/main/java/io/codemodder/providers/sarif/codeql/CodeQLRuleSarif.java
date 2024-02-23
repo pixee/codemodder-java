@@ -78,8 +78,9 @@ public final class CodeQLRuleSarif implements RuleSarif {
                           .getArtifactLocation()
                           .getUri();
                   try {
-                    if (Files.exists(repositoryRoot.resolve(Path.of(uri)))) {
-                      return Files.isSameFile(path, repositoryRoot.resolve(Path.of(uri)));
+                    Path uriPath = Path.of(uri);
+                    if (Files.exists(repositoryRoot.resolve(uriPath))) {
+                      return Files.isSameFile(path, repositoryRoot.resolve(uriPath));
                     } else {
                       return false;
                     }
@@ -88,7 +89,7 @@ public final class CodeQLRuleSarif implements RuleSarif {
                     return false;
                   }
                 })
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
     resultsCache.put(path, results);
     return results;
   }
