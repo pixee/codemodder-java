@@ -24,7 +24,8 @@ public final class CodeQLRuleSarif implements RuleSarif {
   private final Map<Path, List<Result>> resultsCache;
   private final Path repositoryRoot;
 
-  public CodeQLRuleSarif(final String ruleId, final SarifSchema210 sarif, Path repositoryRoot) {
+  public CodeQLRuleSarif(
+      final String ruleId, final SarifSchema210 sarif, final Path repositoryRoot) {
     this.sarif = Objects.requireNonNull(sarif);
     this.ruleId = Objects.requireNonNull(ruleId);
     this.repositoryRoot = repositoryRoot;
