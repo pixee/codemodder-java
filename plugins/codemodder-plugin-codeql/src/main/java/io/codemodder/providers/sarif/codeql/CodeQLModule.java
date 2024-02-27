@@ -29,7 +29,7 @@ public final class CodeQLModule extends AbstractModule {
     // We can safely ignore this case for now.
     final Map<String, RuleSarif> map =
         allCodeqlRuleSarifs.stream()
-            .collect(Collectors.toUnmodifiableMap(rs -> rs.getRule(), rs -> rs));
+            .collect(Collectors.toUnmodifiableMap(RuleSarif::getRule, rs -> rs));
 
     for (final Class<? extends CodeChanger> codemodType : codemodTypes) {
       final Constructor<?>[] constructors = codemodType.getDeclaredConstructors();
@@ -42,11 +42,11 @@ public final class CodeQLModule extends AbstractModule {
               .filter(Objects::nonNull)
               .findFirst();
 
-      if (annotation.isPresent()) {
-        bind(RuleSarif.class)
-            .annotatedWith(annotation.get())
-            .toInstance(map.getOrDefault(annotation.get().ruleId(), RuleSarif.EMPTY));
-      }
+      annotation.ifPresent(
+          providedCodeQLScan ->
+              bind(RuleSarif.class)
+                  .annotatedWith(providedCodeQLScan)
+                  .toInstance(map.getOrDefault(providedCodeQLScan.ruleId(), RuleSarif.EMPTY)));
     }
   }
 }

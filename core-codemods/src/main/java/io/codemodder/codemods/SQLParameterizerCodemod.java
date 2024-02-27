@@ -8,17 +8,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/** Parameterizes SQL statements in the java JDBC api. */
+/** Parameterizes SQL statements in the JDBC API. */
 @Codemod(
     id = "pixee:java/sql-parameterizer",
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
 public final class SQLParameterizerCodemod extends JavaParserChanger {
 
-  private Optional<CodemodChange> onNodeFound(
-      final CodemodInvocationContext context,
-      final MethodCallExpr methodCallExpr,
-      final CompilationUnit cu) {
+  private Optional<CodemodChange> onNodeFound(final MethodCallExpr methodCallExpr) {
     if (new SQLParameterizer(methodCallExpr).checkAndFix()) {
       return Optional.of(CodemodChange.from(methodCallExpr.getBegin().get().line));
     } else {
@@ -26,10 +23,11 @@ public final class SQLParameterizerCodemod extends JavaParserChanger {
     }
   }
 
+  @Override
   public List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     return cu.findAll(MethodCallExpr.class).stream()
-        .flatMap(mce -> onNodeFound(context, mce, cu).stream())
+        .flatMap(mce -> onNodeFound(mce).stream())
         .collect(Collectors.toList());
   }
 }
