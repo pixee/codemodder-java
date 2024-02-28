@@ -20,7 +20,7 @@ public abstract class SarifPluginRawFileChanger extends RawFileChanger {
 
   @Override
   public List<CodemodChange> visitFile(final CodemodInvocationContext context) {
-    List<Result> results = sarif.getResultsByPath(context.path());
+    List<Result> results = sarif.getResultsByLocationPath(context.path());
     if (!results.isEmpty()) {
       return onFileFound(context, results);
     }

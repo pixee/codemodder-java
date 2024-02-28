@@ -11,13 +11,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** Responsible for distributing the SARIFS to AppSCan based codemods based on rules. */
+/** Responsible for distributing the SARIFS to AppScan based codemods based on rules. */
 public final class AppScanModule extends AbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final List<RuleSarif> allAppScanRuleSarifs;
 
-  AppScanModule(
+  public AppScanModule(
       final List<Class<? extends CodeChanger>> codemodTypes, final List<RuleSarif> sarifs) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.allAppScanRuleSarifs = sarifs;

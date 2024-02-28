@@ -22,6 +22,7 @@ extensions.getByType<nebula.plugin.contacts.ContactsExtension>().run {
 
 val publicationName = "nebula"
 signing {
+    setRequired(false)
     if (providers.environmentVariable("CI").isPresent) {
         val signingKey: String? by project
         val signingPassword: String? by project

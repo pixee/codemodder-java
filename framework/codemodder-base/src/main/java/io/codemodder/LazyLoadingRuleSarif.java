@@ -38,9 +38,9 @@ public class LazyLoadingRuleSarif implements RuleSarif {
   }
 
   @Override
-  public List<Result> getResultsByPath(final Path path) {
+  public List<Result> getResultsByLocationPath(final Path path) {
     checkInitialized();
-    return ruleSarif.getResultsByPath(path);
+    return ruleSarif.getResultsByLocationPath(path);
   }
 
   @Override
