@@ -26,13 +26,13 @@ final class PmdRuleSarif implements RuleSarif {
 
   @Override
   public List<Region> getRegionsFromResultsByRule(final Path path) {
-    return getResultsByPath(path).stream()
+    return getResultsByLocationPath(path).stream()
         .map(result -> result.getLocations().get(0).getPhysicalLocation().getRegion())
         .toList();
   }
 
   @Override
-  public List<Result> getResultsByPath(final Path path) {
+  public List<Result> getResultsByLocationPath(final Path path) {
     String absolutePath = path.toAbsolutePath().toString();
     return resultsByFile.getOrDefault(absolutePath, List.of());
   }

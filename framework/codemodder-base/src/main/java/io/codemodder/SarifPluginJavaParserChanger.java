@@ -91,7 +91,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
 
   public List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    List<Result> results = sarif.getResultsByPath(context.path());
+    List<Result> results = sarif.getResultsByLocationPath(context.path());
 
     // small shortcut to avoid always executing the expensive findAll
     if (results.isEmpty()) {

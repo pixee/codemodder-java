@@ -29,8 +29,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.javatuples.Pair;
 
-/** Contains most of the logic for the SQLParameterizerCodemod. */
-final class SQLParameterizer {
+/**
+ * Contains most of the logic for detecting and fixing parameterizable SQL statements for a given
+ * {@link MethodCallExpr}.
+ */
+public final class SQLParameterizer {
 
   private static final String preparedStatementNamePrefix = "stmt";
   private static final String preparedStatementNamePrefixAlternative = "statement";
@@ -39,7 +42,7 @@ final class SQLParameterizer {
 
   private CompilationUnit compilationUnit;
 
-  SQLParameterizer(final MethodCallExpr methodCallExpr) {
+  public SQLParameterizer(final MethodCallExpr methodCallExpr) {
     this.executeCall = Objects.requireNonNull(methodCallExpr);
     this.compilationUnit = null;
   }
@@ -500,7 +503,7 @@ final class SQLParameterizer {
    * Checks if {@code methodCall} is a query call that needs to be fixed and fixes if that's the
    * case.
    */
-  boolean checkAndFix() {
+  public boolean checkAndFix() {
 
     if (executeCall.findCompilationUnit().isPresent()) {
       this.compilationUnit = executeCall.findCompilationUnit().get();
