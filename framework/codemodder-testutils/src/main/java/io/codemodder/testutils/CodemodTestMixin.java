@@ -83,14 +83,6 @@ public interface CodemodTestMixin {
     Path pathToJavaFile = tmpDir.resolve("Test.java");
     Files.copy(before, pathToJavaFile, StandardCopyOption.REPLACE_EXISTING);
 
-    // Check for any sarif files and build the RuleSarif map
-    List<Path> allSarifs = new ArrayList<>();
-    Files.newDirectoryStream(testResourceDir, "*.sarif")
-        .iterator()
-        .forEachRemaining(allSarifs::add);
-
-    Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
-
     // rename file if needed
     if (!renameTestFile.isBlank()) {
       Path parent = tmpDir.resolve(renameTestFile).getParent();
@@ -104,6 +96,13 @@ public interface CodemodTestMixin {
 
     // add the sonar JSON if one exists
     Path sonarJson = testResourceDir.resolve("sonar-issues.json");
+
+    // Check for any sarif files and build the RuleSarif map
+    List<Path> allSarifs = new ArrayList<>();
+    Files.newDirectoryStream(testResourceDir, "*.sarif")
+            .iterator()
+            .forEachRemaining(allSarifs::add);
+    Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
 
     // run the codemod
     CodemodLoader loader =

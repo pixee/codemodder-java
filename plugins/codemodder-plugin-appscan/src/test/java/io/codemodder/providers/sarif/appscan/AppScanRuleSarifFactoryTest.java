@@ -53,12 +53,11 @@ final class AppScanRuleSarifFactoryTest {
 
     // get the results for the file path (not the weird HCL thing) and confirm we have the right
     // results
-    Path p = Path.of(expectedPath);
-    List<Result> resultsForPath = ruleSarif.getResultsByLocationPath(p);
+    List<Result> resultsForPath = ruleSarif.getResultsByLocationPath(actualAssignmentedJavaFilePath);
     assertThat(resultsForPath).isNotEmpty();
 
     // get the regions affected by the given file
-    List<Region> regions = ruleSarif.getRegionsFromResultsByRule(p);
+    List<Region> regions = ruleSarif.getRegionsFromResultsByRule(actualAssignmentedJavaFilePath);
 
     // there is an injection in two form parameters in the SQL, so these 2 share the same sink
     assertThat(regions).hasSize(2);
