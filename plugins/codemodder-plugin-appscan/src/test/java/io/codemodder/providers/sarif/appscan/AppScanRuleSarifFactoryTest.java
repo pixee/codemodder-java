@@ -53,7 +53,8 @@ final class AppScanRuleSarifFactoryTest {
 
     // get the results for the file path (not the weird HCL thing) and confirm we have the right
     // results
-    List<Result> resultsForPath = ruleSarif.getResultsByLocationPath(actualAssignmentedJavaFilePath);
+    List<Result> resultsForPath =
+        ruleSarif.getResultsByLocationPath(actualAssignmentedJavaFilePath);
     assertThat(resultsForPath).isNotEmpty();
 
     // get the regions affected by the given file

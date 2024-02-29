@@ -100,8 +100,8 @@ public interface CodemodTestMixin {
     // Check for any sarif files and build the RuleSarif map
     List<Path> allSarifs = new ArrayList<>();
     Files.newDirectoryStream(testResourceDir, "*.sarif")
-            .iterator()
-            .forEachRemaining(allSarifs::add);
+        .iterator()
+        .forEachRemaining(allSarifs::add);
     Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
 
     // run the codemod

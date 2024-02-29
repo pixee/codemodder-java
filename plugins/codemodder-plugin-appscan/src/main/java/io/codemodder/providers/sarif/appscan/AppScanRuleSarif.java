@@ -56,10 +56,7 @@ final class AppScanRuleSarif implements RuleSarif {
 
       // add to the map if we found a matching file
       existingRealPath.ifPresent(
-          p ->
-              artifactLocationIndices
-                  .computeIfAbsent(p, k -> new HashSet<>())
-                  .add(index));
+          p -> artifactLocationIndices.computeIfAbsent(p, k -> new HashSet<>()).add(index));
     }
     this.artifactLocationIndices = Map.copyOf(artifactLocationIndices);
   }
