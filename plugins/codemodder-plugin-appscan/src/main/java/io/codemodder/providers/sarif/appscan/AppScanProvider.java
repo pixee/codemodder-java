@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
-/** Provides codemods that act on AppSCan results. */
+/** Provides codemods that act on AppScan results. */
 public final class AppScanProvider implements CodemodProvider {
 
   @Override
