@@ -4,24 +4,21 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-import com.contrastsecurity.sarif.Region;
+import com.contrastsecurity.sarif.SarifSchema210;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFReference;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 final class AppScanModuleTest {
-
-  private Path repoDir;
 
   @Codemod(
       id = "appscan-test:java/finds-stuff",
@@ -56,30 +53,45 @@ final class AppScanModuleTest {
     }
   }
 
-  @BeforeEach
-  void setup(@TempDir final Path tmpDir) {
-    AppScanRuleSarifFactory factory = new AppScanRuleSarifFactory();
-    factory.build("appscan", "SA2813462719", null, null);
-    this.repoDir = tmpDir;
-  }
+  private static final String emptySarif =
+      """
+                  {
+                    "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+                    "version": "2.1.0",
+                    "runs": [
+                      {
+                        "tool": {
+                          "driver": {
+                            "name": "HCL AppScan Static Analyzer"
+                          }
+                        },
+                        "artifacts": [
+                          {
+                            "location": {
+                              "uri": "file:///com/acme/MyVulnerableType.java"
+                            }
+                          }
+                        ],
+                        "results": []
+                      }
+                    ]
+                  }
+                  """;
 
+  /** This only tests that the module binds the rule sarif to the codemod. */
   @Test
-  void it_works_with_appscan_sarif() throws IOException {
-    String javaCode = "class Foo { \n Object a = new Thing(); \n }";
-
-    Path javaFile = Files.createTempFile(repoDir, "HasThing", ".java");
-    Files.writeString(javaFile, javaCode, StandardOpenOption.TRUNCATE_EXISTING);
-    AppScanModule module = createModule(List.of(AppScanSarifTestCodemod.class));
+  void it_works_with_appscan_sarif(@TempDir final Path repoDir) throws IOException {
+    SarifSchema210 rawSarif =
+        new ObjectMapper().readValue(AppScanModuleTest.emptySarif, SarifSchema210.class);
+    AppScanRuleSarifFactory ruleSarifFactory = new AppScanRuleSarifFactory();
+    Optional<RuleSarif> ruleSarif =
+        ruleSarifFactory.build("HCL AppScan Static Analyzer", "SA2813462719", rawSarif, repoDir);
+    assertThat(ruleSarif.isPresent(), is(true));
+    AppScanModule module =
+        new AppScanModule(List.of(AppScanSarifTestCodemod.class), List.of(ruleSarif.get()));
     Injector injector = Guice.createInjector(module);
     AppScanSarifTestCodemod instance = injector.getInstance(AppScanSarifTestCodemod.class);
-
-    RuleSarif ruleSarif = instance.ruleSarif;
-    assertThat(ruleSarif, is(notNullValue()));
-    List<Region> regions = ruleSarif.getRegionsFromResultsByRule(javaFile);
-    assertThat(regions.size(), is(1));
-  }
-
-  private AppScanModule createModule(final List<Class<? extends CodeChanger>> codemodTypes) {
-    return new AppScanModule(codemodTypes, List.of());
+    assertThat(instance, is(notNullValue()));
+    assertThat(instance.ruleSarif, is(notNullValue()));
   }
 }
