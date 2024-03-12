@@ -2,12 +2,20 @@ package io.codemodder.codemods;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.NullLiteralExpr;
+import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.*;
 import io.codemodder.providers.sarif.pmd.PmdScan;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 
@@ -41,6 +49,18 @@ public final class SwitchLiteralFirstComparisonsCodemod
     if (!flippableComparisonMethods.contains(methodCallExpr.getNameAsString())) {
       return false;
     }
+
+    final List<VariableDeclarator> variableDeclarators = cu.findAll(VariableDeclarator.class);
+
+    final List<SimpleName> simpleNames = getSimpleNames(methodCallExpr);
+
+    final SimpleName simpleName = !simpleNames.isEmpty() ? simpleNames.get(0) : null;
+
+    // No need to switch order because variable was declared and initialized to a not null value
+    if (isSimpleNameANotNullInitializedVariableDeclarator(variableDeclarators, simpleName)) {
+      return false;
+    }
+
     Expression leftSide = methodCallExpr.getScope().get();
     Expression rightSide = methodCallExpr.getArgument(0);
     try {
@@ -55,6 +75,38 @@ public final class SwitchLiteralFirstComparisonsCodemod
     }
 
     return false;
+  }
+
+  public static boolean isSimpleNameANotNullInitializedVariableDeclarator(
+      List<VariableDeclarator> variableDeclarators, SimpleName targetName) {
+
+    if (targetName != null) {
+      for (VariableDeclarator declarator : variableDeclarators) {
+        if (declarator.getName().equals(targetName)) {
+          final Optional<Expression> initializer = declarator.getInitializer();
+          return initializer.isPresent() && !(initializer.get() instanceof NullLiteralExpr);
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public static List<SimpleName> getSimpleNames(MethodCallExpr methodCallExpr) {
+    List<SimpleName> nameExprNodes = new ArrayList<>();
+
+    // Get the arguments of the MethodCallExpr
+    List<Node> childNodes = methodCallExpr.getChildNodes();
+
+    // Iterate through the arguments and collect NameExpr nodes
+    for (Node node : childNodes) {
+      if (node instanceof NameExpr) {
+        final NameExpr nameExpr = (NameExpr) node;
+        nameExprNodes.add(nameExpr.getName());
+      }
+    }
+
+    return nameExprNodes;
   }
 
   private static final Set<String> flippableComparisonMethods =
