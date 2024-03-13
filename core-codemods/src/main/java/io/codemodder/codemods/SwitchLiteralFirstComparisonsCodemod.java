@@ -61,32 +61,16 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     final List<VariableDeclarator> variableDeclarators = cu.findAll(VariableDeclarator.class);
 
-    final List<SimpleName> simpleNames = getSimpleNames(methodCallExpr);
+    final SimpleName simpleName = getSimpleNameFromMethodCallExpr(methodCallExpr);
 
-    final SimpleName simpleName = !simpleNames.isEmpty() ? simpleNames.get(0) : null;
-
-    // No need to switch order because variable was declared and initialized to a not null value
-    if (isSimpleNameANotNullInitializedVariableDeclarator(variableDeclarators, simpleName)) {
-      return false;
-    }
-
-    final List<FieldDeclaration> fieldDeclarations = cu.findAll(FieldDeclaration.class);
-    final List<Parameter> parameters = cu.findAll(Parameter.class);
-    // Create a new list to collect all annotation nodes
-    final List<Node> annotationNodesCandidates = new ArrayList<>();
-    annotationNodesCandidates.addAll(variableDeclarators);
-    annotationNodesCandidates.addAll(fieldDeclarations);
-    annotationNodesCandidates.addAll(parameters);
-
-    final List<Node> annotationNodes = filterNodesWithNotNullAnnotations(annotationNodesCandidates);
-
-    if (hasSimpleNameNotNullAnnotation(annotationNodes, simpleName)) {
-      return false;
-    }
-
-    final List<NullLiteralExpr> nullLiteralExprs = cu.findAll(NullLiteralExpr.class);
-
-    if (hasSimpleNamePreviousNullAssertion(nullLiteralExprs, simpleName)) {
+    /**
+     * This codemod will not be executed if: 1. Variable was previously initialized to a not null
+     * value 2. Variable has a previous not null assertion 3. Variable has a {@code @NotNull} or
+     * {@code @Nonnull} annotation
+     */
+    if (isSimpleNameANotNullInitializedVariableDeclarator(variableDeclarators, simpleName)
+        || hasSimpleNameNotNullAnnotation(cu, simpleName, variableDeclarators)
+        || hasSimpleNamePreviousNullAssertion(cu, simpleName)) {
       return false;
     }
 
@@ -106,29 +90,37 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
+  /**
+   * Method used to check if variable (nameNode) has a previous node that represents: 1. A not null
+   * assertion 2. A not null annotation 3. An initialization to a not null value
+   */
   private boolean isPreviousNodeBefore(final Node nameNode, final Node previousNode) {
     final Optional<Range> nameNodeRange = nameNode.getRange();
-    final Optional<Range> previosNodeRange = previousNode.getRange();
-    if (nameNodeRange.isEmpty() || previosNodeRange.isEmpty()) {
+    final Optional<Range> previousNodeRange = previousNode.getRange();
+    if (nameNodeRange.isEmpty() || previousNodeRange.isEmpty()) {
       return false;
     }
-    return previosNodeRange.get().begin.isBefore(nameNodeRange.get().begin);
+    return previousNodeRange.get().begin.isBefore(nameNodeRange.get().begin);
   }
 
+  /**
+   * Checks if the given Variable {@code SimpleName} has a previous null assertion in the {@code
+   * CompilationUnit}.
+   */
   private boolean hasSimpleNamePreviousNullAssertion(
-      final List<NullLiteralExpr> nullLiterals, final SimpleName name) {
+      final CompilationUnit cu, final SimpleName name) {
+    final List<NullLiteralExpr> nullLiterals = cu.findAll(NullLiteralExpr.class);
 
     if (nullLiterals != null && !nullLiterals.isEmpty()) {
       for (final NullLiteralExpr nullLiteralExpr : nullLiterals) {
         if (nullLiteralExpr.getParentNode().isPresent()
-            && nullLiteralExpr.getParentNode().get() instanceof BinaryExpr parentBinaryExpr) {
-          if (parentBinaryExpr.getOperator() == BinaryExpr.Operator.NOT_EQUALS) {
-            final Node left = parentBinaryExpr.getLeft();
-            final Node right = parentBinaryExpr.getRight();
-            if (isBinaryNodeChildEqualToSimpleName(left, name)
-                || isBinaryNodeChildEqualToSimpleName(right, name)) {
-              return true;
-            }
+            && nullLiteralExpr.getParentNode().get() instanceof BinaryExpr parentBinaryExpr
+            && parentBinaryExpr.getOperator() == BinaryExpr.Operator.NOT_EQUALS) {
+          final Node left = parentBinaryExpr.getLeft();
+          final Node right = parentBinaryExpr.getRight();
+          if (isBinaryNodeChildEqualToSimpleName(left, name)
+              || isBinaryNodeChildEqualToSimpleName(right, name)) {
+            return true;
           }
         }
       }
@@ -137,33 +129,42 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
+  /**
+   * Checks if the given {@code Node} is a binary expression child node and is equal to the provided
+   * {@code SimpleName}. Additionally, it verifies if the child node is located before the provided
+   * {@code SimpleName}.
+   */
   private boolean isBinaryNodeChildEqualToSimpleName(final Node child, final SimpleName name) {
     return child instanceof NameExpr nameExpr
         && nameExpr.getName().equals(name)
         && isPreviousNodeBefore(name, nameExpr.getName());
   }
 
+  /**
+   * Checks if the given {@code SimpleName} variable has a @NotNull or @Nonnull annotation in the
+   * provided {@code CompilationUnit}.
+   */
   private boolean hasSimpleNameNotNullAnnotation(
-      final List<Node> annotations, final SimpleName simpleName) {
+      final CompilationUnit cu,
+      final SimpleName simpleName,
+      final List<VariableDeclarator> variableDeclarators) {
 
-    if (annotations != null && !annotations.isEmpty()) {
+    final List<FieldDeclaration> fieldDeclarations = cu.findAll(FieldDeclaration.class);
+    final List<Parameter> parameters = cu.findAll(Parameter.class);
+
+    final List<Node> annotationNodesCandidates = new ArrayList<>();
+    annotationNodesCandidates.addAll(variableDeclarators);
+    annotationNodesCandidates.addAll(fieldDeclarations);
+    annotationNodesCandidates.addAll(parameters);
+
+    final List<Node> annotations = filterNodesWithNotNullAnnotations(annotationNodesCandidates);
+
+    if (!annotations.isEmpty()) {
       for (final Node annotation : annotations) {
 
-        if (annotation instanceof Parameter || annotation instanceof VariableDeclarator) {
-          final SimpleName annotationSimpleName = ((NodeWithSimpleName<?>) annotation).getName();
-          if (annotationSimpleName.equals(simpleName)
-              && isPreviousNodeBefore(simpleName, annotationSimpleName)) {
-            return true;
-          }
-        } else if (annotation instanceof FieldDeclaration fieldDeclaration) {
-          final List<VariableDeclarator> variableDeclarators = fieldDeclaration.getVariables();
-          for (final VariableDeclarator variableDeclarator : variableDeclarators) {
-            final SimpleName variableSimpleName = variableDeclarator.getName();
-            if (variableSimpleName.equals(simpleName)
-                && isPreviousNodeBefore(simpleName, variableSimpleName)) {
-              return true;
-            }
-          }
+        if (isSimpleNotNullAnnotationForParameterOrVariable(annotation, simpleName)
+            || isSimpleNotNullAnnotationForFieldDeclaration(annotation, simpleName)) {
+          return true;
         }
       }
     }
@@ -171,6 +172,44 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
+  /**
+   * Checks if the given {@code Node} represents a @NotNull or @Nonnull annotation for a
+   * FieldDeclaration and the associated VariableDeclarator has the provided {@code SimpleName}.
+   */
+  private boolean isSimpleNotNullAnnotationForFieldDeclaration(
+      final Node annotation, final SimpleName simpleName) {
+    if (annotation instanceof FieldDeclaration fieldDeclaration) {
+      final List<VariableDeclarator> fieldDeclarationVariables = fieldDeclaration.getVariables();
+      for (final VariableDeclarator variableDeclarator : fieldDeclarationVariables) {
+        final SimpleName variableSimpleName = variableDeclarator.getName();
+        if (variableSimpleName.equals(simpleName)
+            && isPreviousNodeBefore(simpleName, variableSimpleName)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Checks if the given {@code Node} represents a @NotNull or @Nonnull annotation for a Parameter
+   * or VariableDeclarator, and the associated SimpleName matches the provided {@code SimpleName}.
+   */
+  private boolean isSimpleNotNullAnnotationForParameterOrVariable(
+      final Node annotation, final SimpleName simpleName) {
+    if (annotation instanceof Parameter || annotation instanceof VariableDeclarator) {
+      final SimpleName annotationSimpleName = ((NodeWithSimpleName<?>) annotation).getName();
+      return annotationSimpleName.equals(simpleName)
+          && isPreviousNodeBefore(simpleName, annotationSimpleName);
+    }
+
+    return false;
+  }
+
+  /**
+   * Filters the provided list of nodes to include only those with @NotNull or @Nonnull annotations.
+   */
   private List<Node> filterNodesWithNotNullAnnotations(final List<Node> annotationNodes) {
     final List<Node> nodesWithNotNullAnnotations = new ArrayList<>();
     for (final Node node : annotationNodes) {
@@ -183,6 +222,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return nodesWithNotNullAnnotations;
   }
 
+  /** Checks if the provided list of annotations contains any @NotNull or @Nonnull annotations. */
   private boolean hasNotNullOrNonnullAnnotation(final NodeList<AnnotationExpr> annotations) {
     for (final AnnotationExpr annotation : annotations) {
       if (isNotNullOrNonnullAnnotation(annotation)) {
@@ -193,13 +233,16 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   private boolean isNotNullOrNonnullAnnotation(final AnnotationExpr annotation) {
-
     final Name annotationName = annotation.getName();
     final String name = annotationName.getIdentifier();
     return "NotNull".equals(name) || "Nonnull".equals(name);
   }
 
-  private final boolean isSimpleNameANotNullInitializedVariableDeclarator(
+  /**
+   * Checks if the provided {@code SimpleName} variable corresponds to a VariableDeclarator that was
+   * previously initialized to a non-null value.
+   */
+  private boolean isSimpleNameANotNullInitializedVariableDeclarator(
       final List<VariableDeclarator> variableDeclarators, final SimpleName targetName) {
 
     if (targetName != null) {
@@ -216,8 +259,13 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
-  private List<SimpleName> getSimpleNames(final MethodCallExpr methodCallExpr) {
-    final List<SimpleName> nameExprNodes = new ArrayList<>();
+  /**
+   * Retrieves the SimpleName from the given MethodCallExpr. We know that this codemod only filters
+   * MethodCallExpr nodes that has one SimpleName node.
+   */
+  private SimpleName getSimpleNameFromMethodCallExpr(final MethodCallExpr methodCallExpr) {
+
+    final List<SimpleName> simpleNames = new ArrayList<>();
 
     // Get the arguments of the MethodCallExpr
     final List<Node> childNodes = methodCallExpr.getChildNodes();
@@ -225,11 +273,11 @@ public final class SwitchLiteralFirstComparisonsCodemod
     // Iterate through the arguments and collect NameExpr nodes
     for (final Node node : childNodes) {
       if (node instanceof NameExpr nameExpr) {
-        nameExprNodes.add(nameExpr.getName());
+        simpleNames.add(nameExpr.getName());
       }
     }
 
-    return nameExprNodes;
+    return !simpleNames.isEmpty() ? simpleNames.get(0) : null;
   }
 
   private static final Set<String> flippableComparisonMethods =
