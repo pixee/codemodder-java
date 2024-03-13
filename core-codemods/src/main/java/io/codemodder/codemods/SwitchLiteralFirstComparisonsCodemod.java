@@ -1,6 +1,7 @@
 package io.codemodder.codemods;
 
 import com.contrastsecurity.sarif.Result;
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -8,6 +9,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
@@ -58,8 +60,6 @@ public final class SwitchLiteralFirstComparisonsCodemod
     }
 
     final List<VariableDeclarator> variableDeclarators = cu.findAll(VariableDeclarator.class);
-    final List<FieldDeclaration> fieldDeclarations = cu.findAll(FieldDeclaration.class);
-    final List<Parameter> parameters = cu.findAll(Parameter.class);
 
     final List<SimpleName> simpleNames = getSimpleNames(methodCallExpr);
 
@@ -70,6 +70,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
       return false;
     }
 
+    final List<FieldDeclaration> fieldDeclarations = cu.findAll(FieldDeclaration.class);
+    final List<Parameter> parameters = cu.findAll(Parameter.class);
     // Create a new list to collect all annotation nodes
     List<Node> annotationNodesCandidates = new ArrayList<>();
     annotationNodesCandidates.addAll(variableDeclarators);
@@ -79,6 +81,12 @@ public final class SwitchLiteralFirstComparisonsCodemod
     List<Node> annotationNodes = filterNodesWithNotNullAnnotations(annotationNodesCandidates);
 
     if (hasSimpleNameNotNullAnnotation(annotationNodes, simpleName)) {
+      return false;
+    }
+
+    final List<NullLiteralExpr> nullLiteralExprs = cu.findAll(NullLiteralExpr.class);
+
+    if (hasSimpleNamePreviousNullAssertion(nullLiteralExprs, simpleName)) {
       return false;
     }
 
@@ -98,6 +106,42 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
+  public static boolean isPreviousNodeBefore(Node nameNode, Node previousNode) {
+    final Optional<Range> nameNodeRange = nameNode.getRange();
+    final Optional<Range> previosNodeRange = previousNode.getRange();
+    if (nameNodeRange.isEmpty() || previosNodeRange.isEmpty()) {
+      return false;
+    }
+    return previosNodeRange.get().begin.isBefore(nameNodeRange.get().begin);
+  }
+
+  public boolean hasSimpleNamePreviousNullAssertion(
+      List<NullLiteralExpr> nullLiterals, SimpleName name) {
+
+    if (nullLiterals != null && !nullLiterals.isEmpty()) {
+      for (NullLiteralExpr nullLiteralExpr : nullLiterals) {
+        if (nullLiteralExpr.getParentNode().isPresent()
+            && nullLiteralExpr.getParentNode().get() instanceof BinaryExpr parentBinaryExpr) {
+          if (parentBinaryExpr.getOperator() == BinaryExpr.Operator.NOT_EQUALS) {
+            Node left = parentBinaryExpr.getLeft();
+            Node right = parentBinaryExpr.getRight();
+            if (left instanceof NameExpr nameExpr
+                && nameExpr.getName().equals(name)
+                && isPreviousNodeBefore(name, nameExpr.getName())) {
+              return true;
+            } else if (right instanceof NameExpr nameExpr
+                && nameExpr.getName().equals(name)
+                && isPreviousNodeBefore(name, nameExpr.getName())) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
   public static boolean hasSimpleNameNotNullAnnotation(
       List<Node> annotations, SimpleName simpleName) {
 
@@ -105,13 +149,17 @@ public final class SwitchLiteralFirstComparisonsCodemod
       for (Node annotation : annotations) {
 
         if (annotation instanceof Parameter || annotation instanceof VariableDeclarator) {
-          if (((NodeWithSimpleName<?>) annotation).getName().equals(simpleName)) {
+          SimpleName annotationSimpleName = ((NodeWithSimpleName<?>) annotation).getName();
+          if (annotationSimpleName.equals(simpleName)
+              && isPreviousNodeBefore(simpleName, annotationSimpleName)) {
             return true;
           }
         } else if (annotation instanceof FieldDeclaration fieldDeclaration) {
           final List<VariableDeclarator> variableDeclarators = fieldDeclaration.getVariables();
           for (VariableDeclarator variableDeclarator : variableDeclarators) {
-            if (variableDeclarator.getName().equals(simpleName)) {
+            SimpleName variableSimpleName = variableDeclarator.getName();
+            if (variableSimpleName.equals(simpleName)
+                && isPreviousNodeBefore(simpleName, variableSimpleName)) {
               return true;
             }
           }
@@ -155,7 +203,9 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     if (targetName != null) {
       for (VariableDeclarator declarator : variableDeclarators) {
-        if (declarator.getName().equals(targetName)) {
+        SimpleName declaratorSimpleName = declarator.getName();
+        if (declaratorSimpleName.equals(targetName)
+            && isPreviousNodeBefore(targetName, declaratorSimpleName)) {
           final Optional<Expression> initializer = declarator.getInitializer();
           return initializer.isPresent() && !(initializer.get() instanceof NullLiteralExpr);
         }
