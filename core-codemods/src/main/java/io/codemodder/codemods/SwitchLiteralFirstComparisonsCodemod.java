@@ -73,12 +73,12 @@ public final class SwitchLiteralFirstComparisonsCodemod
     final List<FieldDeclaration> fieldDeclarations = cu.findAll(FieldDeclaration.class);
     final List<Parameter> parameters = cu.findAll(Parameter.class);
     // Create a new list to collect all annotation nodes
-    List<Node> annotationNodesCandidates = new ArrayList<>();
+    final List<Node> annotationNodesCandidates = new ArrayList<>();
     annotationNodesCandidates.addAll(variableDeclarators);
     annotationNodesCandidates.addAll(fieldDeclarations);
     annotationNodesCandidates.addAll(parameters);
 
-    List<Node> annotationNodes = filterNodesWithNotNullAnnotations(annotationNodesCandidates);
+    final List<Node> annotationNodes = filterNodesWithNotNullAnnotations(annotationNodesCandidates);
 
     if (hasSimpleNameNotNullAnnotation(annotationNodes, simpleName)) {
       return false;
@@ -93,20 +93,20 @@ public final class SwitchLiteralFirstComparisonsCodemod
     Expression leftSide = methodCallExpr.getScope().get();
     Expression rightSide = methodCallExpr.getArgument(0);
     try {
-      ResolvedType leftType = leftSide.calculateResolvedType();
+      final ResolvedType leftType = leftSide.calculateResolvedType();
       if ("Ljava/lang/String;".equals(leftType.toDescriptor())) {
         methodCallExpr.setScope(rightSide);
         methodCallExpr.setArgument(0, leftSide);
         return true;
       }
-    } catch (UnsolvedSymbolException e) {
+    } catch (final UnsolvedSymbolException e) {
       // expected in cases where we can't resolve the type
     }
 
     return false;
   }
 
-  public boolean isPreviousNodeBefore(Node nameNode, Node previousNode) {
+  private boolean isPreviousNodeBefore(final Node nameNode, final Node previousNode) {
     final Optional<Range> nameNodeRange = nameNode.getRange();
     final Optional<Range> previosNodeRange = previousNode.getRange();
     if (nameNodeRange.isEmpty() || previosNodeRange.isEmpty()) {
@@ -115,16 +115,16 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return previosNodeRange.get().begin.isBefore(nameNodeRange.get().begin);
   }
 
-  public boolean hasSimpleNamePreviousNullAssertion(
-      List<NullLiteralExpr> nullLiterals, SimpleName name) {
+  private boolean hasSimpleNamePreviousNullAssertion(
+      final List<NullLiteralExpr> nullLiterals, final SimpleName name) {
 
     if (nullLiterals != null && !nullLiterals.isEmpty()) {
-      for (NullLiteralExpr nullLiteralExpr : nullLiterals) {
+      for (final NullLiteralExpr nullLiteralExpr : nullLiterals) {
         if (nullLiteralExpr.getParentNode().isPresent()
             && nullLiteralExpr.getParentNode().get() instanceof BinaryExpr parentBinaryExpr) {
           if (parentBinaryExpr.getOperator() == BinaryExpr.Operator.NOT_EQUALS) {
-            Node left = parentBinaryExpr.getLeft();
-            Node right = parentBinaryExpr.getRight();
+            final Node left = parentBinaryExpr.getLeft();
+            final Node right = parentBinaryExpr.getRight();
             if (isBinaryNodeChildEqualToSimpleName(left, name)
                 || isBinaryNodeChildEqualToSimpleName(right, name)) {
               return true;
@@ -143,21 +143,22 @@ public final class SwitchLiteralFirstComparisonsCodemod
         && isPreviousNodeBefore(name, nameExpr.getName());
   }
 
-  public boolean hasSimpleNameNotNullAnnotation(List<Node> annotations, SimpleName simpleName) {
+  private boolean hasSimpleNameNotNullAnnotation(
+      final List<Node> annotations, final SimpleName simpleName) {
 
     if (annotations != null && !annotations.isEmpty()) {
-      for (Node annotation : annotations) {
+      for (final Node annotation : annotations) {
 
         if (annotation instanceof Parameter || annotation instanceof VariableDeclarator) {
-          SimpleName annotationSimpleName = ((NodeWithSimpleName<?>) annotation).getName();
+          final SimpleName annotationSimpleName = ((NodeWithSimpleName<?>) annotation).getName();
           if (annotationSimpleName.equals(simpleName)
               && isPreviousNodeBefore(simpleName, annotationSimpleName)) {
             return true;
           }
         } else if (annotation instanceof FieldDeclaration fieldDeclaration) {
           final List<VariableDeclarator> variableDeclarators = fieldDeclaration.getVariables();
-          for (VariableDeclarator variableDeclarator : variableDeclarators) {
-            SimpleName variableSimpleName = variableDeclarator.getName();
+          for (final VariableDeclarator variableDeclarator : variableDeclarators) {
+            final SimpleName variableSimpleName = variableDeclarator.getName();
             if (variableSimpleName.equals(simpleName)
                 && isPreviousNodeBefore(simpleName, variableSimpleName)) {
               return true;
@@ -170,9 +171,9 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
-  public List<Node> filterNodesWithNotNullAnnotations(List<Node> annotationNodes) {
-    List<Node> nodesWithNotNullAnnotations = new ArrayList<>();
-    for (Node node : annotationNodes) {
+  private List<Node> filterNodesWithNotNullAnnotations(final List<Node> annotationNodes) {
+    final List<Node> nodesWithNotNullAnnotations = new ArrayList<>();
+    for (final Node node : annotationNodes) {
       if (node instanceof NodeWithAnnotations<?> nodeWithAnnotations
           && !nodeWithAnnotations.getAnnotations().isEmpty()
           && hasNotNullOrNonnullAnnotation(nodeWithAnnotations.getAnnotations())) {
@@ -182,8 +183,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return nodesWithNotNullAnnotations;
   }
 
-  public boolean hasNotNullOrNonnullAnnotation(NodeList<AnnotationExpr> annotations) {
-    for (AnnotationExpr annotation : annotations) {
+  private boolean hasNotNullOrNonnullAnnotation(final NodeList<AnnotationExpr> annotations) {
+    for (final AnnotationExpr annotation : annotations) {
       if (isNotNullOrNonnullAnnotation(annotation)) {
         return true;
       }
@@ -191,19 +192,19 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
-  private boolean isNotNullOrNonnullAnnotation(AnnotationExpr annotation) {
+  private boolean isNotNullOrNonnullAnnotation(final AnnotationExpr annotation) {
 
-    Name annotationName = annotation.getName();
-    String name = annotationName.getIdentifier();
+    final Name annotationName = annotation.getName();
+    final String name = annotationName.getIdentifier();
     return "NotNull".equals(name) || "Nonnull".equals(name);
   }
 
-  public boolean isSimpleNameANotNullInitializedVariableDeclarator(
-      List<VariableDeclarator> variableDeclarators, SimpleName targetName) {
+  private final boolean isSimpleNameANotNullInitializedVariableDeclarator(
+      final List<VariableDeclarator> variableDeclarators, final SimpleName targetName) {
 
     if (targetName != null) {
-      for (VariableDeclarator declarator : variableDeclarators) {
-        SimpleName declaratorSimpleName = declarator.getName();
+      for (final VariableDeclarator declarator : variableDeclarators) {
+        final SimpleName declaratorSimpleName = declarator.getName();
         if (declaratorSimpleName.equals(targetName)
             && isPreviousNodeBefore(targetName, declaratorSimpleName)) {
           final Optional<Expression> initializer = declarator.getInitializer();
@@ -215,14 +216,14 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
-  public List<SimpleName> getSimpleNames(MethodCallExpr methodCallExpr) {
-    List<SimpleName> nameExprNodes = new ArrayList<>();
+  private List<SimpleName> getSimpleNames(final MethodCallExpr methodCallExpr) {
+    final List<SimpleName> nameExprNodes = new ArrayList<>();
 
     // Get the arguments of the MethodCallExpr
-    List<Node> childNodes = methodCallExpr.getChildNodes();
+    final List<Node> childNodes = methodCallExpr.getChildNodes();
 
     // Iterate through the arguments and collect NameExpr nodes
-    for (Node node : childNodes) {
+    for (final Node node : childNodes) {
       if (node instanceof NameExpr nameExpr) {
         nameExprNodes.add(nameExpr.getName());
       }
