@@ -106,7 +106,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
-  public static boolean isPreviousNodeBefore(Node nameNode, Node previousNode) {
+  public boolean isPreviousNodeBefore(Node nameNode, Node previousNode) {
     final Optional<Range> nameNodeRange = nameNode.getRange();
     final Optional<Range> previosNodeRange = previousNode.getRange();
     if (nameNodeRange.isEmpty() || previosNodeRange.isEmpty()) {
@@ -125,13 +125,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
           if (parentBinaryExpr.getOperator() == BinaryExpr.Operator.NOT_EQUALS) {
             Node left = parentBinaryExpr.getLeft();
             Node right = parentBinaryExpr.getRight();
-            if (left instanceof NameExpr nameExpr
-                && nameExpr.getName().equals(name)
-                && isPreviousNodeBefore(name, nameExpr.getName())) {
-              return true;
-            } else if (right instanceof NameExpr nameExpr
-                && nameExpr.getName().equals(name)
-                && isPreviousNodeBefore(name, nameExpr.getName())) {
+            if (isBinaryNodeChildEqualToSimpleName(left, name)
+                || isBinaryNodeChildEqualToSimpleName(right, name)) {
               return true;
             }
           }
@@ -142,8 +137,13 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
-  public static boolean hasSimpleNameNotNullAnnotation(
-      List<Node> annotations, SimpleName simpleName) {
+  private boolean isBinaryNodeChildEqualToSimpleName(final Node child, final SimpleName name) {
+    return child instanceof NameExpr nameExpr
+        && nameExpr.getName().equals(name)
+        && isPreviousNodeBefore(name, nameExpr.getName());
+  }
+
+  public boolean hasSimpleNameNotNullAnnotation(List<Node> annotations, SimpleName simpleName) {
 
     if (annotations != null && !annotations.isEmpty()) {
       for (Node annotation : annotations) {
@@ -170,7 +170,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
-  public static List<Node> filterNodesWithNotNullAnnotations(List<Node> annotationNodes) {
+  public List<Node> filterNodesWithNotNullAnnotations(List<Node> annotationNodes) {
     List<Node> nodesWithNotNullAnnotations = new ArrayList<>();
     for (Node node : annotationNodes) {
       if (node instanceof NodeWithAnnotations<?> nodeWithAnnotations
@@ -182,7 +182,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return nodesWithNotNullAnnotations;
   }
 
-  public static boolean hasNotNullOrNonnullAnnotation(NodeList<AnnotationExpr> annotations) {
+  public boolean hasNotNullOrNonnullAnnotation(NodeList<AnnotationExpr> annotations) {
     for (AnnotationExpr annotation : annotations) {
       if (isNotNullOrNonnullAnnotation(annotation)) {
         return true;
@@ -191,14 +191,14 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
-  private static boolean isNotNullOrNonnullAnnotation(AnnotationExpr annotation) {
+  private boolean isNotNullOrNonnullAnnotation(AnnotationExpr annotation) {
 
     Name annotationName = annotation.getName();
     String name = annotationName.getIdentifier();
     return "NotNull".equals(name) || "Nonnull".equals(name);
   }
 
-  public static boolean isSimpleNameANotNullInitializedVariableDeclarator(
+  public boolean isSimpleNameANotNullInitializedVariableDeclarator(
       List<VariableDeclarator> variableDeclarators, SimpleName targetName) {
 
     if (targetName != null) {
@@ -215,7 +215,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
-  public static List<SimpleName> getSimpleNames(MethodCallExpr methodCallExpr) {
+  public List<SimpleName> getSimpleNames(MethodCallExpr methodCallExpr) {
     List<SimpleName> nameExprNodes = new ArrayList<>();
 
     // Get the arguments of the MethodCallExpr
@@ -223,8 +223,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     // Iterate through the arguments and collect NameExpr nodes
     for (Node node : childNodes) {
-      if (node instanceof NameExpr) {
-        final NameExpr nameExpr = (NameExpr) node;
+      if (node instanceof NameExpr nameExpr) {
         nameExprNodes.add(nameExpr.getName());
       }
     }
