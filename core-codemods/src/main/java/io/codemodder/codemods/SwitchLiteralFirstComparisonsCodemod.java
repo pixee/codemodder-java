@@ -3,12 +3,19 @@ package io.codemodder.codemods;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.*;
@@ -51,6 +58,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
     }
 
     final List<VariableDeclarator> variableDeclarators = cu.findAll(VariableDeclarator.class);
+    final List<FieldDeclaration> fieldDeclarations = cu.findAll(FieldDeclaration.class);
+    final List<Parameter> parameters = cu.findAll(Parameter.class);
 
     final List<SimpleName> simpleNames = getSimpleNames(methodCallExpr);
 
@@ -58,6 +67,18 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     // No need to switch order because variable was declared and initialized to a not null value
     if (isSimpleNameANotNullInitializedVariableDeclarator(variableDeclarators, simpleName)) {
+      return false;
+    }
+
+    // Create a new list to collect all annotation nodes
+    List<Node> annotationNodesCandidates = new ArrayList<>();
+    annotationNodesCandidates.addAll(variableDeclarators);
+    annotationNodesCandidates.addAll(fieldDeclarations);
+    annotationNodesCandidates.addAll(parameters);
+
+    List<Node> annotationNodes = filterNodesWithNotNullAnnotations(annotationNodesCandidates);
+
+    if (hasSimpleNameNotNullAnnotation(annotationNodes, simpleName)) {
       return false;
     }
 
@@ -75,6 +96,58 @@ public final class SwitchLiteralFirstComparisonsCodemod
     }
 
     return false;
+  }
+
+  public static boolean hasSimpleNameNotNullAnnotation(
+      List<Node> annotations, SimpleName simpleName) {
+
+    if (annotations != null && !annotations.isEmpty()) {
+      for (Node annotation : annotations) {
+
+        if (annotation instanceof Parameter || annotation instanceof VariableDeclarator) {
+          if (((NodeWithSimpleName<?>) annotation).getName().equals(simpleName)) {
+            return true;
+          }
+        } else if (annotation instanceof FieldDeclaration fieldDeclaration) {
+          final List<VariableDeclarator> variableDeclarators = fieldDeclaration.getVariables();
+          for (VariableDeclarator variableDeclarator : variableDeclarators) {
+            if (variableDeclarator.getName().equals(simpleName)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public static List<Node> filterNodesWithNotNullAnnotations(List<Node> annotationNodes) {
+    List<Node> nodesWithNotNullAnnotations = new ArrayList<>();
+    for (Node node : annotationNodes) {
+      if (node instanceof NodeWithAnnotations<?> nodeWithAnnotations
+          && !nodeWithAnnotations.getAnnotations().isEmpty()
+          && hasNotNullOrNonnullAnnotation(nodeWithAnnotations.getAnnotations())) {
+        nodesWithNotNullAnnotations.add((Node) nodeWithAnnotations);
+      }
+    }
+    return nodesWithNotNullAnnotations;
+  }
+
+  public static boolean hasNotNullOrNonnullAnnotation(NodeList<AnnotationExpr> annotations) {
+    for (AnnotationExpr annotation : annotations) {
+      if (isNotNullOrNonnullAnnotation(annotation)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean isNotNullOrNonnullAnnotation(AnnotationExpr annotation) {
+
+    Name annotationName = annotation.getName();
+    String name = annotationName.getIdentifier();
+    return "NotNull".equals(name) || "Nonnull".equals(name);
   }
 
   public static boolean isSimpleNameANotNullInitializedVariableDeclarator(

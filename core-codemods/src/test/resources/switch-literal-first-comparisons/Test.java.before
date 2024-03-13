@@ -7,14 +7,19 @@ final class Test {
     static boolean cantChange = bar.equals("foo"); // can't change because we don't know the type of bar
     final boolean change2 = getBar().equalsIgnoreCase("foo");
 
-   void foo(String foo) {
+   void foo(String foo, @NotNull String foo1) {
        boolean change1 = foo.equals("bar");
+       String initializedVar = "init";
        if(foo.equals("bar")) { // should change
            System.out.println("foo");
        } else if(foo.compareTo("bar") > 0) { // shouldn't change, can't mess with compareTo
            System.out.println("foo");
        } else if("foo".equals(bar)) { // should be fine
            System.out.println("foo");
+       } else if(foo1.equals("bar")) { // shouldn't change because foo1 is @NotNull
+           System.out.println("foo");
+       } else if(initializedVar.equals("init")) { // shouldn't change because initializedVar is initialized
+           System.out.println("init");
        }
 
        Object obj = new Object();
