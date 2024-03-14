@@ -8,29 +8,39 @@ public final class Test {
 
   private Runtime memberRuntime;
   private static Runtime staticRuntime;
+  private static final String A = "a";
+
+  void variable(final String var){
+      SystemCommand.runCommand(Runtime.getRuntime(), new String[]{"a", "b", var});
+  }
+
+  void test(){
+    Runtime.getRuntime().exec(new String[]{"a", "b", "c"});
+    Runtime.getRuntime().exec(new String[]{A, "b", "c"});
+  }
 
   void instantiated() {
     Runtime runtime = Runtime.getRuntime();
   }
 
   void fromArgument(Runtime runtime) throws IOException {
-    Process p = SystemCommand.runCommand(runtime, "foo");
+    Process p = runtime.exec("foo");
   }
 
   void fromMemberField() throws IOException {
-    SystemCommand.runCommand(memberRuntime, "ls al");
+    memberRuntime.exec("ls al");
   }
 
   void fromStaticField() throws IOException {
-    SystemCommand.runCommand(staticRuntime, new String[] {"cat", "/app/data.txt"});
+    staticRuntime.exec(new String[] {"cat", "/app/data.txt"});
   }
 
   void withEnvironment() throws IOException {
-    SystemCommand.runCommand(Runtime.getRuntime(), "foo", new String[] {"FOO=BAR"});
+    Runtime.getRuntime().exec("foo", new String[] {"FOO=BAR"});
   }
 
   void withDirectory() throws IOException {
-    SystemCommand.runCommand(Runtime.getRuntime(), "foo", getEnvironment(), getDirectory());
+    Runtime.getRuntime().exec("foo", getEnvironment(), getDirectory());
   }
 
   private String[] getEnvironment() {
