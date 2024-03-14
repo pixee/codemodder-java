@@ -61,16 +61,18 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     final List<VariableDeclarator> variableDeclarators = cu.findAll(VariableDeclarator.class);
 
-    final SimpleName simpleName = getSimpleNameFromMethodCallExpr(methodCallExpr);
+    final Optional<SimpleName> simpleNameOptional = getSimpleNameFromMethodCallExpr(methodCallExpr);
 
     /**
      * This codemod will not be executed if: 1. Variable was previously initialized to a not null
      * value 2. Variable has a previous not null assertion 3. Variable has a {@code @NotNull} or
      * {@code @Nonnull} annotation
      */
-    if (isSimpleNameANotNullInitializedVariableDeclarator(variableDeclarators, simpleName)
-        || hasSimpleNameNotNullAnnotation(cu, simpleName, variableDeclarators)
-        || hasSimpleNamePreviousNullAssertion(cu, simpleName)) {
+    if (simpleNameOptional.isPresent()
+        && (isSimpleNameANotNullInitializedVariableDeclarator(
+                variableDeclarators, simpleNameOptional.get())
+            || hasSimpleNameNotNullAnnotation(cu, simpleNameOptional.get(), variableDeclarators)
+            || hasSimpleNamePreviousNullAssertion(cu, simpleNameOptional.get()))) {
       return false;
     }
 
@@ -245,13 +247,14 @@ public final class SwitchLiteralFirstComparisonsCodemod
    * Retrieves the SimpleName from the given MethodCallExpr. We know that this codemod only filters
    * MethodCallExpr nodes that has one SimpleName node.
    */
-  private SimpleName getSimpleNameFromMethodCallExpr(final MethodCallExpr methodCallExpr) {
+  private Optional<SimpleName> getSimpleNameFromMethodCallExpr(
+      final MethodCallExpr methodCallExpr) {
     final List<SimpleName> simpleNames =
         methodCallExpr.getChildNodes().stream()
             .filter(NameExpr.class::isInstance)
             .map(node -> ((NameExpr) node).getName())
             .toList();
-    return simpleNames.isEmpty() ? null : simpleNames.get(0);
+    return simpleNames.isEmpty() ? Optional.empty() : Optional.of(simpleNames.get(0));
   }
 
   private static final Set<String> flippableComparisonMethods =
