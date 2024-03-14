@@ -30,6 +30,12 @@ final class Test {
        if(obj.equals("foo")) { // can't change because the semantics are different
          System.out.println("foo");
        }
+
+       if(outerNullAssertion != null) {
+          if(outerNullAssertion.equals("something")) { // shouldn't be changed because already checked in outer block
+            System.out.println("outer");
+          }
+       }
    }
 
    private String getBar() { return null; }
