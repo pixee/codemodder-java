@@ -148,7 +148,6 @@ public final class SwitchLiteralFirstComparisonsCodemod
       final CompilationUnit cu,
       final SimpleName simpleName,
       final List<VariableDeclarator> variableDeclarators) {
-
     final List<FieldDeclaration> fieldDeclarations = cu.findAll(FieldDeclaration.class);
     final List<Parameter> parameters = cu.findAll(Parameter.class);
 
@@ -159,17 +158,11 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     final List<Node> annotations = filterNodesWithNotNullAnnotations(annotationNodesCandidates);
 
-    if (!annotations.isEmpty()) {
-      for (final Node annotation : annotations) {
-
-        if (isSimpleNotNullAnnotationForParameterOrVariable(annotation, simpleName)
-            || isSimpleNotNullAnnotationForFieldDeclaration(annotation, simpleName)) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+    return annotations.stream()
+        .anyMatch(
+            annotation ->
+                isSimpleNotNullAnnotationForParameterOrVariable(annotation, simpleName)
+                    || isSimpleNotNullAnnotationForFieldDeclaration(annotation, simpleName));
   }
 
   /**
@@ -180,15 +173,12 @@ public final class SwitchLiteralFirstComparisonsCodemod
       final Node annotation, final SimpleName simpleName) {
     if (annotation instanceof FieldDeclaration fieldDeclaration) {
       final List<VariableDeclarator> fieldDeclarationVariables = fieldDeclaration.getVariables();
-      for (final VariableDeclarator variableDeclarator : fieldDeclarationVariables) {
-        final SimpleName variableSimpleName = variableDeclarator.getName();
-        if (variableSimpleName.equals(simpleName)
-            && isPreviousNodeBefore(simpleName, variableSimpleName)) {
-          return true;
-        }
-      }
+      return fieldDeclarationVariables.stream()
+          .anyMatch(
+              variableDeclarator ->
+                  variableDeclarator.getName().equals(simpleName)
+                      && isPreviousNodeBefore(simpleName, variableDeclarator.getName()));
     }
-
     return false;
   }
 
@@ -211,25 +201,17 @@ public final class SwitchLiteralFirstComparisonsCodemod
    * Filters the provided list of nodes to include only those with @NotNull or @Nonnull annotations.
    */
   private List<Node> filterNodesWithNotNullAnnotations(final List<Node> annotationNodes) {
-    final List<Node> nodesWithNotNullAnnotations = new ArrayList<>();
-    for (final Node node : annotationNodes) {
-      if (node instanceof NodeWithAnnotations<?> nodeWithAnnotations
-          && !nodeWithAnnotations.getAnnotations().isEmpty()
-          && hasNotNullOrNonnullAnnotation(nodeWithAnnotations.getAnnotations())) {
-        nodesWithNotNullAnnotations.add((Node) nodeWithAnnotations);
-      }
-    }
-    return nodesWithNotNullAnnotations;
+    return annotationNodes.stream()
+        .filter(node -> node instanceof NodeWithAnnotations<?>)
+        .filter(node -> !((NodeWithAnnotations<?>) node).getAnnotations().isEmpty())
+        .filter(
+            node -> hasNotNullOrNonnullAnnotation(((NodeWithAnnotations<?>) node).getAnnotations()))
+        .toList();
   }
 
   /** Checks if the provided list of annotations contains any @NotNull or @Nonnull annotations. */
   private boolean hasNotNullOrNonnullAnnotation(final NodeList<AnnotationExpr> annotations) {
-    for (final AnnotationExpr annotation : annotations) {
-      if (isNotNullOrNonnullAnnotation(annotation)) {
-        return true;
-      }
-    }
-    return false;
+    return annotations.stream().anyMatch(this::isNotNullOrNonnullAnnotation);
   }
 
   private boolean isNotNullOrNonnullAnnotation(final AnnotationExpr annotation) {
@@ -264,20 +246,12 @@ public final class SwitchLiteralFirstComparisonsCodemod
    * MethodCallExpr nodes that has one SimpleName node.
    */
   private SimpleName getSimpleNameFromMethodCallExpr(final MethodCallExpr methodCallExpr) {
-
-    final List<SimpleName> simpleNames = new ArrayList<>();
-
-    // Get the arguments of the MethodCallExpr
-    final List<Node> childNodes = methodCallExpr.getChildNodes();
-
-    // Iterate through the arguments and collect NameExpr nodes
-    for (final Node node : childNodes) {
-      if (node instanceof NameExpr nameExpr) {
-        simpleNames.add(nameExpr.getName());
-      }
-    }
-
-    return !simpleNames.isEmpty() ? simpleNames.get(0) : null;
+    final List<SimpleName> simpleNames =
+        methodCallExpr.getChildNodes().stream()
+            .filter(NameExpr.class::isInstance)
+            .map(node -> ((NameExpr) node).getName())
+            .toList();
+    return simpleNames.isEmpty() ? null : simpleNames.get(0);
   }
 
   private static final Set<String> flippableComparisonMethods =
