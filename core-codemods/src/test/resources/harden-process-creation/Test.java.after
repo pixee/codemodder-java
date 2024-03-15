@@ -14,6 +14,10 @@ public final class Test {
       SystemCommand.runCommand(Runtime.getRuntime(), new String[]{"a", "b", var});
   }
 
+  void constantAndHardcodedValues(){
+      Runtime.getRuntime().exec(new Test(new String[]{"a", "b", A}));
+  }
+
   void test(){
     Runtime.getRuntime().exec(new String[]{"a", "b", "c"});
     Runtime.getRuntime().exec(new String[]{A, "b", "c"});

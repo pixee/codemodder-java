@@ -4,8 +4,8 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 final class ArgumentExpressionExtractor {
 
@@ -19,12 +19,11 @@ final class ArgumentExpressionExtractor {
    *     nodes.
    */
   public static List<Expression> extractExpressions(final MethodCallExpr methodCallExpr) {
-    final List<Expression> expressions = new ArrayList<>();
     final NodeList<Expression> arguments = methodCallExpr.getArguments();
-    for (Expression argument : arguments) {
-      expressions.addAll(getExpressionsFromNode(argument));
-    }
-    return expressions;
+    return arguments.stream()
+        .map(ArgumentExpressionExtractor::getExpressionsFromNode)
+        .flatMap(List::stream)
+        .toList();
   }
 
   /**
@@ -34,12 +33,13 @@ final class ArgumentExpressionExtractor {
    * @return A list containing all expressions found in the node and its child nodes.
    */
   private static List<Expression> getExpressionsFromNode(final Node node) {
-    final List<Expression> expressions = new ArrayList<>();
+    final List<Expression> expressions =
+        node.getChildNodes().stream()
+            .flatMap(childNode -> getExpressionsFromNode(childNode).stream())
+            .collect(Collectors.toList());
     if (node instanceof Expression expression) {
       expressions.add(expression);
     }
-    node.getChildNodes()
-        .forEach(childNode -> expressions.addAll(getExpressionsFromNode(childNode)));
     return expressions;
   }
 }
