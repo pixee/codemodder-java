@@ -244,14 +244,14 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     return targetName != null
         && variableDeclarators.stream()
+            .filter(declarator -> declarator.getName().equals(targetName))
+            .filter(declarator -> isPreviousNodeBefore(targetName, declarator.getName()))
             .anyMatch(
                 declarator ->
-                    declarator.getName().equals(targetName)
-                        && isPreviousNodeBefore(targetName, declarator.getName())
-                        && declarator
-                            .getInitializer()
-                            .map(expr -> !(expr instanceof NullLiteralExpr))
-                            .orElse(false));
+                    declarator
+                        .getInitializer()
+                        .map(expr -> !(expr instanceof NullLiteralExpr))
+                        .orElse(false));
   }
 
   /**
