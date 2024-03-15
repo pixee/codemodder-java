@@ -7,7 +7,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ArgumentExpressionExtractor {
+final class ArgumentExpressionExtractor {
 
   private ArgumentExpressionExtractor() {}
 
@@ -18,9 +18,9 @@ public class ArgumentExpressionExtractor {
    * @return A list containing all expressions found in the MethodCallExpr arguments and their child
    *     nodes.
    */
-  public static List<Expression> extractExpressions(MethodCallExpr methodCallExpr) {
-    List<Expression> expressions = new ArrayList<>();
-    NodeList<Expression> arguments = methodCallExpr.getArguments();
+  public static List<Expression> extractExpressions(final MethodCallExpr methodCallExpr) {
+    final List<Expression> expressions = new ArrayList<>();
+    final NodeList<Expression> arguments = methodCallExpr.getArguments();
     for (Expression argument : arguments) {
       expressions.addAll(getExpressionsFromNode(argument));
     }
@@ -33,8 +33,8 @@ public class ArgumentExpressionExtractor {
    * @param node The node to collect expressions from.
    * @return A list containing all expressions found in the node and its child nodes.
    */
-  private static List<Expression> getExpressionsFromNode(Node node) {
-    List<Expression> expressions = new ArrayList<>();
+  private static List<Expression> getExpressionsFromNode(final Node node) {
+    final List<Expression> expressions = new ArrayList<>();
     if (node instanceof Expression expression) {
       expressions.add(expression);
     }

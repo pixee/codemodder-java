@@ -14,7 +14,6 @@ import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.SystemCommand;
-import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 
@@ -82,37 +81,26 @@ public final class HardenProcessCreationCodemod
     return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 
-    private  List<SimpleName> extractVariableNames(List<FieldDeclaration> fieldDeclarations) {
-        return fieldDeclarations.stream()
-                .flatMap(fieldDeclaration -> fieldDeclaration.getVariables().stream())
-                .map(VariableDeclarator::getName)
-                .toList();
-    }
+  private List<SimpleName> extractVariableNames(List<FieldDeclaration> fieldDeclarations) {
+    return fieldDeclarations.stream()
+        .flatMap(fieldDeclaration -> fieldDeclaration.getVariables().stream())
+        .map(VariableDeclarator::getName)
+        .toList();
+  }
 
   private List<FieldDeclaration> getConstantFieldDeclarations(
       final List<FieldDeclaration> fieldDeclarations) {
 
-    final List<FieldDeclaration> constantFieldDeclarations = new ArrayList<>();
-
-    for (FieldDeclaration fieldDeclaration : fieldDeclarations) {
-      // Check if the fieldDeclaration has the 'final' modifier
-      if (fieldDeclaration.isFinal()) {
-        // Check each variable within the fieldDeclaration
-        boolean isAllVariablesConstant = true;
-        for (VariableDeclarator variable : fieldDeclaration.getVariables()) {
-          // Check if the variable has an initializer, indicating it's a constant
-          if (variable.getInitializer().isEmpty()) {
-            isAllVariablesConstant = false;
-            break; // No need to continue if one variable is not constant
-          }
-        }
-        // If all variables are constant, add the fieldDeclaration to the result list
-        if (isAllVariablesConstant) {
-          constantFieldDeclarations.add(fieldDeclaration);
-        }
-      }
-    }
-
-    return constantFieldDeclarations;
+    return fieldDeclarations.stream()
+        .filter(FieldDeclaration::isFinal) // Check if the fieldDeclaration has the 'final' modifier
+        .filter(
+            fieldDeclaration ->
+                fieldDeclaration.getVariables().stream()
+                    .allMatch(
+                        variable ->
+                            variable
+                                .getInitializer()
+                                .isPresent())) // Check if all variables have initializers
+        .toList();
   }
 }
