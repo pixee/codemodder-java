@@ -64,9 +64,13 @@ public final class SwitchLiteralFirstComparisonsCodemod
     final Optional<SimpleName> simpleNameOptional = getSimpleNameFromMethodCallExpr(methodCallExpr);
 
     /**
-     * This codemod will not be executed if: 1. Variable was previously initialized to a not null
-     * value 2. Variable has a previous not null assertion 3. Variable has a {@code @NotNull} or
-     * {@code @Nonnull} annotation
+     * This codemod will not be executed if:
+     *
+     * <ol>
+     *   <li>Variable was previously initialized to a not null value
+     *   <li>Variable has a previous not null assertion
+     *   <li>Variable has a {@link @NotNull} or {@link @Nonnull} annotation
+     * </ol>
      */
     if (simpleNameOptional.isPresent()
         && (isSimpleNameANotNullInitializedVariableDeclarator(
@@ -93,8 +97,13 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   /**
-   * Method used to check if variable (nameNode) has a previous node that represents: 1. A not null
-   * assertion 2. A not null annotation 3. An initialization to a not null value
+   * Method used to check if variable (nameNode) has a previous node that represents:
+   *
+   * <ol>
+   *   <li>A not null assertion
+   *   <li>A not null annotation
+   *   <li>An initialization to a not null value
+   * </ol>
    */
   private boolean isPreviousNodeBefore(final Node nameNode, final Node previousNode) {
     final Optional<Range> nameNodeRange = nameNode.getRange();
@@ -106,7 +115,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   /**
-   * Checks if the given Variable {@code SimpleName} has a previous null assertion in the {@code
+   * Checks if the given Variable {@link SimpleName} has a previous null assertion in the {@link
    * CompilationUnit}.
    */
   private boolean hasSimpleNamePreviousNullAssertion(
@@ -132,9 +141,9 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   /**
-   * Checks if the given {@code Node} is a binary expression child node and is equal to the provided
-   * {@code SimpleName}. Additionally, it verifies if the child node is located before the provided
-   * {@code SimpleName}.
+   * Checks if the given {@link Node} is a binary expression child node and is equal to the provided
+   * {@link SimpleName}. Additionally, it verifies if the child node is located before the provided
+   * {@link SimpleName}.
    */
   private boolean isBinaryNodeChildEqualToSimpleName(final Node child, final SimpleName name) {
     return child instanceof NameExpr nameExpr
@@ -143,8 +152,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   /**
-   * Checks if the given {@code SimpleName} variable has a @NotNull or @Nonnull annotation in the
-   * provided {@code CompilationUnit}.
+   * Checks if the given {@link SimpleName} variable has a @NotNull or @Nonnull annotation in the
+   * provided {@link CompilationUnit}.
    */
   private boolean hasSimpleNameNotNullAnnotation(
       final CompilationUnit cu,
@@ -168,8 +177,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   /**
-   * Checks if the given {@code Node} represents a @NotNull or @Nonnull annotation for a
-   * FieldDeclaration and the associated VariableDeclarator has the provided {@code SimpleName}.
+   * Checks if the given {@link Node} represents a @NotNull or @Nonnull annotation for a
+   * FieldDeclaration and the associated VariableDeclarator has the provided {@link SimpleName}.
    */
   private boolean isSimpleNotNullAnnotationForFieldDeclaration(
       final Node annotation, final SimpleName simpleName) {
@@ -185,8 +194,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   /**
-   * Checks if the given {@code Node} represents a @NotNull or @Nonnull annotation for a Parameter
-   * or VariableDeclarator, and the associated SimpleName matches the provided {@code SimpleName}.
+   * Checks if the given {@link Node} represents a @NotNull or @Nonnull annotation for a Parameter
+   * or VariableDeclarator, and the associated SimpleName matches the provided {@link SimpleName}.
    */
   private boolean isSimpleNotNullAnnotationForParameterOrVariable(
       final Node annotation, final SimpleName simpleName) {
@@ -223,8 +232,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   /**
-   * Checks if the provided {@code SimpleName} variable corresponds to a VariableDeclarator that was
-   * previously initialized to a non-null value.
+   * Checks if the provided {@link SimpleName} variable corresponds to a {@link VariableDeclarator}
+   * that was previously initialized to a non-null value.
    */
   private boolean isSimpleNameANotNullInitializedVariableDeclarator(
       final List<VariableDeclarator> variableDeclarators, final SimpleName targetName) {
@@ -244,8 +253,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   /**
-   * Retrieves the SimpleName from the given MethodCallExpr. We know that this codemod only filters
-   * MethodCallExpr nodes that has one SimpleName node.
+   * Retrieves the {@link SimpleName} from the given {@link MethodCallExpr}. This codemod assumes
+   * that {@link MethodCallExpr} nodes contain only one {@link SimpleName} node.
    */
   private Optional<SimpleName> getSimpleNameFromMethodCallExpr(
       final MethodCallExpr methodCallExpr) {
