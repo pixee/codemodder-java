@@ -123,18 +123,21 @@ public final class SwitchLiteralFirstComparisonsCodemod
     final List<NullLiteralExpr> nullLiterals = cu.findAll(NullLiteralExpr.class);
 
     if (nullLiterals != null && !nullLiterals.isEmpty()) {
-      for (final NullLiteralExpr nullLiteralExpr : nullLiterals) {
-        if (nullLiteralExpr.getParentNode().isPresent()
-            && nullLiteralExpr.getParentNode().get() instanceof BinaryExpr parentBinaryExpr
-            && parentBinaryExpr.getOperator() == BinaryExpr.Operator.NOT_EQUALS) {
-          final Node left = parentBinaryExpr.getLeft();
-          final Node right = parentBinaryExpr.getRight();
-          if (isBinaryNodeChildEqualToSimpleName(left, name)
-              || isBinaryNodeChildEqualToSimpleName(right, name)) {
-            return true;
-          }
-        }
-      }
+      return nullLiterals.stream()
+          .filter(
+              nullLiteralExpr ->
+                  nullLiteralExpr.getParentNode().isPresent()
+                      && nullLiteralExpr.getParentNode().get() instanceof BinaryExpr)
+          .map(nullLiteralExpr -> (BinaryExpr) nullLiteralExpr.getParentNode().get())
+          .filter(
+              parentBinaryExpr -> parentBinaryExpr.getOperator() == BinaryExpr.Operator.NOT_EQUALS)
+          .anyMatch(
+              parentBinaryExpr -> {
+                final Node left = parentBinaryExpr.getLeft();
+                final Node right = parentBinaryExpr.getRight();
+                return isBinaryNodeChildPreviouslyCreatedAndEqualToSimpleName(left, name)
+                    || isBinaryNodeChildPreviouslyCreatedAndEqualToSimpleName(right, name);
+              });
     }
 
     return false;
@@ -145,7 +148,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
    * {@link SimpleName}. Additionally, it verifies if the child node is located before the provided
    * {@link SimpleName}.
    */
-  private boolean isBinaryNodeChildEqualToSimpleName(final Node child, final SimpleName name) {
+  private boolean isBinaryNodeChildPreviouslyCreatedAndEqualToSimpleName(
+      final Node child, final SimpleName name) {
     return child instanceof NameExpr nameExpr
         && nameExpr.getName().equals(name)
         && isPreviousNodeBefore(name, nameExpr.getName());
@@ -238,18 +242,16 @@ public final class SwitchLiteralFirstComparisonsCodemod
   private boolean isSimpleNameANotNullInitializedVariableDeclarator(
       final List<VariableDeclarator> variableDeclarators, final SimpleName targetName) {
 
-    if (targetName != null) {
-      for (final VariableDeclarator declarator : variableDeclarators) {
-        final SimpleName declaratorSimpleName = declarator.getName();
-        if (declaratorSimpleName.equals(targetName)
-            && isPreviousNodeBefore(targetName, declaratorSimpleName)) {
-          final Optional<Expression> initializer = declarator.getInitializer();
-          return initializer.isPresent() && !(initializer.get() instanceof NullLiteralExpr);
-        }
-      }
-    }
-
-    return false;
+    return targetName != null
+        && variableDeclarators.stream()
+            .anyMatch(
+                declarator ->
+                    declarator.getName().equals(targetName)
+                        && isPreviousNodeBefore(targetName, declarator.getName())
+                        && declarator
+                            .getInitializer()
+                            .map(expr -> !(expr instanceof NullLiteralExpr))
+                            .orElse(false));
   }
 
   /**
