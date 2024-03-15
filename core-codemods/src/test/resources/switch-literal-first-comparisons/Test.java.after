@@ -10,6 +10,8 @@ final class Test {
    void foo(String foo, @NotNull String foo1, String nullAssertion) {
        boolean change1 = "bar".equals(foo);
        String initializedVar = "init";
+       String notSureItIsInitialized = someMethod();
+       String notSureItIsInitialized2 = randomVar;
        if("bar".equals(foo)) { // should change
            System.out.println("foo");
        } else if(foo.compareTo("bar") > 0) { // shouldn't change, can't mess with compareTo
@@ -35,6 +37,14 @@ final class Test {
           if(outerNullAssertion.equals("something")) { // shouldn't be changed because already checked in outer block
             System.out.println("outer");
           }
+       }
+
+       if("1".equals(notSureItIsInitialized)){ // shouldn't be changed because we can't assume method returns a not null value
+          System.out.println("One");
+       }
+
+       if("2".equals(notSureItIsInitialized2)){ // shouldn't be changed because we can't assume variable is a not null value
+          System.out.println("Two");
        }
    }
 

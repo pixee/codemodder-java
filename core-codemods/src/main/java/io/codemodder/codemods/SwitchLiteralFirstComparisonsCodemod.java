@@ -16,6 +16,7 @@ import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
@@ -250,8 +251,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
                 declarator ->
                     declarator
                         .getInitializer()
-                        .map(expr -> !(expr instanceof NullLiteralExpr))
-                        .orElse(false));
+                        .filter(StringLiteralExpr.class::isInstance)
+                        .isPresent());
   }
 
   /**
