@@ -18,7 +18,7 @@ final class ArgumentExpressionExtractor {
    * @return A list containing all expressions found in the MethodCallExpr arguments and their child
    *     nodes.
    */
-  public static List<Expression> extractExpressions(final MethodCallExpr methodCallExpr) {
+  static List<Expression> extractExpressions(final MethodCallExpr methodCallExpr) {
     final NodeList<Expression> arguments = methodCallExpr.getArguments();
     return arguments.stream()
         .map(ArgumentExpressionExtractor::getExpressionsFromNode)
