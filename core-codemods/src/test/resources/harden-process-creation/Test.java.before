@@ -7,6 +7,20 @@ public final class Test {
 
   private Runtime memberRuntime;
   private static Runtime staticRuntime;
+  private static final String A = "a";
+
+  void variable(final String var){
+      Runtime.getRuntime().exec(new String[]{"a", "b", var});
+  }
+
+  void constantAndHardcodedValues(){
+      Runtime.getRuntime().exec(new Test(new String[]{"a", "b", A}));
+  }
+
+  void test(){
+    Runtime.getRuntime().exec(new String[]{"a", "b", "c"});
+    Runtime.getRuntime().exec(new String[]{A, "b", "c"});
+  }
 
   void instantiated() {
     Runtime runtime = Runtime.getRuntime();
