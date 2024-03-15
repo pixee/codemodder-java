@@ -7,19 +7,34 @@ final class Test {
     static boolean cantChange = bar.equals("foo"); // can't change because we don't know the type of bar
     final boolean change2 = "foo".equalsIgnoreCase(getBar());
 
-   void foo(String foo) {
+   void foo(String foo, @NotNull String foo1, String nullAssertion) {
        boolean change1 = "bar".equals(foo);
+       String initializedVar = "init";
        if("bar".equals(foo)) { // should change
            System.out.println("foo");
        } else if(foo.compareTo("bar") > 0) { // shouldn't change, can't mess with compareTo
            System.out.println("foo");
        } else if("foo".equals(bar)) { // should be fine
            System.out.println("foo");
+       } else if(foo1.equals("bar")) { // shouldn't change because foo1 is @NotNull
+           System.out.println("foo");
+       } else if(initializedVar.equals("init")) { // shouldn't change because initializedVar is initialized
+           System.out.println("init");
+       }
+
+       if(nullAssertion != null && nullAssertion.equals("anything")){ // shouldn't change because previous null assertion
+           System.out.println("null");
        }
 
        Object obj = new Object();
        if(obj.equals("foo")) { // can't change because the semantics are different
          System.out.println("foo");
+       }
+
+       if(outerNullAssertion != null) {
+          if(outerNullAssertion.equals("something")) { // shouldn't be changed because already checked in outer block
+            System.out.println("outer");
+          }
        }
    }
 
