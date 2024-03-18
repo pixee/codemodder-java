@@ -38,12 +38,7 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: --quiet --no-configuration-cache setVersion -PnewVersion=${{ inputs.version }}
-
-      - uses: gradle/gradle-build-action@v2
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: --console=plain --quiet --no-configuration-cache build distZip publishNebulaPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+          arguments: --console=plain --quiet --no-configuration-cache -Pversion=${{ inputs.version }} build distZip publishNebulaPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
 
       - name: Create GitHub Release
         id: create_release
@@ -65,26 +60,3 @@ jobs:
           asset_path: ./core-codemods/build/distributions/core-codemods-${{ inputs.version }}.zip
           asset_name: codemodder-java-codemods-${{ inputs.version }}.zip
           asset_content_type: application/zip
-
-
-      # share version bump
-      - run: |
-          git checkout -b bot/update-version
-          git add version.txt
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m '🚀 release v${{ inputs.version }}'
-
-      # set version for next release
-      - uses: gradle/gradle-build-action@v2
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: -q --no-configuration-cache bumpPatch applySnapshot
-
-      - run: |
-          git add version.txt
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m '🚧 prepare for next development iteration'
-          git push origin bot/update-version
-          gh pr create --title "🚧 prepare for next development iteration" --body "This PR was automatically created by the release workflow. Please review and merge it to update the version.txt file."

@@ -1,5 +1,4 @@
 plugins {
-    alias(buildlibs.plugins.fileversioning)
     alias(buildlibs.plugins.nexus.publish)
     id("io.codemodder.base")
 }

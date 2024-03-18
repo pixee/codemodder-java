@@ -1,6 +1,5 @@
 plugins {
     id("io.codemodder.spotless")
-    id("de.epitschke.gradle-file-versioning")
     `maven-publish`
     signing
     id("com.netflix.nebula.contacts")
