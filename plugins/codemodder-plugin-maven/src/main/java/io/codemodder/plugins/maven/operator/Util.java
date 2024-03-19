@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 /** Common Utilities */
 class Util {
 
+private Util() {
+}
+
   private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
   /** Represents a Property Reference - as a regex */
