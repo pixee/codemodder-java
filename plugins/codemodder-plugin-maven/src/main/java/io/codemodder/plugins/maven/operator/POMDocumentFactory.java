@@ -17,6 +17,9 @@ import org.dom4j.io.SAXReader;
  */
 class POMDocumentFactory {
 
+private POMDocumentFactory() {
+}
+
   /**
    * Loads a POM document from the provided input stream.
    *
