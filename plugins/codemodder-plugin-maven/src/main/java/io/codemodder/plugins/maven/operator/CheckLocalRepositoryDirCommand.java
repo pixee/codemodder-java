@@ -7,8 +7,7 @@ import java.nio.file.Path;
 /** Commands for checking and creating the local repository directory if it doesn't exist. */
 class CheckLocalRepositoryDirCommand {
 
-private CheckLocalRepositoryDirCommand() {
-}
+  private CheckLocalRepositoryDirCommand() {}
 
   static class CheckParentDirCommand extends AbstractQueryCommand {
 
