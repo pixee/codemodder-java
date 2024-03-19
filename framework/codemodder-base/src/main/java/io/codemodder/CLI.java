@@ -122,6 +122,12 @@ final class CLI implements Callable<Integer> {
   private Path sonarIssuesJsonFilePath;
 
   @CommandLine.Option(
+      names = {"--sonar-hotspots-json"},
+      description =
+          "a path to a file containing the result of a call to the Sonar Web API Hotspots endpoint")
+  private Path sonarHotspotsJsonFilePath;
+
+  @CommandLine.Option(
       names = {"--list"},
       description = "print codemod(s) metadata, then exit",
       defaultValue = "false")
