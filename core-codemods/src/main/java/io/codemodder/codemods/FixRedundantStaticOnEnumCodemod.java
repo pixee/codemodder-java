@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -22,6 +23,14 @@ public final class FixRedundantStaticOnEnumCodemod
   public FixRedundantStaticOnEnumCodemod(
       @ProvidedSonarScan(ruleId = "java:S2786") final RuleIssues issues) {
     super(issues, EnumDeclaration.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S2786",
+        "Nested `enum`s should not be declared static",
+        "https://rules.sonarsource.com/java/RSPEC-2786/");
   }
 
   @Override

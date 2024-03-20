@@ -2,7 +2,6 @@ package io.codemodder;
 
 import io.codemodder.codetf.CodeTFReference;
 import io.codemodder.codetf.DetectionTool;
-
 import java.nio.file.Path;
 import java.util.List;
 
