@@ -1,6 +1,8 @@
 package io.codemodder;
 
 import io.codemodder.codetf.CodeTFReference;
+import io.codemodder.codetf.DetectionTool;
+
 import java.nio.file.Path;
 import java.util.List;
 
@@ -12,6 +14,11 @@ public interface CodeChanger {
 
   /** A deep description of what this codemod's changes. */
   String getDescription();
+
+  /** Detection tool metadata for this codemod. */
+  default DetectionTool getDetectionTool() {
+    return null;
+  }
 
   /**
    * A list of references for further reading on the issues this codemod addresses or other
