@@ -126,5 +126,15 @@ public final class MavenProvider implements ProjectProvider {
     }
   }
 
+  @Override
+  public Collection<DependencyGAV> dependencies(final Path projectDir, final Path file){
+      try{
+          return ((DefaultPOMDependencyUpdater)pomDependencyUpdater).allDependencies(projectDir, file);
+      } catch (Exception e){
+          throw new DependencyUpdateException("Failure when retrieving dependencies", e);
+      }
+
+  }
+
   private static final Logger LOG = LoggerFactory.getLogger(MavenProvider.class);
 }

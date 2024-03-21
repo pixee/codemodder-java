@@ -13,7 +13,7 @@ public final class DefaultCodemods {
   /** Get a list of all the codemods in our default set. */
   public static List<Class<? extends CodeChanger>> asList() {
     return List.of(
-        AddClarifyingBracesCodemod.class,
+        /*AddClarifyingBracesCodemod.class,
         AddMissingOverrideCodemod.class,
         AvoidImplicitPublicConstructorCodemod.class,
         DeclareVariableOnSeparateLineCodemod.class,
@@ -24,8 +24,8 @@ public final class DefaultCodemods {
         HardenStringParseToPrimitivesCodemod.class,
         HardenProcessCreationCodemod.class,
         HardenXMLDecoderCodemod.class,
-        HardenXMLInputFactoryCodemod.class,
-        HardenXStreamCodemod.class,
+        HardenXMLInputFactoryCodemod.class,*/
+        HardenXStreamCodemod.class/*,
         HardenZipEntryPathsCodemod.class,
         HQLParameterizationCodemod.class,
         InputResourceLeakCodemod.class,
@@ -67,7 +67,7 @@ public final class DefaultCodemods {
         UseEmptyForToArrayCodemod.class,
         ValidateJakartaForwardPathCodemod.class,
         VerboseRequestMappingCodemod.class,
-        VerbTamperingCodemod.class);
+        VerbTamperingCodemod.class*/);
   }
 
   /**

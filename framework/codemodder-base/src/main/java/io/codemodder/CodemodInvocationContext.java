@@ -4,6 +4,7 @@ import com.google.common.collect.Streams;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.stream.Stream;
 
 /** The context we provide to each codemod. */
@@ -23,6 +24,8 @@ public interface CodemodInvocationContext {
 
   /** The original contents of the file before this codemod */
   String contents();
+
+  Collection<DependencyGAV> dependencies();
 
   /**
    * Convenience method for stream-wise processing lines of the file being changed with line

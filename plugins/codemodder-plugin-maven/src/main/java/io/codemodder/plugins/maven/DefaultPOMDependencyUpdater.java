@@ -85,7 +85,7 @@ class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
     injectedDependencies = new ArrayList<>();
     erroredFiles = new LinkedHashSet<>();
     foundDependenciesMapped = new AtomicReference<>(pomOperator.getAllFoundDependencies());
-    LOG.trace("Beginning dependency set size: {}", foundDependenciesMapped.get().size());
+    LOG.trace("PIBE Beginning dependency set size: {}", foundDependenciesMapped.get().size());
 
     dependencies.forEach(
         newDependencyGAV -> {
@@ -122,6 +122,18 @@ class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
 
     return DependencyUpdateResult.create(
         injectedDependencies, skippedDependencies, changesets, erroredFiles);
+  }
+
+  public Collection<DependencyGAV> allDependencies(final Path projectDir, final Path file) throws IOException, XMLStreamException, DocumentException, URISyntaxException {
+      if (isEmptyPomFile(projectDir, file)) {
+          LOG.trace("Pom file was empty for {}", file);
+          return Collections.emptyList();
+      }
+
+      final Path pomFile = maybePomFile.get();
+      final POMOperator pomOperator = new POMOperator(pomFile, projectDir);
+
+      return pomOperator.getAllFoundDependencies();
   }
 
   private boolean isEmptyPomFile(final Path projectDir, final Path file) throws IOException {
