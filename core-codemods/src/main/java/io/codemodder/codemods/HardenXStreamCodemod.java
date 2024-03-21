@@ -98,8 +98,8 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
     return context.dependencies().stream()
         .filter(
             dependency ->
-                dependency.group().equals("com.thoughtworks.xstream")
-                    && dependency.artifact().equals("xstream"))
+                "com.thoughtworks.xstream".equals(dependency.group())
+                    && "xstream".equals(dependency.artifact()))
         .findFirst();
   }
 
