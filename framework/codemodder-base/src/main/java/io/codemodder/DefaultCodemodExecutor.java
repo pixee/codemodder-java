@@ -179,7 +179,9 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             codemod.getId(),
             codeChanger.getSummary(),
             codeChanger.getDescription(),
-            codeChanger.getDetectionTool(),
+            codeChanger instanceof FixOnlyCodeChanger fixOnlyCodeChanger
+                ? fixOnlyCodeChanger.getDetectionTool()
+                : null,
             unscannableFiles.stream()
                 .map(file -> getRelativePath(projectDir, file))
                 .collect(Collectors.toSet()),
