@@ -15,5 +15,5 @@ public interface ProjectProvider {
   DependencyUpdateResult updateDependencies(
       Path projectDir, Path file, List<DependencyGAV> remainingFileDependencies) throws IOException;
 
-  Collection<DependencyGAV> dependencies( Path projectDir,  Path file);
+  Collection<DependencyGAV> getAllDependencies(Path projectDir, Path file);
 }

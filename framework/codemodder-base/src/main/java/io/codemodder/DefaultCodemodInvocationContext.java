@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.Objects;
 
 record DefaultCodemodInvocationContext(
-        CodeDirectory codeDirectory,
-        Path path,
-        String contents,
-        String codemodId,
-        LineIncludesExcludes lineIncludesExcludes,
-        Collection<DependencyGAV> dependecies)
+    CodeDirectory codeDirectory,
+    Path path,
+    String contents,
+    String codemodId,
+    LineIncludesExcludes lineIncludesExcludes,
+    Collection<DependencyGAV> dependecies)
     implements CodemodInvocationContext {
 
   DefaultCodemodInvocationContext {
@@ -22,8 +22,8 @@ record DefaultCodemodInvocationContext(
     Objects.requireNonNull(dependecies);
   }
 
-    @Override
-    public Collection<DependencyGAV> dependencies() {
-        return dependecies;
-    }
+  @Override
+  public Collection<DependencyGAV> dependencies() {
+    return dependecies;
+  }
 }

@@ -124,16 +124,18 @@ class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
         injectedDependencies, skippedDependencies, changesets, erroredFiles);
   }
 
-  public Collection<DependencyGAV> allDependencies(final Path projectDir, final Path file) throws IOException, XMLStreamException, DocumentException, URISyntaxException {
-      if (isEmptyPomFile(projectDir, file)) {
-          LOG.trace("Pom file was empty for {}", file);
-          return Collections.emptyList();
-      }
+  @Override
+  public Collection<DependencyGAV> getAllDependencies(final Path projectDir, final Path file)
+      throws IOException, XMLStreamException, DocumentException, URISyntaxException {
+    if (isEmptyPomFile(projectDir, file)) {
+      LOG.trace("Pom file was empty for {}", file);
+      return Collections.emptyList();
+    }
 
-      final Path pomFile = maybePomFile.get();
-      final POMOperator pomOperator = new POMOperator(pomFile, projectDir);
+    final Path pomFile = maybePomFile.get();
+    final POMOperator pomOperator = new POMOperator(pomFile, projectDir);
 
-      return pomOperator.getAllFoundDependencies();
+    return pomOperator.getAllFoundDependencies();
   }
 
   private boolean isEmptyPomFile(final Path projectDir, final Path file) throws IOException {
