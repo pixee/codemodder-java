@@ -34,11 +34,7 @@ final class QueryParameterizer {
 
   private List<Deque<Expression>> checkAndGatherParameters() {
     final var leaves = findLeaves(root).collect(Collectors.toCollection(ArrayDeque::new));
-    if (countInjections(leaves) >= 1) {
-      return gatherParameters(leaves);
-    } else {
-      return List.of();
-    }
+    return gatherParameters(leaves);
   }
 
   Expression getRoot() {
@@ -108,57 +104,41 @@ final class QueryParameterizer {
   /** Looks for the injection patterns and gather all expressions for each injection. */
   private List<Deque<Expression>> gatherParameters(final Deque<Expression> query) {
     final var parameters = new ArrayList<Deque<Expression>>();
+    int modulo2 = 1;
     while (!query.isEmpty()) {
       var start = query.pop();
-      while (!query.isEmpty() && isStartPattern(start)) {
+      while (!query.isEmpty() && !isStartPattern(start, modulo2)) {
+        if (modulo2 == 0) {
+          modulo2 = 1;
+        }
         start = query.pop();
       }
       if (!query.isEmpty()) {
         final var middleExpressions = new ArrayDeque<Expression>();
-        while (!query.isEmpty() && !isEndPattern(query.peek())) {
-          final var expr = query.pop();
-          middleExpressions.add(expr);
+        while (!query.isEmpty() && !isEndPattern(query.peekFirst())) {
+          middleExpressions.add(query.pop());
         }
+
+        // Is there any dangling quotes?
+        if (query.isEmpty()) {
+          return List.of();
+        }
+        var end = query.peekFirst();
+        // end will be tested for start pattern, but we should not consider the first quote
+        modulo2 = 0;
+
         // Either everything is a string literal or
         // there is a single expression that is not convertible to string
-        if ((middleExpressions.size() == 1 && !convertibleToString(middleExpressions.peek()))
-            || middleExpressions.stream().allMatch(e -> e instanceof StringLiteralExpr)) {
-        } else {
+        if (!((middleExpressions.size() == 1 && !convertibleToString(middleExpressions.peek()))
+            || middleExpressions.stream().allMatch(e -> e instanceof StringLiteralExpr))) {
           // add start and end
           middleExpressions.addFirst(start);
-          middleExpressions.add(query.peek());
+          middleExpressions.add(end);
           parameters.add(middleExpressions);
         }
       }
     }
     return parameters;
-  }
-
-  /**
-   * Checks if the deque containing the leaves of a query expression has any valid injection pattern
-   * and no dangling quotes.
-   */
-  private int countInjections(final Deque<Expression> query) {
-    int count = 0;
-    final var iterator = query.iterator();
-    Expression start = null;
-    while (iterator.hasNext()) {
-      while (iterator.hasNext() && isStartPattern(start)) {
-        start = iterator.next();
-      }
-      Expression end = null;
-      while (iterator.hasNext() && !isEndPattern(end)) {
-        end = iterator.next();
-      }
-      if (isEndPattern(end)) {
-        count++;
-        start = end;
-      } else {
-        // missing end quote, do nothing
-        return 0;
-      }
-    }
-    return count;
   }
 
   /** Checks if an expression is convertible to String in JDBC driver. */
@@ -168,7 +148,7 @@ final class QueryParameterizer {
     // for type conversions by setObject
     final var typeRef = calculateResolvedType(exp);
     if (typeRef.isEmpty()) {
-      return false;
+      return true;
     }
     final var type = typeRef.get();
 
@@ -211,11 +191,28 @@ final class QueryParameterizer {
     return true;
   }
 
-  private boolean isStartPattern(final Expression e) {
-    return !(e instanceof StringLiteralExpr) || !e.asStringLiteralExpr().asString().endsWith("'");
+  private List<Integer> allIndexesOf(final char character, final String string) {
+    List<Integer> indexes = new ArrayList<>();
+    for (int currentIndex = string.indexOf(character);
+        currentIndex >= 0;
+        currentIndex = string.indexOf(character, currentIndex + 1)) {
+      indexes.add(currentIndex);
+    }
+    return indexes;
+  }
+
+  private boolean isStartPattern(final Expression e, final int modulo2) {
+    if (e != null && e.isStringLiteralExpr()) {
+      var indexes = allIndexesOf('\'', e.asStringLiteralExpr().asString());
+      return indexes.size() % 2 == modulo2;
+    }
+    return false;
   }
 
   private boolean isEndPattern(final Expression e) {
-    return e instanceof StringLiteralExpr && e.asStringLiteralExpr().asString().startsWith("'");
+    if (e != null && e.isStringLiteralExpr()) {
+      return e.asStringLiteralExpr().asString().indexOf('\'') >= 0;
+    }
+    return false;
   }
 }
