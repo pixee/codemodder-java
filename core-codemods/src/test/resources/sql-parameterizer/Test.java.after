@@ -53,4 +53,12 @@ public final class Test {
     }
     }
   }
+
+  public ResultSet stringAfterQuote(String input, String input2) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = ?" + " AND PHONE=?";
+    PreparedStatement stmt = conn.prepareStatement(sql);
+    stmt.setString(1, "user_" + input + "_name");
+    stmt.setString(2, input2);
+    return stmt.execute();
+  }
 }

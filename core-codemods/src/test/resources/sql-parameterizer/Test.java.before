@@ -42,4 +42,10 @@ public final class Test {
       return rs;
     }
   }
+
+  public ResultSet stringAfterQuote(String input, String input2) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = 'user_" + input + "_name' AND PHONE='" + input2 + "'";
+    Statement stmt = conn.createStatement();
+    return stmt.executeQuery(sql);
+  }
 }
