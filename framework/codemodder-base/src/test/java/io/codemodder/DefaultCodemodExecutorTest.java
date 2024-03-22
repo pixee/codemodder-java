@@ -145,7 +145,7 @@ final class DefaultCodemodExecutorTest {
 
     @Override
     public Collection<DependencyGAV> getAllDependencies(Path projectDir, Path file) {
-      return null;
+      return List.of();
     }
   }
 
@@ -445,7 +445,7 @@ final class DefaultCodemodExecutorTest {
 
           @Override
           public Collection<DependencyGAV> getAllDependencies(Path projectDir, Path file) {
-            return null;
+            return List.of();
           }
         };
 
