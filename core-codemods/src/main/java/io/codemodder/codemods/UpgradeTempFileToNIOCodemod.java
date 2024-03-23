@@ -10,6 +10,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileAttribute;
@@ -33,7 +34,7 @@ public final class UpgradeTempFileToNIOCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr foundCreateTempCall,
@@ -46,7 +47,7 @@ public final class UpgradeTempFileToNIOCodemod
     MethodCallExpr replacement = new MethodCallExpr(nioTmpFileCall, "toFile");
     replace(foundCreateTempCall).withExpression(replacement);
     addImportIfMissing(cu, Files.class);
-    return true;
+    return ChangesResult.changesApplied();
   }
 
   private NodeList<Expression> getNewArguments(final MethodCallExpr foundCreateTempCall) {

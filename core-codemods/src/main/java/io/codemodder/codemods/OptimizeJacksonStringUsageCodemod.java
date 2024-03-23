@@ -12,6 +12,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.*;
 import io.codemodder.ast.ASTs;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -46,7 +47,7 @@ public final class OptimizeJacksonStringUsageCodemod
    * is the IOUtils#toString() call.
    */
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ExpressionStmt varDeclStmt,
@@ -67,7 +68,7 @@ public final class OptimizeJacksonStringUsageCodemod
             .result();
 
     if (toStringCall.isEmpty()) {
-      return false;
+      return ChangesResult.noChanges();
     }
     String streamVariableName = toStringCall.get().getArgument(0).asNameExpr().getNameAsString();
 
@@ -85,7 +86,7 @@ public final class OptimizeJacksonStringUsageCodemod
 
     // just for robustness, but should never happen
     if (readValueCallOpt.isEmpty()) {
-      return false;
+      return ChangesResult.noChanges();
     }
 
     // All the checks have passed, we begin the fix
@@ -97,6 +98,6 @@ public final class OptimizeJacksonStringUsageCodemod
     // now we remove the IOUtils#toString() assignment statement
     varDeclStmt.remove();
 
-    return true;
+    return ChangesResult.changesApplied();
   }
 }

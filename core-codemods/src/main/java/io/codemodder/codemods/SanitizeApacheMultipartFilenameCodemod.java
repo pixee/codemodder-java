@@ -6,6 +6,7 @@ import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.Filenames;
 import java.util.List;
@@ -29,17 +30,16 @@ public final class SanitizeApacheMultipartFilenameCodemod
   }
 
   @Override
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
-  }
-
-  @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
       final Result result) {
-    return wrap(methodCallExpr)
-        .withStaticMethod(Filenames.class.getName(), "toSimpleFileName", false);
+    boolean success =
+        wrap(methodCallExpr).withStaticMethod(Filenames.class.getName(), "toSimpleFileName", false);
+
+    return success
+        ? ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
+        : ChangesResult.noChanges();
   }
 }

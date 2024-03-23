@@ -7,6 +7,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.Type;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.pmd.PmdScan;
 import javax.inject.Inject;
 
@@ -29,7 +30,7 @@ public final class UseEmptyForToArrayCodemod extends SarifPluginJavaParserChange
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr toArrayCall,
@@ -40,6 +41,6 @@ public final class UseEmptyForToArrayCodemod extends SarifPluginJavaParserChange
     ArrayCreationExpr newEmptyArray =
         new ArrayCreationExpr(elementType, NodeList.nodeList(arrayCreationLevel), null);
     toArrayCall.setArgument(0, newEmptyArray);
-    return true;
+    return ChangesResult.changesApplied();
   }
 }

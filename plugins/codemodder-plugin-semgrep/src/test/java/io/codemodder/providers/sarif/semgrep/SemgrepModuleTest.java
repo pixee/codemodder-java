@@ -12,6 +12,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFReference;
+import io.codemodder.javaparser.ChangesResult;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,12 +91,12 @@ final class SemgrepModuleTest {
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr node,
         final Result result) {
-      return true;
+      return ChangesResult.changesApplied();
     }
   }
 
@@ -125,12 +126,12 @@ final class SemgrepModuleTest {
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr node,
         final Result result) {
-      return true;
+      return ChangesResult.changesApplied();
     }
   }
 
@@ -158,12 +159,12 @@ final class SemgrepModuleTest {
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr node,
         final Result result) {
-      return true;
+      return ChangesResult.changesApplied();
     }
   }
 

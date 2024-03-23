@@ -6,6 +6,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -37,7 +38,7 @@ public final class RemoveUnusedLocalVariableCodemod
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator variableDeclarator,
@@ -65,11 +66,11 @@ public final class RemoveUnusedLocalVariableCodemod
             variableDeclarationExpr.setVariables(variables);
           }
 
-          return true;
+          return ChangesResult.changesApplied();
         }
       }
     }
 
-    return false;
+    return ChangesResult.noChanges();
   }
 }

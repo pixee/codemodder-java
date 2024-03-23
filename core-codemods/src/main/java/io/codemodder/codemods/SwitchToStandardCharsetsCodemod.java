@@ -8,6 +8,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -42,7 +43,7 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final MethodCallExpr methodCallExpr,
@@ -50,7 +51,7 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
 
       final Optional<Charset> c = getSpecifiedCharset(methodCallExpr.getArgument(0));
       if (c.isEmpty()) {
-        return false;
+        return ChangesResult.noChanges();
       }
 
       FieldAccessExpr field =
@@ -61,7 +62,7 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
 
       Exceptions.cleanupExceptionHandling(
           field.getParentNode().get(), unsupportedEncodingExceptionFqcn);
-      return true;
+      return ChangesResult.changesApplied();
     }
   }
 
@@ -80,7 +81,7 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final MethodCallExpr methodCallExpr,
@@ -88,7 +89,7 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
 
       final Optional<Charset> c = getSpecifiedCharset(methodCallExpr.getArgument(0));
       if (c.isEmpty()) {
-        return false;
+        return ChangesResult.noChanges();
       }
 
       FieldAccessExpr field =
@@ -98,7 +99,7 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
       parentNode.get().replace(methodCallExpr, field);
       addImportIfMissing(cu, StandardCharsets.class);
       Exceptions.cleanupExceptionHandling(parentNode.get(), unsupportedEncodingExceptionFqcn);
-      return true;
+      return ChangesResult.changesApplied();
     }
   }
 

@@ -6,6 +6,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -27,7 +28,7 @@ public final class UpgradeSSLContextTLSCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr getInstanceCall,
@@ -35,6 +36,6 @@ public final class UpgradeSSLContextTLSCodemod
 
     getInstanceCall.setArguments(
         NodeList.nodeList(new StringLiteralExpr(SSLProtocols.safeTlsVersion)));
-    return true;
+    return ChangesResult.changesApplied();
   }
 }

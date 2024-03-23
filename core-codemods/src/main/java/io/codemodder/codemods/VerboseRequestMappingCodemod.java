@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -25,7 +26,7 @@ public final class VerboseRequestMappingCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final NormalAnnotationExpr annotationExpr,
@@ -45,10 +46,10 @@ public final class VerboseRequestMappingCodemod
         annotationExpr.getPairs().remove(methodAttribute);
         annotationExpr.setName(newType.get());
         addImportIfMissing(cu, "org.springframework.web.bind.annotation." + newType.get());
-        return true;
+        return ChangesResult.changesApplied();
       }
     }
-    return false;
+    return ChangesResult.noChanges();
   }
 
   public static Optional<String> getType(final String httpMethod) {

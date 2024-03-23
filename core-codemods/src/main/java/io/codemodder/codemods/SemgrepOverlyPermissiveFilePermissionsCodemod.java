@@ -11,6 +11,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -55,7 +56,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ExpressionStmt stmt,
@@ -79,7 +80,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
           return fixFromString(fromStringRef.get());
         }
       }
-      return false;
+      return ChangesResult.noChanges();
     }
   }
 
@@ -99,7 +100,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ExpressionStmt fromStringStmt,
@@ -115,11 +116,11 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       if (fromStringMethodRef.isPresent()) {
         return fixFromString(fromStringMethodRef.get());
       }
-      return false;
+      return ChangesResult.noChanges();
     }
   }
 
-  private static boolean fixFromString(final MethodCallExpr fromStringCall) {
+  private static ChangesResult fixFromString(final MethodCallExpr fromStringCall) {
     NodeList<Expression> arguments = fromStringCall.getArguments();
     if (arguments.size() == 1 && arguments.get(0).isStringLiteralExpr()) {
       StringLiteralExpr permissionValue = arguments.get(0).asStringLiteralExpr();
@@ -127,10 +128,10 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       if (previousPermission.length() == 9) {
         String newPermission = previousPermission.substring(0, 6) + "---";
         arguments.set(0, new StringLiteralExpr(newPermission));
-        return true;
+        return ChangesResult.changesApplied();
       }
     }
-    return false;
+    return ChangesResult.noChanges();
   }
 
   /**
@@ -149,7 +150,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final MethodCallExpr methodCallExpr,
@@ -158,7 +159,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
           expect(methodCallExpr).toBeMethodCallExpression().withArguments().result();
 
       if (methodCall.isEmpty()) {
-        return false;
+        return ChangesResult.noChanges();
       }
 
       MethodCallExpr call = methodCall.get();
@@ -166,14 +167,14 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       if ("add".equals(methodName) && call.getArguments().size() == 1) {
         return fixAdd(call);
       }
-      return false;
+      return ChangesResult.noChanges();
     }
 
-    private boolean fixAdd(final MethodCallExpr call) {
+    private ChangesResult fixAdd(final MethodCallExpr call) {
       NodeList<Expression> arguments = call.getArguments();
       Expression permissionArgument = arguments.get(0);
       if (!permissionArgument.isFieldAccessExpr()) {
-        return false;
+        return ChangesResult.noChanges();
       }
       FieldAccessExpr othersAccess = permissionArgument.asFieldAccessExpr();
       final String newFieldName;
@@ -182,11 +183,11 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
         case "OTHERS_WRITE" -> newFieldName = "GROUP_WRITE";
         case "OTHERS_EXECUTE" -> newFieldName = "GROUP_EXECUTE";
         default -> {
-          return false;
+          return ChangesResult.noChanges();
         }
       }
       othersAccess.setName(newFieldName);
-      return true;
+      return ChangesResult.changesApplied();
     }
   }
 }

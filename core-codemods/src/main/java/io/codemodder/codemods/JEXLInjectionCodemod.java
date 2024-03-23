@@ -17,6 +17,7 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import io.github.pixee.security.UnwantedTypes;
 import java.util.List;
@@ -44,17 +45,14 @@ public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Exp
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final Expression expression,
       final Result result) {
-    return checkAndFix(expression).isPresent();
-  }
-
-  @Override
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+    return checkAndFix(expression).isPresent()
+        ? ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
+        : ChangesResult.noChanges();
   }
 
   /**

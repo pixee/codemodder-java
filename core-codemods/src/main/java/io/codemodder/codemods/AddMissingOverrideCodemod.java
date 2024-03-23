@@ -5,6 +5,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -27,7 +28,7 @@ public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChange
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SimpleName methodName,
@@ -38,9 +39,9 @@ public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChange
       Node parentNode = parentNodeRef.get();
       if (parentNode instanceof MethodDeclaration method) {
         method.addAnnotation(Override.class);
-        return true;
+        return ChangesResult.changesApplied();
       }
     }
-    return true;
+    return ChangesResult.noChanges();
   }
 }

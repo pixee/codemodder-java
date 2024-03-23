@@ -10,6 +10,7 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -29,7 +30,7 @@ public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCa
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
@@ -56,8 +57,8 @@ public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCa
 
       ASTTransforms.addStatementBeforeStatement(maybeStmt.get(), newStatement);
       // Should we add a setSecure(false) after to retain behavior?
-      return true;
+      return ChangesResult.changesApplied();
     }
-    return false;
+    return ChangesResult.noChanges();
   }
 }

@@ -9,6 +9,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -37,7 +38,7 @@ public final class ReplaceDefaultHttpClientCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr objectCreationExpr,
@@ -47,6 +48,6 @@ public final class ReplaceDefaultHttpClientCodemod
             "HttpClientBuilder.create().useSystemProperties().build()");
     replace(objectCreationExpr).withExpression(expression);
     addImportIfMissing(cu, "org.apache.http.impl.client.HttpClientBuilder");
-    return true;
+    return ChangesResult.changesApplied();
   }
 }

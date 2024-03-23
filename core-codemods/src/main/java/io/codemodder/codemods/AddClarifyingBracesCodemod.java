@@ -10,6 +10,7 @@ import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.WhileStmt;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.pmd.PmdScan;
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +34,7 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final Node node,
@@ -53,21 +54,21 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
         return handleUnbracedStmt(new UnbracedElseStatement(ifStmt));
       }
     }
-    return false;
+    return ChangesResult.noChanges();
   }
 
   /** Handles the case where the {@link Node} is a while unbracedStatement. */
-  private boolean handleUnbracedStmt(final UnbracedStatement stmt) {
+  private ChangesResult handleUnbracedStmt(final UnbracedStatement stmt) {
     Node parentNode = stmt.getParentNode();
     List<Node> childNodes = parentNode.getChildNodes();
     int index = childNodes.indexOf(stmt.getStatement());
     if (index == childNodes.size() - 1) {
       // it's the last statement in the block, there's no way to get confused, we can exit
-      return false;
+      return ChangesResult.noChanges();
     }
     Node nextChildNode = childNodes.get(index + 1);
     if (nextChildNode.getRange().isEmpty()) {
-      return false;
+      return ChangesResult.noChanges();
     }
     Range nextChildNodeRange = nextChildNode.getRange().get();
     int nextChildNodeBeginColumn = nextChildNodeRange.begin.column;
@@ -77,9 +78,9 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
 
     if (nextChildNodeBeginColumn >= onlyInnerStatementColumn) {
       stmt.addBraces();
-      return true;
+      return ChangesResult.changesApplied();
     }
-    return false;
+    return ChangesResult.noChanges();
   }
 
   /** Represents an unbraced control flow statement (e.g., if, while, etc.). */

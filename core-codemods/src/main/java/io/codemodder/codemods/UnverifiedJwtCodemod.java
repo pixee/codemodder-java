@@ -9,6 +9,7 @@ import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import javax.inject.Inject;
 
@@ -26,13 +27,13 @@ public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expressio
     super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
-  private boolean fix(MethodCallExpr parseCall) {
+  private ChangesResult fix(MethodCallExpr parseCall) {
     parseCall.setName("parseClaimsJws");
-    return true;
+    return ChangesResult.changesApplied();
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final Expression expression,
@@ -91,6 +92,6 @@ public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expressio
       }
     }
 
-    return false;
+    return ChangesResult.noChanges();
   }
 }

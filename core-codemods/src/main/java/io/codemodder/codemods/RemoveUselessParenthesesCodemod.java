@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -26,7 +27,7 @@ public final class RemoveUselessParenthesesCodemod
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final EnclosedExpr enclosedExpr,
@@ -35,6 +36,6 @@ public final class RemoveUselessParenthesesCodemod
     Expression innerExpr = enclosedExpr.getInner();
     enclosedExpr.replace(innerExpr);
 
-    return true;
+    return ChangesResult.changesApplied();
   }
 }

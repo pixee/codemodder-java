@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.XMLDecoderSecurity;
 import java.util.List;
@@ -27,18 +28,15 @@ public final class HardenXMLDecoderCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr newXmlDecoderCall,
       final Result result) {
     final Expression firstArgument = newXmlDecoderCall.getArgument(0);
     wrap(firstArgument).withStaticMethod(XMLDecoderSecurity.class.getName(), "hardenStream", true);
-    return true;
+    return ChangesResult.changesApplied(dependencies);
   }
 
-  @Override
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
-  }
+  private final List<DependencyGAV> dependencies = List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
 }

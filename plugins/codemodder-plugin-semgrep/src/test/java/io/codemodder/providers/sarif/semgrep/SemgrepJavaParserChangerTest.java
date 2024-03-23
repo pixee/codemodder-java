@@ -12,6 +12,7 @@ import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.invalid.bothyamlstrategies.InvalidUsesBothYamlStrategies;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -76,12 +77,12 @@ final class SemgrepJavaParserChangerTest {
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr node,
         final Result result) {
-      return true;
+      return ChangesResult.changesApplied();
     }
   }
 }

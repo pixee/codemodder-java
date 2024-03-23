@@ -4,6 +4,7 @@ import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import javax.inject.Inject;
 
@@ -25,11 +26,13 @@ public final class JDBCResourceLeakCodemod extends SarifPluginJavaParserChanger<
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
       final Result result) {
-    return ResourceLeakFixer.checkAndFix(methodCallExpr).isPresent();
+    return ResourceLeakFixer.checkAndFix(methodCallExpr).isPresent()
+        ? ChangesResult.changesApplied()
+        : ChangesResult.noChanges();
   }
 }
