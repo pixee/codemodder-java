@@ -1,0 +1,39 @@
+package xstream;
+
+import io.github.pixee.security.UnwantedTypes;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.IOException;
+import foo.AnythingConverter;
+import com.thoughtworks.xstream.XStream;
+import java.lang.ClassNotFoundException;
+
+import com.biz.org.UserData;
+
+public class XStreamTest
+{
+    public XStream deserializeObject_Vuln() throws IOException, ClassNotFoundException {
+        // ruleid:harden-xstream
+        XStream xstream = new XStream();
+        xstream.denyTypes(UnwantedTypes.dangerousClassNameTokens().toArray(new String[] {}));
+        return xstream;
+    }
+
+    public void deserializeObject_RegistersConverter() throws IOException, ClassNotFoundException {
+        XStream xstream = new XStream();
+        xstream.registerConverter(new AnythingConverter());
+        return xstream;
+    }
+
+    public void deserializeObject_CallsAllowTypes(XStream xstream) throws IOException, ClassNotFoundException {
+        XStream xstream = new XStream();
+        xstream.allowTypes(new String[]{"com.foo.*"});
+        return xstream;
+    }
+
+    public void deserializeObject_CallsAllowTypes(XStream xstream) throws IOException, ClassNotFoundException {
+        XStream xstream = new XStream();
+        xstream.denyTypes(new String[]{"com.foo.*"});
+        return xstream;
+    }
+}

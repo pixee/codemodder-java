@@ -33,4 +33,6 @@ public @interface Metadata {
    * but with the transformed code, to see if another transformation is erroneously made.
    */
   boolean doRetransformTest() default true;
+
+  Class<?>[] projectProviders() default {};
 }
