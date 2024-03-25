@@ -674,6 +674,51 @@ final class ASTsTest {
     assertThat(new ParameterDeclaration(parameter).getScope().getStatements().size(), is(1));
   }
 
+  @Test
+  void it_finds_a_single_assignment() {
+    String code =
+        """
+			class A{
+				void f(){
+					int i = 0;
+					class Inner{
+						int i = 1;
+						void g(){
+							System.out.println(i);
+							i = 2;
+						}
+					};
+					i = 3;
+				}
+			}
+		""";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var lvd =
+        LocalVariableDeclaration.fromVariableDeclarator(cu.findAll(VariableDeclarator.class).get(0))
+            .get();
+    assertThat(ASTs.findAllAssignments(lvd).toList().size(), is(1));
+  }
+
+  @Test
+  void it_resolves_j_to_0() {
+    String code =
+        """
+			class A{
+				void f(){
+					int i = 0;
+					int j;
+					j = i;
+					System.out.println(j);
+				}
+			}
+		""";
+    var cu = new JavaParser().parse(code).getResult().get();
+    var name = cu.findAll(NameExpr.class).get(3);
+    var resolved = ASTs.resolveLocalExpression(name);
+    assertThat(resolved.isIntegerLiteralExpr(), is(true));
+    assertThat(resolved.asIntegerLiteralExpr().getValue(), is("0"));
+  }
+
   void assertEqualsIgnoreSpace(String string, String expected) {
     var stream = Stream.of(string.split("\n"));
     var expStream = Stream.of(expected.split("\n"));
