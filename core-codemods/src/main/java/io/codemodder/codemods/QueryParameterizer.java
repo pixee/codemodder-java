@@ -87,9 +87,7 @@ final class QueryParameterizer {
             .isPresent()) {
       // TODO consider fields and extract inits if any
       final var maybeSourceLVD =
-          ASTs.findEarliestLocalVariableDeclarationOf(e, e.asNameExpr().getNameAsString())
-              .filter(ASTs::isFinalOrNeverAssigned)
-              .filter(lvd -> ASTs.findAllReferences(lvd).size() == 1);
+          ASTs.findEarliestLocalVariableDeclarationOf(e, e.asNameExpr().getNameAsString());
       maybeSourceLVD.ifPresent(stringDeclarations::add);
 
       return maybeSourceLVD
