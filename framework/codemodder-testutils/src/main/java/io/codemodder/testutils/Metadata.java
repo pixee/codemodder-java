@@ -34,5 +34,9 @@ public @interface Metadata {
    */
   boolean doRetransformTest() default true;
 
+  /**
+   * Custom {@link io.codemodder.ProjectProvider}s required for certain tests. A usage example can
+   * be found at {@link HardenXStreamCodemodTestProjectProvider}
+   */
   Class<?>[] projectProviders() default {};
 }
