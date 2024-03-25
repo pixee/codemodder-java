@@ -13,6 +13,6 @@ final class HardenXStreamCodemodTest implements CodemodTestMixin {}
 @Metadata(
     codemodType = HardenXStreamCodemod.class,
     testResourceDir = "harden-xstream-denyTypes",
-    dependencies = "io.github.pixee:java-security-toolkit-xstream:1.0.2",
+    dependencies = "io.github.pixee:java-security-toolkit:1.1.3",
     projectProviders = HardenXStreamCodemodTestProjectProvider.class)
 final class HardenXStreamCodemodTest_denyTypes implements CodemodTestMixin {}
