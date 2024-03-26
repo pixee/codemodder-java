@@ -1,52 +1,39 @@
 package io.codemodder.codemods;
 
-import com.github.javaparser.ast.expr.BinaryExpr;
-import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
-import io.codemodder.ast.ASTs;
+import io.codemodder.ast.LinearizedStringExpression;
 import io.codemodder.ast.LocalVariableDeclaration;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-/** Checks and fixes injections in query expressions. */
+
 final class QueryParameterizer {
-
-  private final Expression root;
-
-  /** A list of all String declarations containing expressions from the query */
-  private final List<LocalVariableDeclaration> stringDeclarations;
 
   private final List<Deque<Expression>> injections;
 
-  QueryParameterizer(final Expression query) {
-    this.root = query;
-    this.stringDeclarations = new ArrayList<>();
-    this.injections = checkAndGatherParameters();
-  }
+  private final LinearizedStringExpression linearizedQuery;
 
-  private List<Deque<Expression>> checkAndGatherParameters() {
-    final var leaves = findLeaves(root).collect(Collectors.toCollection(ArrayDeque::new));
-    return gatherParameters(leaves);
+  QueryParameterizer(final Expression query) {
+    this.linearizedQuery = new LinearizedStringExpression(query);
+    this.injections = gatherParameters(this.linearizedQuery.getLinearized());
   }
 
   Expression getRoot() {
-    return root;
-  }
-
-  List<LocalVariableDeclaration> getStringDeclarations() {
-    return stringDeclarations;
+    return linearizedQuery.getRoot();
   }
 
   List<Deque<Expression>> getInjections() {
     return injections;
+  }
+
+  LinearizedStringExpression getLinearizedQuery() {
+    return linearizedQuery;
   }
 
   private Optional<ResolvedType> calculateResolvedType(final Expression e) {
@@ -55,48 +42,6 @@ final class QueryParameterizer {
     } catch (final RuntimeException exception) {
       return Optional.empty();
     }
-  }
-
-  /**
-   * Finds the leaves of an expression tree whose internal nodes are BinaryExpr, EnclosedExpr and
-   * NameExpr. Anything else is considered a leaf. Returns a Stream containing the leaves in
-   * pre-order.
-   */
-  private Stream<Expression> findLeaves(final Expression e) {
-    // EnclosedExpr and BinaryExpr are considered as internal nodes, so we recurse
-    if (e instanceof EnclosedExpr) {
-      if (calculateResolvedType(e)
-          .filter(rt -> rt.describe().equals("java.lang.String"))
-          .isPresent()) {
-        return findLeaves(e.asEnclosedExpr().getInner());
-      } else {
-        return Stream.of(e);
-      }
-    }
-    // Only BinaryExpr between strings should be considered
-    else if (e instanceof BinaryExpr
-        && e.asBinaryExpr().getOperator().equals(BinaryExpr.Operator.PLUS)) {
-      final var left = findLeaves(e.asBinaryExpr().getLeft());
-      final var right = findLeaves(e.asBinaryExpr().getRight());
-      return Stream.concat(left, right);
-    }
-    // NameExpr of String types should be recursively searched for more expressions.
-    else if (e instanceof NameExpr
-        && calculateResolvedType(e)
-            .filter(rt -> rt.describe().equals("java.lang.String"))
-            .isPresent()) {
-      // TODO consider fields and extract inits if any
-      final var maybeSourceLVD =
-          ASTs.findEarliestLocalVariableDeclarationOf(e, e.asNameExpr().getNameAsString());
-      maybeSourceLVD.ifPresent(stringDeclarations::add);
-
-      return maybeSourceLVD
-          .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
-          .map(this::findLeaves)
-          .orElse(Stream.of(e));
-    }
-    // Any other expression is a "leaf"
-    return Stream.of(e);
   }
 
   /** Looks for the injection patterns and gather all expressions for each injection. */

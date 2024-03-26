@@ -699,7 +699,7 @@ public final class ASTs {
     }
 
     // No init but a single assignment?
-    if (first2Assignments.size() == 1) {
+    if (maybeInit.isEmpty() && first2Assignments.size() == 1) {
       return resolveLocalExpression(first2Assignments.get(0).getValue());
     }
 
