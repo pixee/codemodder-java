@@ -687,24 +687,30 @@ public final class ASTs {
             .map(e -> e instanceof NameExpr ? e.asNameExpr() : null)
             .flatMap(n -> ASTs.findEarliestLocalDeclarationOf(n.getName()))
             .map(s -> s instanceof LocalVariableDeclaration ? (LocalVariableDeclaration) s : null);
-    // Does it have an initializer?
+    List<AssignExpr> first2Assignments =
+        maybelvd.stream().flatMap(ASTs::findAllAssignments).limit(2).toList();
+
     var maybeInit =
         maybelvd.flatMap(
             lvd -> lvd.getVariableDeclarator().getInitializer().map(ASTs::resolveLocalExpression));
-    if (maybeInit.isPresent()) {
+    // No assignments and a init
+    if (maybeInit.isPresent() && first2Assignments.isEmpty()) {
       return maybeInit.get();
     }
 
-    // If not,  does it have a single assignment?
-    List<AssignExpr> allAssignments =
-        maybelvd.stream().flatMap(ASTs::findAllAssignments).limit(2).toList();
-    if (allAssignments.size() == 1) {
-      return resolveLocalExpression(allAssignments.get(0).getValue());
+    // No init but a single assignment?
+    if (first2Assignments.size() == 1) {
+      return resolveLocalExpression(first2Assignments.get(0).getValue());
     }
+
     // failing that, return itself
     return expr;
   }
 
+  /**
+   * Test for this pattern: {@link AssignExpr} ({@code assignExpr}) -&gt; {@link NameExpr}, where
+   * ({@code expr}) is the left hand side of the assignment.
+   */
   public static Optional<NameExpr> hasNamedTarget(final AssignExpr assignExpr) {
     return Optional.of(assignExpr.getTarget()).map(e -> e.isNameExpr() ? e.asNameExpr() : null);
   }
