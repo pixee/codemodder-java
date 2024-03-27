@@ -39,7 +39,6 @@ public final class DefaultCodemods {
         OverridesMatchParentSynchronizationCodemod.class,
         PreventFileWriterLeakWithFilesCodemod.class,
         RandomizeSeedCodemod.class,
-        RemoveCommentedCodeCodemod.class,
         RemoveRedundantVariableCreationCodemod.class,
         RemoveUnusedLocalVariableCodemod.class,
         RemoveUnusedPrivateMethodCodemod.class,
