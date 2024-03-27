@@ -9,7 +9,12 @@ import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
 import javax.inject.Inject;
 
-/** A codemod for removing commented-out lines of code. This codemod has dubious value because Sonar often reports a single line out of many consecutive lines that may have code, so removing that particular line will only result in a half-removed commented, which is potentially more confusing. It also false positives when comments start with common coding tokens.  */
+/**
+ * A codemod for removing commented-out lines of code. This codemod has dubious value because Sonar
+ * often reports a single line out of many consecutive lines that may have code, so removing that
+ * particular line will only result in a half-removed commented, which is potentially more
+ * confusing. It also false positives when comments start with common coding tokens.
+ */
 @Codemod(
     id = "sonar:java/remove-commented-code-s125",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
