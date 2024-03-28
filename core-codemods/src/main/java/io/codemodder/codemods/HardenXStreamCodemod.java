@@ -3,20 +3,25 @@ package io.codemodder.codemods;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.ArrayCreationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
+import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.UnknownType;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import io.github.pixee.security.UnwantedTypes;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -48,11 +53,8 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
 
     String nameAsString = newXStreamVariable.getNameAsString();
 
-    UnwantedTypes.dangerousClassNameTokens().toArray(new String[0]);
-    UnwantedTypes.dangerousClassNameTokens().toArray(new String[] {});
-
     if (useDenyTypes) {
-      Statement fixStatement = buildDenyStatement(nameAsString);
+      Statement fixStatement = buildDenyTypesByWildcardStatement(nameAsString);
       Statement existingStatement = newXStreamVariable.findAncestor(Statement.class).get();
       ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
       ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.UnwantedTypes");
@@ -66,21 +68,52 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
     return true;
   }
 
-  private static Statement buildDenyStatement(final String variableName) {
+  private Statement buildDenyTypesByWildcardStatement(final String variableName) {
+
+    // represents: "*" + token + "*"
+    final BinaryExpr stringTokenExpression =
+        new BinaryExpr(
+            new BinaryExpr(
+                new StringLiteralExpr("*"), new NameExpr("token"), BinaryExpr.Operator.PLUS),
+            new StringLiteralExpr("*"),
+            BinaryExpr.Operator.PLUS);
+
+    // represents: new String[] { "*" + token + "*" }
+    final ArrayCreationExpr stringArray =
+        new ArrayCreationExpr(
+            new ArrayType(new ClassOrInterfaceType("String")),
+            NodeList.nodeList(),
+            new ArrayInitializerExpr(NodeList.nodeList(stringTokenExpression)));
+
+    // represents: xstream.denyTypesByWildcard(new String[] { "*" + token + "*" });
+    MethodCallExpr registerConverterCall = new MethodCallExpr("denyTypesByWildcard", stringArray);
     ExpressionStmt newStatement = new ExpressionStmt();
-    MethodCallExpr methodCallExpr =
-        new MethodCallExpr(
-            new MethodCallExpr(new NameExpr("UnwantedTypes"), "dangerousClassNameTokens"),
-            "toArray",
-            NodeList.nodeList(
-                new ArrayCreationExpr(
-                    new ArrayType(new ClassOrInterfaceType("String")),
-                    NodeList.nodeList(),
-                    new ArrayInitializerExpr(NodeList.nodeList()))));
-    MethodCallExpr registerConverterCall = new MethodCallExpr("denyTypes", methodCallExpr);
     newStatement.setExpression(registerConverterCall);
     registerConverterCall.setScope(new NameExpr(variableName));
-    return newStatement;
+
+    // represents: UnwantedTypes.dangerousClassNameTokens()
+    final MethodCallExpr unwantedTypesDangerousClassNameTokensMethod =
+        new MethodCallExpr(new NameExpr("UnwantedTypes"), "dangerousClassNameTokens");
+
+    // represents UnwantedTypes.dangerousClassNameTokens().forEach()
+    MethodCallExpr forEachMethodCall =
+        new MethodCallExpr(unwantedTypesDangerousClassNameTokensMethod, "forEach");
+
+    /*
+    Represents:
+    UnwantedTypes.dangerousClassNameTokens().forEach( token -> {
+            xstream.denyTypesByWildcard(new String[] { "*" + token + "*" });
+        });
+     */
+    forEachMethodCall.addArgument(
+        new LambdaExpr(
+            new Parameter(new UnknownType(), "token"),
+            new BlockStmt(NodeList.nodeList(newStatement))));
+
+    ExpressionStmt newStatement2 = new ExpressionStmt();
+    newStatement2.setExpression(forEachMethodCall);
+
+    return newStatement2;
   }
 
   private static Statement buildFixStatement(final String variableName) {

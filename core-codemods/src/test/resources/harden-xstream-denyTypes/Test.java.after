@@ -15,7 +15,9 @@ public class XStreamTest
     public XStream deserializeObject_Vuln() throws IOException, ClassNotFoundException {
         // ruleid:harden-xstream
         XStream xstream = new XStream();
-        xstream.denyTypes(UnwantedTypes.dangerousClassNameTokens().toArray(new String[] {}));
+        UnwantedTypes.dangerousClassNameTokens().forEach( token -> {
+            xstream.denyTypesByWildcard(new String[] { "*" + token + "*" });
+        });
         return xstream;
     }
 
