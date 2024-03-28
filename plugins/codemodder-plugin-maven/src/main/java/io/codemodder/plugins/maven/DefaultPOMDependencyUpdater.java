@@ -85,7 +85,7 @@ class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
     injectedDependencies = new ArrayList<>();
     erroredFiles = new LinkedHashSet<>();
     foundDependenciesMapped = new AtomicReference<>(pomOperator.getAllFoundDependencies());
-    LOG.trace("PIBE Beginning dependency set size: {}", foundDependenciesMapped.get().size());
+    LOG.trace("Beginning dependency set size: {}", foundDependenciesMapped.get().size());
 
     dependencies.forEach(
         newDependencyGAV -> {
