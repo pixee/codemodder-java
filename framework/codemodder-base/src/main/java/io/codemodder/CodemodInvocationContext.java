@@ -25,6 +25,7 @@ public interface CodemodInvocationContext {
   /** The original contents of the file before this codemod */
   String contents();
 
+  /** The list of dependencies that were found at pom file */
   Collection<DependencyGAV> dependencies();
 
   /**
