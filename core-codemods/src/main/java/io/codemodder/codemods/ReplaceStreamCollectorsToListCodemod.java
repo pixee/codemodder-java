@@ -5,6 +5,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -25,6 +26,14 @@ public final class ReplaceStreamCollectorsToListCodemod
   public ReplaceStreamCollectorsToListCodemod(
       @ProvidedSonarScan(ruleId = "java:S6204") final RuleIssues issues) {
     super(issues, MethodCallExpr.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S6204",
+        "`Stream.toList()` should be used instead of `collectors`",
+        "https://rules.sonarsource.com/java/RSPEC-6204");
   }
 
   @Override

@@ -1,5 +1,5 @@
 {
-  "summary" : "Replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations (Sonar)",
+  "summary" : "Replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations",
   "change" : "Replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations.",
   "reviewGuidanceJustification" : "Although the readability and clarity has been increased, there is no functional difference between the code before, and code after.",
   "references" : [

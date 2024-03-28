@@ -1,5 +1,5 @@
 {
-  "summary" : "Remove useless parentheses (Sonar)",
+  "summary" : "Remove useless parentheses",
   "change" : "Remove useless parentheses",
   "reviewGuidanceJustification" : "There should be no functional changes after this change, but the code should be easier to read.",
   "references" : [

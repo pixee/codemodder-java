@@ -1,5 +1,5 @@
 {
-  "summary" : "Removed block of commented-out lines of code (Sonar)",
+  "summary" : "Removed block of commented-out lines of code",
   "change" : "Removed block of commented-out lines of code",
   "reviewGuidanceJustification" : "There is no functional difference after the change, but the source code will be easier to understand.",
   "references" : [

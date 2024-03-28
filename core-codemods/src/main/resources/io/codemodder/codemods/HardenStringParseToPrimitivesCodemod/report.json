@@ -1,5 +1,5 @@
 {
-  "summary" : "Implemented parsing usage when converting Strings to primitives (Sonar)",
+  "summary" : "Implemented parsing usage when converting Strings to primitives",
   "change" : "Implemented parsing usage when converting Strings to primitives.",
   "reviewGuidanceIJustification" : "There is no functional difference after the change, but the source code will be easier to understand.",
   "references" : [

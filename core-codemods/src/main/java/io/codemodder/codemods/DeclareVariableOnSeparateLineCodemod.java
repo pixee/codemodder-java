@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithVariables;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -26,6 +27,14 @@ public final class DeclareVariableOnSeparateLineCodemod
   public DeclareVariableOnSeparateLineCodemod(
       @ProvidedSonarScan(ruleId = "java:S1659") final RuleIssues issues) {
     super(issues, VariableDeclarator.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S1659",
+        "Multiple variables should not be declared on the same line",
+        "https://rules.sonarsource.com/java/RSPEC-1659/");
   }
 
   @Override

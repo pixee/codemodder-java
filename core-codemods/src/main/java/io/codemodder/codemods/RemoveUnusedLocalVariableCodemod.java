@@ -6,6 +6,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -34,6 +35,14 @@ public final class RemoveUnusedLocalVariableCodemod
   public RemoveUnusedLocalVariableCodemod(
       @ProvidedSonarScan(ruleId = "java:S1481") final RuleIssues issues) {
     super(issues, VariableDeclarator.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S1481",
+        "Unused local variables should be removed",
+        "https://rules.sonarsource.com/java/RSPEC-1481");
   }
 
   @Override

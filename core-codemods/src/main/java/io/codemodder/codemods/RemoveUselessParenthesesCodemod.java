@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -23,6 +24,14 @@ public final class RemoveUselessParenthesesCodemod
   public RemoveUselessParenthesesCodemod(
       @ProvidedSonarScan(ruleId = "java:S1110") final RuleIssues issues) {
     super(issues, EnclosedExpr.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S1110",
+        "Redundant pairs of parentheses should be removed",
+        "https://rules.sonarsource.com/java/RSPEC-1110");
   }
 
   @Override

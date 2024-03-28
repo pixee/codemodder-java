@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.comments.Comment;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -37,6 +38,14 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
       @ProvidedSonarScan(ruleId = "java:S125") final RuleIssues issues) {
 
     super(issues, Comment.class, regionNodeMatcher, NodeCollector.ALL_COMMENTS);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S125",
+        "Sections of code should not be commented out",
+        "https://rules.sonarsource.com/java/RSPEC-125");
   }
 
   @Override

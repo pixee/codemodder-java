@@ -1,5 +1,5 @@
 {
-  "summary" : "Replaced `Stream.collect(Collectors.toList())` with `Stream.toList()` (Sonar)",
+  "summary" : "Replaced `Stream.collect(Collectors.toList())` with `Stream.toList()`",
   "change" : "Replaced `Stream.collect(Collectors.toList())` with `Stream.toList()`.",
   "reviewGuidanceJustification" : "There should be no functional changes after this change, but the code should be easier to read.",
   "references" : [

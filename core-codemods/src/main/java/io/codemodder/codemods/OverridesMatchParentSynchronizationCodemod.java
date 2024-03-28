@@ -5,6 +5,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -28,6 +29,14 @@ public final class OverridesMatchParentSynchronizationCodemod
   public OverridesMatchParentSynchronizationCodemod(
       @ProvidedSonarScan(ruleId = "java:S3551") final RuleIssues issues) {
     super(issues, SimpleName.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S3551",
+        "Overrides should match their parent class methods in synchronization",
+        "https://rules.sonarsource.com/java/RSPEC-3551");
   }
 
   @Override

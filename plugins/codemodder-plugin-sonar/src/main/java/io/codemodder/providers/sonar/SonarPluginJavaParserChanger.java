@@ -4,6 +4,8 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectionTool;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
 import java.util.ArrayList;
@@ -11,7 +13,8 @@ import java.util.List;
 import java.util.Objects;
 
 /** Provides base functionality for making JavaParser-based changes based on Sonar results. */
-public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger {
+public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger
+    implements FixOnlyCodeChanger {
 
   private final RuleIssues ruleIssues;
   private final Class<? extends Node> nodeType;
@@ -91,6 +94,13 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   @Override
   public boolean shouldRun() {
     return ruleIssues.hasResults();
+  }
+
+  protected abstract DetectorRule getDetectorRule();
+
+  @Override
+  public DetectionTool getDetectionTool() {
+    return new DetectionTool("Sonar", getDetectorRule(), List.of());
   }
 
   /**

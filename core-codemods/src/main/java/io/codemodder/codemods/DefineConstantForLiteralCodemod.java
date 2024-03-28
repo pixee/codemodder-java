@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -22,6 +23,14 @@ public final class DefineConstantForLiteralCodemod
   public DefineConstantForLiteralCodemod(
       @ProvidedSonarScan(ruleId = "java:S1192") final RuleIssues issues) {
     super(issues, StringLiteralExpr.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S1192",
+        "String literals should not be duplicated",
+        "https://rules.sonarsource.com/java/RSPEC-1192/");
   }
 
   @Override

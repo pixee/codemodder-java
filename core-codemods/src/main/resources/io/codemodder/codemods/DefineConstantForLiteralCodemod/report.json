@@ -1,5 +1,5 @@
 {
-  "summary" : "Define a constant for a literal string that is duplicated n times (Sonar)",
+  "summary" : "Define a constant for a literal string that is duplicated n times",
   "change" : "Define a constant for a literal string that is duplicated n times",
   "reviewGuidanceIJustification" : "This modification is intended to introduce no functional alterations. Nevertheless, we believe it would be beneficial for a developer to review the newly defined constant names to ensure they align with their expectations.",
   "references" : [
