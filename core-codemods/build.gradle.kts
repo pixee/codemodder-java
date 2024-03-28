@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":plugins:codemodder-plugin-aws"))
     implementation(project(":plugins:codemodder-plugin-pmd"))
     implementation(project(":plugins:codemodder-plugin-sonar"))
+    implementation(libs.java.semver)
     implementation(libs.juniversalchardet)
     implementation(libs.dom4j)
     implementation(libs.commons.jexl)
