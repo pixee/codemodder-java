@@ -1,5 +1,5 @@
 {
-  "summary" : "Split variable declarations into their own statements (Sonar)",
+  "summary" : "Split variable declarations into their own statements ",
   "change" : "Split variable declarations into their own statements.",
   "reviewGuidanceIJustification" : "There is no functional difference after the change, but the source code will be easier to understand.",
   "references" : [

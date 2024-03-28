@@ -1,5 +1,5 @@
 {
-  "summary" : "Added missing synchronized keyword (Sonar)",
+  "summary" : "Added missing synchronized keyword",
   "change" : "Added missing synchronized keyword",
   "faqs" : [ {
       "question" : "Are there other ways to implement this?",
