@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
-public class HardenXStreamCodemodTestProjectProvider implements ProjectProvider {
+public final class HardenXStreamCodemodTestProjectProvider implements ProjectProvider {
 
   @Override
   public DependencyUpdateResult updateDependencies(

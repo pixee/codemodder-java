@@ -10,7 +10,7 @@ record DefaultCodemodInvocationContext(
     String contents,
     String codemodId,
     LineIncludesExcludes lineIncludesExcludes,
-    Collection<DependencyGAV> dependecies)
+    Collection<DependencyGAV> dependencies)
     implements CodemodInvocationContext {
 
   DefaultCodemodInvocationContext {
@@ -19,11 +19,6 @@ record DefaultCodemodInvocationContext(
     Objects.requireNonNull(contents);
     Objects.requireNonNull(codemodId);
     Objects.requireNonNull(lineIncludesExcludes);
-    Objects.requireNonNull(dependecies);
-  }
-
-  @Override
-  public Collection<DependencyGAV> dependencies() {
-    return dependecies;
+    Objects.requireNonNull(dependencies);
   }
 }
