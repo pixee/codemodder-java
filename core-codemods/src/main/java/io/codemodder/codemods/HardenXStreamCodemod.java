@@ -1,23 +1,20 @@
 package io.codemodder.codemods;
 
 import com.contrastsecurity.sarif.Result;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.ArrayCreationExpr;
-import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.zafarkhaja.semver.Version;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
-import io.github.pixee.security.UnwantedTypes;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -41,55 +38,51 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
       final VariableDeclarator newXStreamVariable,
       final Result result) {
 
-    Optional<DependencyGAV> xstreamDependencyOptional = getXstreamDependency(context);
+    final Optional<Statement> existingStatementOptional =
+        newXStreamVariable.findAncestor(Statement.class);
+    if (existingStatementOptional.isEmpty()) {
+      return ChangesResult.noChanges();
+    }
+    final Statement existingStatement = existingStatementOptional.get();
 
-    final boolean useDenyTypes =
-        xstreamDependencyOptional.isPresent()
-            && isGreaterThanOrEqualTo(xstreamDependencyOptional.get().version(), "1.4.8");
+    final String nameAsString = newXStreamVariable.getNameAsString();
 
-    String nameAsString = newXStreamVariable.getNameAsString();
+    if (canUseDenyTypesByWildcard(context)) {
+      final Statement fixStatement =
+          StaticJavaParser.parseStatement(
+              "UnwantedTypes.dangerousClassNameTokens().forEach( token -> { "
+                  + nameAsString
+                  + ".denyTypesByWildcard(new String[] { \"*\" + token + \"*\" });});");
 
-    UnwantedTypes.dangerousClassNameTokens().toArray(new String[0]);
-    UnwantedTypes.dangerousClassNameTokens().toArray(new String[] {});
-
-    if (useDenyTypes) {
-      Statement fixStatement = buildDenyStatement(nameAsString);
-      Statement existingStatement = newXStreamVariable.findAncestor(Statement.class).get();
       ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
       ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.UnwantedTypes");
-
       return ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
     }
-    Statement fixStatement = buildFixStatement(nameAsString);
-    Statement existingStatement = newXStreamVariable.findAncestor(Statement.class).get();
+
+    final Statement fixStatement = buildFixStatement(nameAsString);
     ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
     ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.xstream.HardeningConverter");
-
     return ChangesResult.changesApplied(List.of(JAVA_SECURITY_TOOLKIT_XSTREAM));
   }
 
-  private static Statement buildDenyStatement(final String variableName) {
-    ExpressionStmt newStatement = new ExpressionStmt();
-    MethodCallExpr methodCallExpr =
-        new MethodCallExpr(
-            new MethodCallExpr(new NameExpr("UnwantedTypes"), "dangerousClassNameTokens"),
-            "toArray",
-            NodeList.nodeList(
-                new ArrayCreationExpr(
-                    new ArrayType(new ClassOrInterfaceType("String")),
-                    NodeList.nodeList(),
-                    new ArrayInitializerExpr(NodeList.nodeList()))));
-    MethodCallExpr registerConverterCall = new MethodCallExpr("denyTypes", methodCallExpr);
-    newStatement.setExpression(registerConverterCall);
-    registerConverterCall.setScope(new NameExpr(variableName));
-    return newStatement;
+  private boolean canUseDenyTypesByWildcard(final CodemodInvocationContext context) {
+    final Optional<DependencyGAV> xstreamDependencyOptional = getXstreamDependency(context);
+
+    if (xstreamDependencyOptional.isEmpty()) {
+      return false;
+    }
+
+    final Version xtreamDependencyVersion =
+        Version.valueOf(xstreamDependencyOptional.get().version());
+    final Version comparableVersion = Version.valueOf("1.4.8");
+    return xtreamDependencyVersion.greaterThanOrEqualTo(comparableVersion);
   }
 
   private static Statement buildFixStatement(final String variableName) {
-    ExpressionStmt newStatement = new ExpressionStmt();
-    ObjectCreationExpr hardeningConverter = new ObjectCreationExpr();
+    final ExpressionStmt newStatement = new ExpressionStmt();
+    final ObjectCreationExpr hardeningConverter = new ObjectCreationExpr();
     hardeningConverter.setType(new ClassOrInterfaceType("HardeningConverter"));
-    MethodCallExpr registerConverterCall =
+    final MethodCallExpr registerConverterCall =
         new MethodCallExpr("registerConverter", hardeningConverter);
     newStatement.setExpression(registerConverterCall);
     registerConverterCall.setScope(new NameExpr(variableName));
@@ -103,37 +96,6 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
                 "com.thoughtworks.xstream".equals(dependency.group())
                     && "xstream".equals(dependency.artifact()))
         .findFirst();
-  }
-
-  private static boolean isGreaterThanOrEqualTo(String version, String compareToVersion) {
-    String[] versionParts = version.split("\\.");
-    String[] compareToVersionParts = compareToVersion.split("\\.");
-
-    // Compare major version
-    int majorVersionComparison =
-        Integer.compare(
-            Integer.parseInt(versionParts[0]), Integer.parseInt(compareToVersionParts[0]));
-    if (majorVersionComparison > 0) {
-      return true; // Current version is greater
-    } else if (majorVersionComparison < 0) {
-      return false; // Current version is less
-    }
-
-    // Compare minor version
-    int minorVersionComparison =
-        Integer.compare(
-            Integer.parseInt(versionParts[1]), Integer.parseInt(compareToVersionParts[1]));
-    if (minorVersionComparison > 0) {
-      return true; // Current version is greater
-    } else if (minorVersionComparison < 0) {
-      return false; // Current version is less
-    }
-
-    // Compare patch version
-    int patchVersionComparison =
-        Integer.compare(
-            Integer.parseInt(versionParts[2]), Integer.parseInt(compareToVersionParts[2]));
-    return patchVersionComparison >= 0;
   }
 
   private static final DependencyGAV JAVA_SECURITY_TOOLKIT_XSTREAM =

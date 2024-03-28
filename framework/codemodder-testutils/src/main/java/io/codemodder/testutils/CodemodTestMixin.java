@@ -53,6 +53,18 @@ public interface CodemodTestMixin {
                 })
             .toList();
 
+    List<ProjectProvider> projectProviders =
+        Arrays.stream(metadata.projectProviders())
+            .map(
+                projectProvider -> {
+                  try {
+                    return (ProjectProvider) projectProvider.newInstance();
+                  } catch (InstantiationException | IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                  }
+                })
+            .toList();
+
     ThrowingConsumer<Path> testExecutor =
         path ->
             verifyCodemod(
@@ -62,6 +74,7 @@ public interface CodemodTestMixin {
                 testResourceDir,
                 path,
                 dependencies,
+                projectProviders,
                 metadata.doRetransformTest());
 
     return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
@@ -74,6 +87,7 @@ public interface CodemodTestMixin {
       final Path testResourceDir,
       final Path before,
       final List<DependencyGAV> dependenciesExpected,
+      final List<ProjectProvider> projectProviders,
       final boolean doRetransformTest)
       throws IOException {
 
@@ -127,7 +141,7 @@ public interface CodemodTestMixin {
             tmpDir,
             IncludesExcludes.any(),
             codemod,
-            List.of(),
+            projectProviders,
             List.of(),
             FileCache.createDefault(),
             JavaParserFacade.from(
@@ -199,7 +213,7 @@ public interface CodemodTestMixin {
             tmpDir,
             IncludesExcludes.any(),
             codemod2,
-            List.of(),
+            projectProviders,
             List.of(),
             FileCache.createDefault(),
             JavaParserFacade.from(
