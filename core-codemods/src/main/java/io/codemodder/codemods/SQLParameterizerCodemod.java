@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.ast.ASTTransforms;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.List;
 import java.util.Optional;
@@ -26,8 +27,15 @@ public final class SQLParameterizerCodemod extends JavaParserChanger {
   @Override
   public List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    return cu.findAll(MethodCallExpr.class).stream()
-        .flatMap(mce -> onNodeFound(mce).stream())
-        .collect(Collectors.toList());
+    var changes =
+        cu.findAll(MethodCallExpr.class).stream()
+            .flatMap(mce -> onNodeFound(mce).stream())
+            .collect(Collectors.toList());
+    // Cleanup, removes empty string concatenations and unused variables
+    ASTTransforms.removeEmptyStringConcatenation(cu);
+    // TODO hits a bug with javaparser, where adding nodes won't result in the correct children
+    // order. This causes the following to remove actually used variables
+    // ASTTransforms.removeUnusedLocalVariables(compilationUnit);
+    return changes;
   }
 }

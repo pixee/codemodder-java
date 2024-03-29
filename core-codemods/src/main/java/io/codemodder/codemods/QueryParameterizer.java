@@ -4,14 +4,11 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.ast.LinearizedStringExpression;
-import io.codemodder.ast.LocalVariableDeclaration;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
-
 
 final class QueryParameterizer {
 
