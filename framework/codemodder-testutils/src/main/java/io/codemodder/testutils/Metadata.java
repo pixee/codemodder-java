@@ -1,6 +1,7 @@
 package io.codemodder.testutils;
 
 import io.codemodder.CodeChanger;
+import io.codemodder.ProjectProvider;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,8 +36,10 @@ public @interface Metadata {
   boolean doRetransformTest() default true;
 
   /**
-   * Custom {@link io.codemodder.ProjectProvider}s required for certain tests. A usage example can
-   * be found at {@code HardenXStreamCodemodTestProjectProvider}
+   * Some codemods change their behavior based on the context of the app -- like which versions of
+   * libraries are present. If you want to simulate specific contextual conditions related to
+   * dependencies, you can add a customized provider here A usage example can be found at {@code
+   * HardenXStreamCodemodTestProjectProvider}
    */
-  Class<?>[] projectProviders() default {};
+  Class<? extends ProjectProvider>[] projectProviders() default {};
 }

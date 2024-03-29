@@ -18,6 +18,8 @@ import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Adds gadget filtering logic to XStream deserialization. */
 @Codemod(
@@ -78,6 +80,7 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
       final Version comparableVersion = Version.valueOf("1.4.8");
       return xtreamDependencyVersion.greaterThanOrEqualTo(comparableVersion);
     } catch (final Exception e) {
+      LOG.error("Error while parsing dependency version", e);
       return false;
     }
   }
@@ -111,4 +114,6 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
           DependencyLicenses.MIT,
           "https://github.com/pixee/java-security-toolkit-xstream",
           true);
+
+  private static final Logger LOG = LoggerFactory.getLogger(HardenXStreamCodemod.class);
 }
