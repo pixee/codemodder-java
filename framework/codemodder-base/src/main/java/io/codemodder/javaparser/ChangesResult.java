@@ -5,13 +5,12 @@ import java.util.List;
 
 /** Represents the result of changes made during parsing. */
 public interface ChangesResult {
-
-  ChangesResult noChanges = new DefaultChangesResult(false, List.of());
-  ChangesResult changesApplied = new DefaultChangesResult(true, List.of());
-
   boolean areChangesApplied();
 
   List<DependencyGAV> getDependenciesRequired();
+
+  ChangesResult noChanges = new DefaultChangesResult(false, List.of());
+  ChangesResult changesApplied = new DefaultChangesResult(true, List.of());
 
   static ChangesResult changesAppliedWith(List<DependencyGAV> dependenciesRequired) {
     if (dependenciesRequired == null || dependenciesRequired.isEmpty()) {

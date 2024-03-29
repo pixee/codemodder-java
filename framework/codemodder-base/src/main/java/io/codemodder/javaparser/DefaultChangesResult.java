@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 final class DefaultChangesResult implements ChangesResult {
-  
+
   private final boolean changesApplied;
   private final List<DependencyGAV> dependenciesRequired;
 
