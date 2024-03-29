@@ -6,6 +6,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.Type;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
@@ -62,6 +63,14 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
+    protected DetectorRule getDetectorRule() {
+      return new DetectorRule(
+          "java:S2130",
+          "Parsing should be used to convert `String`s to primitives",
+          "https://rules.sonarsource.com/java/RSPEC-2130/");
+    }
+
+    @Override
     public ChangesResult onIssueFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
@@ -113,6 +122,14 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
           MethodCallExpr.class,
           RegionNodeMatcher.MATCHES_START,
           CodemodReporterStrategy.empty());
+    }
+
+    @Override
+    protected DetectorRule getDetectorRule() {
+      return new DetectorRule(
+          "java:S2130",
+          "Parsing should be used to convert `String`s to primitives",
+          "https://rules.sonarsource.com/java/RSPEC-2130/");
     }
 
     @Override

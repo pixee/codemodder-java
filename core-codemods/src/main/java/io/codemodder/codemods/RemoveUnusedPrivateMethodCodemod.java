@@ -5,6 +5,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
@@ -26,6 +27,14 @@ public final class RemoveUnusedPrivateMethodCodemod
   public RemoveUnusedPrivateMethodCodemod(
       @ProvidedSonarScan(ruleId = "java:S1144") final RuleIssues issues) {
     super(issues, SimpleName.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S1144",
+        "Unused private methods should be removed",
+        "https://rules.sonarsource.com/java/RSPEC-1144");
   }
 
   @Override

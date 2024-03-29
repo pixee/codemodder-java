@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
@@ -30,6 +31,13 @@ public final class AvoidImplicitPublicConstructorCodemod
   public AvoidImplicitPublicConstructorCodemod(
       @ProvidedSonarScan(ruleId = "java:S1118") final RuleIssues issues) {
     super(issues, SimpleName.class);
+  }
+
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S1118",
+        "Utility classes should not have public constructors",
+        "https://rules.sonarsource.com/java/RSPEC-1118/");
   }
 
   @Override

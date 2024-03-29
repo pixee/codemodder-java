@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
@@ -22,6 +23,14 @@ public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChan
   public SubstituteReplaceAllCodemod(
       @ProvidedSonarScan(ruleId = "java:S5361") final RuleIssues issues) {
     super(issues, SimpleName.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S5361",
+        "`String#replace` should be preferred to `String#replaceAll`",
+        "https://rules.sonarsource.com/java/RSPEC-5361");
   }
 
   @Override

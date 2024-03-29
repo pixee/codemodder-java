@@ -40,7 +40,8 @@ public final class ASTs {
   /** Test for this pattern: {@link VariableDeclarator} -&gt; {@link Expression} ({@code expr}) */
   public static Optional<VariableDeclarator> isInitExpr(final Expression expr) {
     return expr.getParentNode()
-        .map(p -> p instanceof VariableDeclarator ? (VariableDeclarator) p : null);
+        .map(p -> p instanceof VariableDeclarator ? (VariableDeclarator) p : null)
+        .filter(vd -> vd.getInitializer().filter(init -> init == expr).isPresent());
   }
 
   /** Test for this pattern: {@link TryStmt} -&gt; {@link VariableDeclarationExpr} ({@code vde}) */

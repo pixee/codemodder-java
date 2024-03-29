@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
@@ -25,6 +26,14 @@ public final class RemoveRedundantVariableCreationCodemod
   public RemoveRedundantVariableCreationCodemod(
       @ProvidedSonarScan(ruleId = "java:S1488") final RuleIssues issues) {
     super(issues, ObjectCreationExpr.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S1488",
+        "Local variables should not be declared and then immediately returned or thrown",
+        "https://rules.sonarsource.com/java/RSPEC-1488");
   }
 
   @Override

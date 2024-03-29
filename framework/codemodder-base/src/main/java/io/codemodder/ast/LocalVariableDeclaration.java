@@ -15,7 +15,11 @@ import java.util.Optional;
  * <a href="https://docs.oracle.com/javase/specs/jls/se19/html/jls-6.html#jls-6.1">Java Language
  * Specification - Section 6.1</a> for all the possible ways a local variable can be declarared.
  */
-public abstract class LocalVariableDeclaration implements LocalDeclaration {
+public abstract sealed class LocalVariableDeclaration implements LocalDeclaration
+    permits ForEachDeclaration,
+        ForInitDeclaration,
+        TryResourceDeclaration,
+        ExpressionStmtVariableDeclaration {
 
   protected VariableDeclarationExpr vde;
   protected VariableDeclarator vd;

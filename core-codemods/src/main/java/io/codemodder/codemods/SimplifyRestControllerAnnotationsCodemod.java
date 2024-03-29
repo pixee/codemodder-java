@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
@@ -33,6 +34,14 @@ public final class SimplifyRestControllerAnnotationsCodemod
   public SimplifyRestControllerAnnotationsCodemod(
       @ProvidedSonarScan(ruleId = "java:S6833") final RuleIssues issues) {
     super(issues, ClassOrInterfaceDeclaration.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S6833",
+        "`@Controller` should be replaced with `@RestController`",
+        "https://rules.sonarsource.com/java/RSPEC-6833");
   }
 
   @Override

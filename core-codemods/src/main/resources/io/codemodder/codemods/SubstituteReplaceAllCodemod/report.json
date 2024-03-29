@@ -1,5 +1,5 @@
 {
-  "summary" : "Fixed inefficient usage of `String#replaceAll()` (Sonar)",
+  "summary" : "Fixed inefficient usage of `String#replaceAll()`",
   "change" : "Fixed inefficient usage of `String#replaceAll()`.",
   "reviewGuidanceJustification" : "There should be no functional changes after this change, but this depends on Sonar's accuracy Sonar in assessing whether the first argument contains regex metacharacters. Our testing shows this is a safe assumption, but the behavior can't be guaranteed.",
   "references" : [

@@ -5,26 +5,15 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
-import com.github.javaparser.ast.expr.EnclosedExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.IntegerLiteralExpr;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.Either;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
 import io.codemodder.ast.TryResourceDeclaration;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.javatuples.Pair;
@@ -62,7 +51,6 @@ public final class SQLParameterizer {
                   || n.getNameAsString().equals("executeLargeUpdate")
                   || n.getNameAsString().equals("executeUpdate"));
 
-      // TODO will this catch PreparedStatement objects?
       final Predicate<MethodCallExpr> hasScopeSQLStatement =
           n ->
               n.getScope()
@@ -80,15 +68,32 @@ public final class SQLParameterizer {
       final Predicate<MethodCallExpr> isFirstArgumentNotSLE =
           n ->
               n.getArguments().getFirst().map(e -> !(e instanceof StringLiteralExpr)).orElse(false);
-
-      final Predicate<MethodCallExpr> rule1 =
-          isExecute.and(hasScopeSQLStatement.and(isFirstArgumentNotSLE));
-      return rule1.test(methodCallExpr);
+      // is execute of an statement object whose first argument is not a string?
+      if (isExecute.and(hasScopeSQLStatement.and(isFirstArgumentNotSLE)).test(methodCallExpr)) {
+        return true;
+      }
+      return false;
 
       // Thrown by the JavaParser Symbol Solver when it can't resolve types
     } catch (RuntimeException e) {
       return false;
     }
+  }
+
+  /**
+   * Tries to find the source of an expression if it can be uniquely defined, otherwise, returns
+   * self.
+   */
+  public static Expression resolveExpression(final Expression expr) {
+    return Optional.of(expr)
+        .map(e -> e instanceof NameExpr ? e.asNameExpr() : null)
+        .flatMap(n -> ASTs.findEarliestLocalDeclarationOf(n.getName()))
+        .map(s -> s instanceof LocalVariableDeclaration ? (LocalVariableDeclaration) s : null)
+        // TODO currently it assumes it is never assigned, add support for definite assignments here
+        .filter(ASTs::isFinalOrNeverAssigned)
+        .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
+        .map(SQLParameterizer::resolveExpression)
+        .orElse(expr);
   }
 
   private Optional<MethodCallExpr> isConnectionCreateStatement(final Expression expr) {
@@ -319,27 +324,55 @@ public final class SQLParameterizer {
       final List<Deque<Expression>> injections, Expression root) {
     final List<Expression> combinedExpressions = new ArrayList<>();
     for (final var injection : injections) {
+      // fix start
       final var start = injection.removeFirst();
       final var startString = start.asStringLiteralExpr().getValue();
       final var builder = new StringBuilder(startString);
-      builder.replace(startString.length() - 1, startString.length(), "?");
+      final int lastQuoteIndex = startString.lastIndexOf('\'') + 1;
+      final var prepend = startString.substring(lastQuoteIndex);
+      builder.replace(lastQuoteIndex - 1, startString.length(), "?");
       start.asStringLiteralExpr().setValue(builder.toString());
 
+      // fix end
       final var end = injection.removeLast();
-      final var newEnd = end.asStringLiteralExpr().getValue().substring(1);
+      final var endString = end.asStringLiteralExpr().getValue();
+      final int firstQuoteIndex = endString.indexOf('\'');
+      final var newEnd = end.asStringLiteralExpr().getValue().substring(firstQuoteIndex + 1);
+      final var append = endString.substring(0, firstQuoteIndex);
       if (newEnd.equals("")) {
         root = collapse(end, root);
       } else {
         end.asStringLiteralExpr().setValue(newEnd);
       }
-      final var pair = combineExpressions(injection, root);
-      combinedExpressions.add(pair.getValue0());
+
+      // build expression for parameters
+      final var pair = buildParameter(injection, root);
+      var combined = pair.getValue0();
       root = pair.getValue1();
+      // add the suffix of start
+      if (prepend != "") {
+        final var newCombined =
+            new BinaryExpr(new StringLiteralExpr(prepend), combined, Operator.PLUS);
+        if (combined == root) {
+          root = newCombined;
+        }
+        combined = newCombined;
+      }
+      // add the prefix of end
+      if (append != "") {
+        final var newCombined =
+            new BinaryExpr(combined, new StringLiteralExpr(append), Operator.PLUS);
+        if (combined == root) {
+          root = newCombined;
+        }
+        combined = newCombined;
+      }
+      combinedExpressions.add(combined);
     }
     return new Pair<>(combinedExpressions, root);
   }
 
-  private Pair<Expression, Expression> combineExpressions(
+  private Pair<Expression, Expression> buildParameter(
       final Deque<Expression> injectionExpressions, Expression root) {
     final var it = injectionExpressions.iterator();
     Expression combined = it.next();
@@ -504,7 +537,6 @@ public final class SQLParameterizer {
    * case.
    */
   public boolean checkAndFix() {
-
     if (executeCall.findCompilationUnit().isPresent()) {
       this.compilationUnit = executeCall.findCompilationUnit().get();
     } else {
@@ -517,7 +549,12 @@ public final class SQLParameterizer {
           findStatementCreationExpr(executeCall).flatMap(this::validateStatementCreationExpr);
       if (stmtObject.isPresent()) {
         // Now look for injections
-        final var queryp = new QueryParameterizer(executeCall.getArgument(0));
+        final QueryParameterizer queryp;
+        // should not be emtpy
+        if (executeCall.getArguments().isEmpty()) {
+          return false;
+        }
+        queryp = new QueryParameterizer(executeCall.getArgument(0));
         // If any of the strings used in the query is declared after the stmt object, reject
         final var queryInScope =
             stmtObject

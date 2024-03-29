@@ -5,6 +5,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
@@ -25,6 +26,14 @@ public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChange
   public AddMissingOverrideCodemod(
       @ProvidedSonarScan(ruleId = "java:S1161") final RuleIssues issues) {
     super(issues, SimpleName.class);
+  }
+
+  @Override
+  protected DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java:S1161",
+        "`@Override` should be used on overriding and implementing methods",
+        "https://rules.sonarsource.com/java/RSPEC-1161/");
   }
 
   @Override
