@@ -56,4 +56,18 @@ final class HardenXStreamCodemodTestProjectProvider {
       return List.of(DependencyGAV.createDefault("com.thoughtworks.xstream", "xstream", "1.4.9"));
     }
   }
+
+  public static class XStreamUnparseableDependencyVersion implements ProjectProvider {
+    @Override
+    public DependencyUpdateResult updateDependencies(
+        Path projectDir, Path file, List<DependencyGAV> remainingFileDependencies)
+        throws IOException {
+      return DependencyUpdateResult.EMPTY_UPDATE;
+    }
+
+    @Override
+    public Collection<DependencyGAV> getAllDependencies(Path projectDir, Path file) {
+      return List.of(DependencyGAV.createDefault("com.thoughtworks.xstream", "xstream", ""));
+    }
+  }
 }

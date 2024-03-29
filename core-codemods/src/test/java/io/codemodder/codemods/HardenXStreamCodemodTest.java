@@ -30,3 +30,12 @@ final class HardenXStreamCodemodTestDenyTypesGreaterDependencyVersion implements
     dependencies = "io.github.pixee:java-security-toolkit-xstream:1.0.2",
     projectProviders = HardenXStreamCodemodTestProjectProvider.XStreamLowerDependencyVersion.class)
 final class HardenXStreamCodemodTestDenyTypesLowerDependencyVersion implements CodemodTestMixin {}
+
+@Metadata(
+    codemodType = HardenXStreamCodemod.class,
+    testResourceDir = "harden-xstream",
+    dependencies = "io.github.pixee:java-security-toolkit-xstream:1.0.2",
+    projectProviders =
+        HardenXStreamCodemodTestProjectProvider.XStreamUnparseableDependencyVersion.class)
+final class HardenXStreamCodemodTestDenyTypesUnparseableDependencyVersion
+    implements CodemodTestMixin {}

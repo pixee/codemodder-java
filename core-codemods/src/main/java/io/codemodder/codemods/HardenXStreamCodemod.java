@@ -73,10 +73,14 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
       return false;
     }
 
-    final Version xtreamDependencyVersion =
-        Version.valueOf(xstreamDependencyOptional.get().version());
-    final Version comparableVersion = Version.valueOf("1.4.8");
-    return xtreamDependencyVersion.greaterThanOrEqualTo(comparableVersion);
+    try {
+      final Version xtreamDependencyVersion =
+          Version.valueOf(xstreamDependencyOptional.get().version());
+      final Version comparableVersion = Version.valueOf("1.4.8");
+      return xtreamDependencyVersion.greaterThanOrEqualTo(comparableVersion);
+    } catch (final Exception e) {
+      return false;
+    }
   }
 
   private static Statement buildFixStatement(final String variableName) {
