@@ -16,6 +16,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import java.util.Optional;
@@ -53,21 +54,21 @@ public final class MigrateSpringJobBuilderFactoryCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr jobBuilderFactoryBuild,
       final Result result) {
 
     if (!"build".equals(jobBuilderFactoryBuild.getNameAsString())) {
-      return false;
+      return ChangesResult.noChanges;
     }
 
     Optional<MethodDeclaration> methodDeclarationRef =
         jobBuilderFactoryBuild.findAncestor(MethodDeclaration.class);
     if (methodDeclarationRef.isEmpty()) {
       // if there's no enclosing method declaration, we're in an unexpected state
-      return false;
+      return ChangesResult.noChanges;
     }
 
     Optional<MethodCallExpr> previousStart =
@@ -76,7 +77,7 @@ public final class MigrateSpringJobBuilderFactoryCodemod
             .withName("start")
             .result();
     if (previousStart.isEmpty()) {
-      return false;
+      return ChangesResult.noChanges;
     }
 
     Optional<MethodCallExpr> previousGet =
@@ -86,13 +87,13 @@ public final class MigrateSpringJobBuilderFactoryCodemod
             .result();
 
     if (previousGet.isEmpty()) {
-      return false;
+      return ChangesResult.noChanges;
     }
 
     Optional<FieldAccessExpr> jobBuilderFactoryName =
         expect(previousGet.get().getScope().get()).toBeFieldAccessExpression().result();
     if (jobBuilderFactoryName.isEmpty()) {
-      return false;
+      return ChangesResult.noChanges;
     }
 
     // if there's a JobRepository in the arguments to the function, use that or create a new one
@@ -158,7 +159,7 @@ public final class MigrateSpringJobBuilderFactoryCodemod
 
     removeImportIfUnused(cu, JOB_BUILDER_FACTORY_FQCN);
 
-    return true;
+    return ChangesResult.changesApplied;
   }
 
   private static final String JOB_REPOSITORY_FQCN =

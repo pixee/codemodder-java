@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithVariables;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -29,7 +30,7 @@ public final class DeclareVariableOnSeparateLineCodemod
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator variableDeclarator,
@@ -38,7 +39,7 @@ public final class DeclareVariableOnSeparateLineCodemod
     final Optional<Node> parentOptional = variableDeclarator.getParentNode();
 
     if (parentOptional.isEmpty()) {
-      return false;
+      return ChangesResult.noChanges;
     }
 
     final NodeWithVariables<?> parentNode = (NodeWithVariables<?>) parentOptional.get();
@@ -54,6 +55,8 @@ public final class DeclareVariableOnSeparateLineCodemod
               (VariableDeclarationExpr) parentNode);
     }
 
-    return declareVariableOnSeparateLine.splitVariablesIntoTheirOwnStatements();
+    return declareVariableOnSeparateLine.splitVariablesIntoTheirOwnStatements()
+        ? ChangesResult.changesApplied
+        : ChangesResult.noChanges;
   }
 }

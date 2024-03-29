@@ -7,6 +7,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -24,7 +25,7 @@ public final class RandomizeSeedCodemod extends SarifPluginJavaParserChanger<Met
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr setSeedCall,
@@ -33,6 +34,6 @@ public final class RandomizeSeedCodemod extends SarifPluginJavaParserChanger<Met
         new MethodCallExpr(new NameExpr(System.class.getSimpleName()), "currentTimeMillis");
     NodeList<Expression> arguments = setSeedCall.getArguments();
     arguments.set(0, safeExpression);
-    return true;
+    return ChangesResult.changesApplied;
   }
 }

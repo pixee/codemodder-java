@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.ZipSecurity;
 import java.util.List;
@@ -26,7 +27,7 @@ public final class HardenZipEntryPathsCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator variableDeclarator,
@@ -39,11 +40,6 @@ public final class HardenZipEntryPathsCodemod
     securedCall.setArguments(newZipInputStreamCall.getArguments());
     variableDeclarator.setInitializer(securedCall);
     ASTTransforms.addImportIfMissing(cu, ZipSecurity.class);
-    return true;
-  }
-
-  @Override
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+    return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
   }
 }

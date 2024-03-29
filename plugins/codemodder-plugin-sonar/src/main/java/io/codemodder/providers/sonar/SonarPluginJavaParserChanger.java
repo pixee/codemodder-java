@@ -4,6 +4,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
 import java.util.ArrayList;
@@ -75,10 +76,11 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
           if (node.getRange().isPresent()) {
             Range range = node.getRange().get();
             if (regionNodeMatcher.matches(region, range)) {
-              boolean changeSuccessful = onIssueFound(context, cu, (T) node, issue);
-              if (changeSuccessful) {
+              ChangesResult changeSuccessful = onIssueFound(context, cu, (T) node, issue);
+              if (changeSuccessful.areChangesApplied()) {
                 codemodChanges.add(
-                    CodemodChange.from(region.start().line(), dependenciesRequired()));
+                    CodemodChange.from(
+                        region.start().line(), changeSuccessful.getDependenciesRequired()));
               }
             }
           }
@@ -100,8 +102,8 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
    * @param cu the parsed model of the file being transformed
    * @param node the node to act on
    * @param issue the given Sonar issue to act on
-   * @return true, if the change was made, false otherwise
+   * @return {@link ChangesResult}, that contains result changes
    */
-  public abstract boolean onIssueFound(
+  public abstract ChangesResult onIssueFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
 }

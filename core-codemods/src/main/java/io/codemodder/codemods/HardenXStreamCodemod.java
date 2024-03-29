@@ -13,6 +13,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.zafarkhaja.semver.Version;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,7 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator newXStreamVariable,
@@ -42,15 +43,13 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
     final Optional<Statement> existingStatementOptional =
         newXStreamVariable.findAncestor(Statement.class);
     if (existingStatementOptional.isEmpty()) {
-      return false;
+      return ChangesResult.noChanges;
     }
     final Statement existingStatement = existingStatementOptional.get();
 
     final String nameAsString = newXStreamVariable.getNameAsString();
 
-    useDenyTypes = canUseDenyTypesByWildcard(context);
-
-    if (useDenyTypes) {
+    if (canUseDenyTypesByWildcard(context)) {
       final Statement fixStatement =
           StaticJavaParser.parseStatement(
               "UnwantedTypes.dangerousClassNameTokens().forEach( token -> { "
@@ -59,13 +58,13 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
 
       ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
       ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.UnwantedTypes");
-    } else {
-      final Statement fixStatement = buildFixStatement(nameAsString);
-      ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
-      ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.xstream.HardeningConverter");
+      return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
     }
 
-    return true;
+    final Statement fixStatement = buildFixStatement(nameAsString);
+    ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
+    ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.xstream.HardeningConverter");
+    return ChangesResult.changesAppliedWith(List.of(JAVA_SECURITY_TOOLKIT_XSTREAM));
   }
 
   private boolean canUseDenyTypesByWildcard(final CodemodInvocationContext context) {
@@ -106,14 +105,6 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
         .findFirst();
   }
 
-  @Override
-  public List<DependencyGAV> dependenciesRequired() {
-
-    return useDenyTypes
-        ? List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT)
-        : List.of(JAVA_SECURITY_TOOLKIT_XSTREAM);
-  }
-
   private static final DependencyGAV JAVA_SECURITY_TOOLKIT_XSTREAM =
       DependencyGAV.createDefault(
           "io.github.pixee",
@@ -123,8 +114,6 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
           DependencyLicenses.MIT,
           "https://github.com/pixee/java-security-toolkit-xstream",
           true);
-
-  private static boolean useDenyTypes;
 
   private static final Logger LOG = LoggerFactory.getLogger(HardenXStreamCodemod.class);
 }

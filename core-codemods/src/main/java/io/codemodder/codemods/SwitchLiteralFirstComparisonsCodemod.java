@@ -21,6 +21,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.pmd.PmdScan;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
@@ -56,7 +57,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     // some of the methods that this rule applies to are not flippable, like compareTo() would
     // change the logic after
     if (!flippableComparisonMethods.contains(methodCallExpr.getNameAsString())) {
-      return false;
+      return ChangesResult.noChanges;
     }
 
     final List<VariableDeclarator> variableDeclarators = cu.findAll(VariableDeclarator.class);
@@ -77,7 +78,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
                 variableDeclarators, simpleNameOptional.get())
             || hasSimpleNameNotNullAnnotation(cu, simpleNameOptional.get(), variableDeclarators)
             || hasSimpleNamePreviousNullAssertion(cu, simpleNameOptional.get()))) {
-      return false;
+      return ChangesResult.noChanges;
     }
 
     Expression leftSide = methodCallExpr.getScope().get();
@@ -87,13 +88,13 @@ public final class SwitchLiteralFirstComparisonsCodemod
       if ("Ljava/lang/String;".equals(leftType.toDescriptor())) {
         methodCallExpr.setScope(rightSide);
         methodCallExpr.setArgument(0, leftSide);
-        return true;
+        return ChangesResult.changesApplied;
       }
     } catch (final UnsolvedSymbolException e) {
       // expected in cases where we can't resolve the type
     }
 
-    return false;
+    return ChangesResult.noChanges;
   }
 
   /**

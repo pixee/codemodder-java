@@ -6,6 +6,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.google.common.annotations.VisibleForTesting;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,10 +129,11 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
           if (node.getRange().isPresent()) {
             Range range = node.getRange().get();
             if (regionNodeMatcher.matches(region, range)) {
-              boolean changeSuccessful = onResultFound(context, cu, (T) node, result);
-              if (changeSuccessful) {
+              ChangesResult changeSuccessful = onResultFound(context, cu, (T) node, result);
+              if (changeSuccessful.areChangesApplied()) {
                 codemodChanges.add(
-                    CodemodChange.from(region.start().line(), dependenciesRequired()));
+                    CodemodChange.from(
+                        region.start().line(), changeSuccessful.getDependenciesRequired()));
               }
             }
           }
@@ -154,8 +156,8 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
    * @param cu the parsed model of the file being transformed
    * @param node the node to act on
    * @param result the given SARIF result to act on
-   * @return true, if the change was made, false otherwise
+   * @return {@link ChangesResult}, that contains result changes
    */
-  public abstract boolean onResultFound(
+  public abstract ChangesResult onResultFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Result result);
 }

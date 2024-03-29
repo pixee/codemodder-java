@@ -6,6 +6,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.Type;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -61,7 +62,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
-    public boolean onIssueFound(
+    public ChangesResult onIssueFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr objectCreationExpr,
@@ -81,10 +82,10 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
         replacementExpr.addArgument(argument.get());
 
         objectCreationExpr.replace(replacementExpr);
-        return true;
+        return ChangesResult.changesApplied;
       }
 
-      return false;
+      return ChangesResult.noChanges;
     }
 
     private Optional<Expression> extractArgumentExpression(Expression argumentExpression) {
@@ -115,7 +116,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
-    public boolean onIssueFound(
+    public ChangesResult onIssueFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final MethodCallExpr methodCallExpr,
@@ -131,11 +132,13 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
         if (replacementMethod.isPresent()) {
           methodCallExpr.setName(replacementMethod.get());
 
-          return handleMethodCallChainsAfterValueOfIfNeeded(methodCallExpr);
+          return handleMethodCallChainsAfterValueOfIfNeeded(methodCallExpr)
+              ? ChangesResult.changesApplied
+              : ChangesResult.noChanges;
         }
       }
 
-      return false;
+      return ChangesResult.noChanges;
     }
 
     private String retrieveTargetTypeFromMethodCallExpr(final MethodCallExpr methodCallExpr) {

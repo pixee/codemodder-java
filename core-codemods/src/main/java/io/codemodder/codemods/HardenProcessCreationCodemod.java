@@ -12,6 +12,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.SystemCommand;
 import java.util.List;
@@ -32,7 +33,7 @@ public final class HardenProcessCreationCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
@@ -59,7 +60,7 @@ public final class HardenProcessCreationCodemod
     final boolean containsOnlyConstantsAndHardcodedValues = onlyVariableExpressions.isEmpty();
 
     if (containsOnlyConstantsAndHardcodedValues) {
-      return false;
+      return ChangesResult.noChanges;
     }
 
     Node parent = methodCallExpr.getParentNode().get();
@@ -73,13 +74,11 @@ public final class HardenProcessCreationCodemod
     safeExpression.setArguments(nodeList);
 
     parent.replace(methodCallExpr, safeExpression);
-    return true;
+    return ChangesResult.changesAppliedWith(dependencies);
   }
 
-  @Override
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
-  }
+  private static final List<DependencyGAV> dependencies =
+      List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
 
   private List<SimpleName> extractVariableNames(List<FieldDeclaration> fieldDeclarations) {
     return fieldDeclarations.stream()

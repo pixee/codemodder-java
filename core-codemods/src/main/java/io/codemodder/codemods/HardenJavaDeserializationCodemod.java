@@ -15,6 +15,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.ObjectInputFilters;
 import java.io.ObjectInputStream;
@@ -58,7 +59,7 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr objectCreationExpr,
@@ -67,12 +68,7 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
           .withStaticMethod(ObjectInputFilters.class.getName(), "createSafeObjectInputStream")
           .withStaticImport()
           .withSameArguments();
-      return true;
-    }
-
-    @Override
-    public List<DependencyGAV> dependenciesRequired() {
-      return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+      return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
     }
   }
 
@@ -90,7 +86,7 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final VariableDeclarator variableDeclarator,
@@ -100,14 +96,14 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
           generateFilterHardeningStatement(variableDeclarator.getNameAsExpression());
       Optional<Node> wrappedParentNode = variableDeclarator.getParentNode();
       if (wrappedParentNode.isEmpty()) {
-        return false;
+        return ChangesResult.noChanges;
       }
 
       Node parentNode = wrappedParentNode.get();
       Class<? extends Node> parentType = parentNode.getClass();
 
       if (FieldDeclaration.class.equals(parentType)) {
-        return false;
+        return ChangesResult.noChanges;
       }
 
       if (VariableDeclarationExpr.class.equals(parentType)) {
@@ -117,7 +113,7 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
           ExpressionStmt expressionStmt = (ExpressionStmt) variableDeclarationParent;
           ASTTransforms.addStatementAfterStatement(expressionStmt, newStatement);
           addImportIfMissing(cu, ObjectInputFilters.class.getName());
-          return true;
+          return ChangesResult.changesAppliedWith(dependency);
         }
 
         // if we're not in an expression statement, we might be in a try-with-resources statement
@@ -126,11 +122,11 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
           BlockStmt tryBlock = tryStatement.getTryBlock();
           ASTTransforms.addStatementBeforeStatement(tryBlock.getStatements().get(0), newStatement);
           addImportIfMissing(cu, ObjectInputFilters.class.getName());
-          return true;
+          return ChangesResult.changesAppliedWith(dependency);
         }
       }
 
-      return false;
+      return ChangesResult.noChanges;
     }
 
     /**
@@ -146,9 +142,7 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
       return new ExpressionStmt(hardenStatement);
     }
 
-    @Override
-    public List<DependencyGAV> dependenciesRequired() {
-      return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
-    }
+    private static final List<DependencyGAV> dependency =
+        List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 }

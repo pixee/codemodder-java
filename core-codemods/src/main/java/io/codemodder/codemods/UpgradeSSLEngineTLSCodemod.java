@@ -9,6 +9,7 @@ import com.github.javaparser.ast.expr.ArrayCreationExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
 
@@ -29,7 +30,7 @@ public final class UpgradeSSLEngineTLSCodemod extends SarifPluginJavaParserChang
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr setEnabledProtocolsCall,
@@ -37,6 +38,6 @@ public final class UpgradeSSLEngineTLSCodemod extends SarifPluginJavaParserChang
     ArrayCreationExpr safeProtocols =
         newArray("String", new StringLiteralExpr(SSLProtocols.safeTlsVersion));
     setEnabledProtocolsCall.setArguments(NodeList.nodeList(safeProtocols));
-    return true;
+    return ChangesResult.changesApplied;
   }
 }

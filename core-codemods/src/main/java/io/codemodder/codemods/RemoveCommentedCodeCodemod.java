@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.comments.Comment;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -35,7 +36,7 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final Comment comment,
@@ -43,6 +44,6 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
 
     comment.removeForced();
 
-    return true;
+    return ChangesResult.changesApplied;
   }
 }

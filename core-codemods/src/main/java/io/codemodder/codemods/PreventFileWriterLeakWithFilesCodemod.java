@@ -11,6 +11,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.io.File;
 import java.io.Writer;
@@ -35,7 +36,7 @@ public final class PreventFileWriterLeakWithFilesCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr newBufferedWriterCall,
@@ -53,6 +54,6 @@ public final class PreventFileWriterLeakWithFilesCodemod
     newFilesBufferedWriterCall.setArguments(NodeList.nodeList(pathArgument));
     parent.replace(newBufferedWriterCall, newFilesBufferedWriterCall);
     addImportIfMissing(cu, "java.nio.file.Files");
-    return true;
+    return ChangesResult.changesApplied;
   }
 }

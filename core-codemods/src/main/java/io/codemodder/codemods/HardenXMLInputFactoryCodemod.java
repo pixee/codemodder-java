@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.XMLInputFactorySecurity;
 import java.util.List;
@@ -27,7 +28,7 @@ public final class HardenXMLInputFactoryCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator newFactoryVariable,
@@ -35,11 +36,9 @@ public final class HardenXMLInputFactoryCodemod
     final MethodCallExpr newFactory = newFactoryVariable.getInitializer().get().asMethodCallExpr();
     wrap(newFactory)
         .withStaticMethod(XMLInputFactorySecurity.class.getName(), "hardenFactory", true);
-    return true;
+    return ChangesResult.changesAppliedWith(dependencies);
   }
 
-  @Override
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
-  }
+  private static final List<DependencyGAV> dependencies =
+      List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
 }
