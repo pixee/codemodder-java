@@ -41,7 +41,7 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
     final Optional<Statement> existingStatementOptional =
         newXStreamVariable.findAncestor(Statement.class);
     if (existingStatementOptional.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
     final Statement existingStatement = existingStatementOptional.get();
 
@@ -56,13 +56,13 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
 
       ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
       ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.UnwantedTypes");
-      return ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
+      return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
     }
 
     final Statement fixStatement = buildFixStatement(nameAsString);
     ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
     ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.xstream.HardeningConverter");
-    return ChangesResult.changesApplied(List.of(JAVA_SECURITY_TOOLKIT_XSTREAM));
+    return ChangesResult.changesAppliedWith(List.of(JAVA_SECURITY_TOOLKIT_XSTREAM));
   }
 
   private boolean canUseDenyTypesByWildcard(final CodemodInvocationContext context) {

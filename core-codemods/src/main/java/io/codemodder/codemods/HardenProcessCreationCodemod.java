@@ -60,7 +60,7 @@ public final class HardenProcessCreationCodemod
     final boolean containsOnlyConstantsAndHardcodedValues = onlyVariableExpressions.isEmpty();
 
     if (containsOnlyConstantsAndHardcodedValues) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     Node parent = methodCallExpr.getParentNode().get();
@@ -74,7 +74,7 @@ public final class HardenProcessCreationCodemod
     safeExpression.setArguments(nodeList);
 
     parent.replace(methodCallExpr, safeExpression);
-    return ChangesResult.changesApplied(dependencies);
+    return ChangesResult.changesAppliedWith(dependencies);
   }
 
   private static final List<DependencyGAV> dependencies =

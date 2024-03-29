@@ -44,6 +44,6 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
 
     comment.removeForced();
 
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

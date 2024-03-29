@@ -39,9 +39,9 @@ public final class OverridesMatchParentSynchronizationCodemod
       Node parentNode = parentNodeRef.get();
       if (parentNode instanceof MethodDeclaration method) {
         method.setSynchronized(true);
-        return ChangesResult.changesApplied();
+        return ChangesResult.changesApplied;
       }
     }
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 }

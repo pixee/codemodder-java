@@ -46,7 +46,7 @@ public final class SimplifyRestControllerAnnotationsCodemod
         classOrInterfaceDeclaration.getAnnotationByName("Controller");
 
     if (controllerAnnotationOptional.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     replaceControllerToRestControllerAnnotation(cu, controllerAnnotationOptional.get());
@@ -60,7 +60,7 @@ public final class SimplifyRestControllerAnnotationsCodemod
 
     removeImportIfUnused(cu, "org.springframework.web.bind.annotation.ResponseBody");
 
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 
   private void replaceControllerToRestControllerAnnotation(

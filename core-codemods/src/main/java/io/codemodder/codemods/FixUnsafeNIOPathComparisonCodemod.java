@@ -42,7 +42,7 @@ public final class FixUnsafeNIOPathComparisonCodemod
 
     // make sure we have the event for the startsWith() call, not the getCanonicalPath() calls
     if (!"startsWith".equals(methodCallExpr.getNameAsString())) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     // fix the child reference
@@ -51,7 +51,7 @@ public final class FixUnsafeNIOPathComparisonCodemod
         expect(child).toBeMethodCallExpression().withName("getCanonicalPath").result();
 
     if (childGetCanonicalPathCall.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     Expression childScope = childGetCanonicalPathCall.get().getScope().get();
@@ -64,13 +64,13 @@ public final class FixUnsafeNIOPathComparisonCodemod
         expect(parent).toBeMethodCallExpression().withName("getCanonicalPath").result();
 
     if (parentGetCanonicalPathCall.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     Expression parentScope = parentGetCanonicalPathCall.get().getScope().get();
     MethodCallExpr newParentArgument = new MethodCallExpr(parentScope, "getCanonicalFile().toPath");
     methodCallExpr.setArgument(0, newParentArgument);
 
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

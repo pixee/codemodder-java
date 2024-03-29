@@ -48,7 +48,7 @@ public final class MakeJUnit5TestsPackagePrivateCodemod
       final ClassOrInterfaceDeclaration typeDefinition,
       final Result result) {
     typeDefinition.getModifiers().removeIf(modifier -> modifier.equals(Modifier.publicModifier()));
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 
   @Override

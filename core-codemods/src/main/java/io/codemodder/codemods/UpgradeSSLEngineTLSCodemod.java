@@ -38,6 +38,6 @@ public final class UpgradeSSLEngineTLSCodemod extends SarifPluginJavaParserChang
     ArrayCreationExpr safeProtocols =
         newArray("String", new StringLiteralExpr(SSLProtocols.safeTlsVersion));
     setEnabledProtocolsCall.setArguments(NodeList.nodeList(safeProtocols));
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

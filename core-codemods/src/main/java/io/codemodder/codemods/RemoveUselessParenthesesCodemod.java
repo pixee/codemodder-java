@@ -36,6 +36,6 @@ public final class RemoveUselessParenthesesCodemod
     Expression innerExpr = enclosedExpr.getInner();
     enclosedExpr.replace(innerExpr);
 
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

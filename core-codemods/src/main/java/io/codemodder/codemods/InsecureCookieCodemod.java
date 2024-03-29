@@ -57,8 +57,8 @@ public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCa
 
       ASTTransforms.addStatementBeforeStatement(maybeStmt.get(), newStatement);
       // Should we add a setSecure(false) after to retain behavior?
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 }

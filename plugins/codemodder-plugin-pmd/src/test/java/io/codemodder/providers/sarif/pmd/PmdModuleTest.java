@@ -66,7 +66,7 @@ final class PmdModuleTest {
         final CompilationUnit cu,
         final VariableDeclarator node,
         Result result) {
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
   }
 }

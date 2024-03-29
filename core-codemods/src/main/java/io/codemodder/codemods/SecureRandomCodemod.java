@@ -39,6 +39,6 @@ public final class SecureRandomCodemod extends SarifPluginJavaParserChanger<Obje
       final Result result) {
     objectCreationExpr.setType("SecureRandom");
     addImportIfMissing(cu, SecureRandom.class.getName());
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

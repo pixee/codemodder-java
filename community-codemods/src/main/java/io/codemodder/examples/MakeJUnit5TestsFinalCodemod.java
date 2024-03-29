@@ -49,7 +49,7 @@ public final class MakeJUnit5TestsFinalCodemod
       final ClassOrInterfaceDeclaration typeDefinition,
       final Result result) {
     typeDefinition.getModifiers().add(Modifier.finalModifier());
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 
   @Override

@@ -39,7 +39,7 @@ public final class DeclareVariableOnSeparateLineCodemod
     final Optional<Node> parentOptional = variableDeclarator.getParentNode();
 
     if (parentOptional.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     final NodeWithVariables<?> parentNode = (NodeWithVariables<?>) parentOptional.get();
@@ -56,7 +56,7 @@ public final class DeclareVariableOnSeparateLineCodemod
     }
 
     return declareVariableOnSeparateLine.splitVariablesIntoTheirOwnStatements()
-        ? ChangesResult.changesApplied()
-        : ChangesResult.noChanges();
+        ? ChangesResult.changesApplied
+        : ChangesResult.noChanges;
   }
 }

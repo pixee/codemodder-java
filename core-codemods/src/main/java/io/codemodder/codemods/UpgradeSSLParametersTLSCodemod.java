@@ -39,6 +39,6 @@ public final class UpgradeSSLParametersTLSCodemod
     ArrayCreationExpr safeProtocols =
         newArray("String", new StringLiteralExpr(SSLProtocols.safeTlsVersion));
     setEnabledProtocolsCall.setArguments(NodeList.nodeList(safeProtocols));
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

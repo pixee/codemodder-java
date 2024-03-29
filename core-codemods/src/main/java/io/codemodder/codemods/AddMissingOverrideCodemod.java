@@ -39,9 +39,9 @@ public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChange
       Node parentNode = parentNodeRef.get();
       if (parentNode instanceof MethodDeclaration method) {
         method.addAnnotation(Override.class);
-        return ChangesResult.changesApplied();
+        return ChangesResult.changesApplied;
       }
     }
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 }

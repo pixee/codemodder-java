@@ -36,6 +36,6 @@ public final class UpgradeSSLContextTLSCodemod
 
     getInstanceCall.setArguments(
         NodeList.nodeList(new StringLiteralExpr(SSLProtocols.safeTlsVersion)));
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

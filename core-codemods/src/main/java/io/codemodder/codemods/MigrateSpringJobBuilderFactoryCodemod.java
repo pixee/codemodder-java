@@ -61,14 +61,14 @@ public final class MigrateSpringJobBuilderFactoryCodemod
       final Result result) {
 
     if (!"build".equals(jobBuilderFactoryBuild.getNameAsString())) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     Optional<MethodDeclaration> methodDeclarationRef =
         jobBuilderFactoryBuild.findAncestor(MethodDeclaration.class);
     if (methodDeclarationRef.isEmpty()) {
       // if there's no enclosing method declaration, we're in an unexpected state
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     Optional<MethodCallExpr> previousStart =
@@ -77,7 +77,7 @@ public final class MigrateSpringJobBuilderFactoryCodemod
             .withName("start")
             .result();
     if (previousStart.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     Optional<MethodCallExpr> previousGet =
@@ -87,13 +87,13 @@ public final class MigrateSpringJobBuilderFactoryCodemod
             .result();
 
     if (previousGet.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     Optional<FieldAccessExpr> jobBuilderFactoryName =
         expect(previousGet.get().getScope().get()).toBeFieldAccessExpression().result();
     if (jobBuilderFactoryName.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     // if there's a JobRepository in the arguments to the function, use that or create a new one
@@ -159,7 +159,7 @@ public final class MigrateSpringJobBuilderFactoryCodemod
 
     removeImportIfUnused(cu, JOB_BUILDER_FACTORY_FQCN);
 
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 
   private static final String JOB_REPOSITORY_FQCN =

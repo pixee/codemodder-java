@@ -54,6 +54,6 @@ public final class PreventFileWriterLeakWithFilesCodemod
     newFilesBufferedWriterCall.setArguments(NodeList.nodeList(pathArgument));
     parent.replace(newBufferedWriterCall, newFilesBufferedWriterCall);
     addImportIfMissing(cu, "java.nio.file.Files");
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

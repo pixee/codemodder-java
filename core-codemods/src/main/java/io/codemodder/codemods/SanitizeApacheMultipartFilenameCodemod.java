@@ -39,7 +39,7 @@ public final class SanitizeApacheMultipartFilenameCodemod
         wrap(methodCallExpr).withStaticMethod(Filenames.class.getName(), "toSimpleFileName", false);
 
     return success
-        ? ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
-        : ChangesResult.noChanges();
+        ? ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
+        : ChangesResult.noChanges;
   }
 }

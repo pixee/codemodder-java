@@ -54,9 +54,9 @@ public final class AvoidImplicitPublicConstructorCodemod
 
       // Update the class node's members
       classNode.setMembers(members);
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
 
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 }

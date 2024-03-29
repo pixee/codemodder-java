@@ -47,7 +47,7 @@ public final class UpgradeTempFileToNIOCodemod
     MethodCallExpr replacement = new MethodCallExpr(nioTmpFileCall, "toFile");
     replace(foundCreateTempCall).withExpression(replacement);
     addImportIfMissing(cu, Files.class);
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 
   private NodeList<Expression> getNewArguments(final MethodCallExpr foundCreateTempCall) {

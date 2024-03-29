@@ -53,16 +53,16 @@ public final class RemoveRedundantVariableCreationCodemod
         } else if (lastStmt instanceof ThrowStmt throwStmt) {
           throwStmt.setExpression(objectCreationExpr);
         } else {
-          return ChangesResult.noChanges();
+          return ChangesResult.noChanges;
         }
 
         // Remove the redundant variable creation expression
         blockStmt.getStatements().remove(exprStmtOpt.get());
 
-        return ChangesResult.changesApplied();
+        return ChangesResult.changesApplied;
       }
     }
 
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 }

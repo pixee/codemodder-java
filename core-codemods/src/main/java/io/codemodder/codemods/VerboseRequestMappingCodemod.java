@@ -46,10 +46,10 @@ public final class VerboseRequestMappingCodemod
         annotationExpr.getPairs().remove(methodAttribute);
         annotationExpr.setName(newType.get());
         addImportIfMissing(cu, "org.springframework.web.bind.annotation." + newType.get());
-        return ChangesResult.changesApplied();
+        return ChangesResult.changesApplied;
       }
     }
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 
   public static Optional<String> getType(final String httpMethod) {

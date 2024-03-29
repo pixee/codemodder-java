@@ -82,10 +82,10 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
         replacementExpr.addArgument(argument.get());
 
         objectCreationExpr.replace(replacementExpr);
-        return ChangesResult.changesApplied();
+        return ChangesResult.changesApplied;
       }
 
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     private Optional<Expression> extractArgumentExpression(Expression argumentExpression) {
@@ -133,12 +133,12 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
           methodCallExpr.setName(replacementMethod.get());
 
           return handleMethodCallChainsAfterValueOfIfNeeded(methodCallExpr)
-              ? ChangesResult.changesApplied()
-              : ChangesResult.noChanges();
+              ? ChangesResult.changesApplied
+              : ChangesResult.noChanges;
         }
       }
 
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     private String retrieveTargetTypeFromMethodCallExpr(final MethodCallExpr methodCallExpr) {

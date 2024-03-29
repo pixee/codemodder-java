@@ -31,6 +31,6 @@ public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChan
       final SimpleName name,
       final Issue issue) {
     name.setIdentifier("replace");
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

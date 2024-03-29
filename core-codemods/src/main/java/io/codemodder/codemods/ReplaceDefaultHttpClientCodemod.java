@@ -48,6 +48,6 @@ public final class ReplaceDefaultHttpClientCodemod
             "HttpClientBuilder.create().useSystemProperties().build()");
     replace(objectCreationExpr).withExpression(expression);
     addImportIfMissing(cu, "org.apache.http.impl.client.HttpClientBuilder");
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

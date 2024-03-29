@@ -29,7 +29,7 @@ public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expressio
 
   private ChangesResult fix(MethodCallExpr parseCall) {
     parseCall.setName("parseClaimsJws");
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 
   @Override
@@ -92,6 +92,6 @@ public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expressio
       }
     }
 
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 }

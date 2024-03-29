@@ -33,8 +33,8 @@ public final class FixRedundantStaticOnEnumCodemod
       final Issue issue) {
     if (enumDecl.isStatic()) {
       enumDecl.setStatic(false);
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 }

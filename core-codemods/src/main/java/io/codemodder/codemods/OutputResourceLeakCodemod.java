@@ -32,7 +32,7 @@ public final class OutputResourceLeakCodemod extends SarifPluginJavaParserChange
       final Expression expr,
       final Result result) {
     return ResourceLeakFixer.checkAndFix(expr).isPresent()
-        ? ChangesResult.changesApplied()
-        : ChangesResult.noChanges();
+        ? ChangesResult.changesApplied
+        : ChangesResult.noChanges;
   }
 }

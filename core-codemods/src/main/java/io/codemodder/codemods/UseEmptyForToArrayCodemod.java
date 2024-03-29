@@ -41,6 +41,6 @@ public final class UseEmptyForToArrayCodemod extends SarifPluginJavaParserChange
     ArrayCreationExpr newEmptyArray =
         new ArrayCreationExpr(elementType, NodeList.nodeList(arrayCreationLevel), null);
     toArrayCall.setArgument(0, newEmptyArray);
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

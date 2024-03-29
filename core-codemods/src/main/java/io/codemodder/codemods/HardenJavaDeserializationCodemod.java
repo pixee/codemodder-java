@@ -68,7 +68,7 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
           .withStaticMethod(ObjectInputFilters.class.getName(), "createSafeObjectInputStream")
           .withStaticImport()
           .withSameArguments();
-      return ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
+      return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
     }
   }
 
@@ -96,14 +96,14 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
           generateFilterHardeningStatement(variableDeclarator.getNameAsExpression());
       Optional<Node> wrappedParentNode = variableDeclarator.getParentNode();
       if (wrappedParentNode.isEmpty()) {
-        return ChangesResult.noChanges();
+        return ChangesResult.noChanges;
       }
 
       Node parentNode = wrappedParentNode.get();
       Class<? extends Node> parentType = parentNode.getClass();
 
       if (FieldDeclaration.class.equals(parentType)) {
-        return ChangesResult.noChanges();
+        return ChangesResult.noChanges;
       }
 
       if (VariableDeclarationExpr.class.equals(parentType)) {
@@ -113,7 +113,7 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
           ExpressionStmt expressionStmt = (ExpressionStmt) variableDeclarationParent;
           ASTTransforms.addStatementAfterStatement(expressionStmt, newStatement);
           addImportIfMissing(cu, ObjectInputFilters.class.getName());
-          return ChangesResult.changesApplied(dependency);
+          return ChangesResult.changesAppliedWith(dependency);
         }
 
         // if we're not in an expression statement, we might be in a try-with-resources statement
@@ -122,11 +122,11 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
           BlockStmt tryBlock = tryStatement.getTryBlock();
           ASTTransforms.addStatementBeforeStatement(tryBlock.getStatements().get(0), newStatement);
           addImportIfMissing(cu, ObjectInputFilters.class.getName());
-          return ChangesResult.changesApplied(dependency);
+          return ChangesResult.changesAppliedWith(dependency);
         }
       }
 
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     /**

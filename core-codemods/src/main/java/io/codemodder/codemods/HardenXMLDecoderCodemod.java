@@ -35,7 +35,7 @@ public final class HardenXMLDecoderCodemod
       final Result result) {
     final Expression firstArgument = newXmlDecoderCall.getArgument(0);
     wrap(firstArgument).withStaticMethod(XMLDecoderSecurity.class.getName(), "hardenStream", true);
-    return ChangesResult.changesApplied(dependencies);
+    return ChangesResult.changesAppliedWith(dependencies);
   }
 
   private final List<DependencyGAV> dependencies = List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);

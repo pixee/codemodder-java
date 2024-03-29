@@ -68,7 +68,7 @@ public final class OptimizeJacksonStringUsageCodemod
             .result();
 
     if (toStringCall.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
     String streamVariableName = toStringCall.get().getArgument(0).asNameExpr().getNameAsString();
 
@@ -86,7 +86,7 @@ public final class OptimizeJacksonStringUsageCodemod
 
     // just for robustness, but should never happen
     if (readValueCallOpt.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     // All the checks have passed, we begin the fix
@@ -98,6 +98,6 @@ public final class OptimizeJacksonStringUsageCodemod
     // now we remove the IOUtils#toString() assignment statement
     varDeclStmt.remove();
 
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

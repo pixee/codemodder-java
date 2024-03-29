@@ -66,6 +66,6 @@ public final class SSRFCodemod extends SarifPluginJavaParserChanger<ObjectCreati
             newArguments);
     n.replace(safeCall);
 
-    return ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
+    return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
   }
 }

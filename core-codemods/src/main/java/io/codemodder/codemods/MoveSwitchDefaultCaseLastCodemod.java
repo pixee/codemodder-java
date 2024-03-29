@@ -41,10 +41,10 @@ public final class MoveSwitchDefaultCaseLastCodemod
 
     if (entries.size() == 1) {
       // don't mess with the default case if it's the only case
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
     entries.remove(switchEntry);
     entries.addLast(switchEntry);
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

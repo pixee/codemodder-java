@@ -58,6 +58,6 @@ public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<Met
         NodeList.nodeList(readerScope, new IntegerLiteralExpr(stringLimitValue)));
     ASTTransforms.addImportIfMissing(cu, BoundedLineReader.class);
     readLineParent.replace(readLineCall, safeExpression);
-    return ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
+    return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
   }
 }

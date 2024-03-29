@@ -38,7 +38,7 @@ public final class ReplaceStreamCollectorsToListCodemod
     final Optional<Node> collectMethodExprOptional = methodCallExpr.getParentNode();
 
     if (collectMethodExprOptional.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     final MethodCallExpr collectMethodExpr = (MethodCallExpr) collectMethodExprOptional.get();
@@ -46,6 +46,6 @@ public final class ReplaceStreamCollectorsToListCodemod
 
     collectMethodExpr.setArguments(new NodeList<>());
 
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

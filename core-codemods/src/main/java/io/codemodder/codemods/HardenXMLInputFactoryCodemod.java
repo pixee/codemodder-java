@@ -36,7 +36,7 @@ public final class HardenXMLInputFactoryCodemod
     final MethodCallExpr newFactory = newFactoryVariable.getInitializer().get().asMethodCallExpr();
     wrap(newFactory)
         .withStaticMethod(XMLInputFactorySecurity.class.getName(), "hardenFactory", true);
-    return ChangesResult.changesApplied(dependencies);
+    return ChangesResult.changesAppliedWith(dependencies);
   }
 
   private static final List<DependencyGAV> dependencies =

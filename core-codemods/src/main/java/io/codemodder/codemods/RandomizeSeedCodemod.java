@@ -34,6 +34,6 @@ public final class RandomizeSeedCodemod extends SarifPluginJavaParserChanger<Met
         new MethodCallExpr(new NameExpr(System.class.getSimpleName()), "currentTimeMillis");
     NodeList<Expression> arguments = setSeedCall.getArguments();
     arguments.set(0, safeExpression);
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

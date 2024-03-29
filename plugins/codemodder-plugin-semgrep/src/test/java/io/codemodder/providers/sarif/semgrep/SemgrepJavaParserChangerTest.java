@@ -82,7 +82,7 @@ final class SemgrepJavaParserChangerTest {
         final CompilationUnit cu,
         final ObjectCreationExpr node,
         final Result result) {
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
   }
 }

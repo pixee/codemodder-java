@@ -38,13 +38,13 @@ public final class RemoveUnusedPrivateMethodCodemod
     final Optional<Node> methodDeclarationOptional = node.getParentNode();
 
     if (methodDeclarationOptional.isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     final MethodDeclaration methodDeclaration = (MethodDeclaration) methodDeclarationOptional.get();
 
     methodDeclaration.removeForced();
 
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

@@ -57,7 +57,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     // some of the methods that this rule applies to are not flippable, like compareTo() would
     // change the logic after
     if (!flippableComparisonMethods.contains(methodCallExpr.getNameAsString())) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     final List<VariableDeclarator> variableDeclarators = cu.findAll(VariableDeclarator.class);
@@ -78,7 +78,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
                 variableDeclarators, simpleNameOptional.get())
             || hasSimpleNameNotNullAnnotation(cu, simpleNameOptional.get(), variableDeclarators)
             || hasSimpleNamePreviousNullAssertion(cu, simpleNameOptional.get()))) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     Expression leftSide = methodCallExpr.getScope().get();
@@ -88,13 +88,13 @@ public final class SwitchLiteralFirstComparisonsCodemod
       if ("Ljava/lang/String;".equals(leftType.toDescriptor())) {
         methodCallExpr.setScope(rightSide);
         methodCallExpr.setArgument(0, leftSide);
-        return ChangesResult.changesApplied();
+        return ChangesResult.changesApplied;
       }
     } catch (final UnsolvedSymbolException e) {
       // expected in cases where we can't resolve the type
     }
 
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 
   /**

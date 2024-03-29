@@ -37,7 +37,7 @@ public final class ValidateJakartaForwardPathCodemod
     return wrap(path)
             .withStaticMethod(
                 "io.github.pixee.security.jakarta.PathValidator", "validateDispatcherPath", true)
-        ? ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
-        : ChangesResult.noChanges();
+        ? ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
+        : ChangesResult.noChanges;
   }
 }

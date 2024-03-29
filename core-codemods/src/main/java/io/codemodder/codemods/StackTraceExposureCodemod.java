@@ -35,7 +35,7 @@ public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expr
     if (expression instanceof MethodCallExpr
         && expression.asMethodCallExpr().getNameAsString().equals("printStackTrace")) {
       expression.asMethodCallExpr().setArguments(new NodeList<>());
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
     // is an argument of sendError call e.g. (response.sendError(418,<expression>))
     var maybeSendErrorCall =
@@ -45,10 +45,10 @@ public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expr
       var sendErrorCall = maybeSendErrorCall.get();
       NodeList<Expression> newArguments = NodeList.nodeList(sendErrorCall.getArgument(0));
       sendErrorCall.setArguments(newArguments);
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
     // There are more cases here since it detects calls to other types of XSS sinks, but this should
     // cover the most common usage
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 }

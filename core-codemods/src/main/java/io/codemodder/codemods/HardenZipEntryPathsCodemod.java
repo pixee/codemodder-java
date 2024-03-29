@@ -40,6 +40,6 @@ public final class HardenZipEntryPathsCodemod
     securedCall.setArguments(newZipInputStreamCall.getArguments());
     variableDeclarator.setInitializer(securedCall);
     ASTTransforms.addImportIfMissing(cu, ZipSecurity.class);
-    return ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
+    return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
   }
 }

@@ -36,7 +36,7 @@ public final class SanitizeSpringMultipartFilenameCodemod
       final Result result) {
     return wrap(methodCallExpr)
             .withStaticMethod(Filenames.class.getName(), "toSimpleFileName", false)
-        ? ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
-        : ChangesResult.noChanges();
+        ? ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
+        : ChangesResult.noChanges;
   }
 }

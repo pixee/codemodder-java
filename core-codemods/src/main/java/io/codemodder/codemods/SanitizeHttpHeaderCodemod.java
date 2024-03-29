@@ -35,7 +35,7 @@ public final class SanitizeHttpHeaderCodemod extends SarifPluginJavaParserChange
     final boolean success =
         wrap(headerValueArgument).withStaticMethod(Newlines.class.getName(), "stripAll", false);
     return success
-        ? ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
-        : ChangesResult.noChanges();
+        ? ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
+        : ChangesResult.noChanges;
   }
 }

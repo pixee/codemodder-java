@@ -30,6 +30,6 @@ public final class DisableAutomaticDirContextDeserializationCodemod
       final ObjectCreationExpr objectCreationExpr,
       final Result result) {
     objectCreationExpr.setArgument(4, new BooleanLiteralExpr(false));
-    return ChangesResult.changesApplied();
+    return ChangesResult.changesApplied;
   }
 }

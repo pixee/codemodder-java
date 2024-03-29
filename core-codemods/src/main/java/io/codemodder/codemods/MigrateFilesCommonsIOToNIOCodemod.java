@@ -104,7 +104,7 @@ public final class MigrateFilesCommonsIOToNIOCodemod extends CompositeJavaParser
         removeImportIfUnused(cu, "org.apache.commons.io.FileUtils");
       }
 
-      return success ? ChangesResult.changesApplied() : ChangesResult.noChanges();
+      return success ? ChangesResult.changesApplied : ChangesResult.noChanges;
     }
 
     /**

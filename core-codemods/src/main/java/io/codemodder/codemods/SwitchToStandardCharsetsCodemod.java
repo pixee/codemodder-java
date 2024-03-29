@@ -51,7 +51,7 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
 
       final Optional<Charset> c = getSpecifiedCharset(methodCallExpr.getArgument(0));
       if (c.isEmpty()) {
-        return ChangesResult.noChanges();
+        return ChangesResult.noChanges;
       }
 
       FieldAccessExpr field =
@@ -62,7 +62,7 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
 
       Exceptions.cleanupExceptionHandling(
           field.getParentNode().get(), unsupportedEncodingExceptionFqcn);
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
   }
 
@@ -89,7 +89,7 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
 
       final Optional<Charset> c = getSpecifiedCharset(methodCallExpr.getArgument(0));
       if (c.isEmpty()) {
-        return ChangesResult.noChanges();
+        return ChangesResult.noChanges;
       }
 
       FieldAccessExpr field =
@@ -99,7 +99,7 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
       parentNode.get().replace(methodCallExpr, field);
       addImportIfMissing(cu, StandardCharsets.class);
       Exceptions.cleanupExceptionHandling(parentNode.get(), unsupportedEncodingExceptionFqcn);
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
   }
 

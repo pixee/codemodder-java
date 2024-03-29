@@ -51,8 +51,8 @@ public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Exp
       final Expression expression,
       final Result result) {
     return checkAndFix(expression).isPresent()
-        ? ChangesResult.changesApplied(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
-        : ChangesResult.noChanges();
+        ? ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
+        : ChangesResult.noChanges;
   }
 
   /**

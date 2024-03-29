@@ -43,7 +43,7 @@ public final class DefineConstantForLiteralCodemod
     }
 
     return defineConstantForLiteral.replaceLiteralStringExpressionWithConstant()
-        ? ChangesResult.changesApplied()
-        : ChangesResult.noChanges();
+        ? ChangesResult.changesApplied
+        : ChangesResult.noChanges;
   }
 }

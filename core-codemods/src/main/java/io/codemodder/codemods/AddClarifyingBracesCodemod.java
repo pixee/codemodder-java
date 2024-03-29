@@ -54,7 +54,7 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
         return handleUnbracedStmt(new UnbracedElseStatement(ifStmt));
       }
     }
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 
   /** Handles the case where the {@link Node} is a while unbracedStatement. */
@@ -64,11 +64,11 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
     int index = childNodes.indexOf(stmt.getStatement());
     if (index == childNodes.size() - 1) {
       // it's the last statement in the block, there's no way to get confused, we can exit
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
     Node nextChildNode = childNodes.get(index + 1);
     if (nextChildNode.getRange().isEmpty()) {
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
     Range nextChildNodeRange = nextChildNode.getRange().get();
     int nextChildNodeBeginColumn = nextChildNodeRange.begin.column;
@@ -78,9 +78,9 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
 
     if (nextChildNodeBeginColumn >= onlyInnerStatementColumn) {
       stmt.addBraces();
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 
   /** Represents an unbraced control flow statement (e.g., if, while, etc.). */

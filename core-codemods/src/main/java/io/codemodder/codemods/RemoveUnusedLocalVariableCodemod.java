@@ -66,11 +66,11 @@ public final class RemoveUnusedLocalVariableCodemod
             variableDeclarationExpr.setVariables(variables);
           }
 
-          return ChangesResult.changesApplied();
+          return ChangesResult.changesApplied;
         }
       }
     }
 
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 }

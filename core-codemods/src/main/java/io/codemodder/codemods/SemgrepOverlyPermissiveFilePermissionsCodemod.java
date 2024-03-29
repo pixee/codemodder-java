@@ -80,7 +80,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
           return fixFromString(fromStringRef.get());
         }
       }
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
   }
 
@@ -116,7 +116,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       if (fromStringMethodRef.isPresent()) {
         return fixFromString(fromStringMethodRef.get());
       }
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
   }
 
@@ -128,10 +128,10 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       if (previousPermission.length() == 9) {
         String newPermission = previousPermission.substring(0, 6) + "---";
         arguments.set(0, new StringLiteralExpr(newPermission));
-        return ChangesResult.changesApplied();
+        return ChangesResult.changesApplied;
       }
     }
-    return ChangesResult.noChanges();
+    return ChangesResult.noChanges;
   }
 
   /**
@@ -159,7 +159,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
           expect(methodCallExpr).toBeMethodCallExpression().withArguments().result();
 
       if (methodCall.isEmpty()) {
-        return ChangesResult.noChanges();
+        return ChangesResult.noChanges;
       }
 
       MethodCallExpr call = methodCall.get();
@@ -167,14 +167,14 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       if ("add".equals(methodName) && call.getArguments().size() == 1) {
         return fixAdd(call);
       }
-      return ChangesResult.noChanges();
+      return ChangesResult.noChanges;
     }
 
     private ChangesResult fixAdd(final MethodCallExpr call) {
       NodeList<Expression> arguments = call.getArguments();
       Expression permissionArgument = arguments.get(0);
       if (!permissionArgument.isFieldAccessExpr()) {
-        return ChangesResult.noChanges();
+        return ChangesResult.noChanges;
       }
       FieldAccessExpr othersAccess = permissionArgument.asFieldAccessExpr();
       final String newFieldName;
@@ -183,11 +183,11 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
         case "OTHERS_WRITE" -> newFieldName = "GROUP_WRITE";
         case "OTHERS_EXECUTE" -> newFieldName = "GROUP_EXECUTE";
         default -> {
-          return ChangesResult.noChanges();
+          return ChangesResult.noChanges;
         }
       }
       othersAccess.setName(newFieldName);
-      return ChangesResult.changesApplied();
+      return ChangesResult.changesApplied;
     }
   }
 }
