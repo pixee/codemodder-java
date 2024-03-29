@@ -61,4 +61,22 @@ public final class Test {
     stmt.setString(2, input2);
     return stmt.execute();
   }
+
+  public ResultSet referencesAfterExecute(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = ?";
+    PreparedStatement stmt = conn.prepareStatement(sql);
+    stmt.setString(1, input);
+    var rs = stmt.execute();
+    System.out.println(sql);
+    return rs;
+  }
+
+  public ResultSet definiteAssignmentWithEmptyString(String input) throws SQLException {
+    String sql = "";
+    sql = "SELECT * FROM USERS WHERE USER = ?";
+    PreparedStatement stmt = conn.prepareStatement(sql);
+    stmt.setString(1, input);
+    var rs = stmt.execute();
+    return rs;
+  }
 }

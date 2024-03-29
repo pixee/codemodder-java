@@ -4,20 +4,19 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
-import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
-import io.codemodder.ast.ASTs;
+import io.codemodder.ast.ASTTransforms;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.javatuples.Pair;
 
 /** Parameterize possible injections for Hibernate queries. */
 @Codemod(
@@ -43,9 +42,15 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
   @Override
   public List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    return cu.findAll(MethodCallExpr.class).stream()
-        .flatMap(mce -> onNodeFound(context, mce, cu).stream())
-        .collect(Collectors.toList());
+    final var allChanges =
+        cu.findAll(MethodCallExpr.class).stream()
+            .flatMap(mce -> onNodeFound(context, mce, cu).stream())
+            .collect(Collectors.toList());
+    ASTTransforms.removeEmptyStringConcatenation(cu);
+    // TODO hits a bug with javaparser, where adding nodes won't result in the correct children
+    // order. This causes the following to remove actually used variables
+    // ASTTransforms.removeUnusedLocalVariables(compilationUnit);
+    return allChanges;
   }
 
   private static final String queryParameterNamePrefix = ":parameter";
@@ -67,64 +72,50 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
     return isQueryCall.test(methodCallExpr);
   }
 
-  /** Removes an expression from an expression subtree. */
-  private Expression collapse(final Expression e, final Expression root) {
-    final var p = e.getParentNode().get();
-    if (p instanceof BinaryExpr) {
-      if (e.equals(((BinaryExpr) p).getLeft())) {
-        final var child = ((BinaryExpr) p).getRight();
-        if (p.equals(root)) {
-          return child;
-        } else {
-          p.replace(child);
-          return root;
-        }
-      }
-      if (e.equals(((BinaryExpr) p).getRight())) {
-        final var child = ((BinaryExpr) p).getLeft();
-        if (p.equals(root)) {
-          return child;
-        } else {
-          p.replace(child);
-          return root;
-        }
-      }
-    } else if (p instanceof EnclosedExpr) {
-      return collapse((Expression) p, root);
-    }
-    e.remove();
-    return root;
-  }
-
-  private Pair<List<Expression>, Expression> fixInjections(
-      final List<Deque<Expression>> injections, Expression root) {
+  private List<Expression> fixInjections(
+      final List<Deque<Expression>> injections, Map<Expression, Expression> resolvedMap) {
     final List<Expression> combinedExpressions = new ArrayList<>();
     int count = 0;
     for (final var injection : injections) {
+      // fix start
       final var start = injection.removeFirst();
       final var startString = start.asStringLiteralExpr().getValue();
       final var builder = new StringBuilder(startString);
-      builder.replace(
-          startString.length() - 1, startString.length(), queryParameterNamePrefix + count);
+      final int lastQuoteIndex = startString.lastIndexOf('\'') + 1;
+      final var prepend = startString.substring(lastQuoteIndex);
+      builder.replace(lastQuoteIndex - 1, startString.length(), queryParameterNamePrefix + count);
       start.asStringLiteralExpr().setValue(builder.toString());
 
+      // fix end
       final var end = injection.removeLast();
-      final var newEnd = end.asStringLiteralExpr().getValue().substring(1);
-      if (newEnd.equals("")) {
-        root = collapse(end, root);
-      } else {
-        end.asStringLiteralExpr().setValue(newEnd);
+      final var endString = end.asStringLiteralExpr().getValue();
+      final int firstQuoteIndex = endString.indexOf('\'');
+      final var newEnd = end.asStringLiteralExpr().getValue().substring(firstQuoteIndex + 1);
+      final var append = endString.substring(0, firstQuoteIndex);
+      end.asStringLiteralExpr().setValue(newEnd);
+
+      // build expression for parameters
+      var combined = combineExpressions(injection, resolvedMap);
+      // add the suffix of start
+      if (prepend != "") {
+        final var newCombined =
+            new BinaryExpr(new StringLiteralExpr(prepend), combined, Operator.PLUS);
+        combined = newCombined;
       }
-      final var pair = combineExpressions(injection, root);
-      combinedExpressions.add(pair.getValue0());
-      root = pair.getValue1();
+      // add the prefix of end
+      if (append != "") {
+        final var newCombined =
+            new BinaryExpr(combined, new StringLiteralExpr(append), Operator.PLUS);
+        combined = newCombined;
+      }
+      combinedExpressions.add(combined);
       count++;
     }
-    return new Pair<>(combinedExpressions, root);
+    return combinedExpressions;
   }
 
-  private Pair<Expression, Expression> combineExpressions(
-      final Deque<Expression> injectionExpressions, Expression root) {
+  private Expression combineExpressions(
+      final Deque<Expression> injectionExpressions, Map<Expression, Expression> resolutionMap) {
     final var it = injectionExpressions.iterator();
     Expression combined = it.next();
     boolean atLeastOneString = false;
@@ -132,7 +123,7 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
       atLeastOneString = combined.calculateResolvedType().describe().equals("java.lang.String");
     } catch (final Exception ignored) {
     }
-    root = collapse(combined, root);
+    unresolve(combined, resolutionMap).replace(new StringLiteralExpr(""));
 
     while (it.hasNext()) {
       final var expr = it.next();
@@ -144,21 +135,28 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
         }
       } catch (final Exception ignored) {
       }
-      root = collapse(expr, root);
+      unresolve(expr, resolutionMap).replace(new StringLiteralExpr(""));
       combined = new BinaryExpr(combined, expr, Operator.PLUS);
     }
-    if (atLeastOneString) return new Pair<>(combined, root);
-    else
-      return new Pair<>(new BinaryExpr(combined, new StringLiteralExpr(""), Operator.PLUS), root);
+    if (atLeastOneString) return combined;
+    else return new BinaryExpr(combined, new StringLiteralExpr(""), Operator.PLUS);
+  }
+
+  private Expression unresolve(
+      final Expression expr, final Map<Expression, Expression> resolutionMap) {
+    Expression unresolved = expr;
+    while (resolutionMap.get(unresolved) != null) {
+      unresolved = resolutionMap.get(unresolved);
+    }
+    return unresolved;
   }
 
   private void fix(final MethodCallExpr queryCall, final QueryParameterizer queryParameterizer) {
 
     final var injections = queryParameterizer.getInjections();
-    var root = queryParameterizer.getRoot();
-    final var pair = fixInjections(injections, root);
-    root = pair.getValue1();
-    final var combinedExpressions = pair.getValue0();
+    final var combinedExpressions =
+        fixInjections(
+            injections, queryParameterizer.getLinearizedQuery().getResolvedExpressionsMap());
 
     // query.setParameter() for each injection
     var call = queryCall;
@@ -172,29 +170,6 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
               new StringLiteralExpr(queryParameterNamePrefix + i), combinedExpressions.get(i)));
       call = newCall;
     }
-
-    // Deleting some expressions may result in some String declarations with no initializer
-    // We delete those.
-    var allEmptyLVD =
-        queryParameterizer.getStringDeclarations().stream()
-            .filter(lvd -> lvd.getVariableDeclarator().getInitializer().isEmpty())
-            .collect(Collectors.toSet());
-    var newEmptyLVDs = allEmptyLVD;
-    while (!newEmptyLVDs.isEmpty()) {
-      for (var lvd : newEmptyLVDs) {
-        for (final var ref : ASTs.findAllReferences(lvd)) {
-          root = collapse(ref, root);
-        }
-        lvd.getVariableDeclarationExpr().removeForced();
-      }
-      newEmptyLVDs =
-          queryParameterizer.getStringDeclarations().stream()
-              .filter(lvd -> lvd.getVariableDeclarator().getInitializer().isEmpty())
-              .collect(Collectors.toSet());
-      newEmptyLVDs.removeAll(allEmptyLVD);
-      allEmptyLVD.addAll(newEmptyLVDs);
-    }
-
-    queryCall.setArgument(0, root);
+    queryCall.setArgument(0, queryParameterizer.getRoot());
   }
 }

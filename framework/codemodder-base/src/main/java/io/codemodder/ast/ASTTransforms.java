@@ -4,8 +4,11 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.LambdaExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
@@ -210,5 +213,82 @@ public final class ASTTransforms {
       return;
     }
     cu.remove(importToRemove.get());
+  }
+
+  /** Checks if a given Expression is an empty string literal or resolves to one locally. */
+  private static boolean isEmptyString(final Expression expr) {
+    // TODO declared as empty with one assignment
+    var resolved = ASTs.resolveLocalExpression(expr);
+    if (resolved.isStringLiteralExpr() && resolved.asStringLiteralExpr().getValue().equals("")) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Removes concatenation with empty strings. For example, in : ``` String a = "some string";
+   * String b = ""; a + "" + b; ``` The expression `a + "" + b` would be reduced to `a`. Returns the
+   * expression without the empty concatenations.
+   */
+  public static Expression removeEmptyStringConcatenation(final BinaryExpr binexp) {
+    if (!binexp.getOperator().equals(BinaryExpr.Operator.PLUS)) {
+      return binexp;
+    }
+    var left = binexp.getLeft();
+    var right = binexp.getRight();
+    if (isEmptyString(left)) {
+      if (isEmptyString(right)) {
+        return new StringLiteralExpr("");
+      }
+      return right;
+    }
+    if (isEmptyString(right)) {
+      if (isEmptyString(left)) {
+        return new StringLiteralExpr("");
+      }
+      return left;
+    }
+    return binexp;
+  }
+
+  /** Removes all concatenations with empty strings in the given subtree. */
+  public static void removeEmptyStringConcatenation(Node subtree) {
+    subtree.findAll(BinaryExpr.class, Node.TreeTraversal.POSTORDER).stream()
+        .forEach(binexp -> binexp.replace(removeEmptyStringConcatenation(binexp)));
+  }
+
+  /** Removes unused variables. */
+  public static void removeUnusedLocalVariables(final Node subtree) {
+    // TODO all the other cases besides ExpressionStmt declarations
+    for (final var vd : subtree.findAll(VariableDeclarator.class)) {
+      var maybelvd =
+          LocalVariableDeclaration.fromVariableDeclarator(vd)
+              .filter(lvd -> lvd instanceof ExpressionStmtVariableDeclaration);
+      if (maybelvd.isPresent()) {
+        var lvd = maybelvd.get();
+        var allReferences = ASTs.findAllReferences(lvd);
+        // No references?
+        if (allReferences.size() == 0) {
+          maybelvd.get().getStatement().remove();
+        }
+
+        // Single reference, is it a definite assignment?
+        if (allReferences.size() == 1) {
+          if (lvd.getVariableDeclarator().getInitializer().isEmpty()) {
+            var allAssignments = ASTs.findAllAssignments(lvd).limit(2).toList();
+            if (allAssignments.size() == 1) {
+              var aexprStmt =
+                  Optional.of(allAssignments.get(0))
+                      .flatMap(ae -> ae.getParentNode())
+                      .map(p -> p instanceof ExpressionStmt ? (ExpressionStmt) p : null);
+              if (aexprStmt.isPresent()) {
+                aexprStmt.get().remove();
+                lvd.getStatement().remove();
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

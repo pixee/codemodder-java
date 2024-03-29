@@ -48,4 +48,20 @@ public final class Test {
     Statement stmt = conn.createStatement();
     return stmt.executeQuery(sql);
   }
+
+  public ResultSet referencesAfterExecute(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    Statement stmt = conn.createStatement();
+    var rs = stmt.executeQuery(sql);
+    System.out.println(sql);
+    return rs;
+  }
+
+  public ResultSet definiteAssignmentWithEmptyString(String input) throws SQLException {
+    String sql = "";
+    sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    Statement stmt = conn.createStatement();
+    var rs = stmt.executeQuery(sql);
+    return rs;
+  }
 }

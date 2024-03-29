@@ -22,6 +22,7 @@ public final class Test {
     }
 
     void indirectMultipeString(String tainted, String tainted2) {
+      String third = "";
       String second = " and p.surname like :parameter1";
       String first = "select p from Person p where p.name like :parameter0" + second;
       Query<User> hqlQuery = session.createQuery(first).setParameter(":parameter0", tainted).setParameter(":parameter1", tainted2);
