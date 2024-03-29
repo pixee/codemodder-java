@@ -1,6 +1,7 @@
 package io.codemodder.plugins.maven;
 
 import io.codemodder.*;
+import io.codemodder.plugins.maven.operator.POMOperator;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,6 +55,7 @@ public final class MavenProvider implements ProjectProvider {
   }
 
   private final POMDependencyUpdater pomDependencyUpdater;
+  private final PomFileFinder pomFileFinder;
 
   MavenProvider(
       final PomModifier pomModifier,
@@ -62,6 +64,7 @@ public final class MavenProvider implements ProjectProvider {
       final ArtifactInjectionPositionFinder positionFinder) {
     Objects.requireNonNull(pomModifier);
     Objects.requireNonNull(pomFileFinder);
+    this.pomFileFinder = pomFileFinder;
     this.pomDependencyUpdater =
         new DefaultPOMDependencyUpdater(
             new CodeTFGenerator(positionFinder, dependencyDescriptor), pomFileFinder, pomModifier);
@@ -129,7 +132,16 @@ public final class MavenProvider implements ProjectProvider {
   @Override
   public Collection<DependencyGAV> getAllDependencies(final Path projectDir, final Path file) {
     try {
-      return pomDependencyUpdater.getAllDependencies(projectDir, file);
+      final Optional<Path> maybePomFile = pomFileFinder.findForFile(projectDir, file);
+      if (maybePomFile.isEmpty()) {
+        LOG.trace("Pom file was empty for {}", file);
+        return Collections.emptyList();
+      }
+
+      final Path pomFile = maybePomFile.get();
+      final POMOperator pomOperator = new POMOperator(pomFile, projectDir);
+
+      return pomOperator.getAllFoundDependencies();
     } catch (Exception e) {
       throw new DependencyUpdateException("Failure when retrieving dependencies", e);
     }
