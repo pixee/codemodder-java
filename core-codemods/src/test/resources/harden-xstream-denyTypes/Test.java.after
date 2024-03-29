@@ -33,7 +33,7 @@ public class XStreamTest
         return xstream;
     }
 
-    public void deserializeObject_CallsAllowTypes(XStream xstream) throws IOException, ClassNotFoundException {
+    public void deserializeObject_DenyTypes(XStream xstream) throws IOException, ClassNotFoundException {
         XStream xstream = new XStream();
         xstream.denyTypes(new String[]{"com.foo.*"});
         return xstream;
