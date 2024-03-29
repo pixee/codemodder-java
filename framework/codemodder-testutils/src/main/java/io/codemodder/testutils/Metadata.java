@@ -36,7 +36,7 @@ public @interface Metadata {
 
   /**
    * Custom {@link io.codemodder.ProjectProvider}s required for certain tests. A usage example can
-   * be found at {@link HardenXStreamCodemodTestProjectProvider}
+   * be found at {@code HardenXStreamCodemodTestProjectProvider}
    */
   Class<?>[] projectProviders() default {};
 }
