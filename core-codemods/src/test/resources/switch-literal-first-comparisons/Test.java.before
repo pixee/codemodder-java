@@ -36,6 +36,16 @@ final class Test {
             System.out.println("outer");
           }
        }
+
+       String nullString = null;
+       if(nullString.equals("hola")){
+         System.out.println(nullString);
+       }
+
+       String replacedString = "hola".replace("hola", "fibonacci");
+       if(replacedString.equals("fibonacci")){
+         System.out.println(replacedString);
+       }
    }
 
    private String getBar() { return null; }
