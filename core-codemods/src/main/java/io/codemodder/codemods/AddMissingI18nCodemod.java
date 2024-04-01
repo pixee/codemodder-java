@@ -54,13 +54,14 @@ public final class AddMissingI18nCodemod extends RawFileChanger {
   }
 
   @Override
-  public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
+  public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
+      throws IOException {
     Path path = context.path();
     String fileName = path.getFileName().toString();
     Optional<String> prefix = getPropertyFilePrefix(fileName);
     if (prefix.isEmpty()) {
       // doesn't look like a i18n properties file
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
     return doVisitFile(context, path, prefix.get());
   }
@@ -88,7 +89,7 @@ public final class AddMissingI18nCodemod extends RawFileChanger {
    * @param path the path to the file being checked
    * @param filePrefix the prefix of the file name, e.g. "messages" for "messages_en.properties"
    */
-  private List<CodemodChange> doVisitFile(
+  private CodemodFileScanningResult doVisitFile(
       final CodemodInvocationContext context, final Path path, final String filePrefix)
       throws IOException {
     // try to load it as a properties file and make sure that works
@@ -101,7 +102,7 @@ public final class AddMissingI18nCodemod extends RawFileChanger {
     // if there's no siblings, there's nothing to compare our keys against
     if (siblings.isEmpty()) {
       LOG.trace("Have no baseline files to compare against, exiting");
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
 
     // find all the keys that are present in other sibling files, but not our file
@@ -116,7 +117,7 @@ public final class AddMissingI18nCodemod extends RawFileChanger {
     // it wrong
     if (missingKeys.isEmpty()) {
       LOG.debug("Missing keys in {} weren't discovered in the project", path);
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
 
     // we now have a set of keys that are referenced in the project and missing from our file
@@ -177,7 +178,7 @@ public final class AddMissingI18nCodemod extends RawFileChanger {
       Files.write(path, newLines);
     }
 
-    return changes;
+    return CodemodFileScanningResult.withOnlyChanges(changes);
   }
 
   private static String createChangeDescription(

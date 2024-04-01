@@ -2,7 +2,6 @@ package io.codemodder;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -24,5 +23,5 @@ public interface CodemodRunner {
    * @return an {@link Optional} representing the file "before and after" the codemod
    * @throws IOException if there is an error reading or writing the file
    */
-  List<CodemodChange> run(CodemodInvocationContext context) throws IOException;
+  CodemodFileScanningResult run(CodemodInvocationContext context) throws IOException;
 }

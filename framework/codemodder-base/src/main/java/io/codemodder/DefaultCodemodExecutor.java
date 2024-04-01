@@ -150,8 +150,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
                       deps);
 
               // run the codemod on the file
-              List<CodemodChange> codemodChanges = codemodRunner.run(context);
-
+              CodemodFileScanningResult codemodFileScanningResult = codemodRunner.run(context);
+              List<CodemodChange> codemodChanges = codemodFileScanningResult.changes();
               if (!codemodChanges.isEmpty()) {
                 synchronized (this) {
                   FilesUpdateResult updateResult =

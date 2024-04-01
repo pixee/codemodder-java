@@ -90,13 +90,13 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     this.regionNodeMatcher = Objects.requireNonNull(regionNodeMatcher);
   }
 
-  public List<CodemodChange> visit(
+  public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     List<Result> results = sarif.getResultsByLocationPath(context.path());
 
     // small shortcut to avoid always executing the expensive findAll
     if (results.isEmpty()) {
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
 
     List<? extends Node> allNodes = cu.findAll(nodeType);
@@ -140,7 +140,8 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
         }
       }
     }
-    return codemodChanges;
+
+    return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
   }
 
   @Override

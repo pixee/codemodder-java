@@ -2,10 +2,7 @@ package io.codemodder.javaparser;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import io.codemodder.CodemodChange;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.CodemodRunner;
-import io.codemodder.EncodingDetector;
+import io.codemodder.*;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -40,19 +37,21 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
   }
 
   @Override
-  public List<CodemodChange> run(final CodemodInvocationContext context) throws IOException {
+  public CodemodFileScanningResult run(final CodemodInvocationContext context) throws IOException {
+
     if (!javaParserChanger.shouldRun()) {
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
     Path file = context.path();
     CompilationUnit cu = parser.parseJavaFile(file);
-    List<CodemodChange> changes = javaParserChanger.visit(context, cu);
+    CodemodFileScanningResult result = javaParserChanger.visit(context, cu);
+    List<CodemodChange> changes = result.changes();
     if (!changes.isEmpty()) {
       String encodingName = encodingDetector.detect(file).orElse("UTF-8");
       Charset encoding = Charset.forName(encodingName);
       String modified = (LexicalPreservingPrinter.print(cu));
       Files.writeString(file, modified, encoding, StandardOpenOption.TRUNCATE_EXISTING);
     }
-    return changes;
+    return result;
   }
 }

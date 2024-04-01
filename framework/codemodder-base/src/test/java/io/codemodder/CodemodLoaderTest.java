@@ -85,13 +85,13 @@ final class CodemodLoaderTest {
       super(new EmptyReporter());
     }
 
-    public List<CodemodChange> visitFile(final CodemodInvocationContext context)
+    public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nb";
       Files.writeString(path, contents);
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
 
     @Override
@@ -125,13 +125,13 @@ final class CodemodLoaderTest {
       super(new EmptyReporter());
     }
 
-    public List<CodemodChange> visitFile(final CodemodInvocationContext context)
+    public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nc";
       Files.writeString(path, contents);
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
 
     @Override
@@ -166,13 +166,13 @@ final class CodemodLoaderTest {
       super(new EmptyReporter());
     }
 
-    public List<CodemodChange> visitFile(final CodemodInvocationContext context)
+    public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
       String contents = Files.readString(path);
       contents += "\nd\n";
       Files.writeString(path, contents);
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
 
     @Override
@@ -267,7 +267,7 @@ final class CodemodLoaderTest {
     }
 
     @Override
-    public List<CodemodChange> visitFile(final CodemodInvocationContext context)
+    public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
       List<String> existingLines = Files.readAllLines(path);
@@ -275,7 +275,9 @@ final class CodemodLoaderTest {
       String value = parameter.getValue(path, existingLines.size());
       contents.add(value);
       Files.write(path, contents, StandardCharsets.UTF_8);
-      return List.of(CodemodChange.from(existingLines.size(), parameter, value));
+      List<CodemodChange> changes =
+          List.of(CodemodChange.from(existingLines.size(), parameter, value));
+      return CodemodFileScanningResult.withOnlyChanges(changes);
     }
 
     @Override
@@ -407,6 +409,7 @@ final class CodemodLoaderTest {
         Files.list(dir).toList(),
         Map.of(),
         List.of(),
+        null,
         null);
   }
 
@@ -421,6 +424,7 @@ final class CodemodLoaderTest {
         Files.list(dir).toList(),
         Map.of(),
         List.of(),
+        null,
         null);
   }
 
@@ -438,6 +442,7 @@ final class CodemodLoaderTest {
         Files.list(dir).toList(),
         Map.of(),
         params,
+        null,
         null);
   }
 }

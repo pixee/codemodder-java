@@ -19,7 +19,8 @@ public final class AppScanProvider implements CodemodProvider {
       final List<String> excludePaths,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs,
-      final Path sonarIssuesJsonFile) {
+      final Path sonarIssuesJsonFile,
+      final Path defectDojoFindingsJsonFile) {
     return Set.of(new AppScanModule(codemodTypes, sarifs));
   }
 

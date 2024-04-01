@@ -122,6 +122,12 @@ final class CLI implements Callable<Integer> {
   private Path sonarIssuesJsonFilePath;
 
   @CommandLine.Option(
+      names = {"--defectdojo-findings-json"},
+      description =
+          "a path to a file containing the result of a call to the DefectDojo v2 Findings API endpoint")
+  private Path defectDojoFindingsJsonFilePath;
+
+  @CommandLine.Option(
       names = {"--sonar-hotspots-json"},
       description =
           "a path to a file containing the result of a call to the Sonar Web API Hotspots endpoint")
@@ -381,7 +387,8 @@ final class CLI implements Callable<Integer> {
               filePaths,
               pathSarifMap,
               codemodParameters,
-              sonarIssuesJsonFilePath);
+              sonarIssuesJsonFilePath,
+              defectDojoFindingsJsonFilePath);
       List<CodemodIdPair> codemods = loader.getCodemods();
 
       log.debug("sarif files: {}", sarifFiles.size());

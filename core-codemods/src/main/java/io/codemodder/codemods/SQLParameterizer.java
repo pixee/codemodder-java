@@ -43,12 +43,7 @@ public final class SQLParameterizer {
     // Maybe make this configurable? see:
     // https://github.com/find-sec-bugs/find-sec-bugs/wiki/Injection-detection
     try {
-      final Predicate<MethodCallExpr> isExecute =
-          n ->
-              (n.getNameAsString().equals("executeQuery")
-                  || n.getNameAsString().equals("execute")
-                  || n.getNameAsString().equals("executeLargeUpdate")
-                  || n.getNameAsString().equals("executeUpdate"));
+      final Predicate<MethodCallExpr> isExecute = SQLParameterizer::isSupportedJdbcMethodCall;
 
       final Predicate<MethodCallExpr> hasScopeSQLStatement =
           n ->
@@ -77,6 +72,30 @@ public final class SQLParameterizer {
     } catch (RuntimeException e) {
       return false;
     }
+  }
+
+  /** Returns true if this is a fixable JDBC method name. */
+  public static boolean isSupportedJdbcMethodCall(final MethodCallExpr methodCall) {
+    return methodCall.getNameAsString().equals("executeQuery")
+        || methodCall.getNameAsString().equals("execute")
+        || methodCall.getNameAsString().equals("executeLargeUpdate")
+        || methodCall.getNameAsString().equals("executeUpdate");
+  }
+
+  /**
+   * Tries to find the source of an expression if it can be uniquely defined, otherwise, returns
+   * self.
+   */
+  public static Expression resolveExpression(final Expression expr) {
+    return Optional.of(expr)
+        .map(e -> e instanceof NameExpr ? e.asNameExpr() : null)
+        .flatMap(n -> ASTs.findEarliestLocalDeclarationOf(n.getName()))
+        .map(s -> s instanceof LocalVariableDeclaration ? (LocalVariableDeclaration) s : null)
+        // TODO currently it assumes it is never assigned, add support for definite assignments here
+        .filter(ASTs::isFinalOrNeverAssigned)
+        .flatMap(lvd -> lvd.getVariableDeclarator().getInitializer())
+        .map(SQLParameterizer::resolveExpression)
+        .orElse(expr);
   }
 
   private Optional<MethodCallExpr> isConnectionCreateStatement(final Expression expr) {
