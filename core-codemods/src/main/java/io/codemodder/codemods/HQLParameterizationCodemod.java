@@ -2,6 +2,7 @@ package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.ast.expr.Expression;
@@ -33,6 +34,12 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
       final var queryParameterizer = new QueryParameterizer(methodCallExpr.getArgument(0));
       if (!queryParameterizer.getInjections().isEmpty()) {
         fix(methodCallExpr, queryParameterizer);
+        var maybeMethodDecl = methodCallExpr.findAncestor(CallableDeclaration.class);
+        // Cleanup, removes empty string concatenations and unused variables
+        maybeMethodDecl.ifPresent(cd -> ASTTransforms.removeEmptyStringConcatenation(cd));
+        // TODO hits a bug with javaparser, where adding nodes won't result in the correct children
+        // order. This causes the following to remove actually used variables
+        // maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
         return Optional.of(CodemodChange.from(methodCallExpr.getRange().get().begin.line));
       }
     }
@@ -42,15 +49,9 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
   @Override
   public List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    final var allChanges =
-        cu.findAll(MethodCallExpr.class).stream()
-            .flatMap(mce -> onNodeFound(context, mce, cu).stream())
-            .collect(Collectors.toList());
-    ASTTransforms.removeEmptyStringConcatenation(cu);
-    // TODO hits a bug with javaparser, where adding nodes won't result in the correct children
-    // order. This causes the following to remove actually used variables
-    // ASTTransforms.removeUnusedLocalVariables(compilationUnit);
-    return allChanges;
+    return cu.findAll(MethodCallExpr.class).stream()
+        .flatMap(mce -> onNodeFound(context, mce, cu).stream())
+        .collect(Collectors.toList());
   }
 
   private static final String queryParameterNamePrefix = ":parameter";
