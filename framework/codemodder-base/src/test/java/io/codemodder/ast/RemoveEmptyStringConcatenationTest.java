@@ -73,7 +73,7 @@ final class RemoveEmptyStringConcatenationTest {
 	    class A{
 		    void f(){
 			    String a = "";
-			    String s = "" + "second";
+			    String s = a + "second";
 		    }
 	    }
     """;
