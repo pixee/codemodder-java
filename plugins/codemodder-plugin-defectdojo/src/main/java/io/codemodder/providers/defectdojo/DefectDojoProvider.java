@@ -21,6 +21,6 @@ public final class DefectDojoProvider implements CodemodProvider {
       final List<RuleSarif> sarifs,
       final Path sonarIssuesJsonPath,
       final Path defectDojoFindingsJsonFile) {
-    return Set.of(new DefectDojoModule(codemodTypes, defectDojoFindingsJsonFile));
+    return Set.of(new DefectDojoModule(codemodTypes, repository, defectDojoFindingsJsonFile));
   }
 }
