@@ -34,13 +34,15 @@ public final class VerbTamperingCodemod extends RawFileChanger {
   }
 
   @Override
-  public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
+  public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
+      throws IOException {
     Path file = context.path();
     if (!"web.xml".equalsIgnoreCase(file.getFileName().toString())) {
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
     try {
-      return processWebXml(context, file);
+      List<CodemodChange> changes = processWebXml(context, file);
+      return CodemodFileScanningResult.withOnlyChanges(changes);
     } catch (SAXException | DocumentException | XMLStreamException e) {
       throw new IOException("Problem transforming web.xml", e);
     }

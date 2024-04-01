@@ -47,11 +47,13 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
   }
 
   @Override
-  public List<CodemodChange> visit(
+  public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    return cu.findAll(MethodCallExpr.class).stream()
-        .flatMap(mce -> onNodeFound(context, mce, cu).stream())
-        .collect(Collectors.toList());
+    List<CodemodChange> changes =
+        cu.findAll(MethodCallExpr.class).stream()
+            .flatMap(mce -> onNodeFound(context, mce, cu).stream())
+            .collect(Collectors.toList());
+    return CodemodFileScanningResult.withOnlyChanges(changes);
   }
 
   private static final String queryParameterNamePrefix = ":parameter";

@@ -32,10 +32,12 @@ public final class SQLParameterizerCodemod extends JavaParserChanger {
   }
 
   @Override
-  public List<CodemodChange> visit(
+  public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    return cu.findAll(MethodCallExpr.class).stream()
-        .flatMap(mce -> onNodeFound(mce).stream())
-        .collect(Collectors.toList());
+    List<CodemodChange> changes =
+        cu.findAll(MethodCallExpr.class).stream()
+            .flatMap(mce -> onNodeFound(mce).stream())
+            .collect(Collectors.toList());
+    return CodemodFileScanningResult.withOnlyChanges(changes);
   }
 }

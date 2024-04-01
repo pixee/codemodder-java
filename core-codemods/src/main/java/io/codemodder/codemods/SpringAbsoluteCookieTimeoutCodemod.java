@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,12 +47,13 @@ public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
   }
 
   @Override
-  public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
+  public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
+      throws IOException {
     Path path = context.path();
     if (!"application.properties".equalsIgnoreCase(path.getFileName().toString())) {
-      return List.of();
+      return CodemodFileScanningResult.none();
     } else if (!inExpectedDir(context.codeDirectory().asPath().relativize(path))) {
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
 
     List<CodemodChange> changes = new ArrayList<>();
@@ -93,9 +93,9 @@ public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
 
     if (!changes.isEmpty()) {
       Files.write(path, lines);
-      return Collections.unmodifiableList(changes);
+      return CodemodFileScanningResult.withOnlyChanges(changes);
     }
-    return List.of();
+    return CodemodFileScanningResult.none();
   }
 
   private boolean inExpectedDir(final Path relativePath) {
