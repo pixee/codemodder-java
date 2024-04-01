@@ -8,7 +8,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AssignExpr;
-
 import org.junit.jupiter.api.Test;
 
 final class RemoveUnusedLocalVariablesTest {
