@@ -13,7 +13,7 @@ final class DefectDojoSqlInjectionCodemodTest {
       renameTestFile =
           "src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
       dependencies = {})
-  final class DefectDojoSqlInjectionChallengeCodemodTestMixin implements CodemodTestMixin {}
+  final class WebGoatSqlInjectionChallengeTest implements CodemodTestMixin {}
 
   @Nested
   @Metadata(
@@ -22,5 +22,5 @@ final class DefectDojoSqlInjectionCodemodTest {
       renameTestFile =
           "src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson8.java",
       dependencies = {})
-  final class DefectDojoSqlInjectionLesson8CodemodTestMixin implements CodemodTestMixin {}
+  final class WebGoatSqlInjectionLesson8Test implements CodemodTestMixin {}
 }
