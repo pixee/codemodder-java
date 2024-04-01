@@ -1,5 +1,6 @@
 package io.codemodder.providers.defectdojo;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
@@ -17,11 +18,14 @@ final class DefectDojoModule extends AbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path defectDojoFindingsJsonFile;
+  private final Path projectDir;
 
   DefectDojoModule(
       final List<Class<? extends CodeChanger>> codemodTypes,
+      final Path projectDir,
       final Path defectDojoFindingsJsonFile) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
+    this.projectDir = Objects.requireNonNull(projectDir);
     this.defectDojoFindingsJsonFile = defectDojoFindingsJsonFile;
   }
 
@@ -33,7 +37,10 @@ final class DefectDojoModule extends AbstractModule {
 
     Findings findings;
     try {
-      findings = new ObjectMapper().readValue(defectDojoFindingsJsonFile.toFile(), Findings.class);
+      findings =
+          new ObjectMapper()
+              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+              .readValue(defectDojoFindingsJsonFile.toFile(), Findings.class);
     } catch (IOException e) {
       throw new UncheckedIOException("can't read defectdojo JSON", e);
     }
@@ -61,7 +68,8 @@ final class DefectDojoModule extends AbstractModule {
           defectDojoScan -> {
             List<Finding> ruleFindings =
                 ruleFindingsMap.getOrDefault(defectDojoScan.ruleId(), List.of());
-            DefaultRuleFindings ruleFindingsToBind = new DefaultRuleFindings(ruleFindings);
+            DefaultRuleFindings ruleFindingsToBind =
+                new DefaultRuleFindings(ruleFindings, projectDir);
             bind(RuleFindings.class).annotatedWith(defectDojoScan).toInstance(ruleFindingsToBind);
           });
     }

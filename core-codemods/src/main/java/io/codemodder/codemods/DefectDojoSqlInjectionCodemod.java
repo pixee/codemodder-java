@@ -3,7 +3,9 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectionTool;
 import io.codemodder.codetf.DetectorFinding;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.defectdojo.DefectDojoScan;
 import io.codemodder.providers.defectdojo.Finding;
@@ -19,7 +21,8 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH,
     importance = Importance.HIGH)
-public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
+public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
+    implements FixOnlyCodeChanger {
 
   private final RuleFindings findings;
 
@@ -28,6 +31,16 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
       @DefectDojoScan(ruleId = "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli")
           RuleFindings findings) {
     this.findings = Objects.requireNonNull(findings);
+  }
+
+  @Override
+  public DetectionTool getDetectionTool() {
+    DetectorRule semgrepSqliRule =
+        new DetectorRule(
+            "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
+            "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
+            null);
+    return new DetectionTool("DefectDojo", semgrepSqliRule, List.of());
   }
 
   @Override
@@ -41,8 +54,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
       return CodemodFileScanningResult.none();
     }
 
-    List<DetectorFinding> fixed = new ArrayList<>();
-    List<DetectorFinding> allUnfixable = new ArrayList<>();
+    List<DetectorFinding> allFindings = new ArrayList<>();
 
     List<CodemodChange> changes = new ArrayList<>();
     for (Finding finding : findingsForThisPath) {
@@ -51,7 +63,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
       if (line == null) {
         DetectorFinding unfixableFinding =
             new DetectorFinding(id, false, "No line number provided");
-        allUnfixable.add(unfixableFinding);
+        allFindings.add(unfixableFinding);
         continue;
       }
 
@@ -64,7 +76,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
       if (supportedSqlMethodCallsOnThatLine.isEmpty()) {
         DetectorFinding unfixableFinding =
             new DetectorFinding(id, false, "No supported SQL methods found on the given line");
-        allUnfixable.add(unfixableFinding);
+        allFindings.add(unfixableFinding);
         continue;
       }
 
@@ -72,7 +84,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
         DetectorFinding unfixableFinding =
             new DetectorFinding(
                 id, false, "Multiple supported SQL methods found on the given line");
-        allUnfixable.add(unfixableFinding);
+        allFindings.add(unfixableFinding);
         continue;
       }
 
@@ -81,15 +93,15 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
 
       if (parameterizer.checkAndFix()) {
         DetectorFinding fixedFinding = new DetectorFinding(id, true, null);
-        fixed.add(fixedFinding);
+        allFindings.add(fixedFinding);
         changes.add(CodemodChange.from(line, "Fixes issue " + id + " by parameterizing SQL"));
       } else {
         DetectorFinding unfixableFinding =
             new DetectorFinding(id, false, "Fixing may have side effects");
-        allUnfixable.add(unfixableFinding);
+        allFindings.add(unfixableFinding);
       }
     }
 
-    return CodemodFileScanningResult.from(changes, allUnfixable);
+    return CodemodFileScanningResult.from(changes, allFindings);
   }
 }

@@ -118,6 +118,9 @@ public interface CodemodTestMixin {
         .forEachRemaining(allSarifs::add);
     Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
 
+    // Check for any a defectdojo
+    Path defectDojo = testResourceDir.resolve("defectdojo.json");
+
     // run the codemod
     CodemodLoader loader =
         new CodemodLoader(
@@ -130,7 +133,7 @@ public interface CodemodTestMixin {
             map,
             List.of(),
             Files.exists(sonarJson) ? sonarJson : null,
-            null);
+            Files.exists(defectDojo) ? defectDojo : null);
 
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat(codemods.size(), equalTo(1));
@@ -207,8 +210,8 @@ public interface CodemodTestMixin {
             List.of(pathToJavaFile),
             map,
             List.of(),
-            null,
-            null);
+            Files.exists(sonarJson) ? sonarJson : null,
+            Files.exists(defectDojo) ? defectDojo : null);
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
     CodemodExecutor executor2 =
         CodemodExecutorFactory.from(
