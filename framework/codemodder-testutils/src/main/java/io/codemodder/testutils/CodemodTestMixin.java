@@ -251,6 +251,7 @@ public interface CodemodTestMixin {
       throws IOException {
     String expectedCode = Files.readString(expected);
     String transformedJavaCode = Files.readString(after);
+    System.out.println(transformedJavaCode);
     assertThat(transformedJavaCode, equalTo(expectedCode));
   }
 
