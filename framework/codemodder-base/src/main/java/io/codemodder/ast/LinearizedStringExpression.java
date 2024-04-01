@@ -42,7 +42,7 @@ public final class LinearizedStringExpression {
    * concatenation of several string literals and expressions, it returns all the expressions in
    * order of concatenation.
    */
-  private Stream<Expression> linearize(Expression stringExpression) {
+  private Stream<Expression> linearize(final Expression stringExpression) {
     return findLeaves(stringExpression);
   }
 

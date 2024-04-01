@@ -660,9 +660,6 @@ public final class ASTs {
    * Returns a {@link List} containing all the referenced of {@code localDeclaration} in its scope.
    */
   public static List<NameExpr> findAllReferences(final LocalVariableDeclaration localDeclaration) {
-    System.out.println("REFERENCES:");
-    System.out.println(localDeclaration.getStatement());
-    System.out.println(localDeclaration.getScope().stream().toList());
     return localDeclaration.getScope().stream()
         .flatMap(
             n ->
