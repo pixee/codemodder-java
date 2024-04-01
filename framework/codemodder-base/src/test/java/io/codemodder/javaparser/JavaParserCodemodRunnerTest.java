@@ -29,7 +29,7 @@ final class JavaParserCodemodRunnerTest {
     }
 
     @Override
-    public List<CodemodChange> visit(CodemodInvocationContext context, CompilationUnit cu) {
+    public CodemodFileScanningResult visit(CodemodInvocationContext context, CompilationUnit cu) {
       final List<CodemodChange> codemodChanges = new ArrayList<>();
       cu.findAll(MethodCallExpr.class).stream()
           .forEach(
@@ -39,7 +39,7 @@ final class JavaParserCodemodRunnerTest {
                     CodemodChange.from(
                         mce.getBegin().get().line, DependencyGAV.JAVA_SECURITY_TOOLKIT));
               });
-      return codemodChanges;
+      return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
     }
   }
 
@@ -49,7 +49,7 @@ final class JavaParserCodemodRunnerTest {
     }
 
     @Override
-    public List<CodemodChange> visit(CodemodInvocationContext context, CompilationUnit cu) {
+    public CodemodFileScanningResult visit(CodemodInvocationContext context, CompilationUnit cu) {
       final List<CodemodChange> codemodChanges = new ArrayList<>();
       cu.findAll(ClassOrInterfaceDeclaration.class).stream()
           .forEach(
@@ -57,7 +57,7 @@ final class JavaParserCodemodRunnerTest {
                 c.setName("B");
                 codemodChanges.add(CodemodChange.from(c.getBegin().get().line));
               });
-      return codemodChanges;
+      return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
     }
   }
 
@@ -112,7 +112,8 @@ final class JavaParserCodemodRunnerTest {
     CodeDirectory dir = mock(CodeDirectory.class);
     when(dir.asPath()).thenReturn(tmpDir);
     when(context.codeDirectory()).thenReturn(dir);
-    List<CodemodChange> changes = runner.run(context);
+    CodemodFileScanningResult result = runner.run(context);
+    List<CodemodChange> changes = result.changes();
     assertThat(changes, hasItems(expectedCodemodChanges.toArray(CodemodChange[]::new)));
     assertThat(Files.readString(javaFile), is(updatedCode));
   }
@@ -155,7 +156,8 @@ final class JavaParserCodemodRunnerTest {
                 new UpdatesClassNamesParserChanger(),
                 new EmptyReporter()),
             EncodingDetector.create());
-    List<CodemodChange> changes = runner.run(context);
+    CodemodFileScanningResult result = runner.run(context);
+    List<CodemodChange> changes = result.changes();
 
     CodemodChange change1 = CodemodChange.from(2);
     CodemodChange change2 = CodemodChange.from(4, DependencyGAV.JAVA_SECURITY_TOOLKIT);

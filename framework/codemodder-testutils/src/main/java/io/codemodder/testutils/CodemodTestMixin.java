@@ -129,7 +129,8 @@ public interface CodemodTestMixin {
             List.of(pathToJavaFile),
             map,
             List.of(),
-            Files.exists(sonarJson) ? sonarJson : null);
+            Files.exists(sonarJson) ? sonarJson : null,
+            null);
 
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat(codemods.size(), equalTo(1));
@@ -206,6 +207,7 @@ public interface CodemodTestMixin {
             List.of(pathToJavaFile),
             map,
             List.of(),
+            null,
             null);
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
     CodemodExecutor executor2 =

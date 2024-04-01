@@ -52,13 +52,13 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   }
 
   @Override
-  public List<CodemodChange> visit(
+  public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     List<Issue> issues = ruleIssues.getResultsByPath(context.path());
 
     // small shortcut to avoid always executing the expensive findAll
     if (issues == null || issues.isEmpty()) {
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
     final List<? extends Node> allNodes = nodeCollector.collectNodes(cu, nodeType);
 
@@ -90,7 +90,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
         }
       }
     }
-    return codemodChanges;
+    return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
   }
 
   @Override
