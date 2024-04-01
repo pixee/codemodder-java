@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -33,12 +34,12 @@ public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChan
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SimpleName name,
       final Issue issue) {
     name.setIdentifier("replace");
-    return true;
+    return ChangesResult.changesApplied;
   }
 }

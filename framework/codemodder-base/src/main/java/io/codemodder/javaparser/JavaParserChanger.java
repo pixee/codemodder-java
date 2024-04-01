@@ -24,11 +24,6 @@ public abstract class JavaParserChanger implements CodeChanger {
   public abstract List<CodemodChange> visit(
       final CodemodInvocationContext context, final CompilationUnit cu);
 
-  /** Return the list of dependencies associated with the "fix" provided by this changer. */
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of();
-  }
-
   @Override
   public String getSummary() {
     return reporter.getSummary();

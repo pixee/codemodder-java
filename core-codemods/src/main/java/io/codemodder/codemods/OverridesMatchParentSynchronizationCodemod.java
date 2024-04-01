@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -40,16 +41,16 @@ public final class OverridesMatchParentSynchronizationCodemod
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       CodemodInvocationContext context, CompilationUnit cu, SimpleName methodName, Issue issue) {
     Optional<Node> parentNodeRef = methodName.getParentNode();
     if (parentNodeRef.isPresent()) {
       Node parentNode = parentNodeRef.get();
       if (parentNode instanceof MethodDeclaration method) {
         method.setSynchronized(true);
-        return true;
+        return ChangesResult.changesApplied;
       }
     }
-    return false;
+    return ChangesResult.noChanges;
   }
 }

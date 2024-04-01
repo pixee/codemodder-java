@@ -142,6 +142,11 @@ final class DefaultCodemodExecutorTest {
       return DependencyUpdateResult.create(
           remainingFileDependencies, skippedDependencies, changes, Set.of());
     }
+
+    @Override
+    public Collection<DependencyGAV> getAllDependencies(Path projectDir, Path file) {
+      return List.of();
+    }
   }
 
   @Test
@@ -430,7 +435,19 @@ final class DefaultCodemodExecutorTest {
     CodemodIdPair codemod =
         new CodemodIdPair("codemodder:java/inject-dep-1", new InjectsDependency1());
     ProjectProvider badProvider =
-        (projectDir, file, remainingFileDependencies) -> DependencyUpdateResult.EMPTY_UPDATE;
+        new ProjectProvider() {
+          @Override
+          public DependencyUpdateResult updateDependencies(
+              Path projectDir, Path file, List<DependencyGAV> remainingFileDependencies)
+              throws IOException {
+            return DependencyUpdateResult.EMPTY_UPDATE;
+          }
+
+          @Override
+          public Collection<DependencyGAV> getAllDependencies(Path projectDir, Path file) {
+            return List.of();
+          }
+        };
 
     executor =
         new DefaultCodemodExecutor(

@@ -1,6 +1,7 @@
 package io.codemodder.codemods;
 
 import com.contrastsecurity.sarif.Result;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -9,11 +10,16 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.zafarkhaja.semver.Version;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Adds gadget filtering logic to XStream deserialization. */
 @Codemod(
@@ -28,33 +34,75 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator newXStreamVariable,
       final Result result) {
-    String nameAsString = newXStreamVariable.getNameAsString();
-    Statement fixStatement = buildFixStatement(nameAsString);
-    Statement existingStatement = newXStreamVariable.findAncestor(Statement.class).get();
+
+    final Optional<Statement> existingStatementOptional =
+        newXStreamVariable.findAncestor(Statement.class);
+    if (existingStatementOptional.isEmpty()) {
+      return ChangesResult.noChanges;
+    }
+    final Statement existingStatement = existingStatementOptional.get();
+
+    final String nameAsString = newXStreamVariable.getNameAsString();
+
+    if (canUseDenyTypesByWildcard(context)) {
+      final Statement fixStatement =
+          StaticJavaParser.parseStatement(
+              "UnwantedTypes.dangerousClassNameTokens().forEach( token -> { "
+                  + nameAsString
+                  + ".denyTypesByWildcard(new String[] { \"*\" + token + \"*\" });});");
+
+      ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
+      ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.UnwantedTypes");
+      return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
+    }
+
+    final Statement fixStatement = buildFixStatement(nameAsString);
     ASTTransforms.addStatementAfterStatement(existingStatement, fixStatement);
     ASTTransforms.addImportIfMissing(cu, "io.github.pixee.security.xstream.HardeningConverter");
-    return true;
+    return ChangesResult.changesAppliedWith(List.of(JAVA_SECURITY_TOOLKIT_XSTREAM));
+  }
+
+  private boolean canUseDenyTypesByWildcard(final CodemodInvocationContext context) {
+    final Optional<DependencyGAV> xstreamDependencyOptional = getXstreamDependency(context);
+
+    if (xstreamDependencyOptional.isEmpty()) {
+      return false;
+    }
+
+    try {
+      final Version xtreamDependencyVersion =
+          Version.valueOf(xstreamDependencyOptional.get().version());
+      final Version comparableVersion = Version.valueOf("1.4.8");
+      return xtreamDependencyVersion.greaterThanOrEqualTo(comparableVersion);
+    } catch (final Exception e) {
+      LOG.error("Error while parsing dependency version", e);
+      return false;
+    }
   }
 
   private static Statement buildFixStatement(final String variableName) {
-    ExpressionStmt newStatement = new ExpressionStmt();
-    ObjectCreationExpr hardeningConverter = new ObjectCreationExpr();
+    final ExpressionStmt newStatement = new ExpressionStmt();
+    final ObjectCreationExpr hardeningConverter = new ObjectCreationExpr();
     hardeningConverter.setType(new ClassOrInterfaceType("HardeningConverter"));
-    MethodCallExpr registerConverterCall =
+    final MethodCallExpr registerConverterCall =
         new MethodCallExpr("registerConverter", hardeningConverter);
     newStatement.setExpression(registerConverterCall);
     registerConverterCall.setScope(new NameExpr(variableName));
     return newStatement;
   }
 
-  @Override
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of(JAVA_SECURITY_TOOLKIT_XSTREAM);
+  private Optional<DependencyGAV> getXstreamDependency(final CodemodInvocationContext context) {
+    return context.dependencies().stream()
+        .filter(
+            dependency ->
+                "com.thoughtworks.xstream".equals(dependency.group())
+                    && "xstream".equals(dependency.artifact()))
+        .findFirst();
   }
 
   private static final DependencyGAV JAVA_SECURITY_TOOLKIT_XSTREAM =
@@ -66,4 +114,6 @@ public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<Var
           DependencyLicenses.MIT,
           "https://github.com/pixee/java-security-toolkit-xstream",
           true);
+
+  private static final Logger LOG = LoggerFactory.getLogger(HardenXStreamCodemod.class);
 }

@@ -6,6 +6,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.stmt.SwitchStmt;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.pmd.PmdScan;
 import javax.inject.Inject;
 
@@ -30,7 +31,7 @@ public final class MoveSwitchDefaultCaseLastCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SwitchEntry switchEntry,
@@ -40,10 +41,10 @@ public final class MoveSwitchDefaultCaseLastCodemod
 
     if (entries.size() == 1) {
       // don't mess with the default case if it's the only case
-      return false;
+      return ChangesResult.noChanges;
     }
     entries.remove(switchEntry);
     entries.addLast(switchEntry);
-    return true;
+    return ChangesResult.changesApplied;
   }
 }

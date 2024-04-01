@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -34,7 +35,7 @@ public final class DefineConstantForLiteralCodemod
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final StringLiteralExpr stringLiteralExpr,
@@ -50,6 +51,8 @@ public final class DefineConstantForLiteralCodemod
           new CreateConstantForLiteral(context, cu, stringLiteralExpr, issue);
     }
 
-    return defineConstantForLiteral.replaceLiteralStringExpressionWithConstant();
+    return defineConstantForLiteral.replaceLiteralStringExpressionWithConstant()
+        ? ChangesResult.changesApplied
+        : ChangesResult.noChanges;
   }
 }

@@ -9,6 +9,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.Objects;
 import javax.inject.Inject;
@@ -88,7 +89,7 @@ public final class MigrateFilesCommonsIOToNIOCodemod extends CompositeJavaParser
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final MethodCallExpr readFileToStringCall,
@@ -103,7 +104,7 @@ public final class MigrateFilesCommonsIOToNIOCodemod extends CompositeJavaParser
         removeImportIfUnused(cu, "org.apache.commons.io.FileUtils");
       }
 
-      return success;
+      return success ? ChangesResult.changesApplied : ChangesResult.noChanges;
     }
 
     /**

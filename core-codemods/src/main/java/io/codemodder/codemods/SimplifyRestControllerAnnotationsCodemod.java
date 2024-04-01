@@ -10,6 +10,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -44,7 +45,7 @@ public final class SimplifyRestControllerAnnotationsCodemod
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ClassOrInterfaceDeclaration classOrInterfaceDeclaration,
@@ -54,7 +55,7 @@ public final class SimplifyRestControllerAnnotationsCodemod
         classOrInterfaceDeclaration.getAnnotationByName("Controller");
 
     if (controllerAnnotationOptional.isEmpty()) {
-      return false;
+      return ChangesResult.noChanges;
     }
 
     replaceControllerToRestControllerAnnotation(cu, controllerAnnotationOptional.get());
@@ -68,7 +69,7 @@ public final class SimplifyRestControllerAnnotationsCodemod
 
     removeImportIfUnused(cu, "org.springframework.web.bind.annotation.ResponseBody");
 
-    return true;
+    return ChangesResult.changesApplied;
   }
 
   private void replaceControllerToRestControllerAnnotation(

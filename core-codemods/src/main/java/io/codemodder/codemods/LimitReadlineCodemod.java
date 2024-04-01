@@ -10,6 +10,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.BoundedLineReader;
 import java.util.List;
@@ -42,7 +43,7 @@ public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<Met
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr readLineCall,
@@ -57,11 +58,6 @@ public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<Met
         NodeList.nodeList(readerScope, new IntegerLiteralExpr(stringLimitValue)));
     ASTTransforms.addImportIfMissing(cu, BoundedLineReader.class);
     readLineParent.replace(readLineCall, safeExpression);
-    return true;
-  }
-
-  @Override
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+    return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
   }
 }

@@ -20,6 +20,12 @@ rules:
             $X.denyTypes(...);
             ...
           }
+      - pattern-not-inside: |
+          $RETURNTYPE $METHOD(...) {
+            ...
+            $X.denyTypesByWildcard(...);
+            ...
+          }
       - focus-metavariable: $X
     message: Semgrep found a match
     languages:

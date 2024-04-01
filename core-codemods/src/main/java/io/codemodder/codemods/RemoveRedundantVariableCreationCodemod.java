@@ -5,6 +5,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -36,7 +37,7 @@ public final class RemoveRedundantVariableCreationCodemod
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr objectCreationExpr,
@@ -61,16 +62,16 @@ public final class RemoveRedundantVariableCreationCodemod
         } else if (lastStmt instanceof ThrowStmt throwStmt) {
           throwStmt.setExpression(objectCreationExpr);
         } else {
-          return false;
+          return ChangesResult.noChanges;
         }
 
         // Remove the redundant variable creation expression
         blockStmt.getStatements().remove(exprStmtOpt.get());
 
-        return true;
+        return ChangesResult.changesApplied;
       }
     }
 
-    return false;
+    return ChangesResult.noChanges;
   }
 }

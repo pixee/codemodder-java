@@ -6,6 +6,7 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFReference;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.nio.file.Path;
 import java.util.List;
@@ -42,13 +43,13 @@ public final class MakeJUnit5TestsFinalCodemod
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ClassOrInterfaceDeclaration typeDefinition,
       final Result result) {
     typeDefinition.getModifiers().add(Modifier.finalModifier());
-    return true;
+    return ChangesResult.changesApplied;
   }
 
   @Override

@@ -1,6 +1,7 @@
 package io.codemodder;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Objects;
 
 record DefaultCodemodInvocationContext(
@@ -8,7 +9,8 @@ record DefaultCodemodInvocationContext(
     Path path,
     String contents,
     String codemodId,
-    LineIncludesExcludes lineIncludesExcludes)
+    LineIncludesExcludes lineIncludesExcludes,
+    Collection<DependencyGAV> dependencies)
     implements CodemodInvocationContext {
 
   DefaultCodemodInvocationContext {
@@ -17,5 +19,6 @@ record DefaultCodemodInvocationContext(
     Objects.requireNonNull(contents);
     Objects.requireNonNull(codemodId);
     Objects.requireNonNull(lineIncludesExcludes);
+    Objects.requireNonNull(dependencies);
   }
 }

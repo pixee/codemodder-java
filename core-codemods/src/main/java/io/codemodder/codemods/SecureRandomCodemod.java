@@ -6,6 +6,7 @@ import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.security.SecureRandom;
 import javax.inject.Inject;
@@ -31,13 +32,13 @@ public final class SecureRandomCodemod extends SarifPluginJavaParserChanger<Obje
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr objectCreationExpr,
       final Result result) {
     objectCreationExpr.setType("SecureRandom");
     addImportIfMissing(cu, SecureRandom.class.getName());
-    return true;
+    return ChangesResult.changesApplied;
   }
 }

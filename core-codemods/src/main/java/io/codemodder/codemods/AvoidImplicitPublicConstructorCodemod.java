@@ -10,6 +10,7 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -40,7 +41,7 @@ public final class AvoidImplicitPublicConstructorCodemod
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SimpleName simpleName,
@@ -61,9 +62,9 @@ public final class AvoidImplicitPublicConstructorCodemod
 
       // Update the class node's members
       classNode.setMembers(members);
-      return true; // Return true if the modification was successful
+      return ChangesResult.changesApplied;
     }
 
-    return false;
+    return ChangesResult.noChanges;
   }
 }

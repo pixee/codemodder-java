@@ -133,13 +133,21 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
               }
 
               String beforeFileContents = fileCache.get(filePath);
+
+              Collection<DependencyGAV> deps =
+                  projectProviders.stream()
+                      .flatMap(
+                          provider -> provider.getAllDependencies(projectDir, filePath).stream())
+                      .toList();
+
               CodemodInvocationContext context =
                   new DefaultCodemodInvocationContext(
                       codeDirectory,
                       filePath,
                       beforeFileContents,
                       codemod.getId(),
-                      lineIncludesExcludes);
+                      lineIncludesExcludes,
+                      deps);
 
               // run the codemod on the file
               List<CodemodChange> codemodChanges = codemodRunner.run(context);

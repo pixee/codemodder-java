@@ -11,6 +11,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,12 +61,12 @@ final class PmdModuleTest {
     }
 
     @Override
-    public boolean onResultFound(
+    public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final VariableDeclarator node,
         Result result) {
-      return false;
+      return ChangesResult.changesApplied;
     }
   }
 }

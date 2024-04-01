@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.Newlines;
 import java.util.List;
@@ -25,17 +26,16 @@ public final class SanitizeHttpHeaderCodemod extends SarifPluginJavaParserChange
   }
 
   @Override
-  public boolean onResultFound(
+  public ChangesResult onResultFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr setHeaderCall,
       final Result result) {
     Expression headerValueArgument = setHeaderCall.getArgument(1);
-    return wrap(headerValueArgument).withStaticMethod(Newlines.class.getName(), "stripAll", false);
-  }
-
-  @Override
-  public List<DependencyGAV> dependenciesRequired() {
-    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+    final boolean success =
+        wrap(headerValueArgument).withStaticMethod(Newlines.class.getName(), "stripAll", false);
+    return success
+        ? ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
+        : ChangesResult.noChanges;
   }
 }

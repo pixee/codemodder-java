@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
@@ -37,7 +38,7 @@ public final class RemoveUnusedPrivateMethodCodemod
   }
 
   @Override
-  public boolean onIssueFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SimpleName node,
@@ -46,13 +47,13 @@ public final class RemoveUnusedPrivateMethodCodemod
     final Optional<Node> methodDeclarationOptional = node.getParentNode();
 
     if (methodDeclarationOptional.isEmpty()) {
-      return false;
+      return ChangesResult.noChanges;
     }
 
     final MethodDeclaration methodDeclaration = (MethodDeclaration) methodDeclarationOptional.get();
 
     methodDeclaration.removeForced();
 
-    return true;
+    return ChangesResult.changesApplied;
   }
 }
