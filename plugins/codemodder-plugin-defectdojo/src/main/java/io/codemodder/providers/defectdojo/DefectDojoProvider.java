@@ -1,4 +1,4 @@
-package io.codemodder.providers.sarif.pmd;
+package io.codemodder.providers.defectdojo;
 
 import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
@@ -8,19 +8,19 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
-/** Provides PMD-related functionality to codemodder. */
-public final class PmdProvider implements CodemodProvider {
+/** Provides DefectDojo functionality to codemodder. */
+public final class DefectDojoProvider implements CodemodProvider {
 
   @Override
   public Set<AbstractModule> getModules(
-      final Path codeDirectory,
+      final Path repository,
       final List<Path> includedFiles,
-      final List<String> includePaths,
-      final List<String> excludePaths,
+      final List<String> pathIncludes,
+      final List<String> pathExcludes,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs,
-      final Path sonarIssuesJsonFile,
+      final Path sonarIssuesJsonPath,
       final Path defectDojoFindingsJsonFile) {
-    return Set.of(new PmdModule(codeDirectory, includedFiles, codemodTypes));
+    return Set.of(new DefectDojoModule(codemodTypes, defectDojoFindingsJsonFile));
   }
 }

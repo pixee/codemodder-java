@@ -232,14 +232,15 @@ final class CLITest {
     }
 
     @Override
-    public List<CodemodChange> visitFile(final CodemodInvocationContext context)
+    public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
       if (path.toString().endsWith(".java")) {
         Files.writeString(path, "cloud9");
-        return List.of(CodemodChange.from(1));
+        List<CodemodChange> changes = List.of(CodemodChange.from(1));
+        return CodemodFileScanningResult.withOnlyChanges(changes);
       }
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
   }
 

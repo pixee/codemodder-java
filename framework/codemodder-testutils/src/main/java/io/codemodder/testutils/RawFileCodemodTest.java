@@ -66,6 +66,7 @@ public interface RawFileCodemodTest {
             List.of(tmpFilePath),
             ruleSarifMap,
             List.of(),
+            null,
             null);
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat("Only expecting 1 codemod per test", codemods.size(), equalTo(1));

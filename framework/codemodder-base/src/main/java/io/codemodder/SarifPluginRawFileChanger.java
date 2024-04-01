@@ -19,12 +19,12 @@ public abstract class SarifPluginRawFileChanger extends RawFileChanger {
   }
 
   @Override
-  public List<CodemodChange> visitFile(final CodemodInvocationContext context) {
+  public CodemodFileScanningResult visitFile(final CodemodInvocationContext context) {
     List<Result> results = sarif.getResultsByLocationPath(context.path());
     if (!results.isEmpty()) {
       return onFileFound(context, results);
     }
-    return List.of();
+    return CodemodFileScanningResult.none();
   }
 
   /**
@@ -34,6 +34,6 @@ public abstract class SarifPluginRawFileChanger extends RawFileChanger {
    * @param results the given SARIF results to act on
    * @return a {@link List} of {@link CodemodChange}s representing changes in the file.
    */
-  public abstract List<CodemodChange> onFileFound(
+  public abstract CodemodFileScanningResult onFileFound(
       CodemodInvocationContext context, List<Result> results);
 }
