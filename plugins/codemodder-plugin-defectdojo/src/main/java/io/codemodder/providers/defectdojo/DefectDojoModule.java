@@ -31,18 +31,21 @@ final class DefectDojoModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    if (defectDojoFindingsJsonFile == null) {
-      return;
-    }
 
     Findings findings;
-    try {
-      findings =
-          new ObjectMapper()
-              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-              .readValue(defectDojoFindingsJsonFile.toFile(), Findings.class);
-    } catch (IOException e) {
-      throw new UncheckedIOException("can't read defectdojo JSON", e);
+
+    // if there was no file, we still have to bind an empty result
+    if (defectDojoFindingsJsonFile == null) {
+      findings = new Findings(List.of());
+    } else {
+      try {
+        findings =
+            new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .readValue(defectDojoFindingsJsonFile.toFile(), Findings.class);
+      } catch (IOException e) {
+        throw new UncheckedIOException("can't read defectdojo JSON", e);
+      }
     }
 
     // create a RuleFindings instance for every rule id we come across in the findings object

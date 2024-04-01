@@ -13,6 +13,7 @@ import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.JavaParserFacade;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -153,7 +154,7 @@ public interface CodemodTestMixin {
                   try {
                     return factory.create(List.of(dir));
                   } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new UncheckedIOException(e);
                   }
                 }),
             EncodingDetector.create());
@@ -210,8 +211,8 @@ public interface CodemodTestMixin {
             List.of(pathToJavaFile),
             map,
             List.of(),
-            Files.exists(sonarJson) ? sonarJson : null,
-            Files.exists(defectDojo) ? defectDojo : null);
+            null,
+            null);
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
     CodemodExecutor executor2 =
         CodemodExecutorFactory.from(
