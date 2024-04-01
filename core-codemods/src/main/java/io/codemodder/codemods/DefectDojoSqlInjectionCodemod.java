@@ -31,14 +31,14 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
   }
 
   @Override
-  public List<CodemodChange> visit(
+  public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
 
     List<MethodCallExpr> allMethodCalls = cu.findAll(MethodCallExpr.class);
 
     List<Finding> findingsForThisPath = findings.getForPath(context.path());
     if (findingsForThisPath.isEmpty()) {
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
 
     List<DetectorFinding> fixed = new ArrayList<>();
@@ -90,6 +90,6 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
       }
     }
 
-    return List.copyOf(changes);
+    return CodemodFileScanningResult.from(changes, allUnfixable);
   }
 }
