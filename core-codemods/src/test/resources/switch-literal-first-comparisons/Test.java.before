@@ -85,6 +85,13 @@ final class Test {
        if(invalidStringMethodString2.equals("pibeString")){
          System.out.println(pibeUtilsStr);
        }
+
+       // should change name expr var since it is a string that is initialized by a method from an custom object that is not contained in commonMethodsThatCantReturnNull
+       MyObject myObject = "myObject";
+       String generatedMyObjectString = myObject.generatesString();
+       if(generatedMyObjectString.equals("pibeString")){
+         System.out.println(generatedMyObjectString);
+       }
    }
 
    private String getBar() { return null; }
