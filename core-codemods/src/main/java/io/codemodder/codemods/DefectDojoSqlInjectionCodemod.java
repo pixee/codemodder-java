@@ -94,9 +94,12 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
       SQLParameterizer parameterizer = new SQLParameterizer(methodCallExpr);
 
       if (parameterizer.checkAndFix()) {
-        var maybeMethodDecl = methodCallExpr.findAncestor(CallableDeclaration.class);
+        final var maybeMethodDecl = methodCallExpr.findAncestor(CallableDeclaration.class);
         // Cleanup, removes empty string concatenations and unused variables
         maybeMethodDecl.ifPresent(cd -> ASTTransforms.removeEmptyStringConcatenation(cd));
+        // TODO hits a bug with javaparser, where adding nodes won't result in the correct children
+        // order. This causes the following to remove actually used variables
+        // maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
 
         DetectorFinding fixedFinding = new DetectorFinding(id, true, null);
         allFindings.add(fixedFinding);
