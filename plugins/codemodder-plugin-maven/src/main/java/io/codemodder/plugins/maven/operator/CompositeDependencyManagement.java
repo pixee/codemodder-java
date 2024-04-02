@@ -118,8 +118,8 @@ class CompositeDependencyManagement extends AbstractCommand {
       return dependencyNode;
     }
   }
-  
+
   private static final String DEPENDENCYMANAGEMENT = "dependencyManagement";
-  
+
   private static final String DEPENDENCIES = "dependencies";
 }
