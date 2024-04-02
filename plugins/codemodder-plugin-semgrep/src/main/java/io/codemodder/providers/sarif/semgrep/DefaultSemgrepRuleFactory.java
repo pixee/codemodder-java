@@ -28,8 +28,7 @@ final class DefaultSemgrepRuleFactory implements SemgrepRuleFactory {
     boolean foundYaml = false;
 
     if (!declaredRuleId.isEmpty()) {
-      String classpathYamlPath =
-          "/" + packageName.replace(".", "/") + "/" + declaredRuleId + YAML;
+      String classpathYamlPath = "/" + packageName.replace(".", "/") + "/" + declaredRuleId + YAML;
 
       if (!"".equals(yamlPath)) {
         classpathYamlPath = yamlPath;
@@ -146,6 +145,6 @@ final class DefaultSemgrepRuleFactory implements SemgrepRuleFactory {
     int end = rawYaml.indexOf("\n", start);
     return rawYaml.substring(start + ruleIdStartToken.length(), end).trim();
   }
-  
+
   private static final String YAML = ".yaml";
 }

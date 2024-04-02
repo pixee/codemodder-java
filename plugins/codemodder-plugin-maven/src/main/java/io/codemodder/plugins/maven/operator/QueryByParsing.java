@@ -191,6 +191,6 @@ class QueryByParsing extends AbstractQueryCommand {
   private static final Pattern RE_INTERPOLATION =
       Pattern.compile(".*\\$\\{[\\p{Alnum}.\\-_]+\\}.*");
   private static final Logger logger = LoggerFactory.getLogger(QueryByParsing.class);
-  
+
   private static final String UNKNOWN = "UNKNOWN";
 }
