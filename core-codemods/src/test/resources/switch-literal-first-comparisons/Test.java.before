@@ -70,6 +70,21 @@ final class Test {
        if(fromNameExpr.equals("pibeString")){
          System.out.println(pibeUtilsStr);
        }
+
+       // should change name expr var since it is a string that is initialized to a null value in spite of using a method contained in commonMethodsThatCantReturnNull (Implicit String library)
+       String nullString2 = null;
+       String nullString1 = nullString2;
+       String nullString3 = nullString1.replace("Adios", "Bye");
+       if(nullString3.equals("fail")){
+         System.out.println(nullString3);
+       }
+
+       // should change name expr var since it is a string that is initialized using a method not contained in commonMethodsThatCantReturnNull (Implicit String library)
+       String invalidStringMethodString = "i'm invalid";
+       String invalidStringMethodString2 = invalidStringMethodString.substring(100);
+       if(invalidStringMethodString2.equals("pibeString")){
+         System.out.println(pibeUtilsStr);
+       }
    }
 
    private String getBar() { return null; }
