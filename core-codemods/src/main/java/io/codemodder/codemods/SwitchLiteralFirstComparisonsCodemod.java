@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -16,6 +17,7 @@ import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
@@ -75,7 +77,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
      */
     if (simpleNameOptional.isPresent()
         && (isSimpleNameANotNullInitializedVariableDeclarator(
-                variableDeclarators, simpleNameOptional.get())
+                cu, variableDeclarators, simpleNameOptional.get())
             || hasSimpleNameNotNullAnnotation(cu, simpleNameOptional.get(), variableDeclarators)
             || hasSimpleNamePreviousNullAssertion(cu, simpleNameOptional.get()))) {
       return ChangesResult.noChanges;
@@ -241,7 +243,9 @@ public final class SwitchLiteralFirstComparisonsCodemod
    * that was previously initialized to a non-null value.
    */
   private boolean isSimpleNameANotNullInitializedVariableDeclarator(
-      final List<VariableDeclarator> variableDeclarators, final SimpleName targetName) {
+      final CompilationUnit cu,
+      final List<VariableDeclarator> variableDeclarators,
+      final SimpleName targetName) {
 
     return targetName != null
         && variableDeclarators.stream()
@@ -251,7 +255,10 @@ public final class SwitchLiteralFirstComparisonsCodemod
                 declarator ->
                     declarator
                         .getInitializer()
-                        .map(expr -> !(expr instanceof NullLiteralExpr))
+                        .map(
+                            expr -> {
+                              return !(expr instanceof NullLiteralExpr) && isSafeExpr(cu, expr);
+                            })
                         .orElse(false));
   }
 
@@ -269,6 +276,58 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return simpleNames.isEmpty() ? Optional.empty() : Optional.of(simpleNames.get(0));
   }
 
+  private boolean isSafeExpr(final CompilationUnit cu, final Expression expression) {
+    if (!(expression instanceof MethodCallExpr)) {
+      return true;
+    }
+
+    final MethodCallExpr methodCallExpr = (MethodCallExpr) expression;
+
+    final Optional<Expression> optionalScope = methodCallExpr.getScope();
+
+    if (optionalScope.isEmpty()) {
+      return false;
+    }
+
+    final String method = methodCallExpr.getName().getIdentifier();
+
+    final Expression scope = optionalScope.get();
+
+    if (scope instanceof StringLiteralExpr) {
+
+      return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+    }
+
+    // Explicit non static import StringUtils.method
+    if (scope instanceof NameExpr) {
+      final NameExpr scopeName = (NameExpr) scope;
+      final Optional<Name> optionalImport =
+          cu.getImports().stream()
+              .map(ImportDeclaration::getName)
+              .filter(
+                  importName ->
+                      importName.getIdentifier().equals(scopeName.getName().getIdentifier()))
+              .findFirst();
+
+      if (optionalImport.isEmpty()) {
+        return false;
+      }
+
+      final Name importDeclaration = optionalImport.get();
+
+      final String as = importDeclaration.asString().concat("#").concat(method);
+
+      return commonMethodsThatCantReturnNull.contains(as);
+    }
+
+    // Explicit static import like method and import static library.method
+
+    return false;
+  }
+
   private static final Set<String> flippableComparisonMethods =
       Set.of("equals", "equalsIgnoreCase");
+
+  private static final List<String> commonMethodsThatCantReturnNull =
+      List.of("java.lang.String#replace", "org.apache.commons.lang3.StringUtils#defaultString");
 }

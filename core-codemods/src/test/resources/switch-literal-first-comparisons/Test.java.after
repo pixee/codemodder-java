@@ -1,5 +1,7 @@
 package com.acme.testcode;
 
+import org.apache.commons.lang3.StringUtils;
+
 final class Test {
 
     public boolean fine1 = "foo".equals("bar");
@@ -42,9 +44,16 @@ final class Test {
          System.out.println(nullString);
        }
 
+       // shouldn't be change because var is initialized using a method contained in commonMethodsThatCantReturnNull (Implicit String library)
        String replacedString = "hola".replace("hola", "fibonacci");
        if(replacedString.equals("fibonacci")){
          System.out.println(replacedString);
+       }
+
+       // shouldn't be change because var is initialized using a method contained in commonMethodsThatCantReturnNull (Explicit import library)
+       String defaultString = StringUtils.defaultString(str);
+       if(defaultString.equals("defaultString")){
+         System.out.println(defaultString);
        }
    }
 
