@@ -79,7 +79,7 @@ class QueryByParsing extends AbstractQueryCommand {
         String groupId = getElementTextOrNull(dependencyElement, "groupId");
         String artifactId = getElementTextOrNull(dependencyElement, "artifactId");
         String version =
-            Optional.ofNullable(dependencyElement.elementText("version")).orElse("UNKNOWN");
+            Optional.ofNullable(dependencyElement.elementText("version")).orElse(UNKNOWN);
         String classifier = getElementTextOrNull(dependencyElement, "classifier");
         String packaging = getElementTextOrNull(dependencyElement, "packaging");
 
@@ -87,7 +87,7 @@ class QueryByParsing extends AbstractQueryCommand {
           version = strSubstitutor.replace(version);
         } catch (IllegalStateException e) {
           logger.warn("while interpolating version", e);
-          version = "UNKNOWN";
+          version = UNKNOWN;
         }
 
         Dependency dependency =
@@ -122,7 +122,7 @@ class QueryByParsing extends AbstractQueryCommand {
         String groupId = getElementTextOrNull(dependencyElement, "groupId");
         String artifactId = getElementTextOrNull(dependencyElement, "artifactId");
         String version =
-            Optional.ofNullable(dependencyElement.elementText("version")).orElse("UNKNOWN");
+            Optional.ofNullable(dependencyElement.elementText("version")).orElse(UNKNOWN);
 
         Dependency proposedDependency = lookForDependencyManagement(groupId, artifactId);
 
@@ -136,7 +136,7 @@ class QueryByParsing extends AbstractQueryCommand {
             version = strSubstitutor.replace(version);
           } catch (IllegalStateException e) {
             logger.warn("while interpolating version", e);
-            version = "UNKNOWN";
+            version = UNKNOWN;
           }
 
           Dependency dependency =
@@ -191,4 +191,6 @@ class QueryByParsing extends AbstractQueryCommand {
   private static final Pattern RE_INTERPOLATION =
       Pattern.compile(".*\\$\\{[\\p{Alnum}.\\-_]+\\}.*");
   private static final Logger logger = LoggerFactory.getLogger(QueryByParsing.class);
+  
+  private static final String UNKNOWN = "UNKNOWN";
 }
