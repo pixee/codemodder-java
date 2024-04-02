@@ -257,7 +257,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
                         .getInitializer()
                         .map(
                             expr -> {
-                              return !(expr instanceof NullLiteralExpr) && isSafeExpr(cu, expr);
+                              return isSafeExpr(cu, expr);
                             })
                         .orElse(false));
   }
@@ -277,52 +277,91 @@ public final class SwitchLiteralFirstComparisonsCodemod
   }
 
   private boolean isSafeExpr(final CompilationUnit cu, final Expression expression) {
-    if (!(expression instanceof MethodCallExpr)) {
-      return true;
-    }
-
-    final MethodCallExpr methodCallExpr = (MethodCallExpr) expression;
-
-    final Optional<Expression> optionalScope = methodCallExpr.getScope();
-
-    if (optionalScope.isEmpty()) {
+    if (expression instanceof NullLiteralExpr) {
       return false;
     }
 
-    final String method = methodCallExpr.getName().getIdentifier();
-
-    final Expression scope = optionalScope.get();
-
-    if (scope instanceof StringLiteralExpr) {
-
-      return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+    if (expression instanceof StringLiteralExpr) {
+      return true;
     }
 
-    // Explicit non static import StringUtils.method
-    if (scope instanceof NameExpr) {
-      final NameExpr scopeName = (NameExpr) scope;
-      final Optional<Name> optionalImport =
-          cu.getImports().stream()
-              .map(ImportDeclaration::getName)
-              .filter(
-                  importName ->
-                      importName.getIdentifier().equals(scopeName.getName().getIdentifier()))
-              .findFirst();
+    if (expression instanceof NameExpr nameExpr) {
+      return isSafeNameExpr(cu, nameExpr);
+    }
 
-      if (optionalImport.isEmpty()) {
+    if (expression instanceof MethodCallExpr methodCallExpr) {
+
+      final Optional<Expression> optionalScope = methodCallExpr.getScope();
+
+      if (optionalScope.isEmpty()) {
         return false;
       }
 
-      final Name importDeclaration = optionalImport.get();
+      final String method = methodCallExpr.getName().getIdentifier();
 
-      final String as = importDeclaration.asString().concat("#").concat(method);
+      final Expression scope = optionalScope.get();
 
-      return commonMethodsThatCantReturnNull.contains(as);
+      if (scope instanceof StringLiteralExpr) {
+        return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+      }
+      if (scope instanceof NameExpr scopeName) {
+
+        if (!isSafeNameExpr(cu, scopeName)) {
+          return isNonStaticImportSafeLibrary(cu, scopeName, method);
+        }
+
+        // TODO verify
+        return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+      }
+      // Explicit static import like method and import static library.method
+
+      return false;
     }
 
-    // Explicit static import like method and import static library.method
+    return true;
+  }
+
+  private boolean isSafeNameExpr(final CompilationUnit cu, final NameExpr nameExpr) {
+    final SimpleName simpleName = nameExpr.getName();
+    final Optional<VariableDeclarator> variableDeclaratorOptional =
+        getDeclaredVariable(cu, simpleName);
+    final boolean isVariable = variableDeclaratorOptional.isPresent();
+
+    if (isVariable && variableDeclaratorOptional.get().getInitializer().isPresent()) {
+      return isSafeExpr(cu, variableDeclaratorOptional.get().getInitializer().get());
+    }
 
     return false;
+  }
+
+  private boolean isNonStaticImportSafeLibrary(
+      final CompilationUnit cu, final NameExpr scopeName, final String method) {
+    final Optional<Name> optionalImport =
+        cu.getImports().stream()
+            .map(ImportDeclaration::getName)
+            .filter(
+                importName ->
+                    importName.getIdentifier().equals(scopeName.getName().getIdentifier()))
+            .findFirst();
+
+    if (optionalImport.isEmpty()) {
+      return false;
+    }
+
+    final Name importDeclaration = optionalImport.get();
+
+    final String as = importDeclaration.asString().concat("#").concat(method);
+
+    return commonMethodsThatCantReturnNull.contains(as);
+  }
+
+  private Optional<VariableDeclarator> getDeclaredVariable(
+      final CompilationUnit cu, final SimpleName simpleName) {
+    final List<VariableDeclarator> variableDeclarators = cu.findAll(VariableDeclarator.class);
+    return variableDeclarators.stream()
+        .filter(declarator -> declarator.getName().equals(simpleName))
+        .filter(declarator -> isPreviousNodeBefore(simpleName, declarator.getName()))
+        .findFirst();
   }
 
   private static final Set<String> flippableComparisonMethods =

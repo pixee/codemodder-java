@@ -62,6 +62,14 @@ final class Test {
        if(pibeUtilsStr.equals("pibeString")){
          System.out.println(pibeUtilsStr);
        }
+
+       // should not change name expr var since it is a string that is initialized using a method contained in commonMethodsThatCantReturnNull (Implicit String library)
+       String stringVariable2 = "Hi";
+       String stringVariable1 = stringVariable2;
+       String fromNameExpr = stringVariable1.replace("Hi", "Hola");
+       if(fromNameExpr.equals("pibeString")){
+         System.out.println(pibeUtilsStr);
+       }
    }
 
    private String getBar() { return null; }
