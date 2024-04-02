@@ -1,6 +1,7 @@
 package com.acme.testcode;
 
 import org.apache.commons.lang3.StringUtils;
+import com.pibe.PibeUtils;
 
 final class Test {
 
@@ -50,10 +51,16 @@ final class Test {
          System.out.println(replacedString);
        }
 
-       // shouldn't be change because var is initialized using a method contained in commonMethodsThatCantReturnNull (Explicit import library)
+       // shouldn't be change because var is initialized using a method contained in commonMethodsThatCantReturnNull (Explicit non static import library)
        String defaultString = StringUtils.defaultString(str);
        if(defaultString.equals("defaultString")){
          System.out.println(defaultString);
+       }
+
+       // should change - var is initialized using a method NOT contained in commonMethodsThatCantReturnNull (Explicit non static import library)
+       String pibeUtilsStr = PibeUtils.parse(str);
+       if(pibeUtilsStr.equals("pibeString")){
+         System.out.println(pibeUtilsStr);
        }
    }
 
