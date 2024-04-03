@@ -79,8 +79,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     if (simpleNameOptional.isPresent()
         && (hasSimpleNameNotNullAnnotation(cu, simpleNameOptional.get(), variableDeclarators)
             || hasSimpleNamePreviousNullAssertion(cu, simpleNameOptional.get())
-            || isSimpleNameANotNullInitializedVariableDeclarator(
-                cu, variableDeclarators, simpleNameOptional.get()))) {
+            || isSimpleNameANotNullInitializedVariableDeclarator(cu, simpleNameOptional.get()))) {
       return ChangesResult.noChanges;
     }
 
@@ -244,17 +243,17 @@ public final class SwitchLiteralFirstComparisonsCodemod
    * that was previously initialized to a non-null expression.
    */
   private boolean isSimpleNameANotNullInitializedVariableDeclarator(
-      final CompilationUnit cu,
-      final List<VariableDeclarator> variableDeclarators,
-      final SimpleName targetName) {
+      final CompilationUnit cu, final SimpleName targetName) {
 
-    return targetName != null
-        && variableDeclarators.stream()
-            .filter(declarator -> declarator.getName().equals(targetName))
-            .filter(declarator -> isPreviousNodeBefore(targetName, declarator.getName()))
-            .anyMatch(
-                declarator ->
-                    declarator.getInitializer().map(expr -> isSafeExpr(cu, expr)).orElse(false));
+    final Optional<VariableDeclarator> variableDeclaratorOptional =
+        getDeclaredVariable(cu, targetName);
+
+    if (variableDeclaratorOptional.isEmpty()
+        || variableDeclaratorOptional.get().getInitializer().isEmpty()) {
+      return false;
+    }
+
+    return isNullSafeExpression(cu, variableDeclaratorOptional.get().getInitializer().get());
   }
 
   /**
@@ -271,28 +270,24 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return simpleNames.isEmpty() ? Optional.empty() : Optional.of(simpleNames.get(0));
   }
 
-  private boolean isSafeExpr(final CompilationUnit cu, final Expression expression) {
+  private boolean isNullSafeExpression(final CompilationUnit cu, final Expression expression) {
     if (expression instanceof NullLiteralExpr) {
       return false;
     }
 
-    if (expression instanceof StringLiteralExpr) {
-      return true;
-    }
-
     if (expression instanceof NameExpr nameExpr) {
-      return isVariableInitialized(cu, nameExpr);
+      return isVariableNullSafeInitialized(cu, nameExpr);
     }
 
     if (expression instanceof MethodCallExpr methodCallExpr) {
-
-      return isSafeMethodExpr(cu, methodCallExpr);
+      return isNullSafeMethodExpr(cu, methodCallExpr);
     }
 
     return true;
   }
 
-  private boolean isSafeMethodExpr(final CompilationUnit cu, final MethodCallExpr methodCallExpr) {
+  private boolean isNullSafeMethodExpr(
+      final CompilationUnit cu, final MethodCallExpr methodCallExpr) {
     final Optional<Expression> optionalScope = methodCallExpr.getScope();
 
     final String method = methodCallExpr.getName().getIdentifier();
@@ -300,7 +295,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     // Static import case for example: import static
     // org.apache.commons.lang3.StringUtils.defaultString
     if (optionalScope.isEmpty()) {
-      return isSafeImportLibrary(cu, methodCallExpr.getName().getIdentifier(), method);
+      return isNullSafeImportLibrary(cu, methodCallExpr.getName().getIdentifier(), method);
     }
 
     final Expression scope = optionalScope.get();
@@ -319,9 +314,9 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     if (scope instanceof NameExpr scopeName) {
 
-      if (!isVariableInitialized(cu, scopeName)) {
+      if (!isVariableNullSafeInitialized(cu, scopeName)) {
         // check if scope is non-static import like: import org.apache.commons.lang3.StringUtils
-        return isSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
+        return isNullSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
       }
 
       final Optional<VariableDeclarator> variableDeclaratorOptional =
@@ -335,15 +330,38 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
       // when scope is an object variable, check class type to determine if it is an implicit or
       // explicit import
-      return "String".equals(type)
-          ? commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method))
-          : isSafeImportLibrary(cu, type, method);
+      return isClassObjectMethodNullSafe(cu, type, method);
     }
 
     return false;
   }
 
-  private boolean isVariableInitialized(final CompilationUnit cu, final NameExpr nameExpr) {
+  /** Some basic java lang type classes */
+  private boolean isClassObjectMethodNullSafe(
+      final CompilationUnit cu, final String type, final String method) {
+    switch (type) {
+      case "String" -> {
+        return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+      }
+      case "Integer" -> {
+        return commonMethodsThatCantReturnNull.contains("java.lang.Integer#".concat(method));
+      }
+      case "Double" -> {
+        return commonMethodsThatCantReturnNull.contains("java.lang.Double#".concat(method));
+      }
+      case "Character" -> {
+        return commonMethodsThatCantReturnNull.contains("java.lang.Character#".concat(method));
+      }
+      case "Long" -> {
+        return commonMethodsThatCantReturnNull.contains("java.lang.Long#".concat(method));
+      }
+      default -> {
+        return isNullSafeImportLibrary(cu, type, method);
+      }
+    }
+  }
+
+  private boolean isVariableNullSafeInitialized(final CompilationUnit cu, final NameExpr nameExpr) {
     final SimpleName simpleName = nameExpr.getName();
     final Optional<VariableDeclarator> variableDeclaratorOptional =
         getDeclaredVariable(cu, simpleName);
@@ -352,13 +370,13 @@ public final class SwitchLiteralFirstComparisonsCodemod
     // check if it is an initialized variable
     if (isVariable && variableDeclaratorOptional.get().getInitializer().isPresent()) {
       // check if initializer is a safe expression
-      return isSafeExpr(cu, variableDeclaratorOptional.get().getInitializer().get());
+      return isNullSafeExpression(cu, variableDeclaratorOptional.get().getInitializer().get());
     }
 
     return false;
   }
 
-  private boolean isSafeImportLibrary(
+  private boolean isNullSafeImportLibrary(
       final CompilationUnit cu, final String identifier, final String method) {
     final Optional<ImportDeclaration> optionalImport =
         cu.getImports().stream()

@@ -95,6 +95,7 @@ final class Test {
          System.out.println(generatedMyObjectString);
        }
 
+       // should change because paramValue is not explicitly initialized despite the fact replace is contained incommonMethodsThatCantReturnNull
        String generatedMyObjectString = paramValue.replace();
        if(generatedMyObjectString.equals("pibeString")){
          System.out.println(generatedMyObjectString);
