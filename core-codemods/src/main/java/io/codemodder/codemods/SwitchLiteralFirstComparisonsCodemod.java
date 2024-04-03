@@ -21,7 +21,6 @@ import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
-import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.*;
@@ -282,7 +281,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     }
 
     if (expression instanceof NameExpr nameExpr) {
-      return isSafeNameExpr(cu, nameExpr);
+      return isVariableInitialized(cu, nameExpr);
     }
 
     if (expression instanceof MethodCallExpr methodCallExpr) {
@@ -293,54 +292,66 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return true;
   }
 
-  private boolean isSafeMethodExpr(final CompilationUnit cu, final MethodCallExpr methodCallExpr){
-      final Optional<Expression> optionalScope = methodCallExpr.getScope();
+  private boolean isSafeMethodExpr(final CompilationUnit cu, final MethodCallExpr methodCallExpr) {
+    final Optional<Expression> optionalScope = methodCallExpr.getScope();
 
-      final String method = methodCallExpr.getName().getIdentifier();
+    final String method = methodCallExpr.getName().getIdentifier();
 
-      if (optionalScope.isEmpty()) {
-          return isSafeImportLibrary(cu, methodCallExpr.getName().getIdentifier(), method);
+    // Static import case for example: import static
+    // org.apache.commons.lang3.StringUtils.defaultString
+    if (optionalScope.isEmpty()) {
+      return isSafeImportLibrary(cu, methodCallExpr.getName().getIdentifier(), method);
+    }
+
+    final Expression scope = optionalScope.get();
+
+    // Using java.lang.String's method
+    if (scope instanceof StringLiteralExpr) {
+      return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+    }
+
+    // Using full import name as scope of method, for example: String str =
+    // org.apache.commons.lang3.StringUtils.defaultString("")
+    if (scope instanceof FieldAccessExpr fieldAccessExpr) {
+      final String fullImportName = fieldAccessExpr.toString();
+      return commonMethodsThatCantReturnNull.contains(fullImportName.concat("#").concat(method));
+    }
+
+    if (scope instanceof NameExpr scopeName) {
+
+      if (!isVariableInitialized(cu, scopeName)) {
+        // check if scope is non-static import like: import org.apache.commons.lang3.StringUtils
+        return isSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
       }
 
-      final Expression scope = optionalScope.get();
+      final Optional<VariableDeclarator> variableDeclaratorOptional =
+          getDeclaredVariable(cu, scopeName.getName());
 
-      if (scope instanceof StringLiteralExpr) {
-          return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+      if (variableDeclaratorOptional.isEmpty()) {
+        return false;
       }
 
-      if (scope instanceof FieldAccessExpr fieldAccessExpr) {
-          final String fullImportName = fieldAccessExpr.toString();
-          return commonMethodsThatCantReturnNull.contains(fullImportName.concat("#").concat(method));
-      }
+      final String type = variableDeclaratorOptional.get().getTypeAsString();
 
-      if (scope instanceof NameExpr scopeName) {
+      // when scope is an object variable, check class type to determine if it is an implicit or
+      // explicit import
+      return "String".equals(type)
+          ? commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method))
+          : isSafeImportLibrary(cu, type, method);
+    }
 
-          if (!isSafeNameExpr(cu, scopeName)) {
-              return isSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
-          }
-
-          final Optional<VariableDeclarator> variableDeclaratorOptional =
-                  getDeclaredVariable(cu, scopeName.getName());
-
-          if(variableDeclaratorOptional.isEmpty()){
-              return false;
-          }
-
-          final String type = variableDeclaratorOptional.get().getTypeAsString();
-
-          return "String".equals(type) ? commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method)) :  isSafeImportLibrary(cu, type, method);
-      }
-
-      return false;
+    return false;
   }
 
-  private boolean isSafeNameExpr(final CompilationUnit cu, final NameExpr nameExpr) {
+  private boolean isVariableInitialized(final CompilationUnit cu, final NameExpr nameExpr) {
     final SimpleName simpleName = nameExpr.getName();
     final Optional<VariableDeclarator> variableDeclaratorOptional =
         getDeclaredVariable(cu, simpleName);
     final boolean isVariable = variableDeclaratorOptional.isPresent();
 
+    // check if it is an initialized variable
     if (isVariable && variableDeclaratorOptional.get().getInitializer().isPresent()) {
+      // check if initializer is a safe expression
       return isSafeExpr(cu, variableDeclaratorOptional.get().getInitializer().get());
     }
 
@@ -384,6 +395,10 @@ public final class SwitchLiteralFirstComparisonsCodemod
   private static final Set<String> flippableComparisonMethods =
       Set.of("equals", "equalsIgnoreCase");
 
+  private static final String TEST_IMPLICIT_IMPORT = "io.codemodder.codemods.Codemod#printMessage";
   private static final List<String> commonMethodsThatCantReturnNull =
-      List.of("java.lang.String#replace", "org.apache.commons.lang3.StringUtils#defaultString", "io.codemodder.codemods.Codemod#printMessage");
+      List.of(
+          TEST_IMPLICIT_IMPORT,
+          "java.lang.String#replace",
+          "org.apache.commons.lang3.StringUtils#defaultString");
 }
