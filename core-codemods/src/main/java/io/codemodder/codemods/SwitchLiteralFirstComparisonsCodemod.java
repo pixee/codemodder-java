@@ -21,6 +21,7 @@ import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.*;
@@ -311,7 +312,16 @@ public final class SwitchLiteralFirstComparisonsCodemod
           return isSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
         }
 
-        return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+          final Optional<VariableDeclarator> variableDeclaratorOptional =
+                  getDeclaredVariable(cu, scopeName.getName());
+
+        if(variableDeclaratorOptional.isEmpty()){
+            return false;
+        }
+
+        final String type = variableDeclaratorOptional.get().getTypeAsString();
+
+        return "String".equals(type) ? commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method)) :  isSafeImportLibrary(cu, type, method);
       }
 
       return false;
@@ -371,5 +381,5 @@ public final class SwitchLiteralFirstComparisonsCodemod
       Set.of("equals", "equalsIgnoreCase");
 
   private static final List<String> commonMethodsThatCantReturnNull =
-      List.of("java.lang.String#replace", "org.apache.commons.lang3.StringUtils#defaultString");
+      List.of("java.lang.String#replace", "org.apache.commons.lang3.StringUtils#defaultString", "io.codemodder.codemods.Codemod#printMessage");
 }

@@ -3,6 +3,7 @@ package com.acme.testcode;
 import org.apache.commons.lang3.StringUtils;
 import com.pibe.PibeUtils;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import io.codemodder.codemods.Codemod;
 
 final class Test {
 
@@ -108,6 +109,13 @@ final class Test {
        // shouldn't be change because var is initialized using a method contained in commonMethodsThatCantReturnNull (Explicit static import library)
        String staticImportMethodStr = defaultString(str);
        if(staticImportMethodStr.equals("defaultString")){
+         System.out.println(defaultString);
+       }
+
+       // should not change because io.codemodder.codemods.Codemod#printMessage is contained in commonMethodsThatCantReturnNull
+       Codemod codemod = new Codemod();
+       String codemodMessage = codemod.printMessage();
+       if(codemodMessage.equals("defaultString")){
          System.out.println(defaultString);
        }
    }
