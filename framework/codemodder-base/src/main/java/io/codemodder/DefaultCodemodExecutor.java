@@ -4,11 +4,7 @@ import static java.util.Collections.emptyMap;
 
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
-import io.codemodder.codetf.CodeTFChange;
-import io.codemodder.codetf.CodeTFChangesetEntry;
-import io.codemodder.codetf.CodeTFDiffSide;
-import io.codemodder.codetf.CodeTFPackageAction;
-import io.codemodder.codetf.CodeTFResult;
+import io.codemodder.codetf.*;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.javaparser.JavaParserCodemodRunner;
 import io.codemodder.javaparser.JavaParserFacade;
@@ -113,6 +109,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     ExecutorService executor = Executors.newFixedThreadPool(workers);
     CompletionService<String> service = new ExecutorCompletionService<>(executor);
 
+    List<DetectorFinding> findings = new CopyOnWriteArrayList<>();
+
     // for each file, add a task to the completion service
     for (Path filePath : codemodTargetFiles) {
 
@@ -161,6 +159,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
                 }
               }
 
+              findings.addAll(codemodFileScanningResult.findings());
+
             } catch (Exception e) {
               unscannableFiles.add(filePath);
               log.error("Problem scanning file", e);
@@ -182,14 +182,19 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       log.error("Problem waiting for scanning threads to exit", e);
     }
 
+    DetectionTool detectionTool = null;
+    if (codeChanger instanceof FixOnlyCodeChanger fixOnlyCodeChanger) {
+      detectionTool =
+          new DetectionTool(
+              fixOnlyCodeChanger.vendorName(), fixOnlyCodeChanger.getDetectorRule(), findings);
+    }
+
     CodeTFResult result =
         new CodeTFResult(
             codemod.getId(),
             codeChanger.getSummary(),
             codeChanger.getDescription(),
-            codeChanger instanceof FixOnlyCodeChanger fixOnlyCodeChanger
-                ? fixOnlyCodeChanger.getDetectionTool()
-                : null,
+            detectionTool,
             unscannableFiles.stream()
                 .map(file -> getRelativePath(projectDir, file))
                 .collect(Collectors.toSet()),

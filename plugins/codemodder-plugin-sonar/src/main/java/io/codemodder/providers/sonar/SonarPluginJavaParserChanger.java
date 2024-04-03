@@ -4,8 +4,6 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import io.codemodder.*;
-import io.codemodder.codetf.DetectionTool;
-import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
@@ -98,11 +96,9 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     return ruleIssues.hasResults();
   }
 
-  protected abstract DetectorRule getDetectorRule();
-
   @Override
-  public DetectionTool getDetectionTool() {
-    return new DetectionTool("Sonar", getDetectorRule(), List.of());
+  public String vendorName() {
+    return "Sonar";
   }
 
   /**

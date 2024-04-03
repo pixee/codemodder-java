@@ -31,7 +31,7 @@ public final class DeclareVariableOnSeparateLineCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S1659",
         "Multiple variables should not be declared on the same line",

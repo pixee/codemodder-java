@@ -30,7 +30,7 @@ public final class ReplaceStreamCollectorsToListCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S6204",
         "`Stream.toList()` should be used instead of `collectors`",

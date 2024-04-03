@@ -27,7 +27,7 @@ public final class DefineConstantForLiteralCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S1192",
         "String literals should not be duplicated",

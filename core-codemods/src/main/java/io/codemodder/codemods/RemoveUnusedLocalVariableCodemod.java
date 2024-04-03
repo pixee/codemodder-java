@@ -39,7 +39,7 @@ public final class RemoveUnusedLocalVariableCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S1481",
         "Unused local variables should be removed",

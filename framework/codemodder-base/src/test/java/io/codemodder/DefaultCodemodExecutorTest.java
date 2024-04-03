@@ -161,6 +161,30 @@ final class DefaultCodemodExecutorTest {
   }
 
   @Test
+  void it_collects_fixonly_changer_findings() {
+    executor =
+        new DefaultCodemodExecutor(
+            repoDir,
+            includesEverything,
+            new CodemodIdPair("thirdparty:java/thing", new ProvidesFindingsCodemod()),
+            List.of(),
+            List.of(),
+            fileCache,
+            javaParserFacade,
+            encodingDetector,
+            -1,
+            -1,
+            -1);
+
+    CodeTFResult result = executor.execute(List.of(javaFile1));
+    DetectionTool detectionTool = result.getDetectionTool();
+    assertThat(detectionTool.getFindings())
+        .containsExactly(ProvidesFindingsCodemod.findings.toArray(new DetectorFinding[0]));
+    assertThat(detectionTool.getName()).isEqualTo("acme");
+    assertThat(result.getDetectionTool().getRule()).isSameAs(ProvidesFindingsCodemod.rule);
+  }
+
+  @Test
   void it_allows_codetf_customization() {
 
     CodeTFProvider addsPrefixProvider =
@@ -715,6 +739,57 @@ final class DefaultCodemodExecutorTest {
     @Override
     public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
       return "injects-dependency-2-change";
+    }
+  }
+
+  private static class ProvidesFindingsCodemod extends JavaParserChanger
+      implements FixOnlyCodeChanger {
+
+    ProvidesFindingsCodemod() {
+      super(new EmptyReporter());
+    }
+
+    @Override
+    public CodemodFileScanningResult visit(CodemodInvocationContext context, CompilationUnit cu) {
+      return CodemodFileScanningResult.from(List.of(), findings);
+    }
+
+    private static final List<DetectorFinding> findings =
+        List.of(
+            new DetectorFinding("rule-1", true, null),
+            new DetectorFinding("rule-2", false, "couldnt find thing"));
+
+    private static final DetectorRule rule =
+        new DetectorRule("acme_rule_id", "Find Thing", "https://acme.com/rules/thing");
+
+    @Override
+    public String getDescription() {
+      return "injects-dependency-2-description";
+    }
+
+    @Override
+    public String getSummary() {
+      return "injects-dependency-2-summary";
+    }
+
+    @Override
+    public List<CodeTFReference> getReferences() {
+      return List.of(new CodeTFReference("https://dep2.com/", "https://dep2.com/"));
+    }
+
+    @Override
+    public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
+      return "injects-dependency-2-change";
+    }
+
+    @Override
+    public String vendorName() {
+      return "acme";
+    }
+
+    @Override
+    public DetectorRule getDetectorRule() {
+      return rule;
     }
   }
 

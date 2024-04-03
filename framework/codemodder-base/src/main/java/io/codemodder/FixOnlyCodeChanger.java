@@ -1,6 +1,6 @@
 package io.codemodder;
 
-import io.codemodder.codetf.DetectionTool;
+import io.codemodder.codetf.DetectorRule;
 
 /**
  * A codemod that only fixes issues and does not perform its own detection, instead relying on
@@ -10,6 +10,9 @@ import io.codemodder.codetf.DetectionTool;
  */
 public interface FixOnlyCodeChanger {
 
-  /** Detection tool metadata for this codemod. */
-  DetectionTool getDetectionTool();
+  /** Detection tool name. */
+  String vendorName();
+
+  /** A description of the rule. */
+  DetectorRule getDetectorRule();
 }

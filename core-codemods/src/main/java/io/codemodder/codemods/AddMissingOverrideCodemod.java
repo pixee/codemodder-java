@@ -29,7 +29,7 @@ public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChange
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S1161",
         "`@Override` should be used on overriding and implementing methods",

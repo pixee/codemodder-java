@@ -5,7 +5,6 @@ import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.codetf.DetectionTool;
 import io.codemodder.codetf.DetectorFinding;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.JavaParserChanger;
@@ -36,13 +35,16 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
   }
 
   @Override
-  public DetectionTool getDetectionTool() {
-    DetectorRule semgrepSqliRule =
-        new DetectorRule(
-            "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
-            "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
-            null);
-    return new DetectionTool("DefectDojo", semgrepSqliRule, List.of());
+  public String vendorName() {
+    return "DefectDojo / Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
+        "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
+        "link to semgrep rule?");
   }
 
   @Override

@@ -37,7 +37,7 @@ public final class SimplifyRestControllerAnnotationsCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S6833",
         "`@Controller` should be replaced with `@RestController`",

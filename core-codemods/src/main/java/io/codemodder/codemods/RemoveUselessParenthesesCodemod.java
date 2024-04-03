@@ -28,7 +28,7 @@ public final class RemoveUselessParenthesesCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S1110",
         "Redundant pairs of parentheses should be removed",
