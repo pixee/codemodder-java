@@ -76,10 +76,11 @@ public final class SwitchLiteralFirstComparisonsCodemod
      * </ol>
      */
     if (simpleNameOptional.isPresent()
-        && (isSimpleNameANotNullInitializedVariableDeclarator(
-                cu, variableDeclarators, simpleNameOptional.get())
-            || hasSimpleNameNotNullAnnotation(cu, simpleNameOptional.get(), variableDeclarators)
-            || hasSimpleNamePreviousNullAssertion(cu, simpleNameOptional.get()))) {
+        && (hasSimpleNameNotNullAnnotation(cu, simpleNameOptional.get(), variableDeclarators)
+            || hasSimpleNamePreviousNullAssertion(cu, simpleNameOptional.get())
+            || isSimpleNameANotNullInitializedVariableDeclarator(
+            cu, variableDeclarators, simpleNameOptional.get())
+    )) {
       return ChangesResult.noChanges;
     }
 
