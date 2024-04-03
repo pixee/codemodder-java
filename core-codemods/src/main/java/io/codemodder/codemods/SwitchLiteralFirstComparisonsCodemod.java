@@ -294,11 +294,11 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
       final Optional<Expression> optionalScope = methodCallExpr.getScope();
 
-      if (optionalScope.isEmpty()) {
-        return false;
-      }
-
       final String method = methodCallExpr.getName().getIdentifier();
+
+      if (optionalScope.isEmpty()) {
+        return isSafeImportLibrary(cu, methodCallExpr.getName().getIdentifier(), method);
+      }
 
       final Expression scope = optionalScope.get();
 
@@ -306,15 +306,15 @@ public final class SwitchLiteralFirstComparisonsCodemod
         return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
       }
 
-      if(scope instanceof FieldAccessExpr fieldAccessExpr){
-          final String fullImportName = fieldAccessExpr.toString();
-          return commonMethodsThatCantReturnNull.contains(fullImportName.concat("#").concat(method));
+      if (scope instanceof FieldAccessExpr fieldAccessExpr) {
+        final String fullImportName = fieldAccessExpr.toString();
+        return commonMethodsThatCantReturnNull.contains(fullImportName.concat("#").concat(method));
       }
 
       if (scope instanceof NameExpr scopeName) {
 
         if (!isSafeNameExpr(cu, scopeName)) {
-          return isNonStaticImportSafeLibrary(cu, scopeName, method);
+          return isSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
         }
 
         // TODO verify
@@ -341,21 +341,21 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return false;
   }
 
-  private boolean isNonStaticImportSafeLibrary(
-      final CompilationUnit cu, final NameExpr scopeName, final String method) {
-    final Optional<Name> optionalImport =
+  private boolean isSafeImportLibrary(
+      final CompilationUnit cu, final String identifier, final String method) {
+    final Optional<ImportDeclaration> optionalImport =
         cu.getImports().stream()
-            .map(ImportDeclaration::getName)
-            .filter(
-                importName ->
-                    importName.getIdentifier().equals(scopeName.getName().getIdentifier()))
+            .filter(importName -> importName.getName().getIdentifier().equals(identifier))
             .findFirst();
 
     if (optionalImport.isEmpty()) {
       return false;
     }
 
-    final Name importDeclaration = optionalImport.get();
+    final Name importDeclaration =
+        optionalImport.get().isStatic()
+            ? optionalImport.get().getName().getQualifier().get()
+            : optionalImport.get().getName();
 
     final String as = importDeclaration.asString().concat("#").concat(method);
 
