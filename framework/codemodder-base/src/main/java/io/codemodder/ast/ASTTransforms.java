@@ -295,19 +295,23 @@ public final class ASTTransforms {
     }
   }
 
-  private static Optional<StringLiteralExpr> removeAndReturnRightmostExpression(final BinaryExpr binExpr){
-	  if (binExpr.getRight().isStringLiteralExpr()){
-		  var right = binExpr.asBinaryExpr().getRight().asStringLiteralExpr();
-		  binExpr.replace(binExpr.getLeft());
-		  return Optional.of(right);
-	  }
-	  if (binExpr.isStringLiteralExpr()){
-		  return Optional.of(binExpr.asStringLiteralExpr());
-	  }
-	  return Optional.empty();
+  private static Optional<StringLiteralExpr> removeAndReturnRightmostExpression(
+      final BinaryExpr binExpr) {
+    if (binExpr.getRight().isStringLiteralExpr()) {
+      var right = binExpr.asBinaryExpr().getRight().asStringLiteralExpr();
+      binExpr.replace(binExpr.getLeft());
+      return Optional.of(right);
+    }
+    if (binExpr.isStringLiteralExpr()) {
+      return Optional.of(binExpr.asStringLiteralExpr());
+    }
+    return Optional.empty();
   }
 
-  /** Given a string expression, merge any literals that are directly concatenated. This transform will recurse over any Names referenced. */
+  /**
+   * Given a string expression, merge any literals that are directly concatenated. This transform
+   * will recurse over any Names referenced.
+   */
   public static void mergeConcatenatedLiterals(final Expression e) {
     // EnclosedExpr and BinaryExpr are considered as internal nodes, so we recurse
     if (e instanceof EnclosedExpr) {
@@ -322,17 +326,23 @@ public final class ASTTransforms {
         && e.asBinaryExpr().getOperator().equals(BinaryExpr.Operator.PLUS)) {
       mergeConcatenatedLiterals(e.asBinaryExpr().getLeft());
       mergeConcatenatedLiterals(e.asBinaryExpr().getRight());
-    var left = e.asBinaryExpr().getLeft();
-    var right = e.asBinaryExpr().getRight();
+      var left = e.asBinaryExpr().getLeft();
+      var right = e.asBinaryExpr().getRight();
 
-      if (right.isStringLiteralExpr()){
-	      if (left.isStringLiteralExpr()){
-	      e.replace(new StringLiteralExpr(left.asStringLiteralExpr().getValue() + right.asStringLiteralExpr().getValue()));
-	      }
-	      if (left.isBinaryExpr()){
-	      var maybeLiteral = removeAndReturnRightmostExpression(left.asBinaryExpr());
-	      maybeLiteral.ifPresent(sl -> right.replace(new StringLiteralExpr(sl.getValue() + right.asStringLiteralExpr().getValue())));
-	      }
+      if (right.isStringLiteralExpr()) {
+        if (left.isStringLiteralExpr()) {
+          e.replace(
+              new StringLiteralExpr(
+                  left.asStringLiteralExpr().getValue() + right.asStringLiteralExpr().getValue()));
+        }
+        if (left.isBinaryExpr()) {
+          var maybeLiteral = removeAndReturnRightmostExpression(left.asBinaryExpr());
+          maybeLiteral.ifPresent(
+              sl ->
+                  right.replace(
+                      new StringLiteralExpr(
+                          sl.getValue() + right.asStringLiteralExpr().getValue())));
+        }
       }
 
     }
