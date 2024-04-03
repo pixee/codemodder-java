@@ -275,9 +275,9 @@ public final class SwitchLiteralFirstComparisonsCodemod
       return false;
     }
 
-    if (expression instanceof NameExpr nameExpr) {
+    /*if (expression instanceof NameExpr nameExpr) {
       return isVariableNullSafeInitialized(cu, nameExpr);
-    }
+    }*/
 
     if (expression instanceof MethodCallExpr methodCallExpr) {
       return isNullSafeMethodExpr(cu, methodCallExpr);
@@ -314,7 +314,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     if (scope instanceof NameExpr scopeName) {
 
-      if (!isVariableNullSafeInitialized(cu, scopeName)) {
+      if (!isVariable(cu, scopeName)) {
         // check if scope is non-static import like: import org.apache.commons.lang3.StringUtils
         return isNullSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
       }
@@ -361,19 +361,11 @@ public final class SwitchLiteralFirstComparisonsCodemod
     }
   }
 
-  private boolean isVariableNullSafeInitialized(final CompilationUnit cu, final NameExpr nameExpr) {
+  private boolean isVariable(final CompilationUnit cu, final NameExpr nameExpr) {
     final SimpleName simpleName = nameExpr.getName();
     final Optional<VariableDeclarator> variableDeclaratorOptional =
         getDeclaredVariable(cu, simpleName);
-    final boolean isVariable = variableDeclaratorOptional.isPresent();
-
-    // check if it is an initialized variable
-    if (isVariable && variableDeclaratorOptional.get().getInitializer().isPresent()) {
-      // check if initializer is a safe expression
-      return isNullSafeExpression(cu, variableDeclaratorOptional.get().getInitializer().get());
-    }
-
-    return false;
+    return variableDeclaratorOptional.isPresent() ;
   }
 
   private boolean isNullSafeImportLibrary(
