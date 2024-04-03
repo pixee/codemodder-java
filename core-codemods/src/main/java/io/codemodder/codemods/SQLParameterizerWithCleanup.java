@@ -12,7 +12,7 @@ public final class SQLParameterizerWithCleanup {
       // Cleanup
       var maybeMethodDecl = methodCallExpr.findAncestor(CallableDeclaration.class);
       // Remove concatenation with empty strings e.g "first" +  "" -> "first";
-      maybeMethodDecl.ifPresent(cd -> ASTTransforms.removeEmptyStringConcatenation(cd));
+      maybeMethodDecl.ifPresent(ASTTransforms::removeEmptyStringConcatenation);
       // TODO hits a bug with javaparser, where adding nodes won't result in the correct children
       // order. This causes the following to remove actually used variables
       // maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
@@ -20,7 +20,7 @@ public final class SQLParameterizerWithCleanup {
       // Merge concatenated literals, e.g. "first" + " and second" -> "first and second"
       maybeFixed
           .flatMap(mce -> mce.getArguments().getFirst())
-          .ifPresent(arg -> ASTTransforms.mergeConcatenatedLiterals(arg));
+          .ifPresent(ASTTransforms::mergeConcatenatedLiterals);
       return true;
     }
     return false;

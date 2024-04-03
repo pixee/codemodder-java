@@ -222,10 +222,7 @@ public final class ASTTransforms {
   private static boolean isEmptyString(final Expression expr) {
     // TODO declared as empty with one assignment
     var resolved = ASTs.resolveLocalExpression(expr);
-    if (resolved.isStringLiteralExpr() && resolved.asStringLiteralExpr().getValue().equals("")) {
-      return true;
-    }
-    return false;
+    return resolved.isStringLiteralExpr() && resolved.asStringLiteralExpr().getValue().isEmpty();
   }
 
   /**
@@ -256,7 +253,8 @@ public final class ASTTransforms {
 
   /** Removes all concatenations with empty strings in the given subtree. */
   public static void removeEmptyStringConcatenation(Node subtree) {
-    subtree.findAll(BinaryExpr.class, Node.TreeTraversal.POSTORDER).stream()
+    subtree
+        .findAll(BinaryExpr.class, Node.TreeTraversal.POSTORDER)
         .forEach(binexp -> binexp.replace(removeEmptyStringConcatenation(binexp)));
   }
 
@@ -271,7 +269,7 @@ public final class ASTTransforms {
         var lvd = maybelvd.get();
         var allReferences = ASTs.findAllReferences(lvd);
         // No references?
-        if (allReferences.size() == 0) {
+        if (allReferences.isEmpty()) {
           maybelvd.get().getStatement().remove();
         }
 
@@ -282,7 +280,7 @@ public final class ASTTransforms {
             if (allAssignments.size() == 1) {
               var aexprStmt =
                   Optional.of(allAssignments.get(0))
-                      .flatMap(ae -> ae.getParentNode())
+                      .flatMap(Node::getParentNode)
                       .map(p -> p instanceof ExpressionStmt ? (ExpressionStmt) p : null);
               if (aexprStmt.isPresent()) {
                 aexprStmt.get().remove();
