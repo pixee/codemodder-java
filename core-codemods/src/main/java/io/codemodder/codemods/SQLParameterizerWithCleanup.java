@@ -6,6 +6,8 @@ import io.codemodder.ast.ASTTransforms;
 
 public final class SQLParameterizerWithCleanup {
 
+  private SQLParameterizerWithCleanup() {}
+
   public static boolean checkAndFix(final MethodCallExpr methodCallExpr) {
     var maybeFixed = new SQLParameterizer(methodCallExpr).checkAndFix();
     if (maybeFixed.isPresent()) {
