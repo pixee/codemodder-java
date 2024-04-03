@@ -71,9 +71,9 @@ public final class SwitchLiteralFirstComparisonsCodemod
      * This codemod will not be executed if:
      *
      * <ol>
-     *   <li>Variable was previously initialized to a not null value
      *   <li>Variable has a previous not null assertion
      *   <li>Variable has a {@link @NotNull} or {@link @Nonnull} annotation
+     *   <li>Variable was previously initialized to a not null value
      * </ol>
      */
     if (simpleNameOptional.isPresent()
@@ -241,7 +241,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
   /**
    * Checks if the provided {@link SimpleName} variable corresponds to a {@link VariableDeclarator}
-   * that was previously initialized to a non-null value.
+   * that was previously initialized to a non-null expression.
    */
   private boolean isSimpleNameANotNullInitializedVariableDeclarator(
       final CompilationUnit cu,
@@ -254,13 +254,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
             .filter(declarator -> isPreviousNodeBefore(targetName, declarator.getName()))
             .anyMatch(
                 declarator ->
-                    declarator
-                        .getInitializer()
-                        .map(
-                            expr -> {
-                              return isSafeExpr(cu, expr);
-                            })
-                        .orElse(false));
+                    declarator.getInitializer().map(expr -> isSafeExpr(cu, expr)).orElse(false));
   }
 
   /**
@@ -317,10 +311,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
           return isSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
         }
 
-        // TODO verify
         return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
       }
-      // Explicit static import like method and import static library.method
 
       return false;
     }
@@ -352,14 +344,18 @@ public final class SwitchLiteralFirstComparisonsCodemod
       return false;
     }
 
+    if (optionalImport.get().isStatic()
+        && optionalImport.get().getName().getQualifier().isEmpty()) {
+      return false;
+    }
+
     final Name importDeclaration =
         optionalImport.get().isStatic()
             ? optionalImport.get().getName().getQualifier().get()
             : optionalImport.get().getName();
 
-    final String as = importDeclaration.asString().concat("#").concat(method);
-
-    return commonMethodsThatCantReturnNull.contains(as);
+    return commonMethodsThatCantReturnNull.contains(
+        importDeclaration.asString().concat("#").concat(method));
   }
 
   private Optional<VariableDeclarator> getDeclaredVariable(
