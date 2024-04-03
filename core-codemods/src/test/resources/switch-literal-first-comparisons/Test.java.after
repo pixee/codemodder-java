@@ -10,7 +10,7 @@ final class Test {
     static boolean cantChange = bar.equals("foo"); // can't change because we don't know the type of bar
     final boolean change2 = "foo".equalsIgnoreCase(getBar());
 
-   void foo(String foo, @NotNull String foo1, String nullAssertion) {
+   void foo(String foo, @NotNull String foo1, String nullAssertion, String paramValue) {
        boolean change1 = "bar".equals(foo);
        String initializedVar = "init";
        if("bar".equals(foo)) { // should change
@@ -89,6 +89,11 @@ final class Test {
        // should change name expr var since it is a string that is initialized by a method from an custom object that is not contained in commonMethodsThatCantReturnNull
        MyObject myObject = "myObject";
        String generatedMyObjectString = myObject.generatesString();
+       if("pibeString".equals(generatedMyObjectString)){
+         System.out.println(generatedMyObjectString);
+       }
+
+       String generatedMyObjectString = paramValue.replace();
        if("pibeString".equals(generatedMyObjectString)){
          System.out.println(generatedMyObjectString);
        }
