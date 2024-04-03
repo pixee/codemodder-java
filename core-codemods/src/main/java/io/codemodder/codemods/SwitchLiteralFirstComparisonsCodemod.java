@@ -12,6 +12,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -304,6 +305,12 @@ public final class SwitchLiteralFirstComparisonsCodemod
       if (scope instanceof StringLiteralExpr) {
         return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
       }
+
+      if(scope instanceof FieldAccessExpr fieldAccessExpr){
+          final String fullImportName = fieldAccessExpr.toString();
+          return commonMethodsThatCantReturnNull.contains(fullImportName.concat("#").concat(method));
+      }
+
       if (scope instanceof NameExpr scopeName) {
 
         if (!isSafeNameExpr(cu, scopeName)) {

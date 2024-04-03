@@ -97,6 +97,12 @@ final class Test {
        if("pibeString".equals(generatedMyObjectString)){
          System.out.println(generatedMyObjectString);
        }
+
+       // shouldn't be change because var is initialized using a method contained in commonMethodsThatCantReturnNull (Explicit non static import library)
+       String fieldExprStr = org.apache.commons.lang3.StringUtils.defaultString(str);
+       if(fieldExprStr.equals("defaultString")){
+         System.out.println(defaultString);
+       }
    }
 
    private String getBar() { return null; }
