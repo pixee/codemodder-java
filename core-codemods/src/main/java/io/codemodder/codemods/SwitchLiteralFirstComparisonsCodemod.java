@@ -287,47 +287,51 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     if (expression instanceof MethodCallExpr methodCallExpr) {
 
+      return isSafeMethodExpr(cu, methodCallExpr);
+    }
+
+    return true;
+  }
+
+  private boolean isSafeMethodExpr(final CompilationUnit cu, final MethodCallExpr methodCallExpr){
       final Optional<Expression> optionalScope = methodCallExpr.getScope();
 
       final String method = methodCallExpr.getName().getIdentifier();
 
       if (optionalScope.isEmpty()) {
-        return isSafeImportLibrary(cu, methodCallExpr.getName().getIdentifier(), method);
+          return isSafeImportLibrary(cu, methodCallExpr.getName().getIdentifier(), method);
       }
 
       final Expression scope = optionalScope.get();
 
       if (scope instanceof StringLiteralExpr) {
-        return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+          return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
       }
 
       if (scope instanceof FieldAccessExpr fieldAccessExpr) {
-        final String fullImportName = fieldAccessExpr.toString();
-        return commonMethodsThatCantReturnNull.contains(fullImportName.concat("#").concat(method));
+          final String fullImportName = fieldAccessExpr.toString();
+          return commonMethodsThatCantReturnNull.contains(fullImportName.concat("#").concat(method));
       }
 
       if (scope instanceof NameExpr scopeName) {
 
-        if (!isSafeNameExpr(cu, scopeName)) {
-          return isSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
-        }
+          if (!isSafeNameExpr(cu, scopeName)) {
+              return isSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
+          }
 
           final Optional<VariableDeclarator> variableDeclaratorOptional =
                   getDeclaredVariable(cu, scopeName.getName());
 
-        if(variableDeclaratorOptional.isEmpty()){
-            return false;
-        }
+          if(variableDeclaratorOptional.isEmpty()){
+              return false;
+          }
 
-        final String type = variableDeclaratorOptional.get().getTypeAsString();
+          final String type = variableDeclaratorOptional.get().getTypeAsString();
 
-        return "String".equals(type) ? commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method)) :  isSafeImportLibrary(cu, type, method);
+          return "String".equals(type) ? commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method)) :  isSafeImportLibrary(cu, type, method);
       }
 
       return false;
-    }
-
-    return true;
   }
 
   private boolean isSafeNameExpr(final CompilationUnit cu, final NameExpr nameExpr) {
