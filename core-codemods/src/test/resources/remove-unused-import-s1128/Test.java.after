@@ -1,0 +1,12 @@
+package ai.pixee.triage.sonar;
+
+import java.io.IOException;
+import ai.pixee.triage.TriageProvider;
+
+/** A provider for Sonar. */
+public final class SonarTriageProvider implements TriageProvider {
+
+    public void triage() throws IOException {
+        System.out.println("Triage with Sonar");
+    }
+}
