@@ -330,7 +330,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     }
 
     return false;
-    }
+  }
 
   /** Some basic java lang type classes */
   private boolean isClassObjectMethodNullSafe(
@@ -361,7 +361,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     final SimpleName simpleName = nameExpr.getName();
     final Optional<VariableDeclarator> variableDeclaratorOptional =
         getDeclaredVariable(cu, simpleName);
-    return variableDeclaratorOptional.isPresent() ;
+    return variableDeclaratorOptional.isPresent();
   }
 
   private boolean isNullSafeImportLibrary(
