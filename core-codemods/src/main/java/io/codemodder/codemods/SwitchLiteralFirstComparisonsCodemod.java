@@ -275,10 +275,6 @@ public final class SwitchLiteralFirstComparisonsCodemod
       return false;
     }
 
-    /*if (expression instanceof NameExpr nameExpr) {
-      return isVariableNullSafeInitialized(cu, nameExpr);
-    }*/
-
     if (expression instanceof MethodCallExpr methodCallExpr) {
       return isNullSafeMethodExpr(cu, methodCallExpr);
     }
@@ -305,8 +301,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
       return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
     }
 
-    // Using full import name as scope of method, for example: String str =
-    // org.apache.commons.lang3.StringUtils.defaultString("")
+    // Using full import name as scope of method, for example
+    // String str = org.apache.commons.lang3.StringUtils.defaultString("")
     if (scope instanceof FieldAccessExpr fieldAccessExpr) {
       final String fullImportName = fieldAccessExpr.toString();
       return commonMethodsThatCantReturnNull.contains(fullImportName.concat("#").concat(method));
@@ -334,7 +330,7 @@ public final class SwitchLiteralFirstComparisonsCodemod
     }
 
     return false;
-  }
+    }
 
   /** Some basic java lang type classes */
   private boolean isClassObjectMethodNullSafe(
