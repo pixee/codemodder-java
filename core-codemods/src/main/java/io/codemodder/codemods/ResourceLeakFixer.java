@@ -53,15 +53,6 @@ final class ResourceLeakFixer {
 
   /**
    * Detects if a {@link Expression} detected by CodeQL that creates a leaking resource is fixable.
-   * The following can be assumed.
-   *
-   * <p>(1) No close() is called within its scope.
-   *
-   * <p>(2) There does not exist a "root" expression that is closed. (e.g. new BufferedReader(r), r
-   * is the root, stmt.executeQuery(...), stmt is the root).
-   *
-   * <p>(3) It does not escape the contained method's scope. That is, it is not assigned to a field
-   * or returned.
    *
    * <p>A resource R is dependent of another resource S if closing S will also close R. The
    * following suffices to check if a resource R can be closed. (*) A resource R can be closed if no
@@ -70,6 +61,15 @@ final class ResourceLeakFixer {
    * (+): S is assigned to a variable that escapes.
    */
   public static boolean isFixable(final Expression expr) {
+    // Can it be wrapped in a try statement?
+    if (!isAutoCloseableType(expr)) {
+      return false;
+    }
+    // is it already closed? does it escape?
+    // TODO depends on another resource that is already closed?
+    if (isClosedOrEscapes(expr)) {
+      return false;
+    }
     // For ResultSet objects, still need to check if the generating *Statement object does
     // not escape due to the getResultSet() method.
     try {
@@ -97,16 +97,42 @@ final class ResourceLeakFixer {
       return false;
     }
 
+    // For any dependent resource s of r if s is not closed and escapes, then r cannot be closed
     final var maybeLVD = immediatelyFlowsIntoLocalVariable(expr);
-    final var allDependent = findDependentResources(expr);
     if (maybeLVD.isPresent()) {
       final var scope = maybeLVD.get().getScope();
       final Predicate<Node> isInScope = scope::inScope;
+      final var allDependent = findDependentResources(expr);
       return allDependent.stream().noneMatch(e -> escapesRootScope(e, isInScope));
     } else {
-      final Predicate<Node> isInScope = n -> true;
-      return allDependent.stream().noneMatch(e -> escapesRootScope(e, isInScope));
+      final var allDependent = findDependentResources(expr);
+      return allDependent.stream().noneMatch(e -> escapesRootScope(e, n -> true));
     }
+  }
+
+  private static boolean isClosedOrEscapes(final Expression expr) {
+    if (immediatelyEscapesMethodScope(expr)) return true;
+    // find all the variables it flows into
+    final var allVariables = flowsInto(expr);
+
+    // flows into anything that is not a local variable or parameter
+    if (allVariables.stream().anyMatch(Either::isRight)) {
+      return true;
+    }
+
+    // is any of the assigned variables closed?
+    if (allVariables.stream()
+        .filter(Either::isLeft)
+        .map(Either::getLeft)
+        .anyMatch(ld -> !notClosed(ld))) {
+      return true;
+    }
+
+    // If any of the assigned variables escapes
+    return allVariables.stream()
+        .filter(Either::isLeft)
+        .map(Either::getLeft)
+        .anyMatch(ld -> escapesRootScope(ld, x -> true));
   }
 
   public static ObjectCreationExpr findRootExpression(final ObjectCreationExpr creationExpr) {
