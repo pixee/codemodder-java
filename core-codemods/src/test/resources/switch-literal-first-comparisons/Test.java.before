@@ -54,7 +54,7 @@ final class Test {
        }
 
        // should change name expr var since it is a string that is initialized using a method not contained in commonMethodsThatCantReturnNull (Implicit String library)
-       String invalidStringMethodString2 = invalidStringMethodString.substring(100);
+       String invalidStringMethodString2 = invalidStringMethodString.randomMethod(100);
        if(invalidStringMethodString2.equals("pibeString")){
          System.out.println(pibeUtilsStr);
        }
@@ -88,6 +88,12 @@ final class Test {
        String codemodMessage = codemod.printMessage();
        if(codemodMessage.equals("defaultString")){
          System.out.println(defaultString);
+       }
+
+       // should change because initializer has null literal expression
+       String x = args.length > 0 ? args[0] : null;
+       if (x.equals("test")) {
+         System.out.println("Hello, World!");
        }
    }
 

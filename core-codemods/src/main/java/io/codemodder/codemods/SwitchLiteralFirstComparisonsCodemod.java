@@ -11,6 +11,7 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -277,6 +278,10 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
     if (expression instanceof MethodCallExpr methodCallExpr) {
       return isNullSafeMethodExpr(cu, methodCallExpr);
+    }
+
+    if(expression instanceof ConditionalExpr conditionalExpr){
+        return isNullSafeExpression(cu, conditionalExpr.getThenExpr()) && isNullSafeExpression(cu, conditionalExpr.getElseExpr());
     }
 
     return true;
