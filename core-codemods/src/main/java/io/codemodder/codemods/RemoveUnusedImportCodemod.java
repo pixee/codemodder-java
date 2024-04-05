@@ -18,7 +18,7 @@ import io.codemodder.providers.sonar.api.Issue;
 import javax.inject.Inject;
 
 @Codemod(
-    id = "sonar:java/remove-redundant-variable-creation-s1128",
+    id = "sonar:java/remove-unused-import-s1128",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
