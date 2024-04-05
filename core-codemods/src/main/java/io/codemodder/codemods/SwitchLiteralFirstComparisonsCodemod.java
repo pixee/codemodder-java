@@ -412,10 +412,8 @@ public final class SwitchLiteralFirstComparisonsCodemod
   private static final Set<String> flippableComparisonMethods =
       Set.of("equals", "equalsIgnoreCase");
 
-  private static final String TEST_IMPLICIT_IMPORT = "io.codemodder.codemods.Codemod#printMessage";
   private static final List<String> commonMethodsThatCantReturnNull =
       List.of(
-          TEST_IMPLICIT_IMPORT,
           "org.apache.commons.lang3.StringUtils#defaultString",
           "java.lang.String#concat",
           "java.lang.String#replace",

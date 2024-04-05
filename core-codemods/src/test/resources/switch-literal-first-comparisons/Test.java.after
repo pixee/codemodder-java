@@ -83,17 +83,17 @@ final class Test {
          System.out.println(defaultString);
        }
 
-       // should not change because io.codemodder.codemods.Codemod#printMessage is contained in commonMethodsThatCantReturnNull
-       Codemod codemod = new Codemod();
-       String codemodMessage = codemod.printMessage();
-       if(codemodMessage.equals("defaultString")){
+       // should not change because org.apache.commons.lang3.StringUtils#defaultString is contained in commonMethodsThatCantReturnNull
+       StringUtils stringUtils = new StringUtils();
+       String stringUtilsDefaultString = stringUtils.defaultString();
+       if(stringUtilsDefaultString.equals("defaultString")){
          System.out.println(defaultString);
        }
 
        // should change because anotherVar can be null
        String anotherVar = 1 == 2 ? "hola": null;
        String myVar = anotherVar;
-       if (myVar.equals("test")) {
+       if ("test".equals(myVar)) {
          System.out.println("Hello, World!");
        }
 
