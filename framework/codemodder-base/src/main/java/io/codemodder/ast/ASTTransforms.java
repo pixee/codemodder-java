@@ -6,8 +6,10 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.LambdaExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
@@ -19,6 +21,7 @@ import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.resolution.types.ResolvedType;
 import java.util.Optional;
 
 public final class ASTTransforms {
@@ -219,10 +222,7 @@ public final class ASTTransforms {
   private static boolean isEmptyString(final Expression expr) {
     // TODO declared as empty with one assignment
     var resolved = ASTs.resolveLocalExpression(expr);
-    if (resolved.isStringLiteralExpr() && resolved.asStringLiteralExpr().getValue().equals("")) {
-      return true;
-    }
-    return false;
+    return resolved.isStringLiteralExpr() && resolved.asStringLiteralExpr().getValue().isEmpty();
   }
 
   /**
@@ -253,7 +253,8 @@ public final class ASTTransforms {
 
   /** Removes all concatenations with empty strings in the given subtree. */
   public static void removeEmptyStringConcatenation(Node subtree) {
-    subtree.findAll(BinaryExpr.class, Node.TreeTraversal.POSTORDER).stream()
+    subtree
+        .findAll(BinaryExpr.class, Node.TreeTraversal.POSTORDER)
         .forEach(binexp -> binexp.replace(removeEmptyStringConcatenation(binexp)));
   }
 
@@ -268,7 +269,7 @@ public final class ASTTransforms {
         var lvd = maybelvd.get();
         var allReferences = ASTs.findAllReferences(lvd);
         // No references?
-        if (allReferences.size() == 0) {
+        if (allReferences.isEmpty()) {
           maybelvd.get().getStatement().remove();
         }
 
@@ -279,7 +280,7 @@ public final class ASTTransforms {
             if (allAssignments.size() == 1) {
               var aexprStmt =
                   Optional.of(allAssignments.get(0))
-                      .flatMap(ae -> ae.getParentNode())
+                      .flatMap(Node::getParentNode)
                       .map(p -> p instanceof ExpressionStmt ? (ExpressionStmt) p : null);
               if (aexprStmt.isPresent()) {
                 aexprStmt.get().remove();
@@ -289,6 +290,77 @@ public final class ASTTransforms {
           }
         }
       }
+    }
+  }
+
+  private static Optional<StringLiteralExpr> removeAndReturnRightmostExpression(
+      final BinaryExpr binExpr) {
+    if (binExpr.getRight().isStringLiteralExpr()) {
+      var right = binExpr.asBinaryExpr().getRight().asStringLiteralExpr();
+      binExpr.replace(binExpr.getLeft());
+      return Optional.of(right);
+    }
+    if (binExpr.isStringLiteralExpr()) {
+      return Optional.of(binExpr.asStringLiteralExpr());
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Given a string expression, merge any literals that are directly concatenated. This transform
+   * will recurse over any Names referenced.
+   */
+  public static void mergeConcatenatedLiterals(final Expression e) {
+    // EnclosedExpr and BinaryExpr are considered as internal nodes, so we recurse
+    if (e instanceof EnclosedExpr) {
+      if (calculateResolvedType(e)
+          .filter(rt -> rt.describe().equals("java.lang.String"))
+          .isPresent()) {
+        mergeConcatenatedLiterals(e.asEnclosedExpr().getInner());
+      }
+    }
+    // Only BinaryExpr between strings should be considered
+    else if (e instanceof BinaryExpr
+        && e.asBinaryExpr().getOperator().equals(BinaryExpr.Operator.PLUS)) {
+      mergeConcatenatedLiterals(e.asBinaryExpr().getLeft());
+      mergeConcatenatedLiterals(e.asBinaryExpr().getRight());
+      var left = e.asBinaryExpr().getLeft();
+      var right = e.asBinaryExpr().getRight();
+
+      if (right.isStringLiteralExpr()) {
+        if (left.isStringLiteralExpr()) {
+          e.replace(
+              new StringLiteralExpr(
+                  left.asStringLiteralExpr().getValue() + right.asStringLiteralExpr().getValue()));
+        }
+        if (left.isBinaryExpr()) {
+          var maybeLiteral = removeAndReturnRightmostExpression(left.asBinaryExpr());
+          maybeLiteral.ifPresent(
+              sl ->
+                  right.replace(
+                      new StringLiteralExpr(
+                          sl.getValue() + right.asStringLiteralExpr().getValue())));
+        }
+      }
+
+    }
+    // NameExpr of String types should be recursively searched for more expressions.
+    else if (e instanceof NameExpr
+        && calculateResolvedType(e)
+            .filter(rt -> rt.describe().equals("java.lang.String"))
+            .isPresent()) {
+      final var resolved = ASTs.resolveLocalExpression(e);
+      if (resolved != e) {
+        mergeConcatenatedLiterals(resolved);
+      }
+    }
+  }
+
+  private static Optional<ResolvedType> calculateResolvedType(final Expression e) {
+    try {
+      return Optional.of(e.calculateResolvedType());
+    } catch (final RuntimeException exception) {
+      return Optional.empty();
     }
   }
 }
