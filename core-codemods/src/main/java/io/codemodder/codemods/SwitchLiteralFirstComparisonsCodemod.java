@@ -14,6 +14,7 @@ import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.LiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -280,11 +281,16 @@ public final class SwitchLiteralFirstComparisonsCodemod
       return isNullSafeMethodExpr(cu, methodCallExpr);
     }
 
-    if(expression instanceof ConditionalExpr conditionalExpr){
-        return isNullSafeExpression(cu, conditionalExpr.getThenExpr()) && isNullSafeExpression(cu, conditionalExpr.getElseExpr());
+    if (expression instanceof ConditionalExpr conditionalExpr) {
+      return isNullSafeExpression(cu, conditionalExpr.getThenExpr())
+          && isNullSafeExpression(cu, conditionalExpr.getElseExpr());
     }
 
-    return true;
+    if (expression instanceof NameExpr nameExpr) {
+      return isSimpleNameANotNullInitializedVariableDeclarator(cu, nameExpr.getName());
+    }
+
+    return expression instanceof LiteralExpr;
   }
 
   private boolean isNullSafeMethodExpr(
@@ -410,6 +416,21 @@ public final class SwitchLiteralFirstComparisonsCodemod
   private static final List<String> commonMethodsThatCantReturnNull =
       List.of(
           TEST_IMPLICIT_IMPORT,
+          "org.apache.commons.lang3.StringUtils#defaultString",
+          "java.lang.String#concat",
           "java.lang.String#replace",
-          "org.apache.commons.lang3.StringUtils#defaultString");
+          "java.lang.String#replaceAll",
+          "java.lang.String#replaceFirst",
+          "java.lang.String#join",
+          "java.lang.String#substring",
+          "java.lang.String#substring",
+          "java.lang.String#toLowerCase",
+          "java.lang.String#toUpperCase",
+          "java.lang.String#trim",
+          "java.lang.String#strip",
+          "java.lang.String#stripLeading",
+          "java.lang.String#stripTrailing",
+          "java.lang.String#toString",
+          "java.lang.String#valueOf",
+          "java.lang.String#formatted");
 }

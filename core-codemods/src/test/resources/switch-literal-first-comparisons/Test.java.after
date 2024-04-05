@@ -90,9 +90,17 @@ final class Test {
          System.out.println(defaultString);
        }
 
-       // should change because initializer has null literal expression
-       String x = args.length > 0 ? args[0] : null;
-       if ("test".equals(x)) {
+       // should change because anotherVar can be null
+       String anotherVar = 1 == 2 ? "hola": null;
+       String myVar = anotherVar;
+       if (myVar.equals("test")) {
+         System.out.println("Hello, World!");
+       }
+
+       // should not change because anotherExample will never be null
+       String anotherExample = 1 == 2 ? "hola": "";
+       String example = anotherExample;
+       if (example.equals("test")) {
          System.out.println("Hello, World!");
        }
    }
