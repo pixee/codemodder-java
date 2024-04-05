@@ -5,16 +5,18 @@ import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
-import io.codemodder.codetf.DetectorFinding;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.codetf.FixedFinding;
+import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.defectdojo.DefectDojoScan;
 import io.codemodder.providers.defectdojo.Finding;
 import io.codemodder.providers.defectdojo.RuleFindings;
+
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.inject.Inject;
 
 /** This codemod knows how to translate */
 @Codemod(
@@ -57,17 +59,16 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
     if (findingsForThisPath.isEmpty()) {
       return CodemodFileScanningResult.none();
     }
-
-    List<DetectorFinding> allFindings = new ArrayList<>();
+    
+    List<UnfixedFinding> unfixedFindings = new ArrayList<>();
 
     List<CodemodChange> changes = new ArrayList<>();
     for (Finding finding : findingsForThisPath) {
       String id = String.valueOf(finding.getId());
       Integer line = finding.getLine();
       if (line == null) {
-        DetectorFinding unfixableFinding =
-            new DetectorFinding(id, false, "No line number provided");
-        allFindings.add(unfixableFinding);
+        UnfixedFinding unfixableFinding = new UnfixedFinding(id, getDetectorRule(), context.path().toString(), null, "No line number provided");
+        unfixedFindings.add(unfixableFinding);
         continue;
       }
 
@@ -78,17 +79,17 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
               .toList();
 
       if (supportedSqlMethodCallsOnThatLine.isEmpty()) {
-        DetectorFinding unfixableFinding =
-            new DetectorFinding(id, false, "No supported SQL methods found on the given line");
-        allFindings.add(unfixableFinding);
+        UnfixedFinding unfixableFinding =
+            new UnfixedFinding(id, getDetectorRule(), context.path().toString(), line, "No supported SQL methods found on the given line");
+        unfixedFindings.add(unfixableFinding);
         continue;
       }
 
       if (supportedSqlMethodCallsOnThatLine.size() > 1) {
-        DetectorFinding unfixableFinding =
-            new DetectorFinding(
-                id, false, "Multiple supported SQL methods found on the given line");
-        allFindings.add(unfixableFinding);
+        UnfixedFinding unfixableFinding =
+            new UnfixedFinding(
+                id, getDetectorRule(), context.path().toString(), line,"Multiple supported SQL methods found on the given line");
+        unfixedFindings.add(unfixableFinding);
         continue;
       }
 
@@ -103,16 +104,14 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
         // order. This causes the following to remove actually used variables
         // maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
 
-        DetectorFinding fixedFinding = new DetectorFinding(id, true, null);
-        allFindings.add(fixedFinding);
-        changes.add(CodemodChange.from(line, "Fixes issue " + id + " by parameterizing SQL"));
+        FixedFinding fixedFinding = new FixedFinding(id, getDetectorRule());
+        changes.add(CodemodChange.from(line, fixedFinding));
       } else {
-        DetectorFinding unfixableFinding =
-            new DetectorFinding(id, false, "Fixing may have side effects");
-        allFindings.add(unfixableFinding);
+        UnfixedFinding unfixableFinding = new UnfixedFinding(id, getDetectorRule(), context.path().toString(), line, "State changing effects possible or unrecognized code shape");
+        unfixedFindings.add(unfixableFinding);
       }
     }
 
-    return CodemodFileScanningResult.from(changes, allFindings);
+    return CodemodFileScanningResult.from(changes, unfixedFindings);
   }
 }

@@ -39,7 +39,7 @@ public abstract class CompositeJavaParserChanger extends JavaParserChanger {
         changer -> {
           CodemodFileScanningResult result = changer.visit(context, cu);
           changes.addAll(result.changes());
-          findings.addAll(result.findings());
+          findings.addAll(result.unfixedFindings());
         });
 
     return CodemodFileScanningResult.from(changes, findings);

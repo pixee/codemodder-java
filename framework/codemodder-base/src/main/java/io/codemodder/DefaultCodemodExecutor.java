@@ -109,7 +109,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     ExecutorService executor = Executors.newFixedThreadPool(workers);
     CompletionService<String> service = new ExecutorCompletionService<>(executor);
 
-    List<DetectorFinding> findings = new CopyOnWriteArrayList<>();
+    List<UnfixedFinding> unfixedFindings = new CopyOnWriteArrayList<>();
 
     // for each file, add a task to the completion service
     for (Path filePath : codemodTargetFiles) {
@@ -159,7 +159,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
                 }
               }
 
-              findings.addAll(codemodFileScanningResult.findings());
+              unfixedFindings.addAll(codemodFileScanningResult.unfixedFindings());
 
             } catch (Exception e) {
               unscannableFiles.add(filePath);
@@ -184,9 +184,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
     DetectionTool detectionTool = null;
     if (codeChanger instanceof FixOnlyCodeChanger fixOnlyCodeChanger) {
-      detectionTool =
-          new DetectionTool(
-              fixOnlyCodeChanger.vendorName(), fixOnlyCodeChanger.getDetectorRule(), findings);
+      detectionTool = new DetectionTool(fixOnlyCodeChanger.vendorName());
     }
 
     CodeTFResult result =
@@ -200,7 +198,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
                 .collect(Collectors.toSet()),
             codeChanger.getReferences(),
             emptyMap(),
-            changeset);
+            changeset,
+            unfixedFindings);
 
     for (CodeTFProvider provider : codetfProviders) {
       result = provider.onResultCreated(result);
