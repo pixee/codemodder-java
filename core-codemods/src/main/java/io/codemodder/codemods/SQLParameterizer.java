@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * Contains most of the logic for detecting and fixing parameterizable SQL statements for a given
  * {@link MethodCallExpr}.
  */
-public final class SQLParameterizer {
+final class SQLParameterizer {
 
   private static final String preparedStatementNamePrefix = "stmt";
   private static final String preparedStatementNamePrefixAlternative = "statement";
