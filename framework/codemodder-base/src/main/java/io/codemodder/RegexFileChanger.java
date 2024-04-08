@@ -49,9 +49,10 @@ public abstract class RegexFileChanger extends RawFileChanger {
   }
 
   @Override
-  public List<CodemodChange> visitFile(final CodemodInvocationContext context) throws IOException {
+  public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
+      throws IOException {
     if (!fileMatcher.test(context.path())) {
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
 
     final List<CodemodChange> changes = new ArrayList<>();
@@ -85,7 +86,7 @@ public abstract class RegexFileChanger extends RawFileChanger {
       }
     }
     if (lastEnd == 0) {
-      return changes;
+      return CodemodFileScanningResult.withOnlyChanges(changes);
     }
 
     rebuiltContents.append(fileContents.substring(lastEnd));
@@ -115,11 +116,11 @@ public abstract class RegexFileChanger extends RawFileChanger {
     }
 
     if (changes.isEmpty()) {
-      return changes;
+      return CodemodFileScanningResult.withOnlyChanges(changes);
     }
 
     Files.write(context.path(), rebuiltContents.toString().getBytes());
-    return changes;
+    return CodemodFileScanningResult.withOnlyChanges(changes);
   }
 
   /**

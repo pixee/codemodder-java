@@ -30,13 +30,13 @@ class CompositeDependencyManagement extends AbstractCommand {
 
     // add dependencyManagement
     Element dependencyManagementElement;
-    if (parentPomFile.getResultPom().getRootElement().elements("dependencyManagement").isEmpty()) {
+    if (parentPomFile.getResultPom().getRootElement().elements(DEPENDENCYMANAGEMENT).isEmpty()) {
       dependencyManagementElement =
           Util.addIndentedElement(
-              parentPomFile.getResultPom().getRootElement(), parentPomFile, "dependencyManagement");
+              parentPomFile.getResultPom().getRootElement(), parentPomFile, DEPENDENCYMANAGEMENT);
     } else {
       dependencyManagementElement =
-          parentPomFile.getResultPom().getRootElement().element("dependencyManagement");
+          parentPomFile.getResultPom().getRootElement().element(DEPENDENCYMANAGEMENT);
     }
 
     Element newDependencyManagementElement =
@@ -93,10 +93,10 @@ class CompositeDependencyManagement extends AbstractCommand {
       return (Element) dependencyNodes.get(0);
     } else {
       Element dependenciesNode;
-      if (parentElement.element("dependencies") != null) {
-        dependenciesNode = parentElement.element("dependencies");
+      if (parentElement.element(DEPENDENCIES) != null) {
+        dependenciesNode = parentElement.element(DEPENDENCIES);
       } else {
-        dependenciesNode = Util.addIndentedElement(parentElement, pomFileToModify, "dependencies");
+        dependenciesNode = Util.addIndentedElement(parentElement, pomFileToModify, DEPENDENCIES);
       }
 
       Element dependencyNode =
@@ -118,4 +118,8 @@ class CompositeDependencyManagement extends AbstractCommand {
       return dependencyNode;
     }
   }
+
+  private static final String DEPENDENCYMANAGEMENT = "dependencyManagement";
+
+  private static final String DEPENDENCIES = "dependencies";
 }

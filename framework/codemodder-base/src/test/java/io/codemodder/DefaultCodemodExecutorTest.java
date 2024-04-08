@@ -601,7 +601,7 @@ final class DefaultCodemodExecutorTest {
     }
 
     @Override
-    public List<CodemodChange> visit(
+    public CodemodFileScanningResult visit(
         final CodemodInvocationContext context, final CompilationUnit cu) {
       List<CodemodChange> changes = new ArrayList<>();
       cu.findAll(MethodDeclaration.class).stream()
@@ -611,7 +611,7 @@ final class DefaultCodemodExecutorTest {
                 mb.setName("after");
                 changes.add(CodemodChange.from(mb.getBegin().get().line));
               });
-      return changes;
+      return CodemodFileScanningResult.withOnlyChanges(changes);
     }
 
     @Override
@@ -643,7 +643,7 @@ final class DefaultCodemodExecutorTest {
     }
 
     @Override
-    public List<CodemodChange> visit(CodemodInvocationContext context, CompilationUnit cu) {
+    public CodemodFileScanningResult visit(CodemodInvocationContext context, CompilationUnit cu) {
       List<CodemodChange> changes = new ArrayList<>();
       cu.findAll(MethodDeclaration.class).stream()
           .filter(mb -> mb.getNameAsString().equals("needsDep1"))
@@ -653,7 +653,7 @@ final class DefaultCodemodExecutorTest {
                 blockStmt.addStatement("Dependency1.doStuff();");
                 changes.add(CodemodChange.from(mb.getBegin().get().line, dependency1));
               });
-      return changes;
+      return CodemodFileScanningResult.withOnlyChanges(changes);
     }
 
     @Override
@@ -684,7 +684,7 @@ final class DefaultCodemodExecutorTest {
     }
 
     @Override
-    public List<CodemodChange> visit(CodemodInvocationContext context, CompilationUnit cu) {
+    public CodemodFileScanningResult visit(CodemodInvocationContext context, CompilationUnit cu) {
       List<CodemodChange> changes = new ArrayList<>();
       cu.findAll(MethodDeclaration.class).stream()
           .filter(mb -> mb.getNameAsString().equals("needsDep2"))
@@ -694,7 +694,7 @@ final class DefaultCodemodExecutorTest {
                 blockStmt.addStatement("Dependency2.doStuff();");
                 changes.add(CodemodChange.from(mb.getBegin().get().line, dependency2));
               });
-      return changes;
+      return CodemodFileScanningResult.withOnlyChanges(changes);
     }
 
     @Override

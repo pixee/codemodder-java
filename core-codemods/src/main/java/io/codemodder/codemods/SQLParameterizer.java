@@ -15,8 +15,7 @@ import io.codemodder.ast.LocalVariableDeclaration;
 import io.codemodder.ast.TryResourceDeclaration;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import org.javatuples.Pair;
+import java.util.stream.Stream;
 
 /**
  * Contains most of the logic for detecting and fixing parameterizable SQL statements for a given
@@ -44,12 +43,7 @@ public final class SQLParameterizer {
     // Maybe make this configurable? see:
     // https://github.com/find-sec-bugs/find-sec-bugs/wiki/Injection-detection
     try {
-      final Predicate<MethodCallExpr> isExecute =
-          n ->
-              (n.getNameAsString().equals("executeQuery")
-                  || n.getNameAsString().equals("execute")
-                  || n.getNameAsString().equals("executeLargeUpdate")
-                  || n.getNameAsString().equals("executeUpdate"));
+      final Predicate<MethodCallExpr> isExecute = SQLParameterizer::isSupportedJdbcMethodCall;
 
       final Predicate<MethodCallExpr> hasScopeSQLStatement =
           n ->
@@ -78,6 +72,14 @@ public final class SQLParameterizer {
     } catch (RuntimeException e) {
       return false;
     }
+  }
+
+  /** Returns true if this is a fixable JDBC method name. */
+  public static boolean isSupportedJdbcMethodCall(final MethodCallExpr methodCall) {
+    return methodCall.getNameAsString().equals("executeQuery")
+        || methodCall.getNameAsString().equals("execute")
+        || methodCall.getNameAsString().equals("executeLargeUpdate")
+        || methodCall.getNameAsString().equals("executeUpdate");
   }
 
   /**
@@ -291,37 +293,8 @@ public final class SQLParameterizer {
     return count == 0 ? actualName : nameWithSuffix;
   }
 
-  /** Removes an expression from an expression subtree. */
-  private Expression collapse(final Expression e, final Expression root) {
-    final var p = e.getParentNode().get();
-    if (p instanceof BinaryExpr) {
-      if (e.equals(((BinaryExpr) p).getLeft())) {
-        final var child = ((BinaryExpr) p).getRight();
-        if (p.equals(root)) {
-          return child;
-        } else {
-          p.replace(child);
-          return root;
-        }
-      }
-      if (e.equals(((BinaryExpr) p).getRight())) {
-        final var child = ((BinaryExpr) p).getLeft();
-        if (p.equals(root)) {
-          return child;
-        } else {
-          p.replace(child);
-          return root;
-        }
-      }
-    } else if (p instanceof EnclosedExpr) {
-      return collapse((Expression) p, root);
-    }
-    e.remove();
-    return root;
-  }
-
-  private Pair<List<Expression>, Expression> fixInjections(
-      final List<Deque<Expression>> injections, Expression root) {
+  private List<Expression> fixInjections(
+      final List<Deque<Expression>> injections, Map<Expression, Expression> resolvedMap) {
     final List<Expression> combinedExpressions = new ArrayList<>();
     for (final var injection : injections) {
       // fix start
@@ -339,41 +312,38 @@ public final class SQLParameterizer {
       final int firstQuoteIndex = endString.indexOf('\'');
       final var newEnd = end.asStringLiteralExpr().getValue().substring(firstQuoteIndex + 1);
       final var append = endString.substring(0, firstQuoteIndex);
-      if (newEnd.equals("")) {
-        root = collapse(end, root);
-      } else {
-        end.asStringLiteralExpr().setValue(newEnd);
-      }
+      end.asStringLiteralExpr().setValue(newEnd);
 
       // build expression for parameters
-      final var pair = buildParameter(injection, root);
-      var combined = pair.getValue0();
-      root = pair.getValue1();
+      var combined = buildParameter(injection, resolvedMap);
       // add the suffix of start
       if (prepend != "") {
         final var newCombined =
             new BinaryExpr(new StringLiteralExpr(prepend), combined, Operator.PLUS);
-        if (combined == root) {
-          root = newCombined;
-        }
         combined = newCombined;
       }
       // add the prefix of end
       if (append != "") {
         final var newCombined =
             new BinaryExpr(combined, new StringLiteralExpr(append), Operator.PLUS);
-        if (combined == root) {
-          root = newCombined;
-        }
         combined = newCombined;
       }
       combinedExpressions.add(combined);
     }
-    return new Pair<>(combinedExpressions, root);
+    return combinedExpressions;
   }
 
-  private Pair<Expression, Expression> buildParameter(
-      final Deque<Expression> injectionExpressions, Expression root) {
+  private Expression unresolve(
+      final Expression expr, final Map<Expression, Expression> resolutionMap) {
+    Expression unresolved = expr;
+    while (resolutionMap.get(unresolved) != null) {
+      unresolved = resolutionMap.get(unresolved);
+    }
+    return unresolved;
+  }
+
+  private Expression buildParameter(
+      final Deque<Expression> injectionExpressions, Map<Expression, Expression> resolutionMap) {
     final var it = injectionExpressions.iterator();
     Expression combined = it.next();
     boolean atLeastOneString = false;
@@ -381,7 +351,7 @@ public final class SQLParameterizer {
       atLeastOneString = "java.lang.String".equals(combined.calculateResolvedType().describe());
     } catch (final Exception ignored) {
     }
-    root = collapse(combined, root);
+    unresolve(combined, resolutionMap).replace(new StringLiteralExpr(""));
 
     while (it.hasNext()) {
       final var expr = it.next();
@@ -392,12 +362,11 @@ public final class SQLParameterizer {
         }
       } catch (final Exception ignored) {
       }
-      root = collapse(expr, root);
+      unresolve(expr, resolutionMap).replace(new StringLiteralExpr(""));
       combined = new BinaryExpr(combined, expr, Operator.PLUS);
     }
-    if (atLeastOneString) return new Pair<>(combined, root);
-    else
-      return new Pair<>(new BinaryExpr(combined, new StringLiteralExpr(""), Operator.PLUS), root);
+    if (atLeastOneString) return combined;
+    else return new BinaryExpr(combined, new StringLiteralExpr(""), Operator.PLUS);
   }
 
   /**
@@ -418,7 +387,6 @@ public final class SQLParameterizer {
       final QueryParameterizer queryParameterizer,
       final MethodCallExpr executeCall) {
 
-    var newRoot = queryParameterizer.getRoot();
     var executeStmt = ASTs.findParentStatementFrom(executeCall).get();
     // (0)
     if (stmtCreation.isRight() && executeStmt == stmtCreation.getRight().getStatement()) {
@@ -442,10 +410,10 @@ public final class SQLParameterizer {
             mce -> generateNameWithSuffix(preparedStatementNamePrefix, mce), lvd -> lvd.getName());
 
     // (1)
-    final var pair =
-        fixInjections(queryParameterizer.getInjections(), queryParameterizer.getRoot());
-    newRoot = pair.getValue1();
-    final var combinedExpressions = pair.getValue0();
+    final var combinedExpressions =
+        fixInjections(
+            queryParameterizer.getInjections(),
+            queryParameterizer.getLinearizedQuery().getResolvedExpressionsMap());
 
     var topStatement = executeStmt;
     for (int i = combinedExpressions.size() - 1; i >= 0; i--) {
@@ -462,30 +430,10 @@ public final class SQLParameterizer {
 
     ASTTransforms.addImportIfMissing(compilationUnit, "java.sql.PreparedStatement");
 
-    // Deleting some expressions may result in some String declarations with no initializer
-    // We delete those.
-    var allEmptyLVD =
-        queryParameterizer.getStringDeclarations().stream()
-            .filter(lvd -> lvd.getVariableDeclarator().getInitializer().isEmpty())
-            .collect(Collectors.toSet());
-    var newEmptyLVDs = allEmptyLVD;
-    while (!newEmptyLVDs.isEmpty()) {
-      for (var lvd : newEmptyLVDs) {
-        for (final var ref : ASTs.findAllReferences(lvd)) {
-          newRoot = collapse(ref, newRoot);
-        }
-        lvd.getVariableDeclarationExpr().removeForced();
-      }
-      newEmptyLVDs =
-          queryParameterizer.getStringDeclarations().stream()
-              .filter(lvd -> lvd.getVariableDeclarator().getInitializer().isEmpty())
-              .collect(Collectors.toSet());
-      newEmptyLVDs.removeAll(allEmptyLVD);
-      allEmptyLVD.addAll(newEmptyLVDs);
-    }
-
     // (2)
-    final var args =
+    final var args = new NodeList<Expression>();
+    args.addFirst(queryParameterizer.getRoot());
+    args.addAll(
         stmtCreation.ifLeftOrElseGet(
             mce -> mce.getArguments(),
             lvd ->
@@ -493,8 +441,12 @@ public final class SQLParameterizer {
                     .getInitializer()
                     .get()
                     .asMethodCallExpr()
-                    .getArguments());
-    args.addFirst(newRoot);
+                    .getArguments()));
+
+    // (3)
+    executeCall.setName("execute");
+    executeCall.setScope(new NameExpr(stmtName));
+    executeCall.setArguments(new NodeList<>());
 
     // (2.a)
     if (stmtCreation.isLeft()) {
@@ -525,11 +477,25 @@ public final class SQLParameterizer {
           .getInitializer()
           .ifPresent(expr -> expr.asMethodCallExpr().setArguments(args));
     }
+  }
 
-    // (3)
-    executeCall.setName("execute");
-    executeCall.setScope(new NameExpr(stmtName));
-    executeCall.setArguments(new NodeList<>());
+  private boolean assignedOrDefinedInScope(NameExpr name, LocalVariableDeclaration lvd) {
+    final Stream<AssignExpr> assignmentsInScope =
+        lvd.getScope().stream()
+            .flatMap(
+                node -> node instanceof AssignExpr ? Stream.of((AssignExpr) node) : Stream.empty());
+
+    final boolean assignedInScope =
+        assignmentsInScope
+            .flatMap(aexpr -> ASTs.hasNamedTarget(aexpr).stream())
+            .anyMatch(nexpr -> nexpr.getNameAsString() == name.getNameAsString());
+
+    final boolean definedInScope =
+        ASTs.findNonCallableSimpleNameSource(name.getName())
+            .filter(source -> lvd.getScope().inScope(source))
+            .isPresent();
+
+    return assignedInScope || definedInScope;
   }
 
   /**
@@ -555,19 +521,34 @@ public final class SQLParameterizer {
           return false;
         }
         queryp = new QueryParameterizer(executeCall.getArgument(0));
-        // If any of the strings used in the query is declared after the stmt object, reject
-        final var queryInScope =
+
+        // Is any name resolved to an expression inside the scope of the Statement object?
+        final boolean resolvedInScope =
             stmtObject
                 .get()
                 .ifLeftOrElseGet(
                     mcd -> false,
                     stmtLVD ->
-                        queryp.getStringDeclarations().stream()
-                            .anyMatch(lvd -> stmtLVD.getScope().inScope(lvd.getStatement())));
+                        queryp.getLinearizedQuery().getResolvedExpressionsMap().keySet().stream()
+                            .anyMatch(expr -> stmtLVD.getScope().inScope(expr)));
 
-        if (queryp.getInjections().isEmpty() || queryInScope) {
+        // Is any name in the linearized expression defined/assigned inside the scope of the
+        // Statement Object?
+        final boolean nameInScope =
+            stmtObject
+                .get()
+                .ifLeftOrElseGet(
+                    mcd -> false,
+                    stmtLVD ->
+                        queryp.getLinearizedQuery().getLinearized().stream()
+                            .filter(expr -> expr.isNameExpr())
+                            .map(expr -> expr.asNameExpr())
+                            .anyMatch(name -> assignedOrDefinedInScope(name, stmtLVD)));
+
+        if (queryp.getInjections().isEmpty() || resolvedInScope || nameInScope) {
           return false;
         }
+
         fix(stmtObject.get(), queryp, executeCall);
         return true;
       }

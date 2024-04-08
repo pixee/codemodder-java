@@ -9,10 +9,7 @@ import com.github.difflib.patch.Patch;
 import com.theokanning.openai.completion.chat.*;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest.ChatCompletionRequestFunctionCall;
 import com.theokanning.openai.service.FunctionExecutor;
-import io.codemodder.CodemodChange;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.RuleSarif;
-import io.codemodder.SarifPluginRawFileChanger;
+import io.codemodder.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -48,7 +45,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
   }
 
   @Override
-  public List<CodemodChange> onFileFound(
+  public CodemodFileScanningResult onFileFound(
       final CodemodInvocationContext context, final List<Result> results) {
     logger.debug("processing: {}", context.path());
 
@@ -67,7 +64,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       logger.debug("analysis: {}", analysis.getAnalysis());
 
       if (analysis.getRisk() == BinaryThreatRisk.LOW) {
-        return List.of();
+        return CodemodFileScanningResult.none();
       }
 
       BinaryThreatAnalysisAndFix fix = fixThreat(file, context, results);
@@ -78,13 +75,13 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
 
       // If our second look determined that the risk of the threat is low, don't change the file.
       if (fix.getRisk() == BinaryThreatRisk.LOW) {
-        return List.of();
+        return CodemodFileScanningResult.none();
       }
 
       // If the LLM was unable to fix the threat, don't change the file.
       if (fix.getFix() == null || fix.getFix().length() == 0) {
         logger.info("unable to fix: {}", context.path());
-        return List.of();
+        return CodemodFileScanningResult.none();
       }
 
       // Apply the fix.
@@ -94,7 +91,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       Patch<String> patch = DiffUtils.diff(file.getLines(), fixedLines);
       if (patch.getDeltas().size() == 0 || !isPatchExpected(patch)) {
         logger.error("unexpected patch: {}", patch);
-        return List.of();
+        return CodemodFileScanningResult.none();
       }
 
       try {
@@ -107,7 +104,8 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
 
       // Report all the changes at the line number of the first change.
       int line = patch.getDeltas().get(0).getSource().getPosition() + 1; // Position is 0-based.
-      return List.of(CodemodChange.from(line, fix.getFixDescription()));
+      List<CodemodChange> changes = List.of(CodemodChange.from(line, fix.getFixDescription()));
+      return CodemodFileScanningResult.withOnlyChanges(changes);
     } catch (Exception e) {
       logger.error("failed to process: {}", context.path(), e);
       throw e;

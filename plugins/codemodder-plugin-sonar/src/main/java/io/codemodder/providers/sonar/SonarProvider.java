@@ -19,7 +19,8 @@ public final class SonarProvider implements CodemodProvider {
       final List<String> pathExcludes,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs,
-      final Path sonarIssuesJsonFile) {
+      final Path sonarIssuesJsonFile,
+      final Path defectDojoFindingsJsonFile) {
     return Set.of(new SonarModule(codemodTypes, repository, sonarIssuesJsonFile));
   }
 }

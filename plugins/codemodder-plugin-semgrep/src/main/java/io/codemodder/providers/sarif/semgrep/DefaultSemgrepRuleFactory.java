@@ -28,8 +28,7 @@ final class DefaultSemgrepRuleFactory implements SemgrepRuleFactory {
     boolean foundYaml = false;
 
     if (!declaredRuleId.isEmpty()) {
-      String classpathYamlPath =
-          "/" + packageName.replace(".", "/") + "/" + declaredRuleId + ".yaml";
+      String classpathYamlPath = "/" + packageName.replace(".", "/") + "/" + declaredRuleId + YAML;
 
       if (!"".equals(yamlPath)) {
         classpathYamlPath = yamlPath;
@@ -100,7 +99,7 @@ final class DefaultSemgrepRuleFactory implements SemgrepRuleFactory {
   /** Save the YAML string given to a temporary file. */
   private Path saveStringToTemp(final String yamlAsString) {
     try {
-      Path file = Files.createTempFile("semgrep", ".yaml");
+      Path file = Files.createTempFile("semgrep", YAML);
       Files.writeString(file, yamlAsString);
       return file;
     } catch (IOException e) {
@@ -119,7 +118,7 @@ final class DefaultSemgrepRuleFactory implements SemgrepRuleFactory {
       return Optional.empty();
     }
     try {
-      Path semgrepRuleFile = Files.createTempFile("semgrep", ".yaml");
+      Path semgrepRuleFile = Files.createTempFile("semgrep", YAML);
       Objects.requireNonNull(ruleInputStream);
       Files.copy(ruleInputStream, semgrepRuleFile, StandardCopyOption.REPLACE_EXISTING);
       ruleInputStream.close();
@@ -146,4 +145,6 @@ final class DefaultSemgrepRuleFactory implements SemgrepRuleFactory {
     int end = rawYaml.indexOf("\n", start);
     return rawYaml.substring(start + ruleIdStartToken.length(), end).trim();
   }
+
+  private static final String YAML = ".yaml";
 }

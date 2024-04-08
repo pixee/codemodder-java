@@ -677,6 +677,89 @@ public final class ASTs {
   }
 
   /**
+   * Tries to find the source of an expression if it can be uniquely defined, otherwise, returns
+   * self.
+   */
+  public static Expression resolveLocalExpression(final Expression expr) {
+    // If this is a name, find its local declaration first
+    var maybelvd =
+        Optional.of(expr)
+            .map(e -> e instanceof NameExpr ? e.asNameExpr() : null)
+            .flatMap(n -> ASTs.findEarliestLocalDeclarationOf(n.getName()))
+            .map(s -> s instanceof LocalVariableDeclaration ? (LocalVariableDeclaration) s : null);
+    List<AssignExpr> first2Assignments =
+        maybelvd.stream().flatMap(ASTs::findAllAssignments).limit(2).toList();
+
+    var maybeInit =
+        maybelvd.flatMap(
+            lvd -> lvd.getVariableDeclarator().getInitializer().map(ASTs::resolveLocalExpression));
+    // No assignments and a init
+    if (maybeInit.isPresent() && first2Assignments.isEmpty()) {
+      return maybeInit.get();
+    }
+
+    // No init but a single assignment?
+    if (maybeInit.isEmpty() && first2Assignments.size() == 1) {
+      return resolveLocalExpression(first2Assignments.get(0).getValue());
+    }
+
+    // failing that, return itself
+    return expr;
+  }
+
+  /**
+   * Test for this pattern: {@link AssignExpr} ({@code assignExpr}) -&gt; {@link NameExpr}, where
+   * ({@code expr}) is the left hand side of the assignment.
+   */
+  public static Optional<NameExpr> hasNamedTarget(final AssignExpr assignExpr) {
+    return Optional.of(assignExpr.getTarget()).map(e -> e.isNameExpr() ? e.asNameExpr() : null);
+  }
+
+  /** Finds all assignments of a local variable declaration */
+  public static Stream<AssignExpr> findAllAssignments(final LocalVariableDeclaration lvd) {
+    final Predicate<AssignExpr> isLHS =
+        ae ->
+            ae.getTarget().isNameExpr()
+                && ae.getTarget()
+                    .asNameExpr()
+                    .getNameAsString()
+                    .equals(lvd.getDeclaration().getNameAsString());
+
+    var streamAssignments =
+        Stream.concat(
+            lvd.getScope().getExpressions().stream()
+                .flatMap(e -> e.findAll(AssignExpr.class, isLHS).stream()),
+            lvd.getScope().getStatements().stream()
+                .flatMap(s -> s.findAll(AssignExpr.class, isLHS).stream()));
+
+    // we must check for shadowing first
+    // local declarations can only be shadowed by other local declarations inside local class/record
+    // declarations
+    // we quickly check first if any local class/record declarations are present in the scope
+    final var maybeLocalClassDeclaration =
+        lvd.getScope().getStatements().stream()
+            .flatMap(n -> n.findAll(LocalClassDeclarationStmt.class).stream().findAny().stream());
+    final var maybeLocalRecordDeclaration =
+        lvd.getScope().getStatements().stream()
+            .flatMap(n -> n.findAll(LocalRecordDeclarationStmt.class).stream().findAny().stream());
+    if (maybeLocalClassDeclaration.findAny().isEmpty()
+        && maybeLocalRecordDeclaration.findAny().isEmpty()) {
+      return streamAssignments;
+    }
+
+    // Having detected that, we resolve each name and check if it matches the declaration
+    // This is mildly expensive, hence the previous check
+    final Predicate<AssignExpr> resolvesToLVD =
+        ae ->
+            hasNamedTarget(ae)
+                .flatMap(name -> findNonCallableSimpleNameSource(name.getName()))
+                .filter(source -> source == lvd.getVariableDeclarator())
+                .isPresent();
+
+    return streamAssignments.filter(resolvesToLVD);
+  }
+
+  /**
    * Returns an iterator for all the nodes in the AST that precedes {@code n} in the pre-order
    * ordering.
    */

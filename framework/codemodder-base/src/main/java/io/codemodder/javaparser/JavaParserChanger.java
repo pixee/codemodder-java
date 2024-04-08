@@ -21,7 +21,7 @@ public abstract class JavaParserChanger implements CodeChanger {
   }
 
   /** Called when a Java file, which has already been parsed into a compilation unit, is seen. */
-  public abstract List<CodemodChange> visit(
+  public abstract CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu);
 
   @Override

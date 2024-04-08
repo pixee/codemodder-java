@@ -13,6 +13,7 @@ import io.codemodder.codetf.CodeTFResult;
 import io.codemodder.javaparser.JavaParserFacade;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -118,6 +119,9 @@ public interface CodemodTestMixin {
         .forEachRemaining(allSarifs::add);
     Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
 
+    // Check for any a defectdojo
+    Path defectDojo = testResourceDir.resolve("defectdojo.json");
+
     // run the codemod
     CodemodLoader loader =
         new CodemodLoader(
@@ -129,7 +133,8 @@ public interface CodemodTestMixin {
             List.of(pathToJavaFile),
             map,
             List.of(),
-            Files.exists(sonarJson) ? sonarJson : null);
+            Files.exists(sonarJson) ? sonarJson : null,
+            Files.exists(defectDojo) ? defectDojo : null);
 
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat(codemods.size(), equalTo(1));
@@ -149,7 +154,7 @@ public interface CodemodTestMixin {
                   try {
                     return factory.create(List.of(dir));
                   } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new UncheckedIOException(e);
                   }
                 }),
             EncodingDetector.create());
@@ -206,6 +211,7 @@ public interface CodemodTestMixin {
             List.of(pathToJavaFile),
             map,
             List.of(),
+            null,
             null);
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
     CodemodExecutor executor2 =
@@ -245,6 +251,7 @@ public interface CodemodTestMixin {
       throws IOException {
     String expectedCode = Files.readString(expected);
     String transformedJavaCode = Files.readString(after);
+    System.out.println(transformedJavaCode);
     assertThat(transformedJavaCode, equalTo(expectedCode));
   }
 

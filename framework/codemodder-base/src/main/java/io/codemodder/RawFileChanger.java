@@ -25,7 +25,7 @@ public abstract class RawFileChanger implements CodeChanger {
    *
    * @return a list of changes that were made to the file
    */
-  public abstract List<CodemodChange> visitFile(CodemodInvocationContext context)
+  public abstract CodemodFileScanningResult visitFile(CodemodInvocationContext context)
       throws IOException;
 
   @Override

@@ -2,7 +2,6 @@ package io.codemodder;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -24,9 +23,9 @@ final class RawFileCodemodRunner implements CodemodRunner {
   }
 
   @Override
-  public List<CodemodChange> run(final CodemodInvocationContext context) throws IOException {
+  public CodemodFileScanningResult run(final CodemodInvocationContext context) throws IOException {
     if (!changer.shouldRun()) {
-      return List.of();
+      return CodemodFileScanningResult.none();
     }
     return changer.visitFile(context);
   }
