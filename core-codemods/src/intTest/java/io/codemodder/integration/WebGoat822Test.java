@@ -95,7 +95,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    assertThat(fileChanges.size(), is(54));
+    assertThat(fileChanges.size(), is(58));
 
     // we only inject into a couple files
     verifyStandardCodemodResults(fileChanges);
@@ -133,7 +133,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    assertThat(fileChanges.size(), is(58));
+    assertThat(fileChanges.size(), is(62));
 
     verifyStandardCodemodResults(fileChanges);
 
