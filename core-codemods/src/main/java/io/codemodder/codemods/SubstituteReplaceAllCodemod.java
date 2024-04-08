@@ -26,7 +26,7 @@ public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChan
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S5361",
         "`String#replace` should be preferred to `String#replaceAll`",

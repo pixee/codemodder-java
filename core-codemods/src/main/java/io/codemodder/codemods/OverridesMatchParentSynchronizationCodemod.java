@@ -33,7 +33,7 @@ public final class OverridesMatchParentSynchronizationCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S3551",
         "Overrides should match their parent class methods in synchronization",

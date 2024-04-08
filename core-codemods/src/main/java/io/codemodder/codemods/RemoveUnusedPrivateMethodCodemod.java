@@ -30,7 +30,7 @@ public final class RemoveUnusedPrivateMethodCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S1144",
         "Unused private methods should be removed",

@@ -1,7 +1,7 @@
 package io.codemodder;
 
 import com.github.javaparser.ast.CompilationUnit;
-import io.codemodder.codetf.DetectorFinding;
+import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,16 +33,16 @@ public abstract class CompositeJavaParserChanger extends JavaParserChanger {
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     List<CodemodChange> changes = new ArrayList<>();
-    List<DetectorFinding> findings = new ArrayList<>();
+    List<UnfixedFinding> unfixedFindings = new ArrayList<>();
 
     changers.forEach(
         changer -> {
           CodemodFileScanningResult result = changer.visit(context, cu);
           changes.addAll(result.changes());
-          findings.addAll(result.findings());
+          unfixedFindings.addAll(result.unfixedFindings());
         });
 
-    return CodemodFileScanningResult.from(changes, findings);
+    return CodemodFileScanningResult.from(changes, unfixedFindings);
   }
 
   @Override

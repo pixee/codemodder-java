@@ -3,9 +3,9 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
-import io.codemodder.codetf.DetectionTool;
-import io.codemodder.codetf.DetectorFinding;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.codetf.FixedFinding;
+import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.defectdojo.DefectDojoScan;
 import io.codemodder.providers.defectdojo.Finding;
@@ -34,13 +34,16 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
   }
 
   @Override
-  public DetectionTool getDetectionTool() {
-    DetectorRule semgrepSqliRule =
-        new DetectorRule(
-            "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
-            "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
-            null);
-    return new DetectionTool("DefectDojo", semgrepSqliRule, List.of());
+  public String vendorName() {
+    return "DefectDojo / Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
+        "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
+        "https://semgrep.dev/r?q=java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli");
   }
 
   @Override
@@ -54,16 +57,17 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
       return CodemodFileScanningResult.none();
     }
 
-    List<DetectorFinding> allFindings = new ArrayList<>();
+    List<UnfixedFinding> unfixedFindings = new ArrayList<>();
 
     List<CodemodChange> changes = new ArrayList<>();
     for (Finding finding : findingsForThisPath) {
       String id = String.valueOf(finding.getId());
       Integer line = finding.getLine();
       if (line == null) {
-        DetectorFinding unfixableFinding =
-            new DetectorFinding(id, false, "No line number provided");
-        allFindings.add(unfixableFinding);
+        UnfixedFinding unfixableFinding =
+            new UnfixedFinding(
+                id, getDetectorRule(), context.path().toString(), null, "No line number provided");
+        unfixedFindings.add(unfixableFinding);
         continue;
       }
 
@@ -74,33 +78,45 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
               .toList();
 
       if (supportedSqlMethodCallsOnThatLine.isEmpty()) {
-        DetectorFinding unfixableFinding =
-            new DetectorFinding(id, false, "No supported SQL methods found on the given line");
-        allFindings.add(unfixableFinding);
+        UnfixedFinding unfixableFinding =
+            new UnfixedFinding(
+                id,
+                getDetectorRule(),
+                context.path().toString(),
+                line,
+                "No supported SQL methods found on the given line");
+        unfixedFindings.add(unfixableFinding);
         continue;
       }
 
       if (supportedSqlMethodCallsOnThatLine.size() > 1) {
-        DetectorFinding unfixableFinding =
-            new DetectorFinding(
-                id, false, "Multiple supported SQL methods found on the given line");
-        allFindings.add(unfixableFinding);
+        UnfixedFinding unfixableFinding =
+            new UnfixedFinding(
+                id,
+                getDetectorRule(),
+                context.path().toString(),
+                line,
+                "Multiple supported SQL methods found on the given line");
+        unfixedFindings.add(unfixableFinding);
         continue;
       }
 
       MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
-
       if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
-        DetectorFinding fixedFinding = new DetectorFinding(id, true, null);
-        allFindings.add(fixedFinding);
-        changes.add(CodemodChange.from(line, "Fixes issue " + id + " by parameterizing SQL"));
+        FixedFinding fixedFinding = new FixedFinding(id, getDetectorRule());
+        changes.add(CodemodChange.from(line, fixedFinding));
       } else {
-        DetectorFinding unfixableFinding =
-            new DetectorFinding(id, false, "Fixing may have side effects");
-        allFindings.add(unfixableFinding);
+        UnfixedFinding unfixableFinding =
+            new UnfixedFinding(
+                id,
+                getDetectorRule(),
+                context.path().toString(),
+                line,
+                "State changing effects possible or unrecognized code shape");
+        unfixedFindings.add(unfixableFinding);
       }
     }
 
-    return CodemodFileScanningResult.from(changes, allFindings);
+    return CodemodFileScanningResult.from(changes, unfixedFindings);
   }
 }

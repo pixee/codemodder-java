@@ -63,7 +63,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
-    protected DetectorRule getDetectorRule() {
+    public DetectorRule getDetectorRule() {
       return new DetectorRule(
           "java:S2130",
           "Parsing should be used to convert `String`s to primitives",
@@ -125,7 +125,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
-    protected DetectorRule getDetectorRule() {
+    public DetectorRule getDetectorRule() {
       return new DetectorRule(
           "java:S2130",
           "Parsing should be used to convert `String`s to primitives",

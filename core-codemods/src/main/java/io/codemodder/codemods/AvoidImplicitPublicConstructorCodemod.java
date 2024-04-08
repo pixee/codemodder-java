@@ -33,7 +33,8 @@ public final class AvoidImplicitPublicConstructorCodemod
     super(issues, SimpleName.class);
   }
 
-  protected DetectorRule getDetectorRule() {
+  @Override
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S1118",
         "Utility classes should not have public constructors",

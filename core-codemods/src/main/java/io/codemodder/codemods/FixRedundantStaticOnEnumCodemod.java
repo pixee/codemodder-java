@@ -27,7 +27,7 @@ public final class FixRedundantStaticOnEnumCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S2786",
         "Nested `enum`s should not be declared static",

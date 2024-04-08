@@ -29,7 +29,7 @@ public final class RemoveRedundantVariableCreationCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S1488",
         "Local variables should not be declared and then immediately returned or thrown",

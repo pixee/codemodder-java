@@ -42,7 +42,7 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S125",
         "Sections of code should not be commented out",
