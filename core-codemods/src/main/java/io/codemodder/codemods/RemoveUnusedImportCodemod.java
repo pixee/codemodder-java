@@ -42,7 +42,7 @@ public final class RemoveUnusedImportCodemod
   }
 
   @Override
-  protected DetectorRule getDetectorRule() {
+  public DetectorRule getDetectorRule() {
     return new DetectorRule(
         "java:S1128",
         "Unnecessary imports should be removed",
