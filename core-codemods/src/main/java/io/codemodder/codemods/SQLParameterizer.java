@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * Contains most of the logic for detecting and fixing parameterizable SQL statements for a given
  * {@link MethodCallExpr}.
  */
-public final class SQLParameterizer {
+final class SQLParameterizer {
 
   private static final String preparedStatementNamePrefix = "stmt";
   private static final String preparedStatementNamePrefixAlternative = "statement";
@@ -382,7 +382,7 @@ public final class SQLParameterizer {
    *
    * <p>(3) Change <stmtCreation>.execute*() to pstmt.execute().
    */
-  private void fix(
+  private MethodCallExpr fix(
       final Either<MethodCallExpr, LocalVariableDeclaration> stmtCreation,
       final QueryParameterizer queryParameterizer,
       final MethodCallExpr executeCall) {
@@ -448,16 +448,16 @@ public final class SQLParameterizer {
     executeCall.setScope(new NameExpr(stmtName));
     executeCall.setArguments(new NodeList<>());
 
+    MethodCallExpr pstmtCreation;
     // (2.a)
     if (stmtCreation.isLeft()) {
+      pstmtCreation =
+          new MethodCallExpr(stmtCreation.getLeft().getScope().get(), "prepareStatement", args);
       final var pstmtCreationStmt =
           new ExpressionStmt(
               new VariableDeclarationExpr(
                   new VariableDeclarator(
-                      StaticJavaParser.parseType("PreparedStatement"),
-                      stmtName,
-                      new MethodCallExpr(
-                          stmtCreation.getLeft().getScope().get(), "prepareStatement", args))));
+                      StaticJavaParser.parseType("PreparedStatement"), stmtName, pstmtCreation)));
       ASTTransforms.addStatementBeforeStatement(topStatement, pstmtCreationStmt);
 
       // (2.b)
@@ -476,7 +476,10 @@ public final class SQLParameterizer {
           .getVariableDeclarator()
           .getInitializer()
           .ifPresent(expr -> expr.asMethodCallExpr().setArguments(args));
+      pstmtCreation =
+          stmtCreation.getRight().getVariableDeclarator().getInitializer().get().asMethodCallExpr();
     }
+    return pstmtCreation;
   }
 
   private boolean assignedOrDefinedInScope(NameExpr name, LocalVariableDeclaration lvd) {
@@ -500,13 +503,13 @@ public final class SQLParameterizer {
 
   /**
    * Checks if {@code methodCall} is a query call that needs to be fixed and fixes if that's the
-   * case.
+   * case. If the parameterization happened, returns the PreparedStatement creation.
    */
-  public boolean checkAndFix() {
+  public Optional<MethodCallExpr> checkAndFix() {
     if (executeCall.findCompilationUnit().isPresent()) {
       this.compilationUnit = executeCall.findCompilationUnit().get();
     } else {
-      return false;
+      return Optional.empty();
     }
     // validate the call itself first
     if (isParameterizationCandidate(executeCall) && validateExecuteCall(executeCall).isPresent()) {
@@ -518,7 +521,7 @@ public final class SQLParameterizer {
         final QueryParameterizer queryp;
         // should not be emtpy
         if (executeCall.getArguments().isEmpty()) {
-          return false;
+          return Optional.empty();
         }
         queryp = new QueryParameterizer(executeCall.getArgument(0));
 
@@ -546,13 +549,12 @@ public final class SQLParameterizer {
                             .anyMatch(name -> assignedOrDefinedInScope(name, stmtLVD)));
 
         if (queryp.getInjections().isEmpty() || resolvedInScope || nameInScope) {
-          return false;
+          return Optional.empty();
         }
 
-        fix(stmtObject.get(), queryp, executeCall);
-        return true;
+        return Optional.of(fix(stmtObject.get(), queryp, executeCall));
       }
     }
-    return false;
+    return Optional.empty();
   }
 }

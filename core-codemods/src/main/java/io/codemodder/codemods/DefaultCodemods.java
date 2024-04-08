@@ -41,6 +41,7 @@ public final class DefaultCodemods {
         PreventFileWriterLeakWithFilesCodemod.class,
         RandomizeSeedCodemod.class,
         RemoveRedundantVariableCreationCodemod.class,
+        RemoveUnusedImportCodemod.class,
         RemoveUnusedLocalVariableCodemod.class,
         RemoveUnusedPrivateMethodCodemod.class,
         RemoveUselessParenthesesCodemod.class,

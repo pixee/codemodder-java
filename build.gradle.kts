@@ -1,3 +1,5 @@
+import java.time.Duration
+
 plugins {
     alias(buildlibs.plugins.nexus.publish)
     id("io.codemodder.base")
@@ -9,6 +11,10 @@ nexusPublishing {
             nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
             snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
         }
+    }
+    transitionCheckOptions {
+        maxRetries.set(80) // default is 60 but we've been seeing timeouts
+        delayBetween.set(Duration.ofSeconds(30)) // default is 10 seconds
     }
 }
 
