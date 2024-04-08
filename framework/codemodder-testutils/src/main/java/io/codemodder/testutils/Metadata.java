@@ -42,4 +42,10 @@ public @interface Metadata {
    * HardenXStreamCodemodTestProjectProvider}
    */
   Class<? extends ProjectProvider>[] projectProviders() default {};
+
+  /** The expected fix metadata that the codemod should report. */
+  int[] expectingFixesAtLines() default {};
+
+  /** The expected failed fix metadata that the codemod should report. */
+  int[] expectingFailedFixesAtLines() default {};
 }

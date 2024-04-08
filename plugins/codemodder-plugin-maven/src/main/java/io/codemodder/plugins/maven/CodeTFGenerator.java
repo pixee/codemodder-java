@@ -68,7 +68,13 @@ final class CodeTFGenerator {
     // Use RIGHT side as the diff side for now, as we are only adding dependencies.
     final CodeTFChange change =
         new CodeTFChange(
-            position, properties, description, CodeTFDiffSide.RIGHT, List.of(), List.of());
+            position,
+            properties,
+            description,
+            CodeTFDiffSide.RIGHT,
+            List.of(),
+            List.of(),
+            List.of());
 
     final List<String> patchDiff =
         UnifiedDiffUtils.generateUnifiedDiff(

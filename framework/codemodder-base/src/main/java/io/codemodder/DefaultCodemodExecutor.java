@@ -292,7 +292,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             changeDescription,
             CodeTFDiffSide.LEFT,
             pkgActions,
-            codemodChange.getParameters());
+            codemodChange.getParameters(),
+            codemodChange.getFixedFindings());
 
     for (CodeTFProvider provider : codetfProviders) {
       change = provider.onChangeCreated(filePath, codemod.getId(), change);

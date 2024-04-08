@@ -1,7 +1,6 @@
 package io.codemodder;
 
 import io.codemodder.codetf.UnfixedFinding;
-
 import java.util.List;
 
 /** Represents the result of scanning a file for changes. */

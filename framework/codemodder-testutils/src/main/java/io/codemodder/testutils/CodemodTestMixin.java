@@ -7,9 +7,7 @@ import static org.hamcrest.Matchers.*;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.Patch;
 import io.codemodder.*;
-import io.codemodder.codetf.CodeTFChange;
-import io.codemodder.codetf.CodeTFChangesetEntry;
-import io.codemodder.codetf.CodeTFResult;
+import io.codemodder.codetf.*;
 import io.codemodder.javaparser.JavaParserFacade;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.IOException;
@@ -76,7 +74,9 @@ public interface CodemodTestMixin {
                 path,
                 dependencies,
                 projectProviders,
-                metadata.doRetransformTest());
+                metadata.doRetransformTest(),
+                metadata.expectingFixesAtLines(),
+                metadata.expectingFailedFixesAtLines());
 
     return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
   }
@@ -89,7 +89,9 @@ public interface CodemodTestMixin {
       final Path before,
       final List<DependencyGAV> dependenciesExpected,
       final List<ProjectProvider> projectProviders,
-      final boolean doRetransformTest)
+      final boolean doRetransformTest,
+      final int[] expectedFixLines,
+      final int[] expectingFailedFixesAtLines)
       throws IOException {
 
     // create a copy of the test file in the temp directory to serve as our "repository"
@@ -182,6 +184,19 @@ public interface CodemodTestMixin {
     for (CodeTFChange change : changeset.get(0).getChanges()) {
       assertThat(change.getLineNumber(), is(greaterThan(0)));
       assertThat(change.getDescription(), is(not(blankOrNullString())));
+    }
+
+    List<CodeTFChange> changes =
+        changeset.stream().map(CodeTFChangesetEntry::getChanges).flatMap(List::stream).toList();
+
+    for (int expectedFixLine : expectedFixLines) {
+      assertThat(changes.stream().anyMatch(c -> c.getLineNumber() == expectedFixLine), is(true));
+    }
+
+    List<UnfixedFinding> unfixedFindings = result.getUnfixedFindings();
+    for (int expectedFailedFixLine : expectingFailedFixesAtLines) {
+      assertThat(
+          unfixedFindings.stream().noneMatch(c -> c.getLine() == expectedFailedFixLine), is(true));
     }
 
     // make sure that some of the basics are being reported

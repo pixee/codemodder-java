@@ -12,6 +12,7 @@ import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import io.codemodder.codetf.*;
@@ -136,6 +137,7 @@ final class DefaultCodemodExecutorTest {
               "updated deps",
               CodeTFDiffSide.LEFT,
               List.of(packageAddResult),
+              List.of(),
               List.of());
       CodeTFChangesetEntry entry = new CodeTFChangesetEntry("deps.txt", diff, List.of(change));
       List<CodeTFChangesetEntry> changes = List.of(entry);
@@ -161,12 +163,12 @@ final class DefaultCodemodExecutorTest {
   }
 
   @Test
-  void it_collects_fixonly_changer_findings() {
+  void it_collects_fixonly_metadata() {
     executor =
         new DefaultCodemodExecutor(
             repoDir,
             includesEverything,
-            new CodemodIdPair("thirdparty:java/thing", new ProvidesFindingsCodemod()),
+            new CodemodIdPair("thirdparty:java/thing", new ProvidesRemediationStuffCodemod()),
             List.of(),
             List.of(),
             fileCache,
@@ -178,10 +180,16 @@ final class DefaultCodemodExecutorTest {
 
     CodeTFResult result = executor.execute(List.of(javaFile1));
     DetectionTool detectionTool = result.getDetectionTool();
-    assertThat(detectionTool.getFindings())
-        .containsExactly(ProvidesFindingsCodemod.findings.toArray(new DetectorFinding[0]));
     assertThat(detectionTool.getName()).isEqualTo("acme");
-    assertThat(result.getDetectionTool().getRule()).isSameAs(ProvidesFindingsCodemod.rule);
+
+    assertThat(result.getFailedFiles()).isEmpty();
+
+    List<UnfixedFinding> unfixedFindings = result.getUnfixedFindings();
+    assertThat(unfixedFindings)
+        .containsExactlyElementsOf(ProvidesRemediationStuffCodemod.unfixedFindings);
+
+    CodeTFChange change = result.getChangeset().get(0).getChanges().get(0);
+    assertThat(change.getFixedFindings()).containsOnly(ProvidesRemediationStuffCodemod.finding);
   }
 
   @Test
@@ -742,25 +750,28 @@ final class DefaultCodemodExecutorTest {
     }
   }
 
-  private static class ProvidesFindingsCodemod extends JavaParserChanger
+  private static class ProvidesRemediationStuffCodemod extends JavaParserChanger
       implements FixOnlyCodeChanger {
 
-    ProvidesFindingsCodemod() {
+    ProvidesRemediationStuffCodemod() {
       super(new EmptyReporter());
     }
 
     @Override
-    public CodemodFileScanningResult visit(CodemodInvocationContext context, CompilationUnit cu) {
-      return CodemodFileScanningResult.from(List.of(), findings);
+    public CodemodFileScanningResult visit(
+        final CodemodInvocationContext context, final CompilationUnit cu) {
+      cu.findAll(ClassOrInterfaceDeclaration.class).get(0).addExtendedType("foo");
+      CodemodChange change = CodemodChange.from(10, finding);
+      return CodemodFileScanningResult.from(List.of(change), unfixedFindings);
     }
-
-    private static final List<DetectorFinding> findings =
-        List.of(
-            new DetectorFinding("rule-1", true, null),
-            new DetectorFinding("rule-2", false, "couldnt find thing"));
 
     private static final DetectorRule rule =
         new DetectorRule("acme_rule_id", "Find Thing", "https://acme.com/rules/thing");
+
+    private static final FixedFinding finding = new FixedFinding("id-4", rule);
+
+    private static final List<UnfixedFinding> unfixedFindings =
+        List.of(new UnfixedFinding("rule-2", rule, "/path/thing.java", 15, "couldn't find thing"));
 
     @Override
     public String getDescription() {

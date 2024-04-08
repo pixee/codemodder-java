@@ -2,7 +2,6 @@ package io.codemodder;
 
 import io.codemodder.codetf.CodeTFParameter;
 import io.codemodder.codetf.FixedFinding;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,10 +16,8 @@ public final class CodemodChange {
   /** Represents the dependencies required by the new code we introduced in this weave. */
   private final List<DependencyGAV> dependenciesNeeded;
 
-  /**
-   * The fixed finding that was addressed by this change.
-   */
-  private final FixedFinding fixedFinding;
+  /** The fixed finding that was addressed by this change. */
+  private final List<FixedFinding> fixedFindings;
 
   /**
    * Represents the parameters that were used to generate the new code we introduced in this weave.
@@ -35,7 +32,7 @@ public final class CodemodChange {
     this.dependenciesNeeded = Objects.requireNonNull(dependenciesNeeded, "dependenciesNeeded");
     this.parameters = List.of();
     this.description = null;
-    this.fixedFinding = null;
+    this.fixedFindings = List.of();
   }
 
   private CodemodChange(final int lineNumber, final FixedFinding finding) {
@@ -43,7 +40,7 @@ public final class CodemodChange {
     this.dependenciesNeeded = List.of();
     this.parameters = List.of();
     this.description = null;
-    this.fixedFinding = Objects.requireNonNull(finding);
+    this.fixedFindings = List.of(Objects.requireNonNull(finding));
   }
 
   private CodemodChange(final int lineNumber, final String description) {
@@ -51,7 +48,7 @@ public final class CodemodChange {
     this.dependenciesNeeded = List.of();
     this.parameters = List.of();
     this.description = Objects.requireNonNull(description);
-    this.fixedFinding = null;
+    this.fixedFindings = List.of();
   }
 
   private CodemodChange(final int lineNumber, final Parameter parameter, final String valueUsed) {
@@ -66,7 +63,7 @@ public final class CodemodChange {
             valueUsed);
     this.parameters = List.of(codeTFParameter);
     this.description = null;
-    this.fixedFinding = null;
+    this.fixedFindings = List.of();
   }
 
   @Override
@@ -111,6 +108,11 @@ public final class CodemodChange {
     return Optional.ofNullable(description);
   }
 
+  /** The fixed finding that was addressed by this change. */
+  public List<FixedFinding> getFixedFindings() {
+    return fixedFindings;
+  }
+
   /** Builds a weave. */
   public static CodemodChange from(final int line, final List<DependencyGAV> dependenciesNeeded) {
     return new CodemodChange(line, dependenciesNeeded);
@@ -136,9 +138,7 @@ public final class CodemodChange {
     return new CodemodChange(line, finding);
   }
 
-  /**
-   * A {@link }
-   */
+  /** A {@link } */
   public static CodemodChange from(
       final int line, final Parameter parameter, final String valueUsed) {
     return new CodemodChange(line, parameter, valueUsed);
