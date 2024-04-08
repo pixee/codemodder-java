@@ -1,6 +1,7 @@
 package io.codemodder.codemods;
 
 import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
+import static io.codemodder.ast.ASTTransforms.removeImportIfUnused;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
@@ -46,6 +47,8 @@ public final class VerboseRequestMappingCodemod
         annotationExpr.getPairs().remove(methodAttribute);
         annotationExpr.setName(newType.get());
         addImportIfMissing(cu, "org.springframework.web.bind.annotation." + newType.get());
+        removeImportIfUnused(cu, "org.springframework.web.bind.annotation.RequestMapping");
+        removeImportIfUnused(cu, "org.springframework.web.bind.annotation.RequestMethod");
         return ChangesResult.changesApplied;
       }
     }

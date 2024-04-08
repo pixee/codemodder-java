@@ -8,3 +8,9 @@ import io.codemodder.testutils.Metadata;
     testResourceDir = "verbose-request-mapping",
     dependencies = {})
 final class VerboseRequestMappingCodemodTest implements CodemodTestMixin {}
+
+@Metadata(
+    codemodType = VerboseRequestMappingCodemod.class,
+    testResourceDir = "verbose-request-mapping-remove-imports",
+    dependencies = {})
+final class VerboseRequestMappingRemoveUnusedImportsCodemodTest implements CodemodTestMixin {}
