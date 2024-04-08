@@ -111,7 +111,9 @@ final class ResourceLeakFixer {
   }
 
   private static boolean isClosedOrEscapes(final Expression expr) {
-    if (immediatelyEscapesMethodScope(expr)) return true;
+    if (immediatelyEscapesMethodScope(expr)) {
+      return true;
+    }
     // find all the variables it flows into
     final var allVariables = flowsInto(expr);
 
@@ -301,7 +303,9 @@ final class ResourceLeakFixer {
 
   /** Checks if the expression creates a {@link java.lang.AutoCloseable} */
   private static boolean isResourceInit(final Expression expr) {
-    return (expr.isMethodCallExpr() && isJDBCResourceInit(expr.asMethodCallExpr()))
+    return (expr.isMethodCallExpr()
+            && (isJDBCResourceInit(expr.asMethodCallExpr())
+                || isFilesResourceInit(expr.asMethodCallExpr())))
         || isAutoCloseableCreation(expr).isPresent();
   }
 
@@ -316,6 +320,20 @@ final class ResourceLeakFixer {
       return Either.left(new ParameterDeclaration((Parameter) n));
     }
     return Either.right(n);
+  }
+
+  /** Checks if {@code expr} creates an AutoCloseable Resource. */
+  private static boolean isFilesResourceInit(final MethodCallExpr expr) {
+    try {
+      var hasFilesScope =
+          expr.getScope()
+              .map(mce -> mce.calculateResolvedType().describe())
+              .filter(type -> "java.nio.file.Files".equals(type));
+      return hasFilesScope.isPresent() && expr.getNameAsString().startsWith("new");
+    } catch (final UnsolvedSymbolException e) {
+      LOG.error("Problem resolving type of : {}", expr, e);
+    }
+    return false;
   }
 
   /** Checks if {@code expr} creates a JDBC Resource. */
@@ -563,6 +581,7 @@ final class ResourceLeakFixer {
     if (!isResourceInit(expr)) {
       return true;
     }
+
     // Returned or argument of a MethodCallExpr
     if (ASTs.isReturnExpr(expr).isPresent() || ASTs.isArgumentOfMethodCall(expr).isPresent()) {
       return true;

@@ -1,7 +1,10 @@
 package com.acme.testcode.resourceleak;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.File;
+import java.nio.file.Files;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -15,6 +18,11 @@ public class Test {
 
   public void simple() throws IOException {
     try (FileWriter fr = new FileWriter("~/secrets.txt")) {
+    }
+  }
+
+  public void simpleFiles(File f){
+    try (BufferedWriter writer = Files.newBufferedWriter(f.toPath())) {
     }
   }
 
