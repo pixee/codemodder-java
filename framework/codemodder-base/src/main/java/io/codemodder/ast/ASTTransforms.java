@@ -13,6 +13,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
+import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -212,6 +213,12 @@ public final class ASTTransforms {
       return;
     }
     if (cu.findAll(ClassOrInterfaceType.class).stream()
+        .anyMatch(n -> n.getNameAsString().equals(simpleName))) {
+      return;
+    }
+    if (cu.findAll(Node.class).stream()
+        .filter(n -> n instanceof NodeWithName<?>)
+        .map(n -> (NodeWithName<?>) n)
         .anyMatch(n -> n.getNameAsString().equals(simpleName))) {
       return;
     }
