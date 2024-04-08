@@ -169,6 +169,7 @@ final class ResourceLeakFixer {
       var cu = creationExpr.findCompilationUnit().get();
       for (var resource : deque) {
         var name = count == 0 ? rootPrefix : rootPrefix + count;
+        // TODO try to resolve type, failing to do that use var declaration?
         var type = resource.calculateResolvedType().describe();
         resource.replace(new NameExpr(name));
 
@@ -213,6 +214,7 @@ final class ResourceLeakFixer {
       var cu = mce.findCompilationUnit().get();
       for (var resource : resources) {
         var name = count == 0 ? rootPrefix : rootPrefix + count;
+        // TODO try to resolve type, failing to do that use var declaration?
         var type = resource.calculateResolvedType().describe();
 
         resource.replace(new NameExpr(name));
@@ -279,9 +281,14 @@ final class ResourceLeakFixer {
 
   /** Checks if the expression implements the {@link java.lang.AutoCloseable} interface. */
   private static boolean isAutoCloseableType(final Expression expr) {
-    return expr.calculateResolvedType().isReferenceType()
-        && expr.calculateResolvedType().asReferenceType().getAllAncestors().stream()
-            .anyMatch(t -> t.describe().equals("java.lang.AutoCloseable"));
+    try {
+      return expr.calculateResolvedType().isReferenceType()
+          && expr.calculateResolvedType().asReferenceType().getAllAncestors().stream()
+              .anyMatch(t -> t.describe().equals("java.lang.AutoCloseable"));
+    } catch (final UnsolvedSymbolException e) {
+      LOG.error("Problem resolving type of : {}", expr);
+      return false;
+    }
   }
 
   /** Checks if the expression creates a {@link java.lang.AutoCloseable} */
