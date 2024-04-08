@@ -1,5 +1,10 @@
 package com.acme.testcode;
 
+import org.apache.commons.lang3.StringUtils;
+import com.pibe.PibeUtils;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import io.codemodder.codemods.Codemod;
+
 final class Test {
 
     public boolean fine1 = "foo".equals("bar");
@@ -7,7 +12,7 @@ final class Test {
     static boolean cantChange = bar.equals("foo"); // can't change because we don't know the type of bar
     final boolean change2 = getBar().equalsIgnoreCase("foo");
 
-   void foo(String foo, @NotNull String foo1, String nullAssertion) {
+   void foo(String foo, @NotNull String foo1, String nullAssertion, String paramValue) {
        boolean change1 = foo.equals("bar");
        String initializedVar = "init";
        if(foo.equals("bar")) { // should change
@@ -35,6 +40,68 @@ final class Test {
           if(outerNullAssertion.equals("something")) { // shouldn't be changed because already checked in outer block
             System.out.println("outer");
           }
+       }
+
+       String nullString = null;
+       if(nullString.equals("hola")){
+         System.out.println(nullString);
+       }
+
+       // shouldn't be change because var is initialized using a method contained in commonMethodsThatCantReturnNull (Implicit String library)
+       String replacedString = "hola".replace("hola", "fibonacci");
+       if(replacedString.equals("fibonacci")){
+         System.out.println(replacedString);
+       }
+
+       // should change name expr var since it is a string that is initialized using a method not contained in commonMethodsThatCantReturnNull (Implicit String library)
+       String invalidStringMethodString2 = invalidStringMethodString.randomMethod(100);
+       if(invalidStringMethodString2.equals("pibeString")){
+         System.out.println(pibeUtilsStr);
+       }
+
+       // shouldn't be change because var is initialized using a method contained in commonMethodsThatCantReturnNull (Explicit non static import library)
+       String defaultString = StringUtils.defaultString(str);
+       if(defaultString.equals("defaultString")){
+         System.out.println(defaultString);
+       }
+
+       // should change - var is initialized using a method NOT contained in commonMethodsThatCantReturnNull (Explicit non static import library)
+       String pibeUtilsStr = PibeUtils.parse(str);
+       if(pibeUtilsStr.equals("pibeString")){
+         System.out.println(pibeUtilsStr);
+       }
+
+       // shouldn't be change because var is initialized using a method contained in commonMethodsThatCantReturnNull (Full explicit non static import library)
+       String fieldExprStr = org.apache.commons.lang3.StringUtils.defaultString(str);
+       if(fieldExprStr.equals("defaultString")){
+         System.out.println(defaultString);
+       }
+
+       // shouldn't be change because var is initialized using a method contained in commonMethodsThatCantReturnNull (Explicit static import library)
+       String staticImportMethodStr = defaultString(str);
+       if(staticImportMethodStr.equals("defaultString")){
+         System.out.println(defaultString);
+       }
+
+       // should not change because org.apache.commons.lang3.StringUtils#defaultString is contained in commonMethodsThatCantReturnNull
+       StringUtils stringUtils = new StringUtils();
+       String stringUtilsDefaultString = stringUtils.defaultString();
+       if(stringUtilsDefaultString.equals("defaultString")){
+         System.out.println(defaultString);
+       }
+
+       // should change because anotherVar can be null
+       String anotherVar = 1 == 2 ? "hola": null;
+       String myVar = anotherVar;
+       if (myVar.equals("test")) {
+         System.out.println("Hello, World!");
+       }
+
+       // should not change because anotherExample will never be null
+       String anotherExample = 1 == 2 ? "hola": "";
+       String example = anotherExample;
+       if (example.equals("test")) {
+         System.out.println("Hello, World!");
        }
    }
 

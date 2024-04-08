@@ -1,10 +1,8 @@
 package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
-import io.codemodder.ast.ASTTransforms;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.List;
 import java.util.Optional;
@@ -18,13 +16,7 @@ import java.util.stream.Collectors;
 public final class SQLParameterizerCodemod extends JavaParserChanger {
 
   private Optional<CodemodChange> onNodeFound(final MethodCallExpr methodCallExpr) {
-    if (new SQLParameterizer(methodCallExpr).checkAndFix()) {
-      var maybeMethodDecl = methodCallExpr.findAncestor(CallableDeclaration.class);
-      // Cleanup, removes empty string concatenations and unused variables
-      maybeMethodDecl.ifPresent(cd -> ASTTransforms.removeEmptyStringConcatenation(cd));
-      // TODO hits a bug with javaparser, where adding nodes won't result in the correct children
-      // order. This causes the following to remove actually used variables
-      // maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
+    if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
       return Optional.of(CodemodChange.from(methodCallExpr.getBegin().get().line));
     } else {
       return Optional.empty();

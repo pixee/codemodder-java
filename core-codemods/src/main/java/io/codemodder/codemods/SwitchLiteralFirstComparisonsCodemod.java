@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -10,12 +11,16 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.LiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
@@ -68,16 +73,15 @@ public final class SwitchLiteralFirstComparisonsCodemod
      * This codemod will not be executed if:
      *
      * <ol>
-     *   <li>Variable was previously initialized to a not null value
      *   <li>Variable has a previous not null assertion
      *   <li>Variable has a {@link @NotNull} or {@link @Nonnull} annotation
+     *   <li>Variable was previously initialized to a not null value
      * </ol>
      */
     if (simpleNameOptional.isPresent()
-        && (isSimpleNameANotNullInitializedVariableDeclarator(
-                variableDeclarators, simpleNameOptional.get())
-            || hasSimpleNameNotNullAnnotation(cu, simpleNameOptional.get(), variableDeclarators)
-            || hasSimpleNamePreviousNullAssertion(cu, simpleNameOptional.get()))) {
+        && (hasSimpleNameNotNullAnnotation(cu, simpleNameOptional.get(), variableDeclarators)
+            || hasSimpleNamePreviousNullAssertion(cu, simpleNameOptional.get())
+            || isSimpleNameANotNullInitializedVariableDeclarator(cu, simpleNameOptional.get()))) {
       return ChangesResult.noChanges;
     }
 
@@ -238,21 +242,20 @@ public final class SwitchLiteralFirstComparisonsCodemod
 
   /**
    * Checks if the provided {@link SimpleName} variable corresponds to a {@link VariableDeclarator}
-   * that was previously initialized to a non-null value.
+   * that was previously initialized to a non-null expression.
    */
   private boolean isSimpleNameANotNullInitializedVariableDeclarator(
-      final List<VariableDeclarator> variableDeclarators, final SimpleName targetName) {
+      final CompilationUnit cu, final SimpleName targetName) {
 
-    return targetName != null
-        && variableDeclarators.stream()
-            .filter(declarator -> declarator.getName().equals(targetName))
-            .filter(declarator -> isPreviousNodeBefore(targetName, declarator.getName()))
-            .anyMatch(
-                declarator ->
-                    declarator
-                        .getInitializer()
-                        .map(expr -> !(expr instanceof NullLiteralExpr))
-                        .orElse(false));
+    final Optional<VariableDeclarator> variableDeclaratorOptional =
+        getDeclaredVariable(cu, targetName);
+
+    if (variableDeclaratorOptional.isEmpty()
+        || variableDeclaratorOptional.get().getInitializer().isEmpty()) {
+      return false;
+    }
+
+    return isNullSafeExpression(cu, variableDeclaratorOptional.get().getInitializer().get());
   }
 
   /**
@@ -269,6 +272,163 @@ public final class SwitchLiteralFirstComparisonsCodemod
     return simpleNames.isEmpty() ? Optional.empty() : Optional.of(simpleNames.get(0));
   }
 
+  private boolean isNullSafeExpression(final CompilationUnit cu, final Expression expression) {
+    if (expression instanceof NullLiteralExpr) {
+      return false;
+    }
+
+    if (expression instanceof MethodCallExpr methodCallExpr) {
+      return isNullSafeMethodExpr(cu, methodCallExpr);
+    }
+
+    if (expression instanceof ConditionalExpr conditionalExpr) {
+      return isNullSafeExpression(cu, conditionalExpr.getThenExpr())
+          && isNullSafeExpression(cu, conditionalExpr.getElseExpr());
+    }
+
+    if (expression instanceof NameExpr nameExpr) {
+      return isSimpleNameANotNullInitializedVariableDeclarator(cu, nameExpr.getName());
+    }
+
+    return expression instanceof LiteralExpr;
+  }
+
+  private boolean isNullSafeMethodExpr(
+      final CompilationUnit cu, final MethodCallExpr methodCallExpr) {
+    final Optional<Expression> optionalScope = methodCallExpr.getScope();
+
+    final String method = methodCallExpr.getName().getIdentifier();
+
+    // Static import case for example: import static
+    // org.apache.commons.lang3.StringUtils.defaultString
+    if (optionalScope.isEmpty()) {
+      return isNullSafeImportLibrary(cu, methodCallExpr.getName().getIdentifier(), method);
+    }
+
+    final Expression scope = optionalScope.get();
+
+    // Using java.lang.String's method
+    if (scope instanceof StringLiteralExpr) {
+      return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+    }
+
+    // Using full import name as scope of method, for example
+    // String str = org.apache.commons.lang3.StringUtils.defaultString("")
+    if (scope instanceof FieldAccessExpr fieldAccessExpr) {
+      final String fullImportName = fieldAccessExpr.toString();
+      return commonMethodsThatCantReturnNull.contains(fullImportName.concat("#").concat(method));
+    }
+
+    if (scope instanceof NameExpr scopeName) {
+
+      if (!isVariable(cu, scopeName)) {
+        // check if scope is non-static import like: import org.apache.commons.lang3.StringUtils
+        return isNullSafeImportLibrary(cu, scopeName.getName().getIdentifier(), method);
+      }
+
+      final Optional<VariableDeclarator> variableDeclaratorOptional =
+          getDeclaredVariable(cu, scopeName.getName());
+
+      if (variableDeclaratorOptional.isEmpty()) {
+        return false;
+      }
+
+      final String type = variableDeclaratorOptional.get().getTypeAsString();
+
+      // when scope is an object variable, check class type to determine if it is an implicit or
+      // explicit import
+      return isClassObjectMethodNullSafe(cu, type, method);
+    }
+
+    return false;
+  }
+
+  /** Some basic java lang type classes */
+  private boolean isClassObjectMethodNullSafe(
+      final CompilationUnit cu, final String type, final String method) {
+    switch (type) {
+      case "String" -> {
+        return commonMethodsThatCantReturnNull.contains("java.lang.String#".concat(method));
+      }
+      case "Integer" -> {
+        return commonMethodsThatCantReturnNull.contains("java.lang.Integer#".concat(method));
+      }
+      case "Double" -> {
+        return commonMethodsThatCantReturnNull.contains("java.lang.Double#".concat(method));
+      }
+      case "Character" -> {
+        return commonMethodsThatCantReturnNull.contains("java.lang.Character#".concat(method));
+      }
+      case "Long" -> {
+        return commonMethodsThatCantReturnNull.contains("java.lang.Long#".concat(method));
+      }
+      default -> {
+        return isNullSafeImportLibrary(cu, type, method);
+      }
+    }
+  }
+
+  private boolean isVariable(final CompilationUnit cu, final NameExpr nameExpr) {
+    final SimpleName simpleName = nameExpr.getName();
+    final Optional<VariableDeclarator> variableDeclaratorOptional =
+        getDeclaredVariable(cu, simpleName);
+    return variableDeclaratorOptional.isPresent();
+  }
+
+  private boolean isNullSafeImportLibrary(
+      final CompilationUnit cu, final String identifier, final String method) {
+    final Optional<ImportDeclaration> optionalImport =
+        cu.getImports().stream()
+            .filter(importName -> importName.getName().getIdentifier().equals(identifier))
+            .findFirst();
+
+    if (optionalImport.isEmpty()) {
+      return false;
+    }
+
+    if (optionalImport.get().isStatic()
+        && optionalImport.get().getName().getQualifier().isEmpty()) {
+      return false;
+    }
+
+    final Name importDeclaration =
+        optionalImport.get().isStatic()
+            ? optionalImport.get().getName().getQualifier().get()
+            : optionalImport.get().getName();
+
+    return commonMethodsThatCantReturnNull.contains(
+        importDeclaration.asString().concat("#").concat(method));
+  }
+
+  private Optional<VariableDeclarator> getDeclaredVariable(
+      final CompilationUnit cu, final SimpleName simpleName) {
+    final List<VariableDeclarator> variableDeclarators = cu.findAll(VariableDeclarator.class);
+    return variableDeclarators.stream()
+        .filter(declarator -> declarator.getName().equals(simpleName))
+        .filter(declarator -> isPreviousNodeBefore(simpleName, declarator.getName()))
+        .findFirst();
+  }
+
   private static final Set<String> flippableComparisonMethods =
       Set.of("equals", "equalsIgnoreCase");
+
+  private static final List<String> commonMethodsThatCantReturnNull =
+      List.of(
+          "org.apache.commons.lang3.StringUtils#defaultString",
+          "java.lang.String#concat",
+          "java.lang.String#replace",
+          "java.lang.String#replaceAll",
+          "java.lang.String#replaceFirst",
+          "java.lang.String#join",
+          "java.lang.String#substring",
+          "java.lang.String#substring",
+          "java.lang.String#toLowerCase",
+          "java.lang.String#toUpperCase",
+          "java.lang.String#trim",
+          "java.lang.String#strip",
+          "java.lang.String#stripLeading",
+          "java.lang.String#stripTrailing",
+          "java.lang.String#toString",
+          "java.lang.String#valueOf",
+          "java.lang.String#formatted");
 }

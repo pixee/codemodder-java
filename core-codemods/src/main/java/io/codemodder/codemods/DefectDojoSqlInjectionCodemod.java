@@ -1,7 +1,6 @@
 package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
@@ -104,16 +103,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
       }
 
       MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
-      SQLParameterizer parameterizer = new SQLParameterizer(methodCallExpr);
-
-      if (parameterizer.checkAndFix()) {
-        final var maybeMethodDecl = methodCallExpr.findAncestor(CallableDeclaration.class);
-        // Cleanup, removes empty string concatenations and unused variables
-        maybeMethodDecl.ifPresent(cd -> ASTTransforms.removeEmptyStringConcatenation(cd));
-        // TODO hits a bug with javaparser, where adding nodes won't result in the correct children
-        // order. This causes the following to remove actually used variables
-        // maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
-
+      if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
         FixedFinding fixedFinding = new FixedFinding(id, getDetectorRule());
         changes.add(CodemodChange.from(line, fixedFinding));
       } else {

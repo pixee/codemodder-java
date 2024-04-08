@@ -1,0 +1,8 @@
+{
+  "summary" : "Removed unused import (Sonar)",
+  "change" : "Removed unused import variable",
+  "reviewGuidanceJustification" : "There are no functional changes after this change, but the code will be easier to understand.",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-1128/"
+  ]
+}
