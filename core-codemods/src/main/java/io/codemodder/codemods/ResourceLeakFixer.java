@@ -5,6 +5,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import io.codemodder.Either;
 import io.codemodder.ast.*;
@@ -35,7 +36,7 @@ final class ResourceLeakFixer {
    * Detects if an {@link Expression} that creates a resource type is fixable and tries to fix it.
    * Combines {@code isFixable} and {@code tryToFix}.
    */
-  public static Optional<Integer> checkAndFix(final Expression expr) {
+  public static Optional<TryStmt> checkAndFix(final Expression expr) {
     if (expr instanceof ObjectCreationExpr) {
       // finds the root expression in a chain of new AutoCloseable objects
       ObjectCreationExpr root = findRootExpression(expr.asObjectCreationExpr());
@@ -149,8 +150,7 @@ final class ResourceLeakFixer {
     return current;
   }
 
-  public static Optional<Integer> tryToFix(final ObjectCreationExpr creationExpr) {
-    final int originalLine = creationExpr.getRange().get().begin.line;
+  public static Optional<TryStmt> tryToFix(final ObjectCreationExpr creationExpr) {
     final var deque = findInnerExpressions(creationExpr);
     int count = 0;
     final var maybeLVD =
@@ -184,14 +184,13 @@ final class ResourceLeakFixer {
         ASTTransforms.addImportIfMissing(cu, type);
         count++;
       }
-      return Optional.of(originalLine);
+      return Optional.of(tryStmt);
     }
     return Optional.empty();
   }
 
   /** Tries to fix the leak of {@code expr} and returns its line if it does. */
-  public static Optional<Integer> tryToFix(final MethodCallExpr mce) {
-    final int originalLine = mce.getRange().get().begin.line;
+  public static Optional<TryStmt> tryToFix(final MethodCallExpr mce) {
 
     // Is LocalDeclarationStmt and Never Assigned -> Wrap as a try resource
     List<Expression> resources = new ArrayList<>();
@@ -230,7 +229,7 @@ final class ResourceLeakFixer {
         ASTTransforms.addImportIfMissing(cu, type);
         count++;
       }
-      return Optional.of(originalLine);
+      return Optional.of(tryStmt);
       // TODO if vde is multiple declarations, extract the relevant vd and wrap it
     }
     // other cases here...
@@ -287,7 +286,7 @@ final class ResourceLeakFixer {
       return expr.calculateResolvedType().isReferenceType()
           && expr.calculateResolvedType().asReferenceType().getAllAncestors().stream()
               .anyMatch(t -> t.describe().equals("java.lang.AutoCloseable"));
-    } catch (final UnsolvedSymbolException e) {
+    } catch (RuntimeException e) {
       LOG.error("Problem resolving type of : {}", expr);
       return false;
     }
@@ -328,7 +327,7 @@ final class ResourceLeakFixer {
       var hasFilesScope =
           expr.getScope()
               .map(mce -> mce.calculateResolvedType().describe())
-              .filter(type -> "java.nio.file.Files".equals(type));
+              .filter("java.nio.file.Files"::equals);
       return hasFilesScope.isPresent() && expr.getNameAsString().startsWith("new");
     } catch (final UnsolvedSymbolException e) {
       LOG.error("Problem resolving type of : {}", expr, e);
@@ -339,37 +338,23 @@ final class ResourceLeakFixer {
   /** Checks if {@code expr} creates a JDBC Resource. */
   private static boolean isJDBCResourceInit(final MethodCallExpr expr) {
     final Predicate<MethodCallExpr> isResultSetGen =
-        mce -> {
-          switch (mce.getNameAsString()) {
-            case "executeQuery":
-            case "getResultSet":
-            case "getGeneratedKeys":
-              return true;
-            default:
-              return false;
-          }
-        };
+        mce ->
+            switch (mce.getNameAsString()) {
+              case "executeQuery", "getResultSet", "getGeneratedKeys" -> true;
+              default -> false;
+            };
     final Predicate<MethodCallExpr> isStatementGen =
-        mce -> {
-          switch (mce.getNameAsString()) {
-            case "createStatement":
-            case "prepareCall":
-            case "prepareStatement":
-              return true;
-            default:
-              return false;
-          }
-        };
+        mce ->
+            switch (mce.getNameAsString()) {
+              case "createStatement", "prepareCall", "prepareStatement" -> true;
+              default -> false;
+            };
     final Predicate<MethodCallExpr> isReaderGen =
-        mce -> {
-          switch (mce.getNameAsString()) {
-            case "getCharacterStream":
-            case "getNCharacterStream":
-              return true;
-            default:
-              return false;
-          }
-        };
+        mce ->
+            switch (mce.getNameAsString()) {
+              case "getCharacterStream", "getNCharacterStream" -> true;
+              default -> false;
+            };
     final Predicate<MethodCallExpr> isDependent = isResultSetGen.or(isStatementGen.or(isReaderGen));
     return isDependent.test(expr);
   }

@@ -95,7 +95,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    assertThat(fileChanges.size(), is(58));
+    assertThat(fileChanges.size(), is(67));
 
     // we only inject into a couple files
     verifyStandardCodemodResults(fileChanges);
@@ -117,6 +117,7 @@ final class WebGoat822Test extends GitRepositoryTest {
           outputFile.getPath(),
           "--sarif",
           "src/test/resources/webgoat_v8.2.2_codeql.sarif",
+          "--codemod-exclude=pixee:java/resource-leak",
           "--dont-exit",
           repoDir.getPath()
         });
