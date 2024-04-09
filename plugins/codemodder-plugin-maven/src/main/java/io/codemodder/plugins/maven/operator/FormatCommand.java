@@ -267,7 +267,6 @@ class FormatCommand extends AbstractCommand {
     boolean mustTrack = false;
     boolean hasPreamble = false;
     int elementStart = 0;
-    int elementEnd = 0;
     List<XMLEvent> prevEvents = new ArrayList<>();
 
     while (eventReader.hasNext()) {
