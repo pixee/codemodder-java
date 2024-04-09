@@ -90,7 +90,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       return new DetectorRule(
           "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission",
           "Fix overly permissive file permissions (issue discovered by Semgrep)",
-          "https://find-sec-bugs.github.io/bugs.htm#OVERLY_PERMISSIVE_FILE_PERMISSION");
+          "https://registry.semgrep.dev/rule/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission");
     }
   }
 
@@ -134,7 +134,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       return new DetectorRule(
           "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission",
           "Fix overly permissive file permissions (issue discovered by Semgrep)",
-          "https://find-sec-bugs.github.io/bugs.htm#OVERLY_PERMISSIVE_FILE_PERMISSION");
+          "https://registry.semgrep.dev/rule/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission");
     }
   }
 
@@ -193,7 +193,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       return new DetectorRule(
           "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission",
           "Fix overly permissive file permissions (issue discovered by Semgrep)",
-          "https://find-sec-bugs.github.io/bugs.htm#OVERLY_PERMISSIVE_FILE_PERMISSION");
+          "https://registry.semgrep.dev/rule/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission");
     }
 
     private ChangesResult fixAdd(final MethodCallExpr call) {
