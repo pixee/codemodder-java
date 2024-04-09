@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.ZipSecurity;
@@ -18,7 +19,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenZipEntryPathsCodemod
-    extends SarifPluginJavaParserChanger<VariableDeclarator> {
+    extends SarifPluginJavaParserChanger<VariableDeclarator> implements FixOnlyCodeChanger {
 
   @Inject
   public HardenZipEntryPathsCodemod(
@@ -41,5 +42,18 @@ public final class HardenZipEntryPathsCodemod
     variableDeclarator.setInitializer(securedCall);
     ASTTransforms.addImportIfMissing(cu, ZipSecurity.class);
     return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "harden-zip-entry-paths",
+        "Introduce protections against \"zip slip\" attacks",
+        "https://snyk.io/research/zip-slip-vulnerability");
   }
 }

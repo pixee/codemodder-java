@@ -6,6 +6,7 @@ import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.Filenames;
@@ -18,7 +19,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class SanitizeApacheMultipartFilenameCodemod
-    extends SarifPluginJavaParserChanger<MethodCallExpr> {
+    extends SarifPluginJavaParserChanger<MethodCallExpr> implements FixOnlyCodeChanger {
 
   @Inject
   public SanitizeApacheMultipartFilenameCodemod(
@@ -41,5 +42,18 @@ public final class SanitizeApacheMultipartFilenameCodemod
     return success
         ? ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
         : ChangesResult.noChanges;
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "sanitize-apache-multipart-filename",
+        "Sanitize user-provided file names in HTTP multipart uploads",
+        "https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload");
   }
 }

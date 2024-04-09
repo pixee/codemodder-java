@@ -7,6 +7,7 @@ import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.InsertDelta;
 import com.github.difflib.patch.Patch;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.plugins.llm.OpenAIService;
 import io.codemodder.plugins.llm.SarifToLLMForBinaryVerificationAndFixingCodemod;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
@@ -17,12 +18,26 @@ import javax.inject.Inject;
     id = "pixee:java/log-failed-login",
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
-public final class LogFailedLoginCodemod extends SarifToLLMForBinaryVerificationAndFixingCodemod {
+public final class LogFailedLoginCodemod extends SarifToLLMForBinaryVerificationAndFixingCodemod
+    implements FixOnlyCodeChanger {
 
   @Inject
   public LogFailedLoginCodemod(
       @SemgrepScan(ruleId = "log-failed-login") final RuleSarif sarif, final OpenAIService openAI) {
     super(sarif, openAI);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "log-failed-login",
+        "Log failed login attempts",
+        "https://security.stackexchange.com/a/147261");
   }
 
   @Override

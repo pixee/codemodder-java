@@ -11,6 +11,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.io.File;
@@ -27,7 +28,7 @@ import javax.inject.Inject;
     importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class PreventFileWriterLeakWithFilesCodemod
-    extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
+    extends SarifPluginJavaParserChanger<ObjectCreationExpr> implements FixOnlyCodeChanger {
 
   @Inject
   public PreventFileWriterLeakWithFilesCodemod(
@@ -55,5 +56,18 @@ public final class PreventFileWriterLeakWithFilesCodemod
     parent.replace(newBufferedWriterCall, newFilesBufferedWriterCall);
     addImportIfMissing(cu, "java.nio.file.Files");
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "prevent-filewriter-leak-with-nio",
+        "Prevent file descriptor leak and modernize BufferedWriter creation",
+        "https://cwe.mitre.org/data/definitions/775.html");
   }
 }

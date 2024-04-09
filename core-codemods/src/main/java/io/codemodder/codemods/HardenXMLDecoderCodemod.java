@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.XMLDecoderSecurity;
@@ -18,13 +19,26 @@ import javax.inject.Inject;
     id = "pixee:java/harden-xmldecoder-stream",
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class HardenXMLDecoderCodemod
-    extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
+public final class HardenXMLDecoderCodemod extends SarifPluginJavaParserChanger<ObjectCreationExpr>
+    implements FixOnlyCodeChanger {
 
   @Inject
   public HardenXMLDecoderCodemod(
       @SemgrepScan(ruleId = "harden-xmldecoder-stream") final RuleSarif sarif) {
     super(sarif, ObjectCreationExpr.class);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "harden-xmldecoder-stream",
+        "Harden XMLDecoder usage to prevent common attacks",
+        "https://github.com/mgeeky/Penetration-Testing-Tools/blob/master/web/java-XMLDecoder-RCE.md");
   }
 
   @Override

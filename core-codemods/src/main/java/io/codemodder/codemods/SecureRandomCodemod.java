@@ -6,6 +6,7 @@ import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.security.SecureRandom;
@@ -17,7 +18,8 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.LOW)
-public final class SecureRandomCodemod extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
+public final class SecureRandomCodemod extends SarifPluginJavaParserChanger<ObjectCreationExpr>
+    implements FixOnlyCodeChanger {
 
   private static final String DETECTION_RULE =
       """
@@ -40,5 +42,18 @@ public final class SecureRandomCodemod extends SarifPluginJavaParserChanger<Obje
     objectCreationExpr.setType("SecureRandom");
     addImportIfMissing(cu, SecureRandom.class.getName());
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "secure-random",
+        "Introduced protections against predictable RNG abuse",
+        "https://owasp.org/www-community/vulnerabilities/Insecure_Randomness");
   }
 }

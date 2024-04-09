@@ -5,6 +5,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
@@ -15,7 +16,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class DisableAutomaticDirContextDeserializationCodemod
-    extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
+    extends SarifPluginJavaParserChanger<ObjectCreationExpr> implements FixOnlyCodeChanger {
 
   @Inject
   public DisableAutomaticDirContextDeserializationCodemod(
@@ -31,5 +32,18 @@ public final class DisableAutomaticDirContextDeserializationCodemod
       final Result result) {
     objectCreationExpr.setArgument(4, new BooleanLiteralExpr(false));
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "disable-dircontext-deserialization",
+        "Harden LDAP call against deserialization attacks",
+        "https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf");
   }
 }

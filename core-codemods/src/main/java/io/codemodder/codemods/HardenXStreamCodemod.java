@@ -13,6 +13,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.zafarkhaja.semver.Version;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
@@ -26,11 +27,25 @@ import org.slf4j.LoggerFactory;
     id = "pixee:java/harden-xstream",
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<VariableDeclarator> {
+public final class HardenXStreamCodemod extends SarifPluginJavaParserChanger<VariableDeclarator>
+    implements FixOnlyCodeChanger {
 
   @Inject
   public HardenXStreamCodemod(@SemgrepScan(ruleId = "harden-xstream") final RuleSarif sarif) {
     super(sarif, VariableDeclarator.class, RegionNodeMatcher.MATCHES_START);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "harden-xstream",
+        "Harden XStream with a converter to prevent exploitation",
+        "https://www.contrastsecurity.com/security-influencers/serialization-must-die-act-2-xstream");
   }
 
   @Override

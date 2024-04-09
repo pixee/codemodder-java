@@ -16,6 +16,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
@@ -28,7 +29,7 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class MigrateSpringJobBuilderFactoryCodemod
-    extends SarifPluginJavaParserChanger<MethodCallExpr> {
+    extends SarifPluginJavaParserChanger<MethodCallExpr> implements FixOnlyCodeChanger {
 
   private static final String RULE =
       """
@@ -51,6 +52,19 @@ public final class MigrateSpringJobBuilderFactoryCodemod
   @Inject
   public MigrateSpringJobBuilderFactoryCodemod(@SemgrepScan(yaml = RULE) RuleSarif sarif) {
     super(sarif, MethodCallExpr.class);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "migrate-spring-job-builder-factory",
+        "Migrate Spring JobBuilderFactory",
+        "https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/core/configuration/annotation/JobBuilderFactory.html");
   }
 
   @Override

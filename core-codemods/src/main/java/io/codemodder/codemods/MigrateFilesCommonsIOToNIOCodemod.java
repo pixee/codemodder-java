@@ -9,6 +9,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.Objects;
@@ -80,7 +81,7 @@ public final class MigrateFilesCommonsIOToNIOCodemod extends CompositeJavaParser
   }
 
   private abstract static class CommonsToNIOToPathChanger
-      extends SarifPluginJavaParserChanger<MethodCallExpr> {
+      extends SarifPluginJavaParserChanger<MethodCallExpr> implements FixOnlyCodeChanger {
     private final String methodName;
 
     private CommonsToNIOToPathChanger(final RuleSarif ruleSarif, final String methodName) {
@@ -105,6 +106,19 @@ public final class MigrateFilesCommonsIOToNIOCodemod extends CompositeJavaParser
       }
 
       return success ? ChangesResult.changesApplied : ChangesResult.noChanges;
+    }
+
+    @Override
+    public String vendorName() {
+      return "Semgrep";
+    }
+
+    @Override
+    public DetectorRule getDetectorRule() {
+      return new DetectorRule(
+          "migrate-files-commons-io-to-nio",
+          "Migrate Apache `commons-io` APIs to Java's NIO",
+          "https://itsallbinary.com/reading-file-to-string-in-java-with-performance-io-nio-apache-commons-io-google-guava/");
     }
 
     /**

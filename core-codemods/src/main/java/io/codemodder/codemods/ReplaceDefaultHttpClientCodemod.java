@@ -9,6 +9,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
@@ -22,7 +23,7 @@ import javax.inject.Inject;
     importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class ReplaceDefaultHttpClientCodemod
-    extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
+    extends SarifPluginJavaParserChanger<ObjectCreationExpr> implements FixOnlyCodeChanger {
 
   private static final String RULE =
       """
@@ -49,5 +50,18 @@ public final class ReplaceDefaultHttpClientCodemod
     replace(objectCreationExpr).withExpression(expression);
     addImportIfMissing(cu, "org.apache.http.impl.client.HttpClientBuilder");
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "replace-apache-defaulthttpclient",
+        "Replace deprecated and insecure Apache HTTP client",
+        "https://find-sec-bugs.github.io/bugs.htm#DEFAULT_HTTP_CLIENT");
   }
 }

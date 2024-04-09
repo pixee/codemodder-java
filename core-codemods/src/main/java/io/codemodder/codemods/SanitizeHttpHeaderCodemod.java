@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.Newlines;
@@ -17,7 +18,8 @@ import javax.inject.Inject;
     id = "pixee:java/strip-http-header-newlines",
     importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class SanitizeHttpHeaderCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
+public final class SanitizeHttpHeaderCodemod extends SarifPluginJavaParserChanger<MethodCallExpr>
+    implements FixOnlyCodeChanger {
 
   @Inject
   public SanitizeHttpHeaderCodemod(
@@ -37,5 +39,18 @@ public final class SanitizeHttpHeaderCodemod extends SarifPluginJavaParserChange
     return success
         ? ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
         : ChangesResult.noChanges;
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "strip-http-header-newlines",
+        "Introduced protections against HTTP header injection / smuggling attacks",
+        "https://www.netsparker.com/blog/web-security/crlf-http-header/");
   }
 }

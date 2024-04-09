@@ -7,6 +7,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
@@ -16,7 +17,8 @@ import javax.inject.Inject;
     id = "pixee:java/make-prng-seed-unpredictable",
     importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class RandomizeSeedCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
+public final class RandomizeSeedCodemod extends SarifPluginJavaParserChanger<MethodCallExpr>
+    implements FixOnlyCodeChanger {
 
   @Inject
   public RandomizeSeedCodemod(
@@ -35,5 +37,18 @@ public final class RandomizeSeedCodemod extends SarifPluginJavaParserChanger<Met
     NodeList<Expression> arguments = setSeedCall.getArguments();
     arguments.set(0, safeExpression);
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "make-prng-seed-unpredictable",
+        "Strengthen cipher seed with more unpredictable value",
+        "https://wiki.sei.cmu.edu/confluence/display/c/MSC32-C.+Properly+seed+pseudorandom+number+generators");
   }
 }

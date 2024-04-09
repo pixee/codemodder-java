@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.XMLInputFactorySecurity;
@@ -19,12 +20,25 @@ import javax.inject.Inject;
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class HardenXMLInputFactoryCodemod
-    extends SarifPluginJavaParserChanger<VariableDeclarator> {
+    extends SarifPluginJavaParserChanger<VariableDeclarator> implements FixOnlyCodeChanger {
 
   @Inject
   public HardenXMLInputFactoryCodemod(
       @SemgrepScan(ruleId = "harden-xmlinputfactory") final RuleSarif sarif) {
     super(sarif, VariableDeclarator.class, RegionNodeMatcher.MATCHES_START);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "harden-xmlinputfactory",
+        "Introduce protections against XXE attacks",
+        "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html");
   }
 
   @Override

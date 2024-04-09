@@ -9,6 +9,7 @@ import com.github.javaparser.ast.expr.ArrayCreationExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import javax.inject.Inject;
@@ -21,7 +22,8 @@ import javax.inject.Inject;
     id = "pixee:java/upgrade-sslengine-tls",
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class UpgradeSSLEngineTLSCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
+public final class UpgradeSSLEngineTLSCodemod extends SarifPluginJavaParserChanger<MethodCallExpr>
+    implements FixOnlyCodeChanger {
 
   @Inject
   public UpgradeSSLEngineTLSCodemod(
@@ -39,5 +41,18 @@ public final class UpgradeSSLEngineTLSCodemod extends SarifPluginJavaParserChang
         newArray("String", new StringLiteralExpr(SSLProtocols.safeTlsVersion));
     setEnabledProtocolsCall.setArguments(NodeList.nodeList(safeProtocols));
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "upgrade-sslengine-tls",
+        "Upgraded SSLEngine#setEnabledProtocols() TLS versions to match current best practices",
+        "https://datatracker.ietf.org/doc/rfc8996/");
   }
 }

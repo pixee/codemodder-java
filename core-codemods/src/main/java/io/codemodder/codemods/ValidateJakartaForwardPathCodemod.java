@@ -6,6 +6,7 @@ import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
@@ -20,7 +21,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class ValidateJakartaForwardPathCodemod
-    extends SarifPluginJavaParserChanger<Expression> {
+    extends SarifPluginJavaParserChanger<Expression> implements FixOnlyCodeChanger {
 
   @Inject
   public ValidateJakartaForwardPathCodemod(
@@ -39,5 +40,18 @@ public final class ValidateJakartaForwardPathCodemod
                 "io.github.pixee.security.jakarta.PathValidator", "validateDispatcherPath", true)
         ? ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT))
         : ChangesResult.noChanges;
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "validate-jakarta-forward-path",
+        "Introduce protections against user-controlled internal request forwarding",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html#dangerous-forward-example");
   }
 }

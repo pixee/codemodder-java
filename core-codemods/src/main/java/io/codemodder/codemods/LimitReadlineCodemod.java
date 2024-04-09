@@ -10,6 +10,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.BoundedLineReader;
@@ -22,7 +23,8 @@ import javax.inject.Inject;
     id = "pixee:java/limit-readline",
     importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
+public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<MethodCallExpr>
+    implements FixOnlyCodeChanger {
 
   private final Parameter limit;
 
@@ -40,6 +42,19 @@ public final class LimitReadlineCodemod extends SarifPluginJavaParserChanger<Met
           final Parameter limit) {
     super(sarif, MethodCallExpr.class);
     this.limit = Objects.requireNonNull(limit);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "limit-readline",
+        "Protect `readLine()` against DoS",
+        "https://vulncat.fortify.com/en/detail?id=desc.dataflow.abap.denial_of_service");
   }
 
   @Override

@@ -7,6 +7,7 @@ import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.DeleteDelta;
 import com.github.difflib.patch.Patch;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.plugins.llm.OpenAIService;
 import io.codemodder.plugins.llm.SarifToLLMForBinaryVerificationAndFixingCodemod;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
@@ -19,7 +20,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
 public final class SensitiveDataLoggingCodemod
-    extends SarifToLLMForBinaryVerificationAndFixingCodemod {
+    extends SarifToLLMForBinaryVerificationAndFixingCodemod implements FixOnlyCodeChanger {
 
   @Inject
   public SensitiveDataLoggingCodemod(
@@ -49,5 +50,18 @@ public final class SensitiveDataLoggingCodemod
     }
 
     return true;
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "sensitive-data-logging",
+        "Remove sensitive data from logs",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html");
   }
 }

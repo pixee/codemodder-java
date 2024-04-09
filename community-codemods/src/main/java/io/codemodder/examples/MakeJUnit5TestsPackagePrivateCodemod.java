@@ -6,6 +6,7 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFReference;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.nio.file.Path;
@@ -18,7 +19,8 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.LOW)
 public final class MakeJUnit5TestsPackagePrivateCodemod
-    extends SarifPluginJavaParserChanger<ClassOrInterfaceDeclaration> {
+    extends SarifPluginJavaParserChanger<ClassOrInterfaceDeclaration>
+    implements FixOnlyCodeChanger {
 
   private static final String DETECTION_RULE =
       """
@@ -71,5 +73,18 @@ public final class MakeJUnit5TestsPackagePrivateCodemod
   @Override
   public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
     return "Made class package private";
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "make-junit5-tests-package-private",
+        "JUnit 5 tests should be package-private",
+        "https://github.com/junit-team/junit5/issues/679");
   }
 }

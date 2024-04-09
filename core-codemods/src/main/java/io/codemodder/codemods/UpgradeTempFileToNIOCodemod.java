@@ -10,6 +10,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.nio.file.Files;
@@ -24,13 +25,26 @@ import javax.inject.Inject;
     id = "pixee:java/upgrade-tempfile-to-nio",
     importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class UpgradeTempFileToNIOCodemod
-    extends SarifPluginJavaParserChanger<MethodCallExpr> {
+public final class UpgradeTempFileToNIOCodemod extends SarifPluginJavaParserChanger<MethodCallExpr>
+    implements FixOnlyCodeChanger {
 
   @Inject
   public UpgradeTempFileToNIOCodemod(
       @SemgrepScan(ruleId = "upgrade-tempfile-to-nio") final RuleSarif sarif) {
     super(sarif, MethodCallExpr.class);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "upgrade-tempfile-to-nio",
+        "Modernize and secure temp file creation",
+        "https://cwe.mitre.org/data/definitions/378.html");
   }
 
   @Override

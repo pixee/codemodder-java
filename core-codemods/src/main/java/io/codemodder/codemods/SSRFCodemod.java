@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.HostValidator;
@@ -18,11 +19,25 @@ import javax.inject.Inject;
     id = "pixee:java/sandbox-url-creation",
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class SSRFCodemod extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
+public final class SSRFCodemod extends SarifPluginJavaParserChanger<ObjectCreationExpr>
+    implements FixOnlyCodeChanger {
 
   @Inject
   public SSRFCodemod(@SemgrepScan(ruleId = "sandbox-url-creation") RuleSarif semgrepSarif) {
     super(semgrepSarif, ObjectCreationExpr.class);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "sandbox-url-creation",
+        "Sandboxed URL creation to prevent SSRF attacks",
+        "https://www.hacksplaining.com/prevention/ssrf");
   }
 
   @Override

@@ -8,6 +8,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.*;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.nio.charset.Charset;
@@ -28,7 +29,8 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
     super(getBytesCodemod, charsetForNameCodemode);
   }
 
-  private static class GetBytesCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
+  private static class GetBytesCodemod extends SarifPluginJavaParserChanger<MethodCallExpr>
+      implements FixOnlyCodeChanger {
     private static final String RULE =
         """
                 rules:
@@ -40,6 +42,19 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
     @Inject
     private GetBytesCodemod(@SemgrepScan(yaml = RULE) final RuleSarif ruleSarif) {
       super(ruleSarif, MethodCallExpr.class, CodemodReporterStrategy.empty());
+    }
+
+    @Override
+    public String vendorName() {
+      return "Semgrep";
+    }
+
+    @Override
+    public DetectorRule getDetectorRule() {
+      return new DetectorRule(
+          "switch-to-standard-charsets",
+          "Switch to StandardCharsets fields instead of strings",
+          "https://community.sonarsource.com/t/use-standardcharsets-instead-of-charset-names/638");
     }
 
     @Override
@@ -66,7 +81,8 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
     }
   }
 
-  private static class CharsetForNameCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
+  private static class CharsetForNameCodemod extends SarifPluginJavaParserChanger<MethodCallExpr>
+      implements FixOnlyCodeChanger {
     private static final String RULE =
         """
                 rules:
@@ -78,6 +94,19 @@ public final class SwitchToStandardCharsetsCodemod extends CompositeJavaParserCh
     @Inject
     private CharsetForNameCodemod(@SemgrepScan(yaml = RULE) final RuleSarif ruleSarif) {
       super(ruleSarif, MethodCallExpr.class, CodemodReporterStrategy.empty());
+    }
+
+    @Override
+    public String vendorName() {
+      return "Semgrep";
+    }
+
+    @Override
+    public DetectorRule getDetectorRule() {
+      return new DetectorRule(
+          "switch-to-standard-charsets",
+          "Switch to StandardCharsets fields instead of strings",
+          "https://community.sonarsource.com/t/use-standardcharsets-instead-of-charset-names/638");
     }
 
     @Override

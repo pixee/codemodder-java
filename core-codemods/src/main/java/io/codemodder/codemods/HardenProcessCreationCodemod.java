@@ -12,6 +12,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.SystemCommand;
@@ -23,13 +24,26 @@ import javax.inject.Inject;
     id = "pixee:java/harden-process-creation",
     importance = Importance.HIGH,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
-public final class HardenProcessCreationCodemod
-    extends SarifPluginJavaParserChanger<MethodCallExpr> {
+public final class HardenProcessCreationCodemod extends SarifPluginJavaParserChanger<MethodCallExpr>
+    implements FixOnlyCodeChanger {
 
   @Inject
   public HardenProcessCreationCodemod(
       @SemgrepScan(ruleId = "harden-process-creation") final RuleSarif sarif) {
     super(sarif, MethodCallExpr.class);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "harden-process-creation",
+        "Introduce protections against system command injection",
+        "https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html");
   }
 
   @Override

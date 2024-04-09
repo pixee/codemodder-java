@@ -8,6 +8,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.Optional;
@@ -18,12 +19,25 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW)
 public final class VerboseRequestMappingCodemod
-    extends SarifPluginJavaParserChanger<NormalAnnotationExpr> {
+    extends SarifPluginJavaParserChanger<NormalAnnotationExpr> implements FixOnlyCodeChanger {
 
   @Inject
   public VerboseRequestMappingCodemod(
       @SemgrepScan(ruleId = "verbose-request-mapping") final RuleSarif sarif) {
     super(sarif, NormalAnnotationExpr.class);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "verbose-request-mapping",
+        "Replaced @RequestMapping annotation with shortcut annotation for requested HTTP Method",
+        "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html");
   }
 
   @Override

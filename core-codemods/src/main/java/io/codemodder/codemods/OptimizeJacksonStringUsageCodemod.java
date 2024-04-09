@@ -12,6 +12,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.*;
 import io.codemodder.ast.ASTs;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.Optional;
@@ -22,7 +23,7 @@ import javax.inject.Inject;
     importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
 public final class OptimizeJacksonStringUsageCodemod
-    extends SarifPluginJavaParserChanger<ExpressionStmt> {
+    extends SarifPluginJavaParserChanger<ExpressionStmt> implements FixOnlyCodeChanger {
 
   @Inject
   public OptimizeJacksonStringUsageCodemod(
@@ -31,6 +32,19 @@ public final class OptimizeJacksonStringUsageCodemod
         semgrepSarif,
         ExpressionStmt.class,
         SourceCodeRegionExtractor.FROM_SARIF_FIRST_THREADFLOW_EVENT);
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "optimize-jackson-string-usage",
+        "Optimize out unnecessary JSON deserialization step",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html");
   }
 
   /**

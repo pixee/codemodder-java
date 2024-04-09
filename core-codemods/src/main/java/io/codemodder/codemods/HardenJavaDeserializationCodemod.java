@@ -15,6 +15,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import io.github.pixee.security.ObjectInputFilters;
@@ -46,7 +47,7 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
    * }</pre>
    */
   private static class AnonymousDeserializationShapeChanger
-      extends SarifPluginJavaParserChanger<ObjectCreationExpr> {
+      extends SarifPluginJavaParserChanger<ObjectCreationExpr> implements FixOnlyCodeChanger {
 
     @Inject
     public AnonymousDeserializationShapeChanger(
@@ -70,10 +71,23 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
           .withSameArguments();
       return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
     }
+
+    @Override
+    public String vendorName() {
+      return "Semgrep";
+    }
+
+    @Override
+    public DetectorRule getDetectorRule() {
+      return new DetectorRule(
+          "harden-java-deserialization",
+          "Introduce protections against deserialization attacks",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html");
+    }
   }
 
   private static final class VariableDeclarationDeserializationShapeChanger
-      extends SarifPluginJavaParserChanger<VariableDeclarator> {
+      extends SarifPluginJavaParserChanger<VariableDeclarator> implements FixOnlyCodeChanger {
 
     @Inject
     public VariableDeclarationDeserializationShapeChanger(
@@ -83,6 +97,19 @@ public final class HardenJavaDeserializationCodemod extends CompositeJavaParserC
           VariableDeclarator.class,
           RegionNodeMatcher.MATCHES_START,
           CodemodReporterStrategy.empty());
+    }
+
+    @Override
+    public String vendorName() {
+      return "Semgrep";
+    }
+
+    @Override
+    public DetectorRule getDetectorRule() {
+      return new DetectorRule(
+          "harden-java-deserialization",
+          "Introduce protections against deserialization attacks",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html");
     }
 
     @Override
