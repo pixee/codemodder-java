@@ -11,6 +11,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
 import java.util.Optional;
@@ -22,8 +23,8 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class SemgrepOverlyPermissiveFilePermissionsCodemod
-    extends CompositeJavaParserChanger {
+public final class SemgrepOverlyPermissiveFilePermissionsCodemod extends CompositeJavaParserChanger
+    implements FixOnlyCodeChanger {
 
   @Inject
   public SemgrepOverlyPermissiveFilePermissionsCodemod(
@@ -35,6 +36,19 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
         new PermissionAddCallChanger(sarif),
         new FromStringChanger(sarif),
         new InlineFromStringChanger(sarif));
+  }
+
+  @Override
+  public String vendorName() {
+    return "Semgrep";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission",
+        "Fix overly permissive file permissions (issue discovered by Semgrep)",
+        "https://find-sec-bugs.github.io/bugs.htm#OVERLY_PERMISSIVE_FILE_PERMISSION");
   }
 
   /**

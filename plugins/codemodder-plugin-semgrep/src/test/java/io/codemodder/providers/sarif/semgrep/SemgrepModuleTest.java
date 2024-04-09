@@ -12,6 +12,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFReference;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -270,7 +271,7 @@ final class SemgrepModuleTest {
       id = "pixee-test:java/offline-semgrep",
       importance = Importance.LOW,
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
-  static class UsesOfflineSemgrepCodemod implements CodeChanger {
+  static class UsesOfflineSemgrepCodemod implements CodeChanger, FixOnlyCodeChanger {
 
     private final RuleSarif ruleSarif;
 
@@ -299,6 +300,16 @@ final class SemgrepModuleTest {
 
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
+      return null;
+    }
+
+    @Override
+    public String vendorName() {
+      return null;
+    }
+
+    @Override
+    public DetectorRule getDetectorRule() {
       return null;
     }
   }
