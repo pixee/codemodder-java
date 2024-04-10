@@ -4,12 +4,14 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import io.codemodder.*;
+import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /** Provides base functionality for making JavaParser-based changes based on Sonar results. */
 public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger
@@ -112,4 +114,9 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
    */
   public abstract ChangesResult onIssueFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
+
+  @Override
+  public Optional<FixedFinding> buildFixedFinding(final String id) {
+    return Optional.empty();
+  }
 }

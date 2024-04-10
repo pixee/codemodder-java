@@ -3,8 +3,10 @@ package io.codemodder.javaparser;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.*;
 import io.codemodder.codetf.CodeTFReference;
+import io.codemodder.codetf.FixedFinding;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /** Uses JavaParser to change Java source files. */
@@ -45,4 +47,6 @@ public abstract class JavaParserChanger implements CodeChanger {
         .map(u -> new CodeTFReference(u, u))
         .collect(Collectors.toList());
   }
+
+  public abstract Optional<FixedFinding> buildFixedFinding(final String id);
 }

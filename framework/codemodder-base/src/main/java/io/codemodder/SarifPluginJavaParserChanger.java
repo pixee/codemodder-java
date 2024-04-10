@@ -6,11 +6,13 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.google.common.annotations.VisibleForTesting;
+import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Provides base functionality for making JavaParser-based changes based on results found by a sarif
@@ -131,9 +133,19 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
             if (regionNodeMatcher.matches(region, range)) {
               ChangesResult changeSuccessful = onResultFound(context, cu, (T) node, result);
               if (changeSuccessful.areChangesApplied()) {
-                codemodChanges.add(
-                    CodemodChange.from(
-                        region.start().line(), changeSuccessful.getDependenciesRequired()));
+                final Optional<FixedFinding> optionalFixedFinding =
+                    buildFixedFinding(result.getRuleId());
+                if (optionalFixedFinding.isPresent()) {
+                  codemodChanges.add(
+                      CodemodChange.from(
+                          region.start().line(),
+                          changeSuccessful.getDependenciesRequired(),
+                          optionalFixedFinding.get()));
+                } else {
+                  codemodChanges.add(
+                      CodemodChange.from(
+                          region.start().line(), changeSuccessful.getDependenciesRequired()));
+                }
               }
             }
           }
@@ -142,6 +154,11 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     }
 
     return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
+  }
+
+  @Override
+  public Optional<FixedFinding> buildFixedFinding(final String id) {
+    return Optional.empty();
   }
 
   @Override

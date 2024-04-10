@@ -13,6 +13,7 @@ import io.codemodder.providers.defectdojo.RuleFindings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** This codemod knows how to translate */
@@ -103,8 +104,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
 
       MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
       if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
-        FixedFinding fixedFinding = new FixedFinding(id, getDetectorRule());
-        changes.add(CodemodChange.from(line, fixedFinding));
+        changes.add(CodemodChange.from(line, buildFixedFinding(id).get()));
       } else {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
@@ -118,5 +118,10 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
     }
 
     return CodemodFileScanningResult.from(changes, unfixedFindings);
+  }
+
+  @Override
+  public Optional<FixedFinding> buildFixedFinding(String id) {
+    return Optional.of(new FixedFinding(id, getDetectorRule()));
   }
 }

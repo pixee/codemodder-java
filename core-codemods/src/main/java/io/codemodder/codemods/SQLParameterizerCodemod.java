@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
+import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.List;
 import java.util.Optional;
@@ -31,5 +32,10 @@ public final class SQLParameterizerCodemod extends JavaParserChanger {
             .flatMap(mce -> onNodeFound(mce).stream())
             .collect(Collectors.toList());
     return CodemodFileScanningResult.withOnlyChanges(changes);
+  }
+
+  @Override
+  public Optional<FixedFinding> buildFixedFinding(final String id) {
+    return Optional.empty();
   }
 }

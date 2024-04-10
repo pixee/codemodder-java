@@ -10,6 +10,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -174,5 +175,10 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
       call = newCall;
     }
     queryCall.setArgument(0, queryParameterizer.getRoot());
+  }
+
+  @Override
+  public Optional<FixedFinding> buildFixedFinding(final String id) {
+    return Optional.empty();
   }
 }

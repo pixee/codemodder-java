@@ -8,6 +8,8 @@ import io.codemodder.RegionNodeMatcher;
 import io.codemodder.RuleSarif;
 import io.codemodder.SarifPluginJavaParserChanger;
 import io.codemodder.SourceCodeRegionExtractor;
+import io.codemodder.codetf.FixedFinding;
+import java.util.Optional;
 
 /**
  * Provides foundational functionality for modifying Java code using JavaParser based on findings
@@ -73,5 +75,9 @@ public abstract class SemgrepSarifJavaParserChanger<T extends Node>
   @Override
   public String vendorName() {
     return "Semgrep";
+  }
+
+  public Optional<FixedFinding> buildFixedFinding(final String id) {
+    return Optional.of(new FixedFinding(id, getDetectorRule()));
   }
 }

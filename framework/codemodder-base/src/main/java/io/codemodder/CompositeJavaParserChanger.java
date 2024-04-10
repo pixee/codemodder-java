@@ -1,12 +1,14 @@
 package io.codemodder;
 
 import com.github.javaparser.ast.CompilationUnit;
+import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A type that allows composing multiple {@link JavaParserChanger} instances are under the same
@@ -48,5 +50,10 @@ public abstract class CompositeJavaParserChanger extends JavaParserChanger {
   @Override
   public boolean shouldRun() {
     return changers.stream().anyMatch(CodeChanger::shouldRun);
+  }
+
+  @Override
+  public Optional<FixedFinding> buildFixedFinding(final String id) {
+    return Optional.empty();
   }
 }
