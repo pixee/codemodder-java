@@ -38,14 +38,14 @@ public class Test {
     return br2;
   }
 
-  public Statement method(String query) throws SQLException {
+  public Statement noFixMethod(String query) throws SQLException {
     Statement stmt = conn.createStatement();
     ResultSet rs = stmt.executeQuery(query);
     return stmt;
   }
 
   public void noFixRSLeakByStmt(String query) throws SQLException {
-    var stmt = method(query);
+    var stmt = noFixMethod(query);
     var rs = stmt.getResultSet();
     rs.getRow();
   }

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
     id = "pixee:java/resource-leak",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
-    executionPriority = CodemodExecutionPriority.HIGH)
+    executionPriority = CodemodExecutionPriority.LOW)
 public final class ResourceLeakCodemod extends JavaParserChanger {
 
   private Optional<CodemodChange> onNodeFound(final Expression expr) {

@@ -47,7 +47,7 @@ public final class DefaultCodemods {
         RemoveUselessParenthesesCodemod.class,
         ReplaceDefaultHttpClientCodemod.class,
         ReplaceStreamCollectorsToListCodemod.class,
-        ResourceLeakCodemod.class,
+        // ResourceLeakCodemod.class,
         SanitizeApacheMultipartFilenameCodemod.class,
         SanitizeHttpHeaderCodemod.class,
         SanitizeSpringMultipartFilenameCodemod.class,

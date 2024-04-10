@@ -95,7 +95,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    assertThat(fileChanges.size(), is(71));
+    assertThat(fileChanges.size(), is(58));
 
     // we only inject into a couple files
     verifyStandardCodemodResults(fileChanges);

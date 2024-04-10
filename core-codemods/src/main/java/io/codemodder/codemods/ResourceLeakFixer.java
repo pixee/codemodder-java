@@ -15,6 +15,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,6 +32,15 @@ final class ResourceLeakFixer {
   private static final Logger LOG = LoggerFactory.getLogger(ResourceLeakFixer.class);
 
   private static final String rootPrefix = "resource";
+
+  private static Set<String> initMethodsList =
+      Set.of(
+          "newBufferedReader",
+          "newBufferedWriter",
+          "newByteChannel",
+          "newDirectoryStream",
+          "newInputStream",
+          "newOutputStream");
 
   /**
    * Detects if an {@link Expression} that creates a resource type is fixable and tries to fix it.
@@ -328,7 +338,7 @@ final class ResourceLeakFixer {
           expr.getScope()
               .map(mce -> mce.calculateResolvedType().describe())
               .filter("java.nio.file.Files"::equals);
-      return hasFilesScope.isPresent() && expr.getNameAsString().startsWith("new");
+      return hasFilesScope.isPresent() && initMethodsList.contains(expr.getNameAsString());
     } catch (final UnsolvedSymbolException e) {
       LOG.error("Problem resolving type of : {}", expr, e);
     }
