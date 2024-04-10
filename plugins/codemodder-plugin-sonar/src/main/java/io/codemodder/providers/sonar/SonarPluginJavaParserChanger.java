@@ -116,7 +116,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
       CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
 
   @Override
-  public Optional<FixedFinding> buildFixedFinding(final String id) {
-    return Optional.empty();
+  public Optional<FixedFinding> getFixedFinding(String id) {
+    return Optional.of(new FixedFinding(id, getDetectorRule()));
   }
 }

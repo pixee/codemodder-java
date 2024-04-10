@@ -802,6 +802,11 @@ final class DefaultCodemodExecutorTest {
     public DetectorRule getDetectorRule() {
       return rule;
     }
+
+    @Override
+    public Optional<FixedFinding> getFixedFinding(String id) {
+      return Optional.of(new FixedFinding(id, getDetectorRule()));
+    }
   }
 
   private static final DependencyGAV dependency1 =

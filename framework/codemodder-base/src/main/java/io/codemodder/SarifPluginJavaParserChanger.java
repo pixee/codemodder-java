@@ -134,7 +134,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
               ChangesResult changeSuccessful = onResultFound(context, cu, (T) node, result);
               if (changeSuccessful.areChangesApplied()) {
                 final Optional<FixedFinding> optionalFixedFinding =
-                    buildFixedFinding(result.getRuleId());
+                    getFixedFinding(result.getRuleId());
                 if (optionalFixedFinding.isPresent()) {
                   codemodChanges.add(
                       CodemodChange.from(
@@ -156,8 +156,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
   }
 
-  @Override
-  public Optional<FixedFinding> buildFixedFinding(final String id) {
+  protected Optional<FixedFinding> getFixedFinding(final String id) {
     return Optional.empty();
   }
 
