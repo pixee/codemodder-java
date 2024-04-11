@@ -64,12 +64,11 @@ public class InsecureCookieCodemod extends CodeQLSarifJavaParserChanger<MethodCa
     return ChangesResult.noChanges;
   }
 
-    @Override
-    public DetectorRule getDetectorRule() {
-        return new DetectorRule(
-                "insecure-cookie",
-                "Add secure flag to HTTP cookies (CodeQL)",
-                "https://codeql.github.com/codeql-query-help/java/java-input-resource-leak/"
-        );
-    }
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "insecure-cookie",
+        "Add secure flag to HTTP cookies",
+        "https://codeql.github.com/codeql-query-help/java/java-input-resource-leak/");
+  }
 }

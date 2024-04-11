@@ -178,12 +178,11 @@ public final class JEXLInjectionCodemod extends CodeQLSarifJavaParserChanger<Exp
     return Optional.empty();
   }
 
-    @Override
-    public DetectorRule getDetectorRule() {
-        return new DetectorRule(
-                "jexl-expression-injection",
-                "Expression language injection",
-                "https://codeql.github.com/codeql-query-help/java/java-jexl-expression-injection/"
-        );
-    }
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "jexl-expression-injection",
+        "Expression language injection",
+        "https://codeql.github.com/codeql-query-help/java/java-jexl-expression-injection/");
+  }
 }

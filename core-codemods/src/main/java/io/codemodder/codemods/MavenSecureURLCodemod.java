@@ -2,6 +2,8 @@ package io.codemodder.codemods;
 
 import com.contrastsecurity.sarif.Result;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
+import io.codemodder.codetf.FixedFinding;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +13,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
@@ -29,7 +30,8 @@ import org.xml.sax.SAXException;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
+public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
+    implements FixOnlyCodeChanger {
 
   private final XPathStreamProcessor processor;
 
@@ -39,6 +41,24 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
       final XPathStreamProcessor processor) {
     super(sarif);
     this.processor = Objects.requireNonNull(processor);
+  }
+
+  @Override
+  public String vendorName() {
+    return "CodeQL";
+  }
+
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "non-https-url",
+        "Failure to use HTTPS or SFTP URL in Maven artifact upload/download",
+        "https://codeql.github.com/codeql-query-help/java/java-maven-non-https-url");
+  }
+
+  @Override
+  public Optional<FixedFinding> getFixedFinding(String id) {
+    return Optional.of(new FixedFinding(id, getDetectorRule()));
   }
 
   @Override
@@ -70,7 +90,9 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
     Set<Integer> linesAffected = xmlChange.linesAffected();
 
     List<CodemodChange> allWeaves =
-        linesAffected.stream().map(CodemodChange::from).collect(Collectors.toList());
+        linesAffected.stream()
+            .map(line -> CodemodChange.from(line, getFixedFinding(file.toString()).get()))
+            .toList();
 
     // overwrite the previous web.xml with the new one
     Files.copy(xmlChange.transformedXml(), file, StandardCopyOption.REPLACE_EXISTING);

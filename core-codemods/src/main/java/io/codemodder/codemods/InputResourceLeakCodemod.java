@@ -38,12 +38,11 @@ public final class InputResourceLeakCodemod extends CodeQLSarifJavaParserChanger
         : ChangesResult.noChanges;
   }
 
-    @Override
-    public DetectorRule getDetectorRule() {
-        return new DetectorRule(
-               "input-resource-leak",
-                "Prevent resource leaks",
-                "https://codeql.github.com/codeql-query-help/java/java-input-resource-leak/"
-        );
-    }
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "input-resource-leak",
+        "Prevent resource leaks",
+        "https://codeql.github.com/codeql-query-help/java/java-input-resource-leak/");
+  }
 }

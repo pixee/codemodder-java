@@ -54,12 +54,11 @@ public class StackTraceExposureCodemod extends CodeQLSarifJavaParserChanger<Expr
     return ChangesResult.noChanges;
   }
 
-    @Override
-    public DetectorRule getDetectorRule() {
-        return new DetectorRule(
-                "stack-trace-exposure",
-                "Prevent information leak of stack trace details to HTTP responses",
-                "https://codeql.github.com/codeql-query-help/java/java-stack-trace-exposure/"
-        );
-    }
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "stack-trace-exposure",
+        "Prevent information leak of stack trace details to HTTP responses",
+        "https://codeql.github.com/codeql-query-help/java/java-stack-trace-exposure/");
+  }
 }

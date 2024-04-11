@@ -97,12 +97,11 @@ public class UnverifiedJwtCodemod extends CodeQLSarifJavaParserChanger<Expressio
     return ChangesResult.noChanges;
   }
 
-    @Override
-    public DetectorRule getDetectorRule() {
-        return new DetectorRule(
-                "missing-jwt-signature-check",
-                "Switch JWT calls to versions that enforce signature validity",
-                "https://codeql.github.com/codeql-query-help/java/java-missing-jwt-signature-check/"
-        );
-    }
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "missing-jwt-signature-check",
+        "Switch JWT calls to versions that enforce signature validity",
+        "https://codeql.github.com/codeql-query-help/java/java-missing-jwt-signature-check/");
+  }
 }

@@ -16,31 +16,14 @@ public abstract class SarifPluginFixOnlyCodeChanger<T extends Node>
     super(sarif, nodeType, regionNodeMatcher, reporterStrategy);
   }
 
-    public SarifPluginFixOnlyCodeChanger(RuleSarif sarif, Class<? extends Node> nodeType, SourceCodeRegionExtractor<Result> regionExtractor, RegionNodeMatcher regionNodeMatcher) {
-        super(sarif, nodeType, regionExtractor, regionNodeMatcher);
-    }
+  public SarifPluginFixOnlyCodeChanger(
+      final RuleSarif sarif,
+      final Class<? extends Node> nodeType,
+      final SourceCodeRegionExtractor<Result> regionExtractor) {
+    super(sarif, nodeType, regionExtractor);
+  }
 
-    public SarifPluginFixOnlyCodeChanger(RuleSarif sarif, Class<? extends Node> nodeType, SourceCodeRegionExtractor<Result> regionExtractor, RegionNodeMatcher regionNodeMatcher, CodemodReporterStrategy reporter) {
-        super(sarif, nodeType, regionExtractor, regionNodeMatcher, reporter);
-    }
-
-    public SarifPluginFixOnlyCodeChanger(RuleSarif sarif, Class<? extends Node> nodeType) {
-        super(sarif, nodeType);
-    }
-
-    public SarifPluginFixOnlyCodeChanger(RuleSarif sarif, Class<? extends Node> nodeType, SourceCodeRegionExtractor<Result> regionExtractor) {
-        super(sarif, nodeType, regionExtractor);
-    }
-
-    public SarifPluginFixOnlyCodeChanger(RuleSarif sarif, Class<? extends Node> nodeType, CodemodReporterStrategy codemodReporterStrategy) {
-        super(sarif, nodeType, codemodReporterStrategy);
-    }
-
-    public SarifPluginFixOnlyCodeChanger(RuleSarif sarif, Class<? extends Node> nodeType, RegionNodeMatcher regionNodeMatcher) {
-        super(sarif, nodeType, regionNodeMatcher);
-    }
-
-    @Override
+  @Override
   public Optional<FixedFinding> getFixedFinding(String id) {
     return Optional.of(new FixedFinding(id, getDetectorRule()));
   }

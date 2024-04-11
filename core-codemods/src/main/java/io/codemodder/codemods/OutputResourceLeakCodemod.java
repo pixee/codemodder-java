@@ -38,12 +38,11 @@ public final class OutputResourceLeakCodemod extends CodeQLSarifJavaParserChange
         : ChangesResult.noChanges;
   }
 
-    @Override
-    public DetectorRule getDetectorRule() {
-        return new DetectorRule(
-                "output-resource-leak",
-                "Prevent resource leaks",
-                "https://codeql.github.com/codeql-query-help/java/java-output-resource-leak/"
-        );
-    }
+  @Override
+  public DetectorRule getDetectorRule() {
+    return new DetectorRule(
+        "output-resource-leak",
+        "Prevent resource leaks",
+        "https://codeql.github.com/codeql-query-help/java/java-output-resource-leak/");
+  }
 }
