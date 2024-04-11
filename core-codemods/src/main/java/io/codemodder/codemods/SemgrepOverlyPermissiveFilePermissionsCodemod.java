@@ -29,10 +29,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
 
   @Inject
   public SemgrepOverlyPermissiveFilePermissionsCodemod(
-      @ProvidedSemgrepScan(
-              ruleId =
-                  "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission")
-          final RuleSarif sarif) {
+      @ProvidedSemgrepScan(ruleId = RULE_ID) final RuleSarif sarif) {
     super(
         new PermissionAddCallChanger(sarif),
         new FromStringChanger(sarif),
@@ -87,10 +84,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
 
     @Override
     public DetectorRule getDetectorRule() {
-      return new DetectorRule(
-          "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission",
-          "Fix overly permissive file permissions (issue discovered by Semgrep)",
-          "https://registry.semgrep.dev/rule/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission");
+      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
     }
   }
 
@@ -131,10 +125,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
 
     @Override
     public DetectorRule getDetectorRule() {
-      return new DetectorRule(
-          "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission",
-          "Fix overly permissive file permissions (issue discovered by Semgrep)",
-          "https://registry.semgrep.dev/rule/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission");
+      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
     }
   }
 
@@ -190,10 +181,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
 
     @Override
     public DetectorRule getDetectorRule() {
-      return new DetectorRule(
-          "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission",
-          "Fix overly permissive file permissions (issue discovered by Semgrep)",
-          "https://registry.semgrep.dev/rule/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission");
+      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
     }
 
     private ChangesResult fixAdd(final MethodCallExpr call) {
@@ -216,4 +204,11 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       return ChangesResult.changesApplied;
     }
   }
+
+  private static final String RULE_ID =
+      "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission";
+  private static final String RULE_NAME =
+      "Fix overly permissive file permissions (issue discovered by Semgrep)";
+  private static final String RULE_URL =
+      "https://registry.semgrep.dev/rule/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission";
 }
