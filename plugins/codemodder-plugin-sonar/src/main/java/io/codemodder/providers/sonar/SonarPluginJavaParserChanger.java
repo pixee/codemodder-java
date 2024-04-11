@@ -81,9 +81,13 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
             if (regionNodeMatcher.matches(region, range)) {
               ChangesResult changeSuccessful = onIssueFound(context, cu, (T) node, issue);
               if (changeSuccessful.areChangesApplied()) {
+                final Optional<FixedFinding> optionalFixedFinding =
+                    getFixedFinding(issue.getRule());
                 codemodChanges.add(
                     CodemodChange.from(
-                        region.start().line(), changeSuccessful.getDependenciesRequired()));
+                        region.start().line(),
+                        changeSuccessful.getDependenciesRequired(),
+                        optionalFixedFinding.get()));
               }
             }
           }
@@ -116,7 +120,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
       CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
 
   @Override
-  public Optional<FixedFinding> getFixedFinding(String id) {
+  public Optional<FixedFinding> getFixedFinding(final String id) {
     return Optional.of(new FixedFinding(id, getDetectorRule()));
   }
 }

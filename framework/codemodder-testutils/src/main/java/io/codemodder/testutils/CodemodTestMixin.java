@@ -189,6 +189,22 @@ public interface CodemodTestMixin {
     List<CodeTFChange> changes =
         changeset.stream().map(CodeTFChangesetEntry::getChanges).flatMap(List::stream).toList();
 
+    if (codemod.getChanger() instanceof CompositeJavaParserChanger compositeJavaParserChanger) {
+      compositeJavaParserChanger
+          .getChangers()
+          .forEach(
+              changer -> {
+                if (changer instanceof FixOnlyCodeChanger) {
+                  assertThat(
+                      changes.stream().anyMatch(c -> !c.getFixedFindings().isEmpty()), is(true));
+                }
+              });
+    }
+
+    if (codemod.getChanger() instanceof FixOnlyCodeChanger) {
+      assertThat(changes.stream().anyMatch(c -> !c.getFixedFindings().isEmpty()), is(true));
+    }
+
     for (int expectedFixLine : expectedFixLines) {
       assertThat(changes.stream().anyMatch(c -> c.getLineNumber() == expectedFixLine), is(true));
     }
@@ -266,7 +282,6 @@ public interface CodemodTestMixin {
       throws IOException {
     String expectedCode = Files.readString(expected);
     String transformedJavaCode = Files.readString(after);
-    System.out.println(transformedJavaCode);
     assertThat(transformedJavaCode, equalTo(expectedCode));
   }
 
