@@ -11,8 +11,10 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
+import io.codemodder.providers.sarif.semgrep.SemgrepSarifJavaParserChanger;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -27,10 +29,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
 
   @Inject
   public SemgrepOverlyPermissiveFilePermissionsCodemod(
-      @ProvidedSemgrepScan(
-              ruleId =
-                  "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission")
-          final RuleSarif sarif) {
+      @ProvidedSemgrepScan(ruleId = RULE_ID) final RuleSarif sarif) {
     super(
         new PermissionAddCallChanger(sarif),
         new FromStringChanger(sarif),
@@ -45,7 +44,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
    * PosixFilePermissions.fromString("rwxrwxrwx"));}
    */
   private static final class InlineFromStringChanger
-      extends SarifPluginJavaParserChanger<ExpressionStmt> {
+      extends SemgrepSarifJavaParserChanger<ExpressionStmt> {
 
     private InlineFromStringChanger(final RuleSarif sarif) {
       super(
@@ -82,6 +81,11 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       }
       return ChangesResult.noChanges;
     }
+
+    @Override
+    public DetectorRule getDetectorRule() {
+      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
+    }
   }
 
   /**
@@ -90,7 +94,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
    * <p>{@code var p = Permissions.fromString("rwxrwxrwx")}
    */
   private static final class FromStringChanger
-      extends SarifPluginJavaParserChanger<ExpressionStmt> {
+      extends SemgrepSarifJavaParserChanger<ExpressionStmt> {
     private FromStringChanger(final RuleSarif sarif) {
       super(
           sarif,
@@ -118,6 +122,11 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       }
       return ChangesResult.noChanges;
     }
+
+    @Override
+    public DetectorRule getDetectorRule() {
+      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
+    }
   }
 
   private static ChangesResult fixFromString(final MethodCallExpr fromStringCall) {
@@ -139,7 +148,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
    * java.util.Set#add(Object)} call.
    */
   private static final class PermissionAddCallChanger
-      extends SarifPluginJavaParserChanger<MethodCallExpr> {
+      extends SemgrepSarifJavaParserChanger<MethodCallExpr> {
 
     private PermissionAddCallChanger(final RuleSarif sarif) {
       super(
@@ -170,6 +179,11 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       return ChangesResult.noChanges;
     }
 
+    @Override
+    public DetectorRule getDetectorRule() {
+      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
+    }
+
     private ChangesResult fixAdd(final MethodCallExpr call) {
       NodeList<Expression> arguments = call.getArguments();
       Expression permissionArgument = arguments.get(0);
@@ -190,4 +204,11 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       return ChangesResult.changesApplied;
     }
   }
+
+  private static final String RULE_ID =
+      "java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission";
+  private static final String RULE_NAME =
+      "Fix overly permissive file permissions (issue discovered by Semgrep)";
+  private static final String RULE_URL =
+      "https://registry.semgrep.dev/rule/java.lang.security.audit.overly-permissive-file-permission.overly-permissive-file-permission";
 }

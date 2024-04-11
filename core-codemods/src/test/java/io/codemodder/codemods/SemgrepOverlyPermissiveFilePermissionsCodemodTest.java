@@ -7,5 +7,6 @@ import io.codemodder.testutils.Metadata;
     codemodType = SemgrepOverlyPermissiveFilePermissionsCodemod.class,
     testResourceDir = "semgrep-overly-permissive-file-permission",
     doRetransformTest = false,
-    dependencies = {})
+    dependencies = {},
+    expectingFixesAtLines = {14, 15, 25, 22})
 final class SemgrepOverlyPermissiveFilePermissionsCodemodTest implements CodemodTestMixin {}

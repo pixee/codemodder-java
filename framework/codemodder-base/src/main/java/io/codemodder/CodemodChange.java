@@ -35,6 +35,17 @@ public final class CodemodChange {
     this.fixedFindings = List.of();
   }
 
+  private CodemodChange(
+      final int lineNumber,
+      final List<DependencyGAV> dependenciesNeeded,
+      final List<FixedFinding> fixedFindings) {
+    this.lineNumber = lineNumber;
+    this.dependenciesNeeded = Objects.requireNonNull(dependenciesNeeded, "dependenciesNeeded");
+    this.parameters = List.of();
+    this.description = null;
+    this.fixedFindings = fixedFindings;
+  }
+
   private CodemodChange(final int lineNumber, final FixedFinding finding) {
     this.lineNumber = lineNumber;
     this.dependenciesNeeded = List.of();
@@ -136,6 +147,11 @@ public final class CodemodChange {
 
   public static CodemodChange from(final int line, final FixedFinding finding) {
     return new CodemodChange(line, finding);
+  }
+
+  public static CodemodChange from(
+      final int line, final List<DependencyGAV> dependencyGAVS, final FixedFinding finding) {
+    return new CodemodChange(line, dependencyGAVS, List.of(finding));
   }
 
   /** A {@link } */
