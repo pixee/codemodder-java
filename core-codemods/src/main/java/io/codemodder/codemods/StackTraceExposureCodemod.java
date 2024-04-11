@@ -7,7 +7,9 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTs;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
+import io.codemodder.providers.sarif.codeql.CodeQLSarifJavaParserChanger;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import javax.inject.Inject;
 
@@ -17,7 +19,7 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expression> {
+public class StackTraceExposureCodemod extends CodeQLSarifJavaParserChanger<Expression> {
 
   @Inject
   public StackTraceExposureCodemod(
@@ -51,4 +53,13 @@ public class StackTraceExposureCodemod extends SarifPluginJavaParserChanger<Expr
     // cover the most common usage
     return ChangesResult.noChanges;
   }
+
+    @Override
+    public DetectorRule getDetectorRule() {
+        return new DetectorRule(
+                "stack-trace-exposure",
+                "Prevent information leak of stack trace details to HTTP responses",
+                "https://codeql.github.com/codeql-query-help/java/java-stack-trace-exposure/"
+        );
+    }
 }
