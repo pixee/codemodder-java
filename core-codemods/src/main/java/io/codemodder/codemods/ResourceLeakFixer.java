@@ -5,6 +5,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import io.codemodder.Either;
 import io.codemodder.ast.*;
@@ -14,6 +15,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,11 +33,20 @@ final class ResourceLeakFixer {
 
   private static final String rootPrefix = "resource";
 
+  private static Set<String> initMethodsList =
+      Set.of(
+          "newBufferedReader",
+          "newBufferedWriter",
+          "newByteChannel",
+          "newDirectoryStream",
+          "newInputStream",
+          "newOutputStream");
+
   /**
    * Detects if an {@link Expression} that creates a resource type is fixable and tries to fix it.
    * Combines {@code isFixable} and {@code tryToFix}.
    */
-  public static Optional<Integer> checkAndFix(final Expression expr) {
+  public static Optional<TryStmt> checkAndFix(final Expression expr) {
     if (expr instanceof ObjectCreationExpr) {
       // finds the root expression in a chain of new AutoCloseable objects
       ObjectCreationExpr root = findRootExpression(expr.asObjectCreationExpr());
@@ -53,15 +64,6 @@ final class ResourceLeakFixer {
 
   /**
    * Detects if a {@link Expression} detected by CodeQL that creates a leaking resource is fixable.
-   * The following can be assumed.
-   *
-   * <p>(1) No close() is called within its scope.
-   *
-   * <p>(2) There does not exist a "root" expression that is closed. (e.g. new BufferedReader(r), r
-   * is the root, stmt.executeQuery(...), stmt is the root).
-   *
-   * <p>(3) It does not escape the contained method's scope. That is, it is not assigned to a field
-   * or returned.
    *
    * <p>A resource R is dependent of another resource S if closing S will also close R. The
    * following suffices to check if a resource R can be closed. (*) A resource R can be closed if no
@@ -70,6 +72,15 @@ final class ResourceLeakFixer {
    * (+): S is assigned to a variable that escapes.
    */
   public static boolean isFixable(final Expression expr) {
+    // Can it be wrapped in a try statement?
+    if (!isAutoCloseableType(expr)) {
+      return false;
+    }
+    // is it already closed? does it escape?
+    // TODO depends on another resource that is already closed?
+    if (isClosedOrEscapes(expr)) {
+      return false;
+    }
     // For ResultSet objects, still need to check if the generating *Statement object does
     // not escape due to the getResultSet() method.
     try {
@@ -97,16 +108,44 @@ final class ResourceLeakFixer {
       return false;
     }
 
+    // For any dependent resource s of r if s is not closed and escapes, then r cannot be closed
     final var maybeLVD = immediatelyFlowsIntoLocalVariable(expr);
-    final var allDependent = findDependentResources(expr);
     if (maybeLVD.isPresent()) {
       final var scope = maybeLVD.get().getScope();
       final Predicate<Node> isInScope = scope::inScope;
+      final var allDependent = findDependentResources(expr);
       return allDependent.stream().noneMatch(e -> escapesRootScope(e, isInScope));
     } else {
-      final Predicate<Node> isInScope = n -> true;
-      return allDependent.stream().noneMatch(e -> escapesRootScope(e, isInScope));
+      final var allDependent = findDependentResources(expr);
+      return allDependent.stream().noneMatch(e -> escapesRootScope(e, n -> true));
     }
+  }
+
+  private static boolean isClosedOrEscapes(final Expression expr) {
+    if (immediatelyEscapesMethodScope(expr)) {
+      return true;
+    }
+    // find all the variables it flows into
+    final var allVariables = flowsInto(expr);
+
+    // flows into anything that is not a local variable or parameter
+    if (allVariables.stream().anyMatch(Either::isRight)) {
+      return true;
+    }
+
+    // is any of the assigned variables closed?
+    if (allVariables.stream()
+        .filter(Either::isLeft)
+        .map(Either::getLeft)
+        .anyMatch(ld -> !notClosed(ld))) {
+      return true;
+    }
+
+    // If any of the assigned variables escapes
+    return allVariables.stream()
+        .filter(Either::isLeft)
+        .map(Either::getLeft)
+        .anyMatch(ld -> escapesRootScope(ld, x -> true));
   }
 
   public static ObjectCreationExpr findRootExpression(final ObjectCreationExpr creationExpr) {
@@ -121,8 +160,7 @@ final class ResourceLeakFixer {
     return current;
   }
 
-  public static Optional<Integer> tryToFix(final ObjectCreationExpr creationExpr) {
-    final int originalLine = creationExpr.getRange().get().begin.line;
+  public static Optional<TryStmt> tryToFix(final ObjectCreationExpr creationExpr) {
     final var deque = findInnerExpressions(creationExpr);
     int count = 0;
     final var maybeLVD =
@@ -143,6 +181,7 @@ final class ResourceLeakFixer {
       var cu = creationExpr.findCompilationUnit().get();
       for (var resource : deque) {
         var name = count == 0 ? rootPrefix : rootPrefix + count;
+        // TODO try to resolve type, failing to do that use var declaration?
         var type = resource.calculateResolvedType().describe();
         resource.replace(new NameExpr(name));
 
@@ -155,14 +194,13 @@ final class ResourceLeakFixer {
         ASTTransforms.addImportIfMissing(cu, type);
         count++;
       }
-      return Optional.of(originalLine);
+      return Optional.of(tryStmt);
     }
     return Optional.empty();
   }
 
   /** Tries to fix the leak of {@code expr} and returns its line if it does. */
-  public static Optional<Integer> tryToFix(final MethodCallExpr mce) {
-    final int originalLine = mce.getRange().get().begin.line;
+  public static Optional<TryStmt> tryToFix(final MethodCallExpr mce) {
 
     // Is LocalDeclarationStmt and Never Assigned -> Wrap as a try resource
     List<Expression> resources = new ArrayList<>();
@@ -187,6 +225,7 @@ final class ResourceLeakFixer {
       var cu = mce.findCompilationUnit().get();
       for (var resource : resources) {
         var name = count == 0 ? rootPrefix : rootPrefix + count;
+        // TODO try to resolve type, failing to do that use var declaration?
         var type = resource.calculateResolvedType().describe();
 
         resource.replace(new NameExpr(name));
@@ -200,7 +239,7 @@ final class ResourceLeakFixer {
         ASTTransforms.addImportIfMissing(cu, type);
         count++;
       }
-      return Optional.of(originalLine);
+      return Optional.of(tryStmt);
       // TODO if vde is multiple declarations, extract the relevant vd and wrap it
     }
     // other cases here...
@@ -253,9 +292,14 @@ final class ResourceLeakFixer {
 
   /** Checks if the expression implements the {@link java.lang.AutoCloseable} interface. */
   private static boolean isAutoCloseableType(final Expression expr) {
-    return expr.calculateResolvedType().isReferenceType()
-        && expr.calculateResolvedType().asReferenceType().getAllAncestors().stream()
-            .anyMatch(t -> t.describe().equals("java.lang.AutoCloseable"));
+    try {
+      return expr.calculateResolvedType().isReferenceType()
+          && expr.calculateResolvedType().asReferenceType().getAllAncestors().stream()
+              .anyMatch(t -> t.describe().equals("java.lang.AutoCloseable"));
+    } catch (RuntimeException e) {
+      LOG.error("Problem resolving type of : {}", expr);
+      return false;
+    }
   }
 
   /** Checks if the expression creates a {@link java.lang.AutoCloseable} */
@@ -268,7 +312,9 @@ final class ResourceLeakFixer {
 
   /** Checks if the expression creates a {@link java.lang.AutoCloseable} */
   private static boolean isResourceInit(final Expression expr) {
-    return (expr.isMethodCallExpr() && isJDBCResourceInit(expr.asMethodCallExpr()))
+    return (expr.isMethodCallExpr()
+            && (isJDBCResourceInit(expr.asMethodCallExpr())
+                || isFilesResourceInit(expr.asMethodCallExpr())))
         || isAutoCloseableCreation(expr).isPresent();
   }
 
@@ -285,40 +331,40 @@ final class ResourceLeakFixer {
     return Either.right(n);
   }
 
+  /** Checks if {@code expr} creates an AutoCloseable Resource. */
+  private static boolean isFilesResourceInit(final MethodCallExpr expr) {
+    try {
+      var hasFilesScope =
+          expr.getScope()
+              .map(mce -> mce.calculateResolvedType().describe())
+              .filter("java.nio.file.Files"::equals);
+      return hasFilesScope.isPresent() && initMethodsList.contains(expr.getNameAsString());
+    } catch (final UnsolvedSymbolException e) {
+      LOG.error("Problem resolving type of : {}", expr, e);
+    }
+    return false;
+  }
+
   /** Checks if {@code expr} creates a JDBC Resource. */
   private static boolean isJDBCResourceInit(final MethodCallExpr expr) {
     final Predicate<MethodCallExpr> isResultSetGen =
-        mce -> {
-          switch (mce.getNameAsString()) {
-            case "executeQuery":
-            case "getResultSet":
-            case "getGeneratedKeys":
-              return true;
-            default:
-              return false;
-          }
-        };
+        mce ->
+            switch (mce.getNameAsString()) {
+              case "executeQuery", "getResultSet", "getGeneratedKeys" -> true;
+              default -> false;
+            };
     final Predicate<MethodCallExpr> isStatementGen =
-        mce -> {
-          switch (mce.getNameAsString()) {
-            case "createStatement":
-            case "prepareCall":
-            case "prepareStatement":
-              return true;
-            default:
-              return false;
-          }
-        };
+        mce ->
+            switch (mce.getNameAsString()) {
+              case "createStatement", "prepareCall", "prepareStatement" -> true;
+              default -> false;
+            };
     final Predicate<MethodCallExpr> isReaderGen =
-        mce -> {
-          switch (mce.getNameAsString()) {
-            case "getCharacterStream":
-            case "getNCharacterStream":
-              return true;
-            default:
-              return false;
-          }
-        };
+        mce ->
+            switch (mce.getNameAsString()) {
+              case "getCharacterStream", "getNCharacterStream" -> true;
+              default -> false;
+            };
     final Predicate<MethodCallExpr> isDependent = isResultSetGen.or(isStatementGen.or(isReaderGen));
     return isDependent.test(expr);
   }
@@ -530,6 +576,7 @@ final class ResourceLeakFixer {
     if (!isResourceInit(expr)) {
       return true;
     }
+
     // Returned or argument of a MethodCallExpr
     if (ASTs.isReturnExpr(expr).isPresent() || ASTs.isArgumentOfMethodCall(expr).isPresent()) {
       return true;

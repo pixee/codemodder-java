@@ -148,6 +148,7 @@ public final class ASTTransforms {
       final ExpressionStmt stmt, final VariableDeclarationExpr vdecl, final LocalScope scope) {
     final var wrapper = new TryStmt();
     wrapper.getResources().add(vdecl);
+    stmt.getComment().ifPresent(comment -> wrapper.setComment(comment));
 
     final var block = new BlockStmt();
     scope

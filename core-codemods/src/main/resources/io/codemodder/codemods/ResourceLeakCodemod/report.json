@@ -1,0 +1,9 @@
+{
+  "summary" : "Prevent resource leaks",
+  "change": "Added a try-with-resources statement to automatically close resources",
+  "reviewGuidanceIJustification" : "This codemod causes resources to be cleaned up immediately after use instead of at garbage collection time, and we don't believe this change entails any risk.",
+  "references" : [
+    "https://cwe.mitre.org/data/definitions/404.html",
+    "https://cwe.mitre.org/data/definitions/772.html"
+  ]
+}
