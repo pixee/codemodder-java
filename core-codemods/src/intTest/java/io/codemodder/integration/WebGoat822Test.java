@@ -117,7 +117,6 @@ final class WebGoat822Test extends GitRepositoryTest {
           outputFile.getPath(),
           "--sarif",
           "src/test/resources/webgoat_v8.2.2_codeql.sarif",
-          "--codemod-exclude=pixee:java/resource-leak",
           "--dont-exit",
           repoDir.getPath()
         });
