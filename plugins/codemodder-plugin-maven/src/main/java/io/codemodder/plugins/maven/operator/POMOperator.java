@@ -183,7 +183,7 @@ public class POMOperator {
     if (queryVersionResult.size() == 1) {
       List<VersionDefinition> queryVersionResultList =
           queryVersionResult != null && !queryVersionResult.isEmpty()
-              ? queryVersionResult.stream().collect(Collectors.toList())
+              ? queryVersionResult.stream().toList()
               : Collections.emptyList();
       Version mappedVersion = mapVersion(queryVersionResultList.get(0).getValue());
 
