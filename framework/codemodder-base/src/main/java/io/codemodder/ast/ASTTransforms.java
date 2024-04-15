@@ -30,13 +30,13 @@ public final class ASTTransforms {
   public static void addImportIfMissing(final CompilationUnit cu, final String className) {
     final NodeList<ImportDeclaration> imports = cu.getImports();
     final ImportDeclaration newImport = new ImportDeclaration(className, false, false);
-    if (addInOrdrerIfNeeded(className, imports, newImport)) {
+    if (addInOrderIfNeeded(className, imports, newImport)) {
       return;
     }
     cu.addImport(className);
   }
 
-  private static boolean addInOrdrerIfNeeded(
+  private static boolean addInOrderIfNeeded(
       final String className,
       final NodeList<ImportDeclaration> imports,
       final ImportDeclaration newImport) {
@@ -70,7 +70,7 @@ public final class ASTTransforms {
   public static void addStaticImportIfMissing(final CompilationUnit cu, final String method) {
     final NodeList<ImportDeclaration> imports = cu.getImports();
     final ImportDeclaration newMethodImport = new ImportDeclaration(method, true, false);
-    if (addInOrdrerIfNeeded(method, imports, newMethodImport)) {
+    if (addInOrderIfNeeded(method, imports, newMethodImport)) {
       return;
     }
     cu.addImport(method, true, false);
@@ -370,5 +370,21 @@ public final class ASTTransforms {
     } catch (final RuntimeException exception) {
       return Optional.empty();
     }
+  }
+
+  /**
+   * Tries to merge the given try stmt with an enveloping one. Returns the merged try stmts if sucessfull.
+   * */
+  public static Optional<TryStmt> mergeStackedTryStmts(final TryStmt tryStmt) {
+	  // is the parent a try statement whose single statment in its block is tryStmt?
+	  var maybeTryParent = tryStmt.getParentNode().flatMap(p -> p.getParentNode()).map(p -> p instanceof TryStmt? (TryStmt) p : null).filter(ts -> ts.getTryBlock().getStatements().size() == 1 && ts.getTryBlock().getStatement(0) == tryStmt);
+	  if (maybeTryParent.isPresent()){
+		  tryStmt.remove();
+		  var parent = maybeTryParent.get();
+		  parent.getResources().addAll(tryStmt.getResources());
+		  parent.getTryBlock().getStatements().addAll(tryStmt.getTryBlock().getStatements());
+		  return Optional.of(parent);
+	  }
+	  return Optional.empty();
   }
 }
