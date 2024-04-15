@@ -373,18 +373,27 @@ public final class ASTTransforms {
   }
 
   /**
-   * Tries to merge the given try stmt with an enveloping one. Returns the merged try stmts if sucessfull.
-   * */
+   * Tries to merge the given try stmt with an enveloping one. Returns the merged try stmts if
+   * sucessfull.
+   */
   public static Optional<TryStmt> mergeStackedTryStmts(final TryStmt tryStmt) {
-	  // is the parent a try statement whose single statment in its block is tryStmt?
-	  var maybeTryParent = tryStmt.getParentNode().flatMap(p -> p.getParentNode()).map(p -> p instanceof TryStmt? (TryStmt) p : null).filter(ts -> ts.getTryBlock().getStatements().size() == 1 && ts.getTryBlock().getStatement(0) == tryStmt);
-	  if (maybeTryParent.isPresent()){
-		  tryStmt.remove();
-		  var parent = maybeTryParent.get();
-		  parent.getResources().addAll(tryStmt.getResources());
-		  parent.getTryBlock().getStatements().addAll(tryStmt.getTryBlock().getStatements());
-		  return Optional.of(parent);
-	  }
-	  return Optional.empty();
+    // is the parent a try statement whose single statment in its block is tryStmt?
+    var maybeTryParent =
+        tryStmt
+            .getParentNode()
+            .flatMap(p -> p.getParentNode())
+            .map(p -> p instanceof TryStmt ? (TryStmt) p : null)
+            .filter(
+                ts ->
+                    ts.getTryBlock().getStatements().size() == 1
+                        && ts.getTryBlock().getStatement(0) == tryStmt);
+    if (maybeTryParent.isPresent()) {
+      tryStmt.remove();
+      var parent = maybeTryParent.get();
+      parent.getResources().addAll(tryStmt.getResources());
+      parent.getTryBlock().getStatements().addAll(tryStmt.getTryBlock().getStatements());
+      return Optional.of(parent);
+    }
+    return Optional.empty();
   }
 }

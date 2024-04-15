@@ -32,6 +32,12 @@ public class Test {
     BufferedReader br = new BufferedReader(new BufferedReader(new FileReader("~/test.txt")));
   }
 
+  public void mergeFixes(File f) throws IOException {
+    FileReader fr = new FileReader(f);
+    BufferedReader br = new BufferedReader(fr);
+    System.out.println(br.readLine());
+  }
+
   public Reader noFixReturned() throws IOException {
     BufferedReader br = new BufferedReader(new FileReader(""));
     BufferedReader br2 = new BufferedReader(br);

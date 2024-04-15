@@ -4,13 +4,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
-
 import io.codemodder.javaparser.JavaParserFactory;
-
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.Test;

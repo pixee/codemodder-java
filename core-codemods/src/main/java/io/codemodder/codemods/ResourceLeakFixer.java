@@ -51,12 +51,20 @@ final class ResourceLeakFixer {
       // finds the root expression in a chain of new AutoCloseable objects
       ObjectCreationExpr root = findRootExpression(expr.asObjectCreationExpr());
       if (isFixable(root)) {
-        return tryToFix(root);
+        var maybeFixed = tryToFix(root);
+        // try to merge with an encompassing try stmt and return
+        return maybeFixed
+            .flatMap(ts -> ASTTransforms.mergeStackedTryStmts(ts))
+            .or(() -> maybeFixed);
       }
     }
     if (expr instanceof MethodCallExpr) {
       if (isFixable(expr)) {
-        return tryToFix(expr.asMethodCallExpr());
+        var maybeFixed = tryToFix(expr.asMethodCallExpr());
+        // try to merge with an encompassing try stmt and return
+        return maybeFixed
+            .flatMap(ts -> ASTTransforms.mergeStackedTryStmts(ts))
+            .or(() -> maybeFixed);
       }
     }
     return Optional.empty();
