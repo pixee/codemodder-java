@@ -48,7 +48,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
   }
 
   @Override
-  public Optional<FixedFinding> getFixedFinding(String id) {
+  public Optional<FixedFinding> buildFixedFinding(String id) {
     return Optional.of(new FixedFinding(id, getDetectorRule()));
   }
 
@@ -109,7 +109,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
 
       MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
       if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
-        changes.add(CodemodChange.from(line, getFixedFinding(id).get()));
+        changes.add(CodemodChange.from(line, buildFixedFinding(id).get()));
       } else {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(

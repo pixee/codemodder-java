@@ -16,7 +16,7 @@ public abstract class SarifPluginFixOnlyCodeChanger<T extends Node>
   }
 
   @Override
-  public Optional<FixedFinding> getFixedFinding(String id) {
+  public Optional<FixedFinding> buildFixedFinding(String id) {
     return Optional.of(new FixedFinding(id, getDetectorRule()));
   }
 }

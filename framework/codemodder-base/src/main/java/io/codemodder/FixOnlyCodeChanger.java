@@ -19,5 +19,5 @@ public interface FixOnlyCodeChanger {
   DetectorRule getDetectorRule();
 
   /** Abstract method to build a {@link FixedFinding} object */
-  Optional<FixedFinding> getFixedFinding(String id);
+  Optional<FixedFinding> buildFixedFinding(String id);
 }
