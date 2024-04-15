@@ -38,6 +38,13 @@ public class Test {
     }
   }
 
+  public void mergeFixes(File f) throws IOException {
+    try (FileReader fr = new FileReader(f);
+    BufferedReader br = new BufferedReader(fr)) {
+        System.out.println(br.readLine());
+    }
+  }
+
   public Reader noFixReturned() throws IOException {
     BufferedReader br = new BufferedReader(new FileReader(""));
     BufferedReader br2 = new BufferedReader(br);
