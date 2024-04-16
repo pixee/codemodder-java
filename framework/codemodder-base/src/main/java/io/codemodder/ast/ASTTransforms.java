@@ -15,6 +15,7 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
+import com.github.javaparser.ast.nodeTypes.NodeWithStatements;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
@@ -23,6 +24,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.resolution.types.ResolvedType;
+import java.util.ArrayList;
 import java.util.Optional;
 
 public final class ASTTransforms {
@@ -77,6 +79,27 @@ public final class ASTTransforms {
   }
 
   /**
+   * Adds a statement to a node at a given index. Mostly a workaround for a weird behavior of
+   * JavaParser. See https://github.com/javaparser/javaparser/issues/4370.
+   */
+  public static <N extends Node> void addStatementAt(
+      final NodeWithStatements<N> node, final Statement stmt, final int index) {
+    var newStatements = new ArrayList<Statement>();
+    int i = 0;
+    for (var s : node.getStatements()) {
+      if (i == index) {
+        newStatements.add(stmt);
+      }
+      newStatements.add(s);
+      i++;
+    }
+
+    // rebuilds the whole statements list as to preserve proper children order.
+    node.getStatements().clear();
+    newStatements.forEach(node.getStatements()::add);
+  }
+
+  /**
    * Adds an {@link Statement} before another {@link Statement}. Single {@link Statement}s in the
    * body of For/Do/While/If/Labeled Statements are replaced with a {@link BlockStmt} containing
    * both statements.
@@ -105,13 +128,16 @@ public final class ASTTransforms {
       // NodeWithBody, MethodDeclaration, NodeWithBlockStmt, SwitchStmt(?)
       // No way (or reason) to add a Statement before those, maybe throw an Error?
       final var block = (BlockStmt) parent;
+
+      int existingIndex = block.getStatements().indexOf(existingStatement);
+
       // Workaround for a bug on LexicalPreservingPrinter (see
       // https://github.com/javaparser/javaparser/issues/3746)
-      if (existingStatement.equals(block.getStatement(0))) {
+      if (existingIndex == 0) {
         existingStatement.replace(newStatement);
-        block.addStatement(1, existingStatement);
+        addStatementAt(block, existingStatement, 1);
       } else {
-        block.getStatements().addBefore(newStatement, existingStatement);
+        addStatementAt(block, newStatement, existingIndex);
       }
     }
   }
