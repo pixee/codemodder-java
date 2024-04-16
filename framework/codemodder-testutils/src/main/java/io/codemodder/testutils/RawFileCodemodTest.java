@@ -93,7 +93,12 @@ public interface RawFileCodemodTest {
     assertThat(result.getReferences(), is(not(empty())));
 
     final var modifiedFile = Files.readString(tmpFilePath);
-    assertThat(modifiedFile, equalTo(Files.readString(filePathAfter)));
+    if (filePathAfter == null) {
+      // lack of an after file indicates that the before file should be unchanged
+      assertThat(modifiedFile, equalTo(Files.readString(filePathBefore)));
+    } else {
+      assertThat(modifiedFile, equalTo(Files.readString(filePathAfter)));
+    }
     Files.deleteIfExists(tmpFilePath);
   }
 
@@ -110,23 +115,31 @@ public interface RawFileCodemodTest {
       final Path testResourceDir)
       throws IOException {
     // find all the sarif files
-    final var allSarifFiles =
-        Files.list(testResourceDir)
-            .filter(file -> file.getFileName().toString().endsWith(".sarif"))
-            .collect(Collectors.toList());
+    final List<Path> allSarifFiles;
+    try (final var files = Files.list(testResourceDir)) {
+      allSarifFiles =
+          files.filter(file -> file.getFileName().toString().endsWith(".sarif")).toList();
+    }
 
     final Map<String, List<RuleSarif>> map =
         SarifParser.create().parseIntoMap(allSarifFiles, tmpDir);
 
     // grab all the .before and .after files in the dir
-    final var allBeforeFiles =
-        Files.list(testResourceDir)
-            .filter(file -> file.getFileName().toString().endsWith(".before"))
-            .toList();
-    final Map<String, Path> afterFilesMap =
-        Files.list(testResourceDir)
-            .filter(file -> file.getFileName().toString().endsWith(".after"))
-            .collect(Collectors.toMap(f -> trimExtension(f), f -> f));
+    final List<Path> allBeforeFiles;
+    try (final var files = Files.list(testResourceDir)) {
+      allBeforeFiles =
+          files.filter(file -> file.getFileName().toString().endsWith(".before")).toList();
+    }
+    final Map<String, Path> afterFilesMap;
+    try (final var files = Files.list(testResourceDir)) {
+      afterFilesMap =
+          files
+              .filter(file -> file.getFileName().toString().endsWith(".after"))
+              .collect(Collectors.toMap(RawFileCodemodTest::trimExtension, f -> f));
+    }
+    if (allBeforeFiles.isEmpty()) {
+      throw new IllegalArgumentException("No .before files found in " + testResourceDir);
+    }
 
     for (var beforeFile : allBeforeFiles) {
       final var afterFile = afterFilesMap.get(trimExtension(beforeFile));
