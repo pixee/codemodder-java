@@ -69,7 +69,6 @@ public class SqlInjectionChallenge extends AssignmentEndpoint {
         PreparedStatement statement = connection.prepareStatement(checkUserQuery);
         statement.setString(1, username_reg);
         ResultSet resultSet = statement.execute();
-
         if (resultSet.next()) {
           if (username_reg.contains("tom'")) {
             attackResult = success(this).feedback("user.exists").build();
@@ -85,6 +84,7 @@ public class SqlInjectionChallenge extends AssignmentEndpoint {
           preparedStatement.execute();
           attackResult = success(this).feedback("user.created").feedbackArgs(username_reg).build();
         }
+
       } catch (SQLException e) {
         attackResult = failed(this).output("Something went wrong").build();
       }

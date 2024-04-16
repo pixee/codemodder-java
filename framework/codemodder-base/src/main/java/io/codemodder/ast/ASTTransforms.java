@@ -26,6 +26,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 public final class ASTTransforms {
   /** Add an import in alphabetical order. */
@@ -95,8 +96,15 @@ public final class ASTTransforms {
     }
 
     // rebuilds the whole statements list as to preserve proper children order.
-    node.getStatements().clear();
-    newStatements.forEach(node.getStatements()::add);
+
+    // workaround for maintaining indent, removes all but the first
+    IntStream.range(0, node.getStatements().size() - 1)
+        .forEach(j -> node.getStatements().removeLast());
+    // replace the first with the new statement if needed
+    if (index == 0) {
+      node.getStatements().get(0).replace(stmt);
+    }
+    newStatements.stream().skip(1).forEach(node.getStatements()::add);
   }
 
   /**
@@ -130,15 +138,7 @@ public final class ASTTransforms {
       final var block = (BlockStmt) parent;
 
       int existingIndex = block.getStatements().indexOf(existingStatement);
-
-      // Workaround for a bug on LexicalPreservingPrinter (see
-      // https://github.com/javaparser/javaparser/issues/3746)
-      if (existingIndex == 0) {
-        existingStatement.replace(newStatement);
-        addStatementAt(block, existingStatement, 1);
-      } else {
-        addStatementAt(block, newStatement, existingIndex);
-      }
+      addStatementAt(block, newStatement, existingIndex);
     }
   }
 

@@ -25,6 +25,7 @@ public final class Test {
     int stmt = 0;
     String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
     ResultSet rs = conn.createStatement().executeQuery(sql);
+    stmt++;
     return rs;
   }
 
@@ -33,6 +34,7 @@ public final class Test {
     int statement = 0;
     String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
     ResultSet rs = conn.createStatement().executeQuery(sql);
+    stmt = stmt + statement;
     return rs;
   }
 
