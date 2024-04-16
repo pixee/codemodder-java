@@ -34,7 +34,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = nodeCollector;
     this.fixOnlyCodeChangerInformation =
-        new DefaultFixOnlyCodeChangerInformation(VendorName.SONAR, detectorRule);
+        new DefaultFixOnlyCodeChangerInformation("Sonar", detectorRule);
   }
 
   protected SonarPluginJavaParserChanger(
@@ -61,7 +61,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = NodeCollector.ALL_FROM_TYPE;
     this.fixOnlyCodeChangerInformation =
-        new DefaultFixOnlyCodeChangerInformation(VendorName.SONAR, detectorRule);
+        new DefaultFixOnlyCodeChangerInformation("Sonar", detectorRule);
   }
 
   @Override

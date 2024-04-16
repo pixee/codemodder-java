@@ -4,7 +4,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 
 public interface FixOnlyCodeChangerInformation {
-  VendorName vendorName();
+  String vendorName();
 
   DetectorRule detectorRule();
 

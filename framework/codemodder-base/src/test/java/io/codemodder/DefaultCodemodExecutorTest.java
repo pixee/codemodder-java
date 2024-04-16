@@ -180,7 +180,7 @@ final class DefaultCodemodExecutorTest {
 
     CodeTFResult result = executor.execute(List.of(javaFile1));
     DetectionTool detectionTool = result.getDetectionTool();
-    assertThat(detectionTool.getName()).isEqualTo(VendorName.DEFECT_DOJO.getName());
+    assertThat(detectionTool.getName()).isEqualTo("acme");
 
     assertThat(result.getFailedFiles()).isEmpty();
 
@@ -756,8 +756,7 @@ final class DefaultCodemodExecutorTest {
 
     ProvidesRemediationStuffCodemod() {
       super(new EmptyReporter());
-      this.fixOnlyCodeChangerInformation =
-          new DefaultFixOnlyCodeChangerInformation(VendorName.DEFECT_DOJO, rule);
+      this.fixOnlyCodeChangerInformation = new DefaultFixOnlyCodeChangerInformation("acme", rule);
     }
 
     @Override

@@ -7,7 +7,6 @@ import io.codemodder.FixOnlyCodeChangerInformation;
 import io.codemodder.RegionNodeMatcher;
 import io.codemodder.RuleSarif;
 import io.codemodder.SarifPluginJavaParserChanger;
-import io.codemodder.VendorName;
 import io.codemodder.codetf.DetectorRule;
 import java.util.Optional;
 
@@ -28,7 +27,7 @@ public abstract class SemgrepSarifJavaParserChanger<T extends Node>
       final DetectorRule detectorRule) {
     super(sarif, nodeType, regionNodeMatcher, reporterStrategy);
     this.fixOnlyCodeChangerInformation =
-        new DefaultFixOnlyCodeChangerInformation(VendorName.SEMGREP, detectorRule);
+        new DefaultFixOnlyCodeChangerInformation("Semgrep", detectorRule);
   }
 
   @Override

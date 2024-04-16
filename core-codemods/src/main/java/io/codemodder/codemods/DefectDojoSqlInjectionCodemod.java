@@ -33,7 +33,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
     this.findings = Objects.requireNonNull(findings);
     this.fixOnlyCodeChangerInformation =
         new DefaultFixOnlyCodeChangerInformation(
-            VendorName.DEFECT_DOJO,
+            "DefectDojo / Semgrep",
             new DetectorRule(
                 "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
                 "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
