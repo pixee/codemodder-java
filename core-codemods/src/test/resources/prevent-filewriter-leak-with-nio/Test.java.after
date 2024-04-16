@@ -9,18 +9,13 @@ public class Test
 {
     private Response response;
     void foo(File f) {
-        // ruleid: prevent-filewriter-leak-with-nio
-        Writer change1 = Files.newBufferedWriter(f.toPath());
-        // ruleid: prevent-filewriter-leak-with-nio
-        Writer change2 = Files.newBufferedWriter(f.toPath());
+        try (Writer change1 = Files.newBufferedWriter(f.toPath());
+        Writer change2 = Files.newBufferedWriter(f.toPath())) {
+            Writer dontChange1 = new BufferedWriter(w);
+            Writer dontChange2 = new BufferedWriter(w, 256);
+            Writer dontChange3 = new BufferedWriter(response.getWriter(), 256);
+            Writer dontChange3 = Files.newBufferedWriter(f.toPath());
+        }
 
-        // ok: prevent-filewriter-leak-with-nio
-        Writer dontChange1 = new BufferedWriter(w);
-        // ok: prevent-filewriter-leak-with-nio
-        Writer dontChange2 = new BufferedWriter(w, 256);
-        // ok: prevent-filewriter-leak-with-nio
-        Writer dontChange3 = new BufferedWriter(response.getWriter(), 256);
-        // ok: prevent-filewriter-leak-with-nio
-        Writer dontChange3 = Files.newBufferedWriter(f.toPath());
     }
 }

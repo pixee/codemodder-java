@@ -1,0 +1,65 @@
+package com.acme.testcode.resourceleak;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.File;
+import java.nio.file.Files;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+
+public class Test {
+
+  private Connection conn;
+
+  public void simple() throws IOException {
+    try (FileWriter fr = new FileWriter("~/secrets.txt")) {
+    }
+  }
+
+  public void simpleFiles(File f){
+    try (BufferedWriter writer = Files.newBufferedWriter(f.toPath())) {
+    }
+  }
+
+  public void multipleResourcesInOneLine(String query, ResultSet rs) throws SQLException {
+    try (var stream = conn.createStatement().executeQuery(query)) {
+    }
+  }
+
+  public void nestedReaders() throws IOException {
+    try (FileReader resource1 = new FileReader("~/test.txt");
+    BufferedReader resource = new BufferedReader(resource1);
+    BufferedReader br = new BufferedReader(resource)) {
+    }
+  }
+
+  public void mergeFixes(File f) throws IOException {
+    try (FileReader fr = new FileReader(f);
+    BufferedReader br = new BufferedReader(fr)) {
+        System.out.println(br.readLine());
+    }
+  }
+
+  public Reader noFixReturned() throws IOException {
+    BufferedReader br = new BufferedReader(new FileReader(""));
+    BufferedReader br2 = new BufferedReader(br);
+    return br2;
+  }
+
+  public Statement noFixMethod(String query) throws SQLException {
+    Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery(query);
+    return stmt;
+  }
+
+  public void noFixRSLeakByStmt(String query) throws SQLException {
+    var stmt = noFixMethod(query);
+    var rs = stmt.getResultSet();
+    rs.getRow();
+  }
+}

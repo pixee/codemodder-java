@@ -57,10 +57,9 @@ public class Test {
   }
 
   public void simple(String query) throws SQLException {
-    try (Statement stmt = conn.createStatement()) {
-        try (ResultSet rs = stmt.executeQuery(query)) {
-        }
-    }
+    try (Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery(query)) {
+}
   }
 
   public void assignedToParameter(String query, Statement stmt) throws SQLException {
