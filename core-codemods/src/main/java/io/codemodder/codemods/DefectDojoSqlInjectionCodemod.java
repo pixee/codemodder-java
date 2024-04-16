@@ -66,7 +66,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                fixOnlyCodeChangerInformation.getDetectorRule(),
+                fixOnlyCodeChangerInformation.detectorRule(),
                 context.path().toString(),
                 null,
                 "No line number provided");
@@ -84,7 +84,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                fixOnlyCodeChangerInformation.getDetectorRule(),
+                fixOnlyCodeChangerInformation.detectorRule(),
                 context.path().toString(),
                 line,
                 "No supported SQL methods found on the given line");
@@ -96,7 +96,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                fixOnlyCodeChangerInformation.getDetectorRule(),
+                fixOnlyCodeChangerInformation.detectorRule(),
                 context.path().toString(),
                 line,
                 "Multiple supported SQL methods found on the given line");
@@ -111,7 +111,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                fixOnlyCodeChangerInformation.getDetectorRule(),
+                fixOnlyCodeChangerInformation.detectorRule(),
                 context.path().toString(),
                 line,
                 "State changing effects possible or unrecognized code shape");

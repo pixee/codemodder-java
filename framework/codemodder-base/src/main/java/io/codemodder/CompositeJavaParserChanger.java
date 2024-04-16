@@ -49,8 +49,4 @@ public abstract class CompositeJavaParserChanger extends JavaParserChanger {
   public boolean shouldRun() {
     return changers.stream().anyMatch(CodeChanger::shouldRun);
   }
-
-  public List<JavaParserChanger> getChangers() {
-    return changers;
-  }
 }

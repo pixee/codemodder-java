@@ -6,7 +6,6 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.google.common.annotations.VisibleForTesting;
-import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.ArrayList;
@@ -144,7 +143,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
                           // TODO
                           fixOnlyCodeChangerInformtionOptional
                               .get()
-                              .buildFixedFinding("result.getGuid()")));
+                              .buildFixedFinding(result.getFingerprints().toString())));
                 } else {
                   codemodChanges.add(
                       CodemodChange.from(
@@ -158,10 +157,6 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     }
 
     return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
-  }
-
-  protected Optional<FixedFinding> buildFixedFinding(final String id) {
-    return Optional.empty();
   }
 
   @Override

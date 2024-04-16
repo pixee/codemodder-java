@@ -6,9 +6,9 @@ import io.codemodder.codetf.FixedFinding;
 public interface FixOnlyCodeChangerInformation {
   VendorName vendorName();
 
-  DetectorRule getDetectorRule();
+  DetectorRule detectorRule();
 
   default FixedFinding buildFixedFinding(String id) {
-    return new FixedFinding(id, getDetectorRule());
+    return new FixedFinding(id, detectorRule());
   }
 }
