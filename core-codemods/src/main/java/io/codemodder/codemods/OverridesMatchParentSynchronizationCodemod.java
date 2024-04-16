@@ -29,15 +29,13 @@ public final class OverridesMatchParentSynchronizationCodemod
   @Inject
   public OverridesMatchParentSynchronizationCodemod(
       @ProvidedSonarScan(ruleId = "java:S3551") final RuleIssues issues) {
-    super(issues, SimpleName.class);
-  }
-
-  @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S3551",
-        "Overrides should match their parent class methods in synchronization",
-        "https://rules.sonarsource.com/java/RSPEC-3551");
+    super(
+        issues,
+        SimpleName.class,
+        new DetectorRule(
+            "java:S3551",
+            "Overrides should match their parent class methods in synchronization",
+            "https://rules.sonarsource.com/java/RSPEC-3551"));
   }
 
   @Override

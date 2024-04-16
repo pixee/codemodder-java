@@ -25,15 +25,13 @@ public final class RemoveRedundantVariableCreationCodemod
   @Inject
   public RemoveRedundantVariableCreationCodemod(
       @ProvidedSonarScan(ruleId = "java:S1488") final RuleIssues issues) {
-    super(issues, ObjectCreationExpr.class);
-  }
-
-  @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1488",
-        "Local variables should not be declared and then immediately returned or thrown",
-        "https://rules.sonarsource.com/java/RSPEC-1488");
+    super(
+        issues,
+        ObjectCreationExpr.class,
+        new DetectorRule(
+            "java:S1488",
+            "Local variables should not be declared and then immediately returned or thrown",
+            "https://rules.sonarsource.com/java/RSPEC-1488"));
   }
 
   @Override

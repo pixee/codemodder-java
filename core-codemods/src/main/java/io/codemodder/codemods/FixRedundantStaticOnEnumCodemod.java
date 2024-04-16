@@ -23,15 +23,13 @@ public final class FixRedundantStaticOnEnumCodemod
   @Inject
   public FixRedundantStaticOnEnumCodemod(
       @ProvidedSonarScan(ruleId = "java:S2786") final RuleIssues issues) {
-    super(issues, EnumDeclaration.class);
-  }
-
-  @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S2786",
-        "Nested `enum`s should not be declared static",
-        "https://rules.sonarsource.com/java/RSPEC-2786/");
+    super(
+        issues,
+        EnumDeclaration.class,
+        new DetectorRule(
+            "java:S2786",
+            "Nested `enum`s should not be declared static",
+            "https://rules.sonarsource.com/java/RSPEC-2786/"));
   }
 
   @Override

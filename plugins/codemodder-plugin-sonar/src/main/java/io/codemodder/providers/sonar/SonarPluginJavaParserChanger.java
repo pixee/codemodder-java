@@ -4,7 +4,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import io.codemodder.*;
-import io.codemodder.codetf.FixedFinding;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.sonar.api.Issue;
@@ -14,41 +14,59 @@ import java.util.Objects;
 import java.util.Optional;
 
 /** Provides base functionality for making JavaParser-based changes based on Sonar results. */
-public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger
-    implements FixOnlyCodeChanger {
+public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger {
 
   private final RuleIssues ruleIssues;
   private final Class<? extends Node> nodeType;
   private final RegionNodeMatcher regionNodeMatcher;
 
   private final NodeCollector nodeCollector;
+  private final FixOnlyCodeChangerInformation fixOnlyCodeChangerInformation;
 
   protected SonarPluginJavaParserChanger(
       final RuleIssues ruleIssues,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher,
-      final NodeCollector nodeCollector) {
+      final NodeCollector nodeCollector,
+      final DetectorRule detectorRule) {
     this.ruleIssues = Objects.requireNonNull(ruleIssues);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = nodeCollector;
+    this.fixOnlyCodeChangerInformation =
+        new DefaultFixOnlyCodeChangerInformation(VendorName.SONAR, detectorRule);
   }
 
   protected SonarPluginJavaParserChanger(
-      final RuleIssues ruleIssues, final Class<? extends Node> nodeType) {
-    this(ruleIssues, nodeType, RegionNodeMatcher.MATCHES_START, NodeCollector.ALL_FROM_TYPE);
+      final RuleIssues ruleIssues,
+      final Class<? extends Node> nodeType,
+      final DetectorRule detectorRule) {
+    this(
+        ruleIssues,
+        nodeType,
+        RegionNodeMatcher.MATCHES_START,
+        NodeCollector.ALL_FROM_TYPE,
+        detectorRule);
   }
 
   protected SonarPluginJavaParserChanger(
       final RuleIssues ruleIssues,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher,
-      final CodemodReporterStrategy codemodReporterStrategy) {
+      final CodemodReporterStrategy codemodReporterStrategy,
+      final DetectorRule detectorRule) {
     super(codemodReporterStrategy);
     this.ruleIssues = Objects.requireNonNull(ruleIssues);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = NodeCollector.ALL_FROM_TYPE;
+    this.fixOnlyCodeChangerInformation =
+        new DefaultFixOnlyCodeChangerInformation(VendorName.SONAR, detectorRule);
+  }
+
+  @Override
+  public Optional<FixOnlyCodeChangerInformation> getFixOnlyCodeChangerInformation() {
+    return Optional.of(fixOnlyCodeChangerInformation);
   }
 
   @Override
@@ -81,13 +99,13 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
             if (regionNodeMatcher.matches(region, range)) {
               ChangesResult changeSuccessful = onIssueFound(context, cu, (T) node, issue);
               if (changeSuccessful.areChangesApplied()) {
-                final Optional<FixedFinding> optionalFixedFinding =
-                    buildFixedFinding(issue.getRule());
                 codemodChanges.add(
                     CodemodChange.from(
                         region.start().line(),
                         changeSuccessful.getDependenciesRequired(),
-                        optionalFixedFinding.get()));
+                        getFixOnlyCodeChangerInformation()
+                            .get()
+                            .buildFixedFinding(issue.getKey())));
               }
             }
           }
@@ -102,11 +120,6 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     return ruleIssues.hasResults();
   }
 
-  @Override
-  public String vendorName() {
-    return "Sonar";
-  }
-
   /**
    * Creates a visitor for the given context and locations.
    *
@@ -118,9 +131,4 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
    */
   public abstract ChangesResult onIssueFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
-
-  @Override
-  public Optional<FixedFinding> buildFixedFinding(final String id) {
-    return Optional.of(new FixedFinding(id, getDetectorRule()));
-  }
 }

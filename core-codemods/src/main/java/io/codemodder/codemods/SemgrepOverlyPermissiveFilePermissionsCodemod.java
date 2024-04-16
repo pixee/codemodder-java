@@ -51,7 +51,8 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
           sarif,
           ExpressionStmt.class,
           RegionNodeMatcher.MATCHES_START,
-          CodemodReporterStrategy.empty());
+          CodemodReporterStrategy.empty(),
+          new DetectorRule(RULE_ID, RULE_NAME, RULE_URL));
     }
 
     @Override
@@ -81,11 +82,6 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
       }
       return ChangesResult.noChanges;
     }
-
-    @Override
-    public DetectorRule getDetectorRule() {
-      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
-    }
   }
 
   /**
@@ -100,7 +96,8 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
           sarif,
           ExpressionStmt.class,
           RegionNodeMatcher.MATCHES_START,
-          CodemodReporterStrategy.empty());
+          CodemodReporterStrategy.empty(),
+          new DetectorRule(RULE_ID, RULE_NAME, RULE_URL));
     }
 
     @Override
@@ -121,11 +118,6 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
         return fixFromString(fromStringMethodRef.get());
       }
       return ChangesResult.noChanges;
-    }
-
-    @Override
-    public DetectorRule getDetectorRule() {
-      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
     }
   }
 
@@ -155,7 +147,8 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
           sarif,
           MethodCallExpr.class,
           RegionNodeMatcher.MATCHES_START,
-          CodemodReporterStrategy.empty());
+          CodemodReporterStrategy.empty(),
+          new DetectorRule(RULE_ID, RULE_NAME, RULE_URL));
     }
 
     @Override
@@ -177,11 +170,6 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
         return fixAdd(call);
       }
       return ChangesResult.noChanges;
-    }
-
-    @Override
-    public DetectorRule getDetectorRule() {
-      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
     }
 
     private ChangesResult fixAdd(final MethodCallExpr call) {

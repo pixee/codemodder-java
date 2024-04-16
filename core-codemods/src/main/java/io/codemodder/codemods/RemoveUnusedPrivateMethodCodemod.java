@@ -26,15 +26,13 @@ public final class RemoveUnusedPrivateMethodCodemod
   @Inject
   public RemoveUnusedPrivateMethodCodemod(
       @ProvidedSonarScan(ruleId = "java:S1144") final RuleIssues issues) {
-    super(issues, SimpleName.class);
-  }
-
-  @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1144",
-        "Unused private methods should be removed",
-        "https://rules.sonarsource.com/java/RSPEC-1144");
+    super(
+        issues,
+        SimpleName.class,
+        new DetectorRule(
+            "java:S1144",
+            "Unused private methods should be removed",
+            "https://rules.sonarsource.com/java/RSPEC-1144"));
   }
 
   @Override

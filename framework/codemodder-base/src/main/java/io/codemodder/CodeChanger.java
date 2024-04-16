@@ -3,6 +3,7 @@ package io.codemodder;
 import io.codemodder.codetf.CodeTFReference;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 /** The base of a codemod type. */
 public interface CodeChanger {
@@ -28,5 +29,9 @@ public interface CodeChanger {
    */
   default boolean shouldRun() {
     return true;
+  }
+
+  default Optional<FixOnlyCodeChangerInformation> getFixOnlyCodeChangerInformation() {
+    return Optional.empty();
   }
 }

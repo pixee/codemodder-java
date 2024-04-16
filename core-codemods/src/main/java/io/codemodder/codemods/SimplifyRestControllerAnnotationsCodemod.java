@@ -33,15 +33,13 @@ public final class SimplifyRestControllerAnnotationsCodemod
   @Inject
   public SimplifyRestControllerAnnotationsCodemod(
       @ProvidedSonarScan(ruleId = "java:S6833") final RuleIssues issues) {
-    super(issues, ClassOrInterfaceDeclaration.class);
-  }
-
-  @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S6833",
-        "`@Controller` should be replaced with `@RestController`",
-        "https://rules.sonarsource.com/java/RSPEC-6833");
+    super(
+        issues,
+        ClassOrInterfaceDeclaration.class,
+        new DetectorRule(
+            "java:S6833",
+            "`@Controller` should be replaced with `@RestController`",
+            "https://rules.sonarsource.com/java/RSPEC-6833"));
   }
 
   @Override

@@ -23,15 +23,13 @@ public final class DefineConstantForLiteralCodemod
   @Inject
   public DefineConstantForLiteralCodemod(
       @ProvidedSonarScan(ruleId = "java:S1192") final RuleIssues issues) {
-    super(issues, StringLiteralExpr.class);
-  }
-
-  @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1192",
-        "String literals should not be duplicated",
-        "https://rules.sonarsource.com/java/RSPEC-1192/");
+    super(
+        issues,
+        StringLiteralExpr.class,
+        new DetectorRule(
+            "java:S1192",
+            "String literals should not be duplicated",
+            "https://rules.sonarsource.com/java/RSPEC-1192/"));
   }
 
   @Override

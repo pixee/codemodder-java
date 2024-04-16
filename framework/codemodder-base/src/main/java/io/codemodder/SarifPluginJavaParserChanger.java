@@ -133,14 +133,18 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
             if (regionNodeMatcher.matches(region, range)) {
               ChangesResult changeSuccessful = onResultFound(context, cu, (T) node, result);
               if (changeSuccessful.areChangesApplied()) {
-                final Optional<FixedFinding> optionalFixedFinding =
-                    buildFixedFinding(result.getRuleId());
-                if (optionalFixedFinding.isPresent()) {
+                final Optional<FixOnlyCodeChangerInformation> fixOnlyCodeChangerInformtionOptional =
+                    getFixOnlyCodeChangerInformation();
+
+                if (fixOnlyCodeChangerInformtionOptional.isPresent()) {
                   codemodChanges.add(
                       CodemodChange.from(
                           region.start().line(),
                           changeSuccessful.getDependenciesRequired(),
-                          optionalFixedFinding.get()));
+                          // TODO
+                          fixOnlyCodeChangerInformtionOptional
+                              .get()
+                              .buildFixedFinding("result.getGuid()")));
                 } else {
                   codemodChanges.add(
                       CodemodChange.from(

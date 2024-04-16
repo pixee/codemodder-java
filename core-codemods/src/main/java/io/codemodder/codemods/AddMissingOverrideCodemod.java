@@ -25,15 +25,13 @@ public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChange
   @Inject
   public AddMissingOverrideCodemod(
       @ProvidedSonarScan(ruleId = "java:S1161") final RuleIssues issues) {
-    super(issues, SimpleName.class);
-  }
-
-  @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1161",
-        "`@Override` should be used on overriding and implementing methods",
-        "https://rules.sonarsource.com/java/RSPEC-1161/");
+    super(
+        issues,
+        SimpleName.class,
+        new DetectorRule(
+            "java:S1161",
+            "`@Override` should be used on overriding and implementing methods",
+            "https://rules.sonarsource.com/java/RSPEC-1161/"));
   }
 
   @Override

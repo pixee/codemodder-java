@@ -4,7 +4,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
-import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.defectdojo.DefectDojoScan;
@@ -22,34 +21,28 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH,
     importance = Importance.HIGH)
-public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
-    implements FixOnlyCodeChanger {
+public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
 
   private final RuleFindings findings;
+  private final FixOnlyCodeChangerInformation fixOnlyCodeChangerInformation;
 
   @Inject
   public DefectDojoSqlInjectionCodemod(
       @DefectDojoScan(ruleId = "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli")
           RuleFindings findings) {
     this.findings = Objects.requireNonNull(findings);
+    this.fixOnlyCodeChangerInformation =
+        new DefaultFixOnlyCodeChangerInformation(
+            VendorName.DEFECT_DOJO,
+            new DetectorRule(
+                "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
+                "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
+                "https://semgrep.dev/r?q=java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli"));
   }
 
   @Override
-  public String vendorName() {
-    return "DefectDojo / Semgrep";
-  }
-
-  @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
-        "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
-        "https://semgrep.dev/r?q=java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli");
-  }
-
-  @Override
-  public Optional<FixedFinding> buildFixedFinding(String id) {
-    return Optional.of(new FixedFinding(id, getDetectorRule()));
+  public Optional<FixOnlyCodeChangerInformation> getFixOnlyCodeChangerInformation() {
+    return Optional.of(fixOnlyCodeChangerInformation);
   }
 
   @Override
@@ -72,7 +65,11 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
       if (line == null) {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
-                id, getDetectorRule(), context.path().toString(), null, "No line number provided");
+                id,
+                fixOnlyCodeChangerInformation.getDetectorRule(),
+                context.path().toString(),
+                null,
+                "No line number provided");
         unfixedFindings.add(unfixableFinding);
         continue;
       }
@@ -87,7 +84,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                getDetectorRule(),
+                fixOnlyCodeChangerInformation.getDetectorRule(),
                 context.path().toString(),
                 line,
                 "No supported SQL methods found on the given line");
@@ -99,7 +96,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                getDetectorRule(),
+                fixOnlyCodeChangerInformation.getDetectorRule(),
                 context.path().toString(),
                 line,
                 "Multiple supported SQL methods found on the given line");
@@ -109,12 +106,12 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
 
       MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
       if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
-        changes.add(CodemodChange.from(line, buildFixedFinding(id).get()));
+        changes.add(CodemodChange.from(line, fixOnlyCodeChangerInformation.buildFixedFinding(id)));
       } else {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                getDetectorRule(),
+                fixOnlyCodeChangerInformation.getDetectorRule(),
                 context.path().toString(),
                 line,
                 "State changing effects possible or unrecognized code shape");

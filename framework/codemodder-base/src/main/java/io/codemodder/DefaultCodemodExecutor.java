@@ -183,8 +183,10 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     }
 
     DetectionTool detectionTool = null;
-    if (codeChanger instanceof FixOnlyCodeChanger fixOnlyCodeChanger) {
-      detectionTool = new DetectionTool(fixOnlyCodeChanger.vendorName());
+    if (codeChanger.getFixOnlyCodeChangerInformation().isPresent()) {
+      detectionTool =
+          new DetectionTool(
+              codeChanger.getFixOnlyCodeChangerInformation().get().vendorName().getName());
     }
 
     CodeTFResult result =

@@ -27,15 +27,13 @@ public final class DeclareVariableOnSeparateLineCodemod
   @Inject
   public DeclareVariableOnSeparateLineCodemod(
       @ProvidedSonarScan(ruleId = "java:S1659") final RuleIssues issues) {
-    super(issues, VariableDeclarator.class);
-  }
-
-  @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1659",
-        "Multiple variables should not be declared on the same line",
-        "https://rules.sonarsource.com/java/RSPEC-1659/");
+    super(
+        issues,
+        VariableDeclarator.class,
+        new DetectorRule(
+            "java:S1659",
+            "Multiple variables should not be declared on the same line",
+            "https://rules.sonarsource.com/java/RSPEC-1659/"));
   }
 
   @Override

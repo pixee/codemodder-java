@@ -180,7 +180,7 @@ final class DefaultCodemodExecutorTest {
 
     CodeTFResult result = executor.execute(List.of(javaFile1));
     DetectionTool detectionTool = result.getDetectionTool();
-    assertThat(detectionTool.getName()).isEqualTo("acme");
+    assertThat(detectionTool.getName()).isEqualTo(VendorName.DEFECT_DOJO.getName());
 
     assertThat(result.getFailedFiles()).isEmpty();
 
@@ -750,11 +750,14 @@ final class DefaultCodemodExecutorTest {
     }
   }
 
-  private static class ProvidesRemediationStuffCodemod extends JavaParserChanger
-      implements FixOnlyCodeChanger {
+  private static class ProvidesRemediationStuffCodemod extends JavaParserChanger {
+
+    private final FixOnlyCodeChangerInformation fixOnlyCodeChangerInformation;
 
     ProvidesRemediationStuffCodemod() {
       super(new EmptyReporter());
+      this.fixOnlyCodeChangerInformation =
+          new DefaultFixOnlyCodeChangerInformation(VendorName.DEFECT_DOJO, rule);
     }
 
     @Override
@@ -794,18 +797,8 @@ final class DefaultCodemodExecutorTest {
     }
 
     @Override
-    public String vendorName() {
-      return "acme";
-    }
-
-    @Override
-    public DetectorRule getDetectorRule() {
-      return rule;
-    }
-
-    @Override
-    public Optional<FixedFinding> buildFixedFinding(String id) {
-      return Optional.of(new FixedFinding(id, getDetectorRule()));
+    public Optional<FixOnlyCodeChangerInformation> getFixOnlyCodeChangerInformation() {
+      return Optional.of(fixOnlyCodeChangerInformation);
     }
   }
 
