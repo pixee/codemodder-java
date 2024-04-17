@@ -9,16 +9,19 @@ public final class Test {
 
     void direct(String tainted) {
       Query<User> hqlQuery = session.createQuery("select p from Person p where p.name like '" + tainted + "'");
+      List l = hqlQuery.list();
     }
 
     void indirect(String tainted) {
       String query = "select p from Person p where p.name like '" + tainted + "'";
       Query<User> hqlQuery = session.createQuery(query);
+      List l = hqlQuery.list();
     }
 
     void indirectMultiple(String tainted, String tainted2) {
       String query = "select p from Person p where p.name like '" + tainted + "' and p.surname like '" + tainted2 + "'";
       Query<User> hqlQuery = session.createQuery(query);
+      List l = hqlQuery.list();
     }
 
     void indirectMultipeString(String tainted, String tainted2) {
@@ -26,5 +29,6 @@ public final class Test {
       String second = "' and p.surname like '" + tainted2 + third;
       String first = "select p from Person p where p.name like '" + tainted + second;
       Query<User> hqlQuery = session.createQuery(first);
+      List l = hqlQuery.list();
     }
 }
