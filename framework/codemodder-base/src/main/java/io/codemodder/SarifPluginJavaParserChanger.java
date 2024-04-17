@@ -9,6 +9,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -134,7 +135,10 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
               if (changeSuccessful.areChangesApplied()) {
                 codemodChanges.add(
                     buildCodemodChange(
-                        region.start().line(), changeSuccessful.getDependenciesRequired(), result));
+                        context.path(),
+                        region.start().line(),
+                        changeSuccessful.getDependenciesRequired(),
+                        result));
               }
             }
           }
@@ -146,12 +150,17 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
   }
 
   private CodemodChange buildCodemodChange(
-      final int line, final List<DependencyGAV> dependencies, final Result result) {
+      final Path path,
+      final int line,
+      final List<DependencyGAV> dependencies,
+      final Result result) {
     if (this instanceof FixOnlyCodeChanger fixOnlyCodeChanger) {
       return CodemodChange.from(
           line,
           dependencies,
-          new FixedFinding(result.getFingerprints().toString(), fixOnlyCodeChanger.detectorRule()));
+          new FixedFinding(
+              SarifFindingKeyUtil.buildKey(result.getRuleId(), path, line),
+              fixOnlyCodeChanger.detectorRule()));
     }
 
     return CodemodChange.from(line, dependencies);
