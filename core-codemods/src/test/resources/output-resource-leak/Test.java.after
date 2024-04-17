@@ -13,9 +13,9 @@ public class Test {
   }
 
   public void nestedWriters() throws IOException {
-    try (FileWriter resource1 = new FileWriter("~/test.txt");
-    BufferedWriter resource = new BufferedWriter(resource1);
-    BufferedWriter br = new BufferedWriter(resource)) {
+    try (FileWriter fileWriter = new FileWriter("~/test.txt");
+    BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+    BufferedWriter br = new BufferedWriter(bufferedWriter)) {
     }
   }
 
