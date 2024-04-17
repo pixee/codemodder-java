@@ -6,7 +6,9 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.TryStmt;
+import com.github.javaparser.ast.type.VarType;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
+import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.Either;
 import io.codemodder.ast.*;
 import java.util.ArrayDeque;
@@ -168,9 +170,29 @@ final class ResourceLeakFixer {
     return current;
   }
 
+  private static String generateNameWithSuffix(final Expression start) {
+    var root = rootPrefix;
+    try {
+      var typeName = start.calculateResolvedType().describe();
+      typeName = typeName.substring(typeName.lastIndexOf('.') + 1);
+      typeName = Character.toLowerCase(typeName.charAt(0)) + typeName.substring(1);
+      root = typeName;
+    } catch (RuntimeException e) {
+      root = rootPrefix;
+    }
+    var maybeName = ASTs.findNonCallableSimpleNameSource(start, root);
+    int count = 0;
+    String nameWithSuffix = root;
+    while (maybeName.isPresent()) {
+      count++;
+      nameWithSuffix = root + count;
+      maybeName = ASTs.findNonCallableSimpleNameSource(start, nameWithSuffix);
+    }
+    return count == 0 ? root : nameWithSuffix;
+  }
+
   public static Optional<TryStmt> tryToFix(final ObjectCreationExpr creationExpr) {
     final var deque = findInnerExpressions(creationExpr);
-    int count = 0;
     final var maybeLVD =
         ASTs.isInitExpr(creationExpr)
             .flatMap(LocalVariableDeclaration::fromVariableDeclarator)
@@ -188,26 +210,18 @@ final class ResourceLeakFixer {
               maybeLVD.get().getScope());
       var cu = creationExpr.findCompilationUnit().get();
       for (var resource : deque) {
-        var name = count == 0 ? rootPrefix : rootPrefix + count;
-        // TODO try to resolve type, failing to do that use var declaration?
-        var type = resource.calculateResolvedType().describe();
-        resource.replace(new NameExpr(name));
-
-        var declaration =
-            new VariableDeclarator(
-                StaticJavaParser.parseType(type.substring(type.lastIndexOf('.') + 1)),
-                name,
-                resource);
-        tryStmt.getResources().addFirst(new VariableDeclarationExpr(declaration));
-        ASTTransforms.addImportIfMissing(cu, type);
-        count++;
+        var typeName = calculateResolvedType(resource).map(rt -> rt.describe());
+        tryStmt
+            .getResources()
+            .addFirst(new VariableDeclarationExpr(buildDeclaration(resource, typeName)));
+        typeName.ifPresent(tn -> ASTTransforms.addImportIfMissing(cu, tn));
       }
       return Optional.of(tryStmt);
     }
     return Optional.empty();
   }
 
-  /** Tries to fix the leak of {@code expr} and returns its line if it does. */
+  /** Tries to fix the leak of {@code expr} and returns line if it does. */
   public static Optional<TryStmt> tryToFix(final MethodCallExpr mce) {
 
     // Is LocalDeclarationStmt and Never Assigned -> Wrap as a try resource
@@ -228,30 +242,40 @@ final class ResourceLeakFixer {
       var tryStmt =
           ASTTransforms.wrapIntoResource(
               lvd.getStatement(), lvd.getVariableDeclarationExpr(), lvd.getScope());
-      // TODO check availability here
-      int count = 0;
       var cu = mce.findCompilationUnit().get();
       for (var resource : resources) {
-        var name = count == 0 ? rootPrefix : rootPrefix + count;
-        // TODO try to resolve type, failing to do that use var declaration?
-        var type = resource.calculateResolvedType().describe();
-
-        resource.replace(new NameExpr(name));
-
-        var declaration =
-            new VariableDeclarator(
-                StaticJavaParser.parseType(type.substring(type.lastIndexOf('.') + 1)),
-                name,
-                resource);
-        tryStmt.getResources().addFirst(new VariableDeclarationExpr(declaration));
-        ASTTransforms.addImportIfMissing(cu, type);
-        count++;
+        var typeName = calculateResolvedType(resource).map(rt -> rt.describe());
+        tryStmt
+            .getResources()
+            .addFirst(new VariableDeclarationExpr(buildDeclaration(resource, typeName)));
+        typeName.ifPresent(tn -> ASTTransforms.addImportIfMissing(cu, tn));
       }
       return Optional.of(tryStmt);
       // TODO if vde is multiple declarations, extract the relevant vd and wrap it
     }
     // other cases here...
     return Optional.empty();
+  }
+
+  private static Optional<ResolvedType> calculateResolvedType(final Expression e) {
+    try {
+      return Optional.of(e.calculateResolvedType());
+    } catch (final RuntimeException exception) {
+      return Optional.empty();
+    }
+  }
+
+  private static VariableDeclarator buildDeclaration(
+      final Expression resource, final Optional<String> typeName) {
+    var name = generateNameWithSuffix(resource);
+    resource.replace(new NameExpr(name));
+    return new VariableDeclarator(
+        typeName.isPresent()
+            ? StaticJavaParser.parseType(
+                typeName.get().substring(typeName.get().lastIndexOf('.') + 1))
+            : new VarType(),
+        name,
+        resource);
   }
 
   private static Deque<Expression> findInnerExpressions(final ObjectCreationExpr creationExpr) {
