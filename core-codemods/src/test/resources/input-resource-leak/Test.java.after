@@ -13,9 +13,9 @@ public class Test {
   }
 
   public void nestedReaders() throws IOException {
-    try (FileReader resource1 = new FileReader("~/test.txt");
-    BufferedReader resource = new BufferedReader(resource1);
-    BufferedReader br = new BufferedReader(resource)) {
+    try (FileReader fileReader = new FileReader("~/test.txt");
+    BufferedReader bufferedReader = new BufferedReader(fileReader);
+    BufferedReader br = new BufferedReader(bufferedReader)) {
     }
   }
 

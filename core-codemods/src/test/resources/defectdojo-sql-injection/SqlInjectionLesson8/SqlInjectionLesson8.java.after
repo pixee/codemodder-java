@@ -75,7 +75,6 @@ query,                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDAT
         statement.setString(1, name);
         statement.setString(2, auth_tan);
         ResultSet results = statement.execute();
-
         if (results.getStatement() != null) {
           if (results.first()) {
             output.append(generateTable(results));
@@ -99,6 +98,7 @@ query,                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDAT
         } else {
           return failed(this).build();
         }
+
       } catch (SQLException e) {
         return failed(this)
             .output("<br><span class='feedback-negative'>" + e.getMessage() + "</span>")
@@ -147,7 +147,6 @@ query,                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDAT
     action = action.replace('\'', '"');
     Calendar cal = Calendar.getInstance();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    String time = sdf.format(cal.getTime());
 
     String logQuery =
         "INSERT INTO access_log (time, action) VALUES (?, ?)";
@@ -157,7 +156,7 @@ query,                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDAT
       statement.setString(1, sdf.format(cal.getTime()));
       statement.setString(2, action);
       statement.execute();
-    } catch (SQLException e) {
+        } catch (SQLException e) {
       System.err.println(e.getMessage());
     }
   }

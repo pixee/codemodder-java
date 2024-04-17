@@ -37,9 +37,8 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
         var maybeMethodDecl = methodCallExpr.findAncestor(CallableDeclaration.class);
         // Cleanup, removes empty string concatenations and unused variables
         maybeMethodDecl.ifPresent(cd -> ASTTransforms.removeEmptyStringConcatenation(cd));
-        // TODO hits a bug with javaparser, where adding nodes won't result in the correct children
-        // order. This causes the following to remove actually used variables
-        // maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
+        // Remove potential unused variables left after transform
+        maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
         return Optional.of(CodemodChange.from(methodCallExpr.getRange().get().begin.line));
       }
     }

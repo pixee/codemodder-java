@@ -29,7 +29,7 @@ public class Test {
   }
 
   public void nestedReaders() throws IOException {
-    BufferedReader br = new BufferedReader(new BufferedReader(new FileReader("~/test.txt")));
+    BufferedReader br = new BufferedReader(new BufferedReader(new BufferedReader(new FileReader("~/test.txt"))));
   }
 
   public void mergeFixes(File f) throws IOException {

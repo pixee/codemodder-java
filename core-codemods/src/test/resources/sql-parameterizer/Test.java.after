@@ -23,7 +23,7 @@ public final class Test {
     stmt.setString(1, input);
     var rs = stmt.execute();
     return rs;
-  }
+    }
 
   public ResultSet nameConflict(String input) throws SQLException {
     int stmt = 0;
@@ -31,8 +31,9 @@ public final class Test {
     PreparedStatement statement = conn.prepareStatement(sql);
     statement.setString(1, input);
     ResultSet rs = statement.execute();
+    stmt++;
     return rs;
-  }
+    }
 
   public ResultSet doubleNameConflict(String input) throws SQLException {
     int stmt = 0;
@@ -41,8 +42,9 @@ public final class Test {
     PreparedStatement stmt1 = conn.prepareStatement(sql);
     stmt1.setString(1, input);
     ResultSet rs = stmt1.execute();
+    stmt = stmt + statement;
     return rs;
-  }
+    }
 
   public ResultSet tryResource(String input) throws SQLException {
     String sql = "SELECT * FROM USERS WHERE USER = ?";
@@ -60,7 +62,7 @@ public final class Test {
     stmt.setString(1, "user_" + input + "_name");
     stmt.setString(2, input2);
     return stmt.execute();
-  }
+    }
 
   public ResultSet referencesAfterExecute(String input) throws SQLException {
     String sql = "SELECT * FROM USERS WHERE USER = ?";
