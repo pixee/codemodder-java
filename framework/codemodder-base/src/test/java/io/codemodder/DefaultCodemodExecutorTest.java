@@ -794,11 +794,6 @@ final class DefaultCodemodExecutorTest {
     public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
       return "injects-dependency-2-change";
     }
-
-    @Override
-    public Optional<FixOnlyCodeChangerInformation> getFixOnlyCodeChangerInformation() {
-      return Optional.of(fixOnlyCodeChangerInformation);
-    }
   }
 
   private static final DependencyGAV dependency1 =
