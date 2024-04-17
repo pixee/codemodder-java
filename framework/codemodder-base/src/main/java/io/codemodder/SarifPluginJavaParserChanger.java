@@ -147,12 +147,11 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
 
   private CodemodChange buildCodemodChange(
       final int line, final List<DependencyGAV> dependencies, final Result result) {
-    if (this instanceof FixOnlyCodeChanger fixOnlyCodeChangerInformation) {
+    if (this instanceof FixOnlyCodeChanger fixOnlyCodeChanger) {
       return CodemodChange.from(
           line,
           dependencies,
-          new FixedFinding(
-              result.getFingerprints().toString(), fixOnlyCodeChangerInformation.detectorRule()));
+          new FixedFinding(result.getFingerprints().toString(), fixOnlyCodeChanger.detectorRule()));
     }
 
     return CodemodChange.from(line, dependencies);
