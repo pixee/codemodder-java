@@ -14,7 +14,7 @@ import java.util.Objects;
 
 /** Provides base functionality for making JavaParser-based changes based on Sonar results. */
 public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger
-    implements FixOnlyCodeChangerInformation {
+    implements FixOnlyCodeChanger {
 
   private final RuleIssues ruleIssues;
   private final Class<? extends Node> nodeType;

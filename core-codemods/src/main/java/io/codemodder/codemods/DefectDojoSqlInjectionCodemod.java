@@ -24,7 +24,7 @@ import javax.inject.Inject;
 public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
 
   private final RuleFindings findings;
-  private final FixOnlyCodeChangerInformation fixOnlyCodeChangerInformation;
+  private final FixOnlyCodeChanger fixOnlyCodeChangerInformation;
 
   @Inject
   public DefectDojoSqlInjectionCodemod(
@@ -32,7 +32,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
           RuleFindings findings) {
     this.findings = Objects.requireNonNull(findings);
     this.fixOnlyCodeChangerInformation =
-        new DefaultFixOnlyCodeChangerInformation(
+        new DefaultFixOnlyCodeChanger(
             "DefectDojo / Semgrep",
             new DetectorRule(
                 "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",

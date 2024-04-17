@@ -147,7 +147,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
 
   private CodemodChange buildCodemodChange(
       final int line, final List<DependencyGAV> dependencies, final Result result) {
-    if (this instanceof FixOnlyCodeChangerInformation fixOnlyCodeChangerInformation) {
+    if (this instanceof FixOnlyCodeChanger fixOnlyCodeChangerInformation) {
       return CodemodChange.from(
           line,
           dependencies,

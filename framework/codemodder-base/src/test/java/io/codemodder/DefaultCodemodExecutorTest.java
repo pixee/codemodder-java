@@ -750,13 +750,11 @@ final class DefaultCodemodExecutorTest {
     }
   }
 
-  private static class ProvidesRemediationStuffCodemod extends JavaParserChanger {
-
-    private final FixOnlyCodeChangerInformation fixOnlyCodeChangerInformation;
+  private static class ProvidesRemediationStuffCodemod extends JavaParserChanger
+      implements FixOnlyCodeChanger {
 
     ProvidesRemediationStuffCodemod() {
       super(new EmptyReporter());
-      this.fixOnlyCodeChangerInformation = new DefaultFixOnlyCodeChangerInformation("acme", rule);
     }
 
     @Override
@@ -793,6 +791,16 @@ final class DefaultCodemodExecutorTest {
     @Override
     public String getIndividualChangeDescription(final Path filePath, final CodemodChange change) {
       return "injects-dependency-2-change";
+    }
+
+    @Override
+    public String vendorName() {
+      return "acme";
+    }
+
+    @Override
+    public DetectorRule detectorRule() {
+      return rule;
     }
   }
 

@@ -189,7 +189,7 @@ public interface CodemodTestMixin {
     List<CodeTFChange> changes =
         changeset.stream().map(CodeTFChangesetEntry::getChanges).flatMap(List::stream).toList();
 
-    if (codemod.getChanger() instanceof FixOnlyCodeChangerInformation) {
+    if (codemod.getChanger() instanceof FixOnlyCodeChanger) {
       assertThat(changes.stream().anyMatch(c -> !c.getFixedFindings().isEmpty()), is(true));
     }
 
