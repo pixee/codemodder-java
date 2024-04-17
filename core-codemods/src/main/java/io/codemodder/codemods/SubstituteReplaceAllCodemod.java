@@ -22,13 +22,7 @@ public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChan
   @Inject
   public SubstituteReplaceAllCodemod(
       @ProvidedSonarScan(ruleId = "java:S5361") final RuleIssues issues) {
-    super(
-        issues,
-        SimpleName.class,
-        new DetectorRule(
-            "java:S5361",
-            "`String#replace` should be preferred to `String#replaceAll`",
-            "https://rules.sonarsource.com/java/RSPEC-5361"));
+    super(issues, SimpleName.class);
   }
 
   @Override
@@ -39,5 +33,13 @@ public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChan
       final Issue issue) {
     name.setIdentifier("replace");
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S5361",
+        "`String#replace` should be preferred to `String#replaceAll`",
+        "https://rules.sonarsource.com/java/RSPEC-5361");
   }
 }

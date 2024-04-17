@@ -24,13 +24,7 @@ public final class RemoveUselessParenthesesCodemod
   @Inject
   public RemoveUselessParenthesesCodemod(
       @ProvidedSonarScan(ruleId = "java:S1110") final RuleIssues issues) {
-    super(
-        issues,
-        EnclosedExpr.class,
-        new DetectorRule(
-            "java:S1110",
-            "Redundant pairs of parentheses should be removed",
-            "https://rules.sonarsource.com/java/RSPEC-1110"));
+    super(issues, EnclosedExpr.class);
   }
 
   @Override
@@ -44,5 +38,13 @@ public final class RemoveUselessParenthesesCodemod
     enclosedExpr.replace(innerExpr);
 
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S1110",
+        "Redundant pairs of parentheses should be removed",
+        "https://rules.sonarsource.com/java/RSPEC-1110");
   }
 }

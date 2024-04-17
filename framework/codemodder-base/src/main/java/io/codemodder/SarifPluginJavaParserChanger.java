@@ -6,12 +6,12 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.google.common.annotations.VisibleForTesting;
+import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Provides base functionality for making JavaParser-based changes based on results found by a sarif
@@ -132,23 +132,9 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
             if (regionNodeMatcher.matches(region, range)) {
               ChangesResult changeSuccessful = onResultFound(context, cu, (T) node, result);
               if (changeSuccessful.areChangesApplied()) {
-                final Optional<FixOnlyCodeChangerInformation> fixOnlyCodeChangerInformtionOptional =
-                    getFixOnlyCodeChangerInformation();
-
-                if (fixOnlyCodeChangerInformtionOptional.isPresent()) {
-                  codemodChanges.add(
-                      CodemodChange.from(
-                          region.start().line(),
-                          changeSuccessful.getDependenciesRequired(),
-                          // TODO
-                          fixOnlyCodeChangerInformtionOptional
-                              .get()
-                              .buildFixedFinding(result.getFingerprints().toString())));
-                } else {
-                  codemodChanges.add(
-                      CodemodChange.from(
-                          region.start().line(), changeSuccessful.getDependenciesRequired()));
-                }
+                codemodChanges.add(
+                    buildCodemodChange(
+                        region.start().line(), changeSuccessful.getDependenciesRequired(), result));
               }
             }
           }
@@ -157,6 +143,19 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     }
 
     return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
+  }
+
+  private CodemodChange buildCodemodChange(
+      final int line, final List<DependencyGAV> dependencies, final Result result) {
+    if (this instanceof FixOnlyCodeChangerInformation fixOnlyCodeChangerInformation) {
+      return CodemodChange.from(
+          line,
+          dependencies,
+          new FixedFinding(
+              result.getFingerprints().toString(), fixOnlyCodeChangerInformation.detectorRule()));
+    }
+
+    return CodemodChange.from(line, dependencies);
   }
 
   @Override

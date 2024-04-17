@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.defectdojo.DefectDojoScan;
@@ -12,7 +13,6 @@ import io.codemodder.providers.defectdojo.RuleFindings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import javax.inject.Inject;
 
 /** This codemod knows how to translate */
@@ -38,11 +38,6 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
                 "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
                 "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
                 "https://semgrep.dev/r?q=java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli"));
-  }
-
-  @Override
-  public Optional<FixOnlyCodeChangerInformation> getFixOnlyCodeChangerInformation() {
-    return Optional.of(fixOnlyCodeChangerInformation);
   }
 
   @Override
@@ -106,7 +101,9 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
 
       MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
       if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
-        changes.add(CodemodChange.from(line, fixOnlyCodeChangerInformation.buildFixedFinding(id)));
+        changes.add(
+            CodemodChange.from(
+                line, new FixedFinding(id, fixOnlyCodeChangerInformation.detectorRule())));
       } else {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(

@@ -38,11 +38,7 @@ public final class RemoveUnusedImportCodemod
          * strict with matching here given how relatively simple the import declaration is.
          */
         RegionNodeMatcher.MATCHES_LINE,
-        NodeCollector.ALL_FROM_TYPE,
-        new DetectorRule(
-            "java:S1128",
-            "Unnecessary imports should be removed",
-            "https://rules.sonarsource.com/java/RSPEC-1128"));
+        NodeCollector.ALL_FROM_TYPE);
   }
 
   @Override
@@ -53,5 +49,13 @@ public final class RemoveUnusedImportCodemod
     } else {
       return ChangesResult.noChanges;
     }
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S1128",
+        "Unnecessary imports should be removed",
+        "https://rules.sonarsource.com/java/RSPEC-1128");
   }
 }

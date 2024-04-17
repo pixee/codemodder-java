@@ -26,13 +26,7 @@ public final class ReplaceStreamCollectorsToListCodemod
   @Inject
   public ReplaceStreamCollectorsToListCodemod(
       @ProvidedSonarScan(ruleId = "java:S6204") final RuleIssues issues) {
-    super(
-        issues,
-        MethodCallExpr.class,
-        new DetectorRule(
-            "java:S6204",
-            "`Stream.toList()` should be used instead of `collectors`",
-            "https://rules.sonarsource.com/java/RSPEC-6204"));
+    super(issues, MethodCallExpr.class);
   }
 
   @Override
@@ -54,5 +48,13 @@ public final class ReplaceStreamCollectorsToListCodemod
     collectMethodExpr.setArguments(new NodeList<>());
 
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S6204",
+        "`Stream.toList()` should be used instead of `collectors`",
+        "https://rules.sonarsource.com/java/RSPEC-6204");
   }
 }
