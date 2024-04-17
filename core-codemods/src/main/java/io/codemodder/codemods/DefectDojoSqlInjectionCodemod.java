@@ -21,23 +21,29 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH,
     importance = Importance.HIGH)
-public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
+public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
+    implements FixOnlyCodeChanger {
 
   private final RuleFindings findings;
-  private final FixOnlyCodeChanger fixOnlyCodeChangerInformation;
 
   @Inject
   public DefectDojoSqlInjectionCodemod(
       @DefectDojoScan(ruleId = "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli")
           RuleFindings findings) {
     this.findings = Objects.requireNonNull(findings);
-    this.fixOnlyCodeChangerInformation =
-        new DefaultFixOnlyCodeChanger(
-            "DefectDojo / Semgrep",
-            new DetectorRule(
-                "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
-                "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
-                "https://semgrep.dev/r?q=java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli"));
+  }
+
+  @Override
+  public String vendorName() {
+    return "DefectDojo / Semgrep";
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
+        "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
+        "https://semgrep.dev/r?q=java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli");
   }
 
   @Override
@@ -60,11 +66,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
       if (line == null) {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
-                id,
-                fixOnlyCodeChangerInformation.detectorRule(),
-                context.path().toString(),
-                null,
-                "No line number provided");
+                id, detectorRule(), context.path().toString(), null, "No line number provided");
         unfixedFindings.add(unfixableFinding);
         continue;
       }
@@ -79,7 +81,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                fixOnlyCodeChangerInformation.detectorRule(),
+                detectorRule(),
                 context.path().toString(),
                 line,
                 "No supported SQL methods found on the given line");
@@ -91,7 +93,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                fixOnlyCodeChangerInformation.detectorRule(),
+                detectorRule(),
                 context.path().toString(),
                 line,
                 "Multiple supported SQL methods found on the given line");
@@ -101,14 +103,12 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger {
 
       MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
       if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
-        changes.add(
-            CodemodChange.from(
-                line, new FixedFinding(id, fixOnlyCodeChangerInformation.detectorRule())));
+        changes.add(CodemodChange.from(line, new FixedFinding(id, detectorRule())));
       } else {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                fixOnlyCodeChangerInformation.detectorRule(),
+                detectorRule(),
                 context.path().toString(),
                 line,
                 "State changing effects possible or unrecognized code shape");
