@@ -60,14 +60,14 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
   public CodemodFileScanningResult onFileFound(
       final CodemodInvocationContext context, final List<Result> results) {
     try {
-      return processXml(context.path());
+      return processXml(context.path(), results.get(0));
     } catch (SAXException | DocumentException | IOException | XMLStreamException e) {
       LOG.error("Problem transforming xml file: {}", context.path());
       return CodemodFileScanningResult.none();
     }
   }
 
-  private CodemodFileScanningResult processXml(final Path file)
+  private CodemodFileScanningResult processXml(final Path file, final Result result)
       throws SAXException, IOException, DocumentException, XMLStreamException {
     Optional<XPathStreamProcessChange> change =
         processor.process(
@@ -87,7 +87,11 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
     List<CodemodChange> allWeaves =
         linesAffected.stream()
             .map(
-                line -> CodemodChange.from(line, new FixedFinding(file.toString(), detectorRule())))
+                line ->
+                    CodemodChange.from(
+                        line,
+                        new FixedFinding(
+                            SarifFindingKeyUtil.buildKey(result, file, line), detectorRule())))
             .toList();
 
     // overwrite the previous web.xml with the new one

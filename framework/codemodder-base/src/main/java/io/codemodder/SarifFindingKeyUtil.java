@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** Utility class for building keys for SARIF findings. */
-final class SarifFindingKeyUtil {
+public final class SarifFindingKeyUtil {
 
   private SarifFindingKeyUtil() {}
 
