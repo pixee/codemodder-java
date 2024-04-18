@@ -2,24 +2,26 @@ package io.codemodder;
 
 import com.contrastsecurity.sarif.Fingerprints;
 import com.contrastsecurity.sarif.Result;
-import org.apache.commons.lang3.StringUtils;
-
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 /** Utility class for building keys for SARIF findings. */
 public final class SarifFindingKeyUtil {
 
   private SarifFindingKeyUtil() {}
 
-  /** Builds a finding ID for a SARIF finding based on the provided result, file path, and line number. */
+  /**
+   * Builds a finding ID for a SARIF finding based on the provided result, file path, and line
+   * number.
+   */
   public static String buildFindingId(final Result result, final Path path, final int line) {
     // prefer the guid, then the correlation guid
-    if(!StringUtils.isBlank(result.getGuid())) {
+    if (!StringUtils.isBlank(result.getGuid())) {
       return result.getGuid().trim();
-    } else if(!StringUtils.isBlank(result.getCorrelationGuid())) {
+    } else if (!StringUtils.isBlank(result.getCorrelationGuid())) {
       return result.getCorrelationGuid().trim();
     }
 

@@ -21,7 +21,7 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public class UnverifiedJwtCodemod extends CodeQLSarifJavaParserChanger<Expression> {
+public final class UnverifiedJwtCodemod extends CodeQLSarifJavaParserChanger<Expression> {
 
   @Inject
   public UnverifiedJwtCodemod(

@@ -89,15 +89,23 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
         linesAffected.stream()
             .map(
                 line -> {
-                  Optional<Result> matchingResult = results.stream().filter(
-                          result -> {
-                            Region region = result.getLocations().get(0).getPhysicalLocation().getRegion();
-                            Integer resultStartLine = region.getStartLine();
-                            Integer resultEndLine = region.getEndLine();
-                            return resultStartLine == line || (resultStartLine <= line && resultEndLine != null && resultEndLine >= line);
-                          }).findFirst();
-                  if(matchingResult.isPresent()) {
-                    String id = SarifFindingKeyUtil.buildFindingId(matchingResult.get(), file, line);
+                  Optional<Result> matchingResult =
+                      results.stream()
+                          .filter(
+                              result -> {
+                                Region region =
+                                    result.getLocations().get(0).getPhysicalLocation().getRegion();
+                                Integer resultStartLine = region.getStartLine();
+                                Integer resultEndLine = region.getEndLine();
+                                return resultStartLine == line
+                                    || (resultStartLine <= line
+                                        && resultEndLine != null
+                                        && resultEndLine >= line);
+                              })
+                          .findFirst();
+                  if (matchingResult.isPresent()) {
+                    String id =
+                        SarifFindingKeyUtil.buildFindingId(matchingResult.get(), file, line);
                     return CodemodChange.from(line, new FixedFinding(id, detectorRule()));
                   }
                   return CodemodChange.from(line);

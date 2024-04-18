@@ -19,7 +19,7 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public class StackTraceExposureCodemod extends CodeQLSarifJavaParserChanger<Expression> {
+public final class StackTraceExposureCodemod extends CodeQLSarifJavaParserChanger<Expression> {
 
   @Inject
   public StackTraceExposureCodemod(
