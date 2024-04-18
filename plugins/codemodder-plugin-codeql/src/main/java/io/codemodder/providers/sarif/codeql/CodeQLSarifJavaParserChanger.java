@@ -13,7 +13,7 @@ import io.codemodder.SourceCodeRegionExtractor;
  */
 public abstract class CodeQLSarifJavaParserChanger<T extends Node>
     extends SarifPluginJavaParserChanger<T> implements FixOnlyCodeChanger {
-  public CodeQLSarifJavaParserChanger(
+  protected CodeQLSarifJavaParserChanger(
       final RuleSarif sarif,
       final Class<? extends Node> nodeType,
       final SourceCodeRegionExtractor<Result> regionExtractor) {
