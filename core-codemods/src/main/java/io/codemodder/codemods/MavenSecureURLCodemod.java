@@ -1,7 +1,10 @@
 package io.codemodder.codemods;
 
+import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
+import io.codemodder.codetf.FixedFinding;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +14,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
@@ -29,7 +31,8 @@ import org.xml.sax.SAXException;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
+public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
+    implements FixOnlyCodeChanger {
 
   private final XPathStreamProcessor processor;
 
@@ -42,17 +45,30 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
   }
 
   @Override
+  public String vendorName() {
+    return "CodeQL";
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "non-https-url",
+        "Failure to use HTTPS or SFTP URL in Maven artifact upload/download",
+        "https://codeql.github.com/codeql-query-help/java/java-maven-non-https-url");
+  }
+
+  @Override
   public CodemodFileScanningResult onFileFound(
       final CodemodInvocationContext context, final List<Result> results) {
     try {
-      return processXml(context.path());
+      return processXml(context.path(), results);
     } catch (SAXException | DocumentException | IOException | XMLStreamException e) {
       LOG.error("Problem transforming xml file: {}", context.path());
       return CodemodFileScanningResult.none();
     }
   }
 
-  private CodemodFileScanningResult processXml(final Path file)
+  private CodemodFileScanningResult processXml(final Path file, final List<Result> results)
       throws SAXException, IOException, DocumentException, XMLStreamException {
     Optional<XPathStreamProcessChange> change =
         processor.process(
@@ -70,7 +86,31 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger {
     Set<Integer> linesAffected = xmlChange.linesAffected();
 
     List<CodemodChange> allWeaves =
-        linesAffected.stream().map(CodemodChange::from).collect(Collectors.toList());
+        linesAffected.stream()
+            .map(
+                line -> {
+                  Optional<Result> matchingResult =
+                      results.stream()
+                          .filter(
+                              result -> {
+                                Region region =
+                                    result.getLocations().get(0).getPhysicalLocation().getRegion();
+                                Integer resultStartLine = region.getStartLine();
+                                Integer resultEndLine = region.getEndLine();
+                                return resultStartLine == line
+                                    || (resultStartLine <= line
+                                        && resultEndLine != null
+                                        && resultEndLine >= line);
+                              })
+                          .findFirst();
+                  if (matchingResult.isPresent()) {
+                    String id =
+                        SarifFindingKeyUtil.buildFindingId(matchingResult.get(), file, line);
+                    return CodemodChange.from(line, new FixedFinding(id, detectorRule()));
+                  }
+                  return CodemodChange.from(line);
+                })
+            .toList();
 
     // overwrite the previous web.xml with the new one
     Files.copy(xmlChange.transformedXml(), file, StandardCopyOption.REPLACE_EXISTING);

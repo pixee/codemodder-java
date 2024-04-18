@@ -10,7 +10,9 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
+import io.codemodder.providers.sarif.codeql.CodeQLSarifJavaParserChanger;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -21,7 +23,7 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
-public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCallExpr> {
+public final class InsecureCookieCodemod extends CodeQLSarifJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public InsecureCookieCodemod(
@@ -60,5 +62,13 @@ public class InsecureCookieCodemod extends SarifPluginJavaParserChanger<MethodCa
       return ChangesResult.changesApplied;
     }
     return ChangesResult.noChanges;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "insecure-cookie",
+        "Add secure flag to HTTP cookies",
+        "https://codeql.github.com/codeql-query-help/java/java-input-resource-leak/");
   }
 }

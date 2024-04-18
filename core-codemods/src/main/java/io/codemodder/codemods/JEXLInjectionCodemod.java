@@ -17,7 +17,9 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
+import io.codemodder.providers.sarif.codeql.CodeQLSarifJavaParserChanger;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import io.github.pixee.security.UnwantedTypes;
 import java.util.List;
@@ -36,7 +38,7 @@ import org.apache.commons.jexl3.JexlExpression;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Expression> {
+public final class JEXLInjectionCodemod extends CodeQLSarifJavaParserChanger<Expression> {
 
   @Inject
   public JEXLInjectionCodemod(
@@ -174,5 +176,13 @@ public final class JEXLInjectionCodemod extends SarifPluginJavaParserChanger<Exp
           .filter(mcexpr -> mcexpr.getNameAsString().equals("create"));
     }
     return Optional.empty();
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "jexl-expression-injection",
+        "Expression language injection",
+        "https://codeql.github.com/codeql-query-help/java/java-jexl-expression-injection/");
   }
 }

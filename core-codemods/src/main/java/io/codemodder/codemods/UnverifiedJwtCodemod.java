@@ -9,7 +9,9 @@ import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalVariableDeclaration;
+import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
+import io.codemodder.providers.sarif.codeql.CodeQLSarifJavaParserChanger;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import javax.inject.Inject;
 
@@ -19,7 +21,7 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expression> {
+public final class UnverifiedJwtCodemod extends CodeQLSarifJavaParserChanger<Expression> {
 
   @Inject
   public UnverifiedJwtCodemod(
@@ -93,5 +95,13 @@ public class UnverifiedJwtCodemod extends SarifPluginJavaParserChanger<Expressio
     }
 
     return ChangesResult.noChanges;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "missing-jwt-signature-check",
+        "Switch JWT calls to versions that enforce signature validity",
+        "https://codeql.github.com/codeql-query-help/java/java-missing-jwt-signature-check/");
   }
 }
