@@ -42,14 +42,6 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S125",
-        "Sections of code should not be commented out",
-        "https://rules.sonarsource.com/java/RSPEC-125");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -59,5 +51,13 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
     comment.removeForced();
 
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S125",
+        "Sections of code should not be commented out",
+        "https://rules.sonarsource.com/java/RSPEC-125");
   }
 }

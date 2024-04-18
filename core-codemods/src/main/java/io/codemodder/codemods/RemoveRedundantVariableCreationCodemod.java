@@ -29,14 +29,6 @@ public final class RemoveRedundantVariableCreationCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1488",
-        "Local variables should not be declared and then immediately returned or thrown",
-        "https://rules.sonarsource.com/java/RSPEC-1488");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -73,5 +65,13 @@ public final class RemoveRedundantVariableCreationCodemod
     }
 
     return ChangesResult.noChanges;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S1488",
+        "Local variables should not be declared and then immediately returned or thrown",
+        "https://rules.sonarsource.com/java/RSPEC-1488");
   }
 }

@@ -27,14 +27,6 @@ public final class FixRedundantStaticOnEnumCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S2786",
-        "Nested `enum`s should not be declared static",
-        "https://rules.sonarsource.com/java/RSPEC-2786/");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -45,5 +37,13 @@ public final class FixRedundantStaticOnEnumCodemod
       return ChangesResult.changesApplied;
     }
     return ChangesResult.noChanges;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S2786",
+        "Nested `enum`s should not be declared static",
+        "https://rules.sonarsource.com/java/RSPEC-2786/");
   }
 }

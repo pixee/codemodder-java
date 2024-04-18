@@ -30,14 +30,6 @@ public final class RemoveUnusedPrivateMethodCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1144",
-        "Unused private methods should be removed",
-        "https://rules.sonarsource.com/java/RSPEC-1144");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -55,5 +47,13 @@ public final class RemoveUnusedPrivateMethodCodemod
     methodDeclaration.removeForced();
 
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S1144",
+        "Unused private methods should be removed",
+        "https://rules.sonarsource.com/java/RSPEC-1144");
   }
 }

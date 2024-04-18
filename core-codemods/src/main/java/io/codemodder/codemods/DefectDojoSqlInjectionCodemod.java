@@ -13,7 +13,6 @@ import io.codemodder.providers.defectdojo.RuleFindings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import javax.inject.Inject;
 
 /** This codemod knows how to translate */
@@ -40,16 +39,11 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
+  public DetectorRule detectorRule() {
     return new DetectorRule(
         "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
         "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli",
         "https://semgrep.dev/r?q=java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli");
-  }
-
-  @Override
-  public Optional<FixedFinding> getFixedFinding(String id) {
-    return Optional.of(new FixedFinding(id, getDetectorRule()));
   }
 
   @Override
@@ -72,7 +66,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
       if (line == null) {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
-                id, getDetectorRule(), context.path().toString(), null, "No line number provided");
+                id, detectorRule(), context.path().toString(), null, "No line number provided");
         unfixedFindings.add(unfixableFinding);
         continue;
       }
@@ -87,7 +81,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                getDetectorRule(),
+                detectorRule(),
                 context.path().toString(),
                 line,
                 "No supported SQL methods found on the given line");
@@ -99,7 +93,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                getDetectorRule(),
+                detectorRule(),
                 context.path().toString(),
                 line,
                 "Multiple supported SQL methods found on the given line");
@@ -109,12 +103,12 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
 
       MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
       if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
-        changes.add(CodemodChange.from(line, getFixedFinding(id).get()));
+        changes.add(CodemodChange.from(line, new FixedFinding(id, detectorRule())));
       } else {
         UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
-                getDetectorRule(),
+                detectorRule(),
                 context.path().toString(),
                 line,
                 "State changing effects possible or unrecognized code shape");

@@ -11,7 +11,6 @@ import io.codemodder.providers.sonar.api.Issue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /** Provides base functionality for making JavaParser-based changes based on Sonar results. */
 public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger
@@ -80,10 +79,13 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
             Range range = node.getRange().get();
             if (regionNodeMatcher.matches(region, range)) {
               ChangesResult changeSuccessful = onIssueFound(context, cu, (T) node, issue);
+
               if (changeSuccessful.areChangesApplied()) {
                 codemodChanges.add(
                     CodemodChange.from(
-                        region.start().line(), changeSuccessful.getDependenciesRequired()));
+                        region.start().line(),
+                        changeSuccessful.getDependenciesRequired(),
+                        new FixedFinding(issue.getKey(), this.detectorRule())));
               }
             }
           }
@@ -96,11 +98,6 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   @Override
   public boolean shouldRun() {
     return ruleIssues.hasResults();
-  }
-
-  @Override
-  public String vendorName() {
-    return "Sonar";
   }
 
   /**
@@ -116,7 +113,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
       CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
 
   @Override
-  public Optional<FixedFinding> getFixedFinding(String id) {
-    return Optional.of(new FixedFinding(id, getDetectorRule()));
+  public String vendorName() {
+    return "Sonar";
   }
 }

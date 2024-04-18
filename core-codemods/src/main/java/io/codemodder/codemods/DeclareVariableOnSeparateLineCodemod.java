@@ -31,14 +31,6 @@ public final class DeclareVariableOnSeparateLineCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1659",
-        "Multiple variables should not be declared on the same line",
-        "https://rules.sonarsource.com/java/RSPEC-1659/");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -67,5 +59,13 @@ public final class DeclareVariableOnSeparateLineCodemod
     return declareVariableOnSeparateLine.splitVariablesIntoTheirOwnStatements()
         ? ChangesResult.changesApplied
         : ChangesResult.noChanges;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S1659",
+        "Multiple variables should not be declared on the same line",
+        "https://rules.sonarsource.com/java/RSPEC-1659/");
   }
 }
