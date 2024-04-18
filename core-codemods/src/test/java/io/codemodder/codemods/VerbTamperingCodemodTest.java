@@ -61,6 +61,7 @@ final class VerbTamperingCodemodTest {
             Map.of(),
             List.of(),
             null,
+            null,
             null);
 
     CodemodExecutor executor =

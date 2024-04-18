@@ -255,6 +255,7 @@ final class AddMissingI18nCodemodTest {
         Map.of(),
         List.of(),
         null,
+        null,
         null);
   }
 

@@ -15,7 +15,10 @@ import java.util.List;
 import java.util.Objects;
 import javax.inject.Inject;
 
-/** This codemod knows how to translate */
+/**
+ * This codemod knows how to fix SQL injection findings that come through DefectDojo for supported
+ * vendors.
+ */
 @Codemod(
     id = "defectdojo:java/sql-injection",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,

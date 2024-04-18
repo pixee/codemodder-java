@@ -410,6 +410,7 @@ final class CodemodLoaderTest {
         Map.of(),
         List.of(),
         null,
+        null,
         null);
   }
 
@@ -424,6 +425,7 @@ final class CodemodLoaderTest {
         Files.list(dir).toList(),
         Map.of(),
         List.of(),
+        null,
         null,
         null);
   }
@@ -442,6 +444,7 @@ final class CodemodLoaderTest {
         Files.list(dir).toList(),
         Map.of(),
         params,
+        null,
         null,
         null);
   }

@@ -134,6 +134,12 @@ final class CLI implements Callable<Integer> {
   private Path sonarHotspotsJsonFilePath;
 
   @CommandLine.Option(
+      names = {"--contrast-vulnerabilities-xml"},
+      description =
+          "a path to a file containing the result of a call to the Contrast Assess XML export API")
+  private Path contrastVulnerabilitiesXmlFilePath;
+
+  @CommandLine.Option(
       names = {"--list"},
       description = "print codemod(s) metadata, then exit",
       defaultValue = "false")
@@ -388,7 +394,8 @@ final class CLI implements Callable<Integer> {
               pathSarifMap,
               codemodParameters,
               sonarIssuesJsonFilePath,
-              defectDojoFindingsJsonFilePath);
+              defectDojoFindingsJsonFilePath,
+              contrastVulnerabilitiesXmlFilePath);
       List<CodemodIdPair> codemods = loader.getCodemods();
 
       log.debug("sarif files: {}", sarifFiles.size());
