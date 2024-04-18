@@ -20,7 +20,8 @@ public final class SemgrepProvider implements CodemodProvider {
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs,
       final Path sonarIssuesJsonFile,
-      final Path defectDojoFindingsJsonFile) {
+      final Path defectDojoFindingsJsonFile,
+      final Path contrastFindingsJsonPath) {
     return Set.of(
         new SemgrepModule(
             codeDirectory,

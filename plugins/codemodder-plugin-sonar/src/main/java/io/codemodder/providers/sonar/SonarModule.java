@@ -58,7 +58,7 @@ final class SonarModule extends AbstractModule {
           perRuleList.add(issue);
         });
 
-    // find all the @ProvidedSemgrepScan annotations and bind them as is
+    // find all the  annotations and bind them as is
     Set<String> packagesScanned = new HashSet<>();
     for (final Class<? extends CodeChanger> codemodType : codemodTypes) {
       String packageName = codemodType.getPackageName();

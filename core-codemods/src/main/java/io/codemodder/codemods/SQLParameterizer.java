@@ -76,11 +76,16 @@ final class SQLParameterizer {
 
   /** Returns true if this is a fixable JDBC method name. */
   public static boolean isSupportedJdbcMethodCall(final MethodCallExpr methodCall) {
-    return methodCall.getNameAsString().equals("executeQuery")
-        || methodCall.getNameAsString().equals("execute")
-        || methodCall.getNameAsString().equals("executeLargeUpdate")
-        || methodCall.getNameAsString().equals("executeUpdate");
+    return fixableJdbcMethodNames.contains(methodCall.getNameAsString());
   }
+
+  /** Returns a set of fixable JDBC method names. */
+  public static Set<String> fixableJdbcMethodNames() {
+    return fixableJdbcMethodNames;
+  }
+
+  private static final Set<String> fixableJdbcMethodNames =
+      Set.of("executeQuery", "execute", "executeLargeUpdate", "executeUpdate");
 
   /**
    * Tries to find the source of an expression if it can be uniquely defined, otherwise, returns
