@@ -136,7 +136,7 @@ final class CLI implements Callable<Integer> {
   @CommandLine.Option(
       names = {"--contrast-vulnerabilities-xml"},
       description =
-          "a path to a file containing the result of a call to the Sonar Web API Hotspots endpoint")
+          "a path to a file containing the result of a call to the Contrast Assess XML export API")
   private Path contrastVulnerabilitiesXmlFilePath;
 
   @CommandLine.Option(
