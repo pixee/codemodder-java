@@ -33,14 +33,6 @@ public final class OverridesMatchParentSynchronizationCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S3551",
-        "Overrides should match their parent class methods in synchronization",
-        "https://rules.sonarsource.com/java/RSPEC-3551");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       CodemodInvocationContext context, CompilationUnit cu, SimpleName methodName, Issue issue) {
     Optional<Node> parentNodeRef = methodName.getParentNode();
@@ -52,5 +44,13 @@ public final class OverridesMatchParentSynchronizationCodemod
       }
     }
     return ChangesResult.noChanges;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S3551",
+        "Overrides should match their parent class methods in synchronization",
+        "https://rules.sonarsource.com/java/RSPEC-3551");
   }
 }

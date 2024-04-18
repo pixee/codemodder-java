@@ -799,13 +799,8 @@ final class DefaultCodemodExecutorTest {
     }
 
     @Override
-    public DetectorRule getDetectorRule() {
+    public DetectorRule detectorRule() {
       return rule;
-    }
-
-    @Override
-    public Optional<FixedFinding> getFixedFinding(String id) {
-      return Optional.of(new FixedFinding(id, getDetectorRule()));
     }
   }
 

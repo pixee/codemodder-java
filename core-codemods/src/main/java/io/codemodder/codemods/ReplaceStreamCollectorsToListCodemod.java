@@ -30,14 +30,6 @@ public final class ReplaceStreamCollectorsToListCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S6204",
-        "`Stream.toList()` should be used instead of `collectors`",
-        "https://rules.sonarsource.com/java/RSPEC-6204");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -56,5 +48,13 @@ public final class ReplaceStreamCollectorsToListCodemod
     collectMethodExpr.setArguments(new NodeList<>());
 
     return ChangesResult.changesApplied;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S6204",
+        "`Stream.toList()` should be used instead of `collectors`",
+        "https://rules.sonarsource.com/java/RSPEC-6204");
   }
 }

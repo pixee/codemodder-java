@@ -42,14 +42,6 @@ public final class RemoveUnusedImportCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1128",
-        "Unnecessary imports should be removed",
-        "https://rules.sonarsource.com/java/RSPEC-1128");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       CodemodInvocationContext context, CompilationUnit cu, ImportDeclaration node, Issue issue) {
     if (issue.getMessage().contains(node.getNameAsString())) {
@@ -57,5 +49,13 @@ public final class RemoveUnusedImportCodemod
     } else {
       return ChangesResult.noChanges;
     }
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S1128",
+        "Unnecessary imports should be removed",
+        "https://rules.sonarsource.com/java/RSPEC-1128");
   }
 }

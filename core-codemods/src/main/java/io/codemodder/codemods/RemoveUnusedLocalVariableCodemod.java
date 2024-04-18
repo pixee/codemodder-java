@@ -39,14 +39,6 @@ public final class RemoveUnusedLocalVariableCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1481",
-        "Unused local variables should be removed",
-        "https://rules.sonarsource.com/java/RSPEC-1481");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -81,5 +73,13 @@ public final class RemoveUnusedLocalVariableCodemod
     }
 
     return ChangesResult.noChanges;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S1481",
+        "Unused local variables should be removed",
+        "https://rules.sonarsource.com/java/RSPEC-1481");
   }
 }

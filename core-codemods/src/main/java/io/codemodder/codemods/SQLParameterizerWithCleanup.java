@@ -13,11 +13,11 @@ public final class SQLParameterizerWithCleanup {
     if (maybeFixed.isPresent()) {
       // Cleanup
       var maybeMethodDecl = methodCallExpr.findAncestor(CallableDeclaration.class);
+
       // Remove concatenation with empty strings e.g "first" +  "" -> "first";
       maybeMethodDecl.ifPresent(ASTTransforms::removeEmptyStringConcatenation);
-      // TODO hits a bug with javaparser, where adding nodes won't result in the correct children
-      // order. This causes the following to remove actually used variables
-      // maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
+      // Remove potential unused variables left after transform
+      maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
 
       // Merge concatenated literals, e.g. "first" + " and second" -> "first and second"
       maybeFixed

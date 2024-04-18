@@ -9,10 +9,10 @@ import com.google.common.annotations.VisibleForTesting;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Provides base functionality for making JavaParser-based changes based on results found by a sarif
@@ -133,19 +133,12 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
             if (regionNodeMatcher.matches(region, range)) {
               ChangesResult changeSuccessful = onResultFound(context, cu, (T) node, result);
               if (changeSuccessful.areChangesApplied()) {
-                final Optional<FixedFinding> optionalFixedFinding =
-                    getFixedFinding(result.getRuleId());
-                if (optionalFixedFinding.isPresent()) {
-                  codemodChanges.add(
-                      CodemodChange.from(
-                          region.start().line(),
-                          changeSuccessful.getDependenciesRequired(),
-                          optionalFixedFinding.get()));
-                } else {
-                  codemodChanges.add(
-                      CodemodChange.from(
-                          region.start().line(), changeSuccessful.getDependenciesRequired()));
-                }
+                codemodChanges.add(
+                    buildCodemodChange(
+                        context.path(),
+                        region.start().line(),
+                        changeSuccessful.getDependenciesRequired(),
+                        result));
               }
             }
           }
@@ -156,8 +149,20 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
   }
 
-  protected Optional<FixedFinding> getFixedFinding(final String id) {
-    return Optional.empty();
+  private CodemodChange buildCodemodChange(
+      final Path path,
+      final int line,
+      final List<DependencyGAV> dependencies,
+      final Result result) {
+    if (this instanceof FixOnlyCodeChanger fixOnlyCodeChanger) {
+      return CodemodChange.from(
+          line,
+          dependencies,
+          new FixedFinding(
+              SarifFindingKeyUtil.buildKey(result, path, line), fixOnlyCodeChanger.detectorRule()));
+    }
+
+    return CodemodChange.from(line, dependencies);
   }
 
   @Override

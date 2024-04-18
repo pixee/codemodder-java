@@ -37,14 +37,6 @@ public final class SimplifyRestControllerAnnotationsCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S6833",
-        "`@Controller` should be replaced with `@RestController`",
-        "https://rules.sonarsource.com/java/RSPEC-6833");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -91,5 +83,13 @@ public final class SimplifyRestControllerAnnotationsCodemod
             responseBodyMethodAnnotationOptional.ifPresent(AnnotationExpr::remove);
           });
     }
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S6833",
+        "`@Controller` should be replaced with `@RestController`",
+        "https://rules.sonarsource.com/java/RSPEC-6833");
   }
 }

@@ -55,6 +55,11 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
     }
 
     @Override
+    public DetectorRule detectorRule() {
+      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
+    }
+
+    @Override
     public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
@@ -80,11 +85,6 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
         }
       }
       return ChangesResult.noChanges;
-    }
-
-    @Override
-    public DetectorRule getDetectorRule() {
-      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
     }
   }
 
@@ -124,7 +124,7 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
     }
 
     @Override
-    public DetectorRule getDetectorRule() {
+    public DetectorRule detectorRule() {
       return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
     }
   }
@@ -159,6 +159,11 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
     }
 
     @Override
+    public DetectorRule detectorRule() {
+      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
+    }
+
+    @Override
     public ChangesResult onResultFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
@@ -177,11 +182,6 @@ public final class SemgrepOverlyPermissiveFilePermissionsCodemod
         return fixAdd(call);
       }
       return ChangesResult.noChanges;
-    }
-
-    @Override
-    public DetectorRule getDetectorRule() {
-      return new DetectorRule(RULE_ID, RULE_NAME, RULE_URL);
     }
 
     private ChangesResult fixAdd(final MethodCallExpr call) {

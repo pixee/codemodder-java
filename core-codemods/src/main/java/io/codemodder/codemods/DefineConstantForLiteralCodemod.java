@@ -27,14 +27,6 @@ public final class DefineConstantForLiteralCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1192",
-        "String literals should not be duplicated",
-        "https://rules.sonarsource.com/java/RSPEC-1192/");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -54,5 +46,13 @@ public final class DefineConstantForLiteralCodemod
     return defineConstantForLiteral.replaceLiteralStringExpressionWithConstant()
         ? ChangesResult.changesApplied
         : ChangesResult.noChanges;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S1192",
+        "String literals should not be duplicated",
+        "https://rules.sonarsource.com/java/RSPEC-1192/");
   }
 }

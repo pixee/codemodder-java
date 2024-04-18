@@ -29,14 +29,6 @@ public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChange
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1161",
-        "`@Override` should be used on overriding and implementing methods",
-        "https://rules.sonarsource.com/java/RSPEC-1161/");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -52,5 +44,13 @@ public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChange
       }
     }
     return ChangesResult.noChanges;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S1161",
+        "`@Override` should be used on overriding and implementing methods",
+        "https://rules.sonarsource.com/java/RSPEC-1161/");
   }
 }

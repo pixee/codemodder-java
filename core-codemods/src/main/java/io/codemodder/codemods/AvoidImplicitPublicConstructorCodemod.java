@@ -34,14 +34,6 @@ public final class AvoidImplicitPublicConstructorCodemod
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
-    return new DetectorRule(
-        "java:S1118",
-        "Utility classes should not have public constructors",
-        "https://rules.sonarsource.com/java/RSPEC-1118/");
-  }
-
-  @Override
   public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
@@ -67,5 +59,13 @@ public final class AvoidImplicitPublicConstructorCodemod
     }
 
     return ChangesResult.noChanges;
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S1118",
+        "Utility classes should not have public constructors",
+        "https://rules.sonarsource.com/java/RSPEC-1118/");
   }
 }

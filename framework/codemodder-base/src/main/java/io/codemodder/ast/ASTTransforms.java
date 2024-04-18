@@ -15,6 +15,7 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
+import com.github.javaparser.ast.nodeTypes.NodeWithStatements;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
@@ -23,20 +24,22 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.resolution.types.ResolvedType;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 public final class ASTTransforms {
   /** Add an import in alphabetical order. */
   public static void addImportIfMissing(final CompilationUnit cu, final String className) {
     final NodeList<ImportDeclaration> imports = cu.getImports();
     final ImportDeclaration newImport = new ImportDeclaration(className, false, false);
-    if (addInOrdrerIfNeeded(className, imports, newImport)) {
+    if (addInOrderIfNeeded(className, imports, newImport)) {
       return;
     }
     cu.addImport(className);
   }
 
-  private static boolean addInOrdrerIfNeeded(
+  private static boolean addInOrderIfNeeded(
       final String className,
       final NodeList<ImportDeclaration> imports,
       final ImportDeclaration newImport) {
@@ -70,10 +73,38 @@ public final class ASTTransforms {
   public static void addStaticImportIfMissing(final CompilationUnit cu, final String method) {
     final NodeList<ImportDeclaration> imports = cu.getImports();
     final ImportDeclaration newMethodImport = new ImportDeclaration(method, true, false);
-    if (addInOrdrerIfNeeded(method, imports, newMethodImport)) {
+    if (addInOrderIfNeeded(method, imports, newMethodImport)) {
       return;
     }
     cu.addImport(method, true, false);
+  }
+
+  /**
+   * Adds a statement to a node at a given index. Mostly a workaround for a weird behavior of
+   * JavaParser. See https://github.com/javaparser/javaparser/issues/4370.
+   */
+  public static <N extends Node> void addStatementAt(
+      final NodeWithStatements<N> node, final Statement stmt, final int index) {
+    var newStatements = new ArrayList<Statement>();
+    int i = 0;
+    for (var s : node.getStatements()) {
+      if (i == index) {
+        newStatements.add(stmt);
+      }
+      newStatements.add(s);
+      i++;
+    }
+
+    // rebuilds the whole statements list as to preserve proper children order.
+
+    // workaround for maintaining indent, removes all but the first
+    IntStream.range(0, node.getStatements().size() - 1)
+        .forEach(j -> node.getStatements().removeLast());
+    // replace the first with the new statement if needed
+    if (index == 0) {
+      node.getStatements().get(0).replace(stmt);
+    }
+    newStatements.stream().skip(1).forEach(node.getStatements()::add);
   }
 
   /**
@@ -105,14 +136,9 @@ public final class ASTTransforms {
       // NodeWithBody, MethodDeclaration, NodeWithBlockStmt, SwitchStmt(?)
       // No way (or reason) to add a Statement before those, maybe throw an Error?
       final var block = (BlockStmt) parent;
-      // Workaround for a bug on LexicalPreservingPrinter (see
-      // https://github.com/javaparser/javaparser/issues/3746)
-      if (existingStatement.equals(block.getStatement(0))) {
-        existingStatement.replace(newStatement);
-        block.addStatement(1, existingStatement);
-      } else {
-        block.getStatements().addBefore(newStatement, existingStatement);
-      }
+
+      int existingIndex = block.getStatements().indexOf(existingStatement);
+      addStatementAt(block, newStatement, existingIndex);
     }
   }
 
@@ -148,6 +174,7 @@ public final class ASTTransforms {
       final ExpressionStmt stmt, final VariableDeclarationExpr vdecl, final LocalScope scope) {
     final var wrapper = new TryStmt();
     wrapper.getResources().add(vdecl);
+    stmt.getComment().ifPresent(comment -> wrapper.setComment(comment));
 
     final var block = new BlockStmt();
     scope
@@ -369,5 +396,30 @@ public final class ASTTransforms {
     } catch (final RuntimeException exception) {
       return Optional.empty();
     }
+  }
+
+  /**
+   * Tries to merge the given try stmt with an enveloping one. Returns the merged try stmts if
+   * sucessfull.
+   */
+  public static Optional<TryStmt> mergeStackedTryStmts(final TryStmt tryStmt) {
+    // is the parent a try statement whose single statment in its block is tryStmt?
+    var maybeTryParent =
+        tryStmt
+            .getParentNode()
+            .flatMap(p -> p.getParentNode())
+            .map(p -> p instanceof TryStmt ? (TryStmt) p : null)
+            .filter(
+                ts ->
+                    ts.getTryBlock().getStatements().size() == 1
+                        && ts.getTryBlock().getStatement(0) == tryStmt);
+    if (maybeTryParent.isPresent()) {
+      tryStmt.remove();
+      var parent = maybeTryParent.get();
+      parent.getResources().addAll(tryStmt.getResources());
+      parent.getTryBlock().getStatements().addAll(tryStmt.getTryBlock().getStatements());
+      return Optional.of(parent);
+    }
+    return Optional.empty();
   }
 }

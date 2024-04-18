@@ -626,7 +626,9 @@ final class CLI implements Callable<Integer> {
           "**.jsp",
           "**/*.jsp",
           "web.xml",
-          "**/web.xml");
+          "**/web.xml",
+          ".github/workflows/*.yml",
+          ".github/workflows/*.yaml");
 
   private static final List<String> defaultPathExcludes =
       List.of(
