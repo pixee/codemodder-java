@@ -98,7 +98,7 @@ public class UnverifiedJwtCodemod extends CodeQLSarifJavaParserChanger<Expressio
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
+  public DetectorRule detectorRule() {
     return new DetectorRule(
         "missing-jwt-signature-check",
         "Switch JWT calls to versions that enforce signature validity",

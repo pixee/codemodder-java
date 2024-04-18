@@ -65,7 +65,7 @@ public class InsecureCookieCodemod extends CodeQLSarifJavaParserChanger<MethodCa
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
+  public DetectorRule detectorRule() {
     return new DetectorRule(
         "insecure-cookie",
         "Add secure flag to HTTP cookies",

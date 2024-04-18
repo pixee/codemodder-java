@@ -49,16 +49,11 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
+  public DetectorRule detectorRule() {
     return new DetectorRule(
         "non-https-url",
         "Failure to use HTTPS or SFTP URL in Maven artifact upload/download",
         "https://codeql.github.com/codeql-query-help/java/java-maven-non-https-url");
-  }
-
-  @Override
-  public Optional<FixedFinding> getFixedFinding(String id) {
-    return Optional.of(new FixedFinding(id, getDetectorRule()));
   }
 
   @Override
@@ -91,7 +86,8 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
 
     List<CodemodChange> allWeaves =
         linesAffected.stream()
-            .map(line -> CodemodChange.from(line, getFixedFinding(file.toString()).get()))
+            .map(
+                line -> CodemodChange.from(line, new FixedFinding(file.toString(), detectorRule())))
             .toList();
 
     // overwrite the previous web.xml with the new one

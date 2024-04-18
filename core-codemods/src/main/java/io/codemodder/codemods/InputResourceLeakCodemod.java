@@ -39,7 +39,7 @@ public final class InputResourceLeakCodemod extends CodeQLSarifJavaParserChanger
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
+  public DetectorRule detectorRule() {
     return new DetectorRule(
         "input-resource-leak",
         "Prevent resource leaks",

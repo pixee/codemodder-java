@@ -179,7 +179,7 @@ public final class JEXLInjectionCodemod extends CodeQLSarifJavaParserChanger<Exp
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
+  public DetectorRule detectorRule() {
     return new DetectorRule(
         "jexl-expression-injection",
         "Expression language injection",

@@ -39,7 +39,7 @@ public final class JDBCResourceLeakCodemod extends CodeQLSarifJavaParserChanger<
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
+  public DetectorRule detectorRule() {
     return new DetectorRule(
         "database-resource-leak",
         "Prevent database resource leaks (CodeQL)",

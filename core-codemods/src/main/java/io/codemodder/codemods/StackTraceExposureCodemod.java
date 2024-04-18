@@ -55,7 +55,7 @@ public class StackTraceExposureCodemod extends CodeQLSarifJavaParserChanger<Expr
   }
 
   @Override
-  public DetectorRule getDetectorRule() {
+  public DetectorRule detectorRule() {
     return new DetectorRule(
         "stack-trace-exposure",
         "Prevent information leak of stack trace details to HTTP responses",
