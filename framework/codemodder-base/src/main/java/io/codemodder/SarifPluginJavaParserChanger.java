@@ -159,7 +159,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
           line,
           dependencies,
           new FixedFinding(
-              SarifFindingKeyUtil.buildKey(result, path, line), fixOnlyCodeChanger.detectorRule()));
+              SarifFindingKeyUtil.buildFindingId(result, path, line), fixOnlyCodeChanger.detectorRule()));
     }
 
     return CodemodChange.from(line, dependencies);
