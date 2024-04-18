@@ -23,7 +23,7 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
-public class InsecureCookieCodemod extends CodeQLSarifJavaParserChanger<MethodCallExpr> {
+public final class InsecureCookieCodemod extends CodeQLSarifJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public InsecureCookieCodemod(
