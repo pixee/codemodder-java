@@ -106,15 +106,7 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
                   if (matchingResult.isPresent()) {
                     String id =
                         SarifFindingKeyUtil.buildFindingId(matchingResult.get(), file, line);
-                    return CodemodChange.from(
-                        matchingResult
-                            .get()
-                            .getLocations()
-                            .get(0)
-                            .getPhysicalLocation()
-                            .getRegion()
-                            .getStartLine(),
-                        new FixedFinding(id, detectorRule()));
+                    return CodemodChange.from(line, new FixedFinding(id, detectorRule()));
                   }
                   return CodemodChange.from(line);
                 })

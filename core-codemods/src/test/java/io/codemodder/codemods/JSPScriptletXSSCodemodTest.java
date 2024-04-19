@@ -51,6 +51,7 @@ final class JSPScriptletXSSCodemodTest {
             Map.of(),
             List.of(),
             null,
+            null,
             null);
     CodemodIdPair codemod = codemodInvoker.getCodemods().get(0);
     CodemodExecutor executor =
