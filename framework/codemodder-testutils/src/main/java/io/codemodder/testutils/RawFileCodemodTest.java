@@ -41,7 +41,9 @@ public interface RawFileCodemodTest {
       final Metadata metadata,
       final Path filePathBefore,
       final Path filePathAfter,
-      final Map<String, List<RuleSarif>> ruleSarifMap)
+      final Map<String, List<RuleSarif>> ruleSarifMap,
+      final int[] expectedFixLines,
+      final int[] expectingFailedFixesAtLines)
       throws IOException {
 
     String tmpFileName = trimExtension(filePathBefore);
@@ -101,6 +103,9 @@ public interface RawFileCodemodTest {
       assertThat(modifiedFile, equalTo(Files.readString(filePathAfter)));
     }
     Files.deleteIfExists(tmpFilePath);
+
+    ExpectedFixes.verifyExpectedFixes(
+        result, pair.getChanger(), expectedFixLines, expectingFailedFixesAtLines);
   }
 
   private static String trimExtension(final Path path) {
@@ -145,7 +150,15 @@ public interface RawFileCodemodTest {
     for (var beforeFile : allBeforeFiles) {
       final var afterFile = afterFilesMap.get(trimExtension(beforeFile));
       // run the codemod
-      verifySingleCase(codemod, tmpDir, metadata, beforeFile, afterFile, map);
+      verifySingleCase(
+          codemod,
+          tmpDir,
+          metadata,
+          beforeFile,
+          afterFile,
+          map,
+          metadata.expectingFixesAtLines(),
+          metadata.expectingFailedFixesAtLines());
     }
   }
 }
