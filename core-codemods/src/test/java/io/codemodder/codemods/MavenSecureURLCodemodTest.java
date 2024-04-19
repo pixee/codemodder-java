@@ -6,6 +6,6 @@ import io.codemodder.testutils.RawFileCodemodTest;
 @Metadata(
     codemodType = MavenSecureURLCodemod.class,
     testResourceDir = "maven-non-https-url",
-    expectingFixesAtLines = {25},
+    expectingFixesAtLines = {22},
     dependencies = {})
 final class MavenSecureURLCodemodTest implements RawFileCodemodTest {}
