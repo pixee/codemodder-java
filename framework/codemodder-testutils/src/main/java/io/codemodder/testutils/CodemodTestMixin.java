@@ -186,22 +186,8 @@ public interface CodemodTestMixin {
       assertThat(change.getDescription(), is(not(blankOrNullString())));
     }
 
-    List<CodeTFChange> changes =
-        changeset.stream().map(CodeTFChangesetEntry::getChanges).flatMap(List::stream).toList();
-
-    if (codemod.getChanger() instanceof FixOnlyCodeChanger) {
-      assertThat(changes.stream().anyMatch(c -> !c.getFixedFindings().isEmpty()), is(true));
-    }
-
-    for (int expectedFixLine : expectedFixLines) {
-      assertThat(changes.stream().anyMatch(c -> c.getLineNumber() == expectedFixLine), is(true));
-    }
-
-    List<UnfixedFinding> unfixedFindings = result.getUnfixedFindings();
-    for (int expectedFailedFixLine : expectingFailedFixesAtLines) {
-      assertThat(
-          unfixedFindings.stream().noneMatch(c -> c.getLine() == expectedFailedFixLine), is(true));
-    }
+    ExpectedFixes.verifyExpectedFixes(
+        result, codemod.getChanger(), expectedFixLines, expectingFailedFixesAtLines);
 
     // make sure that some of the basics are being reported
     assertThat(result.getSummary(), is(not(blankOrNullString())));
