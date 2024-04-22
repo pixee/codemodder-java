@@ -40,6 +40,13 @@ public interface CodemodTestMixin {
             .filter(Files::isRegularFile)
             .filter(path -> path.toString().endsWith(".java.before"));
 
+    if ((metadata.expectingFixesAtLines().length > 0
+            || metadata.expectingFailedFixesAtLines().length > 0)
+        && inputStream.toList().size() > 1) {
+      throw new IllegalArgumentException(
+          "Expected fixes at lines is not supported with multi-file test feature");
+    }
+
     Function<Path, String> displayNameGenerator =
         p -> p.toString().substring(testResourceDir.toString().length());
 
