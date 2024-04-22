@@ -30,6 +30,11 @@ public interface RawFileCodemodTest {
     final Class<? extends CodeChanger> codemod = metadata.codemodType();
     final Path testResourceDir = Path.of(metadata.testResourceDir());
 
+    MetadataUtil.checkExpectedFixLinesUsage(
+        metadata.testResourceDir(),
+        metadata.expectingFixesAtLines(),
+        metadata.expectingFailedFixesAtLines());
+
     final Path testDir = Path.of("src/test/resources/" + testResourceDir);
     verifyCodemod(codemod, metadata, tmpDir, testDir);
   }
