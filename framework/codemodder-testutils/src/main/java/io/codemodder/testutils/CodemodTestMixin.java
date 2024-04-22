@@ -44,7 +44,7 @@ public interface CodemodTestMixin {
             || metadata.expectingFailedFixesAtLines().length > 0)
         && inputStream.toList().size() > 1) {
       throw new IllegalArgumentException(
-          "Expected fixes at lines is not supported with multi-file test feature");
+          "Expected fixes at lines is not supported with multi-file test feature. Define single test when setting expected fix lines.");
     }
 
     Function<Path, String> displayNameGenerator =
