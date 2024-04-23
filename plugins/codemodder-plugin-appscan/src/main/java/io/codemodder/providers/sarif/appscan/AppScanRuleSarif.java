@@ -1,16 +1,12 @@
 package io.codemodder.providers.sarif.appscan;
 
 import com.contrastsecurity.sarif.*;
+import io.codemodder.CodeDirectory;
 import io.codemodder.RuleSarif;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 /** A {@link RuleSarif} for AppScan results. */
 final class AppScanRuleSarif implements RuleSarif {
@@ -18,7 +14,6 @@ final class AppScanRuleSarif implements RuleSarif {
   private final SarifSchema210 sarif;
   private final String ruleId;
   private final Map<Path, List<Result>> resultsCache;
-  private final Path repositoryRoot;
   private final List<String> locations;
 
   /** A map of a AppScan SARIF "location" URIs mapped to their respective file paths. */
@@ -28,11 +23,10 @@ final class AppScanRuleSarif implements RuleSarif {
    * Creates an {@link AppScanRuleSarif} that has already done the work of mapping AppScan SARIF
    * locations, which are strange combinations of class name and file path, into predictable paths.
    */
-  public AppScanRuleSarif(
-      final String ruleId, final SarifSchema210 sarif, final Path repositoryRoot) {
+  AppScanRuleSarif(
+      final String ruleId, final SarifSchema210 sarif, final CodeDirectory codeDirectory) {
     this.sarif = Objects.requireNonNull(sarif);
     this.ruleId = Objects.requireNonNull(ruleId);
-    this.repositoryRoot = repositoryRoot;
     this.resultsCache = new HashMap<>();
     this.locations =
         sarif.getRuns().get(0).getArtifacts().stream()
@@ -49,7 +43,7 @@ final class AppScanRuleSarif implements RuleSarif {
       // we have a real but partial path, now we have to find it in the repository
       Optional<Path> existingRealPath;
       try {
-        existingRealPath = findFileWithTrailingPath(path);
+        existingRealPath = codeDirectory.findFilesWithTrailingPath(path);
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
@@ -59,24 +53,6 @@ final class AppScanRuleSarif implements RuleSarif {
           p -> artifactLocationIndicesMap.computeIfAbsent(p, k -> new HashSet<>()).add(index));
     }
     this.artifactLocationIndices = Map.copyOf(artifactLocationIndicesMap);
-  }
-
-  private Optional<Path> findFileWithTrailingPath(final String path) throws IOException {
-    // find the files with the trailing path
-    AtomicReference<Path> found = new AtomicReference<>();
-    Files.walkFileTree(
-        repositoryRoot,
-        new SimpleFileVisitor<>() {
-          @Override
-          public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
-            if (file.toString().endsWith(path)) {
-              found.set(file);
-              return FileVisitResult.TERMINATE;
-            }
-            return FileVisitResult.CONTINUE;
-          }
-        });
-    return Optional.ofNullable(found.get());
   }
 
   @Override

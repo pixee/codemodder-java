@@ -240,7 +240,7 @@ final class SemgrepModuleTest {
         SarifParser.create()
             .parseIntoMap(
                 List.of(Path.of("src/test/resources/semgrep_with_reflection_injection.sarif")),
-                tmpDir);
+                CodeDirectory.from(tmpDir));
     SemgrepModule module =
         new SemgrepModule(
             tmpDir,

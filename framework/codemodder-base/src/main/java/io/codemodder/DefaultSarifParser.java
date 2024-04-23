@@ -30,10 +30,10 @@ final class DefaultSarifParser implements SarifParser {
       final String toolName,
       final String rule,
       final SarifSchema210 sarif,
-      final Path repositoryRoot,
+      final CodeDirectory codeDirectory,
       final List<RuleSarifFactory> factories) {
     for (final var factory : factories) {
-      final var maybeRuleSarif = factory.build(toolName, rule, sarif, repositoryRoot);
+      final var maybeRuleSarif = factory.build(toolName, rule, sarif, codeDirectory);
       if (maybeRuleSarif.isPresent()) {
         return Optional.of(Map.entry(toolName, maybeRuleSarif.get()));
       }
@@ -64,7 +64,7 @@ final class DefaultSarifParser implements SarifParser {
   }
 
   private Stream<Map.Entry<String, RuleSarif>> fromSarif(
-      final Run run, final SarifSchema210 sarif, final Path repositoryRoot) {
+      final Run run, final SarifSchema210 sarif, final CodeDirectory codeDirectory) {
     // driver name
     final var toolName = run.getTool().getDriver().getName();
     final List<RuleSarifFactory> factories =
@@ -81,20 +81,21 @@ final class DefaultSarifParser implements SarifParser {
             : Stream.<String>empty();
 
     return allResults.flatMap(
-        rule -> tryToBuild(toolName, rule, sarif, repositoryRoot, factories).stream());
+        rule -> tryToBuild(toolName, rule, sarif, codeDirectory, factories).stream());
   }
 
   /**
    * Parse a list of SARIF files and organize the obtained {@link RuleSarif}s by tool name with a
    * map .
    */
+  @Override
   public Map<String, List<RuleSarif>> parseIntoMap(
-      final List<Path> sarifFiles, final Path repositoryRoot) {
+      final List<Path> sarifFiles, final CodeDirectory codeDirectory) {
     final var map = new HashMap<String, List<RuleSarif>>();
     sarifFiles.stream()
         .flatMap(f -> readSarifFile(f).stream())
         .flatMap(
-            sarif -> sarif.getRuns().stream().flatMap(run -> fromSarif(run, sarif, repositoryRoot)))
+            sarif -> sarif.getRuns().stream().flatMap(run -> fromSarif(run, sarif, codeDirectory)))
         .forEach(
             p ->
                 map.merge(

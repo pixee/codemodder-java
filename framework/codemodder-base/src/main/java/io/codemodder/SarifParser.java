@@ -14,7 +14,7 @@ public interface SarifParser {
    * Given a list of sarif {@link Path}s, organize them into a {@link Map} containing {@link
    * RuleSarif}s organized by tool name.
    */
-  Map<String, List<RuleSarif>> parseIntoMap(List<Path> sarifFiles, Path repositoryRoot);
+  Map<String, List<RuleSarif>> parseIntoMap(List<Path> sarifFiles, CodeDirectory codeDirectory);
 
   static SarifParser create() {
     return new DefaultSarifParser();

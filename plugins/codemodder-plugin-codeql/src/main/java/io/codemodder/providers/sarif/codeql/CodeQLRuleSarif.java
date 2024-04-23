@@ -4,6 +4,7 @@ import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
+import io.codemodder.CodeDirectory;
 import io.codemodder.RuleSarif;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,10 +26,10 @@ public final class CodeQLRuleSarif implements RuleSarif {
   private final Path repositoryRoot;
 
   public CodeQLRuleSarif(
-      final String ruleId, final SarifSchema210 sarif, final Path repositoryRoot) {
+      final String ruleId, final SarifSchema210 sarif, final CodeDirectory codeDirectory) {
     this.sarif = Objects.requireNonNull(sarif);
     this.ruleId = Objects.requireNonNull(ruleId);
-    this.repositoryRoot = repositoryRoot;
+    this.repositoryRoot = codeDirectory.asPath();
     this.resultsCache = new HashMap<>();
   }
 
