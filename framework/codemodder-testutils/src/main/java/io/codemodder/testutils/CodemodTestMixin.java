@@ -40,11 +40,6 @@ public interface CodemodTestMixin {
             .filter(Files::isRegularFile)
             .filter(path -> path.toString().endsWith(".java.before"));
 
-    MetadataUtil.checkExpectedFixLinesUsage(
-        metadata.testResourceDir(),
-        metadata.expectingFixesAtLines(),
-        metadata.expectingFailedFixesAtLines());
-
     Function<Path, String> displayNameGenerator =
         p -> p.toString().substring(testResourceDir.toString().length());
 
@@ -193,7 +188,11 @@ public interface CodemodTestMixin {
     }
 
     ExpectedFixes.verifyExpectedFixes(
-        result, codemod.getChanger(), expectedFixLines, expectingFailedFixesAtLines);
+        testResourceDir,
+        result,
+        codemod.getChanger(),
+        expectedFixLines,
+        expectingFailedFixesAtLines);
 
     // make sure that some of the basics are being reported
     assertThat(result.getSummary(), is(not(blankOrNullString())));
