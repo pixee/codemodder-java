@@ -6,6 +6,7 @@ import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.codemodder.CodeDirectory;
 import io.codemodder.RuleSarif;
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +43,7 @@ final class AppScanRuleSarifFactoryTest {
                 new File("src/test/resources/webgoat_2023_8_binary.sarif"), SarifSchema210.class);
     Optional<RuleSarif> sarifRef =
         appScanRuleSarifFactory.build(
-            "HCL AppScan Static Analyzer", "SA2813462719", rawSarif, tmpDir);
+            "HCL AppScan Static Analyzer", "SA2813462719", rawSarif, CodeDirectory.from(tmpDir));
     assertThat(sarifRef.isPresent()).isTrue();
     RuleSarif ruleSarif = sarifRef.get();
 
