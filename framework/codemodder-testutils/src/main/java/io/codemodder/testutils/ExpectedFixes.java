@@ -27,8 +27,7 @@ final class ExpectedFixes {
       final int[] expectedFixLines,
       final int[] expectingFailedFixesAtLines)
       throws IOException {
-    ExpectedFixes.checkExpectedFixLinesUsage(
-        testResourceDir, expectedFixLines, expectingFailedFixesAtLines);
+    checkExpectedFixLinesUsage(testResourceDir, expectedFixLines, expectingFailedFixesAtLines);
 
     List<CodeTFChange> changes =
         result.getChangeset().stream()
