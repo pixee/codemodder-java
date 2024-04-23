@@ -124,6 +124,9 @@ public interface CodemodTestMixin {
     // Check for any a defectdojo
     Path defectDojo = testResourceDir.resolve("defectdojo.json");
 
+    // Check for Contrast
+    Path contrastXml = testResourceDir.resolve("contrast.xml");
+
     // run the codemod
     CodemodLoader loader =
         new CodemodLoader(
@@ -137,7 +140,7 @@ public interface CodemodTestMixin {
             List.of(),
             Files.exists(sonarJson) ? sonarJson : null,
             Files.exists(defectDojo) ? defectDojo : null,
-            null);
+            Files.exists(contrastXml) ? contrastXml : null);
 
     List<CodemodIdPair> codemods = loader.getCodemods();
     assertThat(codemods.size(), equalTo(1));
