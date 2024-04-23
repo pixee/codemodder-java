@@ -28,10 +28,10 @@ final class SingleSemgrepRuleSarif implements RuleSarif {
   private final Path repositoryRoot;
 
   SingleSemgrepRuleSarif(
-      final String ruleId, final SarifSchema210 sarif, final Path repositoryRoot) {
+      final String ruleId, final SarifSchema210 sarif, final Path codeDirectory) {
     this.sarif = Objects.requireNonNull(sarif);
     this.ruleId = Objects.requireNonNull(ruleId);
-    this.repositoryRoot = Objects.requireNonNull(repositoryRoot);
+    this.repositoryRoot = Objects.requireNonNull(codeDirectory);
     this.resultsCache = new HashMap<>();
   }
 

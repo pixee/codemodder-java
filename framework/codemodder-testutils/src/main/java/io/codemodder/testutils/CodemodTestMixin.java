@@ -115,11 +115,12 @@ public interface CodemodTestMixin {
     Path sonarJson = testResourceDir.resolve("sonar-issues.json");
 
     // Check for any sarif files and build the RuleSarif map
+    CodeDirectory codeDir = CodeDirectory.from(tmpDir);
     List<Path> allSarifs = new ArrayList<>();
     Files.newDirectoryStream(testResourceDir, "*.sarif")
         .iterator()
         .forEachRemaining(allSarifs::add);
-    Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, tmpDir);
+    Map<String, List<RuleSarif>> map = SarifParser.create().parseIntoMap(allSarifs, codeDir);
 
     // Check for any a defectdojo
     Path defectDojo = testResourceDir.resolve("defectdojo.json");

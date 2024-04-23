@@ -377,10 +377,11 @@ final class CLI implements Callable<Integer> {
       }
 
       // create the loader
+      CodeDirectory codeDirectory = new DefaultCodeDirectory(projectPath);
       List<Path> sarifFiles =
           sarifs != null ? sarifs.stream().map(Path::of).collect(Collectors.toList()) : List.of();
       Map<String, List<RuleSarif>> pathSarifMap =
-          SarifParser.create().parseIntoMap(sarifFiles, projectPath);
+          SarifParser.create().parseIntoMap(sarifFiles, codeDirectory);
       List<ParameterArgument> codemodParameters =
           createFromParameterStrings(this.codemodParameters);
       CodemodLoader loader =

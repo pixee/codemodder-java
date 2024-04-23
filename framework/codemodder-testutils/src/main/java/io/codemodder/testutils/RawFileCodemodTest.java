@@ -127,8 +127,9 @@ public interface RawFileCodemodTest {
           files.filter(file -> file.getFileName().toString().endsWith(".sarif")).toList();
     }
 
+    final CodeDirectory codeDirectory = CodeDirectory.from(tmpDir);
     final Map<String, List<RuleSarif>> map =
-        SarifParser.create().parseIntoMap(allSarifFiles, tmpDir);
+        SarifParser.create().parseIntoMap(allSarifFiles, codeDirectory);
 
     // grab all the .before and .after files in the dir
     final List<Path> allBeforeFiles;
