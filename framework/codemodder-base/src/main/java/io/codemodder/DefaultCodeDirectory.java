@@ -1,5 +1,6 @@
 package io.codemodder;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -37,12 +38,20 @@ final class DefaultCodeDirectory implements CodeDirectory {
   public Optional<Path> findFilesWithTrailingPath(final String path) throws IOException {
     // find the files with the trailing path
     AtomicReference<Path> found = new AtomicReference<>();
+
+    final String cleanPath =
+        path.trim()
+            .replace("\\\\", "\\")
+            .replace("//", "/")
+            .replace('\\', File.separatorChar)
+            .replace('/', File.separatorChar);
+
     Files.walkFileTree(
         repositoryDir,
         new SimpleFileVisitor<>() {
           @Override
           public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
-            if (file.toString().endsWith(path)) {
+            if (file.toString().endsWith(cleanPath)) {
               found.set(file);
               return FileVisitResult.TERMINATE;
             }
