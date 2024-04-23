@@ -192,7 +192,11 @@ public interface CodemodTestMixin {
     }
 
     ExpectedFixes.verifyExpectedFixes(
-        result, codemod.getChanger(), expectedFixLines, expectingFailedFixesAtLines);
+        testResourceDir,
+        result,
+        codemod.getChanger(),
+        expectedFixLines,
+        expectingFailedFixesAtLines);
 
     // make sure that some of the basics are being reported
     assertThat(result.getSummary(), is(not(blankOrNullString())));

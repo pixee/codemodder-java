@@ -43,7 +43,8 @@ public interface RawFileCodemodTest {
       final Path filePathAfter,
       final Map<String, List<RuleSarif>> ruleSarifMap,
       final int[] expectedFixLines,
-      final int[] expectingFailedFixesAtLines)
+      final int[] expectingFailedFixesAtLines,
+      final Path testResourceDir)
       throws IOException {
 
     String tmpFileName = trimExtension(filePathBefore);
@@ -105,7 +106,7 @@ public interface RawFileCodemodTest {
     Files.deleteIfExists(tmpFilePath);
 
     ExpectedFixes.verifyExpectedFixes(
-        result, pair.getChanger(), expectedFixLines, expectingFailedFixesAtLines);
+        testResourceDir, result, pair.getChanger(), expectedFixLines, expectingFailedFixesAtLines);
   }
 
   private static String trimExtension(final Path path) {
@@ -159,7 +160,8 @@ public interface RawFileCodemodTest {
           afterFile,
           map,
           metadata.expectingFixesAtLines(),
-          metadata.expectingFailedFixesAtLines());
+          metadata.expectingFailedFixesAtLines(),
+          testResourceDir);
     }
   }
 }
