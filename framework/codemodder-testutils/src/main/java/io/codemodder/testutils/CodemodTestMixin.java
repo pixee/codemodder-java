@@ -139,7 +139,7 @@ public interface CodemodTestMixin {
             List.of(pathToJavaFile),
             map,
             List.of(),
-            Files.exists(sonarJson) ? sonarJson : null,
+            Files.exists(sonarJson) ? List.of(sonarJson) : null,
             Files.exists(defectDojo) ? defectDojo : null,
             Files.exists(contrastXml) ? contrastXml : null);
 

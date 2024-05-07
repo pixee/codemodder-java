@@ -21,32 +21,39 @@ final class SonarModule extends AbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path repository;
-  private final Path issuesFile;
+  private final List<Path> issuesFiles;
 
   SonarModule(
       final List<Class<? extends CodeChanger>> codemodTypes,
       final Path repository,
-      final Path sonarIssuesJsonFile) {
+      final List<Path> sonarIssuesJsonFile) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.repository = Objects.requireNonNull(repository);
-    this.issuesFile = sonarIssuesJsonFile;
+    this.issuesFiles = sonarIssuesJsonFile;
   }
 
   @Override
   protected void configure() {
 
     List<Issue> allIssues = List.of();
-    if (issuesFile != null) {
-      SearchIssueResponse issueResponse;
-      try {
-        issueResponse =
-            new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .readValue(issuesFile.toFile(), SearchIssueResponse.class);
-        allIssues = issueResponse.getIssues();
-      } catch (IOException e) {
-        throw new UncheckedIOException("Problem reading Sonar issues JSON file", e);
-      }
+    if (issuesFiles != null) {
+      List<SearchIssueResponse> issueResponses = new ArrayList<>();
+
+      this.issuesFiles.forEach(
+          issuesFile -> {
+            try {
+              SearchIssueResponse issueResponse =
+                  new ObjectMapper()
+                      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                      .readValue(issuesFile.toFile(), SearchIssueResponse.class);
+              issueResponses.add(issueResponse);
+            } catch (IOException e) {
+              throw new UncheckedIOException("Problem reading Sonar issues JSON file", e);
+            }
+          });
+
+      allIssues =
+          issueResponses.stream().flatMap(response -> response.getIssues().stream()).toList();
     }
 
     Map<String, List<Issue>> perRuleBreakdown = new HashMap<>();

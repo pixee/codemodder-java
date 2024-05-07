@@ -28,7 +28,7 @@ public final class CodemodLoader {
       final List<Path> includedFiles,
       final Map<String, List<RuleSarif>> ruleSarifByTool,
       final List<ParameterArgument> codemodParameters,
-      final Path sonarIssuesJsonFile,
+      final List<Path> sonarIssuesJsonFile,
       final Path defectDojoFindingsJsonFile,
       final Path contrastVulnerabilitiesXmlFilePath) {
 

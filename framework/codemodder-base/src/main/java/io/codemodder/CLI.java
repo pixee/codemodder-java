@@ -118,8 +118,9 @@ final class CLI implements Callable<Integer> {
   @CommandLine.Option(
       names = {"--sonar-issues-json"},
       description =
-          "a path to a file containing the result of a call to the Sonar Web API Issues endpoint")
-  private Path sonarIssuesJsonFilePath;
+          "comma-separated set of path(s) to file(s) containing the result of a call to the Sonar Web API Issues endpoint",
+      split = ",")
+  private List<String> sonarIssuesJsonFilePath;
 
   @CommandLine.Option(
       names = {"--defectdojo-findings-json"},
@@ -378,8 +379,11 @@ final class CLI implements Callable<Integer> {
 
       // create the loader
       CodeDirectory codeDirectory = new DefaultCodeDirectory(projectPath);
-      List<Path> sarifFiles =
-          sarifs != null ? sarifs.stream().map(Path::of).collect(Collectors.toList()) : List.of();
+      List<Path> sarifFiles = sarifs != null ? sarifs.stream().map(Path::of).toList() : List.of();
+      List<Path> sonarIssuesJsonFiles =
+          sonarIssuesJsonFilePath != null
+              ? sonarIssuesJsonFilePath.stream().map(Path::of).toList()
+              : List.of();
       Map<String, List<RuleSarif>> pathSarifMap =
           SarifParser.create().parseIntoMap(sarifFiles, codeDirectory);
       List<ParameterArgument> codemodParameters =
@@ -394,7 +398,7 @@ final class CLI implements Callable<Integer> {
               filePaths,
               pathSarifMap,
               codemodParameters,
-              sonarIssuesJsonFilePath,
+              sonarIssuesJsonFiles,
               defectDojoFindingsJsonFilePath,
               contrastVulnerabilitiesXmlFilePath);
       List<CodemodIdPair> codemods = loader.getCodemods();
