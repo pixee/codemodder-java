@@ -53,9 +53,7 @@ final class SonarModule extends AbstractModule {
           });
 
       allIssues =
-          issueResponses.stream()
-              .flatMap(issueResponse -> issueResponse.getIssues().stream())
-              .toList();
+          issueResponses.stream().flatMap(response -> response.getIssues().stream()).toList();
     }
 
     Map<String, List<Issue>> perRuleBreakdown = new HashMap<>();
