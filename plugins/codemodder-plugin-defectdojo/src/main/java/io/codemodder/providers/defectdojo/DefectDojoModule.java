@@ -17,40 +17,45 @@ import java.util.stream.Stream;
 final class DefectDojoModule extends AbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
-  private final Path defectDojoFindingsJsonFile;
+  private final List<Path> defectDojoFindingsJsonFiles;
   private final Path projectDir;
 
   DefectDojoModule(
       final List<Class<? extends CodeChanger>> codemodTypes,
       final Path projectDir,
-      final Path defectDojoFindingsJsonFile) {
+      final List<Path> defectDojoFindingsJsonFiles) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.projectDir = Objects.requireNonNull(projectDir);
-    this.defectDojoFindingsJsonFile = defectDojoFindingsJsonFile;
+    this.defectDojoFindingsJsonFiles = defectDojoFindingsJsonFiles;
   }
 
   @Override
   protected void configure() {
 
-    Findings findings;
+    List<Findings> findings = new ArrayList<>();
 
     // if there was no file, we still have to bind an empty result
-    if (defectDojoFindingsJsonFile == null) {
-      findings = new Findings(List.of());
-    } else {
-      try {
-        findings =
-            new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .readValue(defectDojoFindingsJsonFile.toFile(), Findings.class);
-      } catch (IOException e) {
-        throw new UncheckedIOException("can't read defectdojo JSON", e);
-      }
+    if (defectDojoFindingsJsonFiles != null) {
+      defectDojoFindingsJsonFiles.forEach(
+          defectDojoFindingsJsonFile -> {
+            try {
+              Findings finding =
+                  new ObjectMapper()
+                      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                      .readValue(defectDojoFindingsJsonFile.toFile(), Findings.class);
+              findings.add(finding);
+            } catch (IOException e) {
+              throw new UncheckedIOException("can't read defectdojo JSON", e);
+            }
+          });
     }
+
+    final List<Finding> results =
+        findings.stream().flatMap(finding -> finding.getResults().stream()).toList();
 
     // create a RuleFindings instance for every rule id we come across in the findings object
     Map<String, List<Finding>> ruleFindingsMap = new HashMap<>();
-    for (Finding finding : findings.getResults()) {
+    for (Finding finding : results) {
       String ruleId = finding.getVulnIdFromTool();
       List<Finding> ruleFindings =
           ruleFindingsMap.computeIfAbsent(ruleId, (k) -> new ArrayList<>());

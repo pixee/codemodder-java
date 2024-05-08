@@ -120,13 +120,14 @@ final class CLI implements Callable<Integer> {
       description =
           "comma-separated set of path(s) to file(s) containing the result of a call to the Sonar Web API Issues endpoint",
       split = ",")
-  private List<String> sonarIssuesJsonFilePath;
+  private List<String> sonarIssuesJsonFilePaths;
 
   @CommandLine.Option(
       names = {"--defectdojo-findings-json"},
       description =
-          "a path to a file containing the result of a call to the DefectDojo v2 Findings API endpoint")
-  private Path defectDojoFindingsJsonFilePath;
+          "comma-separated set of path(s) to file(s) containing the result of a call to the DefectDojo v2 Findings API endpoint",
+      split = ",")
+  private List<String> defectDojoFindingsJsonFilePaths;
 
   @CommandLine.Option(
       names = {"--sonar-hotspots-json"},
@@ -381,8 +382,12 @@ final class CLI implements Callable<Integer> {
       CodeDirectory codeDirectory = new DefaultCodeDirectory(projectPath);
       List<Path> sarifFiles = sarifs != null ? sarifs.stream().map(Path::of).toList() : List.of();
       List<Path> sonarIssuesJsonFiles =
-          sonarIssuesJsonFilePath != null
-              ? sonarIssuesJsonFilePath.stream().map(Path::of).toList()
+          sonarIssuesJsonFilePaths != null
+              ? sonarIssuesJsonFilePaths.stream().map(Path::of).toList()
+              : List.of();
+      List<Path> defectDojoFindingsJsonFiles =
+          defectDojoFindingsJsonFilePaths != null
+              ? defectDojoFindingsJsonFilePaths.stream().map(Path::of).toList()
               : List.of();
       Map<String, List<RuleSarif>> pathSarifMap =
           SarifParser.create().parseIntoMap(sarifFiles, codeDirectory);
@@ -399,7 +404,7 @@ final class CLI implements Callable<Integer> {
               pathSarifMap,
               codemodParameters,
               sonarIssuesJsonFiles,
-              defectDojoFindingsJsonFilePath,
+              defectDojoFindingsJsonFiles,
               contrastVulnerabilitiesXmlFilePath);
       List<CodemodIdPair> codemods = loader.getCodemods();
 
