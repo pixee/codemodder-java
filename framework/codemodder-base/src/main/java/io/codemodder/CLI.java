@@ -380,11 +380,8 @@ final class CLI implements Callable<Integer> {
 
       // create the loader
       CodeDirectory codeDirectory = new DefaultCodeDirectory(projectPath);
-      List<Path> sarifFiles = sarifs != null ? sarifs.stream().map(Path::of).toList() : List.of();
-      List<Path> sonarIssuesJsonFiles =
-          sonarIssuesJsonFilePaths != null
-              ? sonarIssuesJsonFilePaths.stream().map(Path::of).toList()
-              : List.of();
+      List<Path> sarifFiles = convertToPaths(sarifs);
+      List<Path> sonarIssuesJsonFiles = convertToPaths(sonarIssuesJsonFilePaths);
       Map<String, List<RuleSarif>> pathSarifMap =
           SarifParser.create().parseIntoMap(sarifFiles, codeDirectory);
       List<ParameterArgument> codemodParameters =
@@ -516,6 +513,10 @@ final class CLI implements Callable<Integer> {
         log.debug("cleaned temp directory: {}", projectDirectory);
       }
     }
+  }
+
+  private List<Path> convertToPaths(final List<String> pathsStr) {
+    return pathsStr != null ? pathsStr.stream().map(Path::of).toList() : List.of();
   }
 
   /**
