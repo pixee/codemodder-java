@@ -132,7 +132,7 @@ final class CLI implements Callable<Integer> {
       names = {"--sonar-hotspots-json"},
       description =
           "comma-separated set of path(s) to file(s) containing the result of a call to the Sonar Web API Hotspots endpoint",
-          split = ",")
+      split = ",")
   private List<Path> sonarHotspotsJsonFilePaths;
 
   @CommandLine.Option(
