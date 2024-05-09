@@ -19,7 +19,7 @@ public final class DefectDojoProvider implements CodemodProvider {
       final List<String> pathExcludes,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs,
-      final List<Path> sonarIssuesJsonPath,
+      final List<Path> sonarIssuesJsonPaths,
       final Path defectDojoFindingsJsonFile,
       final Path contrastFindingsJsonPath) {
     return Set.of(new DefectDojoModule(codemodTypes, repository, defectDojoFindingsJsonFile));

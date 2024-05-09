@@ -120,7 +120,7 @@ final class CLI implements Callable<Integer> {
       description =
           "comma-separated set of path(s) to file(s) containing the result of a call to the Sonar Web API Issues endpoint",
       split = ",")
-  private List<String> sonarIssuesJsonFilePath;
+  private List<String> sonarIssuesJsonFilePaths;
 
   @CommandLine.Option(
       names = {"--defectdojo-findings-json"},
@@ -131,8 +131,9 @@ final class CLI implements Callable<Integer> {
   @CommandLine.Option(
       names = {"--sonar-hotspots-json"},
       description =
-          "a path to a file containing the result of a call to the Sonar Web API Hotspots endpoint")
-  private Path sonarHotspotsJsonFilePath;
+          "comma-separated set of path(s) to file(s) containing the result of a call to the Sonar Web API Hotspots endpoint",
+          split = ",")
+  private List<Path> sonarHotspotsJsonFilePaths;
 
   @CommandLine.Option(
       names = {"--contrast-vulnerabilities-xml"},
@@ -381,8 +382,8 @@ final class CLI implements Callable<Integer> {
       CodeDirectory codeDirectory = new DefaultCodeDirectory(projectPath);
       List<Path> sarifFiles = sarifs != null ? sarifs.stream().map(Path::of).toList() : List.of();
       List<Path> sonarIssuesJsonFiles =
-          sonarIssuesJsonFilePath != null
-              ? sonarIssuesJsonFilePath.stream().map(Path::of).toList()
+          sonarIssuesJsonFilePaths != null
+              ? sonarIssuesJsonFilePaths.stream().map(Path::of).toList()
               : List.of();
       Map<String, List<RuleSarif>> pathSarifMap =
           SarifParser.create().parseIntoMap(sarifFiles, codeDirectory);

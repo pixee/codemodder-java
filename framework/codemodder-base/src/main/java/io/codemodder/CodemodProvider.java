@@ -22,7 +22,7 @@ public interface CodemodProvider {
    *     their own analysis)
    * @param codemodTypes the codemod types that are being run
    * @param sarifs the SARIF output of tools that are being run
-   * @param sonarIssuesJsonPath the path to a Sonar issues JSON file retrieved from their web API --
+   * @param sonarIssuesJsonPaths the path to a Sonar issues JSON file retrieved from their web API --
    *     may be null
    * @param contrastFindingsJsonPath the path to a Contrast findings JSON file retrieved from their
    *     web API -- may be null
@@ -35,7 +35,7 @@ public interface CodemodProvider {
       List<String> pathExcludes,
       List<Class<? extends CodeChanger>> codemodTypes,
       List<RuleSarif> sarifs,
-      List<Path> sonarIssuesJsonPath,
+      List<Path> sonarIssuesJsonPaths,
       Path defectDojoFindingsJsonPath,
       Path contrastFindingsJsonPath);
 
