@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -76,7 +77,8 @@ public interface CodemodTestMixin {
                 projectProviders,
                 metadata.doRetransformTest(),
                 metadata.expectingFixesAtLines(),
-                metadata.expectingFailedFixesAtLines());
+                metadata.expectingFailedFixesAtLines(),
+                metadata.sonarIssuesJsonFiles());
 
     return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
   }
@@ -91,7 +93,8 @@ public interface CodemodTestMixin {
       final List<ProjectProvider> projectProviders,
       final boolean doRetransformTest,
       final int[] expectedFixLines,
-      final int[] expectingFailedFixesAtLines)
+      final int[] expectingFailedFixesAtLines,
+      final String[] sonarIssuesJsonFiles)
       throws IOException {
 
     // create a copy of the test file in the temp directory to serve as our "repository"
@@ -111,8 +114,21 @@ public interface CodemodTestMixin {
       pathToJavaFile = newPathToJavaFile;
     }
 
-    // add the sonar JSON if one exists
-    Path sonarJson = testResourceDir.resolve("sonar-issues.json");
+    final List<String> sonarJsons =
+        sonarIssuesJsonFiles != null ? Arrays.asList(sonarIssuesJsonFiles) : new ArrayList<>();
+
+    final List<Path> sonarJsonsPaths =
+        sonarJsons.stream()
+            .map(testResourceDir::resolve)
+            .filter(Files::exists)
+            .collect(Collectors.toList());
+
+    if (sonarJsonsPaths.isEmpty()) {
+      Path defaultPath = testResourceDir.resolve("sonar-issues.json");
+      if (Files.exists(defaultPath)) {
+        sonarJsonsPaths.add(defaultPath);
+      }
+    }
 
     // Check for any sarif files and build the RuleSarif map
     CodeDirectory codeDir = CodeDirectory.from(tmpDir);
@@ -139,7 +155,7 @@ public interface CodemodTestMixin {
             List.of(pathToJavaFile),
             map,
             List.of(),
-            Files.exists(sonarJson) ? List.of(sonarJson) : null,
+            sonarJsonsPaths,
             Files.exists(defectDojo) ? defectDojo : null,
             Files.exists(contrastXml) ? contrastXml : null);
 

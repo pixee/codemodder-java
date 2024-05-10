@@ -48,4 +48,7 @@ public @interface Metadata {
 
   /** The expected failed fix metadata that the codemod should report. */
   int[] expectingFailedFixesAtLines() default {};
+
+  /** Sonar issues file names for testing multiple json files */
+  String[] sonarIssuesJsonFiles() default {};
 }
