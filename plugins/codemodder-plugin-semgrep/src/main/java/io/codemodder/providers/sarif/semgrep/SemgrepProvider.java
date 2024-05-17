@@ -34,6 +34,6 @@ public final class SemgrepProvider implements CodemodProvider {
 
   @Override
   public List<String> wantsSarifToolNames() {
-    return List.of("semgrep", "Semgrep");
+    return List.of("semgrep", "Semgrep", "Semgrep OSS");
   }
 }
