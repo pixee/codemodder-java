@@ -133,7 +133,7 @@ final class CLI implements Callable<Integer> {
       description =
           "comma-separated set of path(s) to file(s) containing the result of a call to the Sonar Web API Hotspots endpoint",
       split = ",")
-  private List<Path> sonarHotspotsJsonFilePaths;
+  private List<String> sonarHotspotsJsonFilePaths;
 
   @CommandLine.Option(
       names = {"--contrast-vulnerabilities-xml"},
@@ -382,6 +382,7 @@ final class CLI implements Callable<Integer> {
       CodeDirectory codeDirectory = new DefaultCodeDirectory(projectPath);
       List<Path> sarifFiles = convertToPaths(sarifs);
       List<Path> sonarIssuesJsonFiles = convertToPaths(sonarIssuesJsonFilePaths);
+      List<Path> sonarHotspotJsonFiles = convertToPaths(sonarHotspotsJsonFilePaths);
       Map<String, List<RuleSarif>> pathSarifMap =
           SarifParser.create().parseIntoMap(sarifFiles, codeDirectory);
       List<ParameterArgument> codemodParameters =
@@ -397,6 +398,7 @@ final class CLI implements Callable<Integer> {
               pathSarifMap,
               codemodParameters,
               sonarIssuesJsonFiles,
+              sonarHotspotJsonFiles,
               defectDojoFindingsJsonFilePath,
               contrastVulnerabilitiesXmlFilePath);
       List<CodemodIdPair> codemods = loader.getCodemods();

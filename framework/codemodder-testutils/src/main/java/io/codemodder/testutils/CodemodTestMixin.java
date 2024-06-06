@@ -78,7 +78,8 @@ public interface CodemodTestMixin {
                 metadata.doRetransformTest(),
                 metadata.expectingFixesAtLines(),
                 metadata.expectingFailedFixesAtLines(),
-                metadata.sonarIssuesJsonFiles());
+                metadata.sonarIssuesJsonFiles(),
+                    metadata.sonarHotspotsJsonFiles());
 
     return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
   }
@@ -94,7 +95,8 @@ public interface CodemodTestMixin {
       final boolean doRetransformTest,
       final int[] expectedFixLines,
       final int[] expectingFailedFixesAtLines,
-      final String[] sonarIssuesJsonFiles)
+      final String[] sonarIssuesJsonFiles,
+      final String[] sonarHotspotsJsonFiles)
       throws IOException {
 
     // create a copy of the test file in the temp directory to serve as our "repository"
@@ -114,21 +116,8 @@ public interface CodemodTestMixin {
       pathToJavaFile = newPathToJavaFile;
     }
 
-    final List<String> sonarJsons =
-        sonarIssuesJsonFiles != null ? Arrays.asList(sonarIssuesJsonFiles) : new ArrayList<>();
-
-    final List<Path> sonarJsonsPaths =
-        sonarJsons.stream()
-            .map(testResourceDir::resolve)
-            .filter(Files::exists)
-            .collect(Collectors.toList());
-
-    if (sonarJsonsPaths.isEmpty()) {
-      Path defaultPath = testResourceDir.resolve("sonar-issues.json");
-      if (Files.exists(defaultPath)) {
-        sonarJsonsPaths.add(defaultPath);
-      }
-    }
+    final List<Path> sonarIssuesJsonsPaths = buildSonarJsonPaths(testResourceDir, sonarIssuesJsonFiles, "sonar-issues.json");
+    final List<Path> sonarHotspotsJsonPaths =buildSonarJsonPaths(testResourceDir, sonarHotspotsJsonFiles, "sonar-hotspots.json");
 
     // Check for any sarif files and build the RuleSarif map
     CodeDirectory codeDir = CodeDirectory.from(tmpDir);
@@ -155,7 +144,8 @@ public interface CodemodTestMixin {
             List.of(pathToJavaFile),
             map,
             List.of(),
-            sonarJsonsPaths,
+            sonarIssuesJsonsPaths,
+            sonarHotspotsJsonPaths,
             Files.exists(defectDojo) ? defectDojo : null,
             Files.exists(contrastXml) ? contrastXml : null);
 
@@ -243,6 +233,7 @@ public interface CodemodTestMixin {
             List.of(),
             null,
             null,
+            null,
             null);
     CodemodIdPair codemod2 = loader2.getCodemods().get(0);
     CodemodExecutor executor2 =
@@ -268,6 +259,26 @@ public interface CodemodTestMixin {
 
     String codeAfterSecondTransform = Files.readString(pathToJavaFile);
     assertThat(codeAfterFirstTransform, equalTo(codeAfterSecondTransform));
+  }
+
+  private List<Path> buildSonarJsonPaths(final Path testResourceDir, final String[] sonarJsonFiles, final String defaultSonarFilename){
+      final List<String> sonarJsons =
+              sonarJsonFiles != null ? Arrays.asList(sonarJsonFiles) : new ArrayList<>();
+
+      final List<Path> sonarIssuesJsonsPaths =
+              sonarJsons.stream()
+                      .map(testResourceDir::resolve)
+                      .filter(Files::exists)
+                      .collect(Collectors.toList());
+
+      if (sonarIssuesJsonsPaths.isEmpty()) {
+          Path defaultPath = testResourceDir.resolve(defaultSonarFilename);
+          if (Files.exists(defaultPath)) {
+              sonarIssuesJsonsPaths.add(defaultPath);
+          }
+      }
+
+      return sonarIssuesJsonsPaths;
   }
 
   /**
