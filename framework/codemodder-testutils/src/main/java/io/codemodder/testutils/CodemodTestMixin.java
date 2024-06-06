@@ -79,7 +79,7 @@ public interface CodemodTestMixin {
                 metadata.expectingFixesAtLines(),
                 metadata.expectingFailedFixesAtLines(),
                 metadata.sonarIssuesJsonFiles(),
-                    metadata.sonarHotspotsJsonFiles());
+                metadata.sonarHotspotsJsonFiles());
 
     return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
   }
@@ -116,8 +116,10 @@ public interface CodemodTestMixin {
       pathToJavaFile = newPathToJavaFile;
     }
 
-    final List<Path> sonarIssuesJsonsPaths = buildSonarJsonPaths(testResourceDir, sonarIssuesJsonFiles, "sonar-issues.json");
-    final List<Path> sonarHotspotsJsonPaths =buildSonarJsonPaths(testResourceDir, sonarHotspotsJsonFiles, "sonar-hotspots.json");
+    final List<Path> sonarIssuesJsonsPaths =
+        buildSonarJsonPaths(testResourceDir, sonarIssuesJsonFiles, "sonar-issues.json");
+    final List<Path> sonarHotspotsJsonPaths =
+        buildSonarJsonPaths(testResourceDir, sonarHotspotsJsonFiles, "sonar-hotspots.json");
 
     // Check for any sarif files and build the RuleSarif map
     CodeDirectory codeDir = CodeDirectory.from(tmpDir);
@@ -261,24 +263,27 @@ public interface CodemodTestMixin {
     assertThat(codeAfterFirstTransform, equalTo(codeAfterSecondTransform));
   }
 
-  private List<Path> buildSonarJsonPaths(final Path testResourceDir, final String[] sonarJsonFiles, final String defaultSonarFilename){
-      final List<String> sonarJsons =
-              sonarJsonFiles != null ? Arrays.asList(sonarJsonFiles) : new ArrayList<>();
+  private List<Path> buildSonarJsonPaths(
+      final Path testResourceDir,
+      final String[] sonarJsonFiles,
+      final String defaultSonarFilename) {
+    final List<String> sonarJsons =
+        sonarJsonFiles != null ? Arrays.asList(sonarJsonFiles) : new ArrayList<>();
 
-      final List<Path> sonarIssuesJsonsPaths =
-              sonarJsons.stream()
-                      .map(testResourceDir::resolve)
-                      .filter(Files::exists)
-                      .collect(Collectors.toList());
+    final List<Path> sonarIssuesJsonsPaths =
+        sonarJsons.stream()
+            .map(testResourceDir::resolve)
+            .filter(Files::exists)
+            .collect(Collectors.toList());
 
-      if (sonarIssuesJsonsPaths.isEmpty()) {
-          Path defaultPath = testResourceDir.resolve(defaultSonarFilename);
-          if (Files.exists(defaultPath)) {
-              sonarIssuesJsonsPaths.add(defaultPath);
-          }
+    if (sonarIssuesJsonsPaths.isEmpty()) {
+      Path defaultPath = testResourceDir.resolve(defaultSonarFilename);
+      if (Files.exists(defaultPath)) {
+        sonarIssuesJsonsPaths.add(defaultPath);
       }
+    }
 
-      return sonarIssuesJsonsPaths;
+    return sonarIssuesJsonsPaths;
   }
 
   /**

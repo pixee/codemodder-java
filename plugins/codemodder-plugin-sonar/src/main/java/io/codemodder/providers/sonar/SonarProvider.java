@@ -23,6 +23,7 @@ public final class SonarProvider implements CodemodProvider {
       final List<Path> sonarHotspotsJsonPaths,
       final Path defectDojoFindingsJsonFile,
       final Path contrastFindingsJsonPath) {
-    return Set.of(new SonarModule(codemodTypes, repository, sonarIssuesJsonPaths));
+    return Set.of(
+        new SonarModule(codemodTypes, repository, sonarIssuesJsonPaths, sonarHotspotsJsonPaths));
   }
 }
