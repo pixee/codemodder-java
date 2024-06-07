@@ -128,3 +128,6 @@ fabric.properties
 .env*
 .secrets
 /plugins/codemodder-plugin-maven/.cache/
+
+TODO.iml
+TODO
