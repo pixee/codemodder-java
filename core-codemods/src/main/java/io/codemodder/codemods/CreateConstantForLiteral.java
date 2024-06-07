@@ -13,7 +13,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import io.codemodder.CodemodInvocationContext;
-import io.codemodder.providers.sonar.api.Issue;
+import triage.Issue;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

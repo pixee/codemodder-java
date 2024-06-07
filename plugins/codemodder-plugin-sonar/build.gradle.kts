@@ -8,6 +8,7 @@ description = "Plugin to enable the use of Sonar in codemods"
 dependencies {
     compileOnly(libs.jetbrains.annotations)
     implementation(project(":framework:codemodder-base"))
+    implementation(project(":TODO"))
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
     testImplementation(testlibs.assertj)

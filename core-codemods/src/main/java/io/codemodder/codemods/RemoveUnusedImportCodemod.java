@@ -14,7 +14,7 @@ import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssues;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.providers.sonar.api.Issue;
+import triage.Issue;
 import javax.inject.Inject;
 
 @Codemod(
