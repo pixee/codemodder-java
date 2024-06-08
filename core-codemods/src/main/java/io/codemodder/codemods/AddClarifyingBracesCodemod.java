@@ -9,6 +9,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.WhileStmt;
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.*;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.pmd.PmdScan;
@@ -76,6 +77,13 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
     Range onlyInnerStatementRange = stmt.getExistingSingleStatementRange();
     int onlyInnerStatementColumn = onlyInnerStatementRange.begin.column;
 
+    String concreteStatementCode = LexicalPreservingPrinter.print(stmt.getStatement());
+    if (concreteStatementCode.contains("\t")) {
+      // if the statement contains tabs, we don't want to touch it -- tabs confuse the visual layout
+      // because we can't go by "column" -- it will depend on the viewer
+      return ChangesResult.noChanges;
+    }
+
     if (nextChildNodeBeginColumn >= onlyInnerStatementColumn) {
       stmt.addBraces();
       return ChangesResult.changesApplied;
@@ -86,6 +94,8 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
   /** Represents an unbraced control flow statement (e.g., if, while, etc.). */
   private interface UnbracedStatement {
     Node getParentNode();
+
+    Statement getExistingSingleStatement();
 
     Range getExistingSingleStatementRange();
 
@@ -110,6 +120,11 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
     }
 
     @Override
+    public Statement getExistingSingleStatement() {
+      return whileStmt.getBody();
+    }
+
+    @Override
     public void addBraces() {
       whileStmt.setBody(new BlockStmt(NodeList.nodeList(whileStmt.getBody())));
     }
@@ -128,6 +143,11 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
     @Override
     public Node getParentNode() {
       return ifStmt.getParentNode().get();
+    }
+
+    @Override
+    public Statement getExistingSingleStatement() {
+      return ifStmt.getThenStmt();
     }
 
     @Override
@@ -159,6 +179,11 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
     @Override
     public Range getExistingSingleStatementRange() {
       return ifStmt.getElseStmt().get().getRange().get();
+    }
+
+    @Override
+    public Statement getExistingSingleStatement() {
+      return ifStmt.getElseStmt().get();
     }
 
     @Override
