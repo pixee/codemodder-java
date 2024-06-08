@@ -95,8 +95,6 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
   private interface UnbracedStatement {
     Node getParentNode();
 
-    Statement getExistingSingleStatement();
-
     Range getExistingSingleStatementRange();
 
     void addBraces();
@@ -120,11 +118,6 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
     }
 
     @Override
-    public Statement getExistingSingleStatement() {
-      return whileStmt.getBody();
-    }
-
-    @Override
     public void addBraces() {
       whileStmt.setBody(new BlockStmt(NodeList.nodeList(whileStmt.getBody())));
     }
@@ -143,11 +136,6 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
     @Override
     public Node getParentNode() {
       return ifStmt.getParentNode().get();
-    }
-
-    @Override
-    public Statement getExistingSingleStatement() {
-      return ifStmt.getThenStmt();
     }
 
     @Override
@@ -179,11 +167,6 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
     @Override
     public Range getExistingSingleStatementRange() {
       return ifStmt.getElseStmt().get().getRange().get();
-    }
-
-    @Override
-    public Statement getExistingSingleStatement() {
-      return ifStmt.getElseStmt().get();
     }
 
     @Override
