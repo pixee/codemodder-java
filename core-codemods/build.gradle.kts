@@ -24,7 +24,7 @@ dependencies {
     implementation(project(":plugins:codemodder-plugin-pmd"))
     implementation(project(":plugins:codemodder-plugin-sonar"))
     implementation(project(":plugins:codemodder-plugin-defectdojo"))
-    implementation(project(":TODO"))
+    implementation(project(":sonar-api-model"))
     implementation(libs.java.semver)
     implementation(libs.juniversalchardet)
     implementation(libs.dom4j)
