@@ -60,7 +60,6 @@ final class VerbTamperingCodemodTest {
             List.of(webxml),
             Map.of(),
             List.of(),
-            List.of(),
             null,
             null,
             null);
