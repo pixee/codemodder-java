@@ -1,0 +1,12 @@
+package com.acme;
+
+abstract class Foo {
+
+    private void loadApplications() {
+        if(m_authProvider.isTokenExpired())
+			return;
+
+        m_applications = new HashMap<String, String>();
+        String url =  m_authProvider.getServer() + ASE_APPS+"?columns=name";
+	}
+}
