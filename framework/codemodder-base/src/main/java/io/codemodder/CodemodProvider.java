@@ -43,7 +43,7 @@ public interface CodemodProvider {
   /**
    * Tools this provider is interested in processing the SARIF output of. Codemodder CLI will look
    * for the SARIF outputted by tools in this list in the repository root and then provide the
-   * results to {@link #getModules(Path, List, List, List, List, List, List, Path, Path)} as a
+   * results to {@link #getModules(Path, List, List, List, List, List, List, List, Path, Path)} as a
    * {@link List} of {@link RuleSarif}s.
    *
    * <p>By default, this returns an empty list.
