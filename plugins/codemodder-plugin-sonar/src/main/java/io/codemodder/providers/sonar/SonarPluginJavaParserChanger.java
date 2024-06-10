@@ -7,7 +7,7 @@ import io.codemodder.*;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
-import triage.Issue;
+import io.codemodder.sonar.model.Issue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

@@ -1,4 +1,4 @@
-package ai.pixee.integration.verboserequestmapping.api;
+package io.pixee.integration.verboserequestmapping.api;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,4 +1,4 @@
-package ai.pixee.integration.moveswitchdefaultlast;
+package io.pixee.integration.moveswitchdefaultlast;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

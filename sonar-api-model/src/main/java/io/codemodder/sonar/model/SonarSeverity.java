@@ -1,6 +1,6 @@
-package triage;
+package io.codemodder.sonar.model;
 
-import triage.update.FindingSeverity;
+import io.codemodder.sonar.model.update.FindingSeverity;
 
 import java.util.Objects;
 

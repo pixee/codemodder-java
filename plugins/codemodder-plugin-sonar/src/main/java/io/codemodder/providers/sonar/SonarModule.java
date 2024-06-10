@@ -7,8 +7,8 @@ import io.codemodder.CodeChanger;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
-import triage.Issue;
-import triage.SearchIssueResponse;
+import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.SearchIssueResponse;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

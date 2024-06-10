@@ -1,4 +1,4 @@
-package triage;
+package io.codemodder.sonar.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -1,7 +1,7 @@
-package triage;
+package io.codemodder.sonar.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import triage.update.FindingSeverity;
+import io.codemodder.sonar.model.update.FindingSeverity;
 
 import java.util.List;
 import java.util.Optional;

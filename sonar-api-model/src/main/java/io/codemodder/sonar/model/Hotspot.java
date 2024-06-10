@@ -1,7 +1,7 @@
-package triage;
+package io.codemodder.sonar.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import triage.update.FindingSeverity;
+import io.codemodder.sonar.model.update.FindingSeverity;
 
 /** Represents a Sonar "hotspot". */
 public final class Hotspot extends SonarFinding {

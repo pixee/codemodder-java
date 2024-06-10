@@ -1,6 +1,6 @@
 package io.codemodder.providers.sonar;
 
-import triage.Issue;
+import io.codemodder.sonar.model.Issue;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
