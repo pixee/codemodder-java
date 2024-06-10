@@ -12,7 +12,8 @@ import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import java.util.Optional;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /** A codemod to remove redundant variable creation */
 @Codemod(
@@ -31,11 +32,11 @@ public final class RemoveRedundantVariableCreationCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr objectCreationExpr,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
 
     // Get full block statement
     final Optional<BlockStmt> blockStmtOpt = objectCreationExpr.findAncestor(BlockStmt.class);

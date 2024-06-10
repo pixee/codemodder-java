@@ -10,7 +10,8 @@ import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /** A codemod for automatically replacing replaceAll() calls to replace() . */
 @Codemod(
@@ -28,11 +29,11 @@ public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChan
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SimpleName name,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
     name.setIdentifier("replace");
     return ChangesResult.changesApplied;
   }

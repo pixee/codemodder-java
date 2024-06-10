@@ -15,7 +15,8 @@ import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /**
  * Codemod to remove unused local variables which expression is a variable or just a Literal
@@ -41,11 +42,11 @@ public final class RemoveUnusedLocalVariableCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator variableDeclarator,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
 
     final Optional<Expression> initializer = variableDeclarator.getInitializer();
 

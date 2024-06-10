@@ -17,7 +17,8 @@ import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import java.util.Optional;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /** A codemod for setting a private constructor to hide implicit public constructor (Sonar) */
 @Codemod(
@@ -36,11 +37,11 @@ public final class AvoidImplicitPublicConstructorCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SimpleName simpleName,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
 
     final Optional<Node> classOptional = simpleName.getParentNode();
 

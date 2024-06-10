@@ -13,7 +13,8 @@ import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import java.util.Optional;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /** A codemod for automatically fixing missing @Override annotations. */
 @Codemod(
@@ -31,11 +32,11 @@ public final class AddMissingOverrideCodemod extends SonarPluginJavaParserChange
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SimpleName methodName,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
 
     Optional<Node> parentNodeRef = methodName.getParentNode();
     if (parentNodeRef.isPresent()) {

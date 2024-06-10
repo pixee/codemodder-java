@@ -13,7 +13,8 @@ import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import java.util.Optional;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /** A codemod for replacing 'Stream.collect(Collectors.toList())' with 'Stream.toList()' */
 @Codemod(
@@ -32,11 +33,11 @@ public final class ReplaceStreamCollectorsToListCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
 
     final Optional<Node> collectMethodExprOptional = methodCallExpr.getParentNode();
 

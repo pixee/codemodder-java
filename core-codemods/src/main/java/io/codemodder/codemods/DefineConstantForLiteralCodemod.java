@@ -10,7 +10,9 @@ import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import javax.inject.Inject;
+
 import triage.Issue;
+import triage.SonarFinding;
 
 /** A codemod for defining a constant for a literal string that is duplicated n times. */
 @Codemod(
@@ -29,15 +31,17 @@ public final class DefineConstantForLiteralCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final StringLiteralExpr stringLiteralExpr,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
 
     DefineConstantForLiteral defineConstantForLiteral;
 
-    if (issue.getMessage().startsWith("Use already-defined constant")) {
+    final Issue issue = (Issue) sonarFinding;
+
+    if (sonarFinding.getMessage().startsWith("Use already-defined constant")) {
       defineConstantForLiteral =
           new UseExistingConstantForLiteral(context, cu, stringLiteralExpr, issue);
     } else {

@@ -63,15 +63,14 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
     final List<? extends Node> allNodes = nodeCollector.collectNodes(cu, nodeType);
 
     List<CodemodChange> codemodChanges = new ArrayList<>();
-    for (SonarFinding issueFidning : issuesFindings) {
-      Issue issue = (Issue) issueFidning;
+    for (SonarFinding sonarFinding : issuesFindings) {
       for (Node node : allNodes) {
         Position start =
             new Position(
-                issue.getTextRange().getStartLine(), issue.getTextRange().getStartOffset() + 1);
+                    sonarFinding.getTextRange().getStartLine(), sonarFinding.getTextRange().getStartOffset() + 1);
         Position end =
             new Position(
-                issue.getTextRange().getEndLine(), issue.getTextRange().getEndOffset() + 1);
+                    sonarFinding.getTextRange().getEndLine(), sonarFinding.getTextRange().getEndOffset() + 1);
         SourceCodeRegion region = new SourceCodeRegion(start, end);
         if (!nodeType.isAssignableFrom(node.getClass())) {
           continue;
@@ -80,14 +79,14 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
           if (node.getRange().isPresent()) {
             Range range = node.getRange().get();
             if (regionNodeMatcher.matches(region, range)) {
-              ChangesResult changeSuccessful = onIssueFound(context, cu, (T) node, issue);
+              ChangesResult changeSuccessful = onFindingFound(context, cu, (T) node, sonarFinding);
 
               if (changeSuccessful.areChangesApplied()) {
                 codemodChanges.add(
                     CodemodChange.from(
                         region.start().line(),
                         changeSuccessful.getDependenciesRequired(),
-                        new FixedFinding(issue.getKey(), this.detectorRule())));
+                        new FixedFinding(sonarFinding.getKey(), this.detectorRule())));
               }
             }
           }
@@ -105,14 +104,14 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   /**
    * Creates a visitor for the given context and locations.
    *
-   * @param context the context of this files transformation
-   * @param cu the parsed model of the file being transformed
-   * @param node the node to act on
-   * @param issue the given Sonar issue to act on
+   * @param context      the context of this files transformation
+   * @param cu           the parsed model of the file being transformed
+   * @param node         the node to act on
+   * @param sonarFinding the given Sonar issue to act on
    * @return {@link ChangesResult}, that contains result changes
    */
-  public abstract ChangesResult onIssueFound(
-      CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
+  public abstract ChangesResult onFindingFound(
+          CodemodInvocationContext context, CompilationUnit cu, T node, SonarFinding sonarFinding);
 
   @Override
   public String vendorName() {

@@ -18,7 +18,8 @@ import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /**
  * A codemod to replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations
@@ -39,11 +40,11 @@ public final class SimplifyRestControllerAnnotationsCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ClassOrInterfaceDeclaration classOrInterfaceDeclaration,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
 
     final Optional<AnnotationExpr> controllerAnnotationOptional =
         classOrInterfaceDeclaration.getAnnotationByName("Controller");

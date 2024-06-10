@@ -11,7 +11,8 @@ import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /** Codemod to remove useless pair of parentheses */
 @Codemod(
@@ -30,11 +31,11 @@ public final class RemoveUselessParenthesesCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final EnclosedExpr enclosedExpr,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
 
     Expression innerExpr = enclosedExpr.getInner();
     enclosedExpr.replace(innerExpr);

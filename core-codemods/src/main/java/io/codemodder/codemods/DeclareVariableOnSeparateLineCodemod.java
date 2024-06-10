@@ -15,7 +15,8 @@ import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import java.util.Optional;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /** A codemod for declaring a variable on a separate line. */
 @Codemod(
@@ -33,11 +34,11 @@ public final class DeclareVariableOnSeparateLineCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator variableDeclarator,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
 
     final Optional<Node> parentOptional = variableDeclarator.getParentNode();
 

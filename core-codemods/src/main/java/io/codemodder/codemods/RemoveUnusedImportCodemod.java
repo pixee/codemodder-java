@@ -16,7 +16,8 @@ import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 @Codemod(
     id = "sonar:java/remove-unused-import-s1128",
@@ -44,9 +45,9 @@ public final class RemoveUnusedImportCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
-      CodemodInvocationContext context, CompilationUnit cu, ImportDeclaration node, Issue issue) {
-    if (issue.getMessage().contains(node.getNameAsString())) {
+  public ChangesResult onFindingFound(
+          CodemodInvocationContext context, CompilationUnit cu, ImportDeclaration node, SonarFinding sonarFinding) {
+    if (sonarFinding.getMessage().contains(node.getNameAsString())) {
       return cu.remove(node) ? ChangesResult.changesApplied : ChangesResult.noChanges;
     } else {
       return ChangesResult.noChanges;

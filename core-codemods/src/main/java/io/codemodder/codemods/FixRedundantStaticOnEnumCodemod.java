@@ -10,7 +10,8 @@ import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /** A codemod for automatically removing redundant static flags on nested enums. */
 @Codemod(
@@ -29,11 +30,11 @@ public final class FixRedundantStaticOnEnumCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final EnumDeclaration enumDecl,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
     if (enumDecl.isStatic()) {
       enumDecl.setStatic(false);
       return ChangesResult.changesApplied;

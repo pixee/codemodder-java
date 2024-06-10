@@ -10,7 +10,8 @@ import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /**
  * A codemod for removing commented-out lines of code. This codemod has dubious value because Sonar
@@ -44,11 +45,11 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final Comment comment,
-      final Issue issue) {
+      final SonarFinding sonarFinding) {
 
     comment.removeForced();
 

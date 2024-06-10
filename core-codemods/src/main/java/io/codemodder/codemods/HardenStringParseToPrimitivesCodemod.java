@@ -14,7 +14,8 @@ import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import java.util.Optional;
 import javax.inject.Inject;
-import triage.Issue;
+
+import triage.SonarFinding;
 
 /**
  * A codemod that enforces the appropriate parsing technique for converting Strings to primitive
@@ -65,11 +66,11 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
-    public ChangesResult onIssueFound(
+    public ChangesResult onFindingFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr objectCreationExpr,
-        final Issue issue) {
+        final SonarFinding sonarFinding) {
 
       final String type = objectCreationExpr.getType().asString();
       final Expression argumentExpression = objectCreationExpr.getArguments().get(0);
@@ -128,11 +129,11 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
-    public ChangesResult onIssueFound(
+    public ChangesResult onFindingFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final MethodCallExpr methodCallExpr,
-        final Issue issue) {
+        final SonarFinding sonarFinding) {
 
       final String methodName = methodCallExpr.getNameAsString();
 
