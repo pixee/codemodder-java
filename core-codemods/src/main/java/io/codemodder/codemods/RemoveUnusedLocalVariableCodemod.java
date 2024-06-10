@@ -9,12 +9,13 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleFinding;
+import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import triage.Issue;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import triage.Issue;
 
 /**
  * Codemod to remove unused local variables which expression is a variable or just a Literal
@@ -34,7 +35,8 @@ public final class RemoveUnusedLocalVariableCodemod
 
   @Inject
   public RemoveUnusedLocalVariableCodemod(
-      @ProvidedSonarScan(ruleId = "java:S1481") final RuleIssues issues) {
+      @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S1481")
+          final RuleFinding issues) {
     super(issues, VariableDeclarator.class);
   }
 

@@ -9,11 +9,12 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleFinding;
+import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import triage.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
+import triage.Issue;
 
 /**
  * A codemod that enforces the appropriate parsing technique for converting Strings to primitive
@@ -54,7 +55,8 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
 
     @Inject
     public HardenParseForConstructorChanger(
-        @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssues issues) {
+        @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S2130")
+            final RuleFinding issues) {
       super(
           issues,
           ObjectCreationExpr.class,
@@ -116,7 +118,8 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
 
     @Inject
     public HardenParseForValueOfChanger(
-        @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssues issues) {
+        @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S2130")
+            final RuleFinding issues) {
       super(
           issues,
           MethodCallExpr.class,

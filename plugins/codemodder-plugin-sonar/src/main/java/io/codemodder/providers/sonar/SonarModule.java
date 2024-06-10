@@ -7,9 +7,6 @@ import io.codemodder.CodeChanger;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
-import triage.Issue;
-import triage.SearchIssueResponse;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Executable;
@@ -17,6 +14,11 @@ import java.lang.reflect.Parameter;
 import java.nio.file.Path;
 import java.util.*;
 import javax.inject.Inject;
+import triage.Hotspot;
+import triage.Issue;
+import triage.SearchHotspotsResponse;
+import triage.SearchIssueResponse;
+import triage.SonarFinding;
 
 final class SonarModule extends AbstractModule {
 
@@ -38,19 +40,20 @@ final class SonarModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    configureIssues();
+    configureFindings(SonarFindingType.ISSUE, getIssues());
+    configureFindings(SonarFindingType.HOTSPOT, getHotspots());
   }
 
-  private void configureIssues() {
-    final List<Issue> allIssues = getIssues();
-    Map<String, List<Issue>> issuesByRuleMap = groupIssuesByRule(allIssues);
+  private void configureFindings(
+      final SonarFindingType sonarFindingType, final List<? extends SonarFinding> findings) {
+    Map<String, List<SonarFinding>> issuesByRuleMap = groupFindingsByRule(findings);
 
     Set<String> packagesScanned = new HashSet<>();
     for (final Class<? extends CodeChanger> codemodType : codemodTypes) {
       String packageName = codemodType.getPackageName();
       if (!packagesScanned.contains(packageName)) {
         packagesScanned.add(packageName);
-        bindAnnotationsForPackage(packageName, issuesByRuleMap);
+        bindAnnotationsForPackage(sonarFindingType, packageName, issuesByRuleMap);
       }
     }
   }
@@ -80,19 +83,48 @@ final class SonarModule extends AbstractModule {
     return allIssues;
   }
 
-  private Map<String, List<Issue>> groupIssuesByRule(List<Issue> allIssues) {
-    Map<String, List<Issue>> issuesByRuleMap = new HashMap<>();
-    allIssues.forEach(
+  private List<Hotspot> getHotspots() {
+    List<Hotspot> allHotspots = List.of();
+    if (hotspotsFiles != null) {
+      List<SearchHotspotsResponse> hotspotsResponses = new ArrayList<>();
+
+      this.hotspotsFiles.forEach(
+          hotspotsFile -> {
+            try {
+              SearchHotspotsResponse hotspotResponse =
+                  new ObjectMapper()
+                      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                      .readValue(hotspotsFile.toFile(), SearchHotspotsResponse.class);
+              hotspotsResponses.add(hotspotResponse);
+            } catch (IOException e) {
+              throw new UncheckedIOException("Problem reading Sonar hotspot JSON file", e);
+            }
+          });
+
+      allHotspots =
+          hotspotsResponses.stream().flatMap(response -> response.getHotspots().stream()).toList();
+    }
+
+    return allHotspots;
+  }
+
+  private Map<String, List<SonarFinding>> groupFindingsByRule(
+      List<? extends SonarFinding> findings) {
+    Map<String, List<SonarFinding>> findingsByRuleMap = new HashMap<>();
+    findings.forEach(
         issue -> {
-          String rule = issue.getRule();
-          List<Issue> perRuleList = issuesByRuleMap.computeIfAbsent(rule, k -> new ArrayList<>());
+          String rule = issue.rule();
+          List<SonarFinding> perRuleList =
+              findingsByRuleMap.computeIfAbsent(rule, k -> new ArrayList<>());
           perRuleList.add(issue);
         });
-    return issuesByRuleMap;
+    return findingsByRuleMap;
   }
 
   private void bindAnnotationsForPackage(
-      String packageName, Map<String, List<Issue>> issuesByRuleMap) {
+      final SonarFindingType sonarFindingType,
+      String packageName,
+      Map<String, List<SonarFinding>> findingsByRuleMap) {
     try (ScanResult scan =
         new ClassGraph()
             .enableAllInfo()
@@ -108,8 +140,8 @@ final class SonarModule extends AbstractModule {
       injectableParams.forEach(
           param -> {
             ProvidedSonarScan annotation = param.getAnnotation(ProvidedSonarScan.class);
-            if (annotation != null) {
-              bindParam(annotation, param, issuesByRuleMap, boundRuleIds);
+            if (annotation != null && sonarFindingType.equals(annotation.type())) {
+              bindParam(annotation, param, findingsByRuleMap, boundRuleIds);
             }
           });
     }
@@ -130,11 +162,11 @@ final class SonarModule extends AbstractModule {
   private void bindParam(
       ProvidedSonarScan annotation,
       Parameter param,
-      Map<String, List<Issue>> issuesByRuleMap,
+      Map<String, List<SonarFinding>> findingsByRuleMap,
       Map<String, Boolean> boundRuleIds) {
-    if (!RuleIssues.class.equals(param.getType())) {
+    if (!RuleFinding.class.equals(param.getType())) {
       throw new IllegalArgumentException(
-          "can't use @ProvidedSonarScan on anything except RuleIssues (see "
+          "can't use @ProvidedSonarScan on anything except RuleFinding (see "
               + param.getDeclaringExecutable().getDeclaringClass().getName()
               + ")");
     }
@@ -147,31 +179,32 @@ final class SonarModule extends AbstractModule {
     }
 
     // bind from existing scan
-    List<Issue> issues = issuesByRuleMap.get(annotation.ruleId());
+    List<SonarFinding> findings = findingsByRuleMap.get(annotation.ruleId());
 
-    if (issues == null || issues.isEmpty()) {
-      bind(RuleIssues.class).annotatedWith(annotation).toInstance(EMPTY);
+    if (findings == null || findings.isEmpty()) {
+      bind(RuleFinding.class).annotatedWith(annotation).toInstance(EMPTY_RULE_FINDINGS);
     } else {
-      RuleIssues ruleIssues = createRuleIssues(issues);
-      bind(RuleIssues.class).annotatedWith(annotation).toInstance(ruleIssues);
+      RuleFinding ruleFinding = createRuleFindings(findings);
+      bind(RuleFinding.class).annotatedWith(annotation).toInstance(ruleFinding);
       // Mark the ruleId as bound
       boundRuleIds.put(ruleId, true);
     }
   }
 
-  private RuleIssues createRuleIssues(List<Issue> issues) {
-    Map<String, List<Issue>> issuesByPath = new HashMap<>();
-    issues.forEach(
+  private RuleFinding createRuleFindings(List<SonarFinding> sonarFindings) {
+    Map<String, List<SonarFinding>> findingsByPath = new HashMap<>();
+    sonarFindings.forEach(
         issue -> {
           Optional<String> filename = issue.componentFileName();
           if (filename.isPresent()) {
             String fullPath = repository.resolve(filename.get()).toString();
-            List<Issue> pathIssues = issuesByPath.computeIfAbsent(fullPath, f -> new ArrayList<>());
+            List<SonarFinding> pathIssues =
+                findingsByPath.computeIfAbsent(fullPath, f -> new ArrayList<>());
             pathIssues.add(issue);
           }
         });
-    return new DefaultRuleIssues(issuesByPath);
+    return new DefaultRuleFindings(findingsByPath);
   }
 
-  private static final RuleIssues EMPTY = new DefaultRuleIssues(Map.of());
+  private static final RuleFinding EMPTY_RULE_FINDINGS = new DefaultRuleFindings(Map.of());
 }

@@ -13,11 +13,11 @@ import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import io.codemodder.CodemodInvocationContext;
-import triage.Issue;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import triage.Issue;
 
 /**
  * A class that extends DefineConstantForLiteral and specializes in creating new constants for

@@ -8,11 +8,12 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleFinding;
+import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import triage.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
+import triage.Issue;
 
 /**
  * A codemod for automatically fixing overridden methods that do not match their parent methods in
@@ -28,7 +29,8 @@ public final class OverridesMatchParentSynchronizationCodemod
 
   @Inject
   public OverridesMatchParentSynchronizationCodemod(
-      @ProvidedSonarScan(ruleId = "java:S3551") final RuleIssues issues) {
+      @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S3551")
+          final RuleFinding issues) {
     super(issues, SimpleName.class);
   }
 

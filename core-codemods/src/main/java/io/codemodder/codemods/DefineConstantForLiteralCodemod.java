@@ -6,10 +6,11 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleFinding;
+import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import triage.Issue;
 import javax.inject.Inject;
+import triage.Issue;
 
 /** A codemod for defining a constant for a literal string that is duplicated n times. */
 @Codemod(
@@ -22,7 +23,8 @@ public final class DefineConstantForLiteralCodemod
 
   @Inject
   public DefineConstantForLiteralCodemod(
-      @ProvidedSonarScan(ruleId = "java:S1192") final RuleIssues issues) {
+      @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S1192")
+          final RuleFinding issues) {
     super(issues, StringLiteralExpr.class);
   }
 

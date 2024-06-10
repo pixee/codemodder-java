@@ -7,11 +7,12 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleFinding;
+import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import triage.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
+import triage.Issue;
 
 /** A codemod to remove redundant variable creation */
 @Codemod(
@@ -24,7 +25,8 @@ public final class RemoveRedundantVariableCreationCodemod
 
   @Inject
   public RemoveRedundantVariableCreationCodemod(
-      @ProvidedSonarScan(ruleId = "java:S1488") final RuleIssues issues) {
+      @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S1488")
+          final RuleFinding issues) {
     super(issues, ObjectCreationExpr.class);
   }
 

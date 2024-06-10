@@ -77,4 +77,6 @@ public abstract class SonarFinding {
 
   /** Returns the type of the issue. */
   public abstract String typeName();
+
+  public abstract String rule();
 }

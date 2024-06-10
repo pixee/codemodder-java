@@ -12,12 +12,13 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleFinding;
+import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import triage.Issue;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
+import triage.Issue;
 
 /**
  * A codemod to replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations
@@ -32,7 +33,8 @@ public final class SimplifyRestControllerAnnotationsCodemod
 
   @Inject
   public SimplifyRestControllerAnnotationsCodemod(
-      @ProvidedSonarScan(ruleId = "java:S6833") final RuleIssues issues) {
+      @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S6833")
+          final RuleFinding issues) {
     super(issues, ClassOrInterfaceDeclaration.class);
   }
 

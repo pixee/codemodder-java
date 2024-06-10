@@ -12,10 +12,11 @@ import io.codemodder.ReviewGuidance;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleFinding;
+import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import triage.Issue;
 import javax.inject.Inject;
+import triage.Issue;
 
 @Codemod(
     id = "sonar:java/remove-unused-import-s1128",
@@ -27,7 +28,8 @@ public final class RemoveUnusedImportCodemod
 
   @Inject
   public RemoveUnusedImportCodemod(
-      @ProvidedSonarScan(ruleId = "java:S1128") final RuleIssues issues) {
+      @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S1128")
+          final RuleFinding issues) {
     super(
         issues,
         ImportDeclaration.class,

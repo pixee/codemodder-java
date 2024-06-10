@@ -1,9 +1,8 @@
 package io.codemodder.providers.sonar;
 
-import triage.Hotspot;
-
 import java.nio.file.Path;
 import java.util.List;
+import triage.Hotspot;
 
 /** A view of the Sonar hotspot results file for a given rule. */
 public interface RuleHotspots {

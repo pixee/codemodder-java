@@ -12,4 +12,6 @@ public @interface ProvidedSonarScan {
 
   /** The rule ID on the Sonar side. */
   String ruleId();
+
+  SonarFindingType type();
 }

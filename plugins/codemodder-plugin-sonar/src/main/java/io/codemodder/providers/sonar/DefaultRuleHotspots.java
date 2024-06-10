@@ -1,12 +1,10 @@
 package io.codemodder.providers.sonar;
 
-import triage.Hotspot;
-import triage.Issue;
-
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import triage.Hotspot;
 
 final class DefaultRuleHotspots implements RuleHotspots {
 
