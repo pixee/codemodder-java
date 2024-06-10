@@ -9,6 +9,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.WhileStmt;
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.*;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.pmd.PmdScan;
@@ -75,6 +76,13 @@ public final class AddClarifyingBracesCodemod extends SarifPluginJavaParserChang
 
     Range onlyInnerStatementRange = stmt.getExistingSingleStatementRange();
     int onlyInnerStatementColumn = onlyInnerStatementRange.begin.column;
+
+    String concreteStatementCode = LexicalPreservingPrinter.print(stmt.getStatement());
+    if (concreteStatementCode.contains("\t")) {
+      // if the statement contains tabs, we don't want to touch it -- tabs confuse the visual layout
+      // because we can't go by "column" -- it will depend on the viewer
+      return ChangesResult.noChanges;
+    }
 
     if (nextChildNodeBeginColumn >= onlyInnerStatementColumn) {
       stmt.addBraces();
