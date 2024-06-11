@@ -3,7 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.CodemodInvocationContext;
-import io.codemodder.providers.sonar.api.Issue;
+import io.codemodder.sonar.model.Issue;
 
 /**
  * A class that extends DefineConstantForLiteral and specializes in using an existing constant

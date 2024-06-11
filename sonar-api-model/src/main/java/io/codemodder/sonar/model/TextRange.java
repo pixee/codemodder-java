@@ -1,8 +1,8 @@
-package io.codemodder.providers.sonar.api;
+package io.codemodder.sonar.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/** Describes where in the source code the issue resides. */
+/** Represents a range of text in a file. */
 public class TextRange {
 
   @JsonProperty("startLine")
@@ -25,11 +25,11 @@ public class TextRange {
     return endLine;
   }
 
-  public int getEndOffset() {
-    return endOffset;
-  }
-
   public int getStartOffset() {
     return startOffset;
+  }
+
+  public int getEndOffset() {
+    return endOffset;
   }
 }

@@ -1,17 +1,15 @@
-package io.codemodder.providers.sonar.api;
+package io.codemodder.sonar.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.codemodder.sonar.model.update.FindingSeverity;
 import java.util.List;
 import java.util.Optional;
 
-/** Describes an issue */
-public class Issue {
+/** The base type for Sonar findings. */
+public abstract class SonarFinding {
 
   @JsonProperty("key")
   private String key;
-
-  @JsonProperty("rule")
-  private String rule;
 
   @JsonProperty("line")
   private int line;
@@ -31,6 +29,9 @@ public class Issue {
   @JsonProperty("component")
   private String component;
 
+  @JsonProperty("severity")
+  private SonarSeverity severity;
+
   @JsonProperty("message")
   private String message;
 
@@ -39,6 +40,10 @@ public class Issue {
 
   public List<Flow> getFlows() {
     return flows;
+  }
+
+  public FindingSeverity getSeverity() {
+    return severity != null ? severity.toSeverity() : null;
   }
 
   public int getLine() {
@@ -57,26 +62,6 @@ public class Issue {
     return textRange;
   }
 
-  public String getEffort() {
-    return effort;
-  }
-
-  public String getRule() {
-    return rule;
-  }
-
-  public String getResolution() {
-    return resolution;
-  }
-
-  public String getComponent() {
-    return component;
-  }
-
-  public String getStatus() {
-    return status;
-  }
-
   /** Returns the file path section of the component. */
   public Optional<String> componentFileName() {
     if (component == null || component.isEmpty()) {
@@ -88,4 +73,7 @@ public class Issue {
     }
     return Optional.of(parts[1]);
   }
+
+  /** Returns the type of the issue. */
+  public abstract String typeName();
 }
