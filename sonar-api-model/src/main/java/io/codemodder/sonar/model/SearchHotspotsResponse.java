@@ -1,7 +1,6 @@
 package io.codemodder.sonar.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 /** The response when searching for hotspots. */

@@ -1,7 +1,6 @@
 package io.codemodder.sonar.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 public final class Flow {

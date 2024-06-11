@@ -1,5 +1,6 @@
 plugins {
     id("io.codemodder.java-library")
+    id("io.codemodder.maven-publish")
 }
 
 dependencies {
