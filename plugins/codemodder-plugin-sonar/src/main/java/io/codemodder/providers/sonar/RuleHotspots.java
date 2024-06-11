@@ -1,6 +1,5 @@
 package io.codemodder.providers.sonar;
 
-import io.codemodder.sonar.model.Issue;
 import java.nio.file.Path;
 import java.util.List;
 import io.codemodder.sonar.model.Hotspot;
