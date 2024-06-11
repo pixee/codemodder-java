@@ -53,16 +53,16 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    List<? extends SonarFinding> issuesFindings = ruleFinding.getResultsByPath(context.path());
+    List<? extends SonarFinding> findings = ruleFinding.getResultsByPath(context.path());
 
     // small shortcut to avoid always executing the expensive findAll
-    if (issuesFindings == null || issuesFindings.isEmpty()) {
+    if (findings == null || findings.isEmpty()) {
       return CodemodFileScanningResult.none();
     }
     final List<? extends Node> allNodes = nodeCollector.collectNodes(cu, nodeType);
 
     List<CodemodChange> codemodChanges = new ArrayList<>();
-    for (SonarFinding sonarFinding : issuesFindings) {
+    for (SonarFinding sonarFinding : findings) {
       for (Node node : allNodes) {
         Position start =
             new Position(
@@ -108,7 +108,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
    * @param context the context of this files transformation
    * @param cu the parsed model of the file being transformed
    * @param node the node to act on
-   * @param sonarFinding the given Sonar issue to act on
+   * @param sonarFinding the given Sonar finding to act on
    * @return {@link ChangesResult}, that contains result changes
    */
   public abstract ChangesResult onFindingFound(
