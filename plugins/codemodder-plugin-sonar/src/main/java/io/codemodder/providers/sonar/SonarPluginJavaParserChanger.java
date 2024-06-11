@@ -16,35 +16,35 @@ import java.util.Objects;
 public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger
     implements FixOnlyCodeChanger {
 
-  private final RuleFinding RuleFinding;
+  private final RuleFinding ruleFinding;
   private final Class<? extends Node> nodeType;
   private final RegionNodeMatcher regionNodeMatcher;
 
   private final NodeCollector nodeCollector;
 
   protected SonarPluginJavaParserChanger(
-      final RuleFinding RuleFinding,
+      final RuleFinding ruleFinding,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher,
       final NodeCollector nodeCollector) {
-    this.RuleFinding = Objects.requireNonNull(RuleFinding);
+    this.ruleFinding = Objects.requireNonNull(ruleFinding);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = nodeCollector;
   }
 
   protected SonarPluginJavaParserChanger(
-      final RuleFinding RuleFinding, final Class<? extends Node> nodeType) {
-    this(RuleFinding, nodeType, RegionNodeMatcher.MATCHES_START, NodeCollector.ALL_FROM_TYPE);
+      final RuleFinding ruleFinding, final Class<? extends Node> nodeType) {
+    this(ruleFinding, nodeType, RegionNodeMatcher.MATCHES_START, NodeCollector.ALL_FROM_TYPE);
   }
 
   protected SonarPluginJavaParserChanger(
-      final RuleFinding RuleFinding,
+      final RuleFinding ruleFinding,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher,
       final CodemodReporterStrategy codemodReporterStrategy) {
     super(codemodReporterStrategy);
-    this.RuleFinding = Objects.requireNonNull(RuleFinding);
+    this.ruleFinding = Objects.requireNonNull(ruleFinding);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = NodeCollector.ALL_FROM_TYPE;
@@ -53,7 +53,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    List<? extends SonarFinding> issuesFindings = RuleFinding.getResultsByPath(context.path());
+    List<? extends SonarFinding> issuesFindings = ruleFinding.getResultsByPath(context.path());
 
     // small shortcut to avoid always executing the expensive findAll
     if (issuesFindings == null || issuesFindings.isEmpty()) {
@@ -99,7 +99,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
 
   @Override
   public boolean shouldRun() {
-    return RuleFinding.hasResults();
+    return ruleFinding.hasResults();
   }
 
   /**
