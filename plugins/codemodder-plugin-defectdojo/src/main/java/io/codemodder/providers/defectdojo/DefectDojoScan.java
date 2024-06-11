@@ -5,7 +5,7 @@ import javax.inject.Qualifier;
 
 /**
  * This tells the framework to inject the findings from DefectDojo into the following parameter.
- * This can only inject {@link io.codemodder.providers.defectdojo.RuleFinding} types.
+ * This can only inject {@link io.codemodder.providers.defectdojo.RuleFindings} types.
  */
 @Documented
 @Qualifier

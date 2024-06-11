@@ -48,7 +48,7 @@ final class DefectDojoModule extends AbstractModule {
       }
     }
 
-    // create a RuleFinding instance for every rule id we come across in the findings object
+    // create a RuleFindings instance for every rule id we come across in the findings object
     Map<String, List<Finding>> ruleFindingsMap = new HashMap<>();
     for (Finding finding : findings.getResults()) {
       String ruleId = finding.getVulnIdFromTool();
