@@ -20,7 +20,7 @@ repository https://hub.docker.com/repositories/codemodder
 
 All the test framework images are re-built and pushed to the registry with the latest changes in each commit to main.
 
-#### Running integration test for a specific codemod
+#### Running integration test for a specific codemod.
 ```
 ./gradlew :core-codemods:test --tests io.codemodder.codemods.integration.tests.MoveSwitchDefaultCaseLastCodemodIntegrationTest
 ```
