@@ -1,8 +1,0 @@
-{
-  "summary" : "Sets a dynamically formatted SQL query",
-  "change" : "Sets a dynamically formatted SQL query",
-  "reviewGuidanceJustification" : "TODO",
-  "references" : [
-    "https://rules.sonarsource.com/java/RSPEC-2077/"
-  ]
-}

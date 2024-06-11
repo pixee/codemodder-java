@@ -46,14 +46,14 @@ final class SonarModule extends AbstractModule {
 
   private void configureFindings(
       final SonarFindingType sonarFindingType, final List<? extends SonarFinding> findings) {
-    Map<String, List<SonarFinding>> issuesByRuleMap = groupFindingsByRule(findings);
+    Map<String, List<SonarFinding>> findingsByRuleMap = groupFindingsByRule(findings);
 
     Set<String> packagesScanned = new HashSet<>();
     for (final Class<? extends CodeChanger> codemodType : codemodTypes) {
       String packageName = codemodType.getPackageName();
       if (!packagesScanned.contains(packageName)) {
         packagesScanned.add(packageName);
-        bindAnnotationsForPackage(sonarFindingType, packageName, issuesByRuleMap);
+        bindAnnotationsForPackage(sonarFindingType, packageName, findingsByRuleMap);
       }
     }
   }
@@ -112,11 +112,11 @@ final class SonarModule extends AbstractModule {
       List<? extends SonarFinding> findings) {
     Map<String, List<SonarFinding>> findingsByRuleMap = new HashMap<>();
     findings.forEach(
-        issue -> {
-          String rule = issue.rule();
+        finding -> {
+          String rule = finding.rule();
           List<SonarFinding> perRuleList =
               findingsByRuleMap.computeIfAbsent(rule, k -> new ArrayList<>());
-          perRuleList.add(issue);
+          perRuleList.add(finding);
         });
     return findingsByRuleMap;
   }
@@ -194,13 +194,13 @@ final class SonarModule extends AbstractModule {
   private RuleFinding createRuleFindings(List<SonarFinding> sonarFindings) {
     Map<String, List<SonarFinding>> findingsByPath = new HashMap<>();
     sonarFindings.forEach(
-        issue -> {
-          Optional<String> filename = issue.componentFileName();
+        finding -> {
+          Optional<String> filename = finding.componentFileName();
           if (filename.isPresent()) {
             String fullPath = repository.resolve(filename.get()).toString();
-            List<SonarFinding> pathIssues =
+            List<SonarFinding> pathFindings =
                 findingsByPath.computeIfAbsent(fullPath, f -> new ArrayList<>());
-            pathIssues.add(issue);
+            pathFindings.add(finding);
           }
         });
     return new DefaultRuleFindings(findingsByPath);
