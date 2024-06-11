@@ -52,5 +52,6 @@ public @interface Metadata {
   /** Sonar issues file names for testing multiple json files */
   String[] sonarIssuesJsonFiles() default {};
 
+  /** Sonar hotspots file names for testing multiple json files */
   String[] sonarHotspotsJsonFiles() default {};
 }

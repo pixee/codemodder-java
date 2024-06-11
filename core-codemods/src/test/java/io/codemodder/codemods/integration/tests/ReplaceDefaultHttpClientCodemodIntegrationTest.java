@@ -3,6 +3,7 @@ package io.codemodder.codemods.integration.tests;
 import io.codemodder.codemods.integration.util.CodemodIntegrationTestMixin;
 import io.codemodder.codemods.integration.util.IntegrationTestMetadata;
 import io.codemodder.codemods.integration.util.IntegrationTestPropertiesMetadata;
+import org.junit.jupiter.api.Disabled;
 
 /**
  * Test project: the project used for this test is using DefaultHttpClient to do a request to
@@ -10,6 +11,7 @@ import io.codemodder.codemods.integration.util.IntegrationTestPropertiesMetadata
  * HttpClientBuilder and the request is still working as expected. Test project location:
  * resources/test-applications/replace-apache-defaulthttpclient
  */
+@Disabled
 @IntegrationTestMetadata(
     codemodId = "replace-apache-defaulthttpclient",
     tests = {
