@@ -71,14 +71,14 @@ jobs:
         with:
           arguments: check --stacktrace
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-#      - name: "Archives Test Repo"
-#        if: always()
-#        run: |
-#          mkdir target
-#          tar czvf target/webgoat-temp.tar.gz /tmp/WebGoat*
-#      - name: Archive build results
-#        uses: actions/upload-artifact@v3
-#        if: always()
-#        with:
-#          name: build-reports
-#          path: 'target/**/*'
+      - name: "Archives Test Repo"
+        if: always()
+        run: |
+          mkdir target
+          tar czvf target/webgoat-temp.tar.gz /tmp/WebGoat*
+      - name: Archive build results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: build-reports
+          path: 'target/**/*'
