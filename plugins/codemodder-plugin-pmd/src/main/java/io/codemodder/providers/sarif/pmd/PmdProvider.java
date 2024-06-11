@@ -20,7 +20,6 @@ public final class PmdProvider implements CodemodProvider {
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs,
       final List<Path> sonarIssuesJsonPaths,
-      final List<Path> sonarHotspotsJsonPaths,
       final Path defectDojoFindingsJsonFile,
       final Path contrastFindingsJsonPath) {
     return Set.of(new PmdModule(codeDirectory, includedFiles, codemodTypes));
