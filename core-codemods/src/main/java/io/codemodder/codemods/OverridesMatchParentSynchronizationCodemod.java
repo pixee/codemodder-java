@@ -11,11 +11,9 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.SonarFinding;
 import java.util.Optional;
 import javax.inject.Inject;
-
-import io.codemodder.sonar.model.SonarFinding;
 
 /**
  * A codemod for automatically fixing overridden methods that do not match their parent methods in
@@ -38,7 +36,10 @@ public final class OverridesMatchParentSynchronizationCodemod
 
   @Override
   public ChangesResult onFindingFound(
-          CodemodInvocationContext context, CompilationUnit cu, SimpleName methodName, SonarFinding sonarFinding) {
+      CodemodInvocationContext context,
+      CompilationUnit cu,
+      SimpleName methodName,
+      SonarFinding sonarFinding) {
     Optional<Node> parentNodeRef = methodName.getParentNode();
     if (parentNodeRef.isPresent()) {
       Node parentNode = parentNodeRef.get();

@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
+import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.SearchHotspotsResponse;
 import io.codemodder.sonar.model.SearchIssueResponse;
+import io.codemodder.sonar.model.SonarFinding;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
@@ -16,11 +19,6 @@ import java.lang.reflect.Parameter;
 import java.nio.file.Path;
 import java.util.*;
 import javax.inject.Inject;
-import io.codemodder.sonar.model.Hotspot;
-import io.codemodder.sonar.model.Issue;
-import io.codemodder.sonar.model.SearchHotspotsResponse;
-import io.codemodder.sonar.model.SearchIssueResponse;
-import io.codemodder.sonar.model.SonarFinding;
 
 final class SonarModule extends AbstractModule {
 

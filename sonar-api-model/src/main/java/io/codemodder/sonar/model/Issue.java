@@ -17,8 +17,8 @@ public final class Issue extends SonarFinding {
     return "issues";
   }
 
-    @Override
-    public String rule() {
-        return rule;
-    }
+  @Override
+  public String rule() {
+    return rule;
+  }
 }

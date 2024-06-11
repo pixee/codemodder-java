@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import io.codemodder.sonar.model.Issue;
 
 /**
  * A class that extends DefineConstantForLiteral and specializes in creating new constants for

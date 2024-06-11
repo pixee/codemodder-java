@@ -11,11 +11,9 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.SonarFinding;
 import java.util.Optional;
 import javax.inject.Inject;
-
-import io.codemodder.sonar.model.SonarFinding;
 
 /** A codemod for replacing 'Stream.collect(Collectors.toList())' with 'Stream.toList()' */
 @Codemod(

@@ -1,9 +1,8 @@
 package io.codemodder.providers.sonar;
 
+import io.codemodder.sonar.model.SonarFinding;
 import java.nio.file.Path;
 import java.util.List;
-
-import io.codemodder.sonar.model.SonarFinding;
 
 /** A view of the Sonar findings results file for a given rule. */
 public interface RuleFinding {

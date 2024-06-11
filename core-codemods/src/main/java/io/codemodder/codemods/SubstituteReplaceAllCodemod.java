@@ -9,10 +9,8 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.sonar.model.Issue;
-import javax.inject.Inject;
-
 import io.codemodder.sonar.model.SonarFinding;
+import javax.inject.Inject;
 
 /** A codemod for automatically replacing replaceAll() calls to replace() . */
 @Codemod(

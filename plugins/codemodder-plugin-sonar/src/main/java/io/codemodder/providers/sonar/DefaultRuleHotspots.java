@@ -1,10 +1,10 @@
 package io.codemodder.providers.sonar;
 
+import io.codemodder.sonar.model.Hotspot;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import io.codemodder.sonar.model.Hotspot;
 
 final class DefaultRuleHotspots implements RuleHotspots {
 

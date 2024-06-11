@@ -16,9 +16,6 @@ import io.codemodder.sonar.model.TextRange;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.codemodder.sonar.model.Flow;
-import io.codemodder.sonar.model.Issue;
-import io.codemodder.sonar.model.TextRange;
 
 /**
  * An abstract class for defining constants to replace string literals in Java code. Subclasses must

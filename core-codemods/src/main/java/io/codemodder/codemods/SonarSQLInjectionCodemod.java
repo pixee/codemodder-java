@@ -14,34 +14,34 @@ import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.SonarFinding;
-
 import javax.inject.Inject;
 
 @Codemod(
-        id = "sonar:java/sonar-sql-injection-s2077",
-        reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
-        importance = Importance.HIGH,
-        executionPriority = CodemodExecutionPriority.HIGH)
+    id = "sonar:java/sonar-sql-injection-s2077",
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
+    importance = Importance.HIGH,
+    executionPriority = CodemodExecutionPriority.HIGH)
 public final class SonarSQLInjectionCodemod extends SonarPluginJavaParserChanger<Node> {
 
-    @Inject
-    public SonarSQLInjectionCodemod(
-            @ProvidedSonarScan(type = SonarFindingType.HOTSPOT, ruleId = "java:S2077")
-            final RuleFinding hotspots) {
-        super(hotspots, Node.class);
-    }
+  @Inject
+  public SonarSQLInjectionCodemod(
+      @ProvidedSonarScan(type = SonarFindingType.HOTSPOT, ruleId = "java:S2077")
+          final RuleFinding hotspots) {
+    super(hotspots, Node.class);
+  }
 
-    @Override
-    public DetectorRule detectorRule() {
-        return new DetectorRule(
-                "java:S2077",
-                "Formatting SQL queries is security-sensitive",
-                "https://rules.sonarsource.com/java/RSPEC-2077/");
-    }
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S2077",
+        "Formatting SQL queries is security-sensitive",
+        "https://rules.sonarsource.com/java/RSPEC-2077/");
+  }
 
-    @Override
-    public ChangesResult onFindingFound(CodemodInvocationContext context, CompilationUnit cu, Node node, SonarFinding sonarFinding) {
-        node.remove();
-        return ChangesResult.changesApplied;
-    }
+  @Override
+  public ChangesResult onFindingFound(
+      CodemodInvocationContext context, CompilationUnit cu, Node node, SonarFinding sonarFinding) {
+    node.remove();
+    return ChangesResult.changesApplied;
+  }
 }

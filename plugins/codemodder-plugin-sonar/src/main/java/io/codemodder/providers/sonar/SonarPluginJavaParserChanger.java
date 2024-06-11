@@ -7,12 +7,10 @@ import io.codemodder.*;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
-import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.SonarFinding;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import io.codemodder.sonar.model.Issue;
-import io.codemodder.sonar.model.SonarFinding;
 
 /** Provides base functionality for making JavaParser-based changes based on Sonar results. */
 public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger
@@ -68,10 +66,12 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
       for (Node node : allNodes) {
         Position start =
             new Position(
-                    sonarFinding.getTextRange().getStartLine(), sonarFinding.getTextRange().getStartOffset() + 1);
+                sonarFinding.getTextRange().getStartLine(),
+                sonarFinding.getTextRange().getStartOffset() + 1);
         Position end =
             new Position(
-                    sonarFinding.getTextRange().getEndLine(), sonarFinding.getTextRange().getEndOffset() + 1);
+                sonarFinding.getTextRange().getEndLine(),
+                sonarFinding.getTextRange().getEndOffset() + 1);
         SourceCodeRegion region = new SourceCodeRegion(start, end);
         if (!nodeType.isAssignableFrom(node.getClass())) {
           continue;
@@ -105,14 +105,14 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   /**
    * Creates a visitor for the given context and locations.
    *
-   * @param context      the context of this files transformation
-   * @param cu           the parsed model of the file being transformed
-   * @param node         the node to act on
+   * @param context the context of this files transformation
+   * @param cu the parsed model of the file being transformed
+   * @param node the node to act on
    * @param sonarFinding the given Sonar issue to act on
    * @return {@link ChangesResult}, that contains result changes
    */
   public abstract ChangesResult onFindingFound(
-          CodemodInvocationContext context, CompilationUnit cu, T node, SonarFinding sonarFinding);
+      CodemodInvocationContext context, CompilationUnit cu, T node, SonarFinding sonarFinding);
 
   @Override
   public String vendorName() {
