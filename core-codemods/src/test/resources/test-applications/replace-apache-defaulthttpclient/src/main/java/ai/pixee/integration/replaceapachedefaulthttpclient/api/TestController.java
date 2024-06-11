@@ -1,4 +1,4 @@
-package io.pixee.integration.replaceapachedefaulthttpclient.api;
+package ai.pixee.integration.replaceapachedefaulthttpclient.api;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
