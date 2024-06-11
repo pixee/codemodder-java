@@ -2,7 +2,6 @@ package io.codemodder.sonar.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.codemodder.sonar.model.update.FindingSeverity;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -36,12 +35,12 @@ public abstract class SonarFinding {
   @JsonProperty("message")
   private String message;
 
-    @JsonProperty("flows")
-    private List<Flow> flows;
+  @JsonProperty("flows")
+  private List<Flow> flows;
 
-    public List<Flow> getFlows() {
-        return flows;
-    }
+  public List<Flow> getFlows() {
+    return flows;
+  }
 
   public FindingSeverity getSeverity() {
     return severity != null ? severity.toSeverity() : null;

@@ -1,7 +1,6 @@
 package io.codemodder.sonar.model;
 
 import io.codemodder.sonar.model.update.FindingSeverity;
-
 import java.util.Objects;
 
 /**

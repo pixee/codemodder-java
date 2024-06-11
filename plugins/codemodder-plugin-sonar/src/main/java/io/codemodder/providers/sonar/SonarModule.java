@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
+import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.SearchIssueResponse;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
-import io.codemodder.sonar.model.Issue;
-import io.codemodder.sonar.model.SearchIssueResponse;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Executable;
