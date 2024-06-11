@@ -36,6 +36,7 @@ public interface CodemodProvider {
       List<Class<? extends CodeChanger>> codemodTypes,
       List<RuleSarif> sarifs,
       List<Path> sonarIssuesJsonPaths,
+      List<Path> sonarHotspotsJsonPaths,
       Path defectDojoFindingsJsonPath,
       Path contrastFindingsJsonPath);
 

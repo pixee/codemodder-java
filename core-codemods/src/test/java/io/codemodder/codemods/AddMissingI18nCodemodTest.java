@@ -254,6 +254,7 @@ final class AddMissingI18nCodemodTest {
         Files.list(dir).toList(),
         Map.of(),
         List.of(),
+        List.of(),
         null,
         null,
         null);
