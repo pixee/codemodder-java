@@ -1,4 +1,4 @@
-package ai.pixee.integration.replaceapachedefaulthttpclient;
+package io.pixee.integration.replaceapachedefaulthttpclient;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

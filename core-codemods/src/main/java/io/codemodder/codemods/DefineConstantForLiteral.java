@@ -10,12 +10,15 @@ import io.codemodder.CodemodInvocationContext;
 import io.codemodder.Position;
 import io.codemodder.RegionNodeMatcher;
 import io.codemodder.SourceCodeRegion;
+import io.codemodder.sonar.model.Flow;
+import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.TextRange;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import triage.Flow;
-import triage.Issue;
-import triage.TextRange;
+import io.codemodder.sonar.model.Flow;
+import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.TextRange;
 
 /**
  * An abstract class for defining constants to replace string literals in Java code. Subclasses must

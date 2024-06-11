@@ -12,10 +12,11 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
+import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
 
-import triage.SonarFinding;
+import io.codemodder.sonar.model.SonarFinding;
 
 /**
  * A codemod that enforces the appropriate parsing technique for converting Strings to primitive

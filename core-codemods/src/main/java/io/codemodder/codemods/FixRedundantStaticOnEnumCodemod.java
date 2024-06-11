@@ -9,9 +9,10 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
+import io.codemodder.sonar.model.Issue;
 import javax.inject.Inject;
 
-import triage.SonarFinding;
+import io.codemodder.sonar.model.SonarFinding;
 
 /** A codemod for automatically removing redundant static flags on nested enums. */
 @Codemod(

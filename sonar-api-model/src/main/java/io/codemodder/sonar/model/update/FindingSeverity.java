@@ -1,4 +1,4 @@
-package triage.update;
+package io.codemodder.sonar.model.update;
 
 /** If a change needs to made to a finding. */
 public enum FindingSeverity {

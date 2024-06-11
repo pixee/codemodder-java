@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import triage.SonarFinding;
+import io.codemodder.sonar.model.SonarFinding;
 
 final class DefaultRuleFindings implements RuleFinding {
 

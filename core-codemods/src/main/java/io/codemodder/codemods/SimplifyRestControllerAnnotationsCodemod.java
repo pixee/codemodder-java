@@ -15,11 +15,12 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
+import io.codemodder.sonar.model.Issue;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
 
-import triage.SonarFinding;
+import io.codemodder.sonar.model.SonarFinding;
 
 /**
  * A codemod to replace `@Controller` with `@RestController` and remove `@ResponseBody` annotations

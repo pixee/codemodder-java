@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import triage.Hotspot;
+import io.codemodder.sonar.model.Hotspot;
 
 final class DefaultRuleHotspots implements RuleHotspots {
 
