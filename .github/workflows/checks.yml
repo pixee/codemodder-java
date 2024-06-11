@@ -80,5 +80,5 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: build-reports
-          path: 'target/**/*'
+          name: test-report
+          path: core-codemods/build/reports/tests/test/
