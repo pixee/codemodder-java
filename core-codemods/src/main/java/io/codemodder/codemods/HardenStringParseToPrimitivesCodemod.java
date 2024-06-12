@@ -10,7 +10,6 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
@@ -55,8 +54,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
 
     @Inject
     public HardenParseForConstructorChanger(
-        @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S2130")
-            final RuleIssue issues) {
+        @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssue issues) {
       super(
           issues,
           ObjectCreationExpr.class,
@@ -118,8 +116,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
 
     @Inject
     public HardenParseForValueOfChanger(
-        @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S2130")
-            final RuleIssue issues) {
+        @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssue issues) {
       super(
           issues,
           MethodCallExpr.class,

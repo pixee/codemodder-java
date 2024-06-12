@@ -8,7 +8,6 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
@@ -25,8 +24,7 @@ public final class RemoveRedundantVariableCreationCodemod
 
   @Inject
   public RemoveRedundantVariableCreationCodemod(
-      @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S1488")
-          final RuleIssue issues) {
+      @ProvidedSonarScan(ruleId = "java:S1488") final RuleIssue issues) {
     super(issues, ObjectCreationExpr.class);
   }
 

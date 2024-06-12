@@ -40,12 +40,13 @@ final class SonarModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    configureFindings(SonarFindingType.ISSUE, getIssues());
-    configureFindings(SonarFindingType.HOTSPOT, getHotspots());
+    configureFindings(RuleIssue.class, getIssues());
+    configureFindings(RuleHotspot.class, getHotspots());
   }
 
   private void configureFindings(
-      final SonarFindingType sonarFindingType, final List<? extends SonarFinding> findings) {
+      final Class<? extends RuleFinding> ruleFindingClass,
+      final List<? extends SonarFinding> findings) {
     Map<String, List<SonarFinding>> findingsByRuleMap = groupFindingsByRule(findings);
 
     Set<String> packagesScanned = new HashSet<>();
@@ -53,7 +54,7 @@ final class SonarModule extends AbstractModule {
       String packageName = codemodType.getPackageName();
       if (!packagesScanned.contains(packageName)) {
         packagesScanned.add(packageName);
-        bindAnnotationsForPackage(sonarFindingType, packageName, findingsByRuleMap);
+        bindAnnotationsForPackage(ruleFindingClass, packageName, findingsByRuleMap);
       }
     }
   }
@@ -122,7 +123,7 @@ final class SonarModule extends AbstractModule {
   }
 
   private void bindAnnotationsForPackage(
-      final SonarFindingType sonarFindingType,
+      final Class<? extends RuleFinding> ruleFindingClass,
       String packageName,
       Map<String, List<SonarFinding>> findingsByRuleMap) {
     try (ScanResult scan =
@@ -140,7 +141,7 @@ final class SonarModule extends AbstractModule {
       injectableParams.forEach(
           param -> {
             ProvidedSonarScan annotation = param.getAnnotation(ProvidedSonarScan.class);
-            if (annotation != null && sonarFindingType.equals(annotation.type())) {
+            if (annotation != null && ruleFindingClass.equals(param.getType())) {
               bindParam(annotation, param, findingsByRuleMap, boundRuleIds);
             }
           });
@@ -164,7 +165,6 @@ final class SonarModule extends AbstractModule {
       Parameter param,
       Map<String, List<SonarFinding>> findingsByRuleMap,
       Map<String, Boolean> boundRuleIds) {
-    // TODO
     if (!RuleIssue.class.equals(param.getType()) && !RuleHotspot.class.equals(param.getType())) {
       throw new IllegalArgumentException(
           "can't use @ProvidedSonarScan on anything except RuleFinding (see "
