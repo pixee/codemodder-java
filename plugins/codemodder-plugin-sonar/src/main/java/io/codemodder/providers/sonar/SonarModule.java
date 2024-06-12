@@ -166,7 +166,9 @@ final class SonarModule extends AbstractModule {
       Parameter param,
       Map<String, List<SonarFinding>> findingsByRuleMap,
       Map<String, Boolean> boundRuleIds) {
-    if (!RuleIssue.class.equals(param.getType()) && !RuleHotspot.class.equals(param.getType())) {
+
+    // Ensure the parameter type is valid
+    if (!RuleFinding.class.isAssignableFrom(param.getType())) {
       throw new IllegalArgumentException(
           "can't use @ProvidedSonarScan on anything except RuleFinding (see "
               + param.getDeclaringExecutable().getDeclaringClass().getName()
@@ -180,28 +182,34 @@ final class SonarModule extends AbstractModule {
       return; // Skip binding if already bound
     }
 
-    // bind from existing scan
-    List<SonarFinding> findings = findingsByRuleMap.get(annotation.ruleId());
+    // Retrieve findings for the ruleId
+    List<SonarFinding> findings = findingsByRuleMap.getOrDefault(ruleId, Collections.emptyList());
 
-    if (findings == null || findings.isEmpty()) {
+    RuleFinding ruleFinding = createRuleFindings(ruleFindingClass, findings);
+
+    // Determine binding target
+    RuleFinding bindingTarget;
+    if (findings.isEmpty()) {
       if (RuleIssue.class.equals(param.getType())) {
-        bind(RuleIssue.class).annotatedWith(annotation).toInstance(EMPTY_RULE_ISSUES);
+        bindingTarget = EMPTY_RULE_ISSUES;
+      } else if (RuleHotspot.class.equals(param.getType())) {
+        bindingTarget = EMPTY_RULE_HOTSPOT;
       } else {
-        bind(RuleHotspot.class).annotatedWith(annotation).toInstance(EMPTY_RULE_HOTSPOT);
+        throw new IllegalArgumentException("Unsupported parameter type: " + param.getType());
       }
-
     } else {
-      RuleFinding ruleFinding = createRuleFindings(ruleFindingClass, findings);
-
-      if (RuleIssue.class.equals(param.getType())) {
-        bind(RuleIssue.class).annotatedWith(annotation).toInstance((RuleIssue) ruleFinding);
-      } else {
-        bind(RuleHotspot.class).annotatedWith(annotation).toInstance((RuleHotspot) ruleFinding);
-      }
-
-      // Mark the ruleId as bound
-      boundRuleIds.put(ruleId, true);
+      bindingTarget = ruleFinding;
     }
+
+    // Bind the target
+    if (bindingTarget instanceof RuleIssue ruleIssue) {
+      bind(RuleIssue.class).annotatedWith(annotation).toInstance(ruleIssue);
+    } else if (bindingTarget instanceof RuleHotspot ruleHotspot) {
+      bind(RuleHotspot.class).annotatedWith(annotation).toInstance(ruleHotspot);
+    }
+
+    // Mark the ruleId as bound
+    boundRuleIds.put(ruleId, true);
   }
 
   private RuleFinding createRuleFindings(
