@@ -8,8 +8,8 @@ import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
-import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.sonar.model.SonarFinding;
+import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.sonar.model.Issue;
 import javax.inject.Inject;
 
 /** A codemod for automatically replacing replaceAll() calls to replace() . */
@@ -18,7 +18,8 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChanger<SimpleName> {
+public final class SubstituteReplaceAllCodemod
+    extends SonarIssuesPluginJavaParserChanger<SimpleName> {
 
   @Inject
   public SubstituteReplaceAllCodemod(
@@ -28,11 +29,11 @@ public final class SubstituteReplaceAllCodemod extends SonarPluginJavaParserChan
   }
 
   @Override
-  public ChangesResult onFindingFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SimpleName name,
-      final SonarFinding sonarFinding) {
+      final Issue sonarFinding) {
     name.setIdentifier("replace");
     return ChangesResult.changesApplied;
   }

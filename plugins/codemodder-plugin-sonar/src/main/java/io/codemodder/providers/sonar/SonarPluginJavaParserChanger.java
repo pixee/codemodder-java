@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 /** Provides base functionality for making JavaParser-based changes based on Sonar results. */
-public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger
+abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger
     implements FixOnlyCodeChanger {
 
   private final RuleFinding ruleFinding;
@@ -111,7 +111,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
    * @param sonarFinding the given Sonar finding to act on
    * @return {@link ChangesResult}, that contains result changes
    */
-  public abstract ChangesResult onFindingFound(
+  protected abstract ChangesResult onFindingFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, SonarFinding sonarFinding);
 
   @Override

@@ -8,8 +8,8 @@ import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
-import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.sonar.model.SonarFinding;
+import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.sonar.model.Issue;
 import javax.inject.Inject;
 
 /**
@@ -23,7 +23,7 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChanger<Comment> {
+public final class RemoveCommentedCodeCodemod extends SonarIssuesPluginJavaParserChanger<Comment> {
 
   /**
    * The reason behind this specific region node matcher is that in the reported column by
@@ -44,11 +44,11 @@ public final class RemoveCommentedCodeCodemod extends SonarPluginJavaParserChang
   }
 
   @Override
-  public ChangesResult onFindingFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final Comment comment,
-      final SonarFinding sonarFinding) {
+      final Issue sonarFinding) {
 
     comment.removeForced();
 

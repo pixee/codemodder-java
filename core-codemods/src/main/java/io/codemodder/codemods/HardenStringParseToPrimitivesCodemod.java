@@ -11,8 +11,8 @@ import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
-import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.sonar.model.SonarFinding;
+import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -51,7 +51,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
    * or new Float("12").
    */
   private static final class HardenParseForConstructorChanger
-      extends SonarPluginJavaParserChanger<ObjectCreationExpr> {
+      extends SonarIssuesPluginJavaParserChanger<ObjectCreationExpr> {
 
     @Inject
     public HardenParseForConstructorChanger(
@@ -65,11 +65,11 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
-    public ChangesResult onFindingFound(
+    public ChangesResult onIssueFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr objectCreationExpr,
-        final SonarFinding sonarFinding) {
+        final Issue sonarFinding) {
 
       final String type = objectCreationExpr.getType().asString();
       final Expression argumentExpression = objectCreationExpr.getArguments().get(0);
@@ -114,7 +114,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
    * Integer or Float classes.
    */
   private static final class HardenParseForValueOfChanger
-      extends SonarPluginJavaParserChanger<MethodCallExpr> {
+      extends SonarIssuesPluginJavaParserChanger<MethodCallExpr> {
 
     @Inject
     public HardenParseForValueOfChanger(
@@ -128,11 +128,11 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
-    public ChangesResult onFindingFound(
+    public ChangesResult onIssueFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final MethodCallExpr methodCallExpr,
-        final SonarFinding sonarFinding) {
+        final Issue sonarFinding) {
 
       final String methodName = methodCallExpr.getNameAsString();
 

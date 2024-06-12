@@ -10,8 +10,8 @@ import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
-import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.sonar.model.SonarFinding;
+import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -22,7 +22,7 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class ReplaceStreamCollectorsToListCodemod
-    extends SonarPluginJavaParserChanger<MethodCallExpr> {
+    extends SonarIssuesPluginJavaParserChanger<MethodCallExpr> {
 
   @Inject
   public ReplaceStreamCollectorsToListCodemod(
@@ -32,11 +32,11 @@ public final class ReplaceStreamCollectorsToListCodemod
   }
 
   @Override
-  public ChangesResult onFindingFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
-      final SonarFinding sonarFinding) {
+      final Issue sonarFinding) {
 
     final Optional<Node> collectMethodExprOptional = methodCallExpr.getParentNode();
 

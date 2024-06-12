@@ -12,8 +12,8 @@ import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
-import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.sonar.model.SonarFinding;
+import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -24,7 +24,7 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class DeclareVariableOnSeparateLineCodemod
-    extends SonarPluginJavaParserChanger<VariableDeclarator> {
+    extends SonarIssuesPluginJavaParserChanger<VariableDeclarator> {
   @Inject
   public DeclareVariableOnSeparateLineCodemod(
       @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S1659")
@@ -33,11 +33,11 @@ public final class DeclareVariableOnSeparateLineCodemod
   }
 
   @Override
-  public ChangesResult onFindingFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator variableDeclarator,
-      final SonarFinding sonarFinding) {
+      final Issue sonarFinding) {
 
     final Optional<Node> parentOptional = variableDeclarator.getParentNode();
 

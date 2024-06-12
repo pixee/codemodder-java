@@ -14,8 +14,8 @@ import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
-import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.sonar.model.SonarFinding;
+import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.sonar.model.Issue;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -29,7 +29,7 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class SimplifyRestControllerAnnotationsCodemod
-    extends SonarPluginJavaParserChanger<ClassOrInterfaceDeclaration> {
+    extends SonarIssuesPluginJavaParserChanger<ClassOrInterfaceDeclaration> {
 
   @Inject
   public SimplifyRestControllerAnnotationsCodemod(
@@ -39,11 +39,11 @@ public final class SimplifyRestControllerAnnotationsCodemod
   }
 
   @Override
-  public ChangesResult onFindingFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ClassOrInterfaceDeclaration classOrInterfaceDeclaration,
-      final SonarFinding sonarFinding) {
+      final Issue sonarFinding) {
 
     final Optional<AnnotationExpr> controllerAnnotationOptional =
         classOrInterfaceDeclaration.getAnnotationByName("Controller");

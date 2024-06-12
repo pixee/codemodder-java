@@ -8,9 +8,8 @@ import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleFinding;
 import io.codemodder.providers.sonar.SonarFindingType;
-import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
-import io.codemodder.sonar.model.SonarFinding;
 import javax.inject.Inject;
 
 /** A codemod for defining a constant for a literal string that is duplicated n times. */
@@ -20,7 +19,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class DefineConstantForLiteralCodemod
-    extends SonarPluginJavaParserChanger<StringLiteralExpr> {
+    extends SonarIssuesPluginJavaParserChanger<StringLiteralExpr> {
 
   @Inject
   public DefineConstantForLiteralCodemod(
@@ -30,17 +29,15 @@ public final class DefineConstantForLiteralCodemod
   }
 
   @Override
-  public ChangesResult onFindingFound(
+  public ChangesResult onIssueFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final StringLiteralExpr stringLiteralExpr,
-      final SonarFinding sonarFinding) {
+      final Issue issue) {
 
     DefineConstantForLiteral defineConstantForLiteral;
 
-    final Issue issue = (Issue) sonarFinding;
-
-    if (sonarFinding.getMessage().startsWith("Use already-defined constant")) {
+    if (issue.getMessage().startsWith("Use already-defined constant")) {
       defineConstantForLiteral =
           new UseExistingConstantForLiteral(context, cu, stringLiteralExpr, issue);
     } else {
