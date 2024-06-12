@@ -6,7 +6,7 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleFinding;
+import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarFindingType;
 import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
@@ -24,7 +24,7 @@ public final class DefineConstantForLiteralCodemod
   @Inject
   public DefineConstantForLiteralCodemod(
       @ProvidedSonarScan(type = SonarFindingType.ISSUE, ruleId = "java:S1192")
-          final RuleFinding issues) {
+          final RuleIssue issues) {
     super(issues, StringLiteralExpr.class);
   }
 

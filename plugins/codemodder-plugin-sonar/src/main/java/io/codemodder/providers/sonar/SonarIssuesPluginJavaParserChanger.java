@@ -15,24 +15,24 @@ public abstract class SonarIssuesPluginJavaParserChanger<T extends Node>
     extends SonarPluginJavaParserChanger<T> {
 
   protected SonarIssuesPluginJavaParserChanger(
-      RuleFinding ruleFinding,
+      RuleIssue ruleIssue,
       Class<? extends Node> nodeType,
       RegionNodeMatcher regionNodeMatcher,
       NodeCollector nodeCollector) {
-    super(ruleFinding, nodeType, regionNodeMatcher, nodeCollector);
+    super(ruleIssue, nodeType, regionNodeMatcher, nodeCollector);
   }
 
   protected SonarIssuesPluginJavaParserChanger(
-      RuleFinding ruleFinding, Class<? extends Node> nodeType) {
-    super(ruleFinding, nodeType);
+      RuleIssue ruleIssue, Class<? extends Node> nodeType) {
+    super(ruleIssue, nodeType);
   }
 
   protected SonarIssuesPluginJavaParserChanger(
-      RuleFinding ruleFinding,
+      RuleIssue ruleIssue,
       Class<? extends Node> nodeType,
       RegionNodeMatcher regionNodeMatcher,
       CodemodReporterStrategy codemodReporterStrategy) {
-    super(ruleFinding, nodeType, regionNodeMatcher, codemodReporterStrategy);
+    super(ruleIssue, nodeType, regionNodeMatcher, codemodReporterStrategy);
   }
 
   @Override

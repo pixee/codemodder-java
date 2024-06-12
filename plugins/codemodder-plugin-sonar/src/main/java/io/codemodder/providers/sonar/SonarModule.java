@@ -164,7 +164,8 @@ final class SonarModule extends AbstractModule {
       Parameter param,
       Map<String, List<SonarFinding>> findingsByRuleMap,
       Map<String, Boolean> boundRuleIds) {
-    if (!RuleFinding.class.equals(param.getType())) {
+      // TODO
+    if (!RuleIssue.class.equals(param.getType()) ) {
       throw new IllegalArgumentException(
           "can't use @ProvidedSonarScan on anything except RuleFinding (see "
               + param.getDeclaringExecutable().getDeclaringClass().getName()
@@ -182,16 +183,27 @@ final class SonarModule extends AbstractModule {
     List<SonarFinding> findings = findingsByRuleMap.get(annotation.ruleId());
 
     if (findings == null || findings.isEmpty()) {
-      bind(RuleFinding.class).annotatedWith(annotation).toInstance(EMPTY_RULE_FINDINGS);
+      if (RuleIssue.class.equals(param.getType())) {
+        bind(RuleIssue.class).annotatedWith(annotation).toInstance(EMPTY_RULE_ISSUES);
+      } else {
+        // TODO
+      }
+
     } else {
       RuleFinding ruleFinding = createRuleFindings(findings);
-      bind(RuleFinding.class).annotatedWith(annotation).toInstance(ruleFinding);
+
+      if (RuleIssue.class.equals(param.getType())) {
+        bind(RuleIssue.class).annotatedWith(annotation).toInstance((RuleIssue) ruleFinding);
+      } else {
+        // TODO
+      }
+
       // Mark the ruleId as bound
       boundRuleIds.put(ruleId, true);
     }
   }
 
-  private RuleFinding createRuleFindings(List<SonarFinding> sonarFindings) {
+  private RuleFinding createRuleFindings(List<? extends SonarFinding> sonarFindings) {
     Map<String, List<SonarFinding>> findingsByPath = new HashMap<>();
     sonarFindings.forEach(
         finding -> {
@@ -203,8 +215,8 @@ final class SonarModule extends AbstractModule {
             pathFindings.add(finding);
           }
         });
-    return new DefaultRuleFindings(findingsByPath);
+    return new RuleIssue(findingsByPath);
   }
 
-  private static final RuleFinding EMPTY_RULE_FINDINGS = new DefaultRuleFindings(Map.of());
+  private static final RuleIssue EMPTY_RULE_ISSUES = new RuleIssue(Map.of());
 }

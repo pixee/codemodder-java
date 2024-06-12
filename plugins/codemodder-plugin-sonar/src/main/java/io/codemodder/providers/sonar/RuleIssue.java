@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-final class DefaultRuleFindings implements RuleFinding {
+public final class RuleIssue implements RuleFinding {
 
   private final Map<String, List<SonarFinding>> findings;
 
-  DefaultRuleFindings(final Map<String, List<SonarFinding>> findings) {
+  RuleIssue(final Map<String, List<SonarFinding>> findings) {
     this.findings = Objects.requireNonNull(findings);
   }
 
