@@ -164,8 +164,8 @@ final class SonarModule extends AbstractModule {
       Parameter param,
       Map<String, List<SonarFinding>> findingsByRuleMap,
       Map<String, Boolean> boundRuleIds) {
-      // TODO
-    if (!RuleIssue.class.equals(param.getType()) ) {
+    // TODO
+    if (!RuleIssue.class.equals(param.getType()) && !RuleHotspot.class.equals(param.getType())) {
       throw new IllegalArgumentException(
           "can't use @ProvidedSonarScan on anything except RuleFinding (see "
               + param.getDeclaringExecutable().getDeclaringClass().getName()
@@ -186,7 +186,7 @@ final class SonarModule extends AbstractModule {
       if (RuleIssue.class.equals(param.getType())) {
         bind(RuleIssue.class).annotatedWith(annotation).toInstance(EMPTY_RULE_ISSUES);
       } else {
-        // TODO
+        bind(RuleHotspot.class).annotatedWith(annotation).toInstance(EMPTY_RULE_HOTSPOT);
       }
 
     } else {
@@ -195,7 +195,7 @@ final class SonarModule extends AbstractModule {
       if (RuleIssue.class.equals(param.getType())) {
         bind(RuleIssue.class).annotatedWith(annotation).toInstance((RuleIssue) ruleFinding);
       } else {
-        // TODO
+        bind(RuleHotspot.class).annotatedWith(annotation).toInstance((RuleHotspot) ruleFinding);
       }
 
       // Mark the ruleId as bound
@@ -219,4 +219,5 @@ final class SonarModule extends AbstractModule {
   }
 
   private static final RuleIssue EMPTY_RULE_ISSUES = new RuleIssue(Map.of());
+  private static final RuleHotspot EMPTY_RULE_HOTSPOT = new RuleHotspot(Map.of());
 }

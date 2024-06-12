@@ -8,7 +8,7 @@ import java.util.List;
 public interface RuleFinding {
 
   /** A list of issues associated with the given path. */
-  List<SonarFinding> getResultsByPath(Path path);
+  List<? extends SonarFinding> getResultsByPath(Path path);
 
   /** Whether any results are available. */
   boolean hasResults();
