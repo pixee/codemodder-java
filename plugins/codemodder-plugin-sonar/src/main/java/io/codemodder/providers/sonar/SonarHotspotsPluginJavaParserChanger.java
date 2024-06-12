@@ -7,32 +7,32 @@ import io.codemodder.CodemodReporterStrategy;
 import io.codemodder.NodeCollector;
 import io.codemodder.RegionNodeMatcher;
 import io.codemodder.javaparser.ChangesResult;
-import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.SonarFinding;
 
-/** Provides base functionality for making JavaParser-based changes based on Sonar issues. */
-public abstract class SonarIssuesPluginJavaParserChanger<T extends Node>
+/** Provides base functionality for making JavaParser-based changes based on Sonar hotspots. */
+public abstract class SonarHotspotsPluginJavaParserChanger<T extends Node>
     extends SonarPluginJavaParserChanger<T> {
 
-  protected SonarIssuesPluginJavaParserChanger(
-      RuleIssue ruleIssue,
+  protected SonarHotspotsPluginJavaParserChanger(
+      RuleHotspot ruleHotspot,
       Class<? extends Node> nodeType,
       RegionNodeMatcher regionNodeMatcher,
       NodeCollector nodeCollector) {
-    super(ruleIssue, nodeType, regionNodeMatcher, nodeCollector);
+    super(ruleHotspot, nodeType, regionNodeMatcher, nodeCollector);
   }
 
-  protected SonarIssuesPluginJavaParserChanger(
-      RuleIssue ruleIssue, Class<? extends Node> nodeType) {
-    super(ruleIssue, nodeType);
+  protected SonarHotspotsPluginJavaParserChanger(
+      RuleHotspot ruleHotspot, Class<? extends Node> nodeType) {
+    super(ruleHotspot, nodeType);
   }
 
-  protected SonarIssuesPluginJavaParserChanger(
-      RuleIssue ruleIssue,
+  protected SonarHotspotsPluginJavaParserChanger(
+      RuleHotspot ruleHotspot,
       Class<? extends Node> nodeType,
       RegionNodeMatcher regionNodeMatcher,
       CodemodReporterStrategy codemodReporterStrategy) {
-    super(ruleIssue, nodeType, regionNodeMatcher, codemodReporterStrategy);
+    super(ruleHotspot, nodeType, regionNodeMatcher, codemodReporterStrategy);
   }
 
   @Override
@@ -41,9 +41,9 @@ public abstract class SonarIssuesPluginJavaParserChanger<T extends Node>
       final CompilationUnit cu,
       final T node,
       final SonarFinding sonarFinding) {
-    return onIssueFound(context, cu, node, (Issue) sonarFinding);
+    return onHotspotFound(context, cu, node, (Hotspot) sonarFinding);
   }
 
-  public abstract ChangesResult onIssueFound(
-      CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
+  public abstract ChangesResult onHotspotFound(
+      CodemodInvocationContext context, CompilationUnit cu, T node, Hotspot hotspot);
 }

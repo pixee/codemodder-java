@@ -142,7 +142,7 @@ final class SonarModule extends AbstractModule {
           param -> {
             ProvidedSonarScan annotation = param.getAnnotation(ProvidedSonarScan.class);
             if (annotation != null && ruleFindingClass.equals(param.getType())) {
-              bindParam(annotation, param, findingsByRuleMap, boundRuleIds);
+              bindParam(ruleFindingClass, annotation, param, findingsByRuleMap, boundRuleIds);
             }
           });
     }
@@ -161,6 +161,7 @@ final class SonarModule extends AbstractModule {
   }
 
   private void bindParam(
+      final Class<? extends RuleFinding> ruleFindingClass,
       ProvidedSonarScan annotation,
       Parameter param,
       Map<String, List<SonarFinding>> findingsByRuleMap,
@@ -190,7 +191,7 @@ final class SonarModule extends AbstractModule {
       }
 
     } else {
-      RuleFinding ruleFinding = createRuleFindings(findings);
+      RuleFinding ruleFinding = createRuleFindings(ruleFindingClass, findings);
 
       if (RuleIssue.class.equals(param.getType())) {
         bind(RuleIssue.class).annotatedWith(annotation).toInstance((RuleIssue) ruleFinding);
@@ -203,7 +204,9 @@ final class SonarModule extends AbstractModule {
     }
   }
 
-  private RuleFinding createRuleFindings(List<? extends SonarFinding> sonarFindings) {
+  private RuleFinding createRuleFindings(
+      final Class<? extends RuleFinding> ruleFindingClass,
+      List<? extends SonarFinding> sonarFindings) {
     Map<String, List<SonarFinding>> findingsByPath = new HashMap<>();
     sonarFindings.forEach(
         finding -> {
@@ -215,7 +218,9 @@ final class SonarModule extends AbstractModule {
             pathFindings.add(finding);
           }
         });
-    return new RuleIssue(findingsByPath);
+    return RuleIssue.class.equals(ruleFindingClass)
+        ? new RuleIssue(findingsByPath)
+        : new RuleHotspot(findingsByPath);
   }
 
   private static final RuleIssue EMPTY_RULE_ISSUES = new RuleIssue(Map.of());
