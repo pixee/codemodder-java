@@ -18,7 +18,7 @@ final class SonarModule<T extends SonarFinding> extends AbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path repository;
-  private final List<T> findingsFound;
+  private final List<T> sonarFindings;
 
   private final Class<? extends RuleFinding<T>> ruleFindingClass;
 
@@ -29,14 +29,14 @@ final class SonarModule<T extends SonarFinding> extends AbstractModule {
       final Class<? extends RuleFinding<T>> ruleFindingClass) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.repository = Objects.requireNonNull(repository);
-    this.findingsFound = findings;
+    this.sonarFindings = findings;
     this.ruleFindingClass = ruleFindingClass;
   }
 
   @Override
   protected void configure() {
 
-    Map<String, List<T>> findingsByRuleMap = groupFindingsByRule(findingsFound);
+    Map<String, List<T>> findingsByRuleMap = groupFindingsByRule(sonarFindings);
 
     Set<String> packagesScanned = new HashSet<>();
     for (final Class<? extends CodeChanger> codemodType : codemodTypes) {
