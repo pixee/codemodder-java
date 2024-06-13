@@ -13,7 +13,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -25,7 +25,7 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class AvoidImplicitPublicConstructorCodemod
-    extends SonarIssuesPluginJavaParserChanger<SimpleName> {
+    extends SonarPluginJavaParserChanger<SimpleName, Issue> {
 
   @Inject
   public AvoidImplicitPublicConstructorCodemod(
@@ -34,11 +34,11 @@ public final class AvoidImplicitPublicConstructorCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SimpleName simpleName,
-      final Issue sonarFinding) {
+      final Issue issue) {
 
     final Optional<Node> classOptional = simpleName.getParentNode();
 

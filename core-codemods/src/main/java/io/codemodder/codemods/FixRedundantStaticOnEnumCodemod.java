@@ -7,7 +7,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import javax.inject.Inject;
 
@@ -18,7 +18,7 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class FixRedundantStaticOnEnumCodemod
-    extends SonarIssuesPluginJavaParserChanger<EnumDeclaration> {
+    extends SonarPluginJavaParserChanger<EnumDeclaration, Issue> {
 
   @Inject
   public FixRedundantStaticOnEnumCodemod(
@@ -27,11 +27,11 @@ public final class FixRedundantStaticOnEnumCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final EnumDeclaration enumDecl,
-      final Issue sonarFinding) {
+      final Issue issue) {
     if (enumDecl.isStatic()) {
       enumDecl.setStatic(false);
       return ChangesResult.changesApplied;

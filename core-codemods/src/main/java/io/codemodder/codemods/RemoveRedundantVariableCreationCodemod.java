@@ -8,7 +8,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -20,7 +20,7 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveRedundantVariableCreationCodemod
-    extends SonarIssuesPluginJavaParserChanger<ObjectCreationExpr> {
+    extends SonarPluginJavaParserChanger<ObjectCreationExpr, Issue> {
 
   @Inject
   public RemoveRedundantVariableCreationCodemod(
@@ -29,11 +29,11 @@ public final class RemoveRedundantVariableCreationCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ObjectCreationExpr objectCreationExpr,
-      final Issue sonarFinding) {
+      final Issue issue) {
 
     // Get full block statement
     final Optional<BlockStmt> blockStmtOpt = objectCreationExpr.findAncestor(BlockStmt.class);

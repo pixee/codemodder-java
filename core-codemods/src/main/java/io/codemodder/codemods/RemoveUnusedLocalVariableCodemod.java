@@ -10,7 +10,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,7 +30,7 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveUnusedLocalVariableCodemod
-    extends SonarIssuesPluginJavaParserChanger<VariableDeclarator> {
+    extends SonarPluginJavaParserChanger<VariableDeclarator, Issue> {
 
   @Inject
   public RemoveUnusedLocalVariableCodemod(
@@ -39,11 +39,11 @@ public final class RemoveUnusedLocalVariableCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator variableDeclarator,
-      final Issue sonarFinding) {
+      final Issue issue) {
 
     final Optional<Expression> initializer = variableDeclarator.getInitializer();
 

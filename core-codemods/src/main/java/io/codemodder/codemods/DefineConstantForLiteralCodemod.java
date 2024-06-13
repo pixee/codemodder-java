@@ -7,7 +7,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import javax.inject.Inject;
 
@@ -18,7 +18,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class DefineConstantForLiteralCodemod
-    extends SonarIssuesPluginJavaParserChanger<StringLiteralExpr> {
+    extends SonarPluginJavaParserChanger<StringLiteralExpr, Issue> {
 
   @Inject
   public DefineConstantForLiteralCodemod(
@@ -27,7 +27,7 @@ public final class DefineConstantForLiteralCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final StringLiteralExpr stringLiteralExpr,

@@ -7,7 +7,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import javax.inject.Inject;
 
@@ -18,7 +18,7 @@ import javax.inject.Inject;
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class SubstituteReplaceAllCodemod
-    extends SonarIssuesPluginJavaParserChanger<SimpleName> {
+    extends SonarPluginJavaParserChanger<SimpleName, Issue> {
 
   @Inject
   public SubstituteReplaceAllCodemod(
@@ -27,11 +27,11 @@ public final class SubstituteReplaceAllCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final SimpleName name,
-      final Issue sonarFinding) {
+      final Issue issue) {
     name.setIdentifier("replace");
     return ChangesResult.changesApplied;
   }

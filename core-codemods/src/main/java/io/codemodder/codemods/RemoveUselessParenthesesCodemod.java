@@ -8,7 +8,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import javax.inject.Inject;
 
@@ -19,7 +19,7 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveUselessParenthesesCodemod
-    extends SonarIssuesPluginJavaParserChanger<EnclosedExpr> {
+    extends SonarPluginJavaParserChanger<EnclosedExpr, Issue> {
 
   @Inject
   public RemoveUselessParenthesesCodemod(
@@ -28,11 +28,11 @@ public final class RemoveUselessParenthesesCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final EnclosedExpr enclosedExpr,
-      final Issue sonarFinding) {
+      final Issue issue) {
 
     Expression innerExpr = enclosedExpr.getInner();
     enclosedExpr.replace(innerExpr);

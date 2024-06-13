@@ -13,7 +13,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import javax.inject.Inject;
 
@@ -23,7 +23,7 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class RemoveUnusedImportCodemod
-    extends SonarIssuesPluginJavaParserChanger<ImportDeclaration> {
+    extends SonarPluginJavaParserChanger<ImportDeclaration, Issue> {
 
   @Inject
   public RemoveUnusedImportCodemod(
@@ -42,12 +42,9 @@ public final class RemoveUnusedImportCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
-      CodemodInvocationContext context,
-      CompilationUnit cu,
-      ImportDeclaration node,
-      Issue sonarFinding) {
-    if (sonarFinding.getMessage().contains(node.getNameAsString())) {
+  public ChangesResult onFindingFound(
+      CodemodInvocationContext context, CompilationUnit cu, ImportDeclaration node, Issue issue) {
+    if (issue.getMessage().contains(node.getNameAsString())) {
       return cu.remove(node) ? ChangesResult.changesApplied : ChangesResult.noChanges;
     } else {
       return ChangesResult.noChanges;

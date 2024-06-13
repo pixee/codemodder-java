@@ -9,7 +9,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -21,7 +21,7 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class ReplaceStreamCollectorsToListCodemod
-    extends SonarIssuesPluginJavaParserChanger<MethodCallExpr> {
+    extends SonarPluginJavaParserChanger<MethodCallExpr, Issue> {
 
   @Inject
   public ReplaceStreamCollectorsToListCodemod(
@@ -30,11 +30,11 @@ public final class ReplaceStreamCollectorsToListCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final MethodCallExpr methodCallExpr,
-      final Issue sonarFinding) {
+      final Issue issue) {
 
     final Optional<Node> collectMethodExprOptional = methodCallExpr.getParentNode();
 

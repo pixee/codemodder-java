@@ -9,7 +9,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarIssuesPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -24,7 +24,7 @@ import javax.inject.Inject;
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class OverridesMatchParentSynchronizationCodemod
-    extends SonarIssuesPluginJavaParserChanger<SimpleName> {
+    extends SonarPluginJavaParserChanger<SimpleName, Issue> {
 
   @Inject
   public OverridesMatchParentSynchronizationCodemod(
@@ -33,11 +33,8 @@ public final class OverridesMatchParentSynchronizationCodemod
   }
 
   @Override
-  public ChangesResult onIssueFound(
-      CodemodInvocationContext context,
-      CompilationUnit cu,
-      SimpleName methodName,
-      Issue sonarFinding) {
+  public ChangesResult onFindingFound(
+      CodemodInvocationContext context, CompilationUnit cu, SimpleName methodName, Issue issue) {
     Optional<Node> parentNodeRef = methodName.getParentNode();
     if (parentNodeRef.isPresent()) {
       Node parentNode = parentNodeRef.get();
