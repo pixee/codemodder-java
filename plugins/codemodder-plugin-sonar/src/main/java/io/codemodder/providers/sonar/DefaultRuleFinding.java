@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-class DefaultRuleFinding<T extends SonarFinding> implements RuleFinding<T> {
+abstract class DefaultRuleFinding<T extends SonarFinding> implements RuleFinding<T> {
 
   private final Map<String, List<T>> findings;
 
