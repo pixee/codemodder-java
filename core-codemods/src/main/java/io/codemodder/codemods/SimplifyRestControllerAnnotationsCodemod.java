@@ -12,7 +12,7 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import java.util.List;
@@ -28,16 +28,16 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class SimplifyRestControllerAnnotationsCodemod
-    extends SonarPluginJavaParserChanger<ClassOrInterfaceDeclaration> {
+    extends SonarPluginJavaParserChanger<ClassOrInterfaceDeclaration, Issue> {
 
   @Inject
   public SimplifyRestControllerAnnotationsCodemod(
-      @ProvidedSonarScan(ruleId = "java:S6833") final RuleIssues issues) {
+      @ProvidedSonarScan(ruleId = "java:S6833") final RuleIssue issues) {
     super(issues, ClassOrInterfaceDeclaration.class);
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final ClassOrInterfaceDeclaration classOrInterfaceDeclaration,

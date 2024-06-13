@@ -10,7 +10,7 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
@@ -23,15 +23,15 @@ import javax.inject.Inject;
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class DeclareVariableOnSeparateLineCodemod
-    extends SonarPluginJavaParserChanger<VariableDeclarator> {
+    extends SonarPluginJavaParserChanger<VariableDeclarator, Issue> {
   @Inject
   public DeclareVariableOnSeparateLineCodemod(
-      @ProvidedSonarScan(ruleId = "java:S1659") final RuleIssues issues) {
+      @ProvidedSonarScan(ruleId = "java:S1659") final RuleIssue issues) {
     super(issues, VariableDeclarator.class);
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final VariableDeclarator variableDeclarator,

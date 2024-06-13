@@ -7,44 +7,44 @@ import io.codemodder.*;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
-import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.SonarFinding;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /** Provides base functionality for making JavaParser-based changes based on Sonar results. */
-public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaParserChanger
-    implements FixOnlyCodeChanger {
+public abstract class SonarPluginJavaParserChanger<T extends Node, S extends SonarFinding>
+    extends JavaParserChanger implements FixOnlyCodeChanger {
 
-  private final RuleIssues ruleIssues;
+  private final RuleFinding<S> ruleFinding;
   private final Class<? extends Node> nodeType;
   private final RegionNodeMatcher regionNodeMatcher;
 
   private final NodeCollector nodeCollector;
 
   protected SonarPluginJavaParserChanger(
-      final RuleIssues ruleIssues,
+      final RuleFinding<S> ruleFinding,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher,
       final NodeCollector nodeCollector) {
-    this.ruleIssues = Objects.requireNonNull(ruleIssues);
+    this.ruleFinding = Objects.requireNonNull(ruleFinding);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = nodeCollector;
   }
 
   protected SonarPluginJavaParserChanger(
-      final RuleIssues ruleIssues, final Class<? extends Node> nodeType) {
-    this(ruleIssues, nodeType, RegionNodeMatcher.MATCHES_START, NodeCollector.ALL_FROM_TYPE);
+      final RuleFinding<S> ruleFinding, final Class<? extends Node> nodeType) {
+    this(ruleFinding, nodeType, RegionNodeMatcher.MATCHES_START, NodeCollector.ALL_FROM_TYPE);
   }
 
   protected SonarPluginJavaParserChanger(
-      final RuleIssues ruleIssues,
+      final RuleFinding<S> ruleFinding,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher,
       final CodemodReporterStrategy codemodReporterStrategy) {
     super(codemodReporterStrategy);
-    this.ruleIssues = Objects.requireNonNull(ruleIssues);
+    this.ruleFinding = Objects.requireNonNull(ruleFinding);
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = NodeCollector.ALL_FROM_TYPE;
@@ -53,23 +53,25 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
   @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    List<Issue> issues = ruleIssues.getResultsByPath(context.path());
+    List<? extends SonarFinding> findings = ruleFinding.getResultsByPath(context.path());
 
     // small shortcut to avoid always executing the expensive findAll
-    if (issues == null || issues.isEmpty()) {
+    if (findings == null || findings.isEmpty()) {
       return CodemodFileScanningResult.none();
     }
     final List<? extends Node> allNodes = nodeCollector.collectNodes(cu, nodeType);
 
     List<CodemodChange> codemodChanges = new ArrayList<>();
-    for (Issue issue : issues) {
+    for (SonarFinding sonarFinding : findings) {
       for (Node node : allNodes) {
         Position start =
             new Position(
-                issue.getTextRange().getStartLine(), issue.getTextRange().getStartOffset() + 1);
+                sonarFinding.getTextRange().getStartLine(),
+                sonarFinding.getTextRange().getStartOffset() + 1);
         Position end =
             new Position(
-                issue.getTextRange().getEndLine(), issue.getTextRange().getEndOffset() + 1);
+                sonarFinding.getTextRange().getEndLine(),
+                sonarFinding.getTextRange().getEndOffset() + 1);
         SourceCodeRegion region = new SourceCodeRegion(start, end);
         if (!nodeType.isAssignableFrom(node.getClass())) {
           continue;
@@ -78,14 +80,15 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
           if (node.getRange().isPresent()) {
             Range range = node.getRange().get();
             if (regionNodeMatcher.matches(region, range)) {
-              ChangesResult changeSuccessful = onIssueFound(context, cu, (T) node, issue);
+              ChangesResult changeSuccessful =
+                  onFindingFound(context, cu, (T) node, (S) sonarFinding);
 
               if (changeSuccessful.areChangesApplied()) {
                 codemodChanges.add(
                     CodemodChange.from(
                         region.start().line(),
                         changeSuccessful.getDependenciesRequired(),
-                        new FixedFinding(issue.getKey(), this.detectorRule())));
+                        new FixedFinding(sonarFinding.getKey(), this.detectorRule())));
               }
             }
           }
@@ -97,7 +100,7 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
 
   @Override
   public boolean shouldRun() {
-    return ruleIssues.hasResults();
+    return ruleFinding.hasResults();
   }
 
   /**
@@ -106,11 +109,11 @@ public abstract class SonarPluginJavaParserChanger<T extends Node> extends JavaP
    * @param context the context of this files transformation
    * @param cu the parsed model of the file being transformed
    * @param node the node to act on
-   * @param issue the given Sonar issue to act on
+   * @param sonarFinding the given Sonar finding to act on
    * @return {@link ChangesResult}, that contains result changes
    */
-  public abstract ChangesResult onIssueFound(
-      CodemodInvocationContext context, CompilationUnit cu, T node, Issue issue);
+  protected abstract ChangesResult onFindingFound(
+      CodemodInvocationContext context, CompilationUnit cu, T node, S sonarFinding);
 
   @Override
   public String vendorName() {

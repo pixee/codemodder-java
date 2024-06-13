@@ -6,7 +6,7 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import javax.inject.Inject;
@@ -18,16 +18,16 @@ import javax.inject.Inject;
     importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class DefineConstantForLiteralCodemod
-    extends SonarPluginJavaParserChanger<StringLiteralExpr> {
+    extends SonarPluginJavaParserChanger<StringLiteralExpr, Issue> {
 
   @Inject
   public DefineConstantForLiteralCodemod(
-      @ProvidedSonarScan(ruleId = "java:S1192") final RuleIssues issues) {
+      @ProvidedSonarScan(ruleId = "java:S1192") final RuleIssue issues) {
     super(issues, StringLiteralExpr.class);
   }
 
   @Override
-  public ChangesResult onIssueFound(
+  public ChangesResult onFindingFound(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
       final StringLiteralExpr stringLiteralExpr,

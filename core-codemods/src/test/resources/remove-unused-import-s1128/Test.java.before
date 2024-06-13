@@ -1,8 +1,8 @@
-package ai.pixee.triage.sonar;
+package ai.pixee.io.codemodder.sonar.model.sonar;
 
 import java.io.IOException;
 import java.util.function.Predicate;
-import ai.pixee.triage.TriageProvider;
+import ai.pixee.io.codemodder.sonar.model.TriageProvider;
 
 /** A provider for Sonar. */
 public final class SonarTriageProvider implements TriageProvider {

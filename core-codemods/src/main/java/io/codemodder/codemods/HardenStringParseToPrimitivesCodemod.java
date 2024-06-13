@@ -9,7 +9,7 @@ import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssues;
+import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
 import java.util.Optional;
@@ -50,11 +50,11 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
    * or new Float("12").
    */
   private static final class HardenParseForConstructorChanger
-      extends SonarPluginJavaParserChanger<ObjectCreationExpr> {
+      extends SonarPluginJavaParserChanger<ObjectCreationExpr, Issue> {
 
     @Inject
     public HardenParseForConstructorChanger(
-        @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssues issues) {
+        @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssue issues) {
       super(
           issues,
           ObjectCreationExpr.class,
@@ -63,7 +63,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
-    public ChangesResult onIssueFound(
+    public ChangesResult onFindingFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final ObjectCreationExpr objectCreationExpr,
@@ -112,11 +112,11 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
    * Integer or Float classes.
    */
   private static final class HardenParseForValueOfChanger
-      extends SonarPluginJavaParserChanger<MethodCallExpr> {
+      extends SonarPluginJavaParserChanger<MethodCallExpr, Issue> {
 
     @Inject
     public HardenParseForValueOfChanger(
-        @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssues issues) {
+        @ProvidedSonarScan(ruleId = "java:S2130") final RuleIssue issues) {
       super(
           issues,
           MethodCallExpr.class,
@@ -125,7 +125,7 @@ public final class HardenStringParseToPrimitivesCodemod extends CompositeJavaPar
     }
 
     @Override
-    public ChangesResult onIssueFound(
+    public ChangesResult onFindingFound(
         final CodemodInvocationContext context,
         final CompilationUnit cu,
         final MethodCallExpr methodCallExpr,

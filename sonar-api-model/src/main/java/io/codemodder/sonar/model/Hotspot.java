@@ -31,4 +31,9 @@ public final class Hotspot extends SonarFinding {
   public String typeName() {
     return "hotspots";
   }
+
+  @Override
+  public String rule() {
+    return ruleKey;
+  }
 }
