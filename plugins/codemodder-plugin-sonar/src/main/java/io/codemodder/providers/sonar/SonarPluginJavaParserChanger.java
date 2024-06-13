@@ -16,14 +16,14 @@ import java.util.Objects;
 public abstract class SonarPluginJavaParserChanger<T extends Node, S extends SonarFinding>
     extends JavaParserChanger implements FixOnlyCodeChanger {
 
-  private final RuleFinding ruleFinding;
+  private final RuleFinding<S> ruleFinding;
   private final Class<? extends Node> nodeType;
   private final RegionNodeMatcher regionNodeMatcher;
 
   private final NodeCollector nodeCollector;
 
   protected SonarPluginJavaParserChanger(
-      final RuleFinding ruleFinding,
+      final RuleFinding<S> ruleFinding,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher,
       final NodeCollector nodeCollector) {
@@ -34,12 +34,12 @@ public abstract class SonarPluginJavaParserChanger<T extends Node, S extends Son
   }
 
   protected SonarPluginJavaParserChanger(
-      final RuleFinding ruleFinding, final Class<? extends Node> nodeType) {
+      final RuleFinding<S> ruleFinding, final Class<? extends Node> nodeType) {
     this(ruleFinding, nodeType, RegionNodeMatcher.MATCHES_START, NodeCollector.ALL_FROM_TYPE);
   }
 
   protected SonarPluginJavaParserChanger(
-      final RuleFinding ruleFinding,
+      final RuleFinding<S> ruleFinding,
       final Class<? extends Node> nodeType,
       final RegionNodeMatcher regionNodeMatcher,
       final CodemodReporterStrategy codemodReporterStrategy) {

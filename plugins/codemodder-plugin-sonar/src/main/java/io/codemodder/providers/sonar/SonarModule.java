@@ -1,131 +1,66 @@
 package io.codemodder.providers.sonar;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
 import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.Issue;
-import io.codemodder.sonar.model.SearchHotspotsResponse;
-import io.codemodder.sonar.model.SearchIssueResponse;
 import io.codemodder.sonar.model.SonarFinding;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.nio.file.Path;
 import java.util.*;
 import javax.inject.Inject;
 
-final class SonarModule extends AbstractModule {
+final class SonarModule<T extends SonarFinding> extends AbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path repository;
-  private final List<Path> issuesFiles;
-  private final List<Path> hotspotsFiles;
+  private final List<T> findingsFound;
+
+  private final Class<? extends RuleFinding<T>> ruleFindingClass;
 
   SonarModule(
       final List<Class<? extends CodeChanger>> codemodTypes,
       final Path repository,
-      final List<Path> sonarIssuesJsonFile,
-      final List<Path> sonarHotspotsJsonPaths) {
+      final List<T> findings,
+      final Class<? extends RuleFinding<T>> ruleFindingClass) {
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.repository = Objects.requireNonNull(repository);
-    this.issuesFiles = sonarIssuesJsonFile;
-    this.hotspotsFiles = sonarHotspotsJsonPaths;
+    this.findingsFound = findings;
+    this.ruleFindingClass = ruleFindingClass;
   }
 
   @Override
   protected void configure() {
-    configureFindings(RuleIssue.class, getIssues());
-    configureFindings(RuleHotspot.class, getHotspots());
-  }
 
-  private void configureFindings(
-      final Class<? extends RuleFinding> ruleFindingClass,
-      final List<? extends SonarFinding> findings) {
-    Map<String, List<SonarFinding>> findingsByRuleMap = groupFindingsByRule(findings);
+    Map<String, List<T>> findingsByRuleMap = groupFindingsByRule(findingsFound);
 
     Set<String> packagesScanned = new HashSet<>();
     for (final Class<? extends CodeChanger> codemodType : codemodTypes) {
       String packageName = codemodType.getPackageName();
       if (!packagesScanned.contains(packageName)) {
         packagesScanned.add(packageName);
-        bindAnnotationsForPackage(ruleFindingClass, packageName, findingsByRuleMap);
+        bindAnnotationsForPackage(packageName, findingsByRuleMap);
       }
     }
   }
 
-  private List<Issue> getIssues() {
-    List<Issue> allIssues = List.of();
-    if (issuesFiles != null) {
-      List<SearchIssueResponse> issueResponses = new ArrayList<>();
-
-      this.issuesFiles.forEach(
-          issuesFile -> {
-            try {
-              SearchIssueResponse issueResponse =
-                  new ObjectMapper()
-                      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                      .readValue(issuesFile.toFile(), SearchIssueResponse.class);
-              issueResponses.add(issueResponse);
-            } catch (IOException e) {
-              throw new UncheckedIOException("Problem reading Sonar issues JSON file", e);
-            }
-          });
-
-      allIssues =
-          issueResponses.stream().flatMap(response -> response.getIssues().stream()).toList();
-    }
-
-    return allIssues;
-  }
-
-  private List<Hotspot> getHotspots() {
-    List<Hotspot> allHotspots = List.of();
-    if (hotspotsFiles != null) {
-      List<SearchHotspotsResponse> hotspotsResponses = new ArrayList<>();
-
-      this.hotspotsFiles.forEach(
-          hotspotsFile -> {
-            try {
-              SearchHotspotsResponse hotspotResponse =
-                  new ObjectMapper()
-                      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                      .readValue(hotspotsFile.toFile(), SearchHotspotsResponse.class);
-              hotspotsResponses.add(hotspotResponse);
-            } catch (IOException e) {
-              throw new UncheckedIOException("Problem reading Sonar hotspot JSON file", e);
-            }
-          });
-
-      allHotspots =
-          hotspotsResponses.stream().flatMap(response -> response.getHotspots().stream()).toList();
-    }
-
-    return allHotspots;
-  }
-
-  private Map<String, List<SonarFinding>> groupFindingsByRule(
-      List<? extends SonarFinding> findings) {
-    Map<String, List<SonarFinding>> findingsByRuleMap = new HashMap<>();
+  private Map<String, List<T>> groupFindingsByRule(List<T> findings) {
+    Map<String, List<T>> findingsByRuleMap = new HashMap<>();
     findings.forEach(
         finding -> {
           String rule = finding.rule();
-          List<SonarFinding> perRuleList =
-              findingsByRuleMap.computeIfAbsent(rule, k -> new ArrayList<>());
+          List<T> perRuleList = findingsByRuleMap.computeIfAbsent(rule, k -> new ArrayList<>());
           perRuleList.add(finding);
         });
     return findingsByRuleMap;
   }
 
   private void bindAnnotationsForPackage(
-      final Class<? extends RuleFinding> ruleFindingClass,
-      String packageName,
-      Map<String, List<SonarFinding>> findingsByRuleMap) {
+      String packageName, Map<String, List<T>> findingsByRuleMap) {
     try (ScanResult scan =
         new ClassGraph()
             .enableAllInfo()
@@ -142,7 +77,7 @@ final class SonarModule extends AbstractModule {
           param -> {
             ProvidedSonarScan annotation = param.getAnnotation(ProvidedSonarScan.class);
             if (annotation != null && ruleFindingClass.equals(param.getType())) {
-              bindParam(ruleFindingClass, annotation, param, findingsByRuleMap, boundRuleIds);
+              bindParam(annotation, param, findingsByRuleMap, boundRuleIds);
             }
           });
     }
@@ -161,10 +96,9 @@ final class SonarModule extends AbstractModule {
   }
 
   private void bindParam(
-      final Class<? extends RuleFinding> ruleFindingClass,
       ProvidedSonarScan annotation,
       Parameter param,
-      Map<String, List<SonarFinding>> findingsByRuleMap,
+      Map<String, List<T>> findingsByRuleMap,
       Map<String, Boolean> boundRuleIds) {
 
     // Ensure the parameter type is valid
@@ -183,54 +117,31 @@ final class SonarModule extends AbstractModule {
     }
 
     // Retrieve findings for the ruleId
-    List<SonarFinding> findings = findingsByRuleMap.getOrDefault(ruleId, Collections.emptyList());
+    List<T> findings = findingsByRuleMap.getOrDefault(ruleId, Collections.emptyList());
 
-    RuleFinding ruleFinding = createRuleFindings(ruleFindingClass, findings);
-
-    // Determine binding target
-    RuleFinding bindingTarget;
-    if (findings.isEmpty()) {
-      if (RuleIssue.class.equals(param.getType())) {
-        bindingTarget = EMPTY_RULE_ISSUES;
-      } else if (RuleHotspot.class.equals(param.getType())) {
-        bindingTarget = EMPTY_RULE_HOTSPOT;
+    if (RuleIssue.class.equals(ruleFindingClass)) {
+      if (findings.isEmpty()) {
+        bind(RuleIssue.class)
+            .annotatedWith(annotation)
+            .toInstance(new RuleIssue(List.of(), repository));
       } else {
-        throw new IllegalArgumentException("Unsupported parameter type: " + param.getType());
+        bind(RuleIssue.class)
+            .annotatedWith(annotation)
+            .toInstance(new RuleIssue((List<Issue>) findings, repository));
       }
-    } else {
-      bindingTarget = ruleFinding;
-    }
-
-    // Bind the target
-    if (bindingTarget instanceof RuleIssue ruleIssue) {
-      bind(RuleIssue.class).annotatedWith(annotation).toInstance(ruleIssue);
-    } else if (bindingTarget instanceof RuleHotspot ruleHotspot) {
-      bind(RuleHotspot.class).annotatedWith(annotation).toInstance(ruleHotspot);
+    } else if (RuleHotspot.class.equals(ruleFindingClass)) {
+      if (findings.isEmpty()) {
+        bind(RuleHotspot.class)
+            .annotatedWith(annotation)
+            .toInstance(new RuleHotspot(List.of(), repository));
+      } else {
+        bind(RuleHotspot.class)
+            .annotatedWith(annotation)
+            .toInstance(new RuleHotspot((List<Hotspot>) findings, repository));
+      }
     }
 
     // Mark the ruleId as bound
     boundRuleIds.put(ruleId, true);
   }
-
-  private RuleFinding createRuleFindings(
-      final Class<? extends RuleFinding> ruleFindingClass,
-      List<? extends SonarFinding> sonarFindings) {
-    Map<String, List<SonarFinding>> findingsByPath = new HashMap<>();
-    sonarFindings.forEach(
-        finding -> {
-          Optional<String> filename = finding.componentFileName();
-          if (filename.isPresent()) {
-            String fullPath = repository.resolve(filename.get()).toString();
-            List<SonarFinding> pathFindings =
-                findingsByPath.computeIfAbsent(fullPath, f -> new ArrayList<>());
-            pathFindings.add(finding);
-          }
-        });
-    return RuleIssue.class.equals(ruleFindingClass)
-        ? new RuleIssue(findingsByPath)
-        : new RuleHotspot(findingsByPath);
-  }
-
-  private static final RuleIssue EMPTY_RULE_ISSUES = new RuleIssue(Map.of());
-  private static final RuleHotspot EMPTY_RULE_HOTSPOT = new RuleHotspot(Map.of());
 }
