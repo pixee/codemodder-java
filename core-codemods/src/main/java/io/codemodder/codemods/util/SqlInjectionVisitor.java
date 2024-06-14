@@ -25,8 +25,8 @@ public class SqlInjectionVisitor {
       final CompilationUnit cu,
       Collection<T> pathFindings,
       final DetectorRule detectorRule,
-      Function<T, String> idExtractor,
-      Function<T, Integer> lineExtractor) {
+      Function<T, String> findingIdExtractor,
+      Function<T, Integer> findingLineExtractor) {
 
     List<MethodCallExpr> allMethodCalls = cu.findAll(MethodCallExpr.class);
 
@@ -38,8 +38,8 @@ public class SqlInjectionVisitor {
     List<CodemodChange> changes = new ArrayList<>();
 
     for (T finding : pathFindings) {
-      String id = idExtractor.apply(finding);
-      Integer line = lineExtractor.apply(finding);
+      String id = findingIdExtractor.apply(finding);
+      Integer line = findingLineExtractor.apply(finding);
 
       if (line == null) {
         UnfixedFinding unfixableFinding =
