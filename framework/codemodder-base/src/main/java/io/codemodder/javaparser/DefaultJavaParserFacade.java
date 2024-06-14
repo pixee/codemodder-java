@@ -29,7 +29,7 @@ final class DefaultJavaParserFacade implements JavaParserFacade {
 
     final ParseResult<CompilationUnit> result = parser.parse(file);
     if (!result.isSuccessful()) {
-      throw new RuntimeException(
+      throw new JavaParseException(
           "Error while parsing file " + file + " encountered problems: " + result.getProblems());
     }
     CompilationUnit cu = result.getResult().orElseThrow();

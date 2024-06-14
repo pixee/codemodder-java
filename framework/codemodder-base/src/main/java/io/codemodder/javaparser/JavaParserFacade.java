@@ -18,7 +18,8 @@ public interface JavaParserFacade {
    * CompilationUnit}.
    *
    * @param file a Java file path
-   * @throws IOException if the file cannot be read
+   * @throws IOException when the file cannot be read and parsed
+   * @throws JavaParseException when the file can be read but fails parsing
    * @return a {@link CompilationUnit} for the given file
    */
   CompilationUnit parseJavaFile(Path file) throws IOException;
