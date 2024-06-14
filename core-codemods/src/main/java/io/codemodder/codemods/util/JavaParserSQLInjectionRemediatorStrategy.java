@@ -7,6 +7,11 @@ import io.codemodder.codetf.DetectorRule;
 import java.util.Collection;
 import java.util.function.Function;
 
+/**
+ * Strategy interface for remediating SQL injection vulnerabilities using JavaParser.
+ * Implementations of this interface define the method to visit a CompilationUnit and process
+ * findings for potential SQL injections.
+ */
 public interface JavaParserSQLInjectionRemediatorStrategy {
 
   /**
