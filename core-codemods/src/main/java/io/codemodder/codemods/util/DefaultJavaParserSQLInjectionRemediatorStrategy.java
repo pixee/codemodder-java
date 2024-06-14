@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /** Utility class for visiting and processing potential SQL injection points in Java source code. */
-public class DefaultJavaParserSQLInjectionRemediatorStrategy
+final class DefaultJavaParserSQLInjectionRemediatorStrategy
     implements JavaParserSQLInjectionRemediatorStrategy {
 
   /**
