@@ -23,21 +23,21 @@ public class SqlInjectionVisitor {
   public static <T> CodemodFileScanningResult visit(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
-      Collection<T> findingsForThisPath,
+      Collection<T> pathFindings,
       final DetectorRule detectorRule,
       Function<T, String> idExtractor,
       Function<T, Integer> lineExtractor) {
 
     List<MethodCallExpr> allMethodCalls = cu.findAll(MethodCallExpr.class);
 
-    if (findingsForThisPath.isEmpty()) {
+    if (pathFindings.isEmpty()) {
       return CodemodFileScanningResult.none();
     }
 
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
     List<CodemodChange> changes = new ArrayList<>();
 
-    for (T finding : findingsForThisPath) {
+    for (T finding : pathFindings) {
       String id = idExtractor.apply(finding);
       Integer line = lineExtractor.apply(finding);
 
