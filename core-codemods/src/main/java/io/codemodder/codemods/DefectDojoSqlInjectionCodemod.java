@@ -2,7 +2,7 @@ package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.*;
-import io.codemodder.codemods.util.SqlInjectionVisitor;
+import io.codemodder.codemods.util.JavaParserSQLInjectionRemediatorStrategy;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.defectdojo.DefectDojoScan;
@@ -51,7 +51,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
       final CodemodInvocationContext context, final CompilationUnit cu) {
     List<Finding> findingsForThisPath = findings.getForPath(context.path());
 
-    return SqlInjectionVisitor.visit(
+    return JavaParserSQLInjectionRemediatorStrategy.DEFAULT.visit(
         context,
         cu,
         findingsForThisPath,

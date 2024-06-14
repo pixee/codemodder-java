@@ -16,47 +16,58 @@ import java.util.List;
 import java.util.function.Function;
 
 /** Utility class for visiting and processing potential SQL injection points in Java source code. */
-public class SqlInjectionVisitor {
+public class DefaultJavaParserSQLInjectionRemediatorStrategy
+    implements JavaParserSQLInjectionRemediatorStrategy {
 
-  private SqlInjectionVisitor() {}
-
-  public static <T> CodemodFileScanningResult visit(
+  /**
+   * Visits the provided CompilationUnit and processes findings for potential SQL injections.
+   *
+   * @param context the context of the codemod invocation
+   * @param cu the compilation unit to be scanned
+   * @param pathFindings a collection of findings to be processed
+   * @param detectorRule the rule used to detect potential issues
+   * @param findingIdExtractor a function to extract the ID from a finding
+   * @param findingLineExtractor a function to extract the line number from a finding
+   * @param <T> the type of the findings
+   * @return a result object containing the changes and unfixed findings
+   */
+  public <T> CodemodFileScanningResult visit(
       final CodemodInvocationContext context,
       final CompilationUnit cu,
-      Collection<T> pathFindings,
+      final Collection<T> pathFindings,
       final DetectorRule detectorRule,
-      Function<T, String> findingIdExtractor,
-      Function<T, Integer> findingLineExtractor) {
+      final Function<T, String> findingIdExtractor,
+      final Function<T, Integer> findingLineExtractor) {
 
-    List<MethodCallExpr> allMethodCalls = cu.findAll(MethodCallExpr.class);
+    final List<MethodCallExpr> allMethodCalls = cu.findAll(MethodCallExpr.class);
 
     if (pathFindings.isEmpty()) {
       return CodemodFileScanningResult.none();
     }
 
-    List<UnfixedFinding> unfixedFindings = new ArrayList<>();
-    List<CodemodChange> changes = new ArrayList<>();
+    final List<UnfixedFinding> unfixedFindings = new ArrayList<>();
+    final List<CodemodChange> changes = new ArrayList<>();
 
     for (T finding : pathFindings) {
-      String id = findingIdExtractor.apply(finding);
-      Integer line = findingLineExtractor.apply(finding);
+      final String id = findingIdExtractor.apply(finding);
+      final Integer line = findingLineExtractor.apply(finding);
 
       if (line == null) {
-        UnfixedFinding unfixableFinding =
+        final UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id, detectorRule, context.path().toString(), null, "No line number provided");
         unfixedFindings.add(unfixableFinding);
         continue;
       }
 
-      List<MethodCallExpr> supportedSqlMethodCallsOnThatLine =
+      final List<MethodCallExpr> supportedSqlMethodCallsOnThatLine =
           allMethodCalls.stream()
               .filter(methodCallExpr -> methodCallExpr.getRange().get().begin.line == line)
               .filter(SQLParameterizer::isSupportedJdbcMethodCall)
               .toList();
 
       if (supportedSqlMethodCallsOnThatLine.isEmpty()) {
-        UnfixedFinding unfixableFinding =
+        final UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
                 detectorRule,
@@ -68,7 +79,7 @@ public class SqlInjectionVisitor {
       }
 
       if (supportedSqlMethodCallsOnThatLine.size() > 1) {
-        UnfixedFinding unfixableFinding =
+        final UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
                 detectorRule,
@@ -79,11 +90,11 @@ public class SqlInjectionVisitor {
         continue;
       }
 
-      MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
+      final MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
       if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
         changes.add(CodemodChange.from(line, new FixedFinding(id, detectorRule)));
       } else {
-        UnfixedFinding unfixableFinding =
+        final UnfixedFinding unfixableFinding =
             new UnfixedFinding(
                 id,
                 detectorRule,
