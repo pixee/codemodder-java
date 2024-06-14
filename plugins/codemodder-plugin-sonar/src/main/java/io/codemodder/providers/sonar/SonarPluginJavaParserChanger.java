@@ -16,7 +16,7 @@ import java.util.Objects;
 public abstract class SonarPluginJavaParserChanger<T extends Node, S extends SonarFinding>
     extends JavaParserChanger implements FixOnlyCodeChanger {
 
-  private final RuleFinding<S> ruleFinding;
+  protected final RuleFinding<S> ruleFinding;
   private final Class<? extends Node> nodeType;
   private final RegionNodeMatcher regionNodeMatcher;
 

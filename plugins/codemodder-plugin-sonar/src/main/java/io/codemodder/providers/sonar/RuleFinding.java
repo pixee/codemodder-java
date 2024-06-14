@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 /** A view of the Sonar findings results file for a given rule. */
-interface RuleFinding<T extends SonarFinding> {
+public interface RuleFinding<T extends SonarFinding> {
 
   /** A list of findings associated with the given path. */
   List<T> getResultsByPath(Path path);
