@@ -9,6 +9,7 @@ import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.javaparser.JavaParserCodemodRunner;
 import io.codemodder.javaparser.JavaParserFacade;
 import java.io.IOException;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -130,7 +131,14 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
                 }
               }
 
-              String beforeFileContents = fileCache.get(filePath);
+              final String beforeFileContents;
+              try {
+                beforeFileContents = fileCache.get(filePath);
+              } catch (final MalformedInputException e) {
+                log.warn("file uses unsupported character encoding: {}", filePath);
+                unscannableFiles.add(filePath);
+                return;
+              }
 
               Collection<DependencyGAV> deps =
                   projectProviders.stream()
@@ -163,7 +171,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
             } catch (Exception e) {
               unscannableFiles.add(filePath);
-              log.error("Problem scanning file", e);
+              log.error("Problem scanning file {}", filePath, e);
             }
           });
     }

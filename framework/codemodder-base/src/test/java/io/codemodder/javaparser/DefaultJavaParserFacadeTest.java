@@ -54,7 +54,7 @@ final class DefaultJavaParserFacadeTest {
   @Test
   void it_fails_loudly_if_cant_parse() throws IOException {
     Files.writeString(javaFile, "bad code");
-    assertThrows(RuntimeException.class, () -> parser.parseJavaFile(javaFile));
+    assertThrows(JavaParseException.class, () -> parser.parseJavaFile(javaFile));
   }
 
   @Test
