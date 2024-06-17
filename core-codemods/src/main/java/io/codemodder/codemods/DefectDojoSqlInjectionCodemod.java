@@ -25,12 +25,14 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
     implements FixOnlyCodeChanger {
 
   private final RuleFindings findings;
+  private JavaParserSQLInjectionRemediatorStrategy remediatorStrategy;
 
   @Inject
   public DefectDojoSqlInjectionCodemod(
       @DefectDojoScan(ruleId = "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli")
           RuleFindings findings) {
     this.findings = Objects.requireNonNull(findings);
+    this.remediatorStrategy = JavaParserSQLInjectionRemediatorStrategy.DEFAULT;
   }
 
   @Override
@@ -50,12 +52,11 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     List<Finding> findingsForThisPath = findings.getForPath(context.path());
-
-    return JavaParserSQLInjectionRemediatorStrategy.DEFAULT.visit(
-        context,
+    return remediatorStrategy.remediateAll(
         cu,
-        findingsForThisPath,
+        context.path().toString(),
         detectorRule(),
+        findingsForThisPath,
         finding -> String.valueOf(finding.getId()),
         Finding::getLine);
   }

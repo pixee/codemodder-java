@@ -1,22 +1,16 @@
 package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodExecutionPriority;
-import io.codemodder.CodemodFileScanningResult;
-import io.codemodder.CodemodInvocationContext;
-import io.codemodder.Importance;
-import io.codemodder.ReviewGuidance;
+import io.codemodder.*;
 import io.codemodder.codemods.util.JavaParserSQLInjectionRemediatorStrategy;
 import io.codemodder.codetf.DetectorRule;
-import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleHotspot;
-import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
+import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.SonarFinding;
 import java.util.List;
+import java.util.Objects;
 import javax.inject.Inject;
 
 @Codemod(
@@ -24,12 +18,16 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class SonarSQLInjectionCodemod extends SonarPluginJavaParserChanger<Node, Hotspot> {
+public final class SonarSQLInjectionCodemod extends SonarRemediatingJavaParserChanger {
+
+  private final JavaParserSQLInjectionRemediatorStrategy remediationStrategy;
+  private final RuleHotspot hotspots;
 
   @Inject
   public SonarSQLInjectionCodemod(
       @ProvidedSonarScan(ruleId = "java:S2077") final RuleHotspot hotspots) {
-    super(hotspots, Node.class);
+    this.hotspots = Objects.requireNonNull(hotspots);
+    this.remediationStrategy = JavaParserSQLInjectionRemediatorStrategy.DEFAULT;
   }
 
   @Override
@@ -43,15 +41,13 @@ public final class SonarSQLInjectionCodemod extends SonarPluginJavaParserChanger
   @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    List<Hotspot> hotspots = ruleFinding.getResultsByPath(context.path());
-
-    return JavaParserSQLInjectionRemediatorStrategy.DEFAULT.visit(
-        context, cu, hotspots, detectorRule(), SonarFinding::getKey, SonarFinding::getLine);
-  }
-
-  @Override
-  protected ChangesResult onFindingFound(
-      CodemodInvocationContext context, CompilationUnit cu, Node node, Hotspot sonarFinding) {
-    return null;
+    List<Hotspot> hotspotsForFile = hotspots.getResultsByPath(context.path());
+    return remediationStrategy.remediateAll(
+        cu,
+        context.path().toString(),
+        detectorRule(),
+        hotspotsForFile,
+        SonarFinding::getKey,
+        SonarFinding::getLine);
   }
 }

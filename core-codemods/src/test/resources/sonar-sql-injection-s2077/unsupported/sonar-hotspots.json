@@ -26,15 +26,5 @@
       "flows": [],
       "ruleKey": "java:S2077"
     }
-  ],
-  "components": [
-    {
-      "organization": "carlosu7",
-      "key": "carlosu7_WebGoat_12_23:src/main/java/org/owasp/webgoat/container/users/UserService.java",
-      "qualifier": "FIL",
-      "name": "UserService.java",
-      "longName": "src/main/java/org/owasp/webgoat/container/users/UserService.java",
-      "path": "src/main/java/org/owasp/webgoat/container/users/UserService.java"
-    }
   ]
 }

@@ -5,3 +5,8 @@ The plugin works by forwarding a JSON file to the codemods. The JSON file is exp
 ```bash
 $ curl -u $SONAR_TOKEN: "https://sonarcloud.io/api/issues/search?projects=<PROJECT_NAME>&statuses=OPEN&ps=500&issues=<ISSUE ID>" | jq .
 ```
+
+To get hotspots:
+```bash
+curl -u $SONAR_TOKEN: "https://sonarcloud.io/api/hotspots/search?projectKey=<PROJECT_NAME>&statuses=OPEN&ps=500" | jq .
+```
