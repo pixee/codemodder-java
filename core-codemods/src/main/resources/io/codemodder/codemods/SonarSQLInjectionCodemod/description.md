@@ -1,9 +1,13 @@
-This change creates a dynamically formatted SQL query.
+This change refactors SQL statements to be parameterized, rather than built by hand.
+
+Without parameterization, developers must remember to escape inputs using the rules for that database. It's usually buggy, at the least -- and sometimes vulnerable.
 
 Our changes look something like this:
 
 ```diff
--   org.hibernate.Query query = session.createQuery("FROM users where username = " + user.getUsername());
-+   org.hibernate.Query query =  session.createQuery("FROM users where username = ?");
-+   query = query.setParameter(0,user.getUsername());
+- Statement stmt = connection.createStatement();
+- ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE name = '" + user + "'");
++ PreparedStatement stmt = connection.prepareStatement("SELECT * FROM users WHERE name = ?");
++ stmt.setString(1, user);
++ ResultSet rs = stmt.executeQuery();
 ```

@@ -25,7 +25,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
     implements FixOnlyCodeChanger {
 
   private final RuleFindings findings;
-  private JavaParserSQLInjectionRemediatorStrategy remediatorStrategy;
+  private final JavaParserSQLInjectionRemediatorStrategy remediatorStrategy;
 
   @Inject
   public DefectDojoSqlInjectionCodemod(
