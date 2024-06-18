@@ -31,6 +31,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
   public DefectDojoSqlInjectionCodemod(
       @DefectDojoScan(ruleId = "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli")
           RuleFindings findings) {
+    super(CodemodReporterStrategy.fromClasspath(SQLParameterizerCodemod.class));
     this.findings = Objects.requireNonNull(findings);
     this.remediatorStrategy = JavaParserSQLInjectionRemediatorStrategy.DEFAULT;
   }
