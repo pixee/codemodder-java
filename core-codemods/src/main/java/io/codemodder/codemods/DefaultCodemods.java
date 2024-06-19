@@ -26,6 +26,7 @@ public final class DefaultCodemods {
         HardenProcessCreationCodemod.class,
         HardenXMLDecoderCodemod.class,
         HardenXMLInputFactoryCodemod.class,
+        HardenXMLReaderCodemod.class,
         HardenXStreamCodemod.class,
         HardenZipEntryPathsCodemod.class,
         HQLParameterizationCodemod.class,

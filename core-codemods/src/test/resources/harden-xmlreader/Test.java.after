@@ -1,0 +1,137 @@
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+
+@Configuration
+@EnableBatchProcessing
+public class MyJobConfig {
+
+    @Autowired
+    private JobBuilderFactory jobBuilderFactory;
+
+    @Bean
+    public Job vuln(Step step) {
+        XMLReader reader = null;
+        try {
+            reader = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+            reader.setFeature("http://xml.org/sax/features/validation", true);
+            reader.setFeature(
+    "http://apache.org/xml/features/validation/schema",
+                true);
+            reader.setFeature(
+                "http://apache.org/xml/features/validation/schema-full-checking",
+                true);
+            reader.setErrorHandler(new ErrorHandler());
+            StringReader sr = new StringReader(str);
+            reader.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            reader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            // ruleid: harden-xmlreader
+            reader.parse(new InputSource(stringReader));
+        }
+        catch (FileNotFoundException e)
+        {
+            bool = false;
+            Logger.error( "problem", e);
+        }
+        return null;
+    }
+
+    @Bean
+    public Job notVuln_both_external_blocked(Step step) {
+        XMLReader reader = null;
+        try {
+            reader = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+            reader.setFeature("http://xml.org/sax/features/validation", true);
+            reader.setFeature(
+    "http://apache.org/xml/features/validation/schema",
+                true);
+            reader.setFeature(
+                "http://apache.org/xml/features/validation/schema-full-checking",
+                true);
+            reader.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            reader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            reader.setErrorHandler(new ErrorHandler());
+            StringReader sr = new StringReader(str);
+            // ok: harden-xmlreader
+            reader.parse(new InputSource(stringReader));
+        }
+        catch (FileNotFoundException e) {
+            Logger.error( "problem", e);
+        }
+        return null;
+    }
+
+    @Bean
+    public Job vuln_general_only_blocked(Step step) {
+        XMLReader reader = null;
+        try {
+            reader = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+            reader.setFeature("http://xml.org/sax/features/validation", true);
+            reader.setFeature(
+    "http://apache.org/xml/features/validation/schema",
+                true);
+            reader.setFeature(
+                "http://apache.org/xml/features/validation/schema-full-checking",
+                true);
+            reader.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            reader.setErrorHandler(new ErrorHandler());
+            StringReader sr = new StringReader(str);
+            reader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            // ruleid: harden-xmlreader
+            reader.parse(new InputSource(stringReader));
+        }
+        catch (FileNotFoundException e) {
+            Logger.error( "problem", e);
+        }
+        return null;
+    }
+
+    @Bean
+    public Job vuln_parameter_only_blocked(Step step) {
+        XMLReader reader = null;
+        try {
+            reader = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+            reader.setFeature("http://xml.org/sax/features/validation", true);
+            reader.setFeature(
+    "http://apache.org/xml/features/validation/schema",
+                true);
+            reader.setFeature(
+                "http://apache.org/xml/features/validation/schema-full-checking",
+                true);
+            reader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            reader.setErrorHandler(new ErrorHandler());
+            StringReader sr = new StringReader(str);
+            reader.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            // ruleid: harden-xmlreader
+            reader.parse(new InputSource(stringReader));
+        }
+        catch (FileNotFoundException e) {
+            Logger.error( "problem", e);
+        }
+        return null;
+    }
+
+    @Bean
+    public Job notVuln_doctype(Step step) {
+        XMLReader reader = null;
+        try {
+            reader = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+            reader.setFeature("http://xml.org/sax/features/validation", true);
+            reader.setFeature(
+    "http://apache.org/xml/features/validation/schema",
+                true);
+            reader.setFeature(
+                "http://apache.org/xml/features/validation/schema-full-checking",
+                true);
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            reader.setErrorHandler(new ErrorHandler());
+
+            StringReader sr = new StringReader(str);
+            // ok: harden-xmlreader
+            reader.parse(new InputSource(stringReader));
+        }
+        catch (FileNotFoundException e) {
+            Logger.error( "problem", e);
+        }
+        return null;
+    }
+
+}

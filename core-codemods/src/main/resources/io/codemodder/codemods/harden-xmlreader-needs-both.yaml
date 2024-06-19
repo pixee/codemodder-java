@@ -1,0 +1,27 @@
+rules:
+  - id: harden-xmlreader-needs-both
+    patterns:
+      - pattern: $XMLR.parse(...);
+      - pattern-inside: |
+          $RT $METHOD ($ARGS) {
+            ...
+            $XMLR = XMLReaderFactory.createXMLReader(...);
+            ...
+          }
+      - pattern-not-inside: >
+          $RT $METHOD ($ARGS) {
+            ...
+            $XMLR.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            ...
+          }
+      - pattern-not-inside: >
+          $RT $METHOD ($ARGS) {
+            ...
+            $XMLR.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            ...
+          }
+      - focus-metavariable: $XMLR
+    message: Semgrep found a match
+    languages:
+      - java
+    severity: WARNING
