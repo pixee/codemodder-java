@@ -1,5 +1,5 @@
 {
-  "summary" : "Introduced protections against XXE attacks",
+  "summary" : "Introduced protections against XXE attacks in XMLInputFactory",
   "control" : "https://github.com/pixee/java-security-toolkit/blob/main/src/main/java/io/github/pixee/security/XMLDecoderSecurity.java",
   "change" : "Hardened the XML processor to prevent external entities from being resolved, which can prevent data exfiltration and arbitrary code execution",
   "reviewGuidanceIJustification" : "We believe this change is safe and effective. The behavior of hardened `XMLInputFactory` instances will only be different if the XML they process uses external entities, which is exceptionally rare (and, as demonstrated, quite unsafe anyway.)",
