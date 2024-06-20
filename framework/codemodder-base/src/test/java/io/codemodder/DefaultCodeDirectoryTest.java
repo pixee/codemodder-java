@@ -51,7 +51,7 @@ final class DefaultCodeDirectoryTest {
     } else {
       assertThat(filesWithTrailingPath).isPresent();
       Path expected = repoDir.resolve(expectedPath);
-      assertThat(filesWithTrailingPath.get()).isEqualTo(expected);
+      assertThat(filesWithTrailingPath).contains(expected);
     }
   }
 
