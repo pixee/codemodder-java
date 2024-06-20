@@ -51,13 +51,13 @@ final class DefaultCodeDirectoryTest {
     } else {
       assertThat(filesWithTrailingPath).isPresent();
       Path expected = repoDir.resolve(expectedPath);
-      assertThat(filesWithTrailingPath.get()).isEqualTo(expected);
+      assertThat(filesWithTrailingPath).contains(expected);
     }
   }
 
   private static Stream<Arguments> fileTests() {
     return Stream.of(
-        Arguments.of("file1.java", "my/other/test/file1.java"),
+        Arguments.of("test/file1.java", "my/other/test/file1.java"),
         Arguments.of("main/file1.java", "src/main/file1.java"),
         Arguments.of("main//file1.java", "src/main/file1.java"),
         Arguments.of("main\\file1.java", "src/main/file1.java"),

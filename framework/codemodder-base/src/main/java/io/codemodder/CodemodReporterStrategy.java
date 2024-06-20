@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
 
 /** A type responsible for reporting codemod changes. */
 public interface CodemodReporterStrategy {
@@ -73,6 +74,26 @@ public interface CodemodReporterStrategy {
     String descriptionResource = "/" + codemodType.getName().replace('.', '/') + "/description.md";
     String reportJson = "/" + codemodType.getName().replace('.', '/') + "/report.json";
 
+    return getCodemodReporterStrategy(codemodType, descriptionResource, reportJson);
+  }
+
+  /** A {@link CodemodReporterStrategy} that reports based on text files in the classpath. */
+  static CodemodReporterStrategy fromClasspathDirectory(
+      final Class<? extends CodeChanger> codemodType, final String directory) {
+    Objects.requireNonNull(codemodType);
+
+    // create the expected paths to the files
+    String descriptionResource = directory + "/description.md";
+    String reportJson = directory + "/report.json";
+
+    return getCodemodReporterStrategy(codemodType, descriptionResource, reportJson);
+  }
+
+  @NotNull
+  private static CodemodReporterStrategy getCodemodReporterStrategy(
+      final Class<? extends CodeChanger> codemodType,
+      final String descriptionResource,
+      final String reportJson) {
     // load the reporting text
     ObjectMapper mapper = new ObjectMapper();
     final JsonNode parent;
@@ -122,6 +143,10 @@ public interface CodemodReporterStrategy {
     };
   }
 
+  /**
+   * A reporter strategy that does nothing, useful for tests or CLI situations where reporting isn't
+   * important.
+   */
   static CodemodReporterStrategy empty() {
     return new CodemodReporterStrategy() {
       @Override

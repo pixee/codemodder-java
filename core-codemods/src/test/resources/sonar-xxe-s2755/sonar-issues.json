@@ -1,0 +1,194 @@
+{
+  "total": 11,
+  "p": 1,
+  "ps": 100,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 11
+  },
+  "effortTotal": 115,
+  "debtTotal": 115,
+  "issues": [
+    {
+      "key": "AZAzHhmeiBoJ0fAlH956",
+      "rule": "java:S2755",
+      "severity": "BLOCKER",
+      "component": "pixee_bad-java-code:src/main/java/com/acme/XXEVuln.java",
+      "project": "pixee_bad-java-code",
+      "line": 53,
+      "hash": "d79f6dee4e8bcc762ce7d6840b7733ee",
+      "textRange": {
+        "startLine": 53,
+        "endLine": 53,
+        "startOffset": 48,
+        "endOffset": 59
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Disable access to external entities in XML parsing.",
+      "effort": "15min",
+      "debt": "15min",
+      "assignee": "nahsra@github",
+      "author": "arshan.dabirsiaghi@gmail.com",
+      "tags": [
+        "cwe",
+        "symbolic-execution"
+      ],
+      "creationDate": "2024-06-20T02:48:27+0200",
+      "updateDate": "2024-06-20T02:48:27+0200",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AZAzHhmeiBoJ0fAlH957",
+      "rule": "java:S2755",
+      "severity": "BLOCKER",
+      "component": "pixee_bad-java-code:src/main/java/com/acme/XXEVuln.java",
+      "project": "pixee_bad-java-code",
+      "line": 62,
+      "hash": "bca74f470a192baef9933c0a00443593",
+      "textRange": {
+        "startLine": 62,
+        "endLine": 62,
+        "startOffset": 60,
+        "endOffset": 71
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Disable access to external entities in XML parsing.",
+      "effort": "15min",
+      "debt": "15min",
+      "assignee": "nahsra@github",
+      "author": "arshan.dabirsiaghi@gmail.com",
+      "tags": [
+        "cwe",
+        "symbolic-execution"
+      ],
+      "creationDate": "2024-06-20T02:48:27+0200",
+      "updateDate": "2024-06-20T02:48:27+0200",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AZAzHhmeiBoJ0fAlH954",
+      "rule": "java:S2755",
+      "severity": "BLOCKER",
+      "component": "pixee_bad-java-code:src/main/java/com/acme/XXEVuln.java",
+      "project": "pixee_bad-java-code",
+      "line": 68,
+      "hash": "bca74f470a192baef9933c0a00443593",
+      "textRange": {
+        "startLine": 68,
+        "endLine": 68,
+        "startOffset": 60,
+        "endOffset": 71
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Disable access to external entities in XML parsing.",
+      "effort": "15min",
+      "debt": "15min",
+      "assignee": "nahsra@github",
+      "author": "arshan.dabirsiaghi@gmail.com",
+      "tags": [
+        "cwe",
+        "symbolic-execution"
+      ],
+      "creationDate": "2024-06-20T02:48:27+0200",
+      "updateDate": "2024-06-20T02:48:27+0200",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AZAzHhmeiBoJ0fAlH955",
+      "rule": "java:S2755",
+      "severity": "BLOCKER",
+      "component": "pixee_bad-java-code:src/main/java/com/acme/XXEVuln.java",
+      "project": "pixee_bad-java-code",
+      "line": 75,
+      "hash": "9c02741147f1fbd343c736cabf8ceeb6",
+      "textRange": {
+        "startLine": 75,
+        "endLine": 75,
+        "startOffset": 23,
+        "endOffset": 38
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Disable access to external entities in XML parsing.",
+      "effort": "15min",
+      "debt": "15min",
+      "assignee": "nahsra@github",
+      "author": "arshan.dabirsiaghi@gmail.com",
+      "tags": [
+        "cwe",
+        "symbolic-execution"
+      ],
+      "creationDate": "2024-06-20T02:48:27+0200",
+      "updateDate": "2024-06-20T02:48:27+0200",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "pixee",
+      "key": "pixee_bad-java-code",
+      "uuid": "AZAybnMG2i3IMwLpnrFI",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "my-bad-code",
+      "longName": "my-bad-code"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_bad-java-code:src/main/java/com/acme/XXEVuln.java",
+      "uuid": "AZAycpG1hxTp4FYWZ4N0",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "XXEVuln.java",
+      "longName": "src/main/java/com/acme/XXEVuln.java",
+      "path": "src/main/java/com/acme/XXEVuln.java"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "pixee",
+      "name": "Pixee"
+    }
+  ],
+  "facets": []
+}

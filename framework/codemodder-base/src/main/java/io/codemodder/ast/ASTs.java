@@ -1,5 +1,9 @@
 package io.codemodder.ast;
 
+import static io.codemodder.javaparser.ASTExpectations.expect;
+
+import com.github.javaparser.Position;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -809,7 +813,7 @@ public final class ASTs {
   }
 
   /**
-   * Staring from the {@link Node} {@code start}, checks if there exists a local variable
+   * Starting from the {@link Node} {@code start}, checks if there exists a local variable
    * declaration whose name is {@code name}.
    */
   public static Optional<LocalVariableDeclaration> findEarliestLocalVariableDeclarationOf(
@@ -818,7 +822,7 @@ public final class ASTs {
   }
 
   /**
-   * Staring from the {@link Node} {@code start}, checks if there exists a local variable
+   * Starting from the {@link Node} {@code start}, checks if there exists a local variable
    * declaration whose name is {@code name}.
    */
   public static Optional<LocalDeclaration> findEarliestLocalDeclarationOf(final SimpleName name) {
@@ -826,7 +830,7 @@ public final class ASTs {
   }
 
   /**
-   * Staring from the {@link Node} {@code start}, checks if there exists a local variable
+   * Starting from the {@link Node} {@code start}, checks if there exists a local variable
    * declaration whose name is {@code name}.
    */
   public static Optional<LocalDeclaration> findEarliestLocalDeclarationOf(
@@ -868,5 +872,51 @@ public final class ASTs {
     public boolean hasNext() {
       return current.getParentNode().isPresent();
     }
+  }
+
+  /**
+   * This finds all methods that match the given location, with the given name, and is assigned to a
+   * variable of one of the given types.
+   */
+  public static List<MethodCallExpr> findMethodCallsWhichAreAssignedToType(
+      final CompilationUnit cu,
+      final int line,
+      final Integer column,
+      final String methodName,
+      final List<String> assignedToTypes) {
+    List<MethodCallExpr> candidateMethods =
+        cu.findAll(MethodCallExpr.class).stream()
+            .filter(
+                m ->
+                    m.getRange()
+                        .isPresent()) // this may be true of nodes we've inserted in a previous
+            // fix
+            .filter(m -> m.getRange().get().begin.line == line)
+            .toList();
+
+    if (column != null) {
+      Position reportedPosition = new Position(line, column);
+      candidateMethods =
+          candidateMethods.stream()
+              .filter(m -> m.getRange().get().contains(reportedPosition))
+              .toList();
+    }
+
+    candidateMethods =
+        candidateMethods.stream()
+            .filter(m -> methodName.equals(m.getNameAsString()))
+            .filter(
+                m -> {
+                  Optional<VariableDeclarator> newFactoryVariableRef =
+                      expect(m).toBeMethodCallExpression().initializingVariable().result();
+                  if (newFactoryVariableRef.isEmpty()) {
+                    return false;
+                  }
+                  String type = newFactoryVariableRef.get().getTypeAsString();
+                  return assignedToTypes.contains(type)
+                      || assignedToTypes.stream().anyMatch(type::endsWith);
+                })
+            .toList();
+    return candidateMethods;
   }
 }

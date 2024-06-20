@@ -305,6 +305,7 @@ public final class ASTExpectations {
       return methodCallExpr;
     }
 
+    /** Return an expectation that asserts the method call has a specific number of arguments. */
     public MethodCallExpectation withArgumentsSize(final int expectedSize) {
       if (methodCallExpr.isEmpty()) {
         return this;
@@ -316,6 +317,7 @@ public final class ASTExpectations {
       return this;
     }
 
+    /** Return an expectation that asserts the method call has a specific name. */
     public MethodCallExpectation withName(final String expectedName) {
       if (methodCallExpr.isEmpty()) {
         return this;
@@ -327,6 +329,7 @@ public final class ASTExpectations {
       return this;
     }
 
+    /** Return an expectation that asserts the method call has 1+ arguments. */
     public MethodCallExpectation withArguments() {
       if (methodCallExpr.isEmpty()) {
         return this;
@@ -336,6 +339,22 @@ public final class ASTExpectations {
         methodCallExpr = Optional.empty();
       }
       return this;
+    }
+
+    /** Return an expectation that asserts the method call is initializing a variable value. */
+    public LocalVariableDeclaratorExpectation initializingVariable() {
+      if (methodCallExpr.isEmpty()) {
+        return new LocalVariableDeclaratorExpectation(Optional.empty());
+      }
+      MethodCallExpr call = methodCallExpr.get();
+      if (call.getParentNode().isEmpty()) {
+        return new LocalVariableDeclaratorExpectation(Optional.empty());
+      }
+      Optional<VariableDeclarator> initExpr = ASTs.isInitExpr(call);
+      if (initExpr.isEmpty()) {
+        return new LocalVariableDeclaratorExpectation(Optional.empty());
+      }
+      return new LocalVariableDeclaratorExpectation(initExpr);
     }
   }
 }
