@@ -56,6 +56,7 @@ public final class DefaultCodemods {
         SemgrepOverlyPermissiveFilePermissionsCodemod.class,
         SimplifyRestControllerAnnotationsCodemod.class,
         SubstituteReplaceAllCodemod.class,
+        SonarXXECodemod.class,
         SQLParameterizerCodemod.class,
         SSRFCodemod.class,
         StackTraceExposureCodemod.class,
