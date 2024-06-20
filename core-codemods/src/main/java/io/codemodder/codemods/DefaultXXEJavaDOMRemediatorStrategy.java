@@ -154,11 +154,7 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
         final T issue, final int line, final Integer column, CompilationUnit cu) {
       List<MethodCallExpr> candidateMethods =
           getMethodCallsWhichAssignToType(
-              cu,
-              line,
-              column,
-              NEWINSTANCE,
-              List.of("DocumentBuilderFactory", "SAXParserFactory"));
+              cu, line, column, NEWINSTANCE, List.of("DocumentBuilderFactory", "SAXParserFactory"));
 
       if (candidateMethods.isEmpty()) {
         return new FixAttempt(false, false, "No calls at that location");
@@ -256,6 +252,6 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
             .toList();
     return candidateMethods;
   }
-  
+
   private static final String NEWINSTANCE = "newInstance";
 }
