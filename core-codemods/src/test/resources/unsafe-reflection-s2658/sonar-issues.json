@@ -1,0 +1,76 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 100,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 1
+  },
+  "effortTotal": 45,
+  "debtTotal": 45,
+  "issues": [
+    {
+      "key": "AZA29hmxtpn0rIhsMyGN",
+      "rule": "java:S2658",
+      "severity": "CRITICAL",
+      "component": "pixee_bad-java-code:src/main/java/com/acme/reflection/UnsafeReflection.java",
+      "project": "pixee_bad-java-code",
+      "line": 25,
+      "hash": "a156d32a33f23ec9cd7fb3dcbbcebf08",
+      "textRange": {
+        "startLine": 25,
+        "endLine": 25,
+        "startOffset": 30,
+        "endOffset": 37
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this use of dynamic class loading.",
+      "effort": "45min",
+      "debt": "45min",
+      "author": "johnathan.gilday@pixee.ai",
+      "tags": [],
+      "creationDate": "2024-06-20T19:50:19+0200",
+      "updateDate": "2024-06-20T20:43:13+0200",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "pixee",
+      "key": "pixee_bad-java-code",
+      "uuid": "AZAybnMG2i3IMwLpnrFI",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "my-bad-code",
+      "longName": "my-bad-code"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_bad-java-code:src/main/java/com/acme/reflection/UnsafeReflection.java",
+      "uuid": "AZA2zRFOgsPIvFR8KBcb",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "UnsafeReflection.java",
+      "longName": "src/main/java/com/acme/reflection/UnsafeReflection.java",
+      "path": "src/main/java/com/acme/reflection/UnsafeReflection.java"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "pixee",
+      "name": "Pixee"
+    }
+  ],
+  "facets": []
+}

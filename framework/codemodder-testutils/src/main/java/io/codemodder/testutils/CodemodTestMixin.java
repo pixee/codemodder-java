@@ -12,6 +12,7 @@ import io.codemodder.javaparser.JavaParserFacade;
 import io.codemodder.javaparser.JavaParserFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -19,6 +20,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.ThrowingConsumer;
@@ -296,9 +298,7 @@ public interface CodemodTestMixin {
    */
   default void verifyTransformedCode(final Path before, final Path expected, final Path after)
       throws IOException {
-    String expectedCode = Files.readString(expected);
-    String transformedJavaCode = Files.readString(after);
-    assertThat(transformedJavaCode, equalTo(expectedCode));
+    Assertions.assertThat(after).hasSameTextualContentAs(expected, StandardCharsets.UTF_8);
   }
 
   private Patch<String> diff(final Path original, final Path revised) throws IOException {
