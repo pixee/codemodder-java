@@ -3,7 +3,7 @@ package io.codemodder.remediation.xxe;
 /** Represents an attempt to fix an XXE vulnerability. */
 record XXEFixAttempt(boolean isResponsibleFixer, boolean isFixed, String reasonNotFixed) {
 
-  public XXEFixAttempt {
+  XXEFixAttempt {
     if (!isResponsibleFixer && isFixed) {
       throw new IllegalStateException("Cannot be fixed by a non-responsible fixer");
     }

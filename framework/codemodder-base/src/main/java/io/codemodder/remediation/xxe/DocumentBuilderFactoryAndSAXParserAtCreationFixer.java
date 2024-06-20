@@ -17,7 +17,7 @@ import java.util.Optional;
  * Fix XXEs that are reported at the (DocumentBuilderFactory/SAXParserFactory).newInstance() call
  * locations.
  */
-class DocumentBuilderFactoryAndSAXParserAtCreationFixer implements XXEFixer {
+final class DocumentBuilderFactoryAndSAXParserAtCreationFixer implements XXEFixer {
 
   @Override
   public <T> XXEFixAttempt tryFix(
