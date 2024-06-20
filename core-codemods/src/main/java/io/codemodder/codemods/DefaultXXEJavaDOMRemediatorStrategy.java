@@ -43,7 +43,7 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
 
     List<MethodCallExpr> newFactoryInstanceCalls =
         cu.findAll(MethodCallExpr.class).stream()
-            .filter(m -> "newInstance".equals(m.getNameAsString()))
+            .filter(m -> NEWINSTANCE.equals(m.getNameAsString()))
             .toList();
     if (newFactoryInstanceCalls.isEmpty()) {
       return CodemodFileScanningResult.none();
@@ -101,7 +101,7 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
         final T issue, final int line, final Integer column, CompilationUnit cu) {
       List<MethodCallExpr> candidateMethods =
           getMethodCallsWhichAssignToType(
-              cu, line, column, "newInstance", List.of("TransformerFactory"));
+              cu, line, column, NEWINSTANCE, List.of("TransformerFactory"));
       if (candidateMethods.isEmpty()) {
         return new FixAttempt(false, false, "No calls at that location");
       } else if (candidateMethods.size() > 1) {
@@ -157,7 +157,7 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
               cu,
               line,
               column,
-              "newInstance",
+              NEWINSTANCE,
               List.of("DocumentBuilderFactory", "SAXParserFactory"));
 
       if (candidateMethods.isEmpty()) {
@@ -256,4 +256,6 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
             .toList();
     return candidateMethods;
   }
+  
+  private static final String NEWINSTANCE = "newInstance";
 }
