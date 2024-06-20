@@ -1,14 +1,13 @@
 package io.codemodder.codemods;
 
+import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 import static io.codemodder.javaparser.ASTExpectations.expect;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.BooleanLiteralExpr;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -28,7 +27,8 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
   private final List<XXEFixer> fixers;
 
   DefaultXXEJavaDOMRemediatorStrategy() {
-    this.fixers = List.of(new DocumentBuilderFactoryFixer());
+    this.fixers =
+        List.of(new DocumentBuilderFactoryAndSAXParserFixer(), new TransformerFactoryFixer());
   }
 
   @Override
@@ -93,47 +93,72 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
     }
   }
 
-  /** Fixer for DocumentBuilderFactory.newInstance() calls */
-  private static class DocumentBuilderFactoryFixer implements XXEFixer {
+  /** Fixer for TransformerFactory.newInstance() calls. */
+  private static class TransformerFactoryFixer implements XXEFixer {
 
     @Override
     public <T> FixAttempt tryFix(
         final T issue, final int line, final Integer column, CompilationUnit cu) {
       List<MethodCallExpr> candidateMethods =
-          cu.findAll(MethodCallExpr.class).stream()
-              .filter(
-                  m ->
-                      m.getRange()
-                          .isPresent()) // this may be true of nodes we've inserted in a previous
-              // fix
-              .filter(m -> m.getRange().get().begin.line == line)
-              .toList();
+          getMethodCallsWhichAssignToType(
+              cu, line, column, "newInstance", List.of("TransformerFactory"));
+      if (candidateMethods.isEmpty()) {
+        return new FixAttempt(false, false, "No calls at that location");
+      } else if (candidateMethods.size() > 1) {
+        return new FixAttempt(
+            false,
+            false,
+            "Multiple calls found at the given location and that may cause confusion");
+      }
+      MethodCallExpr newFactoryInstanceCall = candidateMethods.get(0);
+      Optional<VariableDeclarator> newFactoryVariableRef =
+          expect(newFactoryInstanceCall).toBeMethodCallExpression().initializingVariable().result();
+      VariableDeclarator newFactoryVariable = newFactoryVariableRef.get();
+      Optional<Statement> variableDeclarationStmtRef =
+          newFactoryVariable.findAncestor(Statement.class);
 
-      if (column != null) {
-        Position reportedPosition = new Position(line, column);
-        candidateMethods =
-            candidateMethods.stream()
-                .filter(m -> m.getRange().get().contains(reportedPosition))
-                .toList();
+      if (variableDeclarationStmtRef.isEmpty()) {
+        return new FixAttempt(true, false, "Not assigned as part of statement");
       }
 
-      candidateMethods =
-          candidateMethods.stream()
-              .filter(m -> "newInstance".equals(m.getNameAsString()))
-              .filter(
-                  m -> {
-                    Optional<VariableDeclarator> newFactoryVariableRef =
-                        expect(m).toBeMethodCallExpression().initializingVariable().result();
-                    if (newFactoryVariableRef.isEmpty()) {
-                      return false;
-                    }
-                    String type = newFactoryVariableRef.get().getTypeAsString();
-                    return "SAXParserFactory".equals(type)
-                        || type.endsWith(".SAXParserFactory")
-                        || "DocumentBuilderFactory".equals(type)
-                        || type.endsWith(".DocumentBuilderFactory");
-                  })
-              .toList();
+      Statement statement = variableDeclarationStmtRef.get();
+      Optional<BlockStmt> block = ASTs.findBlockStatementFrom(statement);
+      if (block.isEmpty()) {
+        return new FixAttempt(true, false, "No block statement found for newFactory() call");
+      }
+
+      BlockStmt blockStmt = block.get();
+      MethodCallExpr setAttributeCall =
+          new MethodCallExpr(
+              newFactoryVariable.getNameAsExpression(),
+              "setAttribute",
+              NodeList.nodeList(
+                  // add field access for javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD
+                  new FieldAccessExpr(new NameExpr("XMLConstants"), "ACCESS_EXTERNAL_DTD"),
+                  new StringLiteralExpr("")));
+
+      addImportIfMissing(cu, "javax.xml.XMLConstants");
+      Statement fixStatement = new ExpressionStmt(setAttributeCall);
+      NodeList<Statement> existingStatements = blockStmt.getStatements();
+      int index = existingStatements.indexOf(statement);
+      existingStatements.add(index + 1, fixStatement);
+      return new FixAttempt(true, true, null);
+    }
+  }
+
+  /** Fixer for (DocumentBuilderFactory/SAXParserFactory).newInstance() calls */
+  private static class DocumentBuilderFactoryAndSAXParserFixer implements XXEFixer {
+
+    @Override
+    public <T> FixAttempt tryFix(
+        final T issue, final int line, final Integer column, CompilationUnit cu) {
+      List<MethodCallExpr> candidateMethods =
+          getMethodCallsWhichAssignToType(
+              cu,
+              line,
+              column,
+              "newInstance",
+              List.of("DocumentBuilderFactory", "SAXParserFactory"));
 
       if (candidateMethods.isEmpty()) {
         return new FixAttempt(false, false, "No calls at that location");
@@ -169,6 +194,7 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
               NodeList.nodeList(
                   new StringLiteralExpr("http://xml.org/sax/features/external-general-entities"),
                   new BooleanLiteralExpr(false)));
+
       MethodCallExpr setFeatureParameterEntities =
           new MethodCallExpr(
               newFactoryVariable.getNameAsExpression(),
@@ -176,6 +202,7 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
               NodeList.nodeList(
                   new StringLiteralExpr("http://xml.org/sax/features/external-parameter-entities"),
                   new BooleanLiteralExpr(false)));
+
       List<Statement> fixStatements =
           List.of(
               new ExpressionStmt(setFeatureGeneralEntities),
@@ -186,5 +213,47 @@ final class DefaultXXEJavaDOMRemediatorStrategy implements XXEJavaDOMRemediatorS
       existingStatements.addAll(index + 1, fixStatements);
       return new FixAttempt(true, true, null);
     }
+  }
+
+  private static List<MethodCallExpr> getMethodCallsWhichAssignToType(
+      final CompilationUnit cu,
+      final int line,
+      final Integer column,
+      final String methodName,
+      final List<String> assignedToTypes) {
+    List<MethodCallExpr> candidateMethods =
+        cu.findAll(MethodCallExpr.class).stream()
+            .filter(
+                m ->
+                    m.getRange()
+                        .isPresent()) // this may be true of nodes we've inserted in a previous
+            // fix
+            .filter(m -> m.getRange().get().begin.line == line)
+            .toList();
+
+    if (column != null) {
+      Position reportedPosition = new Position(line, column);
+      candidateMethods =
+          candidateMethods.stream()
+              .filter(m -> m.getRange().get().contains(reportedPosition))
+              .toList();
+    }
+
+    candidateMethods =
+        candidateMethods.stream()
+            .filter(m -> methodName.equals(m.getNameAsString()))
+            .filter(
+                m -> {
+                  Optional<VariableDeclarator> newFactoryVariableRef =
+                      expect(m).toBeMethodCallExpression().initializingVariable().result();
+                  if (newFactoryVariableRef.isEmpty()) {
+                    return false;
+                  }
+                  String type = newFactoryVariableRef.get().getTypeAsString();
+                  return assignedToTypes.contains(type)
+                      || assignedToTypes.stream().anyMatch(type::endsWith);
+                })
+            .toList();
+    return candidateMethods;
   }
 }

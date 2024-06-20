@@ -8,12 +8,21 @@ import io.codemodder.javaparser.JavaParserChanger;
 public abstract class SonarRemediatingJavaParserChanger extends JavaParserChanger
     implements FixOnlyCodeChanger {
 
-  protected SonarRemediatingJavaParserChanger(final CodemodReporterStrategy reporter) {
+  private final boolean shouldRun;
+
+  protected SonarRemediatingJavaParserChanger(
+      final CodemodReporterStrategy reporter, final RuleFinding<?> findings) {
     super(reporter);
+    this.shouldRun = findings.hasResults();
   }
 
   @Override
   public String vendorName() {
     return "Sonar";
+  }
+
+  @Override
+  public boolean shouldRun() {
+    return shouldRun;
   }
 }

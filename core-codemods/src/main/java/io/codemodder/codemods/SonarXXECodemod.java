@@ -14,7 +14,7 @@ import javax.inject.Inject;
 
 @Codemod(
     id = "sonar:java/xxe-2755",
-    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
     importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class SonarXXECodemod extends SonarRemediatingJavaParserChanger {
@@ -24,7 +24,9 @@ public final class SonarXXECodemod extends SonarRemediatingJavaParserChanger {
 
   @Inject
   public SonarXXECodemod(@ProvidedSonarScan(ruleId = "java:S2755") final RuleIssue issues) {
-    super(CodemodReporterStrategy.fromClasspath(SQLParameterizerCodemod.class));
+    super(
+        CodemodReporterStrategy.fromClasspathDirectory(SonarXXECodemod.class, "xxe-generic"),
+        issues);
     this.issues = Objects.requireNonNull(issues);
     this.remediationStrategy = XXEJavaDOMRemediatorStrategy.DEFAULT;
   }

@@ -26,7 +26,7 @@ public final class SonarSQLInjectionCodemod extends SonarRemediatingJavaParserCh
   @Inject
   public SonarSQLInjectionCodemod(
       @ProvidedSonarScan(ruleId = "java:S2077") final RuleHotspot hotspots) {
-    super(CodemodReporterStrategy.fromClasspath(SQLParameterizerCodemod.class));
+    super(CodemodReporterStrategy.fromClasspath(SQLParameterizerCodemod.class), hotspots);
     this.hotspots = Objects.requireNonNull(hotspots);
     this.remediationStrategy = JavaParserSQLInjectionRemediatorStrategy.DEFAULT;
   }
