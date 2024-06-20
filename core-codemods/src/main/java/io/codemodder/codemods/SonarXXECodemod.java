@@ -6,6 +6,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
+import io.codemodder.remediation.xxe.XXEJavaRemediatorStrategy;
 import io.codemodder.sonar.model.Issue;
 import io.codemodder.sonar.model.SonarFinding;
 import java.util.List;
@@ -19,7 +20,7 @@ import javax.inject.Inject;
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class SonarXXECodemod extends SonarRemediatingJavaParserChanger {
 
-  private final XXEJavaDOMRemediatorStrategy remediationStrategy;
+  private final XXEJavaRemediatorStrategy remediationStrategy;
   private final RuleIssue issues;
 
   @Inject
@@ -28,7 +29,7 @@ public final class SonarXXECodemod extends SonarRemediatingJavaParserChanger {
         CodemodReporterStrategy.fromClasspathDirectory(SonarXXECodemod.class, "xxe-generic"),
         issues);
     this.issues = Objects.requireNonNull(issues);
-    this.remediationStrategy = XXEJavaDOMRemediatorStrategy.DEFAULT;
+    this.remediationStrategy = XXEJavaRemediatorStrategy.DEFAULT;
   }
 
   @Override

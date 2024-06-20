@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.remediation.xxe;
 
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.CodemodFileScanningResult;
@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.function.Function;
 
 /** Strategy for remediating XXE vulnerabilities using Java's DOM parser. */
-public interface XXEJavaDOMRemediatorStrategy {
+public interface XXEJavaRemediatorStrategy {
 
   /** A default implementation for callers. */
-  XXEJavaDOMRemediatorStrategy DEFAULT = new DefaultXXEJavaDOMRemediatorStrategy();
+  XXEJavaRemediatorStrategy DEFAULT = new DefaultXXEJavaRemediatorStrategy();
 
   /** Remediate all XXE vulnerabilities in the given compilation unit. */
   <T> CodemodFileScanningResult remediateAll(
