@@ -44,6 +44,6 @@ final class DocumentBuilderFactoryAndSAXParserAtCreationFixer implements XXEFixe
 
     Statement statement = variableDeclarationStmtRef.get();
     return addFeatureDisablingStatements(
-        cu, newFactoryVariable.getNameAsExpression(), statement, false);
+        newFactoryVariable.getNameAsExpression(), statement, false);
   }
 }

@@ -72,6 +72,6 @@ final class XMLReaderAtParseFixer implements XXEFixer {
       return new XXEFixAttempt(true, false, "No statement found for parse() call");
     }
     return XMLFeatures.addFeatureDisablingStatements(
-        cu, parser.asNameExpr(), parseStatement.get(), true);
+        parser.asNameExpr(), parseStatement.get(), true);
   }
 }
