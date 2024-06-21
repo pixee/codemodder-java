@@ -1,6 +1,6 @@
 package io.codemodder.remediation.xxe;
 
-import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -39,10 +39,7 @@ final class XMLFeatures {
   }
 
   static XXEFixAttempt addFeatureDisablingStatements(
-      final CompilationUnit cu,
-      final NameExpr variable,
-      final Statement statementToInjectAround,
-      final boolean before) {
+      final NameExpr variable, final Statement statementToInjectAround, final boolean before) {
     Optional<BlockStmt> block = ASTs.findBlockStatementFrom(statementToInjectAround);
     if (block.isEmpty()) {
       return new XXEFixAttempt(true, false, "No block statement found for newFactory() call");
@@ -62,6 +59,22 @@ final class XMLFeatures {
       index++;
     }
     existingStatements.addAll(index, fixStatements);
+
+    // search for any dbf.setExpandEntityReferences(true) calls and remove them
+    blockStmt.findAll(MethodCallExpr.class).stream()
+        .filter(
+            m ->
+                "setExpandEntityReferences".equals(m.getNameAsString())
+                    && m.getScope().isPresent()
+                    && m.getScope().get().equals(variable)
+                    && m.getArguments().size() == 1
+                    && m.getArguments().get(0).isBooleanLiteralExpr()
+                    && m.getArguments().get(0).asBooleanLiteralExpr().getValue())
+        .map(Node::getParentNode)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .forEach(Node::remove);
+
     return new XXEFixAttempt(true, true, null);
   }
 }
