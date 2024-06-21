@@ -104,7 +104,7 @@ final class DocumentBuilderFactoryAtParseFixer implements XXEFixer {
             "DocumentBuilder was initialized with a factory call without a statement");
       }
       return XMLFeatures.addFeatureDisablingStatements(
-          cu, factoryNameExpr, newDocumentBuilderStatement.get(), true);
+          factoryNameExpr, newDocumentBuilderStatement.get(), true);
     } else if (parserAssignmentNode instanceof Parameter) {
       return new XXEFixAttempt(true, false, "DocumentBuilder came from outside the method scope");
     }
