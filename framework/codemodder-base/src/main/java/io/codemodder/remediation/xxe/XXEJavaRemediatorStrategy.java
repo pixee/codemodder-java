@@ -15,7 +15,7 @@ public interface XXEJavaRemediatorStrategy {
   /** Remediate all XXE vulnerabilities in the given compilation unit. */
   <T> CodemodFileScanningResult remediateAll(
       CompilationUnit cu,
-      String string,
+      String path,
       DetectorRule detectorRule,
       List<T> issuesForFile,
       Function<T, String> getKey,

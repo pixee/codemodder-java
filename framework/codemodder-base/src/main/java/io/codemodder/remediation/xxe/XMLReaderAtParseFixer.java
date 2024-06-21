@@ -20,8 +20,7 @@ import java.util.Set;
 final class XMLReaderAtParseFixer implements XXEFixer {
 
   @Override
-  public <T> XXEFixAttempt tryFix(
-      final T issue, final int line, final Integer column, final CompilationUnit cu) {
+  public XXEFixAttempt tryFix(final int line, final Integer column, final CompilationUnit cu) {
     List<MethodCallExpr> candidateMethods =
         cu.findAll(MethodCallExpr.class).stream()
             .filter(m -> "parse".equals(m.getNameAsString()))
