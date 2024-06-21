@@ -46,7 +46,7 @@ final class ExpectedFixes {
     List<UnfixedFinding> unfixedFindings = result.getUnfixedFindings();
     for (int expectedFailedFixLine : expectingFailedFixesAtLines) {
       assertThat(
-          unfixedFindings.stream().noneMatch(c -> c.getLine() == expectedFailedFixLine), is(true));
+          unfixedFindings.stream().anyMatch(c -> c.getLine() == expectedFailedFixLine), is(true));
     }
   }
 
