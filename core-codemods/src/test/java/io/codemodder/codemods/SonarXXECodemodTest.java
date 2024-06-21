@@ -7,6 +7,6 @@ import io.codemodder.testutils.Metadata;
     codemodType = SonarXXECodemod.class,
     testResourceDir = "sonar-xxe-s2755",
     renameTestFile = "src/main/java/com/acme/XXEVuln.java",
-    expectingFixesAtLines = {62},
+    expectingFixesAtLines = {53, 62, 68},
     dependencies = {})
 final class SonarXXECodemodTest implements CodemodTestMixin {}
