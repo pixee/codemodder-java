@@ -18,6 +18,7 @@ final class DefaultXXEJavaRemediatorStrategy implements XXEJavaRemediatorStrateg
     this.fixers =
         List.of(
             new DocumentBuilderFactoryAndSAXParserAtCreationFixer(),
+            new DocumentBuilderFactoryAtParseFixer(),
             new TransformerFactoryAtCreationFixer(),
             new XMLReaderAtParseFixer());
   }
@@ -41,7 +42,7 @@ final class DefaultXXEJavaRemediatorStrategy implements XXEJavaRemediatorStrateg
       int line = getLine.apply(issue);
       Integer column = getColumn.apply(issue);
       for (XXEFixer fixer : fixers) {
-        XXEFixAttempt fixAttempt = fixer.tryFix(issue, line, column, cu);
+        XXEFixAttempt fixAttempt = fixer.tryFix(line, column, cu);
         if (!fixAttempt.isResponsibleFixer()) {
           continue;
         }
