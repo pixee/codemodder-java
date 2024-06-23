@@ -31,8 +31,7 @@ import org.javatuples.Triplet;
 /** A static library for querying and returning patterns over AST nodes. */
 public final class ASTs {
 
-private ASTs() {
-}
+  private ASTs() {}
 
   /**
    * Test for this pattern: {@link AssignExpr} -&gt; {@link Expression} ({@code expr}), where
