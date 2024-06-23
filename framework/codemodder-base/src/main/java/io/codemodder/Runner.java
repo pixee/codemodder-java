@@ -7,6 +7,9 @@ import picocli.CommandLine;
 /** Provides an entrypoint for CLIs built with the codemodder framework. */
 public final class Runner {
 
+private Runner() {
+}
+
   /**
    * Runs the codemods with a set of customized streams.
    *
