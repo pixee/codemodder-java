@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
  */
 final class ResourceLeakFixer {
 
+  private ResourceLeakFixer() {}
+
   private static final Logger LOG = LoggerFactory.getLogger(ResourceLeakFixer.class);
 
   private static final String rootPrefix = "resource";

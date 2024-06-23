@@ -30,6 +30,8 @@ import java.util.stream.IntStream;
 
 public final class ASTTransforms {
   /** Add an import in alphabetical order. */
+  private ASTTransforms() {}
+
   public static void addImportIfMissing(final CompilationUnit cu, final String className) {
     final NodeList<ImportDeclaration> imports = cu.getImports();
     final ImportDeclaration newImport = new ImportDeclaration(className, false, false);
