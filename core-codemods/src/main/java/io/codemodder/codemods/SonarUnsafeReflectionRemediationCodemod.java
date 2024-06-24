@@ -1,0 +1,55 @@
+package io.codemodder.codemods;
+
+import com.github.javaparser.ast.CompilationUnit;
+import io.codemodder.*;
+import io.codemodder.codetf.DetectorRule;
+import io.codemodder.providers.sonar.ProvidedSonarScan;
+import io.codemodder.providers.sonar.RuleIssue;
+import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
+import io.codemodder.remediation.GenericVulnerabilityReporterStrategies;
+import io.codemodder.remediation.reflectioninjection.ReflectionInjectionRemediator;
+import io.codemodder.sonar.model.Issue;
+import java.util.Objects;
+import javax.inject.Inject;
+
+/** Sonar remediation codemod for S2658: Classes should not be loaded dynamically. */
+@Codemod(
+    id = "sonar:java/unsafe-reflection-s2658",
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    importance = Importance.HIGH,
+    executionPriority = CodemodExecutionPriority.HIGH)
+public final class SonarUnsafeReflectionRemediationCodemod
+    extends SonarRemediatingJavaParserChanger {
+
+  private final ReflectionInjectionRemediator remediator;
+  private final RuleIssue issues;
+
+  @Inject
+  public SonarUnsafeReflectionRemediationCodemod(
+      @ProvidedSonarScan(ruleId = "java:S2658") final RuleIssue issues) {
+    super(GenericVulnerabilityReporterStrategies.reflectionInjectionStrategy, issues);
+    this.remediator = ReflectionInjectionRemediator.DEFAULT;
+    this.issues = Objects.requireNonNull(issues);
+  }
+
+  @Override
+  public DetectorRule detectorRule() {
+    return new DetectorRule(
+        "java:S2658",
+        "Classes should not be loaded dynamically",
+        "https://rules.sonarsource.com/java/RSPEC-2658/");
+  }
+
+  @Override
+  public CodemodFileScanningResult visit(
+      final CodemodInvocationContext context, final CompilationUnit cu) {
+    return remediator.remediateAll(
+        cu,
+        context.path().toString(),
+        detectorRule(),
+        issues.getResultsByPath(context.path()),
+        Issue::getKey,
+        Issue::getLine,
+        i -> i.getTextRange().getStartOffset());
+  }
+}

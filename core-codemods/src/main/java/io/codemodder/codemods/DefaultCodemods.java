@@ -63,6 +63,7 @@ public final class DefaultCodemods {
         SwitchLiteralFirstComparisonsCodemod.class,
         SwitchToStandardCharsetsCodemod.class,
         UnverifiedJwtCodemod.class,
+        SonarUnsafeReflectionRemediationCodemod.class,
         UpgradeSSLContextTLSCodemod.class,
         UpgradeSSLEngineTLSCodemod.class,
         UpgradeSSLParametersTLSCodemod.class,

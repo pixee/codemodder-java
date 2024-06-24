@@ -1,0 +1,6 @@
+{
+  "summary" : "Introduced sandboxing to reflection calls to prevent abuse",
+  "change" : "Added sandbox to reflection calls to prevent abuse",
+  "reviewGuidanceIJustification" : "We believe this change is effective, and it will not break applications unless intentionally loading arbitrary types including those that would be used in exploits.",
+  "references" : ["https://cwe.mitre.org/data/definitions/470.html", "https://owasp.org/www-community/vulnerabilities/Unsafe_use_of_Reflection"]
+}

@@ -38,6 +38,7 @@ dependencies {
     testImplementation(project(":framework:codemodder-testutils-llm"))
     testRuntimeOnly(testlibs.junit.jupiter.engine)
     testImplementation(testlibs.jgit)
+    testImplementation(testlibs.assertj)
     testImplementation("org.testcontainers:testcontainers:1.19.0")
 }
 
