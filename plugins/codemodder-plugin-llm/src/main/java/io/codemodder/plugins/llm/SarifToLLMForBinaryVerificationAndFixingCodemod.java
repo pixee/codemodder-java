@@ -1,6 +1,6 @@
 package io.codemodder.plugins.llm;
 
-import static io.codemodder.plugins.llm.Model.GPT_3_5_TURBO;
+import static io.codemodder.plugins.llm.StandardModel.GPT_3_5_TURBO;
 import static io.codemodder.plugins.llm.Tokens.countTokens;
 
 import com.contrastsecurity.sarif.Region;
