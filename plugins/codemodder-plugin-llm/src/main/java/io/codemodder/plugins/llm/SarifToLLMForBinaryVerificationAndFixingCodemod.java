@@ -1,13 +1,11 @@
 package io.codemodder.plugins.llm;
 
 import static io.codemodder.plugins.llm.StandardModel.GPT_3_5_TURBO;
-import static io.codemodder.plugins.llm.Tokens.countTokens;
 
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.Patch;
-import com.knuddels.jtokkit.api.EncodingType;
 import com.theokanning.openai.completion.chat.*;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest.ChatCompletionRequestFunctionCall;
 import com.theokanning.openai.service.FunctionExecutor;
@@ -78,10 +76,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       }
 
       BinaryThreatAnalysisAndFix fix = fixThreat(file, context, results);
-      logger.debug("risk: {}", fix.getRisk());
-      logger.debug("analysis: {}", fix.getAnalysis());
-      logger.debug("fix: {}", fix.getFix());
-      logger.debug("fix description: {}", fix.getFixDescription());
+      logger.debug("{}", fix);
 
       // If our second look determined that the risk of the threat is low, don't change the file.
       if (fix.getRisk() == BinaryThreatRisk.LOW) {
@@ -152,7 +147,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
 
     // If the estimated token count, which doesn't include the function (~100 tokens) or the reply
     // (~200 tokens), is close to the max, then assume the code is safe (for now).
-    int tokenCount = countTokens(List.of(systemMessage, userMessage), 3, EncodingType.CL100K_BASE);
+    int tokenCount = model.tokens(List.of(systemMessage, userMessage));
     if (tokenCount > model.contextWindow() - 300) {
       return new BinaryThreatAnalysis(
           "Ignoring file: estimated prompt token count (" + tokenCount + ") is too high.",
@@ -253,13 +248,33 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       A file with line numbers is provided below. Analyze it. If the risk is HIGH, use these rules \
       to make the MINIMUM number of changes necessary to reduce the file's risk to LOW:
       - Each change MUST be syntactically correct.
-      - DO NOT change the file's formatting or comments.
       %s
 
-      Create a diff patch for the changed file, using the unified format with a header. Include \
-      the diff patch and a summary of the changes with your threat analysis.
+      Create a diff patch for the changed file. Follow these instructions when creating the patch:
+        - Your output must be in the form a unified diff patch that will be applied by your coworkers.
+        - The output must be similar to the output of `diff -U0`. Do not include line number ranges.
+        - Start each hunk of changes with a `@@ ... @@` line.
+        - Each change in a file should be a separate hunk in the diff.
+        - It is very important for the change to contain only what is minimally required to fix the problem.
+        - Remember that whitespace and indentation changes can be important. Preserve the original formatting and indentation. Do not replace tabs with spaces or vice versa. If the original code uses tabs, use tabs in the patch. Encode tabs using a tab literal (\\\\t). If the original code uses spaces, use spaces in the patch. Do not add spaces where none were present in the original code. **THIS IS ESPECIALLY IMPORTANT AT THE BEGINNING OF DIFF LINES.**
+        - The unified diff must be accurate and complete.
+        - The unified diff will be applied to the source code by your coworkers.
 
-      Save your threat analysis.
+      Here's an example of a unified diff:
+      ```diff
+      --- a/file.txt
+      +++ b/file.txt
+      @@ ... @@
+       This line is unchanged.
+      -This is the original line
+      +This is the new line
+       Here is another unchanged line.
+      @@ ... @@
+      -This line has been removed and not replaced.
+       This line is unchanged.
+
+      ```
+      Now save your threat analysis.
 
       --- %s
       %s

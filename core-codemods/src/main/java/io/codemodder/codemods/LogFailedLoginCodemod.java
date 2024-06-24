@@ -1,7 +1,7 @@
 package io.codemodder.codemods;
 
 import static io.codemodder.CodemodResources.getClassResourceAsString;
-import static io.codemodder.plugins.llm.StandardModel.GPT_4O;
+import static io.codemodder.plugins.llm.StandardModel.GPT_4;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.difflib.patch.AbstractDelta;
@@ -23,7 +23,7 @@ public final class LogFailedLoginCodemod extends SarifToLLMForBinaryVerification
   @Inject
   public LogFailedLoginCodemod(
       @SemgrepScan(ruleId = "log-failed-login") final RuleSarif sarif, final OpenAIService openAI) {
-    super(sarif, openAI, GPT_4O);
+    super(sarif, openAI, GPT_4);
   }
 
   @Override
