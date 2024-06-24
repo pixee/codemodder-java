@@ -14,6 +14,7 @@ import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.FunctionExecutor;
 import io.codemodder.EncodingDetector;
+import io.codemodder.plugins.llm.Model;
 import io.codemodder.plugins.llm.OpenAIService;
 import io.codemodder.testutils.CodemodTestMixin;
 import java.io.IOException;
@@ -31,6 +32,13 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
    * use these requirements to assess whether the changes are similar enough to pass the test.
    */
   String getRequirementsPrompt();
+
+  /**
+   * @return GPT model to use for the test harness to verify the codemod's changes
+   */
+  default Model model() {
+    return Model.GPT_3_5_TURBO;
+  }
 
   @Override
   default void verifyTransformedCode(final Path before, final Path expected, final Path after)
@@ -63,7 +71,7 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
 
     ChatCompletionRequest request =
         ChatCompletionRequest.builder()
-            .model("gpt-3.5-turbo-0613")
+            .model(model().id())
             .messages(
                 List.of(
                     new ChatMessage(
