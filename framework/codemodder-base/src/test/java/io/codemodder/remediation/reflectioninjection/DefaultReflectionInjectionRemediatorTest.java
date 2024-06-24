@@ -119,7 +119,7 @@ final class DefaultReflectionInjectionRemediatorTest {
                           }
                         }
                         """,
-            8,
+            5,
             """
                         import io.github.pixee.security.Reflection;
                         import static java.lang.Class.forName;
