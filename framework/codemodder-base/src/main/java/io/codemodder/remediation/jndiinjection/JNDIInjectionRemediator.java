@@ -13,7 +13,7 @@ import java.util.function.Function;
  * <p>Inspiration for this came from logback:
  * https://github.com/qos-ch/logback/blob/979d76f3f2847f1c129bcc6295e69187d02e472c/logback-core/src/main/java/ch/qos/logback/core/util/JNDIUtil.java#L54
  */
-public interface JNDIInjectionRemediationStrategy {
+public interface JNDIInjectionRemediator {
 
   /** Remediate all JNDI injection vulnerabilities in the given compilation unit. */
   <T> CodemodFileScanningResult remediateAll(
@@ -26,5 +26,5 @@ public interface JNDIInjectionRemediationStrategy {
       Function<T, Integer> getColumn);
 
   /** The default JNDI injection remediation strategy. */
-  JNDIInjectionRemediationStrategy DEFAULT = new DefaultJNDIInjectionRemediationStrategy();
+  JNDIInjectionRemediator DEFAULT = new DefaultJNDIInjectionRemediator();
 }

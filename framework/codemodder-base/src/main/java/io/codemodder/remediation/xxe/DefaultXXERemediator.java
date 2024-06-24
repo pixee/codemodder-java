@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-final class DefaultXXEJavaRemediatorStrategy implements XXEJavaRemediatorStrategy {
+final class DefaultXXERemediator implements XXERemediator {
 
   private final List<XXEFixer> fixers;
 
-  DefaultXXEJavaRemediatorStrategy() {
+  DefaultXXERemediator() {
     this.fixers =
         List.of(
             new DocumentBuilderFactoryAndSAXParserAtCreationFixer(),

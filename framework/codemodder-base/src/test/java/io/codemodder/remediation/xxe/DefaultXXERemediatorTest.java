@@ -12,14 +12,14 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-final class DefaultXXEJavaRemediatorStrategyTest {
+final class DefaultXXERemediatorTest {
 
-  private DefaultXXEJavaRemediatorStrategy remediator;
+  private DefaultXXERemediator remediator;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    this.remediator = new DefaultXXEJavaRemediatorStrategy();
+    this.remediator = new DefaultXXERemediator();
     this.rule = new DetectorRule("xxe", "XXE", null);
   }
 

@@ -19,14 +19,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-final class DefaultJNDIInjectionRemediationStrategyTest {
+final class DefaultJNDIInjectionRemediatorTest {
 
-  private DefaultJNDIInjectionRemediationStrategy remediator;
+  private DefaultJNDIInjectionRemediator remediator;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    this.remediator = new DefaultJNDIInjectionRemediationStrategy();
+    this.remediator = new DefaultJNDIInjectionRemediator();
     this.rule = new DetectorRule("java/JNDIInjection", "JNDI Injection", null);
   }
 
