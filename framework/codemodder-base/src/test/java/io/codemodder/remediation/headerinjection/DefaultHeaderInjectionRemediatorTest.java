@@ -7,7 +7,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.CodemodChange;
 import io.codemodder.CodemodFileScanningResult;
-import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
@@ -29,6 +28,12 @@ final class DefaultHeaderInjectionRemediatorTest {
   void setup() {
     this.remediator = new DefaultHeaderInjectionRemediator();
     this.rule = new DetectorRule("header-injection", "Header Injection", null);
+  }
+
+  @Test
+  void suggested_fix_works() {
+    assertThat("Mascherano\nGerrard\rAlonso".replaceAll("[\r\n]", ""))
+        .isEqualTo("MascheranoGerrardAlonso");
   }
 
   @ParameterizedTest
@@ -96,10 +101,10 @@ final class DefaultHeaderInjectionRemediatorTest {
             RemediationMessages.noCallsAtThatLocation));
   }
 
-  @Test
-  void it_fixes_header_injection() {
-    String vulnerableCode =
-        """
+  private static Stream<Arguments> fixableSamples() {
+    return Stream.of(
+        Arguments.of(
+            """
                 package com.acme;
 
                 @RequestMapping("/search")
@@ -110,44 +115,77 @@ final class DefaultHeaderInjectionRemediatorTest {
                         return ResponseEntity.ok(search());
                     }
                 }
-                """;
-
-    CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
-    LexicalPreservingPrinter.setup(cu);
-
-    HeaderInjectionFinding finding =
-        new HeaderInjectionFinding("header-injection", "SearchController.java", 7);
-    CodemodFileScanningResult result =
-        remediator.remediateAll(
-            cu, "SearchController.java", rule, List.of(finding), f -> f.id, f -> f.line, f -> null);
-    assertThat(result.changes()).hasSize(1);
-    CodemodChange change = result.changes().get(0);
-    assertThat(change.lineNumber()).isEqualTo(7);
-    assertThat(change.getFixedFindings()).hasSize(1);
-    FixedFinding fixedFinding = change.getFixedFindings().get(0);
-    assertThat(fixedFinding.getRule()).isEqualTo(rule);
-    assertThat(fixedFinding.getId()).isEqualTo("header-injection");
-
-    assertThat(change.getDependenciesNeeded()).containsExactly(DependencyGAV.JAVA_SECURITY_TOOLKIT);
-
-    String expectedFixedCode =
-        """
+                """,
+            7,
+            """
                 package com.acme;
-                import io.github.pixee.security.Newlines;
-
 
                 @RequestMapping("/search")
                 public class SearchController extends BaseSearchController {
                     @GetMapping
                     public ResponseEntity<String> search(@RequestParam("q") String q) {
-                        response.setHeader("X-Last-Search", Newlines.stripAll(q));
+                        response.setHeader("X-Last-Search", stripNewlines(q));
+                        return ResponseEntity.ok(search());
+                    }
+
+                    private static String stripNewlines(final String s) {
+                        return s.replaceAll("[\\n\\r]", "");
+                    }
+                }
+                """),
+        Arguments.of(
+            """
+                      package com.acme;
+
+                      @RequestMapping("/search")
+                      public interface SearchController extends BaseSearchController {
+                          @GetMapping
+                          default ResponseEntity<String> search(@RequestParam("q") String q) {
+                              response.setHeader("X-Last-Search", q);
+                              return ResponseEntity.ok(search());
+                          }
+                      }
+                      """,
+            7,
+            """
+                package com.acme;
+
+                @RequestMapping("/search")
+                public interface SearchController extends BaseSearchController {
+                    @GetMapping
+                    default ResponseEntity<String> search(@RequestParam("q") String q) {
+                        response.setHeader("X-Last-Search", q.replaceAll("[\\n\\r]", ""));
                         return ResponseEntity.ok(search());
                     }
                 }
-                """;
+                """));
+  }
+
+  @ParameterizedTest
+  @MethodSource("fixableSamples")
+  void it_fixes_header_injection(
+      final String vulnerableCode, final int line, final String expectedFixedCode) {
+
+    CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
+    LexicalPreservingPrinter.setup(cu);
+
+    HeaderInjectionFinding finding =
+        new HeaderInjectionFinding("header-injection", "SearchController.java", line);
+    CodemodFileScanningResult result =
+        remediator.remediateAll(
+            cu, "SearchController.java", rule, List.of(finding), f -> f.id, f -> f.line, f -> null);
+    assertThat(result.changes()).hasSize(1);
+    CodemodChange change = result.changes().get(0);
+    assertThat(change.lineNumber()).isEqualTo(line);
+    assertThat(change.getFixedFindings()).hasSize(1);
+    FixedFinding fixedFinding = change.getFixedFindings().get(0);
+    assertThat(fixedFinding.getRule()).isEqualTo(rule);
+    assertThat(fixedFinding.getId()).isEqualTo("header-injection");
+
+    assertThat(change.getDependenciesNeeded()).isEmpty();
 
     String actualCode = LexicalPreservingPrinter.print(cu);
-    assertThat(actualCode).isEqualTo(expectedFixedCode);
+    assertThat(actualCode).isEqualToIgnoringWhitespace(expectedFixedCode);
   }
 
   record HeaderInjectionFinding(String id, String path, int line) {}

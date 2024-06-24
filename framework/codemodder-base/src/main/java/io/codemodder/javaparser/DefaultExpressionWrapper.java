@@ -41,4 +41,16 @@ final class DefaultExpressionWrapper implements JavaParserTransformer.Expression
     }
     return true;
   }
+
+  @Override
+  public boolean withScopelessMethod(final String methodName) {
+    Optional<CompilationUnit> cuOpt = expression.findAncestor(CompilationUnit.class);
+    if (cuOpt.isEmpty()) {
+      return false;
+    }
+    Node parent = expression.getParentNode().get();
+    MethodCallExpr safeCall = new MethodCallExpr(methodName, expression);
+    parent.replace(expression, safeCall);
+    return true;
+  }
 }
