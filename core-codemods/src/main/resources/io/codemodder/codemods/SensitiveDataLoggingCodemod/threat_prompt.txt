@@ -1,4 +1,4 @@
-This security threat only applies to code that logs sensitive data, such as passwords, access tokens, API keys, session IDs, and social security numbers.
+This security threat only applies to code that logs sensitive data. Sensitive data includes secrets such as passwords, access tokens, API keys, and session IDs. Sensitive data also includes important personally identifying information such as social security numbers.
 
 Logs are often the target of data breaches or the source of accidental data leaks. Keeping sensitive data out of logs is a simple way to address this issue.
 

@@ -156,7 +156,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       logger.debug("estimated prompt token count: {}", tokenCount);
     }
 
-    return getLLMResponse(model.id(), 0.2D, systemMessage, userMessage, BinaryThreatAnalysis.class);
+    return getLLMResponse(model.id(), 0.0D, systemMessage, userMessage, BinaryThreatAnalysis.class);
   }
 
   private BinaryThreatAnalysisAndFix fixThreat(
@@ -194,6 +194,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
             .functions(functionExecutor.getFunctions())
             .functionCall(ChatCompletionRequestFunctionCall.of(function.getName()))
             .temperature(temperature)
+            .topP(0.0D)
             .build();
 
     ChatCompletionResult result = openAI.createChatCompletion(request);
@@ -245,35 +246,36 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
 
   private static final String FIX_USER_MESSAGE_TEMPLATE =
       """
-      A file with line numbers is provided below. Analyze it. If the risk is HIGH, use these rules \
-      to make the MINIMUM number of changes necessary to reduce the file's risk to LOW:
+      A file with line numbers is provided below. Analyze it. If the risk is HIGH, use these rules to make the MINIMUM number of changes necessary to reduce the file's risk to LOW:
       - Each change MUST be syntactically correct.
       %s
 
-      Create a diff patch for the changed file. Follow these instructions when creating the patch:
-        - Your output must be in the form a unified diff patch that will be applied by your coworkers.
-        - The output must be similar to the output of `diff -U0`. Do not include line number ranges.
-        - Start each hunk of changes with a `@@ ... @@` line.
-        - Each change in a file should be a separate hunk in the diff.
-        - It is very important for the change to contain only what is minimally required to fix the problem.
-        - Remember that whitespace and indentation changes can be important. Preserve the original formatting and indentation. Do not replace tabs with spaces or vice versa. If the original code uses tabs, use tabs in the patch. Encode tabs using a tab literal (\\\\t). If the original code uses spaces, use spaces in the patch. Do not add spaces where none were present in the original code. **THIS IS ESPECIALLY IMPORTANT AT THE BEGINNING OF DIFF LINES.**
-        - The unified diff must be accurate and complete.
-        - The unified diff will be applied to the source code by your coworkers.
+      Any code changes to reduce the file's risk to LOW must be stored in a diff patch format. Follow these instructions when creating the patch:
+      - Your output must be in the form a unified diff patch that will be applied by your coworkers.
+      - The output must be similar to the output of `diff -U0`. Do not include line number ranges.
+      - Start each hunk of changes with a `@@ ... @@` line.
+      - Each change in a file should be a separate hunk in the diff.
+      - It is very important for the change to contain only what is minimally required to fix the problem.
+      - Remember that whitespace and indentation changes can be important. Preserve the original formatting and indentation. Do not replace tabs with spaces or vice versa. If the original code uses tabs, use tabs in the patch. Encode tabs using a tab literal (\\\\t). If the original code uses spaces, use spaces in the patch. Do not add spaces where none were present in the original code. **THIS IS ESPECIALLY IMPORTANT AT THE BEGINNING OF DIFF LINES.**
+      - The unified diff must be accurate and complete.
+      - The unified diff will be applied to the source code by your coworkers.
 
       Here's an example of a unified diff:
       ```diff
       --- a/file.txt
       +++ b/file.txt
       @@ ... @@
-       This line is unchanged.
-      -This is the original line
-      +This is the new line
+       for (var i = 0; i < array.length; i++) {
+         This line is unchanged.
+      -  This is the original line
+      +  This is the replacement line
+       }
        Here is another unchanged line.
       @@ ... @@
-      -This line has been removed and not replaced.
+      -This line has been removed but not replaced.
        This line is unchanged.
-
       ```
+
       Now save your threat analysis.
 
       --- %s
