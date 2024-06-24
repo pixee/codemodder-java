@@ -25,11 +25,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-final class DefaultJNDIInjectionRemediationStrategy implements JNDIInjectionRemediationStrategy {
+final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
 
   private final MethodDeclaration fixMethod;
 
-  DefaultJNDIInjectionRemediationStrategy() {
+  DefaultJNDIInjectionRemediator() {
     String fixMethodCode =
         """
                 private static void validateResourceName(final String name) {
@@ -68,7 +68,6 @@ final class DefaultJNDIInjectionRemediationStrategy implements JNDIInjectionReme
             .toList();
 
     for (T issue : issuesForFile) {
-
       String key = getKey.apply(issue);
       int line = getLine.apply(issue);
       Integer column = getColumn.apply(issue);
