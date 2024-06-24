@@ -13,8 +13,7 @@ public final class Tokens {
   private Tokens() {}
 
   /**
-   * Estimates the number of tokens the messages will consume when passed to the {@code
-   * gpt-3.5-turbo-0613} or {@code gpt-4-0613} models.
+   * Estimates the number of tokens the messages will consume.
    *
    * <p>This does not yet support estimating the number of tokens the functions will consume, since
    * the <a
@@ -25,22 +24,27 @@ public final class Tokens {
    * href="https://github.com/TheoKanning/openai-java/pull/311">feature</a> is released.
    *
    * @param messages The messages.
+   * @param tokensPerMessage The number of tokens consumed per message by the given model.
+   * @param encodingType The encoding type used by the model.
    * @return The number of tokens.
    * @see <a
    *     href="https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb">How
    *     to count tokens with tiktoken</a>
    */
-  public static int countTokens(final List<ChatMessage> messages) {
+  public static int countTokens(
+      final List<ChatMessage> messages,
+      final int tokensPerMessage,
+      final EncodingType encodingType) {
     EncodingRegistry registry = Encodings.newDefaultEncodingRegistry();
-    Encoding encoding = registry.getEncoding(EncodingType.CL100K_BASE);
+    Encoding encoding = registry.getEncoding(encodingType);
 
     int count = 0;
     for (ChatMessage message : messages) {
-      count += 3; // Both gpt-3.5-turbo-0613 and gpt-4-0613 consume 3 tokens per message.
+      count += tokensPerMessage;
       count += encoding.countTokens(message.getContent());
       count += encoding.countTokens(message.getRole());
     }
-    count += 3; // Every reply is primed with <|start|>assistant<|message|>.
+    count += tokensPerMessage; // Every reply is primed with <|start|>assistant<|message|>.
 
     return count;
   }

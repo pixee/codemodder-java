@@ -1,11 +1,13 @@
 package io.codemodder.plugins.llm;
 
+import static io.codemodder.plugins.llm.Model.GPT_3_5_TURBO;
 import static io.codemodder.plugins.llm.Tokens.countTokens;
 
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.Patch;
+import com.knuddels.jtokkit.api.EncodingType;
 import com.theokanning.openai.completion.chat.*;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest.ChatCompletionRequestFunctionCall;
 import com.theokanning.openai.service.FunctionExecutor;
@@ -34,14 +36,22 @@ import org.slf4j.LoggerFactory;
 public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
     extends SarifPluginRawFileChanger {
 
-  private static final Logger logger =
-      LoggerFactory.getLogger(SarifToLLMForBinaryVerificationAndFixingCodemod.class);
   private final OpenAIService openAI;
+  private final Model model;
 
   protected SarifToLLMForBinaryVerificationAndFixingCodemod(
-      final RuleSarif sarif, final OpenAIService openAI) {
+      final RuleSarif sarif, final OpenAIService openAI, final Model model) {
     super(sarif);
     this.openAI = Objects.requireNonNull(openAI);
+    this.model = Objects.requireNonNull(model);
+  }
+
+  /**
+   * For backwards compatibility with a previous version of this API, uses a GPT 3.5 Turbo model.
+   */
+  protected SarifToLLMForBinaryVerificationAndFixingCodemod(
+      final RuleSarif sarif, final OpenAIService openAI) {
+    this(sarif, openAI, GPT_3_5_TURBO);
   }
 
   @Override
@@ -51,7 +61,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
 
     // For fine-tuning the semgrep rule, debug log the matching snippets in the file.
     results.forEach(
-        (result) -> {
+        result -> {
           Region region = result.getLocations().get(0).getPhysicalLocation().getRegion();
           logger.debug("{}:{}", region.getStartLine(), region.getSnippet().getText());
         });
@@ -79,7 +89,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       }
 
       // If the LLM was unable to fix the threat, don't change the file.
-      if (fix.getFix() == null || fix.getFix().length() == 0) {
+      if (fix.getFix() == null || fix.getFix().isEmpty()) {
         logger.info("unable to fix: {}", context.path());
         return CodemodFileScanningResult.none();
       }
@@ -89,7 +99,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
 
       // Ensure the end result isn't wonky.
       Patch<String> patch = DiffUtils.diff(file.getLines(), fixedLines);
-      if (patch.getDeltas().size() == 0 || !isPatchExpected(patch)) {
+      if (patch.getDeltas().isEmpty() || !isPatchExpected(patch)) {
         logger.error("unexpected patch: {}", patch);
         return CodemodFileScanningResult.none();
       }
@@ -140,11 +150,10 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
     ChatMessage systemMessage = getSystemMessage(context, results);
     ChatMessage userMessage = getAnalyzeUserMessage(file);
 
-    int tokenCount = countTokens(List.of(systemMessage, userMessage));
-    if (tokenCount > 3796) {
-      // The max tokens for gpt-3.5-turbo-0613 is 4,096. If the estimated token count, which doesn't
-      // include the function (~100 tokens) or the reply (~200 tokens), is close to the max, assume
-      // the code is safe (for now).
+    // If the estimated token count, which doesn't include the function (~100 tokens) or the reply
+    // (~200 tokens), is close to the max, then assume the code is safe (for now).
+    int tokenCount = countTokens(List.of(systemMessage, userMessage), 3, EncodingType.CL100K_BASE);
+    if (tokenCount > model.contextWindow() - 300) {
       return new BinaryThreatAnalysis(
           "Ignoring file: estimated prompt token count (" + tokenCount + ") is too high.",
           BinaryThreatRisk.LOW);
@@ -152,8 +161,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       logger.debug("estimated prompt token count: {}", tokenCount);
     }
 
-    return getLLMResponse(
-        "gpt-3.5-turbo-0613", 0.2D, systemMessage, userMessage, BinaryThreatAnalysis.class);
+    return getLLMResponse(model.id(), 0.2D, systemMessage, userMessage, BinaryThreatAnalysis.class);
   }
 
   private BinaryThreatAnalysisAndFix fixThreat(
@@ -161,7 +169,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       final CodemodInvocationContext context,
       final List<Result> results) {
     return getLLMResponse(
-        "gpt-4-0613",
+        model.id(),
         0D,
         getSystemMessage(context, results),
         getFixUserMessage(file),
@@ -194,7 +202,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
             .build();
 
     ChatCompletionResult result = openAI.createChatCompletion(request);
-    logger.debug(result.getUsage().toString());
+    logger.debug("{}", result.getUsage());
 
     ChatMessage response = result.getChoices().get(0).getMessage();
     return functionExecutor.execute(response.getFunctionCall());
@@ -256,4 +264,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       --- %s
       %s
       """;
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(SarifToLLMForBinaryVerificationAndFixingCodemod.class);
 }
