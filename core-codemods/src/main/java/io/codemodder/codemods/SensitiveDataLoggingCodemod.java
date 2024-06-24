@@ -1,6 +1,7 @@
 package io.codemodder.codemods;
 
 import static io.codemodder.CodemodResources.getClassResourceAsString;
+import static io.codemodder.plugins.llm.StandardModel.GPT_4O;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.difflib.patch.AbstractDelta;
@@ -9,6 +10,7 @@ import com.github.difflib.patch.Patch;
 import io.codemodder.*;
 import io.codemodder.plugins.llm.OpenAIService;
 import io.codemodder.plugins.llm.SarifToLLMForBinaryVerificationAndFixingCodemod;
+import io.codemodder.plugins.llm.StandardModel;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import javax.inject.Inject;
@@ -25,7 +27,7 @@ public final class SensitiveDataLoggingCodemod
   public SensitiveDataLoggingCodemod(
       @SemgrepScan(ruleId = "sensitive-data-logging") final RuleSarif sarif,
       final OpenAIService openAI) {
-    super(sarif, openAI);
+    super(sarif, openAI, GPT_4O);
   }
 
   @Override

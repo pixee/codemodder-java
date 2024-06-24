@@ -38,7 +38,7 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
    * @return GPT model to use for the test harness to verify the codemod's changes
    */
   default Model model() {
-    return StandardModel.GPT_3_5_TURBO;
+    return StandardModel.GPT_4O;
   }
 
   @Override

@@ -259,7 +259,7 @@ public interface CodemodTestMixin {
             EncodingDetector.create());
     CodeTFResult result2 = executor2.execute(List.of(pathToJavaFile));
     List<CodeTFChangesetEntry> changeset2 = result2.getChangeset();
-    assertThat(changeset2.size(), is(0));
+    assertThat(changeset2, hasSize(0));
 
     String codeAfterSecondTransform = Files.readString(pathToJavaFile);
     assertThat(codeAfterFirstTransform, equalTo(codeAfterSecondTransform));

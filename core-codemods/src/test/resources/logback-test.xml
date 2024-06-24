@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <logger name="org.apache" level="ERROR" />
+    <logger name="httpclient" level="ERROR" />
+    <logger name="io.codemodder" level="DEBUG" />
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
