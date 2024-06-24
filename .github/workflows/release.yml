@@ -36,6 +36,8 @@ jobs:
           java-version: '17'
 
       - uses: gradle/gradle-build-action@v2
+        env:
+          CODEMODDER_OPENAI_API_KEY: ${{ secrets.CODEMODDER_OPENAI_API_KEY }}
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           arguments: --console=plain --quiet --no-configuration-cache -Pversion=${{ inputs.version }} build distZip publishNebulaPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
