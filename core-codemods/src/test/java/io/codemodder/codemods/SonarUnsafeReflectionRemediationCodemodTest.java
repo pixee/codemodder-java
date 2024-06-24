@@ -5,9 +5,7 @@ import io.codemodder.testutils.CodemodTestMixin;
 import io.codemodder.testutils.Metadata;
 
 /**
- * Test for {@link UnsafeReflectionRemediationCodemod} happy path.
- *
- * <p>TODO need to add test cases for edge-cases.
+ * Test for {@link SonarUnsafeReflectionRemediationCodemod}.
  *
  * <ul>
  *   <li>Fully qualified class name {@code java.lang.Class.forName(String)}
@@ -15,8 +13,9 @@ import io.codemodder.testutils.Metadata;
  * </ul>
  */
 @Metadata(
-    codemodType = UnsafeReflectionRemediationCodemod.class,
+    codemodType = SonarUnsafeReflectionRemediationCodemod.class,
     testResourceDir = "unsafe-reflection-s2658",
     renameTestFile = "src/main/java/com/acme/reflection/UnsafeReflection.java",
+    expectingFixesAtLines = {25},
     dependencies = DependencyGAV.JAVA_SECURITY_TOOLKIT_GAV)
-final class UnsafeReflectionRemediationCodemodTest implements CodemodTestMixin {}
+final class SonarUnsafeReflectionRemediationCodemodTest implements CodemodTestMixin {}

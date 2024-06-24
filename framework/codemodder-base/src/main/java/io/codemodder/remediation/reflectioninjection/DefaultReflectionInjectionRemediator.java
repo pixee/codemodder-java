@@ -1,62 +1,59 @@
-package io.codemodder.codemods;
+package io.codemodder.remediation.reflectioninjection;
 
 import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
-import io.codemodder.*;
+import io.codemodder.CodemodChange;
+import io.codemodder.CodemodFileScanningResult;
+import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
-import io.codemodder.javaparser.ChangesResult;
-import io.codemodder.providers.sonar.ProvidedSonarScan;
-import io.codemodder.providers.sonar.RuleIssue;
-import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
-import io.codemodder.sonar.model.Issue;
+import io.codemodder.codetf.FixedFinding;
+import io.codemodder.remediation.FixCandidate;
+import io.codemodder.remediation.FixCandidateSearchResults;
+import io.codemodder.remediation.FixCandidateSearcher;
 import io.github.pixee.security.Reflection;
+import java.util.ArrayList;
 import java.util.List;
-import javax.inject.Inject;
+import java.util.function.Function;
 
-/** Sonar remediation codemod for S2658: Classes should not be loaded dynamically. */
-@Codemod(
-    id = "sonar:java/unsafe-reflection-s2658",
-    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
-    importance = Importance.HIGH,
-    executionPriority = CodemodExecutionPriority.HIGH)
-public final class UnsafeReflectionRemediationCodemod
-    extends SonarPluginJavaParserChanger<MethodCallExpr, Issue> {
-
-  @Inject
-  public UnsafeReflectionRemediationCodemod(
-      @ProvidedSonarScan(ruleId = "java:S2658") final RuleIssue issues) {
-    super(
-        issues,
-        MethodCallExpr.class,
-        RegionNodeMatcher.REGION_INSIDE_RANGE,
-        NodeCollector.ALL_FROM_TYPE);
-  }
+final class DefaultReflectionInjectionRemediator implements ReflectionInjectionRemediator {
 
   @Override
-  public ChangesResult onFindingFound(
-      final CodemodInvocationContext context,
+  public <T> CodemodFileScanningResult remediateAll(
       final CompilationUnit cu,
-      final MethodCallExpr methodCallExpr,
-      final Issue issue) {
+      final String path,
+      final DetectorRule detectorRule,
+      final List<T> issuesForFile,
+      final Function<T, String> getKey,
+      final Function<T, Integer> getLine,
+      final Function<T, Integer> getColumn) {
 
-    // check method expression scope and name, because the region match is fuzzy
-    if (!(isClassForNameCall(cu, methodCallExpr))) {
-      return ChangesResult.noChanges;
+    FixCandidateSearcher<T> searcher =
+        new FixCandidateSearcher.Builder<T>()
+            .withMatcher(mce -> isClassForNameCall(cu, mce))
+            .build();
+
+    FixCandidateSearchResults<T> results =
+        searcher.search(cu, path, detectorRule, issuesForFile, getKey, getLine, getColumn);
+    List<CodemodChange> changes = new ArrayList<>();
+
+    for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
+      T issue = fixCandidate.issue();
+      String id = getKey.apply(issue);
+      int line = getLine.apply(issue);
+      MethodCallExpr methodCallExpr = fixCandidate.methodCall();
+      replaceMethodCallExpression(cu, methodCallExpr);
+      CodemodChange change =
+          CodemodChange.from(
+              line,
+              List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT),
+              new FixedFinding(id, detectorRule));
+      changes.add(change);
     }
 
-    replaceMethodCallExpression(cu, methodCallExpr);
-    return ChangesResult.changesAppliedWith(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
-  }
-
-  @Override
-  public DetectorRule detectorRule() {
-    return new DetectorRule(
-        "java:S2658",
-        "Classes should not be loaded dynamically",
-        "https://rules.sonarsource.com/java/RSPEC-2658/");
+    return CodemodFileScanningResult.from(changes, results.unfixableFindings());
   }
 
   /**
