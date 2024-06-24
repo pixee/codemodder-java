@@ -1,10 +1,7 @@
 package io.codemodder.remediation.jndiinjection;
 
 import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
-import static io.codemodder.remediation.RemediationMessages.multipleCallsFound;
-import static io.codemodder.remediation.RemediationMessages.noCallsAtThatLocation;
 
-import com.github.javaparser.Position;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -19,6 +16,9 @@ import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
+import io.codemodder.remediation.FixCandidate;
+import io.codemodder.remediation.FixCandidateSearchResults;
+import io.codemodder.remediation.FixCandidateSearcher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,51 +56,33 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       final Function<T, Integer> getLine,
       final Function<T, Integer> getColumn) {
 
+    FixCandidateSearcher<T> searcher =
+        new FixCandidateSearcher.Builder<T>()
+            .withMethodName("lookup")
+            .withMatcher(mce -> mce.getScope().isPresent())
+            .withMatcher(mce -> mce.getArguments().size() == 1)
+            .withMatcher(mce -> mce.getArgument(0).isNameExpr())
+            .build();
+
+    // find all the potential lookup() calls
+    FixCandidateSearchResults<T> results =
+        searcher.search(cu, path, detectorRule, issuesForFile, getKey, getLine, getColumn);
+
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
     List<CodemodChange> changes = new ArrayList<>();
 
-    List<MethodCallExpr> lookupCalls =
-        cu.findAll(MethodCallExpr.class).stream()
-            .filter(mce -> mce.getNameAsString().equals("lookup"))
-            .filter(mce -> mce.getScope().isPresent() && mce.getScope().get().isNameExpr())
-            .filter(mce -> mce.getArguments().size() == 1)
-            .filter(mce -> mce.getArguments().get(0).isNameExpr())
-            .toList();
-
-    for (T issue : issuesForFile) {
-      String key = getKey.apply(issue);
+    for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
+      T issue = fixCandidate.issue();
+      String findingId = getKey.apply(issue);
       int line = getLine.apply(issue);
-      Integer column = getColumn.apply(issue);
 
-      List<MethodCallExpr> candidateLookupCalls =
-          lookupCalls.stream().filter(mce -> mce.getRange().get().begin.line == line).toList();
-
-      if (candidateLookupCalls.size() > 1 && column != null) {
-        candidateLookupCalls =
-            candidateLookupCalls.stream()
-                .filter(mce -> mce.getRange().get().contains(new Position(line, column)))
-                .toList();
-      }
-
-      if (candidateLookupCalls.isEmpty()) {
-        UnfixedFinding unfixedFinding =
-            new UnfixedFinding(key, detectorRule, path, line, noCallsAtThatLocation);
-        unfixedFindings.add(unfixedFinding);
-        continue;
-      } else if (candidateLookupCalls.size() > 1) {
-        UnfixedFinding unfixedFinding =
-            new UnfixedFinding(key, detectorRule, path, line, multipleCallsFound);
-        unfixedFindings.add(unfixedFinding);
-        continue;
-      }
-
-      MethodCallExpr lookupCall = candidateLookupCalls.get(0);
-
+      MethodCallExpr lookupCall = fixCandidate.methodCall();
       // get the parent method of the lookup() call
       Optional<MethodDeclaration> parentMethod = lookupCall.findAncestor(MethodDeclaration.class);
       if (parentMethod.isEmpty()) {
         UnfixedFinding unfixedFinding =
-            new UnfixedFinding(key, detectorRule, path, line, "No method found around lookup call");
+            new UnfixedFinding(
+                findingId, detectorRule, path, line, "No method found around lookup call");
         unfixedFindings.add(unfixedFinding);
         continue;
       }
@@ -111,7 +93,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       if (parentClass.isInterface()) {
         UnfixedFinding unfixedFinding =
             new UnfixedFinding(
-                key, detectorRule, path, line, "Cannot add validation method to interface");
+                findingId, detectorRule, path, line, "Cannot add validation method to interface");
         unfixedFindings.add(unfixedFinding);
         continue;
       }
@@ -120,7 +102,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       if (lookupStatement.isEmpty()) {
         UnfixedFinding unfixedFinding =
             new UnfixedFinding(
-                key, detectorRule, path, line, "No statement found around lookup call");
+                findingId, detectorRule, path, line, "No statement found around lookup call");
         unfixedFindings.add(unfixedFinding);
         continue;
       }
@@ -135,7 +117,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       if (lookupParentNode.isEmpty()) {
         UnfixedFinding unfixedFinding =
             new UnfixedFinding(
-                key, detectorRule, path, line, "No parent node found around lookup call");
+                findingId, detectorRule, path, line, "No parent node found around lookup call");
         unfixedFindings.add(unfixedFinding);
         continue;
       }
@@ -143,7 +125,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       if (!(lookupParentNode.get() instanceof BlockStmt)) {
         UnfixedFinding unfixedFinding =
             new UnfixedFinding(
-                key, detectorRule, path, line, "No block statement found around lookup call");
+                findingId, detectorRule, path, line, "No block statement found around lookup call");
         unfixedFindings.add(unfixedFinding);
         continue;
       }
@@ -167,10 +149,13 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
         addImportIfMissing(cu, Set.class);
       }
 
-      changes.add(CodemodChange.from(line, new FixedFinding(key, detectorRule)));
+      changes.add(CodemodChange.from(line, new FixedFinding(findingId, detectorRule)));
     }
 
-    return CodemodFileScanningResult.from(changes, unfixedFindings);
+    List<UnfixedFinding> allUnfixedFindings = new ArrayList<>(results.unfixableFindings());
+    allUnfixedFindings.addAll(unfixedFindings);
+
+    return CodemodFileScanningResult.from(changes, allUnfixedFindings);
   }
 
   private static final String validateResourceMethodName = "validateResourceName";

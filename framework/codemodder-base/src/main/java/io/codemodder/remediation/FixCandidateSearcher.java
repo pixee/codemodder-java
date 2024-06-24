@@ -42,7 +42,7 @@ public interface FixCandidateSearcher<T> {
     }
 
     public FixCandidateSearcher<T> build() {
-      return new DefaultFixCandidateSearcher<T>(methodName, List.copyOf(methodMatchers));
+      return new DefaultFixCandidateSearcher<>(methodName, List.copyOf(methodMatchers));
     }
   }
 }

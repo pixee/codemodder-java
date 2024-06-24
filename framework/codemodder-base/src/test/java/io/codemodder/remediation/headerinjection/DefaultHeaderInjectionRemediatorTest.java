@@ -10,9 +10,15 @@ import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
+import io.codemodder.codetf.UnfixedFinding;
+import io.codemodder.remediation.RemediationMessages;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 final class DefaultHeaderInjectionRemediatorTest {
 
@@ -20,9 +26,74 @@ final class DefaultHeaderInjectionRemediatorTest {
   private DetectorRule rule;
 
   @BeforeEach
-  void setuo() {
+  void setup() {
     this.remediator = new DefaultHeaderInjectionRemediator();
     this.rule = new DetectorRule("header-injection", "Header Injection", null);
+  }
+
+  @ParameterizedTest
+  @MethodSource("unfixableSamples")
+  void it_doesnt_fix_unfixable(final String unfixableCode, final int line, final String reason) {
+    CompilationUnit cu = StaticJavaParser.parse(unfixableCode);
+    LexicalPreservingPrinter.setup(cu);
+
+    HeaderInjectionFinding finding =
+        new HeaderInjectionFinding("header-injection", "SearchController.java", line);
+    CodemodFileScanningResult result =
+        remediator.remediateAll(
+            cu, "SearchController.java", rule, List.of(finding), f -> f.id, f -> line, f -> null);
+    assertThat(result.changes()).isEmpty();
+    assertThat(result.unfixedFindings()).hasSize(1);
+    UnfixedFinding unfixedFinding = result.unfixedFindings().get(0);
+    assertThat(unfixedFinding.getReason()).isEqualTo(reason);
+    assertThat(unfixedFinding.getLine()).isEqualTo(line);
+    assertThat(unfixedFinding.getRule()).isEqualTo(rule);
+  }
+
+  private static Stream<Arguments> unfixableSamples() {
+    return Stream.of(
+        Arguments.of(
+            """
+                      package com.acme;
+                      @Controller
+                      public class SearchController {
+                        @GetMapping
+                        public ResponseEntity<String> search(@RequestParam("q") String q) {
+                          response.header("X-Last-Search", q); // not a call we support
+                          return ResponseEntity.ok(search());
+                        }
+                      }
+                      """,
+            6,
+            RemediationMessages.noCallsAtThatLocation),
+        Arguments.of(
+            """
+                        package com.acme;
+                        @Controller
+                        public class SearchController {
+                          @GetMapping
+                          public ResponseEntity<String> search(@RequestParam("q") String q) {
+                            setHeader("X-Last-Search", q); // no scope -- should ignore
+                            return ResponseEntity.ok(search());
+                          }
+                        }
+                        """,
+            6,
+            RemediationMessages.noCallsAtThatLocation),
+        Arguments.of(
+            """
+                          package com.acme;
+                          @Controller
+                          public class SearchController {
+                            @GetMapping
+                            public ResponseEntity<String> search(@RequestParam("q") String q) {
+                              response.setHeader("X-Last-Search", "foo");
+                              return ResponseEntity.ok(search());
+                            }
+                          }
+                          """,
+            6,
+            RemediationMessages.noCallsAtThatLocation));
   }
 
   @Test
