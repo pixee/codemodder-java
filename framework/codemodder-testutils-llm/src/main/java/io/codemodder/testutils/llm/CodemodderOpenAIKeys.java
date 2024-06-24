@@ -7,6 +7,8 @@ package io.codemodder.testutils.llm;
 @SuppressWarnings("unused")
 public final class CodemodderOpenAIKeys {
 
+  private CodemodderOpenAIKeys() {}
+
   /**
    * Return true if and only if we have a non-empty {@code CODEMODDER_OPENAI_API_KEY} environment
    * variable.

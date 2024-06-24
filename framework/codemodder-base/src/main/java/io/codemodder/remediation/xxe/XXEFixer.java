@@ -6,5 +6,5 @@ import com.github.javaparser.ast.CompilationUnit;
 interface XXEFixer {
 
   /** A provider (for a given XML API) attempts to fix the given issue. */
-  <T> XXEFixAttempt tryFix(T issue, int line, Integer column, CompilationUnit cu);
+  XXEFixAttempt tryFix(int line, Integer column, CompilationUnit cu);
 }

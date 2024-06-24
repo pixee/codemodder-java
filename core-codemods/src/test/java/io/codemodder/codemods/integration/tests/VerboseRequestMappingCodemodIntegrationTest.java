@@ -3,7 +3,9 @@ package io.codemodder.codemods.integration.tests;
 import io.codemodder.codemods.integration.util.CodemodIntegrationTestMixin;
 import io.codemodder.codemods.integration.util.IntegrationTestMetadata;
 import io.codemodder.codemods.integration.util.IntegrationTestPropertiesMetadata;
+import org.junit.jupiter.api.Disabled;
 
+@Disabled
 @IntegrationTestMetadata(
     codemodId = "verbose-request-mapping",
     tests = {

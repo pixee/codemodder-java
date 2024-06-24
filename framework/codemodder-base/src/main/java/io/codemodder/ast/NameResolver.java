@@ -10,6 +10,8 @@ import org.javatuples.Triplet;
 /** Find sources of names in JavaParser ASTs. */
 final class NameResolver {
 
+  private NameResolver() {}
+
   private static Optional<Node> isLocalNameSource(final Node n, final String name) {
     final Optional<Node> maybe =
         ASTs.isExpressionStmtDeclarationOf(n, name).map(Triplet::getValue2);

@@ -20,8 +20,7 @@ import java.util.Set;
 final class XMLReaderAtParseFixer implements XXEFixer {
 
   @Override
-  public <T> XXEFixAttempt tryFix(
-      final T issue, final int line, final Integer column, final CompilationUnit cu) {
+  public XXEFixAttempt tryFix(final int line, final Integer column, final CompilationUnit cu) {
     List<MethodCallExpr> candidateMethods =
         cu.findAll(MethodCallExpr.class).stream()
             .filter(m -> "parse".equals(m.getNameAsString()))
@@ -73,6 +72,6 @@ final class XMLReaderAtParseFixer implements XXEFixer {
       return new XXEFixAttempt(true, false, "No statement found for parse() call");
     }
     return XMLFeatures.addFeatureDisablingStatements(
-        cu, parser.asNameExpr(), parseStatement.get(), true);
+        parser.asNameExpr(), parseStatement.get(), true);
   }
 }

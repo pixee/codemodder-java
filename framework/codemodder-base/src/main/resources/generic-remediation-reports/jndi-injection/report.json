@@ -1,0 +1,6 @@
+{
+  "summary" : "Introduced validation to prevent JNDI Injection",
+  "change" : "Added validation to JNDI lookup calls",
+  "reviewGuidanceIJustification" : "We believe this change is effective, and it will not break applications unless they are currently allowing users to specify arbitrary URLs that get passed to the lookup API.",
+  "references" : ["https://www.veracode.com/blog/research/exploiting-jndi-injections-java", "https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf"]
+}

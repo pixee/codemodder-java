@@ -43,5 +43,14 @@ public abstract class JavaParserTransformer {
      * @return true if the transformation was successful, false otherwise
      */
     boolean withStaticMethod(String className, String methodName, boolean isStaticImport);
+
+    /**
+     * Performs the actual transformation of wrapping the given expression with the given scopeless
+     * method (e.g., a local method).
+     *
+     * @param methodName the method name
+     * @return true if the transformation was successful, false otherwise
+     */
+    boolean withScopelessMethod(String methodName);
   }
 }

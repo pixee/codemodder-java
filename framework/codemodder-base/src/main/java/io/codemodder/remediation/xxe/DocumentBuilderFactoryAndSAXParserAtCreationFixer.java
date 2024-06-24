@@ -20,8 +20,7 @@ import java.util.Optional;
 final class DocumentBuilderFactoryAndSAXParserAtCreationFixer implements XXEFixer {
 
   @Override
-  public <T> XXEFixAttempt tryFix(
-      final T issue, final int line, final Integer column, CompilationUnit cu) {
+  public XXEFixAttempt tryFix(final int line, final Integer column, CompilationUnit cu) {
     List<MethodCallExpr> candidateMethods =
         ASTs.findMethodCallsWhichAreAssignedToType(
             cu, line, column, "newInstance", List.of("DocumentBuilderFactory", "SAXParserFactory"));
@@ -45,6 +44,6 @@ final class DocumentBuilderFactoryAndSAXParserAtCreationFixer implements XXEFixe
 
     Statement statement = variableDeclarationStmtRef.get();
     return addFeatureDisablingStatements(
-        cu, newFactoryVariable.getNameAsExpression(), statement, false);
+        newFactoryVariable.getNameAsExpression(), statement, false);
   }
 }
