@@ -69,7 +69,7 @@ jobs:
       - name: Run Check task
         uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a # v2.9.0
         env:
-          CODEMODDER_OPENAI_API_KEY: ${{ secrets.CODEMODDER_OPENAI_API_KEY }}
+          ORG_GRADLE_PROJECT_codemodderOpenAIKey: ${{ secrets.CODEMODDER_OPENAI_API_KEY }}
         with:
           arguments: check --stacktrace
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
