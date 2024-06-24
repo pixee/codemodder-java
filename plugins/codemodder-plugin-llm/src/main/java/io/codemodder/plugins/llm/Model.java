@@ -1,42 +1,23 @@
 package io.codemodder.plugins.llm;
 
-import com.knuddels.jtokkit.api.EncodingType;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import java.util.List;
 
-/** Well-known GPT models. */
-public enum Model {
-  GPT_3_5_TURBO("gpt-3.5-turbo-0125", 16_385) {
-    @Override
-    public int tokens(final List<ChatMessage> messages) {
-      return Tokens.countTokens(messages, 3, EncodingType.CL100K_BASE);
-    }
-  },
-  GPT_4("gpt-4-0613", 8_192) {
-    @Override
-    public int tokens(final List<ChatMessage> messages) {
-      return Tokens.countTokens(messages, 3, EncodingType.CL100K_BASE);
-    }
-  },
-  GPT_4O("gpt-4o-2024-05-13", 128_000) {
-    /**
-     * Will add support for GPT-4o token counting based on <a
-     * href="https://github.com/knuddelsgmbh/jtokkit/issues/96">pending work from upstream
-     * utility</a>.
-     */
-    @Override
-    public int tokens(final List<ChatMessage> messages) {
-      throw new UnsupportedOperationException("Cannot yet estimate tokens for GPT-4o");
-    }
-  };
+/**
+ * Internal model for a GPT language model. Helps to colocate model-specific logic e.g. token
+ * counting.
+ */
+public interface Model {
 
-  private final String id;
-  private final int contextWindow;
+  /**
+   * @return well-known model ID e.g. gpt-3.5-turbo-0125
+   */
+  String id();
 
-  Model(final String id, final int contextWindow) {
-    this.id = id;
-    this.contextWindow = contextWindow;
-  }
+  /**
+   * @return maximum size of the context window supported by this model
+   */
+  int contextWindow();
 
   /**
    * Estimates the number of tokens the messages will consume when passed to this model. The
@@ -45,19 +26,5 @@ public enum Model {
    * @param messages the list of messages for which to estimate token usage
    * @return estimated tokens that would be consumed by the model
    */
-  public abstract int tokens(final List<ChatMessage> messages);
-
-  /**
-   * @return well-known model ID e.g. gpt-3.5-turbo-0125
-   */
-  public String id() {
-    return id;
-  }
-
-  /**
-   * @return maximum size of the context window supported by this model
-   */
-  public int contextWindow() {
-    return contextWindow;
-  }
+  int tokens(List<ChatMessage> messages);
 }

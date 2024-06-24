@@ -16,6 +16,7 @@ import com.theokanning.openai.service.FunctionExecutor;
 import io.codemodder.EncodingDetector;
 import io.codemodder.plugins.llm.Model;
 import io.codemodder.plugins.llm.OpenAIService;
+import io.codemodder.plugins.llm.StandardModel;
 import io.codemodder.testutils.CodemodTestMixin;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -37,7 +38,7 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
    * @return GPT model to use for the test harness to verify the codemod's changes
    */
   default Model model() {
-    return Model.GPT_3_5_TURBO;
+    return StandardModel.GPT_3_5_TURBO;
   }
 
   @Override
