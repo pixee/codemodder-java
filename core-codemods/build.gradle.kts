@@ -3,6 +3,7 @@ plugins {
     id("io.codemodder.runner")
     id("io.codemodder.maven-publish")
     id("io.codemodder.core-codemods-docs")
+    id("io.codemodder.openai")
     `jvm-test-suite`
 }
 
@@ -30,12 +31,12 @@ dependencies {
     implementation(libs.dom4j)
     implementation(libs.commons.jexl)
     implementation(libs.tuples)
+    testImplementation(testFixtures(project(":plugins:codemodder-plugin-llm")))
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
     testImplementation(testlibs.assertj)
     testImplementation(testlibs.mockito)
     testImplementation(project(":framework:codemodder-testutils"))
-    testImplementation(project(":framework:codemodder-testutils-llm"))
     testRuntimeOnly(testlibs.junit.jupiter.engine)
     testImplementation(testlibs.jgit)
     testImplementation(testlibs.assertj)

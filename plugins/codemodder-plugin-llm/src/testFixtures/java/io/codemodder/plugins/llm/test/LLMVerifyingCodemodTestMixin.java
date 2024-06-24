@@ -1,4 +1,4 @@
-package io.codemodder.testutils.llm;
+package io.codemodder.plugins.llm.test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

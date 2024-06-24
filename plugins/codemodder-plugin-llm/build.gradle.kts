@@ -1,5 +1,6 @@
 plugins {
     id("io.codemodder.java-library")
+    id("io.codemodder.java-test-fixtures")
     id("io.codemodder.maven-publish")
 }
 
@@ -11,6 +12,10 @@ dependencies {
         exclude(group = "com.google.inject", module = "guice")
     }
     implementation("com.google.inject:guice:5.1.0")
+
+    testFixturesApi(testlibs.junit.jupiter.api)
+    testFixturesApi(project(":framework:codemodder-testutils"))
+    testFixturesImplementation(testlibs.bundles.hamcrest)
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
