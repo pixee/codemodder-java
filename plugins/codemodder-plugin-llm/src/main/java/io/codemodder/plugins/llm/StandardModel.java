@@ -20,13 +20,12 @@ public enum StandardModel implements Model {
   },
   GPT_4O("gpt-4o-2024-05-13", 128_000) {
     /**
-     * Will add support for GPT-4o token counting based on <a
-     * href="https://github.com/knuddelsgmbh/jtokkit/issues/96">pending work from upstream
-     * utility</a>.
+     * This is wrong - we copy / pasted from GPT 3.5 while we await GPT-4o token counting support <a
+     * href="https://github.com/knuddelsgmbh/jtokkit/issues/96">from upstream utility</a>.
      */
     @Override
     public int tokens(final List<ChatMessage> messages) {
-      throw new UnsupportedOperationException("Cannot yet estimate tokens for GPT-4o");
+      return Tokens.countTokens(messages, 3, EncodingType.CL100K_BASE);
     }
   };
 

@@ -18,4 +18,19 @@ final class BinaryThreatAnalysisAndFix extends BinaryThreatAnalysis {
   public String getFixDescription() {
     return fixDescription;
   }
+
+  @Override
+  public String toString() {
+    return "BinaryThreatAnalysisAndFix: \n"
+        + "\trisk: "
+        + getRisk()
+        + "\n"
+        + "\tanalysis: "
+        + getAnalysis()
+        + "\n"
+        + "\tfix-description: "
+        + fixDescription
+        + "\n"
+        + fix;
+  }
 }

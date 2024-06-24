@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
@@ -85,7 +86,11 @@ public interface CodemodTestMixin {
               metadata.sonarIssuesJsonFiles(),
               metadata.sonarHotspotsJsonFiles());
         };
-    return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
+
+    final Predicate<String> displayNameFilter =
+        metadata.only().isEmpty() ? s -> true : s -> s.matches(metadata.only());
+    return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor)
+        .filter(test -> displayNameFilter.test(test.getDisplayName()));
   }
 
   private void verifyCodemod(
@@ -261,7 +266,7 @@ public interface CodemodTestMixin {
             EncodingDetector.create());
     CodeTFResult result2 = executor2.execute(List.of(pathToJavaFile));
     List<CodeTFChangesetEntry> changeset2 = result2.getChangeset();
-    assertThat(changeset2.size(), is(0));
+    assertThat(changeset2, hasSize(0));
 
     String codeAfterSecondTransform = Files.readString(pathToJavaFile);
     assertThat(codeAfterFirstTransform, equalTo(codeAfterSecondTransform));
