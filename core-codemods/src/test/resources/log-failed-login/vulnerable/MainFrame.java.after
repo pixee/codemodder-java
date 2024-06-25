@@ -154,7 +154,7 @@ ResultSet rs = stmt.executeQuery(sql);
                     this.dispose();
             }
             else{
-                    Logger.getLogger(MainFrame.class.getName()).log(Level.WARNING, "Failed login attempt for user: " + uname1);
+                    Logger.getLogger(MainFrame.class.getName()).log(Level.INFO, "Failed login attempt for user: " + uname1);
                     JOptionPane.showMessageDialog(null, "Incorrect Username Or Password", "Login Failed", 2);
                 }
 
@@ -211,6 +211,3 @@ ResultSet rs = stmt.executeQuery(sql);
     private javax.swing.JTextField upass;
     // End of variables declaration//GEN-END:variables
 }
-
-
-

@@ -1,5 +1,0 @@
-- Log a message at the start of the block handling failed login attempts.
-- If the username from the failed login attempt is in scope, include it in the message. Never include a secret in a log message.
-- The added logging should be a new side effect that has no impact on the existing code.
-- Use the provided logger in the matching style when one is present in the file, and use the warning log level.
-- If no logger is used in the file, use `System.out.println`.
