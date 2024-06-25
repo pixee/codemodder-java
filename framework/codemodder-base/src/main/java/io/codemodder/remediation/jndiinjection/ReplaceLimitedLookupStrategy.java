@@ -8,13 +8,15 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import io.codemodder.DependencyGAV;
 import io.github.pixee.security.JNDI;
+import java.util.List;
 
 /** Replaces the call with a limited call. */
 final class ReplaceLimitedLookupStrategy implements JNDIFixStrategy {
 
   @Override
-  public void fix(
+  public List<DependencyGAV> fix(
       final CompilationUnit cu,
       final ClassOrInterfaceDeclaration parentClass,
       final MethodCallExpr lookupCall,
@@ -33,5 +35,7 @@ final class ReplaceLimitedLookupStrategy implements JNDIFixStrategy {
 
     // the new scope is the static call
     wrap(jndiContext).withStaticMethod(className, methodName, false);
+
+    return List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT);
   }
 }

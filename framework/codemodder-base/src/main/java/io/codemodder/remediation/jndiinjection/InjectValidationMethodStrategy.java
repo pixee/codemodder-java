@@ -9,6 +9,8 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import io.codemodder.DependencyGAV;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,7 +39,7 @@ final class InjectValidationMethodStrategy implements JNDIFixStrategy {
   }
 
   @Override
-  public void fix(
+  public List<DependencyGAV> fix(
       final CompilationUnit cu,
       final ClassOrInterfaceDeclaration parentClass,
       final MethodCallExpr lookupCall,
@@ -61,6 +63,8 @@ final class InjectValidationMethodStrategy implements JNDIFixStrategy {
       parentClass.addMember(fixMethod);
       addImportIfMissing(cu, Set.class);
     }
+
+    return List.of();
   }
 
   private static final String validateResourceMethodName = "validateResourceName";

@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.CodemodChange;
 import io.codemodder.CodemodFileScanningResult;
+import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
@@ -116,7 +117,8 @@ final class DefaultJNDIInjectionRemediatorTest {
                         }
                     }
                 }
-                """),
+                """,
+            false),
         Arguments.of(
             new ReplaceLimitedLookupStrategy(),
             """
@@ -132,12 +134,16 @@ final class DefaultJNDIInjectionRemediatorTest {
                             Object obj = JNDI.limitedContext(ctx).lookup(name);
                         }
                     }
-                    """));
+                    """,
+            true));
   }
 
   @ParameterizedTest
   @MethodSource("fixableSamples")
-  void it_fixes_jndi_injection(final JNDIFixStrategy fixStrategy, final String expectedFixedCode) {
+  void it_fixes_jndi_injection(
+      final JNDIFixStrategy fixStrategy,
+      final String expectedFixedCode,
+      final boolean expectDependency) {
     String vulnerableCode =
         """
                 import javax.naming.Context;
@@ -177,6 +183,13 @@ final class DefaultJNDIInjectionRemediatorTest {
     FixedFinding fixedFinding = fixedFindings.get(0);
     assertThat(fixedFinding.getId()).isEqualTo("key");
     assertThat(fixedFinding.getRule()).isEqualTo(rule);
+
+    if (expectDependency) {
+      assertThat(change.getDependenciesNeeded())
+          .containsExactly(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+    } else {
+      assertThat(change.getDependenciesNeeded()).isEmpty();
+    }
 
     String actualCode = LexicalPreservingPrinter.print(cu);
     assertThat(expectedFixedCode).isEqualToIgnoringWhitespace(actualCode);

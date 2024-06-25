@@ -10,6 +10,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.CodemodChange;
 import io.codemodder.CodemodFileScanningResult;
+import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
@@ -108,7 +109,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
         continue;
       }
 
-      if (!(lookupParentNode.get() instanceof BlockStmt)) {
+      if (!(lookupParentNode.get() instanceof BlockStmt blockStmt)) {
         UnfixedFinding unfixedFinding =
             new UnfixedFinding(
                 findingId, detectorRule, path, line, "No block statement found around lookup call");
@@ -117,10 +118,10 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       }
 
       // add the validation call to the block statement
-      BlockStmt blockStmt = (BlockStmt) lookupParentNode.get();
       int index = blockStmt.getStatements().indexOf(lookupStatement.get());
-      fixStrategy.fix(cu, parentClass, lookupCall, contextNameVariable, blockStmt, index);
-      changes.add(CodemodChange.from(line, new FixedFinding(findingId, detectorRule)));
+      List<DependencyGAV> deps =
+          fixStrategy.fix(cu, parentClass, lookupCall, contextNameVariable, blockStmt, index);
+      changes.add(CodemodChange.from(line, deps, new FixedFinding(findingId, detectorRule)));
     }
 
     List<UnfixedFinding> allUnfixedFindings = new ArrayList<>(results.unfixableFindings());

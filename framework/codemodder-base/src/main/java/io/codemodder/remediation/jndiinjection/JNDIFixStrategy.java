@@ -5,6 +5,8 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import io.codemodder.DependencyGAV;
+import java.util.List;
 
 /** Strategy for fixing JNDI injection vulnerabilities. */
 interface JNDIFixStrategy {
@@ -18,8 +20,9 @@ interface JNDIFixStrategy {
    * @param blockStmt the block which contains the lookup statement
    * @param index the index of the statement in the block
    * @param contextNameVariable the variable that holds the JNDI context
+   * @return the list of dependencies that need to be added to the project
    */
-  void fix(
+  List<DependencyGAV> fix(
       CompilationUnit cu,
       ClassOrInterfaceDeclaration parentClass,
       MethodCallExpr lookupCall,
