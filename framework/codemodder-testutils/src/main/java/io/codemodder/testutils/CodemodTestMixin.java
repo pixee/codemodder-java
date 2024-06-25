@@ -68,21 +68,23 @@ public interface CodemodTestMixin {
             .toList();
 
     ThrowingConsumer<Path> testExecutor =
-        path ->
-            verifyCodemod(
-                metadata.codemodType(),
-                metadata.renameTestFile(),
-                tmpDir,
-                testResourceDir,
-                path,
-                dependencies,
-                projectProviders,
-                metadata.doRetransformTest(),
-                metadata.expectingFixesAtLines(),
-                metadata.expectingFailedFixesAtLines(),
-                metadata.sonarIssuesJsonFiles(),
-                metadata.sonarHotspotsJsonFiles());
-
+        path -> {
+          // create a new temporary directory for each test case
+          final var tmp = Files.createTempDirectory(tmpDir, "test-case-");
+          verifyCodemod(
+              metadata.codemodType(),
+              metadata.renameTestFile(),
+              tmp,
+              testResourceDir,
+              path,
+              dependencies,
+              projectProviders,
+              metadata.doRetransformTest(),
+              metadata.expectingFixesAtLines(),
+              metadata.expectingFailedFixesAtLines(),
+              metadata.sonarIssuesJsonFiles(),
+              metadata.sonarHotspotsJsonFiles());
+        };
     return DynamicTest.stream(inputStream, displayNameGenerator, testExecutor);
   }
 

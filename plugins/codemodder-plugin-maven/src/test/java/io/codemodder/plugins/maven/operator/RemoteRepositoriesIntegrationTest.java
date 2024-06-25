@@ -1,14 +1,17 @@
 package io.codemodder.plugins.maven.operator;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
 import java.io.*;
 import java.util.*;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Execution(SAME_THREAD)
 final class RemoteRepositoriesIntegrationTest {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(RemoteRepositoriesIntegrationTest.class);

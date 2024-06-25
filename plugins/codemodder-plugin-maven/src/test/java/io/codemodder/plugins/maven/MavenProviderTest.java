@@ -1,6 +1,7 @@
 package io.codemodder.plugins.maven;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,6 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  * Unit tests for {@link MavenProvider}. We bend over backwards here not to test the pom-operator
  * types.
  */
+@Execution(SAME_THREAD)
 final class MavenProviderTest {
 
   private static class TestPomModifier implements MavenProvider.PomModifier {
