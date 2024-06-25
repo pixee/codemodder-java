@@ -1,8 +1,5 @@
 package io.codemodder.remediation.jndiinjection;
 
-import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
-
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -21,29 +18,20 @@ import io.codemodder.remediation.FixCandidateSearchResults;
 import io.codemodder.remediation.FixCandidateSearcher;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
 
-  private final MethodDeclaration fixMethod;
+  private final JNDIFixStrategy fixStrategy;
 
   DefaultJNDIInjectionRemediator() {
-    String fixMethodCode =
-        """
-                private static void validateResourceName(final String name) {
-                    if (name != null) {
-                      Set<String> illegalNames = Set.of("ldap://", "rmi://", "dns://", "java:");
-                      String canonicalName = name.toLowerCase().trim();
-                      if (illegalNames.stream().anyMatch(canonicalName::startsWith)) {
-                        throw new SecurityException("Illegal JNDI resource name: " + name);
-                      }
-                    }
-                }
-                """;
+    this(new ReplaceLimitedLookupStrategy());
+  }
 
-    this.fixMethod = StaticJavaParser.parseMethodDeclaration(fixMethodCode);
+  DefaultJNDIInjectionRemediator(final JNDIFixStrategy fixStrategy) {
+    this.fixStrategy = Objects.requireNonNull(fixStrategy);
   }
 
   @Override
@@ -110,8 +98,6 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       // validate the shape of code around the lookup call to make sure its safe to add the call and
       // method
       NameExpr contextNameVariable = lookupCall.getArgument(0).asNameExpr();
-      MethodCallExpr validationCall = new MethodCallExpr(null, validateResourceMethodName);
-      validationCall.addArgument(contextNameVariable);
 
       Optional<Node> lookupParentNode = lookupStatement.get().getParentNode();
       if (lookupParentNode.isEmpty()) {
@@ -133,22 +119,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       // add the validation call to the block statement
       BlockStmt blockStmt = (BlockStmt) lookupParentNode.get();
       int index = blockStmt.getStatements().indexOf(lookupStatement.get());
-      blockStmt.addStatement(index, validationCall);
-
-      // add the validation method if it's not already present
-      boolean alreadyHasResourceValidationCallPresent =
-          parentClass.findAll(MethodDeclaration.class).stream()
-              .anyMatch(
-                  md ->
-                      md.getNameAsString().equals(validateResourceMethodName)
-                          && md.getParameters().size() == 1
-                          && md.getParameters().get(0).getTypeAsString().equals("String"));
-
-      if (!alreadyHasResourceValidationCallPresent) {
-        parentClass.addMember(fixMethod);
-        addImportIfMissing(cu, Set.class);
-      }
-
+      fixStrategy.fix(cu, parentClass, lookupCall, contextNameVariable, blockStmt, index);
       changes.add(CodemodChange.from(line, new FixedFinding(findingId, detectorRule)));
     }
 
@@ -157,6 +128,4 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
 
     return CodemodFileScanningResult.from(changes, allUnfixedFindings);
   }
-
-  private static final String validateResourceMethodName = "validateResourceName";
 }
