@@ -5,6 +5,7 @@ import io.codemodder.plugins.llm.CodeChangingLLMRemediationOutcome;
 import io.codemodder.plugins.llm.NoActionLLMRemediationOutcome;
 import io.codemodder.plugins.llm.OpenAIService;
 import io.codemodder.plugins.llm.SarifToLLMForMultiOutcomeCodemod;
+import io.codemodder.plugins.llm.StandardModel;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.util.List;
 import javax.inject.Inject;
@@ -61,11 +62,13 @@ public final class LogFailedLoginCodemod extends SarifToLLMForMultiOutcomeCodemo
                 """
                   Immediately following the login failure, add precisely one statement to log the failed login attempt at the INFO level.
                   If the username for the failed login is in scope, the new log message references the username.
-                  Add exactly one such log statement. Exactly one! Exactly one!
-                  The new log statement is consistent with the rest of the code.
+                  Add exactly one such log statement! Exactly one!
+                  The new log statement is consistent with the rest of the code with respect to formatting, braces, casing, etc.
                   When no logger is in scope, the new code emits a log message to the console.
                   """
-                    .replace('\n', ' '))));
+                    .replace('\n', ' '))),
+        StandardModel.GPT_4O,
+        StandardModel.GPT_4);
   }
 
   @Override
