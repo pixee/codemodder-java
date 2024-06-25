@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.CodemodChange;
 import io.codemodder.CodemodFileScanningResult;
+import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
@@ -88,49 +89,11 @@ final class DefaultJNDIInjectionRemediatorTest {
             "No method found around lookup call"));
   }
 
-  @Test
-  void it_fixes_jndi_injection() {
-    String vulnerableCode =
-        """
-                import javax.naming.Context;
-                import javax.naming.InitialContext;
-                import javax.http.servlet.HttpServletRequest;
-
-                public class JNDIUtil {
-                    public static void lookup(HttpServletRequest request) {
-                        String name = request.getParameter("name");
-                        Context ctx = new InitialContext();
-                        Object obj = ctx.lookup(name);
-                    }
-                }
-                """;
-
-    CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
-    LexicalPreservingPrinter.setup(cu);
-
-    JNDIInjectionIssue issue = new JNDIInjectionIssue("key", 9, null);
-    CodemodFileScanningResult result =
-        remediator.remediateAll(
-            cu,
-            "JNDIUtil.java",
-            rule,
-            List.of(issue),
-            JNDIInjectionIssue::key,
-            JNDIInjectionIssue::line,
-            JNDIInjectionIssue::column);
-
-    assertThat(result.changes()).hasSize(1);
-    CodemodChange change = result.changes().get(0);
-    assertThat(change.lineNumber()).isEqualTo(9);
-
-    List<FixedFinding> fixedFindings = change.getFixedFindings();
-    assertThat(fixedFindings).hasSize(1);
-    FixedFinding fixedFinding = fixedFindings.get(0);
-    assertThat(fixedFinding.getId()).isEqualTo("key");
-    assertThat(fixedFinding.getRule()).isEqualTo(rule);
-
-    String fixedCode =
-        """
+  private static Stream<Arguments> fixableSamples() {
+    return Stream.of(
+        Arguments.of(
+            new InjectValidationMethodStrategy(),
+            """
                 import java.util.Set;
                 import javax.naming.Context;
                 import javax.naming.InitialContext;
@@ -154,14 +117,87 @@ final class DefaultJNDIInjectionRemediatorTest {
                         }
                     }
                 }
+                """,
+            false),
+        Arguments.of(
+            new ReplaceLimitedLookupStrategy(),
+            """
+                    import io.github.pixee.security.JNDI;
+                    import javax.naming.Context;
+                    import javax.naming.InitialContext;
+                    import javax.http.servlet.HttpServletRequest;
+
+                    public class JNDIUtil {
+                        public static void lookup(HttpServletRequest request) {
+                            String name = request.getParameter("name");
+                            Context ctx = new InitialContext();
+                            Object obj = JNDI.limitedContext(ctx).lookup(name);
+                        }
+                    }
+                    """,
+            true));
+  }
+
+  @ParameterizedTest
+  @MethodSource("fixableSamples")
+  void it_fixes_jndi_injection(
+      final JNDIFixStrategy fixStrategy,
+      final String expectedFixedCode,
+      final boolean expectDependency) {
+    String vulnerableCode =
+        """
+                import javax.naming.Context;
+                import javax.naming.InitialContext;
+                import javax.http.servlet.HttpServletRequest;
+
+                public class JNDIUtil {
+                    public static void lookup(HttpServletRequest request) {
+                        String name = request.getParameter("name");
+                        Context ctx = new InitialContext();
+                        Object obj = ctx.lookup(name);
+                    }
+                }
                 """;
+    int line = 9;
+    CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
+    LexicalPreservingPrinter.setup(cu);
+
+    JNDIInjectionIssue issue = new JNDIInjectionIssue("key", line, null);
+    remediator = new DefaultJNDIInjectionRemediator(fixStrategy);
+    CodemodFileScanningResult result =
+        remediator.remediateAll(
+            cu,
+            "JNDIUtil.java",
+            rule,
+            List.of(issue),
+            JNDIInjectionIssue::key,
+            JNDIInjectionIssue::line,
+            JNDIInjectionIssue::column);
+
+    assertThat(result.changes()).hasSize(1);
+    CodemodChange change = result.changes().get(0);
+    assertThat(change.lineNumber()).isEqualTo(line);
+
+    List<FixedFinding> fixedFindings = change.getFixedFindings();
+    assertThat(fixedFindings).hasSize(1);
+    FixedFinding fixedFinding = fixedFindings.get(0);
+    assertThat(fixedFinding.getId()).isEqualTo("key");
+    assertThat(fixedFinding.getRule()).isEqualTo(rule);
+
+    if (expectDependency) {
+      assertThat(change.getDependenciesNeeded())
+          .containsExactly(DependencyGAV.JAVA_SECURITY_TOOLKIT);
+    } else {
+      assertThat(change.getDependenciesNeeded()).isEmpty();
+    }
 
     String actualCode = LexicalPreservingPrinter.print(cu);
-    assertThat(fixedCode).isEqualToIgnoringWhitespace(actualCode);
+    assertThat(expectedFixedCode).isEqualToIgnoringWhitespace(actualCode);
   }
 
   @Test
   void it_fixes_without_duplicating_control_method() {
+    remediator = new DefaultJNDIInjectionRemediator(new InjectValidationMethodStrategy());
     String vulnerableCode =
         """
                 import java.util.Set;
