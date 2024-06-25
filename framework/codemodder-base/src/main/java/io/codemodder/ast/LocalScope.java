@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -16,6 +17,8 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -133,6 +136,21 @@ public final class LocalScope {
     }
     if (parent instanceof ConstructorDeclaration) {
       statements = ((ConstructorDeclaration) parent).getBody().getStatements();
+    }
+    return new LocalScope(expressions, statements);
+  }
+
+  /** Calculates the scope of a Assignment {@link AssignExpr}. This function is currently incomplete as it only works if the AssignExpr is contained in an ExpressionStmt.*/
+  public static LocalScope fromAssignExpression(AssignExpr aexpr) {
+    var expressions = new NodeList<Expression>();
+    var statements = new NodeList<Statement>();
+    var maybeStmt = ASTs.isExpressionStmtExpr(aexpr);
+    if (maybeStmt.isPresent()){
+	    var block = (BlockStmt) maybeStmt.get().getParentNode().get();
+	    statements.setParentNode(block);
+	    block.getStatements().stream()
+		.skip(block.getStatements().indexOf(maybeStmt.get()) + 1)
+		.forEach(statements::add);
     }
     return new LocalScope(expressions, statements);
   }

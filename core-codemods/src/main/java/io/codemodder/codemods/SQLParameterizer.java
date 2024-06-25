@@ -11,6 +11,7 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.Either;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
+import io.codemodder.ast.LocalScope;
 import io.codemodder.ast.LocalVariableDeclaration;
 import io.codemodder.ast.TryResourceDeclaration;
 import java.util.*;
@@ -174,42 +175,60 @@ public final class SQLParameterizer {
    * the call itself, if immediate, or the {@link LocalVariableDeclaration} that has it as an
    * initializer.
    */
-  private Optional<Either<MethodCallExpr, LocalVariableDeclaration>> findStatementCreationExpr(
+  private Optional<Either<MethodCallExpr, Either<AssignExpr,LocalVariableDeclaration>>> findStatementCreationExpr(
       final MethodCallExpr executeCall) {
-    // Is itself a MethodCallExpr like <conn>.createStatement
+    // Has the form: <conn>.createStatement().executeQuery(...)
     // We require <conn> to be a nameExpr in this case.
-    final Optional<Either<MethodCallExpr, LocalVariableDeclaration>> maybeImmediate =
+    final Optional<Either<MethodCallExpr, Either<AssignExpr, LocalVariableDeclaration>>> maybeImmediate =
         executeCall
             .getScope()
             .flatMap(this::isConnectionCreateStatement)
             // .filter(scope -> scope.getScope().filter(Expression::isNameExpr).isPresent())
             .map(Either::left);
+   
 
-    // Is a NameExpr that is initialized with <conn>.createStatement
-    final Optional<Either<MethodCallExpr, LocalVariableDeclaration>> maybeLVD =
+
+    // Has the form: <stmt>.executeQuery()
+    // Find the <stmt> declaration
+    final Optional<LocalVariableDeclaration> maybeLVD =
         executeCall
             .getScope()
             .map(expr -> expr instanceof NameExpr ? expr.asNameExpr() : null)
             .flatMap(ne -> ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getNameAsString()))
-            .filter(
+    ;
+
+    // Has a single assignment
+    // We erroniously assume that it always shadows the init expression
+    // Needs some flow analysis to correctly address this case
+    final Optional<AssignExpr> maybeSingleAssigned = 
+	    maybeLVD.map(lvd -> ASTs.findAllAssignments(lvd).limit(2).toList())
+	    .filter(allAssignments -> allAssignments.size() ==1 )
+	    .map(allAssignments -> allAssignments.get(0))
+	    .filter(assign -> isConnectionCreateStatement(assign.getValue()).isPresent());
+
+    // Is <stmt> initialized with <conn>.createStatement()?
+    final Optional<LocalVariableDeclaration> maybeInitExpr =  
+            maybeLVD.filter(
                 lvd ->
                     lvd.getVariableDeclarator()
                         .getInitializer()
                         .map(this::isConnectionCreateStatement)
                         .isPresent())
-            .map(Either::right);
+	    ;
 
-    return maybeImmediate.or(() -> maybeLVD);
+    final Optional<Either<MethodCallExpr,Either<AssignExpr,LocalVariableDeclaration>>> maybeAssignOrInit = maybeSingleAssigned.map(a -> Either.right(Either.left(a)));
+	    maybeAssignOrInit.or(() -> maybeInitExpr.map(init -> Either.right(Either.right(init))));
+    return maybeImmediate.or(() -> maybeAssignOrInit);
   }
 
-  private Optional<Either<MethodCallExpr, LocalVariableDeclaration>> validateStatementCreationExpr(
-      final Either<MethodCallExpr, LocalVariableDeclaration> stmtObject) {
-    if (stmtObject.isRight() && !canChangeTypes(stmtObject.getRight())) {
+  private Optional<Either<MethodCallExpr, Either<AssignExpr, LocalVariableDeclaration>>> validateStatementCreationExpr(
+      final Either<MethodCallExpr, Either<AssignExpr,LocalVariableDeclaration>> stmtObject) {
+    if (stmtObject.isRight() && stmtObject.getRight().isRight() && !canChangeTypes(stmtObject.getRight().getRight())) {
       return Optional.empty();
     }
-    if (stmtObject.isRight()
-        && stmtObject.getRight() instanceof TryResourceDeclaration
-        && !validateTryResource((TryResourceDeclaration) stmtObject.getRight(), executeCall)) {
+    if (stmtObject.isRight() && stmtObject.getRight().isRight()
+        && stmtObject.getRight().getRight() instanceof TryResourceDeclaration
+        && !validateTryResource((TryResourceDeclaration) stmtObject.getRight().getRight(), executeCall)) {
       return Optional.empty();
     }
     return Optional.of(stmtObject);
@@ -487,9 +506,27 @@ public final class SQLParameterizer {
     return pstmtCreation;
   }
 
-  private boolean assignedOrDefinedInScope(NameExpr name, LocalVariableDeclaration lvd) {
+  private boolean resolvedInScope(final Either<AssignExpr, LocalVariableDeclaration> assignOrLVD, Expression expr){
+	  if (assignOrLVD.isLeft()){
+		  final var scope = LocalScope.fromAssignExpression(assignOrLVD.getLeft());
+		  // Unsupported case for scope calculation, fail here until we add some
+		  if (scope.stream().findAny().isEmpty()){
+			  return true;
+		  }
+		  return scope.inScope(expr);
+	  }
+	  return assignOrLVD.getRight().getScope().inScope(expr);
+
+  }
+
+  private boolean assignedOrDefinedInScope(final NameExpr name, final Either<AssignExpr, LocalVariableDeclaration> assignOrLVD) {
+	  final var scope = assignOrLVD.ifLeftOrElseGet(a -> LocalScope.fromAssignExpression(a), lvd -> lvd.getScope());
+  	// Unsupported case for scope calculation, fail here until we add some
+	if (scope.stream().findAny().isEmpty()){
+		return true;
+	}
     final Stream<AssignExpr> assignmentsInScope =
-        lvd.getScope().stream()
+        scope.stream()
             .flatMap(
                 node -> node instanceof AssignExpr ? Stream.of((AssignExpr) node) : Stream.empty());
 
@@ -500,11 +537,12 @@ public final class SQLParameterizer {
 
     final boolean definedInScope =
         ASTs.findNonCallableSimpleNameSource(name.getName())
-            .filter(source -> lvd.getScope().inScope(source))
+            .filter(source -> scope.inScope(source))
             .isPresent();
 
     return assignedInScope || definedInScope;
   }
+
 
   /**
    * Checks if {@code methodCall} is a query call that needs to be fixed and fixes if that's the
@@ -521,6 +559,8 @@ public final class SQLParameterizer {
       // Now find the stmt creation expression, if any and validate it
       final var stmtObject =
           findStatementCreationExpr(executeCall).flatMap(this::validateStatementCreationExpr);
+
+      System.out.println(stmtObject);
       if (stmtObject.isPresent()) {
         // Now look for injections
         final QueryParameterizer queryp;
@@ -536,28 +576,28 @@ public final class SQLParameterizer {
                 .get()
                 .ifLeftOrElseGet(
                     mcd -> false,
-                    stmtLVD ->
+                    assignOrLVD ->
                         queryp.getLinearizedQuery().getResolvedExpressionsMap().keySet().stream()
-                            .anyMatch(expr -> stmtLVD.getScope().inScope(expr)));
+                            .anyMatch(expr -> resolvedInScope(assignOrLVD, expr)));
 
-        // Is any name in the linearized expression defined/assigned inside the scope of the
+        //// Is any name in the linearized expression defined/assigned inside the scope of the
         // Statement Object?
         final boolean nameInScope =
             stmtObject
                 .get()
                 .ifLeftOrElseGet(
                     mcd -> false,
-                    stmtLVD ->
+                    assignOrLVD ->
                         queryp.getLinearizedQuery().getLinearized().stream()
                             .filter(expr -> expr.isNameExpr())
                             .map(expr -> expr.asNameExpr())
-                            .anyMatch(name -> assignedOrDefinedInScope(name, stmtLVD)));
+                            .anyMatch(name -> assignedOrDefinedInScope(name, assignOrLVD)));
 
         if (queryp.getInjections().isEmpty() || resolvedInScope || nameInScope) {
           return Optional.empty();
         }
 
-        return Optional.of(fix(stmtObject.get(), queryp, executeCall));
+        //return Optional.of(fix(stmtObject.get(), queryp, executeCall));
       }
     }
     return Optional.empty();
