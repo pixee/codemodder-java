@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 
 /** A codemod that removes any sensitive data being logged. */
@@ -51,6 +49,12 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     final var source = context.path();
+    final List<String> numberedLines;
+    try {
+      numberedLines = readNumberedLines(source);
+    } catch (IOException e) {
+      throw new UncheckedIOException("Couldn't read source file", e);
+    }
     final List<Result> results = sarif.getResultsByLocationPath(source);
     final List<CodemodChange> changes = new ArrayList<>();
     for (final Result result : results) {
@@ -63,7 +67,7 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
 
       SensitivityAndFixAnalysis analysis;
       try {
-        analysis = performSensitivityAnalysis(source, startLine);
+        analysis = performSensitivityAnalysis(numberedLines, startLine);
       } catch (IOException e) {
         throw new UncheckedIOException("Couldn't perform sensitivity analysis", e);
       }
@@ -83,8 +87,8 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
   }
 
   private SensitivityAndFixAnalysis performSensitivityAnalysis(
-      final Path source, final Integer startLine) throws IOException {
-    String codeSnippet = numberedContextWithExtraLines(source, startLine);
+      final List<String> source, final Integer startLine) throws IOException {
+    String codeSnippet = snippet(source, startLine);
     String prompt =
         """
               A tool has cited line %d of the code for possibly logging sensitive data:
@@ -145,6 +149,7 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
   }
 
   private static class SensitivityAndFixAnalysisDTO implements SensitivityAndFixAnalysis {
+
     @JsonProperty("sensitive_analysis_text")
     private String sensitiveAnalysisText;
 
@@ -173,23 +178,32 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
     }
   }
 
-  private static String numberedContextWithExtraLines(final Path path, final int line)
-      throws IOException {
-    int startLine = Math.max(0, line - CONTEXT);
-    try (final Stream<String> lines = Files.lines(path)) {
-      final AtomicInteger counter = new AtomicInteger(startLine);
-      return lines
-          .skip(startLine)
-          .limit(1L + CONTEXT)
-          .map(s -> counter.incrementAndGet() + ": " + s)
-          .collect(Collectors.joining("\n"));
-    }
-  }
-
   @Override
   public boolean shouldRun() {
     List<Run> runs = sarif.rawDocument().getRuns();
     return runs != null && !runs.isEmpty() && !runs.get(0).getResults().isEmpty();
+  }
+
+  /** Reads the source code from the given file and numbers each line. */
+  private List<String> readNumberedLines(final Path source) throws IOException {
+    final var counter = new AtomicInteger();
+    try (final var lines = Files.lines(source)) {
+      return lines.map(line -> counter.incrementAndGet() + ": " + line).toList();
+    }
+  }
+
+  /**
+   * Returns a snippet of code surrounding the given line number.
+   *
+   * @param lines numbered source code lines
+   * @param line the line number to center the snippet around
+   * @return a snippet of code surrounding the given line number
+   */
+  private static String snippet(final List<String> lines, final int line) {
+    final int start = Math.max(0, line - CONTEXT);
+    final int end = Math.min(lines.size(), line + CONTEXT + 1);
+    final var snippet = lines.subList(start, end);
+    return String.join("\n", snippet);
   }
 
   /**
