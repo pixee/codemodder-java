@@ -33,9 +33,7 @@ public final class ASTs {
 
   private ASTs() {}
 
-  /**
-   * Test for this pattern: {@link ExpressionStmt} -&gt; {@link Expression} ({@code expr}).
-   */
+  /** Test for this pattern: {@link ExpressionStmt} -&gt; {@link Expression} ({@code expr}). */
   public static Optional<ExpressionStmt> isExpressionStmtExpr(final Expression expr) {
     return expr.getParentNode()
         .map(p -> p instanceof ExpressionStmt ? (ExpressionStmt) p : null)

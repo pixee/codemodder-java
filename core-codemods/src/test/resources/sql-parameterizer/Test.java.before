@@ -66,4 +66,16 @@ public final class Test {
     var rs = stmt.executeQuery(sql);
     return rs;
   }
+
+  public ResultSet singeAssigned(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = '" + input + "'";
+    Statement stmt = conn.createStatement();
+    try {
+      stmt = conn.createStatement();
+      ResultSet rs = stmt.executeQuery(sql);
+      return rs;
+    } catch (Exception e) {
+    }
+  }
+
 }
