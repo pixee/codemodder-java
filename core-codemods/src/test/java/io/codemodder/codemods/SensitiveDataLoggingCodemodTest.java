@@ -16,7 +16,7 @@ final class SensitiveDataLoggingCodemodTest implements LLMVerifyingCodemodTestMi
   @Override
   public String getRequirementsPrompt() {
     return """
-        - Remove ALL lines that log sensitive data at INFO or higher severities.
+        - The code no longer logs sensitive data (or it does so at DEBUG or below level).
         """;
   }
 }
