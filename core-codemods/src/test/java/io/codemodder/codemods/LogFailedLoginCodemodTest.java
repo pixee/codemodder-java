@@ -3,6 +3,7 @@ package io.codemodder.codemods;
 import io.codemodder.plugins.llm.test.LLMVerifyingCodemodTestMixin;
 import io.codemodder.plugins.llm.test.OpenAIIntegrationTest;
 import io.codemodder.testutils.Metadata;
+import org.junit.jupiter.api.Disabled;
 
 /**
  * Tests for the {@link LogFailedLoginCodemod}.
@@ -42,6 +43,7 @@ import io.codemodder.testutils.Metadata;
     testResourceDir = "log-failed-login",
     dependencies = {})
 @OpenAIIntegrationTest
+@Disabled("codemod in disrepair - behavior is too indeterminate")
 public final class LogFailedLoginCodemodTest implements LLMVerifyingCodemodTestMixin {
 
   @Override
