@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Disabled;
     testResourceDir = "sensitive-data-logging",
     dependencies = {})
 @OpenAIIntegrationTest
-@Disabled("more work needed before this codemod is reliable enough to include in the test suite")
 final class SensitiveDataLoggingCodemodTest implements LLMVerifyingCodemodTestMixin {
 
   @Override
   public String getRequirementsPrompt() {
     return """
         - The code no longer logs sensitive data (or it does so at DEBUG or below level).
+        - A username alone is not considered sensitive data.
         """;
   }
 }
