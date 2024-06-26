@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Disabled;
     testResourceDir = "sensitive-data-logging",
     dependencies = {})
 @OpenAIIntegrationTest
-@Disabled("codemod is in disrepair")
+@Disabled("more work needed before this codemod is reliable enough to include in the test suite")
 final class SensitiveDataLoggingCodemodTest implements LLMVerifyingCodemodTestMixin {
 
   @Override
