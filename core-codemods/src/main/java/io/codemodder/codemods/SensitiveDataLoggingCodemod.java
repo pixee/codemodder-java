@@ -5,6 +5,7 @@ import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.stmt.Statement;
@@ -16,10 +17,14 @@ import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 
 /** A codemod that removes any sensitive data being logged. */
@@ -31,53 +36,46 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
 
   private final RuleSarif sarif;
   private final OpenAIService service;
+  private final ObjectReader reader;
 
   @Inject
   public SensitiveDataLoggingCodemod(
       @SemgrepScan(ruleId = "sensitive-data-logging") final RuleSarif sarif,
       final OpenAIService openAIService) {
-    this.sarif = sarif;
+    this.sarif = Objects.requireNonNull(sarif);
     this.service = Objects.requireNonNull(openAIService);
+    this.reader = new ObjectMapper().readerFor(SensitivityAndFixAnalysisDTO.class);
   }
 
   @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-
-    List<Result> results = sarif.getResultsByLocationPath(context.path());
-
-    String rawFile;
-    try {
-      rawFile = Files.readString(context.path());
-    } catch (IOException e) {
-      throw new UncheckedIOException("Couldn't read file", e);
-    }
-
-    List<String> rawLines = rawFile.lines().toList();
-
-    List<CodemodChange> changes = new ArrayList<>();
-    for (Result result : results) {
+    final var source = context.path();
+    final List<Result> results = sarif.getResultsByLocationPath(source);
+    final List<CodemodChange> changes = new ArrayList<>();
+    for (final Result result : results) {
       PhysicalLocation physicalLocation = result.getLocations().get(0).getPhysicalLocation();
       Integer startLine = physicalLocation.getRegion().getStartLine();
       Optional<Statement> statement = getSingleStatement(cu, startLine);
+      if (statement.isEmpty()) {
+        continue;
+      }
 
-      if (statement.isPresent()) {
-        SensitivityAndFixAnalysis analysis;
-        try {
-          analysis = performSensitivityAnalysis(rawLines, startLine);
-        } catch (IOException e) {
-          throw new UncheckedIOException("Couldn't perform sensitivity analysis", e);
-        }
-        if (analysis.isSensitiveAndDirectlyLogged()) {
-          String newStatement = analysis.newStatement();
-          if (newStatement != null && !newStatement.isBlank()) {
-            Statement newStmt = StaticJavaParser.parseStatement(newStatement);
-            statement.get().replace(newStmt);
+      SensitivityAndFixAnalysis analysis;
+      try {
+        analysis = performSensitivityAnalysis(source, startLine);
+      } catch (IOException e) {
+        throw new UncheckedIOException("Couldn't perform sensitivity analysis", e);
+      }
+      if (analysis.isSensitiveAndDirectlyLogged()) {
+        String newStatement = analysis.newStatement();
+        if (newStatement != null && !newStatement.isBlank()) {
+          Statement newStmt = StaticJavaParser.parseStatement(newStatement);
+          statement.get().replace(newStmt);
 
-            String analysisText = analysis.isSensitiveAnalysisText();
-            CodemodChange change = CodemodChange.from(startLine, analysisText);
-            changes.add(change);
-          }
+          String analysisText = analysis.isSensitiveAnalysisText();
+          CodemodChange change = CodemodChange.from(startLine, analysisText);
+          changes.add(change);
         }
       }
     }
@@ -85,8 +83,8 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
   }
 
   private SensitivityAndFixAnalysis performSensitivityAnalysis(
-      final List<String> lines, final Integer startLine) throws IOException {
-    String codeSnippet = numberedContextWithExtraLines(lines, startLine, 10, 10);
+      final Path source, final Integer startLine) throws IOException {
+    String codeSnippet = numberedContextWithExtraLines(source, startLine);
     String prompt =
         """
               A tool has cited line %d of the code for possibly logging sensitive data:
@@ -106,7 +104,6 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
         ChatCompletionRequest.builder()
             .temperature(0D)
             .model("gpt-4o-2024-05-13")
-            //            .model("gpt-4-0613")
             .n(1)
             .messages(List.of(new ChatMessage(ChatMessageRole.USER.value(), prompt)))
             .build();
@@ -114,25 +111,21 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
     ChatCompletionChoice response = completion.getChoices().get(0);
     String responseText = response.getMessage().getContent();
     if (responseText.startsWith("```json") && responseText.endsWith("```")) {
-      responseText = responseText.substring(7, responseText.length() - 3);
+      responseText =
+          responseText.substring("```json".length(), responseText.length() - "```".length());
     }
-    return new ObjectMapper().readValue(responseText, SensitivityAndFixAnalysisDTO.class);
+    return reader.readValue(responseText);
   }
 
   /**
    * We can fix if there's only one statement on the given line (meaning, it may span multiple
-   * lines, but only one statement is started on the lin.
+   * lines, but only one statement is started on the line).
    */
   private Optional<Statement> getSingleStatement(final CompilationUnit cu, final Integer line) {
-    List<Statement> statements =
-        cu.findAll(Statement.class).stream()
-            .filter(s -> s.getRange().isPresent())
-            .filter(s -> s.getRange().get().begin.line == line)
-            .toList();
-    if (statements.size() == 1) {
-      return Optional.of(statements.get(0));
-    }
-    return Optional.empty();
+    return cu.findAll(Statement.class).stream()
+        .filter(s -> s.getRange().isPresent())
+        .filter(s -> s.getRange().get().begin.line == line)
+        .findFirst();
   }
 
   /** The results of the sensitivity analysis and, optionally, the fix to apply. */
@@ -180,21 +173,17 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
     }
   }
 
-  private static String numberedContextWithExtraLines(
-      final List<String> lines,
-      final int line,
-      final int extraLinesBefore,
-      final int extraLinesAfter) {
-    StringBuilder sb = new StringBuilder();
-    int startLine = Math.max(0, line - extraLinesBefore);
-    int endLine = Math.min(lines.size(), line + extraLinesAfter);
-    for (int i = startLine; i < endLine; i++) {
-      sb.append(i + 1);
-      sb.append(": ");
-      sb.append(lines.get(i));
-      sb.append("\n");
+  private static String numberedContextWithExtraLines(final Path path, final int line)
+      throws IOException {
+    int startLine = Math.max(0, line - CONTEXT);
+    try (final Stream<String> lines = Files.lines(path)) {
+      final AtomicInteger counter = new AtomicInteger(startLine);
+      return lines
+          .skip(startLine)
+          .limit(1L + CONTEXT)
+          .map(s -> counter.incrementAndGet() + ": " + s)
+          .collect(Collectors.joining("\n"));
     }
-    return sb.toString();
   }
 
   @Override
@@ -202,4 +191,10 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
     List<Run> runs = sarif.rawDocument().getRuns();
     return runs != null && !runs.isEmpty() && !runs.get(0).getResults().isEmpty();
   }
+
+  /**
+   * Number of lines of leading and trailing context surrounding each Semgrep finding to include in
+   * the code snippet sent to OpenAI.
+   */
+  private static final int CONTEXT = 10;
 }

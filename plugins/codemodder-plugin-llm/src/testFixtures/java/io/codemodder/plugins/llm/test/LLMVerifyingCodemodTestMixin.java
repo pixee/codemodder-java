@@ -63,7 +63,7 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
 
     ChatCompletionRequest request =
         ChatCompletionRequest.builder()
-            .model("gpt-3.5-turbo-0613")
+            .model("gpt-4o-2024-05-13")
             .messages(
                 List.of(
                     new ChatMessage(
