@@ -54,4 +54,19 @@ public @interface Metadata {
 
   /** Sonar hotspots file names for testing multiple json files */
   String[] sonarHotspotsJsonFiles() default {};
+
+  /**
+   * Used to filter test execution to only the tests with a display name that matches the given
+   * regex. This is a test-driven development tool for iterating on a single, dynamic test case.
+   *
+   * <pre>
+   * &#64;Metadata(
+   *   codemodType = LogFailedLoginCodemod.class,
+   *   testResourceDir = "log-failed-login",
+   *   only = "\\/safe\\/.*",
+   *   dependencies = {})
+   * public final class LogFailedLoginCodemodTest implements CodemodTestMixin {
+   * </pre>
+   */
+  String only() default "";
 }

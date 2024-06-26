@@ -1,6 +1,6 @@
 package io.codemodder.plugins.llm;
 
-import static io.codemodder.plugins.llm.Tokens.countTokens;
+import static io.codemodder.plugins.llm.StandardModel.GPT_3_5_TURBO;
 
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
@@ -34,14 +34,22 @@ import org.slf4j.LoggerFactory;
 public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
     extends SarifPluginRawFileChanger {
 
-  private static final Logger logger =
-      LoggerFactory.getLogger(SarifToLLMForBinaryVerificationAndFixingCodemod.class);
   private final OpenAIService openAI;
+  private final Model model;
 
   protected SarifToLLMForBinaryVerificationAndFixingCodemod(
-      final RuleSarif sarif, final OpenAIService openAI) {
+      final RuleSarif sarif, final OpenAIService openAI, final Model model) {
     super(sarif);
     this.openAI = Objects.requireNonNull(openAI);
+    this.model = Objects.requireNonNull(model);
+  }
+
+  /**
+   * For backwards compatibility with a previous version of this API, uses a GPT 3.5 Turbo model.
+   */
+  protected SarifToLLMForBinaryVerificationAndFixingCodemod(
+      final RuleSarif sarif, final OpenAIService openAI) {
+    this(sarif, openAI, GPT_3_5_TURBO);
   }
 
   @Override
@@ -51,7 +59,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
 
     // For fine-tuning the semgrep rule, debug log the matching snippets in the file.
     results.forEach(
-        (result) -> {
+        result -> {
           Region region = result.getLocations().get(0).getPhysicalLocation().getRegion();
           logger.debug("{}:{}", region.getStartLine(), region.getSnippet().getText());
         });
@@ -68,10 +76,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       }
 
       BinaryThreatAnalysisAndFix fix = fixThreat(file, context, results);
-      logger.debug("risk: {}", fix.getRisk());
-      logger.debug("analysis: {}", fix.getAnalysis());
-      logger.debug("fix: {}", fix.getFix());
-      logger.debug("fix description: {}", fix.getFixDescription());
+      logger.debug("{}", fix);
 
       // If our second look determined that the risk of the threat is low, don't change the file.
       if (fix.getRisk() == BinaryThreatRisk.LOW) {
@@ -79,7 +84,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       }
 
       // If the LLM was unable to fix the threat, don't change the file.
-      if (fix.getFix() == null || fix.getFix().length() == 0) {
+      if (fix.getFix() == null || fix.getFix().isEmpty()) {
         logger.info("unable to fix: {}", context.path());
         return CodemodFileScanningResult.none();
       }
@@ -89,7 +94,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
 
       // Ensure the end result isn't wonky.
       Patch<String> patch = DiffUtils.diff(file.getLines(), fixedLines);
-      if (patch.getDeltas().size() == 0 || !isPatchExpected(patch)) {
+      if (patch.getDeltas().isEmpty() || !isPatchExpected(patch)) {
         logger.error("unexpected patch: {}", patch);
         return CodemodFileScanningResult.none();
       }
@@ -140,11 +145,10 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
     ChatMessage systemMessage = getSystemMessage(context, results);
     ChatMessage userMessage = getAnalyzeUserMessage(file);
 
-    int tokenCount = countTokens(List.of(systemMessage, userMessage));
-    if (tokenCount > 3796) {
-      // The max tokens for gpt-3.5-turbo-0613 is 4,096. If the estimated token count, which doesn't
-      // include the function (~100 tokens) or the reply (~200 tokens), is close to the max, assume
-      // the code is safe (for now).
+    // If the estimated token count, which doesn't include the function (~100 tokens) or the reply
+    // (~200 tokens), is close to the max, then assume the code is safe (for now).
+    int tokenCount = model.tokens(List.of(systemMessage, userMessage));
+    if (tokenCount > model.contextWindow() - 300) {
       return new BinaryThreatAnalysis(
           "Ignoring file: estimated prompt token count (" + tokenCount + ") is too high.",
           BinaryThreatRisk.LOW);
@@ -152,8 +156,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       logger.debug("estimated prompt token count: {}", tokenCount);
     }
 
-    return getLLMResponse(
-        "gpt-3.5-turbo-0613", 0.2D, systemMessage, userMessage, BinaryThreatAnalysis.class);
+    return getLLMResponse(model.id(), 0.0D, systemMessage, userMessage, BinaryThreatAnalysis.class);
   }
 
   private BinaryThreatAnalysisAndFix fixThreat(
@@ -161,7 +164,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       final CodemodInvocationContext context,
       final List<Result> results) {
     return getLLMResponse(
-        "gpt-4-0613",
+        model.id(),
         0D,
         getSystemMessage(context, results),
         getFixUserMessage(file),
@@ -194,7 +197,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
             .build();
 
     ChatCompletionResult result = openAI.createChatCompletion(request);
-    logger.debug(result.getUsage().toString());
+    logger.debug("{}", result.getUsage());
 
     ChatMessage response = result.getChoices().get(0).getMessage();
     return functionExecutor.execute(response.getFunctionCall());
@@ -242,18 +245,42 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
 
   private static final String FIX_USER_MESSAGE_TEMPLATE =
       """
-      A file with line numbers is provided below. Analyze it. If the risk is HIGH, use these rules \
-      to make the MINIMUM number of changes necessary to reduce the file's risk to LOW:
+      A file with line numbers is provided below. Analyze it. If the risk is HIGH, use these rules to make the MINIMUM number of changes necessary to reduce the file's risk to LOW:
       - Each change MUST be syntactically correct.
-      - DO NOT change the file's formatting or comments.
       %s
 
-      Create a diff patch for the changed file, using the unified format with a header. Include \
-      the diff patch and a summary of the changes with your threat analysis.
+      Any code changes to reduce the file's risk to LOW must be stored in a diff patch format. Follow these instructions when creating the patch:
+      - Your output must be in the form a unified diff patch that will be applied by your coworkers.
+      - The output must be similar to the output of `diff -U0`. Do not include line number ranges.
+      - Start each hunk of changes with a `@@ ... @@` line.
+      - Each change in a file should be a separate hunk in the diff.
+      - It is very important for the change to contain only what is minimally required to fix the problem.
+      - Remember that whitespace and indentation changes can be important. Preserve the original formatting and indentation. Do not replace tabs with spaces or vice versa. If the original code uses tabs, use tabs in the patch. Encode tabs using a tab literal (\\\\t). If the original code uses spaces, use spaces in the patch. Do not add spaces where none were present in the original code. **THIS IS ESPECIALLY IMPORTANT AT THE BEGINNING OF DIFF LINES.**
+      - The unified diff must be accurate and complete.
+      - The unified diff will be applied to the source code by your coworkers.
 
-      Save your threat analysis.
+      Here's an example of a unified diff:
+      ```diff
+      --- a/file.txt
+      +++ b/file.txt
+      @@ ... @@
+       for (var i = 0; i < array.length; i++) {
+         This line is unchanged.
+      -  This is the original line
+      +  This is the replacement line
+       }
+       Here is another unchanged line.
+      @@ ... @@
+      -This line has been removed but not replaced.
+       This line is unchanged.
+      ```
+
+      Now save your threat analysis.
 
       --- %s
       %s
       """;
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(SarifToLLMForBinaryVerificationAndFixingCodemod.class);
 }
