@@ -6,7 +6,6 @@ import com.contrastsecurity.sarif.Run;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.stmt.Statement;
 import com.theokanning.openai.completion.chat.*;
@@ -72,15 +71,11 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
         throw new UncheckedIOException("Couldn't perform sensitivity analysis", e);
       }
       if (analysis.isSensitiveAndDirectlyLogged()) {
-        String newStatement = analysis.newStatement();
-        if (newStatement != null && !newStatement.isBlank()) {
-          Statement newStmt = StaticJavaParser.parseStatement(newStatement);
-          statement.get().replace(newStmt);
-
-          String analysisText = analysis.isSensitiveAnalysisText();
-          CodemodChange change = CodemodChange.from(startLine, analysisText);
-          changes.add(change);
-        }
+        // remove the log statement altogether
+        statement.get().remove();
+        String analysisText = analysis.isSensitiveAnalysisText();
+        CodemodChange change = CodemodChange.from(startLine, analysisText);
+        changes.add(change);
       }
     }
     return CodemodFileScanningResult.from(changes, List.of());
@@ -100,9 +95,8 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
               sensitive_analysis_text: a careful, thorough analysis of whether the data is sensitive (specifically a password, session ID, security token, SSN, etc -- not a username)
               is_data_directly_logged: a careful, thorough analysis of whether the data is definitely and directly logged (e.g., not just passed to another method inside to the scope, unless that's a method that obviously returns the given string)
               is_it_sensitive_and_directly_logged: a boolean dictating whether it is sensitive and definitely and directly logged
-              new_line_to_replace: if sensitive and directly logged, the statement on line %d that should replace it -- remember to correctly JSON escape this value
               """
-            .formatted(startLine, codeSnippet, startLine);
+            .formatted(startLine, codeSnippet);
 
     ChatCompletionRequest request =
         ChatCompletionRequest.builder()
@@ -143,9 +137,6 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
 
     /** Whether the statement logs sensitive data. */
     boolean isSensitiveAndDirectlyLogged();
-
-    /** The new statement with which to replace the old. */
-    String newStatement();
   }
 
   private static class SensitivityAndFixAnalysisDTO implements SensitivityAndFixAnalysis {
@@ -159,9 +150,6 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
     @JsonProperty("is_it_sensitive_and_directly_logged")
     private boolean isSensitiveAndDirectlyLogged;
 
-    @JsonProperty("new_line_to_replace")
-    private String newLineToReplace;
-
     @Override
     public String isSensitiveAnalysisText() {
       return sensitiveAnalysisText;
@@ -170,11 +158,6 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
     @Override
     public boolean isSensitiveAndDirectlyLogged() {
       return isSensitiveAndDirectlyLogged;
-    }
-
-    @Override
-    public String newStatement() {
-      return newLineToReplace;
     }
   }
 

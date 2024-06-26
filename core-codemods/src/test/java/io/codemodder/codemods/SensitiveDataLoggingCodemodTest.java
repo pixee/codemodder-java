@@ -3,7 +3,6 @@ package io.codemodder.codemods;
 import io.codemodder.plugins.llm.test.LLMVerifyingCodemodTestMixin;
 import io.codemodder.plugins.llm.test.OpenAIIntegrationTest;
 import io.codemodder.testutils.Metadata;
-import org.junit.jupiter.api.Disabled;
 
 @Metadata(
     codemodType = SensitiveDataLoggingCodemod.class,
