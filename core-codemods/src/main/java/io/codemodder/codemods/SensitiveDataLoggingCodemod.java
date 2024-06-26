@@ -73,7 +73,7 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
       if (analysis.isSensitiveAndDirectlyLogged()) {
         // remove the log statement altogether
         statement.get().remove();
-        String analysisText = analysis.isSensitiveAnalysisText();
+        String analysisText = analysis.sensitiveAnalysisText();
         CodemodChange change = CodemodChange.from(startLine, analysisText);
         changes.add(change);
       }
@@ -119,46 +119,12 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
    * We can fix if there's only one statement on the given line (meaning, it may span multiple
    * lines, but only one statement is started on the line).
    */
-  private Optional<Statement> getSingleStatement(final CompilationUnit cu, final Integer line) {
+  private static Optional<Statement> getSingleStatement(
+      final CompilationUnit cu, final Integer line) {
     return cu.findAll(Statement.class).stream()
         .filter(s -> s.getRange().isPresent())
         .filter(s -> s.getRange().get().begin.line == line)
         .findFirst();
-  }
-
-  /** The results of the sensitivity analysis and, optionally, the fix to apply. */
-  private interface SensitivityAndFixAnalysis {
-
-    /**
-     * A detailed analysis of whether the data is sensitive, like a password, security token, etc.
-     * and its directly logged.
-     */
-    String isSensitiveAnalysisText();
-
-    /** Whether the statement logs sensitive data. */
-    boolean isSensitiveAndDirectlyLogged();
-  }
-
-  private static class SensitivityAndFixAnalysisDTO implements SensitivityAndFixAnalysis {
-
-    @JsonProperty("sensitive_analysis_text")
-    private String sensitiveAnalysisText;
-
-    @JsonProperty("is_data_directly_logged")
-    private String isDataDirectlyLogged;
-
-    @JsonProperty("is_it_sensitive_and_directly_logged")
-    private boolean isSensitiveAndDirectlyLogged;
-
-    @Override
-    public String isSensitiveAnalysisText() {
-      return sensitiveAnalysisText;
-    }
-
-    @Override
-    public boolean isSensitiveAndDirectlyLogged() {
-      return isSensitiveAndDirectlyLogged;
-    }
   }
 
   @Override
@@ -168,7 +134,7 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
   }
 
   /** Reads the source code from the given file and numbers each line. */
-  private List<String> readNumberedLines(final Path source) throws IOException {
+  private static List<String> readNumberedLines(final Path source) throws IOException {
     final var counter = new AtomicInteger();
     try (final var lines = Files.lines(source)) {
       return lines.map(line -> counter.incrementAndGet() + ": " + line).toList();
@@ -194,4 +160,23 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
    * the code snippet sent to OpenAI.
    */
   private static final int CONTEXT = 10;
+
+  /** The results of the sensitivity analysis. */
+  private interface SensitivityAndFixAnalysis {
+
+    /**
+     * A detailed analysis of whether the data is sensitive, like a password, security token, etc.
+     * and its directly logged.
+     */
+    String sensitiveAnalysisText();
+
+    /** Whether the statement logs sensitive data. */
+    boolean isSensitiveAndDirectlyLogged();
+  }
+
+  private record SensitivityAndFixAnalysisDTO(
+      @JsonProperty("sensitive_analysis_text") String sensitiveAnalysisText,
+      @JsonProperty("is_data_directly_logged") String isDataDirectlyLogged,
+      @JsonProperty("is_it_sensitive_and_directly_logged") boolean isSensitiveAndDirectlyLogged)
+      implements SensitivityAndFixAnalysis {}
 }
