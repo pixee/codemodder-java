@@ -35,4 +35,12 @@ public class Test {
       log.info("Remote auth settings for " + fetchSettings(securityToken));
   }
 
+  public void multiline(final String privateKeyId) {
+    var key = lookupPrivateKeyFromKeyChain(privateKeyId);
+    logger.info("Retrieved Private Key {}\nalgo: {}\nkey: {}",
+        key.getId(),
+        key.getAlgorithm(),
+        key.getEncoded());
+    decrypt(key);
+  }
 }
