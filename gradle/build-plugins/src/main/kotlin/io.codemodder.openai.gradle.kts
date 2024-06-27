@@ -1,5 +1,4 @@
 plugins {
-    id("io.codemodder.java")
     `jvm-test-suite`
 }
 
@@ -11,9 +10,10 @@ testing {
             targets {
                 all {
                     testTask {
-                        val openAIKey = project.findProperty("codemodderOpenAIKey") as String?
-                        openAIKey?.let {
-                            environment("CODEMODDER_OPENAI_API_KEY", it)
+                        val openAIKey = providers.gradleProperty("codemodderOpenAIKey")
+                        inputs.property("codemodderOpenAIKey", openAIKey)
+                        if (openAIKey.isPresent) {
+                            environment("CODEMODDER_OPENAI_API_KEY", openAIKey.get())
                         }
                     }
                 }
