@@ -7,6 +7,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleHotspot;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
+import io.codemodder.remediation.GenericVulnerabilityReporterStrategies;
 import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.SonarFinding;
 import java.util.List;
@@ -26,7 +27,7 @@ public final class SonarSQLInjectionCodemod extends SonarRemediatingJavaParserCh
   @Inject
   public SonarSQLInjectionCodemod(
       @ProvidedSonarScan(ruleId = "java:S2077") final RuleHotspot hotspots) {
-    super(CodemodReporterStrategy.fromClasspath(SQLParameterizerCodemod.class), hotspots);
+    super(GenericVulnerabilityReporterStrategies.sqlInjectionStrategy, hotspots);
     this.hotspots = Objects.requireNonNull(hotspots);
     this.remediationStrategy = JavaParserSQLInjectionRemediatorStrategy.DEFAULT;
   }
