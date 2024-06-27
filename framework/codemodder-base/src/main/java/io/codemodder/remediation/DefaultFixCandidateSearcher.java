@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
 
@@ -30,8 +32,8 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
       final DetectorRule rule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final Function<T, Integer> getColumn) {
+      final ToIntFunction<T> getLine,
+      final Function<T, OptionalInt> getColumn) {
 
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
     List<MethodCallExpr> calls =
@@ -49,17 +51,17 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
 
     for (T issue : issuesForFile) {
       String findingId = getKey.apply(issue);
-      int line = getLine.apply(issue);
-      Integer column = getColumn.apply(issue);
+      int line = getLine.applyAsInt(issue);
+      OptionalInt column = getColumn.apply(issue);
       List<MethodCallExpr> callsForIssue =
           calls.stream()
               .filter(mce -> mce.getRange().isPresent())
               .filter(mce -> mce.getRange().get().begin.line == line)
               .toList();
-      if (callsForIssue.size() > 1 && column != null) {
+      if (callsForIssue.size() > 1 && column.isPresent()) {
         callsForIssue =
             callsForIssue.stream()
-                .filter(mce -> mce.getRange().get().contains(new Position(line, column)))
+                .filter(mce -> mce.getRange().get().contains(new Position(line, column.getAsInt())))
                 .toList();
       }
       if (callsForIssue.isEmpty()) {

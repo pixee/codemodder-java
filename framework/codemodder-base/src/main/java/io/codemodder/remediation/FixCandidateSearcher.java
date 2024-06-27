@@ -6,8 +6,10 @@ import io.codemodder.codetf.DetectorRule;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 /** Searches for potential fix locations in the source code. */
 public interface FixCandidateSearcher<T> {
@@ -19,8 +21,26 @@ public interface FixCandidateSearcher<T> {
       DetectorRule rule,
       List<T> issuesForFile,
       Function<T, String> getKey,
-      Function<T, Integer> getLine,
-      Function<T, Integer> getColumn);
+      ToIntFunction<T> getLine,
+      Function<T, OptionalInt> getColumn);
+
+  default FixCandidateSearchResults<T> search(
+      CompilationUnit cu,
+      String path,
+      DetectorRule rule,
+      List<T> issuesForFile,
+      Function<T, String> getKey,
+      ToIntFunction<T> getLine,
+      ToIntFunction<T> getColumn) {
+    return search(
+        cu,
+        path,
+        rule,
+        issuesForFile,
+        getKey,
+        getLine,
+        (Function<T, OptionalInt>) issue -> OptionalInt.of(getColumn.applyAsInt(issue)));
+  }
 
   /** Builder for {@link FixCandidateSearcher}. */
   final class Builder<T> {

@@ -21,7 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
 
@@ -42,8 +44,8 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       final DetectorRule detectorRule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final Function<T, Integer> getColumn) {
+      final ToIntFunction<T> getLine,
+      final Function<T, OptionalInt> getColumn) {
 
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>()
@@ -62,7 +64,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
 
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
       List<T> issues = fixCandidate.issues();
-      int line = getLine.apply(issues.get(0));
+      int line = getLine.applyAsInt(issues.get(0));
 
       MethodCallExpr lookupCall = fixCandidate.methodCall();
       // get the parent method of the lookup() call

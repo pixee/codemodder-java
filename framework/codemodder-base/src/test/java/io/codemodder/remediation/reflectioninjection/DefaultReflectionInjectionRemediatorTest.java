@@ -11,6 +11,8 @@ import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.RemediationMessages;
 import java.util.List;
+import java.util.OptionalInt;
+import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
@@ -192,7 +194,7 @@ final class DefaultReflectionInjectionRemediatorTest {
         final String vulnerableCode, final int line, final String expectedFixCode) {
       CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
       LexicalPreservingPrinter.setup(cu);
-      ReflectionInjectionFinding finding = new ReflectionInjectionFinding("id", line, null);
+      ReflectionInjectionFinding finding = new ReflectionInjectionFinding("id", line);
       CodemodFileScanningResult result =
           remediator.remediateAll(
               cu,
@@ -201,7 +203,7 @@ final class DefaultReflectionInjectionRemediatorTest {
               List.of(finding),
               ReflectionInjectionFinding::key,
               ReflectionInjectionFinding::line,
-              ReflectionInjectionFinding::column);
+              (Function<ReflectionInjectionFinding, OptionalInt>) ignored -> OptionalInt.empty());
       assertThat(result.unfixedFindings()).isEmpty();
       assertThat(result.changes()).hasSize(1);
 
@@ -260,7 +262,7 @@ final class DefaultReflectionInjectionRemediatorTest {
         final String reason) {
       CompilationUnit cu = StaticJavaParser.parse(unfixableCode);
       LexicalPreservingPrinter.setup(cu);
-      ReflectionInjectionFinding finding = new ReflectionInjectionFinding("id", line, null);
+      ReflectionInjectionFinding finding = new ReflectionInjectionFinding("id", line);
       CodemodFileScanningResult result =
           remediator.remediateAll(
               cu,
@@ -269,7 +271,7 @@ final class DefaultReflectionInjectionRemediatorTest {
               List.of(finding),
               ReflectionInjectionFinding::key,
               ReflectionInjectionFinding::line,
-              ReflectionInjectionFinding::column);
+              (Function<ReflectionInjectionFinding, OptionalInt>) ignored -> OptionalInt.empty());
       assertThat(result.changes()).isEmpty();
       assertThat(result.unfixedFindings()).hasSize(1);
       assertThat(result.unfixedFindings().get(0).getLine()).isEqualTo(line);
@@ -279,5 +281,5 @@ final class DefaultReflectionInjectionRemediatorTest {
     }
   }
 
-  record ReflectionInjectionFinding(String key, int line, Integer column) {}
+  record ReflectionInjectionFinding(String key, int line) {}
 }

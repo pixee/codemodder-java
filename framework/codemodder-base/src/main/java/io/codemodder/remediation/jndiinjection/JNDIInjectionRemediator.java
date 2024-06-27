@@ -4,7 +4,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 /**
  * Remediates JNDI injection vulnerabilities. It does this by weaving in a check to limit what JNDI
@@ -22,8 +24,8 @@ public interface JNDIInjectionRemediator {
       DetectorRule detectorRule,
       List<T> issuesForFile,
       Function<T, String> getKey,
-      Function<T, Integer> getLine,
-      Function<T, Integer> getColumn);
+      ToIntFunction<T> getLine,
+      Function<T, OptionalInt> getColumn);
 
   /** The default JNDI injection remediation strategy. */
   JNDIInjectionRemediator DEFAULT = new DefaultJNDIInjectionRemediator();

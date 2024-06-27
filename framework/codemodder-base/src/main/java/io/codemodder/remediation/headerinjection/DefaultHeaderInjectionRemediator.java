@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediator {
 
@@ -45,8 +46,8 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
       final DetectorRule detectorRule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final Function<T, Integer> getColumn) {
+      final ToIntFunction<T> getLine,
+      final ToIntFunction<T> getColumn) {
 
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>()
