@@ -6,7 +6,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
-import io.codemodder.remediation.GenericVulnerabilityReporterStrategies;
+import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.reflectioninjection.ReflectionInjectionRemediator;
 import io.codemodder.sonar.model.Issue;
 import java.util.Objects;
@@ -27,7 +27,7 @@ public final class SonarUnsafeReflectionRemediationCodemod
   @Inject
   public SonarUnsafeReflectionRemediationCodemod(
       @ProvidedSonarScan(ruleId = "java:S2658") final RuleIssue issues) {
-    super(GenericVulnerabilityReporterStrategies.reflectionInjectionStrategy, issues);
+    super(GenericRemediationMetadata.REFLECTION_INJECTION.reporter(), issues);
     this.remediator = ReflectionInjectionRemediator.DEFAULT;
     this.issues = Objects.requireNonNull(issues);
   }
