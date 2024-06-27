@@ -91,13 +91,11 @@ final class DefaultReflectionInjectionRemediator implements ReflectionInjectionR
                 expression -> {
                   if (expression.isNameExpr()) {
                     final var nameExpr = expression.asNameExpr();
-                    return nameExpr.getNameAsString().equals("Class")
-                        || nameExpr.getNameAsString().equals("java.lang.Class");
+                    return nameExpr.getNameAsString().equals("Class");
                   }
                   return false;
                 })
             .orElse(
-                // check for static import (TODO test)
                 cu.getImports().stream()
                     .anyMatch(
                         importDeclaration ->
