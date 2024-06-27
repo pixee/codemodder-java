@@ -6,7 +6,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
-import io.codemodder.remediation.GenericVulnerabilityReporterStrategies;
+import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.xxe.XXERemediator;
 import io.codemodder.sonar.model.Issue;
 import io.codemodder.sonar.model.SonarFinding;
@@ -26,7 +26,7 @@ public final class SonarXXECodemod extends SonarRemediatingJavaParserChanger {
 
   @Inject
   public SonarXXECodemod(@ProvidedSonarScan(ruleId = "java:S2755") final RuleIssue issues) {
-    super(GenericVulnerabilityReporterStrategies.xxeReporterStrategy, issues);
+    super(GenericRemediationMetadata.XXE.reporter(), issues);
     this.issues = Objects.requireNonNull(issues);
     this.remediationStrategy = XXERemediator.DEFAULT;
   }
