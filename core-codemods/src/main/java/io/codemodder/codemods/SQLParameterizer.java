@@ -7,11 +7,11 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
-import com.github.javaparser.ast.expr.CastExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.codemodder.Either;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.ASTs;
+import io.codemodder.ast.ExpressionStmtVariableDeclaration;
 import io.codemodder.ast.LocalScope;
 import io.codemodder.ast.LocalVariableDeclaration;
 import io.codemodder.ast.TryResourceDeclaration;
@@ -188,6 +188,10 @@ public final class SQLParameterizer {
                 // .filter(scope -> scope.getScope().filter(Expression::isNameExpr).isPresent())
                 .map(Either::left);
 
+    if (maybeImmediate.isPresent()) {
+      return maybeImmediate;
+    }
+
     // Has the form: <stmt>.executeQuery()
     // Find the <stmt> declaration
     final Optional<LocalVariableDeclaration> maybeLVD =
@@ -204,7 +208,12 @@ public final class SQLParameterizer {
             .map(lvd -> ASTs.findAllAssignments(lvd).limit(2).toList())
             .filter(allAssignments -> allAssignments.size() == 1)
             .map(allAssignments -> allAssignments.get(0))
+            .filter(assign -> assign.getTarget().isNameExpr())
             .filter(assign -> isConnectionCreateStatement(assign.getValue()).isPresent());
+
+    if (maybeSingleAssigned.isPresent()) {
+      return maybeSingleAssigned.map(a -> Either.right(Either.left(a)));
+    }
 
     // Is <stmt> initialized with <conn>.createStatement()?
     final Optional<LocalVariableDeclaration> maybeInitExpr =
@@ -215,13 +224,7 @@ public final class SQLParameterizer {
                     .map(this::isConnectionCreateStatement)
                     .isPresent());
 
-    final Optional<Either<MethodCallExpr, Either<AssignExpr, LocalVariableDeclaration>>>
-        maybeAssign = maybeSingleAssigned.map(a -> Either.right(Either.left(a)));
-
-    final Optional<Either<MethodCallExpr, Either<AssignExpr, LocalVariableDeclaration>>>
-        maybeAssignOrInit =
-            maybeAssign.or(() -> maybeInitExpr.map(init -> Either.right(Either.right(init))));
-    return maybeImmediate.or(() -> maybeAssignOrInit);
+    return maybeInitExpr.map(init -> Either.right(Either.right(init)));
   }
 
   private Optional<Either<MethodCallExpr, Either<AssignExpr, LocalVariableDeclaration>>>
@@ -232,12 +235,25 @@ public final class SQLParameterizer {
         && !canChangeTypes(stmtObject.getRight().getRight())) {
       return Optional.empty();
     }
-    if (stmtObject.isRight()
-        && stmtObject.getRight().isRight()
-        && stmtObject.getRight().getRight() instanceof TryResourceDeclaration
-        && !validateTryResource(
-            (TryResourceDeclaration) stmtObject.getRight().getRight(), executeCall)) {
-      return Optional.empty();
+    if (stmtObject.isRight()) {
+      // For the assignment case, the declaration must be from an ExpressionStmt
+      if (stmtObject.getRight().isLeft()) {
+        final var maybelvd =
+            ASTs.findEarliestLocalVariableDeclarationOf(
+                    stmtObject.getRight().getLeft(),
+                    stmtObject.getRight().getLeft().getTarget().asNameExpr().getNameAsString())
+                .filter(lvd -> lvd instanceof ExpressionStmtVariableDeclaration);
+        if (maybelvd.isEmpty()) {
+          return Optional.empty();
+        }
+
+      } else {
+        if (stmtObject.getRight().getRight() instanceof TryResourceDeclaration
+            && !validateTryResource(
+                (TryResourceDeclaration) stmtObject.getRight().getRight(), executeCall)) {
+          return Optional.empty();
+        }
+      }
     }
     return Optional.of(stmtObject);
   }
@@ -457,24 +473,12 @@ public final class SQLParameterizer {
     for (int i = combinedExpressions.size() - 1; i >= 0; i--) {
       final var expr = combinedExpressions.get(i);
       ExpressionStmt setStmt = null;
-      if (stmtCreation.isRight() && stmtCreation.getRight().isLeft()) {
-        setStmt =
-            new ExpressionStmt(
-                new MethodCallExpr(
-                    new EnclosedExpr(
-                        new CastExpr(
-                            StaticJavaParser.parseType("PreparedStatement"),
-                            new NameExpr(stmtName))),
-                    "setString",
-                    new NodeList<>(new IntegerLiteralExpr(String.valueOf(i + 1)), expr)));
-      } else {
-        setStmt =
-            new ExpressionStmt(
-                new MethodCallExpr(
-                    new NameExpr(stmtName),
-                    "setString",
-                    new NodeList<>(new IntegerLiteralExpr(String.valueOf(i + 1)), expr)));
-      }
+      setStmt =
+          new ExpressionStmt(
+              new MethodCallExpr(
+                  new NameExpr(stmtName),
+                  "setString",
+                  new NodeList<>(new IntegerLiteralExpr(String.valueOf(i + 1)), expr)));
       ASTTransforms.addStatementBeforeStatement(topStatement, setStmt);
       topStatement = setStmt;
     }
@@ -499,14 +503,7 @@ public final class SQLParameterizer {
 
     // (3)
     executeCall.setName("execute");
-    if (stmtCreation.isRight() && stmtCreation.getRight().isLeft()) {
-      executeCall.setScope(
-          new EnclosedExpr(
-              new CastExpr(
-                  StaticJavaParser.parseType("PreparedStatement"), new NameExpr(stmtName))));
-    } else {
-      executeCall.setScope(new NameExpr(stmtName));
-    }
+    executeCall.setScope(new NameExpr(stmtName));
     executeCall.setArguments(new NodeList<>());
 
     MethodCallExpr pstmtCreation;
@@ -529,13 +526,23 @@ public final class SQLParameterizer {
         pstmtCreation.setArguments(args);
         pstmtCreation.setName("prepareStatement");
 
-        assignOrLVD
-            .getLeft()
-            .setValue(
-                new CastExpr(
-                    StaticJavaParser.parseType("Statement"),
-                    StaticJavaParser.parseExpression("a")));
-        assignOrLVD.getLeft().getValue().asCastExpr().setExpression(pstmtCreation);
+        // change the assignment
+        assignOrLVD.getLeft().setValue(StaticJavaParser.parseExpression("a"));
+        assignOrLVD.getLeft().setValue(pstmtCreation);
+
+        // change the initialization to be null and its type to PreparedStatement
+        // This will only work assuming a single shadowing assignment, may require changes here in
+        // the future
+        var maybeLVD =
+            ASTs.findEarliestLocalVariableDeclarationOf(
+                assignOrLVD.getLeft().getTarget(),
+                assignOrLVD.getLeft().getTarget().asNameExpr().getNameAsString());
+        if (maybeLVD.isPresent()) {
+          var vd = maybeLVD.get().getVariableDeclarator();
+          vd.setInitializer(new NullLiteralExpr());
+          vd.setType(StaticJavaParser.parseType("PreparedStatement"));
+        }
+
       } else {
         assignOrLVD
             .getRight()
