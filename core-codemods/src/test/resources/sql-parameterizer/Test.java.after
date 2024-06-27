@@ -81,4 +81,17 @@ public final class Test {
     var rs = stmt.execute();
     return rs;
   }
+
+  public ResultSet singleAssigned(String input) throws SQLException {
+    String sql = "SELECT * FROM USERS WHERE USER = ?";
+    PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(sql);
+      stmt.setString(1, input);
+      ResultSet rs = stmt.execute();
+      return rs;
+    } catch (Exception e) {
+    }
+  }
+
 }
