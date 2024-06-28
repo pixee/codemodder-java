@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.codetf.UnfixedFinding;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -31,8 +32,9 @@ final class DefaultFixCandidateSearcherTest {
     Issue issue1 = new Issue("key1", 3);
     Issue issue2 = new Issue("key2", 3);
     Issue issue3 = new Issue("key3", 7);
+    Issue issue4 = new Issue("key4", 505); // doesnt exist
 
-    List<Issue> allIssues = List.of(issue1, issue2, issue3);
+    List<Issue> allIssues = List.of(issue1, issue2, issue3, issue4);
 
     CompilationUnit cu = StaticJavaParser.parse(javaCode);
     DefaultFixCandidateSearcher<Issue> searcher =
@@ -41,7 +43,6 @@ final class DefaultFixCandidateSearcherTest {
     DetectorRule rule1 = new DetectorRule("key1", "rule 1", null);
     FixCandidateSearchResults<Issue> fixCandidateSearchResults =
         searcher.search(cu, "path", rule1, allIssues, Issue::key, Issue::line, i -> null);
-    assertThat(fixCandidateSearchResults.unfixableFindings()).isEmpty();
     List<FixCandidate<Issue>> fixCandidates = fixCandidateSearchResults.fixCandidates();
     assertThat(fixCandidates).hasSize(2);
 
@@ -54,5 +55,11 @@ final class DefaultFixCandidateSearcherTest {
     FixCandidate<Issue> fixCandidate2 = fixCandidates.get(1);
     assertThat(fixCandidate2.methodCall().getArgument(0).toString()).hasToString("\"Bar\"");
     assertThat(fixCandidate2.issues()).containsExactly(issue3);
+
+    // confirm that the unfixed finding is the one that doesn't exist
+    assertThat(fixCandidateSearchResults.unfixableFindings())
+        .containsExactly(
+            new UnfixedFinding(
+                "key4", rule1, "path", 505, RemediationMessages.noCallsAtThatLocation));
   }
 }

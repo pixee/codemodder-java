@@ -77,11 +77,10 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
       fixCandidateToIssueMapping.computeIfAbsent(call, k -> new ArrayList<>()).add(issue);
     }
 
-    List<FixCandidate<T>> fixCandidates = new ArrayList<>();
-    fixCandidateToIssueMapping.forEach(
-        (call, issuesForCall) -> {
-          fixCandidates.add(new FixCandidate<>(call, issuesForCall));
-        });
+    List<FixCandidate<T>> fixCandidates =
+        fixCandidateToIssueMapping.entrySet().stream()
+            .map(entry -> new FixCandidate<>(entry.getKey(), entry.getValue()))
+            .toList();
 
     return new FixCandidateSearchResults<T>() {
       @Override
