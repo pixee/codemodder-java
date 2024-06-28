@@ -63,9 +63,7 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
 
     List<CodemodChange> changes = new ArrayList<>();
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
-      T issue = fixCandidate.issue();
-      String findingId = getKey.apply(issue);
-      int line = getLine.apply(issue);
+      List<T> issues = fixCandidate.issues();
 
       MethodCallExpr setHeaderCall = fixCandidate.methodCall();
       Expression headerValueArgument = setHeaderCall.getArgument(1);
@@ -94,7 +92,14 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
           parentClass.addMember(fixMethod);
         }
       }
-      changes.add(CodemodChange.from(line, new FixedFinding(findingId, detectorRule)));
+
+      // all the line numbers should be the same, so we just grab the first one
+      int line = getLine.apply(fixCandidate.issues().get(0));
+      List<FixedFinding> fixedFindings =
+          issues.stream()
+              .map(issue -> new FixedFinding(getKey.apply(issue), detectorRule))
+              .toList();
+      changes.add(CodemodChange.from(line, List.of(), fixedFindings));
     }
 
     return CodemodFileScanningResult.from(changes, results.unfixableFindings());
