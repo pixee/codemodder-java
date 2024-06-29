@@ -61,18 +61,20 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
     List<CodemodChange> changes = new ArrayList<>();
 
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
-      T issue = fixCandidate.issue();
-      String findingId = getKey.apply(issue);
-      int line = getLine.apply(issue);
+      List<T> issues = fixCandidate.issues();
+      int line = getLine.apply(issues.get(0));
 
       MethodCallExpr lookupCall = fixCandidate.methodCall();
       // get the parent method of the lookup() call
       Optional<MethodDeclaration> parentMethod = lookupCall.findAncestor(MethodDeclaration.class);
       if (parentMethod.isEmpty()) {
-        UnfixedFinding unfixedFinding =
-            new UnfixedFinding(
-                findingId, detectorRule, path, line, "No method found around lookup call");
-        unfixedFindings.add(unfixedFinding);
+        issues.stream()
+            .map(getKey)
+            .map(
+                findingId ->
+                    new UnfixedFinding(
+                        findingId, detectorRule, path, line, "No method found around lookup call"))
+            .forEach(unfixedFindings::add);
         continue;
       }
 
@@ -80,19 +82,33 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       ClassOrInterfaceDeclaration parentClass =
           parentMethod.get().findAncestor(ClassOrInterfaceDeclaration.class).get();
       if (parentClass.isInterface()) {
-        UnfixedFinding unfixedFinding =
-            new UnfixedFinding(
-                findingId, detectorRule, path, line, "Cannot add validation method to interface");
-        unfixedFindings.add(unfixedFinding);
+        issues.stream()
+            .map(getKey)
+            .map(
+                findingId ->
+                    new UnfixedFinding(
+                        findingId,
+                        detectorRule,
+                        path,
+                        line,
+                        "Cannot add validation method to interface"))
+            .forEach(unfixedFindings::add);
         continue;
       }
 
       Optional<Statement> lookupStatement = lookupCall.findAncestor(Statement.class);
       if (lookupStatement.isEmpty()) {
-        UnfixedFinding unfixedFinding =
-            new UnfixedFinding(
-                findingId, detectorRule, path, line, "No statement found around lookup call");
-        unfixedFindings.add(unfixedFinding);
+        issues.stream()
+            .map(getKey)
+            .map(
+                findingId ->
+                    new UnfixedFinding(
+                        findingId,
+                        detectorRule,
+                        path,
+                        line,
+                        "No statement found around lookup call"))
+            .forEach(unfixedFindings::add);
         continue;
       }
 
@@ -102,18 +118,32 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
 
       Optional<Node> lookupParentNode = lookupStatement.get().getParentNode();
       if (lookupParentNode.isEmpty()) {
-        UnfixedFinding unfixedFinding =
-            new UnfixedFinding(
-                findingId, detectorRule, path, line, "No parent node found around lookup call");
-        unfixedFindings.add(unfixedFinding);
+        issues.stream()
+            .map(getKey)
+            .map(
+                findingId ->
+                    new UnfixedFinding(
+                        findingId,
+                        detectorRule,
+                        path,
+                        line,
+                        "No parent node found around lookup call"))
+            .forEach(unfixedFindings::add);
         continue;
       }
 
       if (!(lookupParentNode.get() instanceof BlockStmt blockStmt)) {
-        UnfixedFinding unfixedFinding =
-            new UnfixedFinding(
-                findingId, detectorRule, path, line, "No block statement found around lookup call");
-        unfixedFindings.add(unfixedFinding);
+        issues.stream()
+            .map(getKey)
+            .map(
+                findingId ->
+                    new UnfixedFinding(
+                        findingId,
+                        detectorRule,
+                        path,
+                        line,
+                        "No block statement found around lookup call"))
+            .forEach(unfixedFindings::add);
         continue;
       }
 
@@ -121,7 +151,14 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       int index = blockStmt.getStatements().indexOf(lookupStatement.get());
       List<DependencyGAV> deps =
           fixStrategy.fix(cu, parentClass, lookupCall, contextNameVariable, blockStmt, index);
-      changes.add(CodemodChange.from(line, deps, new FixedFinding(findingId, detectorRule)));
+
+      List<FixedFinding> fixedFindings =
+          issues.stream()
+              .map(getKey)
+              .map(findingId -> new FixedFinding(findingId, detectorRule))
+              .toList();
+
+      changes.add(CodemodChange.from(line, deps, fixedFindings));
     }
 
     List<UnfixedFinding> allUnfixedFindings = new ArrayList<>(results.unfixableFindings());

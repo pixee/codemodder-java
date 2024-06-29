@@ -9,6 +9,9 @@ import io.codemodder.codemods.SQLParameterizerWithCleanup;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
+import io.codemodder.remediation.FixCandidate;
+import io.codemodder.remediation.FixCandidateSearchResults;
+import io.codemodder.remediation.FixCandidateSearcher;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,7 +45,20 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
       final Function<T, String> findingIdExtractor,
       final Function<T, Integer> findingLineExtractor) {
 
-    final List<MethodCallExpr> allMethodCalls = cu.findAll(MethodCallExpr.class);
+    FixCandidateSearcher<T> searcher =
+        new FixCandidateSearcher.Builder<T>()
+            .withMatcher(SQLParameterizer::isSupportedJdbcMethodCall)
+            .build();
+
+    FixCandidateSearchResults<T> results =
+        searcher.search(
+            cu,
+            path,
+            detectorRule,
+            new ArrayList<>(findingsForPath),
+            findingIdExtractor,
+            findingLineExtractor,
+            f -> null);
 
     if (findingsForPath.isEmpty()) {
       return CodemodFileScanningResult.none();
@@ -51,55 +67,41 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
     final List<UnfixedFinding> unfixedFindings = new ArrayList<>();
     final List<CodemodChange> changes = new ArrayList<>();
 
-    for (T finding : findingsForPath) {
-      final String id = findingIdExtractor.apply(finding);
-      final Integer line = findingLineExtractor.apply(finding);
+    for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
+      List<T> issues = fixCandidate.issues();
+      Integer line = findingLineExtractor.apply(issues.get(0));
 
       if (line == null) {
-        final UnfixedFinding unfixableFinding =
-            new UnfixedFinding(id, detectorRule, path, null, "No line number provided");
-        unfixedFindings.add(unfixableFinding);
+        issues.forEach(
+            issue -> {
+              final String id = findingIdExtractor.apply(issue);
+              final UnfixedFinding unfixableFinding =
+                  new UnfixedFinding(id, detectorRule, path, null, "No line number provided");
+              unfixedFindings.add(unfixableFinding);
+            });
         continue;
       }
 
-      final List<MethodCallExpr> supportedSqlMethodCallsOnThatLine =
-          allMethodCalls.stream()
-              .filter(methodCallExpr -> methodCallExpr.getRange().get().begin.line == line)
-              .filter(SQLParameterizer::isSupportedJdbcMethodCall)
-              .toList();
-
-      if (supportedSqlMethodCallsOnThatLine.isEmpty()) {
-        final UnfixedFinding unfixableFinding =
-            new UnfixedFinding(
-                id, detectorRule, path, line, "No supported SQL methods found on the given line");
-        unfixedFindings.add(unfixableFinding);
-        continue;
-      }
-
-      if (supportedSqlMethodCallsOnThatLine.size() > 1) {
-        final UnfixedFinding unfixableFinding =
-            new UnfixedFinding(
-                id,
-                detectorRule,
-                path,
-                line,
-                "Multiple supported SQL methods found on the given line");
-        unfixedFindings.add(unfixableFinding);
-        continue;
-      }
-
-      final MethodCallExpr methodCallExpr = supportedSqlMethodCallsOnThatLine.get(0);
+      final MethodCallExpr methodCallExpr = fixCandidate.methodCall();
       if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
-        changes.add(CodemodChange.from(line, new FixedFinding(id, detectorRule)));
+        issues.forEach(
+            issue -> {
+              final String id = findingIdExtractor.apply(issue);
+              changes.add(CodemodChange.from(line, new FixedFinding(id, detectorRule)));
+            });
       } else {
-        final UnfixedFinding unfixableFinding =
-            new UnfixedFinding(
-                id,
-                detectorRule,
-                path,
-                line,
-                "State changing effects possible or unrecognized code shape");
-        unfixedFindings.add(unfixableFinding);
+        issues.forEach(
+            issue -> {
+              final String id = findingIdExtractor.apply(issue);
+              final UnfixedFinding unfixableFinding =
+                  new UnfixedFinding(
+                      id,
+                      detectorRule,
+                      path,
+                      line,
+                      "State changing effects possible or unrecognized code shape");
+              unfixedFindings.add(unfixableFinding);
+            });
       }
     }
 

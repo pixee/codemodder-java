@@ -164,6 +164,11 @@ public final class CodemodChange {
   }
 
   public static CodemodChange from(
+      final int line, final List<DependencyGAV> dependencyGAVS, final List<FixedFinding> finding) {
+    return new CodemodChange(line, dependencyGAVS, finding);
+  }
+
+  public static CodemodChange from(
       final int line, final String description, final FixedFinding finding) {
     return new CodemodChange(line, description, List.of(finding));
   }

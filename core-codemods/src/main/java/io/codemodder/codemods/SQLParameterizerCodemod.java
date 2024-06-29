@@ -6,7 +6,6 @@ import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /** Parameterizes SQL statements in the JDBC API. */
 @Codemod(
@@ -29,7 +28,7 @@ public final class SQLParameterizerCodemod extends JavaParserChanger {
     List<CodemodChange> changes =
         cu.findAll(MethodCallExpr.class).stream()
             .flatMap(mce -> onNodeFound(mce).stream())
-            .collect(Collectors.toList());
+            .toList();
     return CodemodFileScanningResult.withOnlyChanges(changes);
   }
 }

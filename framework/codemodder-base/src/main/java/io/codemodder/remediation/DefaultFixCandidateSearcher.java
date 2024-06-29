@@ -6,7 +6,9 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.UnfixedFinding;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -32,7 +34,6 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
       final Function<T, Integer> getColumn) {
 
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
-    List<FixCandidate<T>> fixCandidates = new ArrayList<>();
     List<MethodCallExpr> calls =
         cu.findAll(MethodCallExpr.class).stream()
             .filter(
@@ -43,6 +44,8 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
             .filter(mce -> methodName == null || methodName.equals(mce.getNameAsString()))
             .filter(mce -> matchers.stream().allMatch(m -> m.test(mce)))
             .toList();
+
+    Map<MethodCallExpr, List<T>> fixCandidateToIssueMapping = new HashMap<>();
 
     for (T issue : issuesForFile) {
       String findingId = getKey.apply(issue);
@@ -71,8 +74,13 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
         continue;
       }
       MethodCallExpr call = callsForIssue.get(0);
-      fixCandidates.add(new FixCandidate<>(call, issue));
+      fixCandidateToIssueMapping.computeIfAbsent(call, k -> new ArrayList<>()).add(issue);
     }
+
+    List<FixCandidate<T>> fixCandidates =
+        fixCandidateToIssueMapping.entrySet().stream()
+            .map(entry -> new FixCandidate<>(entry.getKey(), entry.getValue()))
+            .toList();
 
     return new FixCandidateSearchResults<T>() {
       @Override

@@ -40,17 +40,23 @@ final class DefaultReflectionInjectionRemediator implements ReflectionInjectionR
     List<CodemodChange> changes = new ArrayList<>();
 
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
-      T issue = fixCandidate.issue();
-      String id = getKey.apply(issue);
-      int line = getLine.apply(issue);
+      List<T> issues = fixCandidate.issues();
+      int line = getLine.apply(issues.get(0));
+
       MethodCallExpr methodCallExpr = fixCandidate.methodCall();
       replaceMethodCallExpression(cu, methodCallExpr);
-      CodemodChange change =
-          CodemodChange.from(
-              line,
-              List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT),
-              new FixedFinding(id, detectorRule));
-      changes.add(change);
+
+      issues.stream()
+          .map(getKey)
+          .forEach(
+              id -> {
+                CodemodChange change =
+                    CodemodChange.from(
+                        line,
+                        List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT),
+                        new FixedFinding(id, detectorRule));
+                changes.add(change);
+              });
     }
 
     return CodemodFileScanningResult.from(changes, results.unfixableFindings());
