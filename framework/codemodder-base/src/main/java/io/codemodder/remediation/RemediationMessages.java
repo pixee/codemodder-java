@@ -12,4 +12,6 @@ public interface RemediationMessages {
   /** Multiple calls found at the given location and that may cause confusion */
   String multipleCallsFound =
       "Multiple calls found at the given location and that may cause confusion";
+
+  String ambiguousCodeShape = "Ambiguous code shape";
 }
