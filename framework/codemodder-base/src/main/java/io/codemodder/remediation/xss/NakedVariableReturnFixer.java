@@ -18,11 +18,6 @@ import java.util.function.Function;
  */
 final class NakedVariableReturnFixer implements XSSCodeShapeFixer {
 
-  // whatever.print(anything)   whatever.write(anything) or   println(anything) ->
-  // methodName(Encode.forHtml(anything))
-  // return unknownMethodCall(foo) <-- what to do? if foo is a string and methodCall doesnt return
-  // string, then we can wrap it with Encode.forHtml(foo)
-
   @Override
   public <T> XSSCodeShapeFixResult fixCodeShape(
       final CompilationUnit cu,
