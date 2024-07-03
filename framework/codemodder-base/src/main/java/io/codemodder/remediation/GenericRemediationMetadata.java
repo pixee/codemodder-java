@@ -6,6 +6,7 @@ import io.codemodder.CodemodReporterStrategy;
 /** Reporter strategies that are useful without mentioning specific APIs. */
 public enum GenericRemediationMetadata {
   XXE("xxe"),
+  XSS("xss"),
   JNDI("jndi-injection"),
   HEADER_INJECTION("header-injection"),
   REFLECTION_INJECTION("reflection-injection"),
