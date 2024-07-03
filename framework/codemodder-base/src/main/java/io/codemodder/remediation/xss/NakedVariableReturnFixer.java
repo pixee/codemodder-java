@@ -47,7 +47,7 @@ final class NakedVariableReturnFixer implements XSSCodeShapeFixer {
 
     ReturnStmt nakedReturn = matchingStatements.get(0);
     wrap(nakedReturn.getExpression().get())
-        .withStaticMethod("org.owasp.encoder.Encoder", "forHtml", false);
+        .withStaticMethod("org.owasp.encoder.Encode", "forHtml", false);
 
     return new XSSCodeShapeFixResult(true, true, null, line);
   }

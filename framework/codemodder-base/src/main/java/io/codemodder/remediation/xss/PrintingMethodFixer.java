@@ -70,7 +70,7 @@ final class PrintingMethodFixer implements XSSCodeShapeFixer {
     }
 
     MethodCallExpr call = writingMethodCalls.get(0);
-    wrap(call.getArgument(0)).withStaticMethod("org.owasp.encoder.Encoder", "forHtml", false);
+    wrap(call.getArgument(0)).withStaticMethod("org.owasp.encoder.Encode", "forHtml", false);
     return new XSSCodeShapeFixResult(true, true, null, line);
   }
 }

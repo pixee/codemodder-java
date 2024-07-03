@@ -129,13 +129,13 @@ final class NakedVariableReturnFixerTest {
     assertThat(afterCode)
         .isEqualToIgnoringWhitespace(
             """
-                  import org.owasp.encoder.Encoder;
+                  import org.owasp.encoder.Encode;
 
                   class Samples {
                       String foo = null;
                       Map map = null;
                       void should_be_fixed_simple_name() {
-                        return Encoder.forHtml(foo);
+                        return Encode.forHtml(foo);
                       }
                   }
                   """);

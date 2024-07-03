@@ -35,10 +35,10 @@ final class PrintingMethodFixerTest {
             }
             """,
             """
-                import org.owasp.encoder.Encoder;
+                import org.owasp.encoder.Encode;
                 class Samples {
                   void should_be_fixed(String s) {
-                    print(Encoder.forHtml(s));
+                    print(Encode.forHtml(s));
                   }
                 }
                 """),
@@ -51,10 +51,10 @@ final class PrintingMethodFixerTest {
            }
            """,
             """
-           import org.owasp.encoder.Encoder;
+           import org.owasp.encoder.Encode;
            class Samples {
              void should_be_fixed(String s) {
-               write(Encoder.forHtml(s));
+               write(Encode.forHtml(s));
              }
            }
            """),
@@ -67,10 +67,10 @@ final class PrintingMethodFixerTest {
                         }
                         """,
             """
-                        import org.owasp.encoder.Encoder;
+                        import org.owasp.encoder.Encode;
                         class Samples {
                           void should_be_fixed(String s) {
-                            getWriter().write(Encoder.forHtml(s));
+                            getWriter().write(Encode.forHtml(s));
                           }
                         }
                         """));

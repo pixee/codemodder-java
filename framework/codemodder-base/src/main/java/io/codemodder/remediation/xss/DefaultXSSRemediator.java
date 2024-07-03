@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.groupingBy;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.CodemodChange;
 import io.codemodder.CodemodFileScanningResult;
+import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
@@ -40,17 +41,19 @@ final class DefaultXSSRemediator implements XSSRemediator {
     for (XSSFixGroup<T> fixGroup : fixGroups) {
       boolean foundResponsibleFixer = false;
       for (XSSCodeShapeFixer javaFixer : javaFixers) {
-        foundResponsibleFixer = true;
         XSSCodeShapeFixResult fixResult =
             javaFixer.fixCodeShape(
                 cu, path, detectorRule, fixGroup.issues(), getKey, getLine, getColumn);
         if (fixResult.isResponsibleFixer()) {
+          foundResponsibleFixer = true;
           if (fixResult.isFixed()) {
             List<FixedFinding> fixes =
                 fixGroup.issues().stream()
                     .map(fix -> new FixedFinding(getKey.apply(fix), detectorRule))
                     .toList();
-            changes.add(CodemodChange.from(fixResult.line(), List.of(), fixes));
+            changes.add(
+                CodemodChange.from(
+                    fixResult.line(), List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER), fixes));
           } else {
             List<UnfixedFinding> unfixed =
                 fixGroup.issues().stream()

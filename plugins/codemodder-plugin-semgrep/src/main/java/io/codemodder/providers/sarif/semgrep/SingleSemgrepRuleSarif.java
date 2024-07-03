@@ -8,10 +8,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * {@inheritDoc}
@@ -91,7 +88,7 @@ final class SingleSemgrepRuleSarif implements RuleSarif {
 
   @Override
   public String getDriver() {
-    return toolName;
+    return sarif.getRuns().get(0).getTool().getDriver().getName();
   }
 
   static final String toolName = "semgrep";

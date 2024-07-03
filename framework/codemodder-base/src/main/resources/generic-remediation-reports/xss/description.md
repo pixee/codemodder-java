@@ -12,7 +12,7 @@ Our changes introduce an HTML-encoding mechanism that look something like this:
 
 ```diff
 - Welcome to our site <%= request.getParameter("name") %>
-+ Welcome to our site <%= org.owasp.encoder.Encoder.encode(request.getParameter("name")) %>
++ Welcome to our site <%= org.owasp.encoder.Encode.forHtml(request.getParameter("name")) %>
 ```
 
 This change neutralizes the control characters that attackers would use to execute code. Depending on the context in which the output is rendered (e.g., inside HTML tags, HTML attributes, in JavaScript, quoted contexts, etc.), you may need to use another encoder. Check out the [OWASP XSS Prevention CheatSheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html) to learn more about these cases and other controls you may need.
