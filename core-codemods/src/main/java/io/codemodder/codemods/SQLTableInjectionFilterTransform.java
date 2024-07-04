@@ -16,8 +16,7 @@ import java.util.regex.Pattern;
 
 public final class SQLTableInjectionFilterTransform {
 
-private SQLTableInjectionFilterTransform() {
-}
+  private SQLTableInjectionFilterTransform() {}
 
   private static boolean isExecuteCall(final MethodCallExpr methodCallExpr) {
     try {
