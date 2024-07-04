@@ -1,0 +1,39 @@
+package com.acme.testcode;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+
+public final class Test {
+
+  private Connection conn;
+
+  public ResultSet simpleIndirect(String input) throws SQLException {
+    String sql = "SELECT * FROM " + input;
+    Statement stmt = conn.createStatement();
+    return stmt.executeQuery(sql);
+  }
+
+  public ResultSet simplePreparedStatementDirect(String input) throws SQLException {
+    PreparedStatement stmt = conn.prepareStatement("SELECT * FROM " + input);
+    return stmt.execute();
+  }
+
+  public ResultSet deleteStatement(String input) throws SQLException {
+    Statement stmt = conn.createStatement();
+    return stmt.executeQuery("DELETE FROM " + input + " WHERE 1=1");
+  }
+
+  public ResultSet withQuotes(String input) throws SQLException {
+    Statement stmt = conn.createStatement();
+    return stmt.executeQuery("DELETE FROM \"" + input + "\" WHERE 1=1");
+  }
+
+  public ResultSet ignoreStatic() throws SQLException {
+    Statement stmt = conn.createStatement();
+    return stmt.executeQuery("SELECT * FROM " + "user_table");
+  }
+
+}

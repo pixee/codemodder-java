@@ -58,6 +58,7 @@ public final class DefaultCodemods {
         SubstituteReplaceAllCodemod.class,
         SonarXXECodemod.class,
         SQLParameterizerCodemod.class,
+	SQLTableInjectionFilterCodemod.class,
         SSRFCodemod.class,
         StackTraceExposureCodemod.class,
         SwitchLiteralFirstComparisonsCodemod.class,

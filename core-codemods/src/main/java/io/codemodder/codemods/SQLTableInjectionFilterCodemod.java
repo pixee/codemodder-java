@@ -9,6 +9,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
+import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.LinearizedStringExpression;
 import io.codemodder.javaparser.JavaParserChanger;
 import java.util.ArrayList;
@@ -80,8 +81,8 @@ public final class SQLTableInjectionFilterCodemod extends JavaParserChanger {
 
   private static boolean isPrepareStatementCall(final MethodCallExpr methodCallExpr) {
     try {
-      final Predicate<MethodCallExpr> isPrepareStatementCall =
-          call -> call.getNameAsString() == "prepareStatement";
+      final Predicate<MethodCallExpr> isPrepareStatementCallPredicate =
+          call -> call.getNameAsString().equals("prepareStatement");
 
       final Predicate<MethodCallExpr> hasSQLConnectionScope =
           n ->
@@ -101,7 +102,7 @@ public final class SQLTableInjectionFilterCodemod extends JavaParserChanger {
           n ->
               n.getArguments().getFirst().map(e -> !(e instanceof StringLiteralExpr)).orElse(false);
       // is execute of an statement object whose first argument is not a string?
-      if (isPrepareStatementCall
+      if (isPrepareStatementCallPredicate
           .and(hasSQLConnectionScope.and(isFirstArgumentNotSLE))
           .test(methodCallExpr)) {
         return true;
@@ -116,14 +117,18 @@ public final class SQLTableInjectionFilterCodemod extends JavaParserChanger {
 
   public static boolean findAndFix(final MethodCallExpr call) {
     if (isPrepareStatementCall(call) || isExecuteCall(call)) {
-      var linearized = new LinearizedStringExpression(call.getArgument(0));
-      fix(findTableInjections(linearized));
-      return true;
+      final var linearized = new LinearizedStringExpression(call.getArgument(0));
+      var injections = findTableInjections(linearized);
+      injections = injections.stream().filter(e -> !(e.isMethodCallExpr() && e.asMethodCallExpr().getNameAsString().equals("filterTable"))).toList();
+      if (!injections.isEmpty()){
+	      fix(injections);
+	      return true;
+      }
     }
     return false;
   }
 
-  private static Pattern regex = Pattern.compile(".*from\s+\"?", Pattern.CASE_INSENSITIVE);
+  private static Pattern regex = Pattern.compile(".*from\s+((\\\\)?\")?", Pattern.CASE_INSENSITIVE);
 
   private static String filterMethodName = "filterTable";
 
@@ -151,13 +156,12 @@ public final class SQLTableInjectionFilterCodemod extends JavaParserChanger {
   }
 
   private static void addFilterMethodIfMissing(final ClassOrInterfaceDeclaration classDecl) {
-    // TODO allow dots in table names for schema.tablename case
     final String method =
         """
 		  void filterTable(final String tablename){
 			  var regex = Pattern.compile("[a-zA-Z0-9]+(.[a-zA-Z0-9]+)?");
 			  if (!regex.matcher(tablename).matches()){
-				  throw new RuntimeException("Table name with no alphanumeric characters");
+				  throw new RuntimeException("Supplied table name contains non-alphanumeric characters");
 			  }
 		  }
 	  """;
@@ -171,7 +175,8 @@ public final class SQLTableInjectionFilterCodemod extends JavaParserChanger {
     if (!filterMethodPresent) {
       classDecl.addMember(StaticJavaParser.parseMethodDeclaration(method));
     }
-    // TODO add Pattern, RuntimeException imports
+    // Add Pattern import
+    ASTTransforms.addImportIfMissing(classDecl.findCompilationUnit().get(), "java.util.regex.Pattern");
 
   }
 
