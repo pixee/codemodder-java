@@ -25,19 +25,17 @@ import java.util.function.Function;
 final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediator {
 
   private static final Set<String> setHeaderNames = Set.of("setHeader", "addHeader");
-  private final MethodDeclaration fixMethod;
 
   private static final String validatorMethodName = "stripNewlines";
+  private final String fixMethodCode;
 
   DefaultHeaderInjectionRemediator() {
-    String fixMethodCode =
+    this.fixMethodCode =
         """
             private static String stripNewlines(final String s) {
               return s.replaceAll("[\\n\\r]", "");
             }
             """;
-
-    this.fixMethod = StaticJavaParser.parseMethodDeclaration(fixMethodCode);
   }
 
   @Override
@@ -89,6 +87,11 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
                             && md.getParameters().get(0).getTypeAsString().equals("String"));
 
         if (!alreadyHasResourceValidationCallPresent) {
+          // one might be tempted to cache this result, but then it will be a shared resource with
+          // shared CST metadata and cause bugs
+          MethodDeclaration fixMethod = StaticJavaParser.parseMethodDeclaration(fixMethodCode);
+
+          // add the method to the class
           parentClass.addMember(fixMethod);
         }
       }
