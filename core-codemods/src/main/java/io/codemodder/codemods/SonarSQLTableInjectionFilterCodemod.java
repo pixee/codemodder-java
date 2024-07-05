@@ -16,7 +16,7 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 @Codemod(
-    id = "sonar:java/sonar-table-injection-filter-s2077",
+    id = "sonar:java/sql-table-injection-filter-s2077",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)

@@ -1,0 +1,29 @@
+{
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 1
+  },
+  "hotspots": [
+    {
+      "key": "AZCCyRXBup4HSvipktyz",
+      "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/SQLTest.java",
+      "project": "pixee_codemodder-java",
+      "securityCategory": "sql-injection",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 18,
+      "message": "Make sure using a dynamically formatted SQL query is safe here.",
+      "creationDate": "2024-07-05T14:03:46+0200",
+      "updateDate": "2024-07-05T14:05:06+0200",
+      "textRange": {
+        "startLine": 18,
+        "endLine": 18,
+        "startOffset": 29,
+        "endOffset": 32
+      },
+      "flows": [],
+      "ruleKey": "java:S2077"
+    }
+  ]
+}

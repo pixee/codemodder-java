@@ -72,6 +72,7 @@ public final class SonarProvider implements CodemodProvider {
       sonarHotspotsJsonPaths.forEach(
           hotspotsFile -> {
             try {
+              System.out.println("-=-===========================");
               SearchHotspotsResponse hotspotResponse =
                   new ObjectMapper()
                       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
