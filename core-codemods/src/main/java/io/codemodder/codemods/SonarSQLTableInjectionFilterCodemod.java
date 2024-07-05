@@ -3,7 +3,7 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.*;
 import io.codemodder.codemods.util.JavaParserSQLInjectionRemediatorStrategy;
-import io.codemodder.codemods.util.JavaParserSQLTableInjectionRemediatorStrategy;
+import io.codemodder.codemods.util.ParameterizedJavaParserSQLInjectionRemediatorStrategy;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleHotspot;
@@ -30,7 +30,9 @@ public final class SonarSQLTableInjectionFilterCodemod extends SonarRemediatingJ
       @ProvidedSonarScan(ruleId = "java:S2077") final RuleHotspot hotspots) {
     super(GenericRemediationMetadata.SQL_INJECTION.reporter(), hotspots);
     this.hotspots = Objects.requireNonNull(hotspots);
-    this.remediationStrategy = new JavaParserSQLTableInjectionRemediatorStrategy();
+    this.remediationStrategy =
+        new ParameterizedJavaParserSQLInjectionRemediatorStrategy(
+            SQLTableInjectionFilterTransform::matchCall, SQLTableInjectionFilterTransform::fix);
   }
 
   @Override

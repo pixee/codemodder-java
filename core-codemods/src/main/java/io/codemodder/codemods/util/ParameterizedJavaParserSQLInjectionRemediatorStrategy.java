@@ -4,8 +4,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.CodemodChange;
 import io.codemodder.CodemodFileScanningResult;
-import io.codemodder.codemods.SQLParameterizer;
-import io.codemodder.codemods.SQLParameterizerWithCleanup;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
@@ -16,13 +14,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Default implementation of the JavaParserSQLInjectionRemediatorStrategy interface. This class
  * provides the logic to visit a CompilationUnit and process findings for potential SQL injections.
  */
-final class DefaultJavaParserSQLInjectionRemediatorStrategy
+public final class ParameterizedJavaParserSQLInjectionRemediatorStrategy
     implements JavaParserSQLInjectionRemediatorStrategy {
+
+  private Predicate<MethodCallExpr> matcher;
+  private Predicate<MethodCallExpr> fixer;
+
+  public ParameterizedJavaParserSQLInjectionRemediatorStrategy(
+      final Predicate<MethodCallExpr> matcher, final Predicate<MethodCallExpr> fixer) {
+    this.matcher = matcher;
+    this.fixer = fixer;
+  }
 
   /**
    * Visits the provided CompilationUnit and processes findings for potential SQL injections.
@@ -46,9 +54,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
       final Function<T, Integer> findingLineExtractor) {
 
     FixCandidateSearcher<T> searcher =
-        new FixCandidateSearcher.Builder<T>()
-            .withMatcher(SQLParameterizer::isSupportedJdbcMethodCall)
-            .build();
+        new FixCandidateSearcher.Builder<T>().withMatcher(matcher).build();
 
     FixCandidateSearchResults<T> results =
         searcher.search(
@@ -83,7 +89,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
       }
 
       final MethodCallExpr methodCallExpr = fixCandidate.methodCall();
-      if (SQLParameterizerWithCleanup.checkAndFix(methodCallExpr)) {
+      if (fixer.test(methodCallExpr)) {
         issues.forEach(
             issue -> {
               final String id = findingIdExtractor.apply(issue);

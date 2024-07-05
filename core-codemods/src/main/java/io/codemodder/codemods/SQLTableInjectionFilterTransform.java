@@ -17,36 +17,7 @@ import java.util.regex.Pattern;
 public final class SQLTableInjectionFilterTransform {
 
   private static boolean isExecuteCall(final MethodCallExpr methodCallExpr) {
-    try {
-      final Predicate<MethodCallExpr> isExecute = SQLParameterizer::isSupportedJdbcMethodCall;
-
-      final Predicate<MethodCallExpr> hasScopeSQLStatement =
-          n ->
-              n.getScope()
-                  .filter(
-                      s -> {
-                        try {
-                          String resolvedType = s.calculateResolvedType().describe();
-                          return "java.sql.Statement".equals(resolvedType);
-                        } catch (RuntimeException e) {
-                          return false;
-                        }
-                      })
-                  .isPresent();
-
-      final Predicate<MethodCallExpr> isFirstArgumentNotSLE =
-          n ->
-              n.getArguments().getFirst().map(e -> !(e instanceof StringLiteralExpr)).orElse(false);
-      // is execute of an statement object whose first argument is not a string?
-      if (isExecute.and(hasScopeSQLStatement.and(isFirstArgumentNotSLE)).test(methodCallExpr)) {
-        return true;
-      }
-      return false;
-
-      // Thrown by the JavaParser Symbol Solver when it can't resolve types
-    } catch (RuntimeException e) {
-      return false;
-    }
+    return SQLParameterizer.isParameterizationCandidate(methodCallExpr);
   }
 
   private static boolean isPrepareStatementCall(final MethodCallExpr methodCallExpr) {
@@ -71,13 +42,10 @@ public final class SQLTableInjectionFilterTransform {
       final Predicate<MethodCallExpr> isFirstArgumentNotSLE =
           n ->
               n.getArguments().getFirst().map(e -> !(e instanceof StringLiteralExpr)).orElse(false);
-      // is execute of an statement object whose first argument is not a string?
-      if (isPrepareStatementCallPredicate
+      // is execute of a statement object whose first argument is not a string?
+      return isPrepareStatementCallPredicate
           .and(hasSQLConnectionScope.and(isFirstArgumentNotSLE))
-          .test(methodCallExpr)) {
-        return true;
-      }
-      return false;
+          .test(methodCallExpr);
 
       // Thrown by the JavaParser Symbol Solver when it can't resolve types
     } catch (RuntimeException e) {
@@ -113,9 +81,10 @@ public final class SQLTableInjectionFilterTransform {
     return false;
   }
 
-  private static Pattern regex = Pattern.compile(".*from\s+((\\\\)?\")?", Pattern.CASE_INSENSITIVE);
+  private static final Pattern regex =
+      Pattern.compile(".*from\s+((\\\\)?\")?", Pattern.CASE_INSENSITIVE);
 
-  private static String filterMethodName = "filterTable";
+  private static final String filterMethodName = "filterTable";
 
   private static List<Expression> findTableInjections(final LinearizedStringExpression linearized) {
     final var tableInjections = new ArrayList<Expression>();
@@ -136,7 +105,7 @@ public final class SQLTableInjectionFilterTransform {
       }
     }
     // We don't care about static table names...
-    tableInjections.removeIf(e -> e.isStringLiteralExpr());
+    tableInjections.removeIf(Expression::isStringLiteralExpr);
     return tableInjections;
   }
 
