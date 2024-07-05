@@ -10,7 +10,7 @@ import java.util.Optional;
 /** Filter table name parameters in SQL queries */
 @Codemod(
     id = "pixee:java/sql-table-injection-filter",
-    importance = Importance.HIGH,
+    importance = Importance.MEDIUM,
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW)
 public final class SQLTableInjectionFilterCodemod extends JavaParserChanger {
 

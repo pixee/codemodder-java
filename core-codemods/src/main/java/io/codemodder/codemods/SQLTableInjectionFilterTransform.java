@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+/** Wrap table name parameters in SQL queries with an alphanumeric blacklist filter. */
 public final class SQLTableInjectionFilterTransform {
 
   private SQLTableInjectionFilterTransform() {}
@@ -115,9 +116,9 @@ public final class SQLTableInjectionFilterTransform {
     final String method =
         """
 		  void filterTable(final String tablename){
-			  var regex = Pattern.compile("[a-zA-Z0-9]+(.[a-zA-Z0-9]+)?");
+			  Pattern regex = Pattern.compile("[a-zA-Z0-9]+(.[a-zA-Z0-9]+)?");
 			  if (!regex.matcher(tablename).matches()){
-				  throw new RuntimeException("Supplied table name contains non-alphanumeric characters");
+				  throw new SecurityException("Supplied table name contains non-alphanumeric characters");
 			  }
 		  }
 	  """;

@@ -38,9 +38,9 @@ public final class Test {
   }
   
   void filterTable(final String tablename) {
-      var regex = Pattern.compile("[a-zA-Z0-9]+(.[a-zA-Z0-9]+)?");
+      Pattern regex = Pattern.compile("[a-zA-Z0-9]+(.[a-zA-Z0-9]+)?");
       if (!regex.matcher(tablename).matches()) {
-          throw new RuntimeException("Supplied table name contains non-alphanumeric characters");
+          throw new SecurityException("Supplied table name contains non-alphanumeric characters");
       }
   }
 

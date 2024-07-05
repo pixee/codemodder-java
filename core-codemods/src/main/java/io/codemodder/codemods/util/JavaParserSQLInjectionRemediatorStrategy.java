@@ -4,8 +4,10 @@ import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codemods.SQLParameterizer;
 import io.codemodder.codemods.SQLParameterizerWithCleanup;
+import io.codemodder.codemods.SQLTableInjectionFilterTransform;
 import io.codemodder.codetf.DetectorRule;
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -35,6 +37,10 @@ public interface JavaParserSQLInjectionRemediatorStrategy {
 
   /** A default implementation that should be used in all non-test scenarios. */
   JavaParserSQLInjectionRemediatorStrategy DEFAULT =
-      new ParameterizedJavaParserSQLInjectionRemediatorStrategy(
-          SQLParameterizer::isSupportedJdbcMethodCall, SQLParameterizerWithCleanup::checkAndFix);
+      new DefaultJavaParserSQLInjectionRemediatorStrategy(
+          Map.of(
+              SQLParameterizer::isSupportedJdbcMethodCall,
+              SQLParameterizerWithCleanup::checkAndFix,
+              SQLTableInjectionFilterTransform::matchCall,
+              SQLTableInjectionFilterTransform::fix));
 }
