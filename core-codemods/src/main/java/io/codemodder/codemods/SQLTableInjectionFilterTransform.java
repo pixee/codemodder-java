@@ -116,7 +116,7 @@ public final class SQLTableInjectionFilterTransform {
     final String method =
         """
 		  void filterTable(final String tablename){
-			  Pattern regex = Pattern.compile("[a-zA-Z0-9]+(.[a-zA-Z0-9]+)?");
+			  Pattern regex = Pattern.compile("[a-zA-Z0-9_]+(.[a-zA-Z0-9_]+)?");
 			  if (!regex.matcher(tablename).matches()){
 				  throw new SecurityException("Supplied table name contains non-alphanumeric characters");
 			  }
