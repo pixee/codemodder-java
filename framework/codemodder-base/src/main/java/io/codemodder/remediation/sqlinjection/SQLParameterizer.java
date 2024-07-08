@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.remediation.sqlinjection;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;

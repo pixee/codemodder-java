@@ -1,4 +1,4 @@
-package io.codemodder.codemods.remediation.sql;
+package io.codemodder.remediation.sqlinjection;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;

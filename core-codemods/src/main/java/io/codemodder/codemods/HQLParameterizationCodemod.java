@@ -11,6 +11,7 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.*;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.javaparser.JavaParserChanger;
+import io.codemodder.remediation.sqlinjection.QueryParameterizer;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;

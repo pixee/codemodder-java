@@ -2,12 +2,12 @@ package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.*;
-import io.codemodder.codemods.remediation.sql.JavaParserSQLInjectionRemediatorStrategy;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleHotspot;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.sqlinjection.JavaParserSQLInjectionRemediatorStrategy;
 import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.SonarFinding;
 import java.util.List;

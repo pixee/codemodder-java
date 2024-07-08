@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
+import io.codemodder.remediation.sqlinjection.SQLParameterizerWithCleanup;
 import java.util.List;
 import java.util.Optional;
 
