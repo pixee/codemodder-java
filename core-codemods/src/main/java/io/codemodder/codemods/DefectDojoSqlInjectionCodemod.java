@@ -2,7 +2,7 @@ package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.*;
-import io.codemodder.codemods.util.JavaParserSQLInjectionRemediatorStrategy;
+import io.codemodder.codemods.remediation.sql.JavaParserSQLInjectionRemediatorStrategy;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.defectdojo.DefectDojoScan;

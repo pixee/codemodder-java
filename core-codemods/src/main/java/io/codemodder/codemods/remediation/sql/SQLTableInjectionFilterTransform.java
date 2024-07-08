@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.codemods.remediation.sql;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -9,6 +9,8 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.LinearizedStringExpression;
+import io.codemodder.codemods.SQLParameterizer;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;

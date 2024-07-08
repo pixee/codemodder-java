@@ -41,7 +41,7 @@ public final class SQLParameterizer {
    * Checks if the {@link MethodCallExpr} is of one of the execute calls of {@link
    * java.sql.Statement} whose argument is not a {@link String} literal.
    */
-  static boolean isParameterizationCandidate(final MethodCallExpr methodCallExpr) {
+  public static boolean isParameterizationCandidate(final MethodCallExpr methodCallExpr) {
     // Maybe make this configurable? see:
     // https://github.com/find-sec-bugs/find-sec-bugs/wiki/Injection-detection
     try {

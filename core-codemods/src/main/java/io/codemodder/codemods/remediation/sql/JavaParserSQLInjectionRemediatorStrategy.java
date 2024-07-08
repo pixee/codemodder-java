@@ -1,10 +1,9 @@
-package io.codemodder.codemods.util;
+package io.codemodder.codemods.remediation.sql;
 
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codemods.SQLParameterizer;
 import io.codemodder.codemods.SQLParameterizerWithCleanup;
-import io.codemodder.codemods.SQLTableInjectionFilterTransform;
 import io.codemodder.codetf.DetectorRule;
 import java.util.Collection;
 import java.util.Map;

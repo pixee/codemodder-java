@@ -1,9 +1,0 @@
-{
-  "summary" : "Added blacklist filter for table parameter to avoid injections",
-  "change": "Added blacklist filter for table parameter to avoid injections",
-  "reviewGuidanceIJustification" : "While blacklists for input validation is enough to cover common attacks, it is not foolproof and quite restrictive.",
-  "references" : [
-    "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html",
-    "https://cwe.mitre.org/data/definitions/89.html"
-  ]
-}
