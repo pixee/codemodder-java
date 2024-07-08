@@ -70,7 +70,7 @@ public final class SQLTableInjectionFilterTransform {
             .filter(
                 e ->
                     !(e.isMethodCallExpr()
-                        && e.asMethodCallExpr().getNameAsString().equals("filterTable")))
+                        && e.asMethodCallExpr().getNameAsString().equals("validateTableName")))
             .toList();
     if (!injections.isEmpty()) {
       fix(injections, linearized.getResolvedExpressionsMap());
@@ -89,7 +89,7 @@ public final class SQLTableInjectionFilterTransform {
   private static final Pattern regex =
       Pattern.compile(".*from\s+((\\\\)?\")?", Pattern.CASE_INSENSITIVE);
 
-  private static final String filterMethodName = "filterTable";
+  private static final String filterMethodName = "validateTableName";
 
   private static List<Expression> findTableInjections(final LinearizedStringExpression linearized) {
     final var tableInjections = new ArrayList<Expression>();
@@ -117,7 +117,7 @@ public final class SQLTableInjectionFilterTransform {
   private static void addFilterMethodIfMissing(final ClassOrInterfaceDeclaration classDecl) {
     final String method =
         """
-		  String filterTable(final String tablename){
+		  String validateTableName(final String tablename){
 			  Pattern regex = Pattern.compile("[a-zA-Z0-9_]+(.[a-zA-Z0-9_]+)?");
 			  if (!regex.matcher(tablename).matches()){
 				  throw new SecurityException("Supplied table name contains non-alphanumeric characters");
