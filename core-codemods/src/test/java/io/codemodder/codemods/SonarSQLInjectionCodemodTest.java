@@ -30,7 +30,7 @@ final class SonarSQLInjectionCodemodTest {
       codemodType = SonarSQLInjectionCodemod.class,
       testResourceDir = "sonar-sql-injection-s2077/supportedTableInjection",
       renameTestFile = "core-codemods/src/main/java/io/codemodder/codemods/SQLTest.java",
-      expectingFixesAtLines = {18},
+      expectingFixesAtLines = {19, 25, 33, 40},
       dependencies = {})
   class SupportedTableInjectionTest implements CodemodTestMixin {}
 }

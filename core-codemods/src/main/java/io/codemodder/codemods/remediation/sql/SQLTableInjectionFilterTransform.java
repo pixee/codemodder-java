@@ -10,9 +10,9 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.ast.ASTTransforms;
 import io.codemodder.ast.LinearizedStringExpression;
 import io.codemodder.codemods.SQLParameterizer;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -73,7 +73,7 @@ public final class SQLTableInjectionFilterTransform {
                         && e.asMethodCallExpr().getNameAsString().equals("filterTable")))
             .toList();
     if (!injections.isEmpty()) {
-      fix(injections);
+      fix(injections, linearized.getResolvedExpressionsMap());
       return true;
     }
     return false;
@@ -117,11 +117,12 @@ public final class SQLTableInjectionFilterTransform {
   private static void addFilterMethodIfMissing(final ClassOrInterfaceDeclaration classDecl) {
     final String method =
         """
-		  void filterTable(final String tablename){
+		  String filterTable(final String tablename){
 			  Pattern regex = Pattern.compile("[a-zA-Z0-9_]+(.[a-zA-Z0-9_]+)?");
 			  if (!regex.matcher(tablename).matches()){
 				  throw new SecurityException("Supplied table name contains non-alphanumeric characters");
 			  }
+			  return tablename;
 		  }
 	  """;
     boolean filterMethodPresent =
@@ -139,10 +140,22 @@ public final class SQLTableInjectionFilterTransform {
         classDecl.findCompilationUnit().get(), "java.util.regex.Pattern");
   }
 
-  private static void fix(final List<Expression> injections) {
-    injections.forEach(SQLTableInjectionFilterTransform::wrapExpressionWithCall);
+  private static void fix(
+      final List<Expression> injections, final Map<Expression, Expression> resolutionMap) {
+    injections.stream()
+        .map(e -> unresolve(e, resolutionMap))
+        .forEach(SQLTableInjectionFilterTransform::wrapExpressionWithCall);
     var classDecl = injections.get(0).findAncestor(ClassOrInterfaceDeclaration.class);
     classDecl.ifPresent(SQLTableInjectionFilterTransform::addFilterMethodIfMissing);
+  }
+
+  private static Expression unresolve(
+      final Expression expr, final Map<Expression, Expression> resolutionMap) {
+    Expression unresolved = expr;
+    while (resolutionMap.get(unresolved) != null) {
+      unresolved = resolutionMap.get(unresolved);
+    }
+    return unresolved;
   }
 
   private static void wrapExpressionWithCall(final Expression expr) {
