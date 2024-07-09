@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.remediation.sqlinjection;
 
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;

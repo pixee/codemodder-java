@@ -1,0 +1,108 @@
+{
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 4
+  },
+  "hotspots": [
+    {
+      "key": "AZCR88Tp4FI6qXo1Oo7Z",
+      "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/SQLTest.java",
+      "project": "pixee_codemodder-java",
+      "securityCategory": "sql-injection",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 19,
+      "message": "Make sure using a dynamically formatted SQL query is safe here.",
+      "creationDate": "2024-07-08T12:45:43+0200",
+      "updateDate": "2024-07-08T12:45:59+0200",
+      "textRange": {
+        "startLine": 19,
+        "endLine": 19,
+        "startOffset": 29,
+        "endOffset": 32
+      },
+      "flows": [],
+      "ruleKey": "java:S2077"
+    },
+    {
+      "key": "AZCR9sx3sB8d7cmTiSDr",
+      "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/SQLTest.java",
+      "project": "pixee_codemodder-java",
+      "securityCategory": "sql-injection",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 25,
+      "message": "Make sure using a dynamically formatted SQL query is safe here.",
+      "creationDate": "2024-07-08T12:49:19+0200",
+      "updateDate": "2024-07-08T12:49:19+0200",
+      "textRange": {
+        "startLine": 25,
+        "endLine": 25,
+        "startOffset": 51,
+        "endOffset": 75
+      },
+      "flows": [],
+      "ruleKey": "java:S2077"
+    },
+    {
+      "key": "AZCR9sx3sB8d7cmTiSDs",
+      "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/SQLTest.java",
+      "project": "pixee_codemodder-java",
+      "securityCategory": "sql-injection",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 33,
+      "message": "Make sure using a dynamically formatted SQL query is safe here.",
+      "creationDate": "2024-07-08T12:49:19+0200",
+      "updateDate": "2024-07-08T12:49:19+0200",
+      "textRange": {
+        "startLine": 33,
+        "endLine": 33,
+        "startOffset": 29,
+        "endOffset": 66
+      },
+      "flows": [],
+      "ruleKey": "java:S2077"
+    },
+    {
+      "key": "AZCR9sx3sB8d7cmTiSDt",
+      "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/SQLTest.java",
+      "project": "pixee_codemodder-java",
+      "securityCategory": "sql-injection",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 40,
+      "message": "Make sure using a dynamically formatted SQL query is safe here.",
+      "creationDate": "2024-07-08T12:49:19+0200",
+      "updateDate": "2024-07-08T12:49:19+0200",
+      "textRange": {
+        "startLine": 40,
+        "endLine": 40,
+        "startOffset": 29,
+        "endOffset": 70
+      },
+      "flows": [],
+      "ruleKey": "java:S2077"
+    }
+  ],
+  "components": [
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-java",
+      "qualifier": "TRK",
+      "name": "codemodder-java",
+      "longName": "codemodder-java",
+      "pullRequest": "412"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/SQLTest.java",
+      "qualifier": "FIL",
+      "name": "SQLTest.java",
+      "longName": "core-codemods/src/main/java/io/codemodder/codemods/SQLTest.java",
+      "path": "core-codemods/src/main/java/io/codemodder/codemods/SQLTest.java",
+      "pullRequest": "412"
+    }
+  ]
+}

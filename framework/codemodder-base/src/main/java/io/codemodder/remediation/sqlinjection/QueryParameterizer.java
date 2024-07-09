@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.remediation.sqlinjection;
 
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
@@ -10,26 +10,32 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 
-final class QueryParameterizer {
+/**
+ * This class is temporarily public -- it should ideally be hidden behind a package-private
+ * implementor in {@link io.codemodder.remediation.sqlinjection} that abstracts away all logic about
+ * remediating Hibernate injections.
+ */
+public final class QueryParameterizer {
 
   private final List<Deque<Expression>> injections;
 
   private final LinearizedStringExpression linearizedQuery;
 
-  QueryParameterizer(final Expression query) {
+  public QueryParameterizer(final Expression query) {
     this.linearizedQuery = new LinearizedStringExpression(query);
     this.injections = gatherParameters(this.linearizedQuery.getLinearized());
   }
 
-  Expression getRoot() {
+  public Expression getRoot() {
     return linearizedQuery.getRoot();
   }
 
-  List<Deque<Expression>> getInjections() {
+  /** Returns the list of injections found. */
+  public List<Deque<Expression>> getInjections() {
     return injections;
   }
 
-  LinearizedStringExpression getLinearizedQuery() {
+  public LinearizedStringExpression getLinearizedQuery() {
     return linearizedQuery;
   }
 

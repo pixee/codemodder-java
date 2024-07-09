@@ -1,9 +1,10 @@
-package io.codemodder.codemods.util;
+package io.codemodder.remediation.sqlinjection;
 
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -33,5 +34,10 @@ public interface JavaParserSQLInjectionRemediatorStrategy {
 
   /** A default implementation that should be used in all non-test scenarios. */
   JavaParserSQLInjectionRemediatorStrategy DEFAULT =
-      new DefaultJavaParserSQLInjectionRemediatorStrategy();
+      new DefaultJavaParserSQLInjectionRemediatorStrategy(
+          Map.of(
+              SQLParameterizer::isSupportedJdbcMethodCall,
+              SQLParameterizerWithCleanup::checkAndFix,
+              SQLTableInjectionFilterTransform::matchCall,
+              SQLTableInjectionFilterTransform::fix));
 }
