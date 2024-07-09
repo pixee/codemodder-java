@@ -6,24 +6,45 @@ import com.azure.ai.openai.models.ChatCompletions;
 import com.azure.ai.openai.models.ChatCompletionsJsonResponseFormat;
 import com.azure.ai.openai.models.ChatCompletionsOptions;
 import com.azure.ai.openai.models.ChatRequestMessage;
+import com.azure.core.credential.AzureKeyCredential;
+import com.azure.core.credential.KeyCredential;
 import com.azure.core.http.policy.RetryPolicy;
 import com.azure.core.util.HttpClientOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
 /** A custom service class to wrap the {@link OpenAIClient} */
 public class OpenAIService {
   private final OpenAIClient api;
   private static final int TIMEOUT_SECONDS = 90;
 
-  public OpenAIService(final String token) {
+  private static OpenAIClientBuilder getBuilder(final KeyCredential key) {
     HttpClientOptions clientOptions = new HttpClientOptions();
     clientOptions.setReadTimeout(Duration.ofSeconds(TIMEOUT_SECONDS));
-    final var builder =
-        new OpenAIClientBuilder().retryPolicy(new RetryPolicy()).clientOptions(clientOptions);
-    this.api = builder.buildClient();
+    return new OpenAIClientBuilder()
+        .retryPolicy(new RetryPolicy())
+        .clientOptions(clientOptions)
+        .credential(key);
+  }
+
+  OpenAIService(final KeyCredential key) {
+    this.api = getBuilder(key).buildClient();
+  }
+
+  OpenAIService(final KeyCredential key, final String endpoint) {
+    this.api = getBuilder(key).endpoint(endpoint).buildClient();
+  }
+
+  public static OpenAIService fromOpenAI(final String token) {
+    return new OpenAIService(new KeyCredential(Objects.requireNonNull(token)));
+  }
+
+  public static OpenAIService fromAzureOpenAI(final String token, final String endpoint) {
+    return new OpenAIService(
+        new AzureKeyCredential(Objects.requireNonNull(token)), Objects.requireNonNull(endpoint));
   }
 
   public String getJSONCompletion(

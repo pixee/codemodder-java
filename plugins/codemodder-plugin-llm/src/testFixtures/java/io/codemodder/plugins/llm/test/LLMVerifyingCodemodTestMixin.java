@@ -56,7 +56,7 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
 
   private Assessment assessChanges(
       final Path before, final Path actualAfter, final Path expectedAfter) throws IOException {
-    OpenAIService openAI = new OpenAIService(System.getenv("CODEMODDER_OPENAI_API_KEY"));
+    OpenAIService openAI = OpenAIService.fromOpenAI(System.getenv("CODEMODDER_OPENAI_API_KEY"));
     return openAI.getResponseForPrompt(
         List.of(
             new ChatRequestSystemMessage(
