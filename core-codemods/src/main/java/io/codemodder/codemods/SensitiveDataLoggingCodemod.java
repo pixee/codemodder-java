@@ -1,5 +1,6 @@
 package io.codemodder.codemods;
 
+import com.azure.ai.openai.models.ChatRequestUserMessage;
 import com.contrastsecurity.sarif.PhysicalLocation;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
@@ -8,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.stmt.Statement;
-import com.theokanning.openai.completion.chat.*;
 import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.plugins.llm.OpenAIService;
@@ -98,21 +98,10 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
               """
             .formatted(startLine, codeSnippet);
 
-    ChatCompletionRequest request =
-        ChatCompletionRequest.builder()
-            .temperature(0D)
-            .model("gpt-4o-2024-05-13")
-            .n(1)
-            .messages(List.of(new ChatMessage(ChatMessageRole.USER.value(), prompt)))
-            .build();
-    ChatCompletionResult completion = service.createChatCompletion(request);
-    ChatCompletionChoice response = completion.getChoices().get(0);
-    String responseText = response.getMessage().getContent();
-    if (responseText.startsWith("```json") && responseText.endsWith("```")) {
-      responseText =
-          responseText.substring("```json".length(), responseText.length() - "```".length());
-    }
-    return reader.readValue(responseText);
+    return service.getResponseForPrompt(
+        List.of(new ChatRequestUserMessage(prompt)),
+        "gpt-4o-2024-05-13",
+        SensitivityAndFixAnalysisDTO.class);
   }
 
   /**

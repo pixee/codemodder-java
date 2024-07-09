@@ -2,18 +2,16 @@ package io.codemodder.plugins.llm;
 
 import static io.codemodder.plugins.llm.StandardModel.GPT_3_5_TURBO;
 
+import com.azure.ai.openai.models.ChatRequestSystemMessage;
+import com.azure.ai.openai.models.ChatRequestUserMessage;
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.Patch;
-import com.theokanning.openai.completion.chat.*;
-import com.theokanning.openai.completion.chat.ChatCompletionRequest.ChatCompletionRequestFunctionCall;
-import com.theokanning.openai.service.FunctionExecutor;
 import io.codemodder.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -111,6 +109,9 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       int line = patch.getDeltas().get(0).getSource().getPosition() + 1; // Position is 0-based.
       List<CodemodChange> changes = List.of(CodemodChange.from(line, fix.getFixDescription()));
       return CodemodFileScanningResult.withOnlyChanges(changes);
+    } catch (IOException e) {
+      logger.error("failed to process: {}", context.path(), e);
+      throw new UncheckedIOException(e);
     } catch (Exception e) {
       logger.error("failed to process: {}", context.path(), e);
       throw e;
@@ -141,13 +142,15 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
   private BinaryThreatAnalysis analyzeThreat(
       final FileDescription file,
       final CodemodInvocationContext context,
-      final List<Result> results) {
-    ChatMessage systemMessage = getSystemMessage(context, results);
-    ChatMessage userMessage = getAnalyzeUserMessage(file);
+      final List<Result> results)
+      throws IOException {
+    final ChatRequestSystemMessage systemMessage = getSystemMessage(context, results);
+    final ChatRequestUserMessage userMessage = getAnalyzeUserMessage(file);
 
     // If the estimated token count, which doesn't include the function (~100 tokens) or the reply
     // (~200 tokens), is close to the max, then assume the code is safe (for now).
-    int tokenCount = model.tokens(List.of(systemMessage, userMessage));
+    int tokenCount =
+        model.tokens(List.of(systemMessage.getContent(), userMessage.getContent().toString()));
     if (tokenCount > model.contextWindow() - 300) {
       return new BinaryThreatAnalysis(
           "Ignoring file: estimated prompt token count (" + tokenCount + ") is too high.",
@@ -156,71 +159,37 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       logger.debug("estimated prompt token count: {}", tokenCount);
     }
 
-    return getLLMResponse(model.id(), 0.0D, systemMessage, userMessage, BinaryThreatAnalysis.class);
+    return openAI.getResponseForPrompt(
+        List.of(systemMessage, userMessage), model.id(), BinaryThreatAnalysis.class);
   }
 
   private BinaryThreatAnalysisAndFix fixThreat(
       final FileDescription file,
       final CodemodInvocationContext context,
-      final List<Result> results) {
-    return getLLMResponse(
+      final List<Result> results)
+      throws IOException {
+    return openAI.getResponseForPrompt(
+        List.of(getSystemMessage(context, results), getFixUserMessage(file)),
         model.id(),
-        0D,
-        getSystemMessage(context, results),
-        getFixUserMessage(file),
         BinaryThreatAnalysisAndFix.class);
   }
 
-  private <T> T getLLMResponse(
-      final String model,
-      final Double temperature,
-      final ChatMessage systemMessage,
-      final ChatMessage userMessage,
-      final Class<T> responseClass) {
-    // Create a function to get the LLM to return a structured response.
-    ChatFunction function =
-        ChatFunction.builder()
-            .name("save_analysis")
-            .description("Saves a security threat analysis.")
-            .executor(responseClass, c -> c) // Return the `responseClass` instance when executed.
-            .build();
-
-    FunctionExecutor functionExecutor = new FunctionExecutor(Collections.singletonList(function));
-
-    ChatCompletionRequest request =
-        ChatCompletionRequest.builder()
-            .model(model)
-            .messages(List.of(systemMessage, userMessage))
-            .functions(functionExecutor.getFunctions())
-            .functionCall(ChatCompletionRequestFunctionCall.of(function.getName()))
-            .temperature(temperature)
-            .build();
-
-    ChatCompletionResult result = openAI.createChatCompletion(request);
-    logger.debug("{}", result.getUsage());
-
-    ChatMessage response = result.getChoices().get(0).getMessage();
-    return functionExecutor.execute(response.getFunctionCall());
-  }
-
-  private ChatMessage getSystemMessage(CodemodInvocationContext context, List<Result> results) {
+  private ChatRequestSystemMessage getSystemMessage(
+      CodemodInvocationContext context, List<Result> results) {
     String threatPrompt = getThreatPrompt(context, results);
-    return new ChatMessage(
-        ChatMessageRole.SYSTEM.value(),
+    return new ChatRequestSystemMessage(
         SYSTEM_MESSAGE_TEMPLATE.formatted(threatPrompt.strip()).strip());
   }
 
-  private ChatMessage getAnalyzeUserMessage(final FileDescription file) {
-    return new ChatMessage(
-        ChatMessageRole.SYSTEM.value(),
+  private ChatRequestUserMessage getAnalyzeUserMessage(final FileDescription file) {
+    return new ChatRequestUserMessage(
         ANALYZE_USER_MESSAGE_TEMPLATE
             .formatted(file.getFileName(), file.formatLinesWithLineNumbers())
             .strip());
   }
 
-  private ChatMessage getFixUserMessage(final FileDescription file) {
-    return new ChatMessage(
-        ChatMessageRole.USER.value(),
+  private ChatRequestUserMessage getFixUserMessage(final FileDescription file) {
+    return new ChatRequestUserMessage(
         FIX_USER_MESSAGE_TEMPLATE
             .formatted(
                 getFixPrompt().strip(), file.getFileName(), file.formatLinesWithLineNumbers())
@@ -239,6 +208,9 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       """
       A file with line numbers is provided below. Analyze it and save your threat analysis.
 
+      Return a JSON object with the following properties in this order:
+        - `analysis`: A detailed analysis of how the risk was assessed.
+        - `risk`: The risk of the security threat, either HIGH or LOW.
       --- %s
       %s
       """;
@@ -277,6 +249,11 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
 
       Now save your threat analysis.
 
+      Return a JSON object with the following properties in this order:
+        - `analysis`: A detailed analysis of how the risk was assessed.
+        - `risk`: The risk of the security threat, either HIGH or LOW.
+        - `fixDescription`: A short description of the fix. Required if the file is fixed.
+        - `fix`: The fix as a diff patch in unified format. Required if the risk is HIGH.
       --- %s
       %s
       """;

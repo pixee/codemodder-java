@@ -1,14 +1,14 @@
 package io.codemodder.plugins.llm;
 
+import com.azure.ai.openai.models.ChatRequestMessage;
+import com.azure.ai.openai.models.ChatRequestSystemMessage;
+import com.azure.ai.openai.models.ChatRequestUserMessage;
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.Patch;
-import com.theokanning.openai.completion.chat.*;
-import com.theokanning.openai.completion.chat.ChatCompletionRequest.ChatCompletionRequestFunctionCall;
-import com.theokanning.openai.service.FunctionExecutor;
 import io.codemodder.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -142,7 +142,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
 
       String codeChange = response.codeChange;
       // If the LLM was unable to fix the threat, don't change the file.
-      if (codeChange == null || codeChange.length() == 0) {
+      if (codeChange == null || codeChange.isEmpty()) {
         logger.info("unable to fix because diff not present: {}", context.path());
         return Optional.empty();
       }
@@ -152,7 +152,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
 
       // Ensure the end result isn't wonky.
       Patch<String> patch = DiffUtils.diff(file.getLines(), fixedLines);
-      if (patch.getDeltas().size() == 0) {
+      if (patch.getDeltas().isEmpty()) {
         logger.error("empty patch: {}", patch);
         return Optional.empty();
       }
@@ -168,6 +168,9 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
       // Report all the changes at their respective line number
 
       return Optional.of(createCodemodChange(result, response.line, response.fixDescription));
+    } catch (IOException e) {
+      logger.error("failed to process: {}", context.path(), e);
+      throw new UncheckedIOException(e);
     } catch (Exception e) {
       logger.error("failed to process: {}", context.path(), e);
       throw e;
@@ -185,10 +188,12 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
   private boolean estimatedToExceedContextWindow(final CodemodInvocationContext context) {
     // in both the threat analysis and code fix cases, the estimated user message size is dominated
     // by the code snippet, so use the code snippets as the floor
-    final var estimatedUserMessage =
-        new ChatMessage(ChatMessageRole.USER.value(), context.contents());
+    final var estimatedUserMessage = new ChatRequestUserMessage(context.contents());
     for (final var model : List.of(categorizationModel, codeChangingModel)) {
-      int tokenCount = model.tokens(List.of(getSystemMessage(), estimatedUserMessage));
+      int tokenCount =
+          model.tokens(
+              List.of(
+                  getSystemMessage().getContent(), estimatedUserMessage.getContent().toString()));
       // estimated token count doesn't include the function (~100 tokens) or the reply
       // (~200 tokens) so add those estimates before checking against window size
       tokenCount += 300;
@@ -217,83 +222,39 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
    */
   protected abstract String getThreatPrompt();
 
-  private CategorizeResponse categorize(final FileDescription file, final Result result) {
-    ChatMessage systemMessage = getSystemMessage();
-    ChatMessage userMessage = getCategorizationUserMessage(file, result);
+  private CategorizeResponse categorize(final FileDescription file, final Result result)
+      throws IOException {
+    ChatRequestMessage systemMessage = getSystemMessage();
+    ChatRequestMessage userMessage = getCategorizationUserMessage(file, result);
     return getCategorizationResponse(systemMessage, userMessage);
   }
 
-  private CodeChangeResponse changeCode(final FileDescription file, final Result result) {
+  private CodeChangeResponse changeCode(final FileDescription file, final Result result)
+      throws IOException {
     return getCodeChangeResponse(getSystemMessage(), getChangeCodeMessage(file, result));
   }
 
   private CategorizeResponse getCategorizationResponse(
-      final ChatMessage systemMessage, final ChatMessage userMessage) {
-    // Create a function to get the LLM to return a structured response.
-    ChatFunction function =
-        ChatFunction.builder()
-            .name("save_categorization_analysis")
-            .description("Saves a categorization analysis.")
-            .executor(
-                CategorizeResponse.class,
-                c -> c) // Return the `responseClass` instance when executed.
-            .build();
-
-    FunctionExecutor functionExecutor = new FunctionExecutor(Collections.singletonList(function));
-
-    ChatCompletionRequest request =
-        ChatCompletionRequest.builder()
-            .model(categorizationModel.id())
-            .messages(List.of(systemMessage, userMessage))
-            .functions(functionExecutor.getFunctions())
-            .functionCall(ChatCompletionRequestFunctionCall.of(function.getName()))
-            .temperature(0.0)
-            .build();
-
-    ChatCompletionResult result = openAI.createChatCompletion(request);
-    logger.debug(result.getUsage().toString());
-
-    ChatMessage response = result.getChoices().get(0).getMessage();
-    return functionExecutor.execute(response.getFunctionCall());
+      final ChatRequestMessage systemMessage, final ChatRequestMessage userMessage)
+      throws IOException {
+    return openAI.getResponseForPrompt(
+        List.of(systemMessage, userMessage), categorizationModel.id(), CategorizeResponse.class);
   }
 
   private CodeChangeResponse getCodeChangeResponse(
-      final ChatMessage systemMessage, final ChatMessage userMessage) {
-    // Create a function to get the LLM to return a structured response.
-    ChatFunction function =
-        ChatFunction.builder()
-            .name("save_categorization_analysis_and_code_change")
-            .description("Saves a categorization, analysis and code change.")
-            .executor(CodeChangeResponse.class, c -> c)
-            .build();
-
-    FunctionExecutor functionExecutor = new FunctionExecutor(Collections.singletonList(function));
-
-    ChatCompletionRequest request =
-        ChatCompletionRequest.builder()
-            .model(codeChangingModel.id())
-            .messages(List.of(systemMessage, userMessage))
-            .functions(functionExecutor.getFunctions())
-            .functionCall(ChatCompletionRequestFunctionCall.of(function.getName()))
-            .topP(0.1)
-            .temperature(0.0)
-            .build();
-
-    ChatCompletionResult result = openAI.createChatCompletion(request);
-    logger.debug(result.getUsage().toString());
-
-    ChatMessage response = result.getChoices().get(0).getMessage();
-    return functionExecutor.execute(response.getFunctionCall());
+      final ChatRequestMessage systemMessage, final ChatRequestMessage userMessage)
+      throws IOException {
+    return openAI.getResponseForPrompt(
+        List.of(systemMessage, userMessage), codeChangingModel.id(), CodeChangeResponse.class);
   }
 
-  private ChatMessage getSystemMessage() {
-    return new ChatMessage(
-        ChatMessageRole.SYSTEM.value(),
+  private ChatRequestSystemMessage getSystemMessage() {
+    return new ChatRequestSystemMessage(
         SYSTEM_MESSAGE_TEMPLATE.formatted(getThreatPrompt().strip()).strip());
   }
 
   /** Analyze a single SARIF result and get feedback. */
-  private ChatMessage getCategorizationUserMessage(
+  private ChatRequestMessage getCategorizationUserMessage(
       final FileDescription file, final Result result) {
     Region region = result.getLocations().get(0).getPhysicalLocation().getRegion();
     int line = region.getStartLine();
@@ -301,8 +262,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
 
     String outcomeDescriptions = formatOutcomeDescriptions(false);
 
-    return new ChatMessage(
-        ChatMessageRole.SYSTEM.value(),
+    return new ChatRequestSystemMessage(
         CATEGORIZE_CODE_USER_MESSAGE_TEMPLATE
             .formatted(
                 String.valueOf(line),
@@ -365,14 +325,13 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
    * @param result the result to analyze
    * @return the message to send to the LLM
    */
-  private ChatMessage getChangeCodeMessage(final FileDescription file, final Result result) {
+  private ChatRequestMessage getChangeCodeMessage(final FileDescription file, final Result result) {
 
     Region region = result.getLocations().get(0).getPhysicalLocation().getRegion();
     String regionStr = "  Line " + region.getStartLine() + ", column " + region.getStartColumn();
 
     String outcomeDescriptions = formatOutcomeDescriptions(true);
-    return new ChatMessage(
-        ChatMessageRole.USER.value(),
+    return new ChatRequestUserMessage(
         CHANGE_CODE_USER_MESSAGE_TEMPLATE
             .formatted(
                 regionStr,
@@ -394,6 +353,10 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
                   Analyze ONLY line %s, column %s, and discern which "outcome" best describes the code. You should save your categorization analysis. You MUST ignore any other file contents, even if they look like they have issues.
                   Here are the possible outcomes:
                   %s
+
+                  Return a JSON object as a response with the following keys in this order:
+                    - analysis: A detailed analysis of how the analysis arrived at the outcome
+                    - outcomeKey: The category of the analysis, or empty if the analysis could not be categorized
                   --- %s
                   %s
                   """;
@@ -438,6 +401,13 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
                     - The patch must use the unified format with a header. Include the diff patch and a summary of the changes with your analysis.
                     If you the outcome says you should suppress a Semgrep finding in the code, insert a comment above it and put `// nosemgrep: <ruleid>`
                     Save your categorization and code change analysis when you're done.
+
+                    Return a JSON object as a response with the following keys in this order:
+                      - outcomeKey: The outcome key associated with this particular result location
+                      - fixDescription: A short description of the code change. Required only if the file needs a change.
+                      - codeChange: A diff patch in unified format. Required if any of the outcome keys indicate a change.
+                      - line: The line in the file to which this analysis is related
+                      - column: The column to which this analysis is related
                     --- %s
                     %s
                     """;

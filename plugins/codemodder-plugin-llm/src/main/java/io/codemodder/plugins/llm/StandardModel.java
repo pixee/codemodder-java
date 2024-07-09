@@ -1,20 +1,19 @@
 package io.codemodder.plugins.llm;
 
 import com.knuddels.jtokkit.api.EncodingType;
-import com.theokanning.openai.completion.chat.ChatMessage;
 import java.util.List;
 
 /** Well-known GPT models used in Codemod development. */
 public enum StandardModel implements Model {
   GPT_3_5_TURBO("gpt-3.5-turbo-0125", 16_385) {
     @Override
-    public int tokens(final List<ChatMessage> messages) {
+    public int tokens(final List<String> messages) {
       return Tokens.countTokens(messages, 3, EncodingType.CL100K_BASE);
     }
   },
   GPT_4("gpt-4-0613", 8_192) {
     @Override
-    public int tokens(final List<ChatMessage> messages) {
+    public int tokens(final List<String> messages) {
       return Tokens.countTokens(messages, 3, EncodingType.CL100K_BASE);
     }
   },
@@ -24,7 +23,7 @@ public enum StandardModel implements Model {
      * href="https://github.com/knuddelsgmbh/jtokkit/issues/96">from upstream utility</a>.
      */
     @Override
-    public int tokens(final List<ChatMessage> messages) {
+    public int tokens(final List<String> messages) {
       return Tokens.countTokens(messages, 3, EncodingType.CL100K_BASE);
     }
   };

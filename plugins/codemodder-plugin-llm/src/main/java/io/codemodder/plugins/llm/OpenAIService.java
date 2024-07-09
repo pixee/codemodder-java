@@ -1,69 +1,63 @@
 package io.codemodder.plugins.llm;
 
-import com.theokanning.openai.client.OpenAiApi;
-import com.theokanning.openai.completion.chat.ChatCompletionRequest;
-import com.theokanning.openai.completion.chat.ChatCompletionResult;
-import com.theokanning.openai.service.OpenAiService;
-import io.reactivex.Flowable;
-import io.reactivex.functions.Function;
-import java.net.SocketTimeoutException;
+import com.azure.ai.openai.OpenAIClient;
+import com.azure.ai.openai.OpenAIClientBuilder;
+import com.azure.ai.openai.models.ChatCompletions;
+import com.azure.ai.openai.models.ChatCompletionsJsonResponseFormat;
+import com.azure.ai.openai.models.ChatCompletionsOptions;
+import com.azure.ai.openai.models.ChatRequestMessage;
+import com.azure.core.http.policy.RetryPolicy;
+import com.azure.core.util.HttpClientOptions;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import retrofit2.HttpException;
+import java.util.List;
 
-/**
- * A custom service class to call the {@link OpenAiApi}, since the out-of-the box {@link
- * OpenAiService} <a href="https://github.com/TheoKanning/openai-java/issues/189">does not support
- * automatic retries</a>.
- */
+/** A custom service class to wrap the {@link OpenAIClient} */
 public class OpenAIService {
-  private final OpenAiApi api;
+  private final OpenAIClient api;
+  private static final int TIMEOUT_SECONDS = 90;
 
   public OpenAIService(final String token) {
-    this.api = OpenAiService.buildApi(token, Duration.ofSeconds(90));
+    HttpClientOptions clientOptions = new HttpClientOptions();
+    clientOptions.setReadTimeout(Duration.ofSeconds(TIMEOUT_SECONDS));
+    final var builder =
+        new OpenAIClientBuilder().retryPolicy(new RetryPolicy()).clientOptions(clientOptions);
+    this.api = builder.buildClient();
   }
 
-  public ChatCompletionResult createChatCompletion(final ChatCompletionRequest request) {
-    return this.api
-        .createChatCompletion(request)
-        .retryWhen(new OpenAIRetryStrategy())
-        .blockingGet();
-  }
-}
-
-/**
- * When there is a retryable error from OpenAI -- either a timeout or a retryable <a
- * href="https://platform.openai.com/docs/guides/error-codes/api-errors">error code</a> -- this will
- * retry the request up to 3 times, with a delay of {@code 1 * retryCount} seconds between retries.
- */
-class OpenAIRetryStrategy implements Function<Flowable<? extends Throwable>, Flowable<Object>> {
-  private static final int MAX_RETRY_COUNT = 3;
-  private static final Logger logger = LoggerFactory.getLogger(OpenAIRetryStrategy.class);
-
-  private int retryCount = 0;
-
-  @Override
-  public Flowable<Object> apply(final Flowable<? extends Throwable> flowable) {
-    return flowable.flatMap(
-        e -> {
-          if (++retryCount <= MAX_RETRY_COUNT && isRetryable(e)) {
-            logger.warn("retrying after {}s: {}", retryCount, e);
-            return Flowable.timer(retryCount, TimeUnit.SECONDS);
-          } else {
-            return Flowable.error(e);
-          }
-        });
+  public String getJSONCompletion(
+      final List<ChatRequestMessage> messages, final String modelOrDeploymentName) {
+    ChatCompletionsOptions options =
+        new ChatCompletionsOptions(messages)
+            .setTemperature(0D)
+            .setN(1)
+            .setResponseFormat(new ChatCompletionsJsonResponseFormat());
+    ChatCompletions completions = this.api.getChatCompletions(modelOrDeploymentName, options);
+    return completions.getChoices().get(0).getMessage().getContent().trim();
   }
 
-  private boolean isRetryable(final Throwable e) {
-    if (e instanceof SocketTimeoutException) {
-      return true;
-    } else if (e instanceof HttpException) {
-      int code = ((HttpException) e).code();
-      return code == 429 || code == 500 || code == 503;
+  public <T> T getResponseForPrompt(
+      final List<ChatRequestMessage> messages, final String modelName, final Class<T> responseType)
+      throws IOException {
+    String json = getJSONCompletion(messages, modelName);
+
+    // we've seen this with turbo/lesser models
+    if (json.startsWith("```json") && json.endsWith("```")) {
+      json = json.substring(7, json.length() - 3);
     }
-    return false;
+
+    // try to deserialize the content as is
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      return mapper.readValue(json, responseType);
+    } catch (IOException e) {
+      int firstBorder = json.indexOf("```json");
+      int lastBorder = json.lastIndexOf("```");
+      if (firstBorder != -1 && lastBorder != -1 && lastBorder > firstBorder) {
+        json = json.substring(firstBorder + 7, lastBorder);
+      }
+      return mapper.readValue(json, responseType);
+    }
   }
 }
