@@ -51,7 +51,12 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
       final RuleSarif sarif,
       final OpenAIService openAI,
       final List<LLMRemediationOutcome> remediationOutcomes) {
-    this(sarif, openAI, remediationOutcomes, StandardModel.GPT_4O, StandardModel.GPT_4);
+    this(
+        sarif,
+        openAI,
+        remediationOutcomes,
+        StandardModel.GPT_4O_2024_05_13,
+        StandardModel.GPT_4_0613);
   }
 
   protected SarifToLLMForMultiOutcomeCodemod(

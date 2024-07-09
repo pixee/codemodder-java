@@ -12,6 +12,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.plugins.llm.OpenAIService;
+import io.codemodder.plugins.llm.StandardModel;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -100,7 +101,7 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
 
     return service.getResponseForPrompt(
         List.of(new ChatRequestUserMessage(prompt)),
-        "gpt-4o-2024-05-13",
+        StandardModel.GPT_4O_2024_05_13.id(),
         SensitivityAndFixAnalysisDTO.class);
   }
 

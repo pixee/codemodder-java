@@ -1,6 +1,6 @@
 package io.codemodder.plugins.llm;
 
-import static io.codemodder.plugins.llm.StandardModel.GPT_3_5_TURBO;
+import static io.codemodder.plugins.llm.StandardModel.GPT_3_5_TURBO_0125;
 
 import com.azure.ai.openai.models.ChatRequestSystemMessage;
 import com.azure.ai.openai.models.ChatRequestUserMessage;
@@ -47,7 +47,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
    */
   protected SarifToLLMForBinaryVerificationAndFixingCodemod(
       final RuleSarif sarif, final OpenAIService openAI) {
-    this(sarif, openAI, GPT_3_5_TURBO);
+    this(sarif, openAI, GPT_3_5_TURBO_0125);
   }
 
   @Override

@@ -67,8 +67,8 @@ public final class LogFailedLoginCodemod extends SarifToLLMForMultiOutcomeCodemo
                   When no logger is in scope, the new code emits a log message to the console.
                   """
                     .replace('\n', ' '))),
-        StandardModel.GPT_4O,
-        StandardModel.GPT_4);
+        StandardModel.GPT_4O_2024_05_13,
+        StandardModel.GPT_4_0613);
   }
 
   @Override
