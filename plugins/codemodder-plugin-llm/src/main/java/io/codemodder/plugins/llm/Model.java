@@ -1,6 +1,5 @@
 package io.codemodder.plugins.llm;
 
-import com.theokanning.openai.completion.chat.ChatMessage;
 import java.util.List;
 
 /**
@@ -26,5 +25,5 @@ public interface Model {
    * @param messages the list of messages for which to estimate token usage
    * @return estimated tokens that would be consumed by the model
    */
-  int tokens(List<ChatMessage> messages);
+  int tokens(List<String> messages);
 }

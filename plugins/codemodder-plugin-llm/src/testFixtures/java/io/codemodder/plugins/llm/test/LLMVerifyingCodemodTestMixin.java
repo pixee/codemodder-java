@@ -3,16 +3,13 @@ package io.codemodder.plugins.llm.test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import com.azure.ai.openai.models.ChatRequestSystemMessage;
+import com.azure.ai.openai.models.ChatRequestUserMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
-import com.theokanning.openai.completion.chat.ChatCompletionRequest;
-import com.theokanning.openai.completion.chat.ChatFunction;
-import com.theokanning.openai.completion.chat.ChatMessage;
-import com.theokanning.openai.completion.chat.ChatMessageRole;
-import com.theokanning.openai.service.FunctionExecutor;
 import io.codemodder.EncodingDetector;
 import io.codemodder.plugins.llm.Model;
 import io.codemodder.plugins.llm.OpenAIService;
@@ -22,7 +19,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
 /** A mixin for codemod tests that use the LLM framework to change the code. */
@@ -38,7 +34,7 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
    * @return GPT model to use for the test harness to verify the codemod's changes
    */
   default Model model() {
-    return StandardModel.GPT_4O;
+    return StandardModel.GPT_4O_2024_05_13;
   }
 
   @Override
@@ -60,42 +56,21 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
 
   private Assessment assessChanges(
       final Path before, final Path actualAfter, final Path expectedAfter) throws IOException {
-    // Create a function to get the LLM to return a structured response.
-    ChatFunction function =
-        ChatFunction.builder()
-            .name("save_assessment")
-            .description("Saves an assessment.")
-            .executor(Assessment.class, c -> c) // Return the instance when executed.
-            .build();
-
-    FunctionExecutor functionExecutor = new FunctionExecutor(Collections.singletonList(function));
-
-    ChatCompletionRequest request =
-        ChatCompletionRequest.builder()
-            .model(model().id())
-            .messages(
-                List.of(
-                    new ChatMessage(
-                        ChatMessageRole.SYSTEM.value(),
-                        SYSTEM_MESSAGE_TEMPLATE
-                            .formatted(
-                                getRequirementsPrompt().strip(),
-                                getUnifiedDiff(before, expectedAfter).strip())
-                            .strip()),
-                    new ChatMessage(
-                        ChatMessageRole.USER.value(),
-                        USER_MESSAGE_TEMPLATE
-                            .formatted(getUnifiedDiff(before, actualAfter).strip())
-                            .strip())))
-            .functions(functionExecutor.getFunctions())
-            .functionCall(
-                ChatCompletionRequest.ChatCompletionRequestFunctionCall.of(function.getName()))
-            .temperature(0D)
-            .build();
-
-    OpenAIService openAI = new OpenAIService(System.getenv("CODEMODDER_OPENAI_API_KEY"));
-    ChatMessage response = openAI.createChatCompletion(request).getChoices().get(0).getMessage();
-    return functionExecutor.execute(response.getFunctionCall());
+    OpenAIService openAI = OpenAIService.fromOpenAI(System.getenv("CODEMODDER_OPENAI_API_KEY"));
+    return openAI.getResponseForPrompt(
+        List.of(
+            new ChatRequestSystemMessage(
+                SYSTEM_MESSAGE_TEMPLATE
+                    .formatted(
+                        getRequirementsPrompt().strip(),
+                        getUnifiedDiff(before, expectedAfter).strip())
+                    .strip()),
+            new ChatRequestUserMessage(
+                USER_MESSAGE_TEMPLATE
+                    .formatted(getUnifiedDiff(before, actualAfter).strip())
+                    .strip())),
+        model(),
+        Assessment.class);
   }
 
   private String getUnifiedDiff(final Path original, final Path revised) throws IOException {
@@ -139,6 +114,10 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
             line-by-line, compare them to the PASS example, and assess whether they PASS or FAIL the \
             assignment. If the changes have any syntax errors or are made in a block of code that does \
             not meet the requirements, they automatically FAIL.
+
+            Return a JSON object with the following fields in order:
+            - analysis: A detailed analysis of how the candidate's solution was assessed.
+            - result: The result of the assessment, either PASS or FAIL.
             """;
 
   String USER_MESSAGE_TEMPLATE =

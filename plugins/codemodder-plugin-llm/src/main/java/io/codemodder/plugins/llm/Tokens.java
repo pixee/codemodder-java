@@ -4,7 +4,6 @@ import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
 import com.knuddels.jtokkit.api.EncodingType;
-import com.theokanning.openai.completion.chat.ChatMessage;
 import java.util.List;
 
 /** A set of utilities around LLM tokens. */
@@ -32,17 +31,14 @@ public final class Tokens {
    *     to count tokens with tiktoken</a>
    */
   public static int countTokens(
-      final List<ChatMessage> messages,
-      final int tokensPerMessage,
-      final EncodingType encodingType) {
+      final List<String> messages, final int tokensPerMessage, final EncodingType encodingType) {
     EncodingRegistry registry = Encodings.newDefaultEncodingRegistry();
     Encoding encoding = registry.getEncoding(encodingType);
 
     int count = 0;
-    for (ChatMessage message : messages) {
+    for (var message : messages) {
       count += tokensPerMessage;
-      count += encoding.countTokens(message.getContent());
-      count += encoding.countTokens(message.getRole());
+      count += encoding.countTokens(message);
     }
     count += tokensPerMessage; // Every reply is primed with <|start|>assistant<|message|>.
 
