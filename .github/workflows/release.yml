@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: a stable version to set in version.txt before publishing
+        description: a stable version to set in version.txt before publishing (e.g. 0.42.1, without the 'v' prefix)
 
 jobs:
   release:
