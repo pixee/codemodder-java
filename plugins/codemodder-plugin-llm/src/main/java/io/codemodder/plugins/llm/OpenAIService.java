@@ -22,7 +22,7 @@ public class OpenAIService {
   private static final int TIMEOUT_SECONDS = 90;
   private final ModelMapper modelMapper;
 
-  private static OpenAIClientBuilder getBuilder(final KeyCredential key) {
+  private static OpenAIClientBuilder builder(final KeyCredential key) {
     HttpClientOptions clientOptions = new HttpClientOptions();
     clientOptions.setReadTimeout(Duration.ofSeconds(TIMEOUT_SECONDS));
     return new OpenAIClientBuilder()
@@ -31,14 +31,14 @@ public class OpenAIService {
         .credential(key);
   }
 
-  OpenAIService(ModelMapper mapper, final KeyCredential key) {
+  OpenAIService(final ModelMapper mapper, final KeyCredential key) {
     this.modelMapper = mapper;
-    this.api = getBuilder(key).buildClient();
+    this.api = builder(key).buildClient();
   }
 
-  OpenAIService(ModelMapper mapper, final KeyCredential key, final String endpoint) {
+  OpenAIService(final ModelMapper mapper, final KeyCredential key, final String endpoint) {
     this.modelMapper = mapper;
-    this.api = getBuilder(key).endpoint(endpoint).buildClient();
+    this.api = builder(key).endpoint(endpoint).buildClient();
   }
 
   /**

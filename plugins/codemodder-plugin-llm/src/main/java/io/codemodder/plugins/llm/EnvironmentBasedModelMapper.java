@@ -8,7 +8,7 @@ final class EnvironmentBasedModelMapper implements ModelMapper {
 
   private final HashMap<Model, String> map = new HashMap<>();
 
-  public EnvironmentBasedModelMapper() {
+  EnvironmentBasedModelMapper() {
     for (Model m : StandardModel.values()) {
       final var deployment = System.getenv(String.format(DEPLOYMENT_TEMPLATE, m));
       map.put(m, deployment == null ? m.id() : deployment);
