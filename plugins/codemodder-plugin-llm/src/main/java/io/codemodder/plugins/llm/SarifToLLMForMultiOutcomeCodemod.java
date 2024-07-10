@@ -56,7 +56,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
         openAI,
         remediationOutcomes,
         StandardModel.GPT_4O_2024_05_13,
-        StandardModel.GPT_4_0613);
+        StandardModel.GPT_4_TURBO_2024_04_09);
   }
 
   protected SarifToLLMForMultiOutcomeCodemod(
