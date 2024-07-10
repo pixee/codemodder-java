@@ -20,6 +20,7 @@ import java.util.Objects;
 public class OpenAIService {
   private final OpenAIClient api;
   private static final int TIMEOUT_SECONDS = 90;
+  private final ModelMapper modelMapper;
 
   private static OpenAIClientBuilder getBuilder(final KeyCredential key) {
     HttpClientOptions clientOptions = new HttpClientOptions();
@@ -30,36 +31,69 @@ public class OpenAIService {
         .credential(key);
   }
 
-  OpenAIService(final KeyCredential key) {
+  OpenAIService(ModelMapper mapper, final KeyCredential key) {
+    this.modelMapper = mapper;
     this.api = getBuilder(key).buildClient();
   }
 
-  OpenAIService(final KeyCredential key, final String endpoint) {
+  OpenAIService(ModelMapper mapper, final KeyCredential key, final String endpoint) {
+    this.modelMapper = mapper;
     this.api = getBuilder(key).endpoint(endpoint).buildClient();
   }
 
+  /**
+   * Creates a new {@link OpenAIService} instance with the given OpenAI token.
+   *
+   * @param token the token to use
+   * @return the new instance
+   */
   public static OpenAIService fromOpenAI(final String token) {
-    return new OpenAIService(new KeyCredential(Objects.requireNonNull(token)));
+    return new OpenAIService(
+        new EnvironmentBasedModelMapper(), new KeyCredential(Objects.requireNonNull(token)));
   }
 
+  /**
+   * Creates a new {@link OpenAIService} instance with the given Azure OpenAI token and endpoint.
+   *
+   * @param token the token to use
+   * @param endpoint the endpoint to use
+   * @return the new instance
+   */
   public static OpenAIService fromAzureOpenAI(final String token, final String endpoint) {
     return new OpenAIService(
-        new AzureKeyCredential(Objects.requireNonNull(token)), Objects.requireNonNull(endpoint));
+        new EnvironmentBasedModelMapper(),
+        new AzureKeyCredential(Objects.requireNonNull(token)),
+        Objects.requireNonNull(endpoint));
   }
 
+  /**
+   * Gets the completion for the given messages.
+   *
+   * @param messages the messages
+   * @param modelOrDeploymentName the model or deployment name
+   * @return the completion
+   */
   public String getJSONCompletion(
-      final List<ChatRequestMessage> messages, final String modelOrDeploymentName) {
+      final List<ChatRequestMessage> messages, final Model modelOrDeploymentName) {
     ChatCompletionsOptions options =
         new ChatCompletionsOptions(messages)
             .setTemperature(0D)
             .setN(1)
             .setResponseFormat(new ChatCompletionsJsonResponseFormat());
-    ChatCompletions completions = this.api.getChatCompletions(modelOrDeploymentName, options);
+    final var modelName = modelMapper.getModelName(modelOrDeploymentName);
+    ChatCompletions completions = this.api.getChatCompletions(modelName, options);
     return completions.getChoices().get(0).getMessage().getContent().trim();
   }
 
+  /**
+   * Returns an object of the given type based on the completion for the given messages.
+   *
+   * @param messages the messages
+   * @param modelName the model name
+   * @return the completion
+   */
   public <T> T getResponseForPrompt(
-      final List<ChatRequestMessage> messages, final String modelName, final Class<T> responseType)
+      final List<ChatRequestMessage> messages, final Model modelName, final Class<T> responseType)
       throws IOException {
     String json = getJSONCompletion(messages, modelName);
 

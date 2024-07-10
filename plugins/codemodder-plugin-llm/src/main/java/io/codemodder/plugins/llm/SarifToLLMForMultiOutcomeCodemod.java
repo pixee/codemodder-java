@@ -243,14 +243,14 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
       final ChatRequestMessage systemMessage, final ChatRequestMessage userMessage)
       throws IOException {
     return openAI.getResponseForPrompt(
-        List.of(systemMessage, userMessage), categorizationModel.id(), CategorizeResponse.class);
+        List.of(systemMessage, userMessage), categorizationModel, CategorizeResponse.class);
   }
 
   private CodeChangeResponse getCodeChangeResponse(
       final ChatRequestMessage systemMessage, final ChatRequestMessage userMessage)
       throws IOException {
     return openAI.getResponseForPrompt(
-        List.of(systemMessage, userMessage), codeChangingModel.id(), CodeChangeResponse.class);
+        List.of(systemMessage, userMessage), codeChangingModel, CodeChangeResponse.class);
   }
 
   private ChatRequestSystemMessage getSystemMessage() {

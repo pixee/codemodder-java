@@ -101,7 +101,7 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
 
     return service.getResponseForPrompt(
         List.of(new ChatRequestUserMessage(prompt)),
-        StandardModel.GPT_4O_2024_05_13.id(),
+        StandardModel.GPT_4O_2024_05_13,
         SensitivityAndFixAnalysisDTO.class);
   }
 

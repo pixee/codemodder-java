@@ -160,7 +160,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
     }
 
     return openAI.getResponseForPrompt(
-        List.of(systemMessage, userMessage), model.id(), BinaryThreatAnalysis.class);
+        List.of(systemMessage, userMessage), model, BinaryThreatAnalysis.class);
   }
 
   private BinaryThreatAnalysisAndFix fixThreat(
@@ -170,7 +170,7 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       throws IOException {
     return openAI.getResponseForPrompt(
         List.of(getSystemMessage(context, results), getFixUserMessage(file)),
-        model.id(),
+        model,
         BinaryThreatAnalysisAndFix.class);
   }
 

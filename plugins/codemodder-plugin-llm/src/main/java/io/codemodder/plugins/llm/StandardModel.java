@@ -28,15 +28,8 @@ public enum StandardModel implements Model {
     }
   };
 
-  private static final String DEPLOYMENT_TEMPLATE = "CODEMODDER_AZURE_OPENAI_%s_DEPLOYMENT";
-
   private final String id;
   private final int contextWindow;
-  private final EnvironmentGetter envGetter = System::getenv;
-
-  public interface EnvironmentGetter {
-    String getEnv(String name);
-  }
 
   StandardModel(final String id, final int contextWindow) {
     this.id = id;
@@ -45,9 +38,7 @@ public enum StandardModel implements Model {
 
   @Override
   public String id() {
-    final var envName = String.format(DEPLOYMENT_TEMPLATE, this);
-    final var deployment = System.getenv(envName);
-    return deployment == null ? id : deployment;
+    return id;
   }
 
   @Override

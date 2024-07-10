@@ -69,7 +69,7 @@ public interface LLMVerifyingCodemodTestMixin extends CodemodTestMixin {
                 USER_MESSAGE_TEMPLATE
                     .formatted(getUnifiedDiff(before, actualAfter).strip())
                     .strip())),
-        model().id(),
+        model(),
         Assessment.class);
   }
 
