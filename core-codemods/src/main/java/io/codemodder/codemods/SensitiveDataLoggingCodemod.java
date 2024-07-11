@@ -119,6 +119,9 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
 
   @Override
   public boolean shouldRun() {
+    if (!service.isServiceAvailable()) {
+      return false;
+    }
     List<Run> runs = sarif.rawDocument().getRuns();
     return runs != null && !runs.isEmpty() && !runs.get(0).getResults().isEmpty();
   }
