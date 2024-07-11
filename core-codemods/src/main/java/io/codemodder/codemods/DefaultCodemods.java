@@ -35,7 +35,6 @@ public final class DefaultCodemods {
         JDBCResourceLeakCodemod.class,
         JEXLInjectionCodemod.class,
         JSPScriptletXSSCodemod.class,
-        // LogFailedLoginCodemod.class,
         LimitReadlineCodemod.class,
         MavenSecureURLCodemod.class,
         OutputResourceLeakCodemod.class,
