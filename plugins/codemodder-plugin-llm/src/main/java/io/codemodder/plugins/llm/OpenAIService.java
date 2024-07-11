@@ -21,6 +21,7 @@ public class OpenAIService {
   private final OpenAIClient api;
   private static final int TIMEOUT_SECONDS = 90;
   private final ModelMapper modelMapper;
+  private boolean serviceAvailable = true;
 
   private static OpenAIClientBuilder builder(final KeyCredential key) {
     HttpClientOptions clientOptions = new HttpClientOptions();
@@ -29,6 +30,12 @@ public class OpenAIService {
         .retryPolicy(new RetryPolicy())
         .clientOptions(clientOptions)
         .credential(key);
+  }
+
+  OpenAIService(final boolean serviceAvailable) {
+    this.serviceAvailable = serviceAvailable;
+    this.modelMapper = null;
+    this.api = null;
   }
 
   OpenAIService(final ModelMapper mapper, final KeyCredential key) {
@@ -64,6 +71,19 @@ public class OpenAIService {
         new EnvironmentBasedModelMapper(),
         new AzureKeyCredential(Objects.requireNonNull(token)),
         Objects.requireNonNull(endpoint));
+  }
+
+  public static OpenAIService noServiceAvailable() {
+    return new OpenAIService(false);
+  }
+
+  /**
+   * Returns whether the service is available.
+   *
+   * @return whether the service is available
+   */
+  public boolean isServiceAvailable() {
+    return serviceAvailable;
   }
 
   /**

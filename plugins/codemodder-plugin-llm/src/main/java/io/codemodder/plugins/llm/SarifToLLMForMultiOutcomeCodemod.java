@@ -38,11 +38,10 @@ import org.slf4j.LoggerFactory;
  * <p>To accomplish that, we need the analysis to "bucket" the code into one of the above
  * categories.
  */
-public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFileChanger {
+public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginLLMCodemod {
 
   private static final Logger logger =
       LoggerFactory.getLogger(SarifToLLMForMultiOutcomeCodemod.class);
-  private final OpenAIService openAI;
   private final List<LLMRemediationOutcome> remediationOutcomes;
   private final Model categorizationModel;
   private final Model codeChangingModel;
@@ -65,8 +64,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
       final List<LLMRemediationOutcome> remediationOutcomes,
       final Model categorizationModel,
       final Model codeChangingModel) {
-    super(sarif);
-    this.openAI = Objects.requireNonNull(openAI);
+    super(sarif, openAI);
     this.remediationOutcomes = Objects.requireNonNull(remediationOutcomes);
     if (remediationOutcomes.size() < 2) {
       throw new IllegalArgumentException("must have 2+ remediation outcome");
@@ -78,7 +76,7 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginRawFil
   @Override
   public CodemodFileScanningResult onFileFound(
       final CodemodInvocationContext context, final List<Result> results) {
-    logger.info("processing: {}", context.path());
+    logger.debug("processing: {}", context.path());
 
     List<CodemodChange> changes = new ArrayList<>();
     for (Result result : results) {

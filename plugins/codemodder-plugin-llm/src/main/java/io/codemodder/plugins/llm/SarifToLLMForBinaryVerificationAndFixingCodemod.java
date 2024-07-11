@@ -30,15 +30,13 @@ import org.slf4j.LoggerFactory;
  * </ol>
  */
 public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
-    extends SarifPluginRawFileChanger {
+    extends SarifPluginLLMCodemod {
 
-  private final OpenAIService openAI;
   private final Model model;
 
   protected SarifToLLMForBinaryVerificationAndFixingCodemod(
       final RuleSarif sarif, final OpenAIService openAI, final Model model) {
-    super(sarif);
-    this.openAI = Objects.requireNonNull(openAI);
+    super(sarif, openAI);
     this.model = Objects.requireNonNull(model);
   }
 
