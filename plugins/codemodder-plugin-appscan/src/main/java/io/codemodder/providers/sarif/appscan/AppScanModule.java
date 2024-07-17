@@ -41,10 +41,22 @@ public final class AppScanModule extends AbstractModule {
               .findFirst();
 
       annotation.ifPresent(
-          providedAppScanScan ->
-              bind(RuleSarif.class)
-                  .annotatedWith(providedAppScanScan)
-                  .toInstance(map.getOrDefault(providedAppScanScan.ruleId(), RuleSarif.EMPTY)));
+          providedAppScanScan -> {
+            RuleSarif sarif = null;
+            for (final var ruleId : providedAppScanScan.ruleIds()) {
+              final var value = map.get(ruleId);
+              if (value != null) {
+                sarif = value;
+                break;
+              }
+            }
+
+            if (sarif == null) {
+              sarif = RuleSarif.EMPTY;
+            }
+
+            bind(RuleSarif.class).annotatedWith(providedAppScanScan).toInstance(sarif);
+          });
     }
   }
 }
