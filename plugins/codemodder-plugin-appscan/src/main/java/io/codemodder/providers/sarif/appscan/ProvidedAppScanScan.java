@@ -13,6 +13,9 @@ import javax.inject.Qualifier;
 @Target(ElementType.PARAMETER)
 public @interface ProvidedAppScanScan {
 
-  /** The AppScan rule "id" field from the sarif. */
-  String ruleId();
+  /**
+   * The AppScan rule "id" field from the sarif. If multiple are provided, we look for the first ID
+   * in the SARIF before looking up alternative rule IDs
+   */
+  String[] ruleIds();
 }
