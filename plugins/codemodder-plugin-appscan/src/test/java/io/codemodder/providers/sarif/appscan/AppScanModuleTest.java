@@ -28,7 +28,7 @@ final class AppScanModuleTest {
     private final RuleSarif ruleSarif;
 
     @Inject
-    AppScanSarifTestCodemod(@ProvidedAppScanScan(ruleIds = {"SA2813462719"}) RuleSarif ruleSarif) {
+    AppScanSarifTestCodemod(@ProvidedAppScanScan(ruleName = "SQL Injection") RuleSarif ruleSarif) {
       this.ruleSarif = ruleSarif;
     }
 

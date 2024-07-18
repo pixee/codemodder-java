@@ -52,7 +52,7 @@ final class AppScanRuleSarifFactoryTest {
     RuleSarif ruleSarif = sarifRef.get();
 
     // verify the rule sarif has the right stuff
-    assertThat(ruleSarif.getRule()).isEqualTo("SA2813462719");
+    assertThat(ruleSarif.getRule()).isEqualTo("SQL Injection");
     assertThat(ruleSarif.getDriver()).isEqualTo("HCL AppScan Static Analyzer");
     assertThat(ruleSarif.rawDocument()).isEqualTo(rawSarif);
 

@@ -12,7 +12,7 @@ import java.util.*;
 final class AppScanRuleSarif implements RuleSarif {
 
   private final SarifSchema210 sarif;
-  private final String ruleId;
+  private final String messageText;
   private final Map<Path, List<Result>> resultsCache;
   private final List<String> locations;
 
@@ -24,9 +24,9 @@ final class AppScanRuleSarif implements RuleSarif {
    * locations, which are strange combinations of class name and file path, into predictable paths.
    */
   AppScanRuleSarif(
-      final String ruleId, final SarifSchema210 sarif, final CodeDirectory codeDirectory) {
+      final String messageText, final SarifSchema210 sarif, final CodeDirectory codeDirectory) {
     this.sarif = Objects.requireNonNull(sarif);
-    this.ruleId = Objects.requireNonNull(ruleId);
+    this.messageText = Objects.requireNonNull(messageText);
     this.resultsCache = new HashMap<>();
     this.locations =
         sarif.getRuns().get(0).getArtifacts().stream()
@@ -76,7 +76,7 @@ final class AppScanRuleSarif implements RuleSarif {
         p ->
             sarif.getRuns().stream()
                 .flatMap(run -> run.getResults().stream())
-                .filter(result -> result.getRuleId().equals(ruleId))
+                .filter(result -> result.getMessage().getText().equals(messageText))
                 .filter(
                     result ->
                         artifactLocationIndices.get(path) != null
@@ -113,7 +113,7 @@ final class AppScanRuleSarif implements RuleSarif {
    */
   @Override
   public String getRule() {
-    return ruleId;
+    return messageText;
   }
 
   static final String toolName = "HCL AppScan Static Analyzer";
