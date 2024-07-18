@@ -64,7 +64,8 @@ final class DefaultSarifParser implements SarifParser {
         return null;
       }
     }
-    return new RuleDescriptor(result.getRuleId(), result.getMessage().getText());
+    return new RuleDescriptor(
+        result.getRuleId(), result.getMessage() != null ? result.getMessage().getText() : null);
   }
 
   private Stream<Map.Entry<String, RuleSarif>> fromSarif(
