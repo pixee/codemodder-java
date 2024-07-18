@@ -8,5 +8,9 @@ public interface RuleSarifFactory {
 
   /** Builds {@link RuleSarif}s if it supports {@code toolName}. */
   Optional<RuleSarif> build(
-      String toolName, String rule, SarifSchema210 sarif, CodeDirectory codeDirectory);
+      String toolName,
+      String rule,
+      String messageText,
+      SarifSchema210 sarif,
+      CodeDirectory codeDirectory);
 }

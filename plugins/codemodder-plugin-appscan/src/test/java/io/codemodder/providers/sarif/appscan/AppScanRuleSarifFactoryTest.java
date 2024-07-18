@@ -43,7 +43,11 @@ final class AppScanRuleSarifFactoryTest {
                 new File("src/test/resources/webgoat_2023_8_binary.sarif"), SarifSchema210.class);
     Optional<RuleSarif> sarifRef =
         appScanRuleSarifFactory.build(
-            "HCL AppScan Static Analyzer", "SA2813462719", rawSarif, CodeDirectory.from(tmpDir));
+            "HCL AppScan Static Analyzer",
+            "SA2813462719",
+            "SQL Injection",
+            rawSarif,
+            CodeDirectory.from(tmpDir));
     assertThat(sarifRef.isPresent()).isTrue();
     RuleSarif ruleSarif = sarifRef.get();
 

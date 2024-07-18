@@ -15,6 +15,7 @@ public class SemgrepRuleSarifFactory implements RuleSarifFactory {
   public Optional<RuleSarif> build(
       final String toolName,
       final String rule,
+      final String messageText,
       final SarifSchema210 sarif,
       final CodeDirectory codeDirectory) {
 

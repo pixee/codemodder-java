@@ -86,7 +86,11 @@ final class AppScanModuleTest {
     AppScanRuleSarifFactory ruleSarifFactory = new AppScanRuleSarifFactory();
     Optional<RuleSarif> ruleSarif =
         ruleSarifFactory.build(
-            "HCL AppScan Static Analyzer", "SA2813462719", rawSarif, CodeDirectory.from(repoDir));
+            "HCL AppScan Static Analyzer",
+            "SA2813462719",
+            "SQL Injection",
+            rawSarif,
+            CodeDirectory.from(repoDir));
     assertThat(ruleSarif.isPresent(), is(true));
     AppScanModule module =
         new AppScanModule(List.of(AppScanSarifTestCodemod.class), List.of(ruleSarif.get()));
