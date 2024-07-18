@@ -1,6 +1,5 @@
 package io.codemodder;
 
-import com.contrastsecurity.sarif.ReportingDescriptor;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
@@ -9,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +28,13 @@ final class DefaultSarifParser implements SarifParser {
   /** Send the arguments to all factories and returns the first that built something. */
   private Optional<Map.Entry<String, RuleSarif>> tryToBuild(
       final String toolName,
-      final String rule,
+      final RuleDescriptor rule,
       final SarifSchema210 sarif,
       final CodeDirectory codeDirectory,
       final List<RuleSarifFactory> factories) {
     for (final var factory : factories) {
-      final var maybeRuleSarif = factory.build(toolName, rule, sarif, codeDirectory);
+      final var maybeRuleSarif =
+          factory.build(toolName, rule.ruleId, rule.messageText, sarif, codeDirectory);
       if (maybeRuleSarif.isPresent()) {
         return Optional.of(Map.entry(toolName, maybeRuleSarif.get()));
       }
@@ -43,7 +44,9 @@ final class DefaultSarifParser implements SarifParser {
     return Optional.empty();
   }
 
-  private String extractRuleId(final Result result, final Run run) {
+  private record RuleDescriptor(String ruleId, String messageText) {}
+
+  private RuleDescriptor extractRuleId(final Result result, final Run run) {
     if (result.getRuleId() == null) {
       var toolIndex = result.getRule().getToolComponent().getIndex();
       var ruleIndex = result.getRule().getIndex();
@@ -52,7 +55,8 @@ final class DefaultSarifParser implements SarifParser {
               .skip(toolIndex)
               .findFirst()
               .flatMap(tool -> tool.getRules().stream().skip(ruleIndex).findFirst())
-              .map(ReportingDescriptor::getId);
+              .map(descriptor -> new RuleDescriptor(descriptor.getId(), null));
+
       if (maybeRule.isPresent()) {
         return maybeRule.get();
       } else {
@@ -60,7 +64,7 @@ final class DefaultSarifParser implements SarifParser {
         return null;
       }
     }
-    return result.getRuleId();
+    return new RuleDescriptor(result.getRuleId(), result.getMessage().getText());
   }
 
   private Stream<Map.Entry<String, RuleSarif>> fromSarif(
@@ -77,8 +81,11 @@ final class DefaultSarifParser implements SarifParser {
             ? runResults.stream()
                 .map(result -> extractRuleId(result, run))
                 .filter(Objects::nonNull)
-                .distinct()
-            : Stream.<String>empty();
+                .filter(ruleDescriptor -> ruleDescriptor.ruleId != null)
+                .collect(Collectors.toMap(r -> r.ruleId, r -> r, (r1, r2) -> r1))
+                .values()
+                .stream()
+            : Stream.<RuleDescriptor>empty();
 
     return allResults.flatMap(
         rule -> tryToBuild(toolName, rule, sarif, codeDirectory, factories).stream());

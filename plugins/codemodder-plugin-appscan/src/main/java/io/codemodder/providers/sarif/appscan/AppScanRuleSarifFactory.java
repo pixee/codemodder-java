@@ -13,10 +13,11 @@ public final class AppScanRuleSarifFactory implements RuleSarifFactory {
   public Optional<RuleSarif> build(
       final String toolName,
       final String rule,
+      final String messageText,
       final SarifSchema210 sarif,
       final CodeDirectory codeDirectory) {
     if (AppScanRuleSarif.toolName.equals(toolName)) {
-      return Optional.of(new AppScanRuleSarif(rule, sarif, codeDirectory));
+      return Optional.of(new AppScanRuleSarif(messageText, sarif, codeDirectory));
     }
     return Optional.empty();
   }
