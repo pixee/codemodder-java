@@ -13,7 +13,6 @@ import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.remediation.RemediationMessages;
 import java.util.List;
-import java.util.OptionalInt;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,8 +46,7 @@ final class DefaultJNDIInjectionRemediatorTest {
             rule,
             List.of(issue),
             JNDIInjectionIssue::key,
-            JNDIInjectionIssue::line,
-            ignored -> OptionalInt.empty());
+            JNDIInjectionIssue::line);
 
     assertThat(result.changes()).isEmpty();
     ;
@@ -172,8 +170,7 @@ final class DefaultJNDIInjectionRemediatorTest {
             rule,
             List.of(issue),
             JNDIInjectionIssue::key,
-            JNDIInjectionIssue::line,
-            ignored -> OptionalInt.empty());
+            JNDIInjectionIssue::line);
 
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);
@@ -236,8 +233,7 @@ final class DefaultJNDIInjectionRemediatorTest {
             rule,
             List.of(issue),
             JNDIInjectionIssue::key,
-            JNDIInjectionIssue::line,
-            ignored -> OptionalInt.empty());
+            JNDIInjectionIssue::line);
 
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);

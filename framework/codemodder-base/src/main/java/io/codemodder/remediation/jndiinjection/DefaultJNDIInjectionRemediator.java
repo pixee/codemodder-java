@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
@@ -41,11 +40,11 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
   public <T> CodemodFileScanningResult remediateAll(
       final CompilationUnit cu,
       final String path,
-      final DetectorRule detectorRule,
+      final DetectorRule rule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
       final ToIntFunction<T> getLine,
-      final Function<T, OptionalInt> getColumn) {
+      final ToIntFunction<T> getColumn) {
 
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>()
@@ -57,7 +56,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
 
     // find all the potential lookup() calls
     FixCandidateSearchResults<T> results =
-        searcher.search(cu, path, detectorRule, issuesForFile, getKey, getLine, getColumn);
+        searcher.search(cu, path, rule, issuesForFile, getKey, getLine, getColumn);
 
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
     List<CodemodChange> changes = new ArrayList<>();
@@ -75,7 +74,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
             .map(
                 findingId ->
                     new UnfixedFinding(
-                        findingId, detectorRule, path, line, "No method found around lookup call"))
+                        findingId, rule, path, line, "No method found around lookup call"))
             .forEach(unfixedFindings::add);
         continue;
       }
@@ -89,11 +88,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
             .map(
                 findingId ->
                     new UnfixedFinding(
-                        findingId,
-                        detectorRule,
-                        path,
-                        line,
-                        "Cannot add validation method to interface"))
+                        findingId, rule, path, line, "Cannot add validation method to interface"))
             .forEach(unfixedFindings::add);
         continue;
       }
@@ -105,11 +100,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
             .map(
                 findingId ->
                     new UnfixedFinding(
-                        findingId,
-                        detectorRule,
-                        path,
-                        line,
-                        "No statement found around lookup call"))
+                        findingId, rule, path, line, "No statement found around lookup call"))
             .forEach(unfixedFindings::add);
         continue;
       }
@@ -125,11 +116,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
             .map(
                 findingId ->
                     new UnfixedFinding(
-                        findingId,
-                        detectorRule,
-                        path,
-                        line,
-                        "No parent node found around lookup call"))
+                        findingId, rule, path, line, "No parent node found around lookup call"))
             .forEach(unfixedFindings::add);
         continue;
       }
@@ -140,11 +127,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
             .map(
                 findingId ->
                     new UnfixedFinding(
-                        findingId,
-                        detectorRule,
-                        path,
-                        line,
-                        "No block statement found around lookup call"))
+                        findingId, rule, path, line, "No block statement found around lookup call"))
             .forEach(unfixedFindings::add);
         continue;
       }
@@ -155,10 +138,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
           fixStrategy.fix(cu, parentClass, lookupCall, contextNameVariable, blockStmt, index);
 
       List<FixedFinding> fixedFindings =
-          issues.stream()
-              .map(getKey)
-              .map(findingId -> new FixedFinding(findingId, detectorRule))
-              .toList();
+          issues.stream().map(getKey).map(findingId -> new FixedFinding(findingId, rule)).toList();
 
       changes.add(CodemodChange.from(line, deps, fixedFindings));
     }

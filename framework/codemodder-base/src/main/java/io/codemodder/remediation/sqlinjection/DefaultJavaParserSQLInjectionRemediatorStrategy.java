@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 import org.javatuples.Pair;
 
 /**
@@ -25,11 +26,11 @@ import org.javatuples.Pair;
 final class DefaultJavaParserSQLInjectionRemediatorStrategy
     implements JavaParserSQLInjectionRemediatorStrategy {
 
-  private Map<Predicate<MethodCallExpr>, Predicate<MethodCallExpr>> remediationStrategies;
+  private final Map<Predicate<MethodCallExpr>, Predicate<MethodCallExpr>> remediationStrategies;
 
   /**
    * Builds a strategy from a matcher-fixer pair. A matcher is a predicate that matches the call,
-   * ensure it is the right one for attempting a fix. A fixer fixes a predicate that chagnes the AST
+   * ensure it is the right one for attempting a fix. A fixer fixes a predicate that changes the AST
    * as a side-effect and reports if successful with a boolean.
    */
   DefaultJavaParserSQLInjectionRemediatorStrategy(
@@ -50,7 +51,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
       final DetectorRule detectorRule,
       final Collection<T> findingsForPath,
       final Function<T, String> findingIdExtractor,
-      final Function<T, Integer> findingLineExtractor,
+      final ToIntFunction<T> findingLineExtractor,
       final Predicate<MethodCallExpr> matcher,
       final Predicate<MethodCallExpr> fixer) {
 
@@ -64,8 +65,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
             detectorRule,
             new ArrayList<>(findingsForPath),
             findingIdExtractor,
-            findingLineExtractor,
-            f -> null);
+            findingLineExtractor);
 
     if (findingsForPath.isEmpty()) {
       return Pair.with(List.of(), List.of());
@@ -76,18 +76,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
 
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
       List<T> issues = fixCandidate.issues();
-      Integer line = findingLineExtractor.apply(issues.get(0));
-
-      if (line == null) {
-        issues.forEach(
-            issue -> {
-              final String id = findingIdExtractor.apply(issue);
-              final UnfixedFinding unfixableFinding =
-                  new UnfixedFinding(id, detectorRule, path, null, "No line number provided");
-              unfixedFindings.add(unfixableFinding);
-            });
-        continue;
-      }
+      int line = findingLineExtractor.applyAsInt(issues.get(0));
 
       final MethodCallExpr methodCallExpr = fixCandidate.methodCall();
       if (fixer.test(methodCallExpr)) {
@@ -133,7 +122,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
       final DetectorRule detectorRule,
       final Collection<T> findingsForPath,
       final Function<T, String> findingIdExtractor,
-      final Function<T, Integer> findingLineExtractor) {
+      final ToIntFunction<T> findingLineExtractor) {
     List<CodemodChange> allChanges = new ArrayList<>();
     List<UnfixedFinding> allUnfixed = new ArrayList<>();
 

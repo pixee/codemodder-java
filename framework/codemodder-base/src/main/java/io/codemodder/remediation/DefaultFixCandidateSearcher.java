@@ -33,7 +33,7 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
       final List<T> issuesForFile,
       final Function<T, String> getKey,
       final ToIntFunction<T> getLine,
-      final Function<T, OptionalInt> getColumn) {
+      final ToIntFunction<T> getColumn) {
 
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
     List<MethodCallExpr> calls =
@@ -52,7 +52,8 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
     for (T issue : issuesForFile) {
       String findingId = getKey.apply(issue);
       int line = getLine.applyAsInt(issue);
-      OptionalInt column = getColumn.apply(issue);
+      final OptionalInt column =
+          getColumn == null ? OptionalInt.empty() : OptionalInt.of(getColumn.applyAsInt(issue));
       List<MethodCallExpr> callsForIssue =
           calls.stream()
               .filter(mce -> mce.getRange().isPresent())

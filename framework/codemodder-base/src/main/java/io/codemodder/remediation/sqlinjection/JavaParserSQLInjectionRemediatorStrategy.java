@@ -6,6 +6,7 @@ import io.codemodder.codetf.DetectorRule;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 /**
  * Strategy interface for remediating SQL injection vulnerabilities using JavaParser.
@@ -30,7 +31,7 @@ public interface JavaParserSQLInjectionRemediatorStrategy {
       final DetectorRule rule,
       final Collection<T> pathFindings,
       final Function<T, String> findingIdExtractor,
-      final Function<T, Integer> findingLineExtractor);
+      final ToIntFunction<T> findingLineExtractor);
 
   /** A default implementation that should be used in all non-test scenarios. */
   JavaParserSQLInjectionRemediatorStrategy DEFAULT =

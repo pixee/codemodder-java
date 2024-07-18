@@ -16,7 +16,6 @@ import io.codemodder.remediation.FixCandidateSearcher;
 import io.github.pixee.security.Reflection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
@@ -26,11 +25,11 @@ final class DefaultReflectionInjectionRemediator implements ReflectionInjectionR
   public <T> CodemodFileScanningResult remediateAll(
       final CompilationUnit cu,
       final String path,
-      final DetectorRule detectorRule,
+      final DetectorRule rule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
       final ToIntFunction<T> getLine,
-      final Function<T, OptionalInt> getColumn) {
+      final ToIntFunction<T> getColumn) {
 
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>()
@@ -38,7 +37,7 @@ final class DefaultReflectionInjectionRemediator implements ReflectionInjectionR
             .build();
 
     FixCandidateSearchResults<T> results =
-        searcher.search(cu, path, detectorRule, issuesForFile, getKey, getLine, getColumn);
+        searcher.search(cu, path, rule, issuesForFile, getKey, getLine, getColumn);
     List<CodemodChange> changes = new ArrayList<>();
 
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
@@ -55,7 +54,7 @@ final class DefaultReflectionInjectionRemediator implements ReflectionInjectionR
                     CodemodChange.from(
                         line,
                         List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT),
-                        new FixedFinding(id, detectorRule));
+                        new FixedFinding(id, rule));
                 changes.add(change);
               });
     }

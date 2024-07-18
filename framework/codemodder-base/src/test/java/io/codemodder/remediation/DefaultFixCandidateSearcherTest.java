@@ -42,7 +42,7 @@ final class DefaultFixCandidateSearcherTest {
 
     DetectorRule rule1 = new DetectorRule("key1", "rule 1", null);
     FixCandidateSearchResults<Issue> fixCandidateSearchResults =
-        searcher.search(cu, "path", rule1, allIssues, Issue::key, Issue::line, i -> null);
+        searcher.search(cu, "path", rule1, allIssues, Issue::key, Issue::line);
     List<FixCandidate<Issue>> fixCandidates = fixCandidateSearchResults.fixCandidates();
     assertThat(fixCandidates).hasSize(2);
 

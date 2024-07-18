@@ -10,7 +10,6 @@ import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.reflectioninjection.ReflectionInjectionRemediator;
 import io.codemodder.sonar.model.Issue;
 import java.util.Objects;
-import java.util.function.ToIntFunction;
 import javax.inject.Inject;
 
 /** Sonar remediation codemod for S2658: Classes should not be loaded dynamically. */
@@ -51,6 +50,6 @@ public final class SonarUnsafeReflectionRemediationCodemod
         issues.getResultsByPath(context.path()),
         Issue::getKey,
         Issue::getLine,
-        (ToIntFunction<Issue>) i -> i.getTextRange().getStartOffset());
+        i -> i.getTextRange().getStartOffset());
   }
 }

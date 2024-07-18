@@ -11,8 +11,6 @@ import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.RemediationMessages;
 import java.util.List;
-import java.util.OptionalInt;
-import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
@@ -202,8 +200,7 @@ final class DefaultReflectionInjectionRemediatorTest {
               rule,
               List.of(finding),
               ReflectionInjectionFinding::key,
-              ReflectionInjectionFinding::line,
-              (Function<ReflectionInjectionFinding, OptionalInt>) ignored -> OptionalInt.empty());
+              ReflectionInjectionFinding::line);
       assertThat(result.unfixedFindings()).isEmpty();
       assertThat(result.changes()).hasSize(1);
 
@@ -270,8 +267,7 @@ final class DefaultReflectionInjectionRemediatorTest {
               rule,
               List.of(finding),
               ReflectionInjectionFinding::key,
-              ReflectionInjectionFinding::line,
-              (Function<ReflectionInjectionFinding, OptionalInt>) ignored -> OptionalInt.empty());
+              ReflectionInjectionFinding::line);
       assertThat(result.changes()).isEmpty();
       assertThat(result.unfixedFindings()).hasSize(1);
       assertThat(result.unfixedFindings().get(0).getLine()).isEqualTo(line);
