@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,10 @@ final class DefaultSarifParser implements SarifParser {
             ? runResults.stream()
                 .map(result -> extractRuleId(result, run))
                 .filter(Objects::nonNull)
-                .distinct()
+                .filter(ruleDescriptor -> ruleDescriptor.ruleId != null)
+                .collect(Collectors.toMap(r -> r.ruleId, r -> r, (r1, r2) -> r1))
+                .values()
+                .stream()
             : Stream.<RuleDescriptor>empty();
 
     return allResults.flatMap(
