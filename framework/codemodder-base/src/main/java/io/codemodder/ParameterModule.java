@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 /**
  * Responsible for binding {@link Parameter}s to codemods. Also performs validation to ensure
  * provided arguments are valid.

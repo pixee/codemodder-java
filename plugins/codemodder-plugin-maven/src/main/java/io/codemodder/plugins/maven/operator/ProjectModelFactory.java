@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 import org.dom4j.DocumentException;
 
 /**
