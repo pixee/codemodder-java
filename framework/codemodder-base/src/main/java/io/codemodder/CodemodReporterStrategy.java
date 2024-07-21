@@ -118,7 +118,7 @@ public interface CodemodReporterStrategy {
     List<String> references =
         StreamSupport.stream(referencesNode.spliterator(), false)
             .map(JsonNode::asText)
-            .collect(Collectors.toList());
+            .toList();
 
     return new CodemodReporterStrategy() {
       @Override

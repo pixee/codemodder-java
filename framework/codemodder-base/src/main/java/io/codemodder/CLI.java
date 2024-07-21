@@ -488,7 +488,7 @@ final class CLI implements Callable<Integer> {
                   String.join(" ", args),
                   sarifs == null
                       ? List.of()
-                      : sarifs.stream().map(Path::of).collect(Collectors.toList()),
+                      : sarifs.stream().map(Path::of).toList(),
                   results,
                   elapsed);
           ObjectMapper mapper = new ObjectMapper();

@@ -48,7 +48,7 @@ class ProjectModelFactory {
   public ProjectModelFactory withParentPomFiles(Collection<POMDocument> parentPomFiles) {
     this.parentPomFiles =
         new ArrayList<>(
-            parentPomFiles.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+            parentPomFiles.stream().filter(Objects::nonNull).toList());
     return this;
   }
 

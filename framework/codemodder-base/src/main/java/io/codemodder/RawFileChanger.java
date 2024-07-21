@@ -47,6 +47,6 @@ public abstract class RawFileChanger implements CodeChanger {
   public List<CodeTFReference> getReferences() {
     return reporter.getReferences().stream()
         .map(u -> new CodeTFReference(u, u))
-        .collect(Collectors.toList());
+        .toList();
   }
 }

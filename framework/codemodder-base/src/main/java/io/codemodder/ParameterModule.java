@@ -33,7 +33,7 @@ final class ParameterModule extends AbstractModule {
         this.injectableParameters.stream()
             .filter(param -> param.isAnnotationPresent(CodemodParameter.class))
             .filter(param -> param.getType().equals(Parameter.class))
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
 
     for (java.lang.reflect.Parameter param : codemodParameters) {
       CodemodParameter codemodParameter = param.getAnnotation(CodemodParameter.class);

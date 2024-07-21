@@ -43,6 +43,6 @@ public abstract class JavaParserChanger implements CodeChanger {
   public List<CodeTFReference> getReferences() {
     return reporter.getReferences().stream()
         .map(u -> new CodeTFReference(u, u))
-        .collect(Collectors.toList());
+        .toList();
   }
 }

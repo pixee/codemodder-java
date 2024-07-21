@@ -63,7 +63,7 @@ public final class VerbTamperingCodemod extends RawFileChanger {
 
     // add the weaves to the context
     List<CodemodChange> changes =
-        linesAffected.stream().map(CodemodChange::from).collect(Collectors.toList());
+        linesAffected.stream().map(CodemodChange::from).toList();
 
     // overwrite the previous web.xml with the new one
     Files.copy(xmlChange.transformedXml(), file, StandardCopyOption.REPLACE_EXISTING);
@@ -109,6 +109,6 @@ public final class VerbTamperingCodemod extends RawFileChanger {
   public List<CodeTFReference> getReferences() {
     return reporter.getReferences().stream()
         .map(u -> new CodeTFReference(u, u))
-        .collect(Collectors.toList());
+        .toList();
   }
 }
