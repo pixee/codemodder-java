@@ -14,5 +14,8 @@ import javax.inject.Qualifier;
 public @interface ProvidedAppScanScan {
 
   /** The AppScan rule name, which shows up as the "message text" in the SARIF results. */
-  String ruleName();
+  String ruleName() default "";
+
+  /** The AppScan rule names, which show up as the "message text" in the SARIF results. */
+  String[] ruleNames() default {};
 }
