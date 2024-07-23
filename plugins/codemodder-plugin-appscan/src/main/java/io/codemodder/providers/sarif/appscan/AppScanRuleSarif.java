@@ -107,9 +107,9 @@ final class AppScanRuleSarif implements RuleSarif {
   }
 
   /**
-   * This returns the "ruleId" element, which has a value like "SA2813462719". The "message[text]"
-   * field has a more human-readable value like "SQL Injection". To stay aligned with other tools
-   * that use a more strict ID, we use the rule ID.
+   * This returns the "message[text]" field from the SARIF results. This is a human-readable value
+   * like "SQL Injection". We would ordinarily use this as the rule ID but this value is different
+   * each time we retrieve the SARIF for a given scan
    */
   @Override
   public String getRule() {
