@@ -1,5 +1,6 @@
 package io.codemodder;
 
+import io.codemodder.codetf.CodeTFAiMetadata;
 import io.codemodder.codetf.UnfixedFinding;
 import java.util.List;
 
@@ -20,6 +21,17 @@ public interface CodemodFileScanningResult {
         return unfixedFindings;
       }
     };
+  }
+
+  /**
+   * Creates a new instance of {@link CodemodFileScanningResult} from the given values, including AI
+   * usage metadata
+   */
+  static CodemodFileScanningResult from(
+      final List<CodemodChange> changes,
+      final List<UnfixedFinding> unfixedFindings,
+      CodeTFAiMetadata codeTFAiMetadata) {
+    return new AICodemodFileScanningResult(changes, unfixedFindings, codeTFAiMetadata);
   }
 
   /** Creates an empty instance of {@link CodemodFileScanningResult}. */
