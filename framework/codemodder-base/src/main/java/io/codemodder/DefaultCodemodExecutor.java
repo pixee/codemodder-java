@@ -212,6 +212,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             codeChanger.getSummary(),
             codeChanger.getDescription(),
             detectionTool,
+            // TODO augment CodeTF with failure metadata
             null,
             unscannableFiles.stream()
                 .map(file -> getRelativePath(projectDir, file))
