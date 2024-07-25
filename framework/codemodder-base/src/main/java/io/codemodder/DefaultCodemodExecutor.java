@@ -243,6 +243,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     List<Path> filesFailedToChange = List.of();
 
     // update the dependencies in the manifest file if needed
+    // We suppress warnings because we conditionally remove items from this list instance
+    @SuppressWarnings("java:S6204")
     List<DependencyGAV> dependencies =
         codemodChanges.stream()
             .map(CodemodChange::getDependenciesNeeded)
@@ -267,7 +269,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             .map(
                 change ->
                     translateCodemodChangetoCodeTFChange(codeChanger, filePath, change, pkgActions))
-            .collect(Collectors.toList());
+            .toList();
 
     // make sure we add the file's entry first, then the dependency entries, so the causality
     // is clear

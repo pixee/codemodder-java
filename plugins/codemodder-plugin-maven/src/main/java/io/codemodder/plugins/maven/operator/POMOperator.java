@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 import org.dom4j.DocumentException;
 import org.jetbrains.annotations.NotNull;
@@ -183,7 +182,7 @@ public class POMOperator {
     if (queryVersionResult.size() == 1) {
       List<VersionDefinition> queryVersionResultList =
           queryVersionResult != null && !queryVersionResult.isEmpty()
-              ? queryVersionResult.stream().collect(Collectors.toList())
+              ? queryVersionResult.stream().toList()
               : Collections.emptyList();
       Version mappedVersion = mapVersion(queryVersionResultList.get(0).getValue());
 

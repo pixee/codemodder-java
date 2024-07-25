@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 import org.dom4j.DocumentException;
 
 /**
@@ -47,8 +46,7 @@ class ProjectModelFactory {
    */
   public ProjectModelFactory withParentPomFiles(Collection<POMDocument> parentPomFiles) {
     this.parentPomFiles =
-        new ArrayList<>(
-            parentPomFiles.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+        new ArrayList<>(parentPomFiles.stream().filter(Objects::nonNull).toList());
     return this;
   }
 

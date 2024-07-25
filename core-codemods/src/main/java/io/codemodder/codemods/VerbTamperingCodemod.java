@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -62,8 +61,7 @@ public final class VerbTamperingCodemod extends RawFileChanger {
     Set<Integer> linesAffected = xmlChange.linesAffected();
 
     // add the weaves to the context
-    List<CodemodChange> changes =
-        linesAffected.stream().map(CodemodChange::from).collect(Collectors.toList());
+    List<CodemodChange> changes = linesAffected.stream().map(CodemodChange::from).toList();
 
     // overwrite the previous web.xml with the new one
     Files.copy(xmlChange.transformedXml(), file, StandardCopyOption.REPLACE_EXISTING);
@@ -107,8 +105,6 @@ public final class VerbTamperingCodemod extends RawFileChanger {
 
   @Override
   public List<CodeTFReference> getReferences() {
-    return reporter.getReferences().stream()
-        .map(u -> new CodeTFReference(u, u))
-        .collect(Collectors.toList());
+    return reporter.getReferences().stream().map(u -> new CodeTFReference(u, u)).toList();
   }
 }

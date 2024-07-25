@@ -485,9 +485,7 @@ final class CLI implements Callable<Integer> {
               reportGenerator.createReport(
                   projectDirectory.toPath(),
                   String.join(" ", args),
-                  sarifs == null
-                      ? List.of()
-                      : sarifs.stream().map(Path::of).collect(Collectors.toList()),
+                  sarifs == null ? List.of() : sarifs.stream().map(Path::of).toList(),
                   results,
                   elapsed);
           ObjectMapper mapper = new ObjectMapper();
