@@ -81,6 +81,7 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
       }
     }
     return CodemodFileScanningResult.from(
+        // TODO update tokens to be an accurate number
         changes, List.of(), new CodeTFAiMetadata(service.providerName(), MODEL.id(), 0));
   }
 
