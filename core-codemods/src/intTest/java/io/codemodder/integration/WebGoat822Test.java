@@ -52,8 +52,11 @@ final class WebGoat822Test extends GitRepositoryTest {
 
     verifyNoFailedFiles(report);
     List<CodeTFResult> results = report.getResults();
-    assertThat(results.size(), is(1));
-    CodeTFResult result = results.get(0);
+    CodeTFResult result =
+        results.stream()
+            .filter(r -> r.getCodemod().equals("pixee:java/harden-java-deserialization"))
+            .findFirst()
+            .orElseThrow();
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
     assertThat(changeset.size(), is(3));
     assertThat(

@@ -447,9 +447,8 @@ final class CLI implements Callable<Integer> {
 
         log.info("running codemod: {}", codemod.getId());
         CodeTFResult result = codemodExecutor.execute(filePaths);
-        if (!result.getChangeset().isEmpty() || !result.getFailedFiles().isEmpty()) {
-          results.add(result);
-        }
+        results.add(result);
+
         if (!result.getChangeset().isEmpty()) {
           log.info("changed:");
           result
