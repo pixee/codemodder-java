@@ -8,7 +8,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
@@ -116,9 +115,7 @@ public interface CodemodReporterStrategy {
     String change = parent.get("change").asText();
     ArrayNode referencesNode = (ArrayNode) parent.get("references");
     List<String> references =
-        StreamSupport.stream(referencesNode.spliterator(), false)
-            .map(JsonNode::asText)
-            .collect(Collectors.toList());
+        StreamSupport.stream(referencesNode.spliterator(), false).map(JsonNode::asText).toList();
 
     return new CodemodReporterStrategy() {
       @Override

@@ -248,7 +248,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             .map(CodemodChange::getDependenciesNeeded)
             .flatMap(Collection::stream)
             .distinct()
-            .collect(Collectors.toList());
+            .toList();
 
     List<CodeTFPackageAction> pkgActions;
     List<CodeTFChangesetEntry> dependencyChangesetEntries = Collections.emptyList();
@@ -267,7 +267,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             .map(
                 change ->
                     translateCodemodChangetoCodeTFChange(codeChanger, filePath, change, pkgActions))
-            .collect(Collectors.toList());
+            .toList();
 
     // make sure we add the file's entry first, then the dependency entries, so the causality
     // is clear

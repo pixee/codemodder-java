@@ -58,7 +58,7 @@ final class DefaultXPathStreamProcessor implements XPathStreamProcessor {
         DocumentHelper.selectNodes(xpathExpression, doc).stream()
             .map(node -> (LocationAwareElement) node)
             .map(element -> new Position(element.getLine(), element.getColumn()))
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
 
     if (httpMethodPositions.isEmpty()) {
       return Optional.empty();
@@ -97,7 +97,7 @@ final class DefaultXPathStreamProcessor implements XPathStreamProcessor {
     // remove the empty leftover lines affected by our changes if there are any
     Set<Integer> linesAffected =
         httpMethodPositions.stream().map(pos -> pos.line()).collect(Collectors.toUnmodifiableSet());
-    List<String> lines = transformedXml.lines().collect(Collectors.toUnmodifiableList());
+    List<String> lines = transformedXml.lines().toList();
     List<String> updatedLines = new ArrayList<>(lines.size() - linesAffected.size());
     for (int i = 1; i <= lines.size(); i++) {
       String actualLine = lines.get(i - 1);

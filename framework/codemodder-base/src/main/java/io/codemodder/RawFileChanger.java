@@ -4,7 +4,6 @@ import io.codemodder.codetf.CodeTFReference;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /** Gives access to raw files for performing arbitrary changes. */
 public abstract class RawFileChanger implements CodeChanger {
@@ -45,8 +44,6 @@ public abstract class RawFileChanger implements CodeChanger {
 
   @Override
   public List<CodeTFReference> getReferences() {
-    return reporter.getReferences().stream()
-        .map(u -> new CodeTFReference(u, u))
-        .collect(Collectors.toList());
+    return reporter.getReferences().stream().map(u -> new CodeTFReference(u, u)).toList();
   }
 }

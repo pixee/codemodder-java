@@ -5,7 +5,6 @@ import io.codemodder.*;
 import io.codemodder.codetf.CodeTFReference;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /** Uses JavaParser to change Java source files. */
 public abstract class JavaParserChanger implements CodeChanger {
@@ -41,8 +40,6 @@ public abstract class JavaParserChanger implements CodeChanger {
 
   @Override
   public List<CodeTFReference> getReferences() {
-    return reporter.getReferences().stream()
-        .map(u -> new CodeTFReference(u, u))
-        .collect(Collectors.toList());
+    return reporter.getReferences().stream().map(u -> new CodeTFReference(u, u)).toList();
   }
 }
