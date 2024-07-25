@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.Patch;
 import io.codemodder.*;
+import io.codemodder.codetf.CodeTFAiMetadata;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -83,7 +84,11 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginLLMCod
       Optional<CodemodChange> change = processResult(context, result);
       change.ifPresent(changes::add);
     }
-    return CodemodFileScanningResult.withOnlyChanges(List.copyOf(changes));
+    return CodemodFileScanningResult.from(
+        List.copyOf(changes),
+        List.of(),
+        // TODO use the actual token count
+        new CodeTFAiMetadata(openAI.providerName(), codeChangingModel.id(), 0));
   }
 
   private Optional<CodemodChange> processResult(
