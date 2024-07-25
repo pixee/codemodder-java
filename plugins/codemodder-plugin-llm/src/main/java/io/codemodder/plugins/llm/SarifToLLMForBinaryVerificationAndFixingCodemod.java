@@ -9,6 +9,7 @@ import com.contrastsecurity.sarif.Result;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.Patch;
 import io.codemodder.*;
+import io.codemodder.codetf.CodeTFAiMetadata;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -106,7 +107,9 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
       // Report all the changes at the line number of the first change.
       int line = patch.getDeltas().get(0).getSource().getPosition() + 1; // Position is 0-based.
       List<CodemodChange> changes = List.of(CodemodChange.from(line, fix.getFixDescription()));
-      return CodemodFileScanningResult.withOnlyChanges(changes);
+      // TODO update tokens to be an accurate number
+      return CodemodFileScanningResult.from(
+          changes, List.of(), new CodeTFAiMetadata(openAI.providerName(), model.id(), 0));
     } catch (IOException e) {
       logger.error("failed to process: {}", context.path(), e);
       throw new UncheckedIOException(e);

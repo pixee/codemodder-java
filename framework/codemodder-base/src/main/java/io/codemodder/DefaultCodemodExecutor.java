@@ -157,11 +157,22 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
               // run the codemod on the file
               CodemodFileScanningResult codemodFileScanningResult = codemodRunner.run(context);
+              final CodeTFAiMetadata codeTFAiMetadata;
+              if (codemodFileScanningResult instanceof AIMetadataProvider aiMetadataProvider) {
+                codeTFAiMetadata = aiMetadataProvider.codeTFAiMetadata();
+              } else {
+                codeTFAiMetadata = null;
+              }
               List<CodemodChange> codemodChanges = codemodFileScanningResult.changes();
               if (!codemodChanges.isEmpty()) {
                 synchronized (this) {
                   FilesUpdateResult updateResult =
-                      updateFiles(codeChanger, filePath, beforeFileContents, codemodChanges);
+                      updateFiles(
+                          codeChanger,
+                          filePath,
+                          beforeFileContents,
+                          codemodChanges,
+                          codeTFAiMetadata);
                   unscannableFiles.addAll(updateResult.filesFailedToChange());
                   changeset.addAll(updateResult.changeset());
                 }
@@ -201,6 +212,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             codeChanger.getSummary(),
             codeChanger.getDescription(),
             detectionTool,
+            // TODO augment CodeTF with failure metadata
+            null,
             unscannableFiles.stream()
                 .map(file -> getRelativePath(projectDir, file))
                 .collect(Collectors.toSet()),
@@ -223,7 +236,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       final CodeChanger codeChanger,
       final Path filePath,
       final String beforeFileContents,
-      final List<CodemodChange> codemodChanges)
+      final List<CodemodChange> codemodChanges,
+      final CodeTFAiMetadata codeTFAiMetadata)
       throws IOException {
 
     List<Path> filesFailedToChange = List.of();
@@ -272,7 +286,9 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
     // create a changeset for this file change + its downstream dependency changes
     List<CodeTFChangesetEntry> changeset = new ArrayList<>();
-    changeset.add(new CodeTFChangesetEntry(getRelativePath(projectDir, filePath), diff, changes));
+    changeset.add(
+        new CodeTFChangesetEntry(
+            getRelativePath(projectDir, filePath), diff, changes, codeTFAiMetadata));
     changeset.addAll(dependencyChangesetEntries);
 
     // update the cache
