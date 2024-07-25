@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.*;
+import io.codemodder.codetf.CodeTFAiMetadata;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.plugins.llm.OpenAIService;
 import io.codemodder.plugins.llm.StandardModel;
@@ -79,7 +80,8 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
         changes.add(change);
       }
     }
-    return CodemodFileScanningResult.from(changes, List.of());
+    return CodemodFileScanningResult.from(
+        changes, List.of(), new CodeTFAiMetadata(service.providerName(), MODEL.id(), 0));
   }
 
   private SensitivityAndFixAnalysis performSensitivityAnalysis(
@@ -100,9 +102,7 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
             .formatted(startLine, codeSnippet);
 
     return service.getResponseForPrompt(
-        List.of(new ChatRequestUserMessage(prompt)),
-        StandardModel.GPT_4O_2024_05_13,
-        SensitivityAndFixAnalysisDTO.class);
+        List.of(new ChatRequestUserMessage(prompt)), MODEL, SensitivityAndFixAnalysisDTO.class);
   }
 
   /**
@@ -153,6 +153,8 @@ public final class SensitiveDataLoggingCodemod extends JavaParserChanger {
    * the code snippet sent to OpenAI.
    */
   private static final int CONTEXT = 10;
+
+  private static final StandardModel MODEL = StandardModel.GPT_4O_2024_05_13;
 
   /** The results of the sensitivity analysis. */
   private interface SensitivityAndFixAnalysis {
