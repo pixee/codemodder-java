@@ -23,6 +23,8 @@ public class OpenAIService {
   private final ModelMapper modelMapper;
   private boolean serviceAvailable = true;
 
+  private final String providerName;
+
   private static OpenAIClientBuilder builder(final KeyCredential key) {
     HttpClientOptions clientOptions = new HttpClientOptions();
     clientOptions.setReadTimeout(Duration.ofSeconds(TIMEOUT_SECONDS));
@@ -32,20 +34,27 @@ public class OpenAIService {
         .credential(key);
   }
 
-  OpenAIService(final boolean serviceAvailable) {
-    this.serviceAvailable = serviceAvailable;
+  OpenAIService() {
+    this.serviceAvailable = false;
     this.modelMapper = null;
     this.api = null;
+    this.providerName = null;
   }
 
-  OpenAIService(final ModelMapper mapper, final KeyCredential key) {
+  OpenAIService(final ModelMapper mapper, final KeyCredential key, final String providerName) {
     this.modelMapper = mapper;
     this.api = builder(key).buildClient();
+    this.providerName = providerName;
   }
 
-  OpenAIService(final ModelMapper mapper, final KeyCredential key, final String endpoint) {
+  OpenAIService(
+      final ModelMapper mapper,
+      final KeyCredential key,
+      final String endpoint,
+      final String providerName) {
     this.modelMapper = mapper;
     this.api = builder(key).endpoint(endpoint).buildClient();
+    this.providerName = providerName;
   }
 
   /**
@@ -56,7 +65,9 @@ public class OpenAIService {
    */
   public static OpenAIService fromOpenAI(final String token) {
     return new OpenAIService(
-        new EnvironmentBasedModelMapper(), new KeyCredential(Objects.requireNonNull(token)));
+        new EnvironmentBasedModelMapper(),
+        new KeyCredential(Objects.requireNonNull(token)),
+        "openai");
   }
 
   /**
@@ -70,11 +81,12 @@ public class OpenAIService {
     return new OpenAIService(
         new EnvironmentBasedModelMapper(),
         new AzureKeyCredential(Objects.requireNonNull(token)),
-        Objects.requireNonNull(endpoint));
+        Objects.requireNonNull(endpoint),
+        "azure-openai");
   }
 
   public static OpenAIService noServiceAvailable() {
-    return new OpenAIService(false);
+    return new OpenAIService();
   }
 
   /**
@@ -84,6 +96,10 @@ public class OpenAIService {
    */
   public boolean isServiceAvailable() {
     return serviceAvailable;
+  }
+
+  public String providerName() {
+    return providerName;
   }
 
   /**
