@@ -169,7 +169,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
   @Override
   public boolean shouldRun() {
     List<Run> runs = sarif.rawDocument().getRuns();
-    return runs != null && runs.size() > 0 && !runs.get(0).getResults().isEmpty();
+    return runs != null && !runs.isEmpty() && !runs.get(0).getResults().isEmpty();
   }
 
   /**

@@ -90,6 +90,8 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
           "unsupported codeChanger type: " + codeChanger.getClass().getName());
     }
 
+    log.debug("Total files available for scan {}", filePaths.size());
+
     /*
      * Filter the files to those that the CodemodRunner supports.
      */
@@ -100,6 +102,9 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
             .limit(maxFiles != -1 ? maxFiles : Long.MAX_VALUE)
             .sorted()
             .toList();
+
+    log.debug("Will scan {} files after filtering", codemodTargetFiles.size());
+
 
     /*
      * The changeset doesn't need to be thread-safe because it's only added to within a synchronized block.
@@ -126,6 +131,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
               if (maxFileSize != -1) {
                 long size = Files.size(filePath);
                 if (size > maxFileSize) {
+                  log.warn("File above max size: {} bytes: {}", size, filePath);
                   unscannableFiles.add(filePath);
                   return;
                 }
