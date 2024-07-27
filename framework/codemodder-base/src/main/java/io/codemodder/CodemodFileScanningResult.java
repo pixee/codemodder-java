@@ -13,12 +13,12 @@ public interface CodemodFileScanningResult {
     return new CodemodFileScanningResult() {
       @Override
       public List<CodemodChange> changes() {
-        return changes;
+        return List.copyOf(changes);
       }
 
       @Override
       public List<UnfixedFinding> unfixedFindings() {
-        return unfixedFindings;
+        return List.copyOf(unfixedFindings);
       }
     };
   }

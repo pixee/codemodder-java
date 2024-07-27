@@ -6,11 +6,15 @@ import io.codemodder.codetf.DetectorRule;
 import java.util.List;
 import java.util.function.Function;
 
-/** Strategy for remediating XXE vulnerabilities at the sink for multiple parser APIs. */
-public interface XXERemediator {
+/**
+ * Strategy for remediating XXE vulnerabilities at an intermediate step in {@link
+ * javax.xml.stream.XMLInputFactory#createXMLStreamReader}.
+ */
+public interface XXEIntermediateXMLStreamReaderRemediator {
 
   /** A default implementation for callers. */
-  XXERemediator DEFAULT = new DefaultXXERemediator();
+  XXEIntermediateXMLStreamReaderRemediator DEFAULT =
+      new DefaultXXEIntermediateXMLStreamReaderRemediator();
 
   /** Remediate all XXE vulnerabilities in the given compilation unit. */
   <T> CodemodFileScanningResult remediateAll(

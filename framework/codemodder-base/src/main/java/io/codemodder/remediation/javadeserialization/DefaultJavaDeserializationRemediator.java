@@ -123,6 +123,8 @@ final class DefaultJavaDeserializationRemediator implements JavaDeserializationR
             .forEach(unfixedFindings::add);
       }
     }
+
+    unfixedFindings.addAll(results.unfixableFindings());
     return CodemodFileScanningResult.from(changes, unfixedFindings);
   }
 
