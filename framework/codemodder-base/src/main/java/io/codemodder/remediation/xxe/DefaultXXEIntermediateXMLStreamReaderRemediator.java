@@ -82,7 +82,7 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediator
         continue;
       }
       Statement stmt = ancestorStatement.get();
-      XMLFeatures.addFeatureDisablingStatements(xmlStreamReaderVariable, stmt, true);
+      XMLFeatures.addXMLInputFactoryDisablingStatement(xmlStreamReaderVariable, stmt, true);
       issues.stream()
           .map(
               issue ->

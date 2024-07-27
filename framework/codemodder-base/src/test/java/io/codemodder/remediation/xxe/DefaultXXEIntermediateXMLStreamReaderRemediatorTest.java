@@ -62,8 +62,7 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediatorTest {
                 class MessageReader {
                     Message read(String xml) {
                         XMLInputFactory factory = XMLInputFactory.newInstance();
-                        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-                        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+                        factory.setProperty("javax.xml.stream.isSupportingExternalEntities", false);
                         XMLStreamReader reader = factory.createXMLStreamReader(new StringReader(xml));
                         // turn into a Message
                         Message message = convertMessage(reader);
