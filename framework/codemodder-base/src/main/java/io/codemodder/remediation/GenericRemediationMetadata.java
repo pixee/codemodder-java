@@ -10,6 +10,7 @@ public enum GenericRemediationMetadata {
   JNDI("jndi-injection"),
   HEADER_INJECTION("header-injection"),
   REFLECTION_INJECTION("reflection-injection"),
+  DESERIALIZATION("java-deserialization"),
   SQL_INJECTION("sql-injection");
 
   private final CodemodReporterStrategy reporter;

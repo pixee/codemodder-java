@@ -38,6 +38,37 @@ final class XMLFeatures {
             new BooleanLiteralExpr(false)));
   }
 
+  /**
+   * Creates a call for {@link javax.xml.stream.XMLInputFactory#setProperty(java.lang.String,
+   * java.lang.Object)} for disabling.
+   */
+  static XXEFixAttempt addXMLInputFactoryDisablingStatement(
+      final NameExpr variable, final Statement statementToInjectAround, final boolean before) {
+    MethodCallExpr call =
+        new MethodCallExpr(
+            variable,
+            "setProperty",
+            NodeList.nodeList(
+                new StringLiteralExpr("javax.xml.stream.isSupportingExternalEntities"),
+                new BooleanLiteralExpr(false)));
+
+    Optional<BlockStmt> block = ASTs.findBlockStatementFrom(statementToInjectAround);
+    if (block.isEmpty()) {
+      return new XXEFixAttempt(true, false, "No block statement found for newFactory() call");
+    }
+
+    BlockStmt blockStmt = block.get();
+    NodeList<Statement> existingStatements = blockStmt.getStatements();
+    int index = existingStatements.indexOf(statementToInjectAround);
+    if (!before) {
+      index++;
+    }
+
+    Statement fixStatement = new ExpressionStmt(call);
+    existingStatements.add(index, fixStatement);
+    return new XXEFixAttempt(true, true, null);
+  }
+
   static XXEFixAttempt addFeatureDisablingStatements(
       final NameExpr variable, final Statement statementToInjectAround, final boolean before) {
     Optional<BlockStmt> block = ASTs.findBlockStatementFrom(statementToInjectAround);
