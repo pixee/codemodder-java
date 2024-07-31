@@ -1,6 +1,7 @@
 package io.codemodder.codemods;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -12,10 +13,10 @@ public final class SQLTestMixed {
     public ResultSet simpleIndirect() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
-        String input2 = scanner.nextLine();
-        String sql = "SELECT * FROM " + input + " where name='" + input2 + "'" ;
-        Statement stmt = conn.createStatement();
-        return stmt.executeQuery(sql);
+        String sql = "SELECT * FROM " + input + " where name=?" ;
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setString(1, scanner.nextLine());
+        return stmt.execute();
     }
 
 }
