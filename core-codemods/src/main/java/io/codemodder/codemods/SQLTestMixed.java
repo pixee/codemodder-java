@@ -1,4 +1,4 @@
-package com.acme.testcode;
+package io.codemodder.codemods;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
