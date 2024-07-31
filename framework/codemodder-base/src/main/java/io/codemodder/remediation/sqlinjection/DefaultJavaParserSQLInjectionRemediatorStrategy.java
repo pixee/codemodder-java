@@ -1,5 +1,3 @@
-package io.codemodder.remediation.sqlinjection;
-
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.CodemodChange;
@@ -141,7 +139,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
       var fixer = remediationStrategies.get(matcher);
       var pairResult =
           remediateWithStrategy(
-              cu,
+              cu.clone(),
               path,
               detectorRule,
               findingsForPath,
