@@ -8,7 +8,7 @@ import java.sql.PreparedStatement;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-public final class SQLTest {
+public final class SQLTestMixed {
 
     private Connection conn;
 
@@ -16,7 +16,7 @@ public final class SQLTest {
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
         String input2 = scanner.nextLine();
-        String sql = "SELECT * FROM " + input + " where name='" + input2 + "" ;
+        String sql = "SELECT * FROM " + input + " where name='" + input2 + "'" ;
         Statement stmt = conn.createStatement();
         return stmt.executeQuery(sql);
     }
