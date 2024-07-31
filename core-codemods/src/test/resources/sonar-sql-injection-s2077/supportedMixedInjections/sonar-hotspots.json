@@ -1,0 +1,48 @@
+{
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 1
+  },
+  "hotspots": [
+    {
+      "key": "AZEIpASKc7kK4RXktkeh",
+      "component": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/SQLTestMixed.java",
+      "project": "pixee_codemodder-java",
+      "securityCategory": "sql-injection",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 21,
+      "message": "Make sure using a dynamically formatted SQL query is safe here.",
+      "creationDate": "2024-07-31T13:53:37+0200",
+      "updateDate": "2024-07-31T13:53:37+0200",
+      "textRange": {
+        "startLine": 21,
+        "endLine": 21,
+        "startOffset": 33,
+        "endOffset": 36
+      },
+      "flows": [],
+      "ruleKey": "java:S2077"
+    }
+  ],
+  "components": [
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-java",
+      "qualifier": "TRK",
+      "name": "codemodder-java",
+      "longName": "codemodder-java",
+      "pullRequest": "434"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-java:core-codemods/src/main/java/io/codemodder/codemods/SQLTestMixed.java",
+      "qualifier": "FIL",
+      "name": "SQLTestMixed.java",
+      "longName": "core-codemods/src/main/java/io/codemodder/codemods/SQLTestMixed.java",
+      "path": "core-codemods/src/main/java/io/codemodder/codemods/SQLTestMixed.java",
+      "pullRequest": "434"
+    }
+  ]
+}

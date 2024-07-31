@@ -6,7 +6,13 @@ import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,7 +26,7 @@ public final class LinearizedStringExpression {
   private final Deque<Expression> linearized;
 
   public LinearizedStringExpression(final Expression expression) {
-    this.resolvedExpressions = new HashMap<>();
+    this.resolvedExpressions = new IdentityHashMap<>();
     this.root = expression;
     this.linearized = linearize(expression).collect(Collectors.toCollection(ArrayDeque::new));
   }

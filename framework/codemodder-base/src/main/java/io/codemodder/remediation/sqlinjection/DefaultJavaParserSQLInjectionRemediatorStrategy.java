@@ -25,7 +25,7 @@ import org.javatuples.Pair;
 final class DefaultJavaParserSQLInjectionRemediatorStrategy
     implements JavaParserSQLInjectionRemediatorStrategy {
 
-  private Map<Predicate<MethodCallExpr>, Predicate<MethodCallExpr>> remediationStrategies;
+  private final Map<Predicate<MethodCallExpr>, Predicate<MethodCallExpr>> remediationStrategies;
 
   /**
    * Builds a strategy from a matcher-fixer pair. A matcher is a predicate that matches the call,

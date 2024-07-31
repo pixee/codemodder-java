@@ -33,4 +33,13 @@ final class SonarSQLInjectionCodemodTest {
       expectingFixesAtLines = {19, 25, 33, 40},
       dependencies = {})
   class SupportedTableInjectionTest implements CodemodTestMixin {}
+
+  @Nested
+  @Metadata(
+      codemodType = SonarSQLInjectionCodemod.class,
+      testResourceDir = "sonar-sql-injection-s2077/supportedMixedInjections",
+      renameTestFile = "core-codemods/src/main/java/io/codemodder/codemods/SQLTestMixed.java",
+      expectingFixesAtLines = {21},
+      dependencies = {})
+  class SupportedMixedInjectionTest implements CodemodTestMixin {}
 }
