@@ -35,9 +35,5 @@ public interface JavaParserSQLInjectionRemediatorStrategy {
   /** A default implementation that should be used in all non-test scenarios. */
   JavaParserSQLInjectionRemediatorStrategy DEFAULT =
       new DefaultJavaParserSQLInjectionRemediatorStrategy(
-          Map.of(
-              SQLParameterizer::isSupportedJdbcMethodCall,
-              SQLParameterizerWithCleanup::checkAndFix,
-              SQLTableInjectionFilterTransform::matchCall,
-              SQLTableInjectionFilterTransform::fix));
+          Map.of(SQLInjectionFixComposer::match, SQLInjectionFixComposer::checkAndFix));
 }
