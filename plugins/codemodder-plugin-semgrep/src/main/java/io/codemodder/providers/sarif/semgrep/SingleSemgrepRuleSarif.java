@@ -5,10 +5,11 @@ import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
 import io.codemodder.RuleSarif;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@inheritDoc}
@@ -77,8 +78,10 @@ final class SingleSemgrepRuleSarif implements RuleSarif {
                           .getUri();
                   try {
                     return Files.isSameFile(path, repositoryRoot.resolve(uri));
-                  } catch (IOException e) { // this should never happen
-                    throw new UncheckedIOException(e);
+                  } catch (IOException e) {
+                    // this can happen if the file referenced in SARIF doesn't exist (like in tests)
+                    log.debug("Couldn't find file referenced in SARIF", e);
+                    return false;
                   }
                 })
             .toList();
@@ -91,5 +94,5 @@ final class SingleSemgrepRuleSarif implements RuleSarif {
     return sarif.getRuns().get(0).getTool().getDriver().getName();
   }
 
-  static final String toolName = "semgrep";
+  private static final Logger log = LoggerFactory.getLogger(SingleSemgrepRuleSarif.class);
 }
