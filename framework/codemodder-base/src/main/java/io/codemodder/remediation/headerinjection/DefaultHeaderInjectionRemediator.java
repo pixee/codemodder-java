@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediator {
 
@@ -42,11 +43,11 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
   public <T> CodemodFileScanningResult remediateAll(
       final CompilationUnit cu,
       final String path,
-      final DetectorRule detectorRule,
+      final DetectorRule rule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final Function<T, Integer> getColumn) {
+      final ToIntFunction<T> getLine,
+      final ToIntFunction<T> getColumn) {
 
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>()
@@ -57,7 +58,7 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
             .build();
 
     FixCandidateSearchResults<T> results =
-        searcher.search(cu, path, detectorRule, issuesForFile, getKey, getLine, getColumn);
+        searcher.search(cu, path, rule, issuesForFile, getKey, getLine, getColumn);
 
     List<CodemodChange> changes = new ArrayList<>();
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
@@ -97,11 +98,9 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
       }
 
       // all the line numbers should be the same, so we just grab the first one
-      int line = getLine.apply(fixCandidate.issues().get(0));
+      int line = getLine.applyAsInt(fixCandidate.issues().get(0));
       List<FixedFinding> fixedFindings =
-          issues.stream()
-              .map(issue -> new FixedFinding(getKey.apply(issue), detectorRule))
-              .toList();
+          issues.stream().map(issue -> new FixedFinding(getKey.apply(issue), rule)).toList();
       changes.add(CodemodChange.from(line, List.of(), fixedFindings));
     }
 

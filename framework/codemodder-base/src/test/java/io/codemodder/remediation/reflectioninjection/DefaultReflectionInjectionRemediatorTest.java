@@ -192,7 +192,7 @@ final class DefaultReflectionInjectionRemediatorTest {
         final String vulnerableCode, final int line, final String expectedFixCode) {
       CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
       LexicalPreservingPrinter.setup(cu);
-      ReflectionInjectionFinding finding = new ReflectionInjectionFinding("id", line, null);
+      ReflectionInjectionFinding finding = new ReflectionInjectionFinding("id", line);
       CodemodFileScanningResult result =
           remediator.remediateAll(
               cu,
@@ -200,8 +200,7 @@ final class DefaultReflectionInjectionRemediatorTest {
               rule,
               List.of(finding),
               ReflectionInjectionFinding::key,
-              ReflectionInjectionFinding::line,
-              ReflectionInjectionFinding::column);
+              ReflectionInjectionFinding::line);
       assertThat(result.unfixedFindings()).isEmpty();
       assertThat(result.changes()).hasSize(1);
 
@@ -260,7 +259,7 @@ final class DefaultReflectionInjectionRemediatorTest {
         final String reason) {
       CompilationUnit cu = StaticJavaParser.parse(unfixableCode);
       LexicalPreservingPrinter.setup(cu);
-      ReflectionInjectionFinding finding = new ReflectionInjectionFinding("id", line, null);
+      ReflectionInjectionFinding finding = new ReflectionInjectionFinding("id", line);
       CodemodFileScanningResult result =
           remediator.remediateAll(
               cu,
@@ -268,8 +267,7 @@ final class DefaultReflectionInjectionRemediatorTest {
               rule,
               List.of(finding),
               ReflectionInjectionFinding::key,
-              ReflectionInjectionFinding::line,
-              ReflectionInjectionFinding::column);
+              ReflectionInjectionFinding::line);
       assertThat(result.changes()).isEmpty();
       assertThat(result.unfixedFindings()).hasSize(1);
       assertThat(result.unfixedFindings().get(0).getLine()).isEqualTo(line);
@@ -279,5 +277,5 @@ final class DefaultReflectionInjectionRemediatorTest {
     }
   }
 
-  record ReflectionInjectionFinding(String key, int line, Integer column) {}
+  record ReflectionInjectionFinding(String key, int line) {}
 }

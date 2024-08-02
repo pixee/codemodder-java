@@ -38,7 +38,7 @@ final class DefaultJNDIInjectionRemediatorTest {
     CompilationUnit cu = StaticJavaParser.parse(unfixableCode);
     LexicalPreservingPrinter.setup(cu);
 
-    JNDIInjectionIssue issue = new JNDIInjectionIssue("key", line, null);
+    JNDIInjectionIssue issue = new JNDIInjectionIssue("key", line);
     CodemodFileScanningResult result =
         remediator.remediateAll(
             cu,
@@ -46,8 +46,7 @@ final class DefaultJNDIInjectionRemediatorTest {
             rule,
             List.of(issue),
             JNDIInjectionIssue::key,
-            JNDIInjectionIssue::line,
-            JNDIInjectionIssue::column);
+            JNDIInjectionIssue::line);
 
     assertThat(result.changes()).isEmpty();
     ;
@@ -162,7 +161,7 @@ final class DefaultJNDIInjectionRemediatorTest {
     CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
     LexicalPreservingPrinter.setup(cu);
 
-    JNDIInjectionIssue issue = new JNDIInjectionIssue("key", line, null);
+    JNDIInjectionIssue issue = new JNDIInjectionIssue("key", line);
     remediator = new DefaultJNDIInjectionRemediator(fixStrategy);
     CodemodFileScanningResult result =
         remediator.remediateAll(
@@ -171,8 +170,7 @@ final class DefaultJNDIInjectionRemediatorTest {
             rule,
             List.of(issue),
             JNDIInjectionIssue::key,
-            JNDIInjectionIssue::line,
-            JNDIInjectionIssue::column);
+            JNDIInjectionIssue::line);
 
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);
@@ -227,7 +225,7 @@ final class DefaultJNDIInjectionRemediatorTest {
     CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
     LexicalPreservingPrinter.setup(cu);
 
-    JNDIInjectionIssue issue = new JNDIInjectionIssue("key", 10, null);
+    JNDIInjectionIssue issue = new JNDIInjectionIssue("key", 10);
     CodemodFileScanningResult result =
         remediator.remediateAll(
             cu,
@@ -235,8 +233,7 @@ final class DefaultJNDIInjectionRemediatorTest {
             rule,
             List.of(issue),
             JNDIInjectionIssue::key,
-            JNDIInjectionIssue::line,
-            JNDIInjectionIssue::column);
+            JNDIInjectionIssue::line);
 
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);
@@ -279,5 +276,5 @@ final class DefaultJNDIInjectionRemediatorTest {
     assertThat(fixedCode).isEqualToIgnoringWhitespace(actualCode);
   }
 
-  record JNDIInjectionIssue(String key, int line, Integer column) {}
+  record JNDIInjectionIssue(String key, int line) {}
 }
