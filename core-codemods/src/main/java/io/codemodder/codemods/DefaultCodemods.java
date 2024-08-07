@@ -57,6 +57,7 @@ public final class DefaultCodemods {
         SimplifyRestControllerAnnotationsCodemod.class,
         SubstituteReplaceAllCodemod.class,
         SonarXXECodemod.class,
+        SonarSQLInjectionCodemod.class,
         SQLParameterizerCodemod.class,
         SSRFCodemod.class,
         StackTraceExposureCodemod.class,
