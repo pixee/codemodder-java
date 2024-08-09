@@ -344,16 +344,24 @@ final class CLI implements Callable<Integer> {
 
       // get path includes/excludes
       List<String> pathIncludes = this.pathIncludes;
+      List<String> pathExcludes = this.pathExcludes;
+
+      // If no path includes/excludes were specified, relegate filtering to each codemod
+      // This is indicated by the MatchesEverything type of IncludesExcludes
+      boolean useGlobalIncludesExcludes = pathIncludes != null || pathExcludes != null;
+      IncludesExcludes includesExcludes = IncludesExcludes.any();
       if (pathIncludes == null) {
-        pathIncludes = defaultPathIncludes;
+        pathIncludes = List.of("**");
       }
 
-      List<String> pathExcludes = this.pathExcludes;
       if (pathExcludes == null) {
-        pathExcludes = defaultPathExcludes;
+        pathExcludes = List.of();
       }
-      IncludesExcludes includesExcludes =
-          IncludesExcludes.withSettings(projectDirectory, pathIncludes, pathExcludes);
+
+      if (useGlobalIncludesExcludes) {
+        includesExcludes =
+            IncludesExcludes.withSettings(projectDirectory, pathIncludes, pathExcludes);
+      }
 
       log.debug("including paths: {}", pathIncludes);
       log.debug("excluding paths: {}", pathExcludes);

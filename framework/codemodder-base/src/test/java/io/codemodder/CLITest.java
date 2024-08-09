@@ -242,6 +242,11 @@ final class CLITest {
       }
       return CodemodFileScanningResult.none();
     }
+
+    @Override
+    public IncludesExcludesPattern getIncludesExcludesPattern() {
+      return new IncludesExcludesPattern.Default(List.of(), List.of("**/*Test.java"));
+    }
   }
 
   @Test

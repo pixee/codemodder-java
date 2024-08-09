@@ -82,9 +82,14 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     if (codeChanger instanceof JavaParserChanger) {
       codemodRunner =
           new JavaParserCodemodRunner(
-              javaParserFacade, (JavaParserChanger) codeChanger, encodingDetector);
+              javaParserFacade,
+              (JavaParserChanger) codeChanger,
+              projectDir,
+              includesExcludes,
+              encodingDetector);
     } else if (codeChanger instanceof RawFileChanger) {
-      codemodRunner = new RawFileCodemodRunner((RawFileChanger) codeChanger);
+      codemodRunner =
+          new RawFileCodemodRunner((RawFileChanger) codeChanger, projectDir, includesExcludes);
     } else {
       throw new UnsupportedOperationException(
           "unsupported codeChanger type: " + codeChanger.getClass().getName());
@@ -95,7 +100,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
      */
     List<Path> codemodTargetFiles =
         filePaths.stream()
-            .filter(codemodRunner::supports)
+            .filter(p -> codemodRunner.supports(p))
             .sorted()
             .limit(maxFiles != -1 ? maxFiles : Long.MAX_VALUE)
             .sorted()

@@ -2,12 +2,8 @@ package io.codemodder.providers.sonar;
 
 import io.codemodder.sonar.model.SonarFinding;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Stream;
 
 abstract class DefaultRuleFinding<T extends SonarFinding> implements RuleFinding<T> {
 
@@ -36,5 +32,12 @@ abstract class DefaultRuleFinding<T extends SonarFinding> implements RuleFinding
   @Override
   public boolean hasResults() {
     return !findings.isEmpty();
+  }
+
+  @Override
+  public List<String> getPaths() {
+    var pathSet = new HashSet<Path>();
+    Stream<T> allFindings = findings.values().stream().flatMap(l -> l.stream());
+    return allFindings.flatMap(f -> f.componentFileName().stream()).distinct().toList();
   }
 }

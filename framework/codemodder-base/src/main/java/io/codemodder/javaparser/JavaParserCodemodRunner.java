@@ -21,19 +21,29 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
   private final JavaParserChanger javaParserChanger;
   private final JavaParserFacade parser;
   private final EncodingDetector encodingDetector;
+  private final IncludesExcludes rootedFileMatcher;
 
   public JavaParserCodemodRunner(
       final JavaParserFacade parser,
       final JavaParserChanger javaParserChanger,
+      final Path projectDir,
+      final IncludesExcludes globalIncludesExcludes,
       final EncodingDetector encodingDetector) {
     this.parser = Objects.requireNonNull(parser);
     this.javaParserChanger = Objects.requireNonNull(javaParserChanger);
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
+    if (globalIncludesExcludes instanceof IncludesExcludes.MatchesEverything) {
+      this.rootedFileMatcher =
+          javaParserChanger.getIncludesExcludesPattern().getRootedMatcher(projectDir);
+    } else {
+      this.rootedFileMatcher = Objects.requireNonNull(globalIncludesExcludes);
+    }
   }
 
   @Override
   public boolean supports(final Path path) {
-    return path.getFileName().toString().toLowerCase().endsWith(".java");
+    return path.getFileName().toString().endsWith(".java")
+        && rootedFileMatcher.shouldInspect(path.toFile());
   }
 
   @Override

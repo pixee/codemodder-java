@@ -30,6 +30,12 @@ public abstract class CompositeJavaParserChanger extends JavaParserChanger {
   }
 
   @Override
+  public IncludesExcludesPattern getIncludesExcludesPattern() {
+    // The first changer will dictate which files this composition accepts
+    return changers.get(0).getIncludesExcludesPattern();
+  }
+
+  @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     List<CodemodChange> changes = new ArrayList<>();

@@ -12,4 +12,7 @@ public interface RuleFinding<T extends SonarFinding> {
 
   /** Whether any results are available. */
   boolean hasResults();
+
+  /** Get all file paths that have any results. */
+  List<String> getPaths();
 }
