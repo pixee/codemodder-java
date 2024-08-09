@@ -22,6 +22,11 @@ public interface CodeChanger {
   /** A description of an individual change made by this codemod. */
   String getIndividualChangeDescription(final Path filePath, final CodemodChange change);
 
+  /** A list of paths requested or rejected by the codemod * */
+  default IncludesExcludesPattern getIncludesExcludesPattern() {
+    return IncludesExcludesPattern.getAnyMatcher();
+  }
+
   /**
    * A lifecycle event that is called before any files are processed. This is a good place to short
    * circuit if you don't have the necessary resources (e.g., SARIF).

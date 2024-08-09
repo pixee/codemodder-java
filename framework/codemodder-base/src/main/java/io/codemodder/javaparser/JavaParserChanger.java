@@ -39,6 +39,11 @@ public abstract class JavaParserChanger implements CodeChanger {
   }
 
   @Override
+  public IncludesExcludesPattern getIncludesExcludesPattern() {
+    return IncludesExcludesPattern.getJavaMatcher();
+  }
+
+  @Override
   public List<CodeTFReference> getReferences() {
     return reporter.getReferences().stream().map(u -> new CodeTFReference(u, u)).toList();
   }

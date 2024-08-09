@@ -12,14 +12,23 @@ import java.util.Objects;
 final class RawFileCodemodRunner implements CodemodRunner {
 
   private final RawFileChanger changer;
+  private final IncludesExcludes rootedFileMatcher;
 
-  RawFileCodemodRunner(final RawFileChanger changer) {
+  RawFileCodemodRunner(
+      final RawFileChanger changer,
+      final Path projectDir,
+      final IncludesExcludes globalIncludesExcludes) {
     this.changer = Objects.requireNonNull(changer);
+    if (globalIncludesExcludes instanceof IncludesExcludes.MatchesEverything) {
+      this.rootedFileMatcher = changer.getIncludesExcludesPattern().getRootedMatcher(projectDir);
+    } else {
+      this.rootedFileMatcher = Objects.requireNonNull(globalIncludesExcludes);
+    }
   }
 
   @Override
   public boolean supports(final Path path) {
-    return true;
+    return rootedFileMatcher.shouldInspect(path.toFile());
   }
 
   @Override

@@ -26,6 +26,29 @@ final class WebGoat822Test extends GitRepositoryTest {
     super("https://github.com/WebGoat/WebGoat", "main", "e75cfbeb110e3d3a2ca3c8fee2754992d89c419d");
   }
 
+  private static final String testPathIncludes =
+      "**.java,"
+          + "**/*.java,"
+          + "pom.xml,"
+          + "**/pom.xml,"
+          + "**.jsp,"
+          + "**/*.jsp,"
+          + "web.xml,"
+          + "**/web.xml,"
+          + ".github/workflows/*.yml,"
+          + ".github/workflows/*.yaml";
+
+  private static final String testPathExcludes =
+      "**/test/**,"
+          + "**/testFixtures/**,"
+          + "**/*Test.java,"
+          + "**/intTest/**,"
+          + "**/tests/**,"
+          + "**/target/**,"
+          + "**/build/**,"
+          + "**/.mvn/**,"
+          + ".mvn/**";
+
   @Test
   void it_injects_dependency_even_when_no_poms_included() throws Exception {
 
@@ -83,7 +106,13 @@ final class WebGoat822Test extends GitRepositoryTest {
   void it_transforms_webgoat_normally() throws Exception {
     DefaultCodemods.main(
         new String[] {
-          "--output", outputFile.getPath(), "--verbose", "--dont-exit", repoDir.getPath()
+          "--output",
+          outputFile.getPath(),
+          "--verbose",
+          "--dont-exit",
+          repoDir.getPath(),
+          "--path-include=" + testPathIncludes,
+          "--path-exclude=" + testPathExcludes,
         });
 
     ObjectMapper objectMapper = new ObjectMapper();
@@ -121,6 +150,8 @@ final class WebGoat822Test extends GitRepositoryTest {
           "--sarif",
           "src/test/resources/webgoat_v8.2.2_codeql.sarif",
           "--dont-exit",
+          "--path-include=" + testPathIncludes,
+          "--path-exclude=" + testPathExcludes,
           repoDir.getPath()
         });
 

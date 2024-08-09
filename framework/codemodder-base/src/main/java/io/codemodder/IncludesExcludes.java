@@ -166,6 +166,7 @@ public interface IncludesExcludes {
     return includePatterns.isEmpty() && excludePatterns.isEmpty();
   }
 
+  /** Matches every file, indicates that the codemods should use their own filtering. */
   class MatchesEverything implements IncludesExcludes {
     @Override
     public boolean shouldInspect(final File file) {
