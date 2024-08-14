@@ -9,10 +9,7 @@ import io.codemodder.RuleSarif;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +21,7 @@ public final class CodeQLRuleSarif implements RuleSarif {
   private final String ruleId;
   private final Map<Path, List<Result>> resultsCache;
   private final Path repositoryRoot;
+  private Set<String> relativeLocations;
 
   public CodeQLRuleSarif(
       final String ruleId, final SarifSchema210 sarif, final CodeDirectory codeDirectory) {
@@ -31,6 +29,7 @@ public final class CodeQLRuleSarif implements RuleSarif {
     this.ruleId = Objects.requireNonNull(ruleId);
     this.repositoryRoot = codeDirectory.asPath();
     this.resultsCache = new HashMap<>();
+    this.relativeLocations = null;
   }
 
   private String extractRuleId(final Result result, final Run run) {
@@ -94,6 +93,28 @@ public final class CodeQLRuleSarif implements RuleSarif {
             .toList();
     resultsCache.put(path, results);
     return results;
+  }
+
+  @Override
+  public Set<String> getPaths() {
+    if (relativeLocations == null) {
+      relativeLocations =
+          sarif.getRuns().stream()
+              .flatMap(
+                  run ->
+                      run.getResults().stream()
+                          .filter(result -> ruleId.equals(extractRuleId(result, run))))
+              .map(
+                  result ->
+                      result
+                          .getLocations()
+                          .get(0)
+                          .getPhysicalLocation()
+                          .getArtifactLocation()
+                          .getUri())
+              .collect(Collectors.toSet());
+    }
+    return relativeLocations;
   }
 
   @Override

@@ -32,6 +32,7 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
     this.parser = Objects.requireNonNull(parser);
     this.javaParserChanger = Objects.requireNonNull(javaParserChanger);
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
+    // If no global includes/excludes are specified, each codemod will decide which files to inspect
     if (globalIncludesExcludes instanceof IncludesExcludes.MatchesEverything) {
       this.rootedFileMatcher =
           javaParserChanger.getIncludesExcludesPattern().getRootedMatcher(projectDir);

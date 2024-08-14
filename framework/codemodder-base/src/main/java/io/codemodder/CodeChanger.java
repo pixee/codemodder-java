@@ -22,7 +22,10 @@ public interface CodeChanger {
   /** A description of an individual change made by this codemod. */
   String getIndividualChangeDescription(final Path filePath, final CodemodChange change);
 
-  /** A list of paths requested or rejected by the codemod * */
+  /**
+   * A list of paths requested or rejected by the codemod. Those patterns are treated as relative to
+   * the repository root.
+   */
   default IncludesExcludesPattern getIncludesExcludesPattern() {
     return IncludesExcludesPattern.getAnyMatcher();
   }

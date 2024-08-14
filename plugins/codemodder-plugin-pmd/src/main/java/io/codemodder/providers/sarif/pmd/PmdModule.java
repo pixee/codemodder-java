@@ -127,7 +127,8 @@ public final class PmdModule extends AbstractModule {
                       resultsByFile.computeIfAbsent(normalizedFilePath, k -> new ArrayList<>());
                   resultsForFile.add(result);
                 }
-                return new PmdRuleSarif(trimmedRuleId, rawSarifFromRun, resultsByFile);
+                return new PmdRuleSarif(
+                    trimmedRuleId, rawSarifFromRun, resultsByFile, this.codeDirectory);
               });
 
       this.bind(RuleSarif.class).annotatedWith(scanTarget.pmdScan).toInstance(sarif);

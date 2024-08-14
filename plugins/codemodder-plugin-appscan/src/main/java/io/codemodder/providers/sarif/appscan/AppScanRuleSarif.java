@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /** A {@link RuleSarif} for AppScan results. */
 final class AppScanRuleSarif implements RuleSarif {
@@ -90,6 +91,11 @@ final class AppScanRuleSarif implements RuleSarif {
                                         .getArtifactLocation()
                                         .getIndex()))
                 .toList());
+  }
+
+  @Override
+  public Set<String> getPaths() {
+    return locations.stream().collect(Collectors.toSet());
   }
 
   @Override

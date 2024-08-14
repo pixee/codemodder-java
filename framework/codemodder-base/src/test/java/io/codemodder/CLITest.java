@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -245,7 +246,7 @@ final class CLITest {
 
     @Override
     public IncludesExcludesPattern getIncludesExcludesPattern() {
-      return new IncludesExcludesPattern.Default(List.of(), List.of("**/*Test.java"));
+      return new IncludesExcludesPattern.Default(Set.of(), Set.of("**/*Test.java"));
     }
   }
 

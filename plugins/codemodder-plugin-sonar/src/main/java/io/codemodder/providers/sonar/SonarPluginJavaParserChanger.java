@@ -11,6 +11,7 @@ import io.codemodder.sonar.model.SonarFinding;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /** Provides base functionality for making JavaParser-based changes based on Sonar results. */
 public abstract class SonarPluginJavaParserChanger<T extends Node, S extends SonarFinding>
@@ -22,6 +23,8 @@ public abstract class SonarPluginJavaParserChanger<T extends Node, S extends Son
 
   private final NodeCollector nodeCollector;
 
+  private final IncludesExcludesPattern includesExcludesPattern;
+
   protected SonarPluginJavaParserChanger(
       final RuleFinding<S> ruleFinding,
       final Class<? extends Node> nodeType,
@@ -31,6 +34,8 @@ public abstract class SonarPluginJavaParserChanger<T extends Node, S extends Son
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = nodeCollector;
+    this.includesExcludesPattern =
+        new IncludesExcludesPattern.Default(ruleFinding.getPaths(), Set.of());
   }
 
   protected SonarPluginJavaParserChanger(
@@ -48,6 +53,8 @@ public abstract class SonarPluginJavaParserChanger<T extends Node, S extends Son
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = NodeCollector.ALL_FROM_TYPE;
+    this.includesExcludesPattern =
+        new IncludesExcludesPattern.Default(ruleFinding.getPaths(), Set.of());
   }
 
   @Override

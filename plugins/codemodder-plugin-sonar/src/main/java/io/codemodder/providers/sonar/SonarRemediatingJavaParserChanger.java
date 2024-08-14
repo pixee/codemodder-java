@@ -4,7 +4,7 @@ import io.codemodder.CodemodReporterStrategy;
 import io.codemodder.FixOnlyCodeChanger;
 import io.codemodder.IncludesExcludesPattern;
 import io.codemodder.javaparser.JavaParserChanger;
-import java.util.List;
+import java.util.Set;
 
 /** Provides base functionality for making JavaParser-based remediation of Sonar results. */
 public abstract class SonarRemediatingJavaParserChanger extends JavaParserChanger
@@ -17,8 +17,8 @@ public abstract class SonarRemediatingJavaParserChanger extends JavaParserChange
       final CodemodReporterStrategy reporter, final RuleFinding<?> findings) {
     super(reporter);
     this.shouldRun = findings.hasResults();
-    List<String> allPathFindings = findings.getPaths();
-    this.includesExcludesPattern = new IncludesExcludesPattern.Default(allPathFindings, List.of());
+    Set<String> allPathFindings = findings.getPaths();
+    this.includesExcludesPattern = new IncludesExcludesPattern.Default(allPathFindings, Set.of());
   }
 
   @Override

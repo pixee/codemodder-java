@@ -5,6 +5,7 @@ import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 /** Defines a model for interacting with SARIF. */
 public interface RuleSarif {
@@ -37,6 +38,12 @@ public interface RuleSarif {
   /** Returns the tool driver that produced this SARIF. */
   String getDriver();
 
+  /**
+   * Returns all file paths with results for the rule. Those paths are relative to the repository
+   * root.
+   */
+  Set<String> getPaths();
+
   /** An empty implementation of {@link RuleSarif} for binding codemods with no SARIF results. */
   final class EmptyRuleSarif implements RuleSarif {
 
@@ -63,6 +70,11 @@ public interface RuleSarif {
     @Override
     public SarifSchema210 rawDocument() {
       return new SarifSchema210();
+    }
+
+    @Override
+    public Set<String> getPaths() {
+      return Set.of();
     }
   }
 }

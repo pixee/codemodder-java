@@ -14,10 +14,10 @@ public interface IncludesExcludesPattern {
 
   class Default implements IncludesExcludesPattern {
 
-    private final List<String> pathIncludes;
-    private final List<String> pathExcludes;
+    private final Set<String> pathIncludes;
+    private final Set<String> pathExcludes;
 
-    public Default(final List<String> pathIncludes, final List<String> pathExcludes) {
+    public Default(final Set<String> pathIncludes, final Set<String> pathExcludes) {
       this.pathIncludes = pathIncludes;
       this.pathExcludes = pathExcludes;
     }
@@ -29,15 +29,40 @@ public interface IncludesExcludesPattern {
 
     @Override
     public IncludesExcludes getRootedMatcher(final Path root) {
-      return IncludesExcludes.withSettings(root.toFile(), pathIncludes, pathExcludes);
+      return IncludesExcludes.withSettings(
+          root.toFile(), pathIncludes.stream().toList(), pathExcludes.stream().toList());
+    }
+  }
+
+  final class JavaMatcherSingleton {
+    private static IncludesExcludesPattern singleton;
+
+    public static IncludesExcludesPattern getInstance() {
+      if (singleton == null) {
+        singleton =
+            new IncludesExcludesPattern.Default(
+                Set.of("**.[jJ][aA][vV][Aa]"), Collections.emptySet());
+      }
+      return singleton;
+    }
+  }
+
+  final class AnySingleton {
+    private static IncludesExcludesPattern singleton;
+
+    public static IncludesExcludesPattern getInstance() {
+      if (singleton == null) {
+        singleton = new IncludesExcludesPattern.Default(Set.of("**"), Collections.emptySet());
+      }
+      return singleton;
     }
   }
 
   public static IncludesExcludesPattern getJavaMatcher() {
-    return new Default(List.of("**.java"), List.of());
+    return JavaMatcherSingleton.getInstance();
   }
 
   public static IncludesExcludesPattern getAnyMatcher() {
-    return new Default(List.of("**"), List.of());
+    return AnySingleton.getInstance();
   }
 }

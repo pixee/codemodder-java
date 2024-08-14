@@ -100,7 +100,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
      */
     List<Path> codemodTargetFiles =
         filePaths.stream()
-            .filter(p -> codemodRunner.supports(p))
+            .filter(codemodRunner::supports)
             .sorted()
             .limit(maxFiles != -1 ? maxFiles : Long.MAX_VALUE)
             .sorted()
@@ -371,13 +371,12 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
     dependencies.stream()
         .filter(d -> !skippedDependencies.contains(d))
         .forEach(
-            dep -> {
-              pkgActions.add(
-                  new CodeTFPackageAction(
-                      CodeTFPackageAction.CodeTFPackageActionType.ADD,
-                      CodeTFPackageAction.CodeTFPackageActionResult.FAILED,
-                      toPackageUrl(dep)));
-            });
+            dep ->
+                pkgActions.add(
+                    new CodeTFPackageAction(
+                        CodeTFPackageAction.CodeTFPackageActionType.ADD,
+                        CodeTFPackageAction.CodeTFPackageActionResult.FAILED,
+                        toPackageUrl(dep))));
     return CodemodPackageUpdateResult.from(pkgActions, pkgChanges, unscannableFiles);
   }
 
