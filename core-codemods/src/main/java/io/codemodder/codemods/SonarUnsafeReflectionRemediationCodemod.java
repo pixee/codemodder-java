@@ -49,7 +49,8 @@ public final class SonarUnsafeReflectionRemediationCodemod
         detectorRule(),
         issues.getResultsByPath(context.path()),
         Issue::getKey,
-        Issue::getLine,
+        i -> i.getTextRange() != null ? i.getTextRange().getStartLine() : i.getLine(),
+        i -> i.getTextRange() != null ? i.getTextRange().getEndLine() : null,
         i -> i.getTextRange().getStartOffset());
   }
 }

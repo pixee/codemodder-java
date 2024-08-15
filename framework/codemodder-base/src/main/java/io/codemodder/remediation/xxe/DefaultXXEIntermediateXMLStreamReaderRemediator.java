@@ -28,17 +28,26 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediator
       final DetectorRule detectorRule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final Function<T, Integer> getColumn) {
+      final Function<T, Integer> getStartLine,
+      final Function<T, Integer> getEndLine,
+      final Function<T, Integer> getStartColumn) {
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>()
             .withMethodName("createXMLStreamReader")
-            .withMatcher(mce -> mce.getScope().isPresent())
+            .withMatcher(mce -> mce.asNode().hasScope())
             .withMatcher(mce -> mce.getArguments().isNonEmpty())
             .build();
 
     FixCandidateSearchResults<T> results =
-        searcher.search(cu, path, detectorRule, issuesForFile, getKey, getLine, getColumn);
+        searcher.search(
+            cu,
+            path,
+            detectorRule,
+            issuesForFile,
+            getKey,
+            getStartLine,
+            getEndLine,
+            getStartColumn);
 
     List<CodemodChange> changes = new ArrayList<>();
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
@@ -47,9 +56,10 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediator
       List<T> issues = fixCandidate.issues();
 
       // get the xmlstreamreader scope variable
-      MethodCallExpr createXMLStreamReaderCall = fixCandidate.methodCall();
+      MethodCallExpr createXMLStreamReaderCall = fixCandidate.call().asMethodCall();
       Expression xmlStreamReaderScope = createXMLStreamReaderCall.getScope().get();
-      // make sure its a variable
+
+      // make sure it's a variable
       if (!xmlStreamReaderScope.isNameExpr()) {
         issues.stream()
             .map(
@@ -58,7 +68,7 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediator
                         getKey.apply(issue),
                         detectorRule,
                         path,
-                        getLine.apply(issue),
+                        getStartLine.apply(issue),
                         "Could not find the XMLStreamReader variable"))
             .forEach(unfixedFindings::add);
         continue;
@@ -76,7 +86,7 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediator
                         getKey.apply(issue),
                         detectorRule,
                         path,
-                        getLine.apply(issue),
+                        getStartLine.apply(issue),
                         "Could not find the statement containing the XMLStreamReader creation"))
             .forEach(unfixedFindings::add);
         continue;
@@ -87,7 +97,8 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediator
           .map(
               issue ->
                   CodemodChange.from(
-                      getLine.apply(issue), new FixedFinding(getKey.apply(issue), detectorRule)))
+                      getStartLine.apply(issue),
+                      new FixedFinding(getKey.apply(issue), detectorRule)))
           .forEach(changes::add);
     }
 

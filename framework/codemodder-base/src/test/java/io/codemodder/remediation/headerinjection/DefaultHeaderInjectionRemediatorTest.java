@@ -46,7 +46,14 @@ final class DefaultHeaderInjectionRemediatorTest {
         new HeaderInjectionFinding("header-injection", "SearchController.java", line);
     CodemodFileScanningResult result =
         remediator.remediateAll(
-            cu, "SearchController.java", rule, List.of(finding), f -> f.id, f -> line, f -> null);
+            cu,
+            "SearchController.java",
+            rule,
+            List.of(finding),
+            f -> f.id,
+            f -> line,
+            f -> null,
+            f -> null);
     assertThat(result.changes()).isEmpty();
     assertThat(result.unfixedFindings()).hasSize(1);
     UnfixedFinding unfixedFinding = result.unfixedFindings().get(0);
@@ -173,7 +180,14 @@ final class DefaultHeaderInjectionRemediatorTest {
         new HeaderInjectionFinding("header-injection", "SearchController.java", line);
     CodemodFileScanningResult result =
         remediator.remediateAll(
-            cu, "SearchController.java", rule, List.of(finding), f -> f.id, f -> f.line, f -> null);
+            cu,
+            "SearchController.java",
+            rule,
+            List.of(finding),
+            f -> f.id,
+            f -> f.line,
+            f -> null,
+            f -> null);
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);
     assertThat(change.lineNumber()).isEqualTo(line);

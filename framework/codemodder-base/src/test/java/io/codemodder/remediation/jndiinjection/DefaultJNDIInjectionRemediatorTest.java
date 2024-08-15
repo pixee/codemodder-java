@@ -47,6 +47,7 @@ final class DefaultJNDIInjectionRemediatorTest {
             List.of(issue),
             JNDIInjectionIssue::key,
             JNDIInjectionIssue::line,
+            i -> null,
             JNDIInjectionIssue::column);
 
     assertThat(result.changes()).isEmpty();
@@ -172,6 +173,7 @@ final class DefaultJNDIInjectionRemediatorTest {
             List.of(issue),
             JNDIInjectionIssue::key,
             JNDIInjectionIssue::line,
+            i -> null,
             JNDIInjectionIssue::column);
 
     assertThat(result.changes()).hasSize(1);
@@ -236,6 +238,7 @@ final class DefaultJNDIInjectionRemediatorTest {
             List.of(issue),
             JNDIInjectionIssue::key,
             JNDIInjectionIssue::line,
+            i -> null,
             JNDIInjectionIssue::column);
 
     assertThat(result.changes()).hasSize(1);

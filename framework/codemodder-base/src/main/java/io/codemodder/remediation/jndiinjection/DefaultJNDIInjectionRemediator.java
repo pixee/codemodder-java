@@ -42,29 +42,38 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       final DetectorRule detectorRule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final Function<T, Integer> getColumn) {
+      final Function<T, Integer> getStartLine,
+      final Function<T, Integer> getEndLine,
+      final Function<T, Integer> getStartColumn) {
 
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>()
             .withMethodName("lookup")
-            .withMatcher(mce -> mce.getScope().isPresent())
+            .withMatcher(mce -> mce.asNode().hasScope())
             .withMatcher(mce -> mce.getArguments().size() == 1)
-            .withMatcher(mce -> mce.getArgument(0).isNameExpr())
+            .withMatcher(mce -> mce.getArguments().get(0) instanceof NameExpr)
             .build();
 
     // find all the potential lookup() calls
     FixCandidateSearchResults<T> results =
-        searcher.search(cu, path, detectorRule, issuesForFile, getKey, getLine, getColumn);
+        searcher.search(
+            cu,
+            path,
+            detectorRule,
+            issuesForFile,
+            getKey,
+            getStartLine,
+            getEndLine,
+            getStartColumn);
 
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
     List<CodemodChange> changes = new ArrayList<>();
 
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
       List<T> issues = fixCandidate.issues();
-      int line = getLine.apply(issues.get(0));
+      int line = getStartLine.apply(issues.get(0));
 
-      MethodCallExpr lookupCall = fixCandidate.methodCall();
+      MethodCallExpr lookupCall = fixCandidate.call().asMethodCall();
       // get the parent method of the lookup() call
       Optional<MethodDeclaration> parentMethod = lookupCall.findAncestor(MethodDeclaration.class);
       if (parentMethod.isEmpty()) {

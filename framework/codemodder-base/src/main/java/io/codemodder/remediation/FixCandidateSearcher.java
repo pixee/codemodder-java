@@ -1,7 +1,6 @@
 package io.codemodder.remediation;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.codetf.DetectorRule;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +18,14 @@ public interface FixCandidateSearcher<T> {
       DetectorRule rule,
       List<T> issuesForFile,
       Function<T, String> getKey,
-      Function<T, Integer> getLine,
+      Function<T, Integer> getStartLine,
+      Function<T, Integer> getEndLine,
       Function<T, Integer> getColumn);
 
   /** Builder for {@link FixCandidateSearcher}. */
   final class Builder<T> {
     private String methodName;
-    private final List<Predicate<MethodCallExpr>> methodMatchers;
+    private final List<Predicate<MethodOrConstructor>> methodMatchers;
 
     public Builder() {
       this.methodMatchers = new ArrayList<>();
@@ -36,7 +36,7 @@ public interface FixCandidateSearcher<T> {
       return this;
     }
 
-    public Builder<T> withMatcher(final Predicate<MethodCallExpr> methodMatcher) {
+    public Builder<T> withMatcher(final Predicate<MethodOrConstructor> methodMatcher) {
       this.methodMatchers.add(Objects.requireNonNull(methodMatcher));
       return this;
     }

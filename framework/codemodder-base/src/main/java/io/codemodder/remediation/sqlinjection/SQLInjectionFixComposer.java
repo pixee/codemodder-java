@@ -1,6 +1,7 @@
 package io.codemodder.remediation.sqlinjection;
 
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import io.codemodder.remediation.MethodOrConstructor;
 
 /** Composes several transformations related to SQL injections. */
 public final class SQLInjectionFixComposer {
@@ -12,7 +13,14 @@ public final class SQLInjectionFixComposer {
    * prepareStatement(), executeQuery(), etc.), parameterize data injections or add a validation
    * step for structural injections.
    */
-  public static boolean checkAndFix(final MethodCallExpr methodCallExpr) {
+  public static boolean checkAndFix(final MethodOrConstructor m) {
+
+    if (!m.isMethodCall()) {
+      return false;
+    }
+
+    MethodCallExpr methodCallExpr = m.asMethodCall();
+
     // First, check if any data injection fixes apply
     var maybeFixed = new SQLParameterizer(methodCallExpr).checkAndFix();
     if (maybeFixed.isPresent()) {
@@ -30,7 +38,11 @@ public final class SQLInjectionFixComposer {
    * Check if the {@link MethodCallExpr} is a JDBC API query method that is a target of a SQL
    * injection transformation.
    */
-  public static boolean match(final MethodCallExpr methodCallExpr) {
+  public static boolean match(final MethodOrConstructor methodOrConstructor) {
+    if (!methodOrConstructor.isMethodCall()) {
+      return false;
+    }
+    MethodCallExpr methodCallExpr = methodOrConstructor.asMethodCall();
     return SQLParameterizer.isSupportedJdbcMethodCall(methodCallExpr)
         || SQLTableInjectionFilterTransform.matchCall(methodCallExpr);
   }

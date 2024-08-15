@@ -59,6 +59,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
         detectorRule(),
         findingsForThisPath,
         finding -> String.valueOf(finding.getId()),
-        Finding::getLine);
+        Finding::getLine,
+        f -> null);
   }
 }

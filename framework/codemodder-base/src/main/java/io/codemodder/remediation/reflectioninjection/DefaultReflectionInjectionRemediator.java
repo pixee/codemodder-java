@@ -13,6 +13,7 @@ import io.codemodder.codetf.FixedFinding;
 import io.codemodder.remediation.FixCandidate;
 import io.codemodder.remediation.FixCandidateSearchResults;
 import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.MethodOrConstructor;
 import io.github.pixee.security.Reflection;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,9 @@ final class DefaultReflectionInjectionRemediator implements ReflectionInjectionR
       final DetectorRule detectorRule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final Function<T, Integer> getColumn) {
+      final Function<T, Integer> getStartLine,
+      final Function<T, Integer> getEndLine,
+      final Function<T, Integer> getStartColumn) {
 
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>()
@@ -36,14 +38,23 @@ final class DefaultReflectionInjectionRemediator implements ReflectionInjectionR
             .build();
 
     FixCandidateSearchResults<T> results =
-        searcher.search(cu, path, detectorRule, issuesForFile, getKey, getLine, getColumn);
+        searcher.search(
+            cu,
+            path,
+            detectorRule,
+            issuesForFile,
+            getKey,
+            getStartLine,
+            getEndLine,
+            getStartColumn);
+
     List<CodemodChange> changes = new ArrayList<>();
 
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
       List<T> issues = fixCandidate.issues();
-      int line = getLine.apply(issues.get(0));
+      int line = getStartLine.apply(issues.get(0));
 
-      MethodCallExpr methodCallExpr = fixCandidate.methodCall();
+      MethodCallExpr methodCallExpr = fixCandidate.call().asMethodCall();
       replaceMethodCallExpression(cu, methodCallExpr);
 
       issues.stream()
@@ -85,11 +96,15 @@ final class DefaultReflectionInjectionRemediator implements ReflectionInjectionR
    * the method expression.
    *
    * @param cu CompilationUnit for checking static imports
-   * @param methodCallExpr the method call expression to check
+   * @param methodOrConstructor the node to check
    * @return true if the method call expression is a call to {@code Class.forName(String)}
    */
   private static boolean isClassForNameCall(
-      final CompilationUnit cu, final MethodCallExpr methodCallExpr) {
+      final CompilationUnit cu, final MethodOrConstructor methodOrConstructor) {
+    if (!methodOrConstructor.isMethodCall()) {
+      return false;
+    }
+    MethodCallExpr methodCallExpr = methodOrConstructor.asMethodCall();
     final boolean scopeMatches =
         methodCallExpr
             .getScope()

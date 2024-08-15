@@ -23,6 +23,7 @@ public interface XXEIntermediateXMLStreamReaderRemediator {
       DetectorRule detectorRule,
       List<T> issuesForFile,
       Function<T, String> getKey,
-      Function<T, Integer> getLine,
-      Function<T, Integer> getColumn);
+      Function<T, Integer> getEndLine,
+      Function<T, Integer> getStartColumn,
+      Function<T, Integer> getEndColumn);
 }

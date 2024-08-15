@@ -22,8 +22,9 @@ public interface JNDIInjectionRemediator {
       DetectorRule detectorRule,
       List<T> issuesForFile,
       Function<T, String> getKey,
-      Function<T, Integer> getLine,
-      Function<T, Integer> getColumn);
+      Function<T, Integer> getStartLine,
+      Function<T, Integer> getEndLine,
+      Function<T, Integer> getStartColumn);
 
   /** The default JNDI injection remediation strategy. */
   JNDIInjectionRemediator DEFAULT = new DefaultJNDIInjectionRemediator();

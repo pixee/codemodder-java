@@ -16,7 +16,8 @@ public interface ReflectionInjectionRemediator {
       DetectorRule detectorRule,
       List<T> issuesForFile,
       Function<T, String> getKey,
-      Function<T, Integer> getLine,
+      Function<T, Integer> getStartLine,
+      Function<T, Integer> getEndLine,
       Function<T, Integer> getColumn);
 
   ReflectionInjectionRemediator DEFAULT = new DefaultReflectionInjectionRemediator();

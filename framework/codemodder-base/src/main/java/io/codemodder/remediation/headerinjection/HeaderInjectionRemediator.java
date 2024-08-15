@@ -16,7 +16,8 @@ public interface HeaderInjectionRemediator {
       DetectorRule detectorRule,
       List<T> issuesForFile,
       Function<T, String> getKey,
-      Function<T, Integer> getLine,
+      Function<T, Integer> getStartLine,
+      Function<T, Integer> getEndLine,
       Function<T, Integer> getColumn);
 
   /** The default header injection remediation strategy. */
