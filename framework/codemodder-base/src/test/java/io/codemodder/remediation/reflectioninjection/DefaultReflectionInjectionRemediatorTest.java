@@ -201,6 +201,7 @@ final class DefaultReflectionInjectionRemediatorTest {
               List.of(finding),
               ReflectionInjectionFinding::key,
               ReflectionInjectionFinding::line,
+              f -> null,
               ReflectionInjectionFinding::column);
       assertThat(result.unfixedFindings()).isEmpty();
       assertThat(result.changes()).hasSize(1);
@@ -269,6 +270,7 @@ final class DefaultReflectionInjectionRemediatorTest {
               List.of(finding),
               ReflectionInjectionFinding::key,
               ReflectionInjectionFinding::line,
+              f -> null,
               ReflectionInjectionFinding::column);
       assertThat(result.changes()).isEmpty();
       assertThat(result.unfixedFindings()).hasSize(1);

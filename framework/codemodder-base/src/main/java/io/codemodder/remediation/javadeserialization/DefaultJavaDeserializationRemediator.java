@@ -19,11 +19,13 @@ import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.remediation.FixCandidate;
 import io.codemodder.remediation.FixCandidateSearchResults;
 import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.MethodOrConstructor;
 import io.github.pixee.security.ObjectInputFilters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import org.jetbrains.annotations.NotNull;
 
 final class DefaultJavaDeserializationRemediator implements JavaDeserializationRemediator {
 
@@ -34,32 +36,79 @@ final class DefaultJavaDeserializationRemediator implements JavaDeserializationR
       final DetectorRule detectorRule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final Function<T, Integer> getColumn) {
+      final Function<T, Integer> getStartLine,
+      final Function<T, Integer> getEndLine,
+      final Function<T, Integer> getStartColumn) {
+
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>()
             .withMethodName("readObject")
-            .withMatcher(mce -> mce.getScope().isPresent())
+            .withMatcher(MethodOrConstructor::isMethodCallWithScope)
             .withMatcher(mce -> mce.getArguments().isEmpty())
             .build();
 
+    // search for readObject() calls on those lines, assuming the tool points there
     FixCandidateSearchResults<T> results =
-        searcher.search(cu, path, detectorRule, issuesForFile, getKey, getLine, getColumn);
+        searcher.search(
+            cu,
+            path,
+            detectorRule,
+            issuesForFile,
+            getKey,
+            getStartLine,
+            getEndLine,
+            getStartColumn);
+
+    if (results.fixCandidates().isEmpty()) {
+      // try searching for matching ObjectInputStream creation objects, maybe that's where they're
+      // pointing
+      searcher =
+          new FixCandidateSearcher.Builder<T>()
+              .withMatcher(mc -> mc.isConstructorForType("ObjectInputStream"))
+              .build();
+
+      results =
+          searcher.search(
+              cu,
+              path,
+              detectorRule,
+              issuesForFile,
+              getKey,
+              getStartLine,
+              getEndLine,
+              getStartColumn);
+    }
 
     List<CodemodChange> changes = new ArrayList<>();
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
+
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
       List<T> issues = fixCandidate.issues();
-      MethodCallExpr call = fixCandidate.methodCall();
-      // get the declaration of the ObjectInputStream
-      Expression callScope = call.getScope().get();
+      MethodOrConstructor call = fixCandidate.call();
+
+      if (call.isConstructor()) {
+        // we're pointing to the readObject(), fix and move on
+        fixObjectInputStreamCreation((ObjectCreationExpr) call.asNode());
+        CodemodChange change = buildFixChange(detectorRule, getKey, getStartLine, issues);
+        changes.add(change);
+        continue;
+      }
+
+      // we're pointing to the readObject(), so we must work backwards to find the declaration of
+      // the ObjectInputStream
+      MethodCallExpr mce = (MethodCallExpr) call.asNode();
+      Expression callScope = mce.getScope().get();
       if (!callScope.isNameExpr()) {
         // can't fix these
         issues.stream()
             .map(
                 i ->
                     new UnfixedFinding(
-                        getKey.apply(i), detectorRule, path, getLine.apply(i), "Unexpected shape"))
+                        getKey.apply(i),
+                        detectorRule,
+                        path,
+                        getStartLine.apply(i),
+                        "Unexpected shape"))
             .forEach(unfixedFindings::add);
         continue;
       }
@@ -74,7 +123,7 @@ final class DefaultJavaDeserializationRemediator implements JavaDeserializationR
                         getKey.apply(i),
                         detectorRule,
                         path,
-                        getLine.apply(i),
+                        getStartLine.apply(i),
                         "No declaration found"))
             .forEach(unfixedFindings::add);
         continue;
@@ -92,7 +141,7 @@ final class DefaultJavaDeserializationRemediator implements JavaDeserializationR
                           getKey.apply(i),
                           detectorRule,
                           path,
-                          getLine.apply(i),
+                          getStartLine.apply(i),
                           "No initializer found"))
               .forEach(unfixedFindings::add);
           continue;
@@ -101,13 +150,7 @@ final class DefaultJavaDeserializationRemediator implements JavaDeserializationR
         Expression expression = initializer.get();
         if (expression instanceof ObjectCreationExpr objCreation) {
           fixObjectInputStreamCreation(objCreation);
-          CodemodChange change =
-              CodemodChange.from(
-                  getLine.apply(issues.get(0)),
-                  List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT),
-                  issues.stream()
-                      .map(i -> new FixedFinding(getKey.apply(i), detectorRule))
-                      .toList());
+          CodemodChange change = buildFixChange(detectorRule, getKey, getStartLine, issues);
           changes.add(change);
         }
       } else {
@@ -118,7 +161,7 @@ final class DefaultJavaDeserializationRemediator implements JavaDeserializationR
                         getKey.apply(i),
                         detectorRule,
                         path,
-                        getLine.apply(i),
+                        getStartLine.apply(i),
                         "Unexpected declaration type"))
             .forEach(unfixedFindings::add);
       }
@@ -126,6 +169,20 @@ final class DefaultJavaDeserializationRemediator implements JavaDeserializationR
 
     unfixedFindings.addAll(results.unfixableFindings());
     return CodemodFileScanningResult.from(changes, unfixedFindings);
+  }
+
+  /**
+   * Build a {@link io.codemodder.CodemodChange} for this code change that fixes the given issues.
+   */
+  private static <T> @NotNull CodemodChange buildFixChange(
+      final DetectorRule detectorRule,
+      final Function<T, String> getKey,
+      final Function<T, Integer> getLine,
+      final List<T> issues) {
+    return CodemodChange.from(
+        getLine.apply(issues.get(0)),
+        List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT),
+        issues.stream().map(i -> new FixedFinding(getKey.apply(i), detectorRule)).toList());
   }
 
   private void fixObjectInputStreamCreation(final ObjectCreationExpr objCreation) {

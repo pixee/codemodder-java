@@ -1,7 +1,6 @@
 package io.codemodder.remediation.sqlinjection;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.CodemodChange;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
@@ -10,6 +9,7 @@ import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.remediation.FixCandidate;
 import io.codemodder.remediation.FixCandidateSearchResults;
 import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.MethodOrConstructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +25,8 @@ import org.javatuples.Pair;
 final class DefaultJavaParserSQLInjectionRemediatorStrategy
     implements JavaParserSQLInjectionRemediatorStrategy {
 
-  private final Map<Predicate<MethodCallExpr>, Predicate<MethodCallExpr>> remediationStrategies;
+  private final Map<Predicate<MethodOrConstructor>, Predicate<MethodOrConstructor>>
+      remediationStrategies;
 
   /**
    * Builds a strategy from a matcher-fixer pair. A matcher is a predicate that matches the call,
@@ -33,13 +34,13 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
    * as a side-effect and reports if successful with a boolean.
    */
   DefaultJavaParserSQLInjectionRemediatorStrategy(
-      final Predicate<MethodCallExpr> matcher, final Predicate<MethodCallExpr> fixer) {
+      final Predicate<MethodOrConstructor> matcher, final Predicate<MethodOrConstructor> fixer) {
     this.remediationStrategies = Map.of(matcher, fixer);
   }
 
   /** Builds a grand strategy as a combination of several strategies. */
   DefaultJavaParserSQLInjectionRemediatorStrategy(
-      final Map<Predicate<MethodCallExpr>, Predicate<MethodCallExpr>> strategies) {
+      final Map<Predicate<MethodOrConstructor>, Predicate<MethodOrConstructor>> strategies) {
     this.remediationStrategies = strategies;
   }
 
@@ -50,9 +51,10 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
       final DetectorRule detectorRule,
       final Collection<T> findingsForPath,
       final Function<T, String> findingIdExtractor,
-      final Function<T, Integer> findingLineExtractor,
-      final Predicate<MethodCallExpr> matcher,
-      final Predicate<MethodCallExpr> fixer) {
+      final Function<T, Integer> findingStartLineExtractor,
+      final Function<T, Integer> findingEndLineExtractor,
+      final Predicate<MethodOrConstructor> matcher,
+      final Predicate<MethodOrConstructor> fixer) {
 
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>().withMatcher(matcher).build();
@@ -64,7 +66,8 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
             detectorRule,
             new ArrayList<>(findingsForPath),
             findingIdExtractor,
-            findingLineExtractor,
+            findingStartLineExtractor,
+            findingEndLineExtractor,
             f -> null);
 
     if (findingsForPath.isEmpty()) {
@@ -76,7 +79,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
 
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
       List<T> issues = fixCandidate.issues();
-      Integer line = findingLineExtractor.apply(issues.get(0));
+      Integer line = findingStartLineExtractor.apply(issues.get(0));
 
       if (line == null) {
         issues.forEach(
@@ -89,8 +92,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
         continue;
       }
 
-      final MethodCallExpr methodCallExpr = fixCandidate.methodCall();
-      if (fixer.test(methodCallExpr)) {
+      if (fixer.test(fixCandidate.call())) {
         issues.forEach(
             issue -> {
               final String id = findingIdExtractor.apply(issue);
@@ -122,7 +124,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
    * @param detectorRule the detector rule that generated the findings
    * @param findingsForPath a collection of findings to be processed
    * @param findingIdExtractor a function to extract the ID from a finding
-   * @param findingLineExtractor a function to extract the line number from a finding
+   * @param findingStartLineExtractor a function to extract the line number from a finding
    * @param <T> the type of the findings
    * @return a result object containing the changes and unfixed findings
    */
@@ -133,7 +135,9 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
       final DetectorRule detectorRule,
       final Collection<T> findingsForPath,
       final Function<T, String> findingIdExtractor,
-      final Function<T, Integer> findingLineExtractor) {
+      final Function<T, Integer> findingStartLineExtractor,
+      final Function<T, Integer> findingEndLineExtractor) {
+
     List<CodemodChange> allChanges = new ArrayList<>();
     List<UnfixedFinding> allUnfixed = new ArrayList<>();
 
@@ -146,7 +150,8 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
               detectorRule,
               findingsForPath,
               findingIdExtractor,
-              findingLineExtractor,
+              findingStartLineExtractor,
+              findingEndLineExtractor,
               matcher,
               fixer);
       allChanges.addAll(pairResult.getValue0());

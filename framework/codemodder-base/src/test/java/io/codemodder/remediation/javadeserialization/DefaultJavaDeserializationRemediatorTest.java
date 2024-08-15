@@ -14,10 +14,10 @@ import io.codemodder.codetf.UnfixedFinding;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 final class DefaultJavaDeserializationRemediatorTest {
 
@@ -64,7 +64,7 @@ final class DefaultJavaDeserializationRemediatorTest {
 
     CodemodFileScanningResult result =
         remediator.remediateAll(
-            cu, "path", rule, List.of(new Object()), o -> "id", o -> line, o -> null);
+            cu, "path", rule, List.of(new Object()), o -> "id", o -> line, o -> null, o -> null);
     assertThat(result.unfixedFindings()).hasSize(1);
     assertThat(result.changes()).isEmpty();
     UnfixedFinding unfixedFinding = result.unfixedFindings().get(0);
@@ -74,35 +74,40 @@ final class DefaultJavaDeserializationRemediatorTest {
     assertThat(unfixedFinding.getPath()).isEqualTo("path");
   }
 
-  @Test
-  void it_fixes_java_deserialization() {
+  private static final String fixableCode =
+      """
+                    package com.acme;
+                    import java.io.ObjectInputStream;
+                    import java.io.InputStream;
 
-    String fixableCode =
-        """
-                package com.acme;
-                import java.io.ObjectInputStream;
-                import java.io.InputStream;
-
-                class Foo {
-                    Acme readAcme(InputStream is) {
-                        ObjectInputStream ois = new ObjectInputStream(is);
-                        // read the obj
-                        Acme acme = (Acme) ois.readObject();
-                        return acme;
+                    class Foo {
+                        Acme readAcme(InputStream is) {
+                            ObjectInputStream ois = new ObjectInputStream(is);
+                            // read the obj
+                            Acme acme = (Acme) ois.readObject();
+                            return acme;
+                        }
                     }
-                }
-                """;
+                    """;
+
+  /**
+   * Confirm that whether the tool points to the readObject() or the constructor, they both fix
+   * well.
+   */
+  @ParameterizedTest
+  @ValueSource(ints = {7, 9})
+  void it_fixes_java_deserialization(final int line) {
 
     CompilationUnit cu = StaticJavaParser.parse(fixableCode);
     LexicalPreservingPrinter.setup(cu);
 
     CodemodFileScanningResult result =
         remediator.remediateAll(
-            cu, "path", rule, List.of(new Object()), o -> "id", o -> 9, o -> null);
+            cu, "path", rule, List.of(new Object()), o -> "id", o -> line, o -> null, o -> null);
     assertThat(result.unfixedFindings()).isEmpty();
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);
-    assertThat(change.lineNumber()).isEqualTo(9);
+    assertThat(change.lineNumber()).isEqualTo(line);
     List<FixedFinding> fixedFindings = change.getFixedFindings();
     assertThat(fixedFindings).hasSize(1);
     assertThat(change.getDependenciesNeeded()).containsExactly(DependencyGAV.JAVA_SECURITY_TOOLKIT);

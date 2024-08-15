@@ -50,6 +50,7 @@ public final class SonarSQLInjectionCodemod extends SonarRemediatingJavaParserCh
         detectorRule(),
         hotspotsForFile,
         SonarFinding::getKey,
-        SonarFinding::getLine);
+        i -> i.getTextRange() != null ? i.getTextRange().getStartLine() : i.getLine(),
+        i -> i.getTextRange() != null ? i.getTextRange().getEndLine() : null);
   }
 }

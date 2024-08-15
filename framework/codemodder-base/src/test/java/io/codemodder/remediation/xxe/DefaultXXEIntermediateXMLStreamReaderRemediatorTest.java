@@ -48,7 +48,7 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediatorTest {
 
     CodemodFileScanningResult result =
         remediator.remediateAll(
-            cu, "foo", rule, List.of(new Object()), f -> "my-id-1", f -> 9, f -> null);
+            cu, "foo", rule, List.of(new Object()), f -> "my-id-1", f -> 9, f -> null, f -> null);
 
     // confirm code is what's expected
     String actualCode = LexicalPreservingPrinter.print(cu);

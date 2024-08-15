@@ -17,6 +17,7 @@ import io.codemodder.codetf.FixedFinding;
 import io.codemodder.remediation.FixCandidate;
 import io.codemodder.remediation.FixCandidateSearchResults;
 import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.MethodOrConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -45,25 +46,34 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
       final DetectorRule detectorRule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final Function<T, Integer> getColumn) {
+      final Function<T, Integer> getStartLine,
+      final Function<T, Integer> getEndLine,
+      final Function<T, Integer> getStartColumn) {
 
     FixCandidateSearcher<T> searcher =
         new FixCandidateSearcher.Builder<T>()
-            .withMatcher(mce -> setHeaderNames.contains(mce.getNameAsString()))
-            .withMatcher(mce -> mce.getScope().isPresent())
+            .withMatcher(mce -> mce.isMethodCallWithNameIn(setHeaderNames))
+            .withMatcher(MethodOrConstructor::isMethodCallWithScope)
             .withMatcher(mce -> mce.getArguments().size() == 2)
-            .withMatcher(mce -> !mce.getArgument(1).isStringLiteralExpr())
+            .withMatcher(mce -> !(mce.getArguments().get(1) instanceof StringLiteralExpr))
             .build();
 
     FixCandidateSearchResults<T> results =
-        searcher.search(cu, path, detectorRule, issuesForFile, getKey, getLine, getColumn);
+        searcher.search(
+            cu,
+            path,
+            detectorRule,
+            issuesForFile,
+            getKey,
+            getStartLine,
+            getEndLine,
+            getStartColumn);
 
     List<CodemodChange> changes = new ArrayList<>();
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
       List<T> issues = fixCandidate.issues();
 
-      MethodCallExpr setHeaderCall = fixCandidate.methodCall();
+      MethodCallExpr setHeaderCall = fixCandidate.call().asMethodCall();
       Expression headerValueArgument = setHeaderCall.getArgument(1);
       wrap(headerValueArgument).withScopelessMethod(validatorMethodName);
 
@@ -97,7 +107,7 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
       }
 
       // all the line numbers should be the same, so we just grab the first one
-      int line = getLine.apply(fixCandidate.issues().get(0));
+      int line = getStartLine.apply(fixCandidate.issues().get(0));
       List<FixedFinding> fixedFindings =
           issues.stream()
               .map(issue -> new FixedFinding(getKey.apply(issue), detectorRule))

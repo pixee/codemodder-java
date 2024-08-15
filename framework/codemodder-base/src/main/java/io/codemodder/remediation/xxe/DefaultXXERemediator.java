@@ -18,6 +18,8 @@ final class DefaultXXERemediator implements XXERemediator {
     this.fixers =
         List.of(
             new DocumentBuilderFactoryAndSAXParserAtCreationFixer(),
+            new DocumentBuilderFactoryAtNewDBFixer(),
+            new SAXParserAtNewSPFixer(),
             new DocumentBuilderFactoryAtParseFixer(),
             new TransformerFactoryAtCreationFixer(),
             new XMLReaderAtParseFixer());
@@ -30,7 +32,7 @@ final class DefaultXXERemediator implements XXERemediator {
       final DetectorRule detectorRule,
       final List<T> issuesForFile,
       final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
+      final Function<T, Integer> getStartLine,
       final Function<T, Integer> getColumn) {
 
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
@@ -39,7 +41,7 @@ final class DefaultXXERemediator implements XXERemediator {
     for (T issue : issuesForFile) {
 
       String findingId = getKey.apply(issue);
-      int line = getLine.apply(issue);
+      int line = getStartLine.apply(issue);
       Integer column = getColumn.apply(issue);
       for (XXEFixer fixer : fixers) {
         XXEFixAttempt fixAttempt = fixer.tryFix(line, column, cu);

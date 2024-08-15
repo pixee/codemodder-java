@@ -5,6 +5,8 @@ import java.util.List;
 
 /** Represents the result of changes made during parsing. */
 public interface ChangesResult {
+
+  /** Returns true if changes were applied. */
   boolean areChangesApplied();
 
   List<DependencyGAV> getDependenciesRequired();

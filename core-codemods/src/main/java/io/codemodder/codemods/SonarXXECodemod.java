@@ -49,7 +49,7 @@ public final class SonarXXECodemod extends SonarRemediatingJavaParserChanger {
         detectorRule(),
         issuesForFile,
         SonarFinding::getKey,
-        SonarFinding::getLine,
+        f -> f.getTextRange() != null ? f.getTextRange().getStartLine() : f.getLine(),
         f -> f.getTextRange().getStartOffset());
   }
 }
