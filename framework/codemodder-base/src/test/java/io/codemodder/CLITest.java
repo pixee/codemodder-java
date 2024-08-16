@@ -37,6 +37,7 @@ final class CLITest {
   private Path fooJavaFile;
   private Path barJavaFile;
   private Path testFile;
+  private Path notJavaFile;
   private List<SourceDirectory> sourceDirectories;
 
   @BeforeEach
@@ -49,11 +50,13 @@ final class CLITest {
     fooJavaFile = module1JavaDir.resolve("Foo.java");
     barJavaFile = module2JavaDir.resolve("Bar.java");
     testFile = module2JavaDir.resolve("MyTest.java");
+    notJavaFile = module2JavaDir.resolve("MyTest.txt");
     Files.write(
         fooJavaFile,
         "import com.acme.util.Bar; class Foo {private var bar = new Bar();}".getBytes());
     Files.write(barJavaFile, "public class Bar {}".getBytes());
     Files.write(testFile, "public class MyTest {}".getBytes());
+    Files.write(notJavaFile, "ground0".getBytes());
 
     /*
      * Only add module2 to the discovered source directories. This will help prove that the module1 files can still be seen and changed, even if we couldn't locate it as a "source directory".
@@ -80,6 +83,22 @@ final class CLITest {
     String[] args = new String[] {"--dont-exit", workingRepoDir.toString()};
     Runner.run(List.of(Cloud9Changer.class), args);
     assertThat(Files.readString(testFile)).doesNotContain("cloud9");
+  }
+
+  @Test
+  void global_overrides_codemod_includes_excludes() throws IOException {
+    String[] args =
+        new String[] {"--dont-exit", "--path-include=**/*Test.java", workingRepoDir.toString()};
+    Runner.run(List.of(Cloud9Changer.class), args);
+    assertThat(Files.readString(testFile)).contains("cloud9");
+  }
+
+  @Test
+  void it_must_respect_codemod_supports() throws IOException {
+    String[] args =
+        new String[] {"--dont-exit", "--path-include=**/*Test.txt", workingRepoDir.toString()};
+    Runner.run(List.of(Cloud9Changer.class), args);
+    assertThat(Files.readString(notJavaFile)).doesNotContain("cloud9");
   }
 
   @Test
@@ -214,7 +233,7 @@ final class CLITest {
 
     IncludesExcludes all = IncludesExcludes.any();
     List<Path> files = finder.findFiles(workingRepoDir, all);
-    assertThat(files).containsExactly(fooJavaFile, barJavaFile, testFile);
+    assertThat(files).containsExactly(fooJavaFile, barJavaFile, testFile, notJavaFile);
 
     IncludesExcludes onlyFoo =
         IncludesExcludes.withSettings(workingRepoDir.toFile(), List.of("**/Foo.java"), List.of());
@@ -236,12 +255,9 @@ final class CLITest {
     public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
         throws IOException {
       Path path = context.path();
-      if (path.toString().endsWith(".java")) {
-        Files.writeString(path, "cloud9");
-        List<CodemodChange> changes = List.of(CodemodChange.from(1));
-        return CodemodFileScanningResult.withOnlyChanges(changes);
-      }
-      return CodemodFileScanningResult.none();
+      Files.writeString(path, "cloud9");
+      List<CodemodChange> changes = List.of(CodemodChange.from(1));
+      return CodemodFileScanningResult.withOnlyChanges(changes);
     }
 
     @Override
@@ -250,8 +266,8 @@ final class CLITest {
     }
 
     @Override
-    public boolean supports(Path file) {
-      return true;
+    public boolean supports(final Path file) {
+      return file.toString().endsWith(".java");
     }
   }
 
