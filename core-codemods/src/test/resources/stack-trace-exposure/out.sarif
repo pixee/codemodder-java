@@ -70,10 +70,10 @@
       }
     } ],
     "results" : [ {
-      "ruleId" : "java/stack-trace-exposure",
+      "ruleId" : "java/error-message-exposure",
       "ruleIndex" : 0,
       "rule" : {
-        "id" : "java/stack-trace-exposure",
+        "id" : "java/error-message-exposure",
         "index" : 0
       },
       "message" : {
@@ -116,10 +116,10 @@
         }
       } ]
     }, {
-      "ruleId" : "java/stack-trace-exposure",
+      "ruleId" : "java/error-message-exposure",
       "ruleIndex" : 0,
       "rule" : {
-        "id" : "java/stack-trace-exposure",
+        "id" : "java/error-message-exposure",
         "index" : 0
       },
       "message" : {
@@ -162,10 +162,10 @@
         }
       } ]
     }, {
-      "ruleId" : "java/stack-trace-exposure",
+      "ruleId" : "java/error-message-exposure",
       "ruleIndex" : 0,
       "rule" : {
-        "id" : "java/stack-trace-exposure",
+        "id" : "java/error-message-exposure",
         "index" : 0
       },
       "message" : {
