@@ -7,10 +7,11 @@ import java.util.*;
 public interface IncludesExcludesPattern {
 
   /**
-   * Returns an IncludesExcludes file matcher that matches files following the patterns against a
-   * root folder.
+   * Returns an IncludesExcludes file matcher that matches files following the patterns specified
+   * patterns. The patterns must follow the java's {@link java.nio.file.PathMatcher} specification
+   * and are treated as relative paths with regard to the repository root.
    */
-  public IncludesExcludes getRootedMatcher(final Path root);
+  IncludesExcludes getRootedMatcher(final Path root);
 
   class Default implements IncludesExcludesPattern {
 
@@ -34,8 +35,11 @@ public interface IncludesExcludesPattern {
     }
   }
 
+  /** An includes/excludes pattern that matches java files. */
   final class JavaMatcherSingleton {
     private static IncludesExcludesPattern singleton;
+
+    private JavaMatcherSingleton() {}
 
     public static IncludesExcludesPattern getInstance() {
       if (singleton == null) {
@@ -47,8 +51,11 @@ public interface IncludesExcludesPattern {
     }
   }
 
+  /** An includes/excludes pattern that matches any files. */
   final class AnySingleton {
     private static IncludesExcludesPattern singleton;
+
+    private AnySingleton() {}
 
     public static IncludesExcludesPattern getInstance() {
       if (singleton == null) {
@@ -58,11 +65,13 @@ public interface IncludesExcludesPattern {
     }
   }
 
-  public static IncludesExcludesPattern getJavaMatcher() {
+  /** Returns an includes/excludes pattern that matches any java files. */
+  static IncludesExcludesPattern getJavaMatcher() {
     return JavaMatcherSingleton.getInstance();
   }
 
-  public static IncludesExcludesPattern getAnyMatcher() {
+  /** Returns an includes/excludes pattern that matches any files. */
+  static IncludesExcludesPattern getAnyMatcher() {
     return AnySingleton.getInstance();
   }
 }

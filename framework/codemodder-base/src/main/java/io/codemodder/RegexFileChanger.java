@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +31,6 @@ public abstract class RegexFileChanger extends RawFileChanger {
   }
 
   protected RegexFileChanger(
-      final Predicate<Path> fileMatcher,
       final Pattern pattern,
       final boolean removeEmptyLeftoverLines,
       final List<DependencyGAV> dependenciesRequired,
