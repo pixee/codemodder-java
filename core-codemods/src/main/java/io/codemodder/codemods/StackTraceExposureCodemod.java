@@ -13,9 +13,12 @@ import io.codemodder.providers.sarif.codeql.CodeQLSarifJavaParserChanger;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import javax.inject.Inject;
 
-/** Fixes issues reported under the id "java/stack-trace-exposure" */
+/**
+ * Fixes issues reported under the id "java/java-error-message-exposure" (used to be
+ * java-stack-trace-exposure).
+ */
 @Codemod(
-    id = "codeql:java/stack-trace-exposure",
+    id = "codeql:java/error-message-exposure",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
@@ -23,7 +26,7 @@ public final class StackTraceExposureCodemod extends CodeQLSarifJavaParserChange
 
   @Inject
   public StackTraceExposureCodemod(
-      @ProvidedCodeQLScan(ruleId = "java/stack-trace-exposure") final RuleSarif sarif) {
+      @ProvidedCodeQLScan(ruleId = "java/error-message-exposure") final RuleSarif sarif) {
     super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
 
@@ -57,8 +60,8 @@ public final class StackTraceExposureCodemod extends CodeQLSarifJavaParserChange
   @Override
   public DetectorRule detectorRule() {
     return new DetectorRule(
-        "stack-trace-exposure",
+        "error-message-exposure",
         "Prevent information leak of stack trace details to HTTP responses",
-        "https://codeql.github.com/codeql-query-help/java/java-stack-trace-exposure/");
+        "https://codeql.github.com/codeql-query-help/java/java-error-message-exposure/");
   }
 }

@@ -8,8 +8,8 @@
         "organization" : "GitHub",
         "semanticVersion" : "2.11.6",
         "rules" : [ {
-          "id" : "java/stack-trace-exposure",
-          "name" : "java/stack-trace-exposure",
+          "id" : "java/error-message-exposure",
+          "name" : "java/error-message-exposure",
           "shortDescription" : {
             "text" : "Information exposure through a stack trace"
           },
@@ -23,7 +23,7 @@
           "properties" : {
             "tags" : [ "security", "external/cwe/cwe-209", "external/cwe/cwe-497" ],
             "description" : "Information from a stack trace propagates to an external user.\n              Stack traces can unintentionally reveal implementation details\n              that are useful to an attacker for developing a subsequent exploit.",
-            "id" : "java/stack-trace-exposure",
+            "id" : "java/error-message-exposure",
             "kind" : "problem",
             "name" : "Information exposure through a stack trace",
             "precision" : "high",
@@ -70,10 +70,10 @@
       }
     } ],
     "results" : [ {
-      "ruleId" : "java/stack-trace-exposure",
+      "ruleId" : "java/error-message-exposure",
       "ruleIndex" : 0,
       "rule" : {
-        "id" : "java/stack-trace-exposure",
+        "id" : "java/error-message-exposure",
         "index" : 0
       },
       "message" : {
@@ -116,10 +116,10 @@
         }
       } ]
     }, {
-      "ruleId" : "java/stack-trace-exposure",
+      "ruleId" : "java/error-message-exposure",
       "ruleIndex" : 0,
       "rule" : {
-        "id" : "java/stack-trace-exposure",
+        "id" : "java/error-message-exposure",
         "index" : 0
       },
       "message" : {
@@ -162,10 +162,10 @@
         }
       } ]
     }, {
-      "ruleId" : "java/stack-trace-exposure",
+      "ruleId" : "java/error-message-exposure",
       "ruleIndex" : 0,
       "rule" : {
-        "id" : "java/stack-trace-exposure",
+        "id" : "java/error-message-exposure",
         "index" : 0
       },
       "message" : {
