@@ -35,9 +35,8 @@ public interface IncludesExcludesPattern {
   }
 
   final class JavaMatcherSingleton {
-    private JavaMatcherSingleton() {
-    }
-    
+    private JavaMatcherSingleton() {}
+
     private static IncludesExcludesPattern singleton;
 
     public static IncludesExcludesPattern getInstance() {
@@ -51,9 +50,8 @@ public interface IncludesExcludesPattern {
   }
 
   final class AnySingleton {
-    private AnySingleton() {
-    }
-    
+    private AnySingleton() {}
+
     private static IncludesExcludesPattern singleton;
 
     public static IncludesExcludesPattern getInstance() {
