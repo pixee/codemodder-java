@@ -51,6 +51,11 @@ final class AppScanModuleTest {
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
     }
+
+    @Override
+    public boolean supports(Path file) {
+      return true;
+    }
   }
 
   private static final String emptySarif =

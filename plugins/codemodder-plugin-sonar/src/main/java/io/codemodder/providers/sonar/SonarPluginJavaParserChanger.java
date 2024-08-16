@@ -8,10 +8,10 @@ import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.sonar.model.SonarFinding;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /** Provides base functionality for making JavaParser-based changes based on Sonar results. */
 public abstract class SonarPluginJavaParserChanger<T extends Node, S extends SonarFinding>
@@ -23,8 +23,6 @@ public abstract class SonarPluginJavaParserChanger<T extends Node, S extends Son
 
   private final NodeCollector nodeCollector;
 
-  private final IncludesExcludesPattern includesExcludesPattern;
-
   protected SonarPluginJavaParserChanger(
       final RuleFinding<S> ruleFinding,
       final Class<? extends Node> nodeType,
@@ -34,8 +32,6 @@ public abstract class SonarPluginJavaParserChanger<T extends Node, S extends Son
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = nodeCollector;
-    this.includesExcludesPattern =
-        new IncludesExcludesPattern.Default(ruleFinding.getPaths(), Set.of());
   }
 
   protected SonarPluginJavaParserChanger(
@@ -53,20 +49,19 @@ public abstract class SonarPluginJavaParserChanger<T extends Node, S extends Son
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionNodeMatcher = regionNodeMatcher;
     this.nodeCollector = NodeCollector.ALL_FROM_TYPE;
-    this.includesExcludesPattern =
-        new IncludesExcludesPattern.Default(ruleFinding.getPaths(), Set.of());
+  }
+
+  @Override
+  public boolean supports(final Path file) {
+    List<? extends SonarFinding> findings = ruleFinding.getResultsByPath(file);
+    return super.supports(file) && findings != null && !findings.isEmpty();
   }
 
   @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    List<? extends SonarFinding> findings = ruleFinding.getResultsByPath(context.path());
-
-    // small shortcut to avoid always executing the expensive findAll
-    if (findings == null || findings.isEmpty()) {
-      return CodemodFileScanningResult.none();
-    }
     final List<? extends Node> allNodes = nodeCollector.collectNodes(cu, nodeType);
+    List<? extends SonarFinding> findings = ruleFinding.getResultsByPath(context.path());
 
     List<CodemodChange> codemodChanges = new ArrayList<>();
     for (SonarFinding sonarFinding : findings) {
@@ -103,11 +98,6 @@ public abstract class SonarPluginJavaParserChanger<T extends Node, S extends Son
       }
     }
     return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
-  }
-
-  @Override
-  public boolean shouldRun() {
-    return ruleFinding.hasResults();
   }
 
   /**

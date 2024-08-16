@@ -21,7 +21,6 @@ public final class CodeQLRuleSarif implements RuleSarif {
   private final String ruleId;
   private final Map<Path, List<Result>> resultsCache;
   private final Path repositoryRoot;
-  private Set<String> relativeLocations;
 
   public CodeQLRuleSarif(
       final String ruleId, final SarifSchema210 sarif, final CodeDirectory codeDirectory) {
@@ -29,7 +28,6 @@ public final class CodeQLRuleSarif implements RuleSarif {
     this.ruleId = Objects.requireNonNull(ruleId);
     this.repositoryRoot = codeDirectory.asPath();
     this.resultsCache = new HashMap<>();
-    this.relativeLocations = null;
   }
 
   private String extractRuleId(final Result result, final Run run) {
@@ -93,28 +91,6 @@ public final class CodeQLRuleSarif implements RuleSarif {
             .toList();
     resultsCache.put(path, results);
     return results;
-  }
-
-  @Override
-  public Set<String> getPaths() {
-    if (relativeLocations == null) {
-      relativeLocations =
-          sarif.getRuns().stream()
-              .flatMap(
-                  run ->
-                      run.getResults().stream()
-                          .filter(result -> ruleId.equals(extractRuleId(result, run))))
-              .map(
-                  result ->
-                      result
-                          .getLocations()
-                          .get(0)
-                          .getPhysicalLocation()
-                          .getArtifactLocation()
-                          .getUri())
-              .collect(Collectors.toSet());
-    }
-    return relativeLocations;
   }
 
   @Override

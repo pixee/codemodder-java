@@ -43,16 +43,11 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
 
   @Override
   public boolean supports(final Path path) {
-    return path.getFileName().toString().endsWith(".java")
-        && rootedFileMatcher.shouldInspect(path.toFile());
+    return rootedFileMatcher.shouldInspect(path.toFile()) && javaParserChanger.supports(path);
   }
 
   @Override
   public CodemodFileScanningResult run(final CodemodInvocationContext context) throws IOException {
-
-    if (!javaParserChanger.shouldRun()) {
-      return CodemodFileScanningResult.none();
-    }
     Path file = context.path();
     CompilationUnit cu = parser.parseJavaFile(file);
     CodemodFileScanningResult result = javaParserChanger.visit(context, cu);

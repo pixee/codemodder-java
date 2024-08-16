@@ -44,6 +44,11 @@ public abstract class JavaParserChanger implements CodeChanger {
   }
 
   @Override
+  public boolean supports(final Path file) {
+    return file.getFileName().toString().toLowerCase().endsWith(".java");
+  }
+
+  @Override
   public List<CodeTFReference> getReferences() {
     return reporter.getReferences().stream().map(u -> new CodeTFReference(u, u)).toList();
   }

@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,6 @@ final class SingleSemgrepRuleSarif implements RuleSarif {
   private final String ruleId;
   private final Map<Path, List<Result>> resultsCache;
   private final Path repositoryRoot;
-  private Set<String> relativeLocations;
 
   SingleSemgrepRuleSarif(
       final String ruleId, final SarifSchema210 sarif, final Path codeDirectory) {
@@ -33,7 +31,6 @@ final class SingleSemgrepRuleSarif implements RuleSarif {
     this.ruleId = Objects.requireNonNull(ruleId);
     this.repositoryRoot = Objects.requireNonNull(codeDirectory);
     this.resultsCache = new HashMap<>();
-    this.relativeLocations = null;
   }
 
   @Override
@@ -90,38 +87,6 @@ final class SingleSemgrepRuleSarif implements RuleSarif {
             .toList();
     resultsCache.put(path, results);
     return results;
-  }
-
-  @Override
-  public Set<String> getPaths() {
-    if (relativeLocations == null) {
-      relativeLocations =
-          sarif.getRuns().get(0).getResults().stream()
-              /*
-               * The default Semgrep rules have a rule id reported that is what you'd expect. When you run
-               * your own custom rules locally, they'll contain part of the file system path to the rule.
-               *
-               * Because this provides support for both types, we need this check to account for which type
-               * of rule id we're dealing with.
-               */
-              .filter(
-                  result ->
-                      result.getRuleId().endsWith("." + ruleId)
-                          || result.getRuleId().equals(ruleId))
-              .map(
-                  result ->
-                      result
-                          .getLocations()
-                          .get(0)
-                          .getPhysicalLocation()
-                          .getArtifactLocation()
-                          .getUri())
-              .map(s -> Path.of(s))
-              .map(p -> p.startsWith(repositoryRoot) ? repositoryRoot.relativize(p) : p)
-              .map(p -> p.toString())
-              .collect(Collectors.toSet());
-    }
-    return relativeLocations;
   }
 
   @Override

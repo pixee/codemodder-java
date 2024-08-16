@@ -248,6 +248,11 @@ final class CLITest {
     public IncludesExcludesPattern getIncludesExcludesPattern() {
       return new IncludesExcludesPattern.Default(Set.of(), Set.of("**/*Test.java"));
     }
+
+    @Override
+    public boolean supports(Path file) {
+      return true;
+    }
   }
 
   @Test

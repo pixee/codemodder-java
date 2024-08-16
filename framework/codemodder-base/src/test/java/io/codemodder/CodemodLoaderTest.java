@@ -54,6 +54,11 @@ final class CodemodLoaderTest {
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
     }
+
+    @Override
+    public boolean supports(Path file) {
+      return true;
+    }
   }
 
   @Test
@@ -113,6 +118,11 @@ final class CodemodLoaderTest {
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
     }
+
+    @Override
+    public boolean supports(Path file) {
+      return true;
+    }
   }
 
   @Codemod(
@@ -152,6 +162,11 @@ final class CodemodLoaderTest {
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
+    }
+
+    @Override
+    public boolean supports(Path file) {
+      return true;
     }
   }
 
@@ -193,6 +208,11 @@ final class CodemodLoaderTest {
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
+    }
+
+    @Override
+    public boolean supports(Path file) {
+      return true;
     }
   }
 
@@ -298,6 +318,11 @@ final class CodemodLoaderTest {
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
+    }
+
+    @Override
+    public boolean supports(Path file) {
+      return true;
     }
   }
 

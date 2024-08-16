@@ -126,7 +126,7 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
   }
 
   /*
-   * Change contents of the {@code url} tag if it it uses an insecure protocol.
+   * Change contents of the {@code url} tag if it uses an insecure protocol.
    */
   private static void handle(
       final XMLEventReader xmlEventReader,

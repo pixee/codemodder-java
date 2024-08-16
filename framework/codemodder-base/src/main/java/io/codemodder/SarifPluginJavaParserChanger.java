@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Provides base functionality for making JavaParser-based changes based on results found by a sarif
@@ -25,7 +24,6 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
   private final Class<? extends Node> nodeType;
   private final SourceCodeRegionExtractor<Result> regionExtractor;
   private final RegionNodeMatcher regionNodeMatcher;
-  private final IncludesExcludesPattern includesExcludesPattern;
 
   protected SarifPluginJavaParserChanger(
       final RuleSarif sarif, final Class<? extends Node> nodeType) {
@@ -79,7 +77,6 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionExtractor = Objects.requireNonNull(regionExtractor);
     this.regionNodeMatcher = Objects.requireNonNull(regionNodeMatcher);
-    this.includesExcludesPattern = new IncludesExcludesPattern.Default(sarif.getPaths(), Set.of());
   }
 
   protected SarifPluginJavaParserChanger(
@@ -93,19 +90,17 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     this.nodeType = Objects.requireNonNull(nodeType);
     this.regionExtractor = Objects.requireNonNull(regionExtractor);
     this.regionNodeMatcher = Objects.requireNonNull(regionNodeMatcher);
-    this.includesExcludesPattern = new IncludesExcludesPattern.Default(sarif.getPaths(), Set.of());
+  }
+
+  @Override
+  public boolean supports(final Path file) {
+    return !sarif.getResultsByLocationPath(file).isEmpty();
   }
 
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    List<Result> results = sarif.getResultsByLocationPath(context.path());
-
-    // small shortcut to avoid always executing the expensive findAll
-    if (results.isEmpty()) {
-      return CodemodFileScanningResult.none();
-    }
-
     List<? extends Node> allNodes = cu.findAll(nodeType);
+    List<Result> results = sarif.getResultsByLocationPath(context.path());
 
     /*
      * We have an interesting scenario we have to handle whereby we could accidentally feed two results that should be
@@ -187,9 +182,4 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
    */
   public abstract ChangesResult onResultFound(
       CodemodInvocationContext context, CompilationUnit cu, T node, Result result);
-
-  @Override
-  public IncludesExcludesPattern getIncludesExcludesPattern() {
-    return includesExcludesPattern;
-  }
 }

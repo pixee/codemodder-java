@@ -8,8 +8,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 final class PmdRuleSarif implements RuleSarif {
 
@@ -17,7 +15,6 @@ final class PmdRuleSarif implements RuleSarif {
   private final String ruleId;
   private final Map<String, List<Result>> resultsByFile;
   private final Path repositoryRoot;
-  private Set<String> relativeLocations;
 
   PmdRuleSarif(
       final String ruleId,
@@ -28,7 +25,6 @@ final class PmdRuleSarif implements RuleSarif {
     this.sarif = Objects.requireNonNull(sarif);
     this.resultsByFile = Objects.requireNonNull(resultsByFile);
     this.repositoryRoot = repositoryRoot;
-    this.relativeLocations = null;
   }
 
   @Override
@@ -60,15 +56,4 @@ final class PmdRuleSarif implements RuleSarif {
   }
 
   static final String toolName = "pmd";
-
-  @Override
-  public Set<String> getPaths() {
-    if (this.relativeLocations == null) {
-      relativeLocations =
-          resultsByFile.keySet().stream()
-              .map(s -> repositoryRoot.relativize(Path.of(s)).toString())
-              .collect(Collectors.toSet());
-    }
-    return relativeLocations;
-  }
 }

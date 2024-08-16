@@ -1,6 +1,7 @@
 package io.codemodder.codemods;
 
 import io.codemodder.*;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -23,11 +24,7 @@ public final class JSPScriptletXSSCodemod extends RegexFileChanger {
   private IncludesExcludesPattern includesExcludesPattern;
 
   public JSPScriptletXSSCodemod() {
-    super(
-        path -> path.getFileName().toString().toLowerCase().endsWith(".jsp"),
-        scriptlet,
-        true,
-        List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER));
+    super(scriptlet, true, List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER));
     this.includesExcludesPattern =
         new IncludesExcludesPattern.Default(Set.of("**.[jJ][sS][pP]"), Set.of());
   }
@@ -37,6 +34,11 @@ public final class JSPScriptletXSSCodemod extends RegexFileChanger {
     var codeWithinScriptlet =
         matchingSnippet.substring(matchingSnippet.indexOf('=') + 1, matchingSnippet.length() - 2);
     return "<%=org.owasp.encoder.Encode.forHtml(" + codeWithinScriptlet + ")%>";
+  }
+
+  @Override
+  public boolean supports(Path file) {
+    return file.getFileName().toString().toLowerCase().endsWith(".jsp");
   }
 
   private static final Pattern scriptlet =

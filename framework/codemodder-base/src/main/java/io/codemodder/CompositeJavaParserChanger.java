@@ -3,6 +3,7 @@ package io.codemodder;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.javaparser.JavaParserChanger;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +37,11 @@ public abstract class CompositeJavaParserChanger extends JavaParserChanger {
   }
 
   @Override
+  public boolean supports(final Path file) {
+    return changers.stream().anyMatch(c -> c.supports(file));
+  }
+
+  @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     List<CodemodChange> changes = new ArrayList<>();
@@ -49,10 +55,5 @@ public abstract class CompositeJavaParserChanger extends JavaParserChanger {
         });
 
     return CodemodFileScanningResult.from(changes, unfixedFindings);
-  }
-
-  @Override
-  public boolean shouldRun() {
-    return changers.stream().anyMatch(CodeChanger::shouldRun);
   }
 }

@@ -108,8 +108,6 @@ public final class CodemodLoader {
       allModules.addAll(modules);
     }
 
-    // TODO add interested files in each provider
-
     // record which changers are associated with which codemod ids
     final List<CodemodIdPair> codemods = new ArrayList<>();
 

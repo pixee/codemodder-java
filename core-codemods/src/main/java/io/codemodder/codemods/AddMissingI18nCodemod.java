@@ -54,15 +54,17 @@ public final class AddMissingI18nCodemod extends RawFileChanger {
   }
 
   @Override
+  public boolean supports(final Path file) {
+    return getPropertyFilePrefix(file.getFileName().toString()).isPresent();
+  }
+
+  @Override
   public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
       throws IOException {
     Path path = context.path();
     String fileName = path.getFileName().toString();
+    // The supports check will guarantee that this won't be empty
     Optional<String> prefix = getPropertyFilePrefix(fileName);
-    if (prefix.isEmpty()) {
-      // doesn't look like a i18n properties file
-      return CodemodFileScanningResult.none();
-    }
     return doVisitFile(context, path, prefix.get());
   }
 

@@ -28,14 +28,11 @@ final class RawFileCodemodRunner implements CodemodRunner {
 
   @Override
   public boolean supports(final Path path) {
-    return rootedFileMatcher.shouldInspect(path.toFile());
+    return rootedFileMatcher.shouldInspect(path.toFile()) && changer.supports(path);
   }
 
   @Override
   public CodemodFileScanningResult run(final CodemodInvocationContext context) throws IOException {
-    if (!changer.shouldRun()) {
-      return CodemodFileScanningResult.none();
-    }
     return changer.visitFile(context);
   }
 }
