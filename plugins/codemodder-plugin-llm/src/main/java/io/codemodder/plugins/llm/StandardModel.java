@@ -24,13 +24,9 @@ public enum StandardModel implements Model {
     }
   },
   GPT_4O_2024_05_13("gpt-4o-2024-05-13", 128_000) {
-    /**
-     * This is wrong - we copy / pasted from GPT 3.5 while we await GPT-4o token counting support <a
-     * href="https://github.com/knuddelsgmbh/jtokkit/issues/96">from upstream utility</a>.
-     */
     @Override
     public int tokens(final List<String> messages) {
-      return Tokens.countTokens(messages, 3, EncodingType.CL100K_BASE);
+      return Tokens.countTokens(messages, 3, EncodingType.O200K_BASE);
     }
   };
 
