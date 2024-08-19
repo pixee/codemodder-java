@@ -37,7 +37,7 @@ public final class JSPScriptletXSSCodemod extends RegexFileChanger {
   }
 
   @Override
-  public boolean supports(Path file) {
+  public boolean supports(final Path file) {
     return file.getFileName().toString().toLowerCase().endsWith(".jsp");
   }
 

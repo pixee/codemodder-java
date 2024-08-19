@@ -56,7 +56,7 @@ final class CodemodLoaderTest {
     }
 
     @Override
-    public boolean supports(Path file) {
+    public boolean supports(final Path file) {
       return true;
     }
   }
@@ -120,7 +120,7 @@ final class CodemodLoaderTest {
     }
 
     @Override
-    public boolean supports(Path file) {
+    public boolean supports(final Path file) {
       return true;
     }
   }
@@ -321,7 +321,7 @@ final class CodemodLoaderTest {
     }
 
     @Override
-    public boolean supports(Path file) {
+    public boolean supports(final Path file) {
       return true;
     }
   }

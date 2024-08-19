@@ -19,8 +19,8 @@ public interface IncludesExcludesPattern {
     private final Set<String> pathExcludes;
 
     public Default(final Set<String> pathIncludes, final Set<String> pathExcludes) {
-      this.pathIncludes = pathIncludes;
-      this.pathExcludes = pathExcludes;
+      this.pathIncludes = Objects.requireNonNull(pathIncludes);
+      this.pathExcludes = Objects.requireNonNull(pathExcludes);
     }
 
     @Override
@@ -41,7 +41,7 @@ public interface IncludesExcludesPattern {
 
     private JavaMatcherSingleton() {}
 
-    public static IncludesExcludesPattern getInstance() {
+    static IncludesExcludesPattern getInstance() {
       if (singleton == null) {
         singleton =
             new IncludesExcludesPattern.Default(
@@ -57,7 +57,7 @@ public interface IncludesExcludesPattern {
 
     private AnySingleton() {}
 
-    public static IncludesExcludesPattern getInstance() {
+    static IncludesExcludesPattern getInstance() {
       if (singleton == null) {
         singleton = new IncludesExcludesPattern.Default(Set.of("**"), Collections.emptySet());
       }

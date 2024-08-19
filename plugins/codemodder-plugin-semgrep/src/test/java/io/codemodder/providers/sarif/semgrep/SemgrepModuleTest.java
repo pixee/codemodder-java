@@ -70,7 +70,7 @@ final class SemgrepModuleTest {
     }
 
     @Override
-    public boolean supports(Path file) {
+    public boolean supports(final Path file) {
       return true;
     }
   }

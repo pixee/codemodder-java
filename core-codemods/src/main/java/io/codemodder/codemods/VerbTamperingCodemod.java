@@ -111,7 +111,7 @@ public final class VerbTamperingCodemod extends RawFileChanger {
   }
 
   @Override
-  public boolean supports(Path file) {
+  public boolean supports(final Path file) {
     return "web.xml".equalsIgnoreCase(file.getFileName().toString());
   }
 }
