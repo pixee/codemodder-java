@@ -30,6 +30,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
   private final IncludesExcludes includesExcludes;
   private final EncodingDetector encodingDetector;
   private final FileCache fileCache;
+  private final boolean perCodemodIncludesExcludes;
 
   /** The max size of a file we'll scan. If a file is larger than this, we'll skip it. */
   private final int maxFileSize;
@@ -45,6 +46,31 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
   DefaultCodemodExecutor(
       final Path projectDir,
+      final CodemodIdPair codemod,
+      final List<ProjectProvider> projectProviders,
+      final List<CodeTFProvider> codetfProviders,
+      final FileCache fileCache,
+      final JavaParserFacade javaParserFacade,
+      final EncodingDetector encodingDetector,
+      final int maxFileSize,
+      final int maxFiles,
+      final int maxWorkers) {
+    this.projectDir = Objects.requireNonNull(projectDir);
+    this.includesExcludes = IncludesExcludes.any();
+    this.perCodemodIncludesExcludes = true;
+    this.codemod = Objects.requireNonNull(codemod);
+    this.codetfProviders = Objects.requireNonNull(codetfProviders);
+    this.projectProviders = Objects.requireNonNull(projectProviders);
+    this.javaParserFacade = Objects.requireNonNull(javaParserFacade);
+    this.fileCache = Objects.requireNonNull(fileCache);
+    this.encodingDetector = Objects.requireNonNull(encodingDetector);
+    this.maxFileSize = maxFileSize;
+    this.maxFiles = maxFiles;
+    this.maxWorkers = maxWorkers;
+  }
+
+  DefaultCodemodExecutor(
+      final Path projectDir,
       final IncludesExcludes includesExcludes,
       final CodemodIdPair codemod,
       final List<ProjectProvider> projectProviders,
@@ -57,6 +83,7 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
       final int maxWorkers) {
     this.projectDir = Objects.requireNonNull(projectDir);
     this.includesExcludes = Objects.requireNonNull(includesExcludes);
+    this.perCodemodIncludesExcludes = false;
     this.codemod = Objects.requireNonNull(codemod);
     this.codetfProviders = Objects.requireNonNull(codetfProviders);
     this.projectProviders = Objects.requireNonNull(projectProviders);
@@ -80,16 +107,25 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
      */
     CodemodRunner codemodRunner;
     if (codeChanger instanceof JavaParserChanger) {
-      codemodRunner =
-          new JavaParserCodemodRunner(
-              javaParserFacade,
-              (JavaParserChanger) codeChanger,
-              projectDir,
-              includesExcludes,
-              encodingDetector);
+      if (perCodemodIncludesExcludes) {
+        codemodRunner =
+            new JavaParserCodemodRunner(
+                javaParserFacade, (JavaParserChanger) codeChanger, projectDir, encodingDetector);
+      } else {
+        codemodRunner =
+            new JavaParserCodemodRunner(
+                javaParserFacade,
+                (JavaParserChanger) codeChanger,
+                projectDir,
+                includesExcludes,
+                encodingDetector);
+      }
     } else if (codeChanger instanceof RawFileChanger) {
-      codemodRunner =
-          new RawFileCodemodRunner((RawFileChanger) codeChanger, projectDir, includesExcludes);
+      if (perCodemodIncludesExcludes) {
+        codemodRunner = new RawFileCodemodRunner((RawFileChanger) codeChanger, projectDir);
+      } else {
+        codemodRunner = new RawFileCodemodRunner((RawFileChanger) codeChanger, includesExcludes);
+      }
     } else {
       throw new UnsupportedOperationException(
           "unsupported codeChanger type: " + codeChanger.getClass().getName());

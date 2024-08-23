@@ -347,7 +347,6 @@ final class CLI implements Callable<Integer> {
       List<String> pathExcludes = this.pathExcludes;
 
       // If no path includes/excludes were specified, relegate filtering to each codemod
-      // This is indicated by the MatchesEverything type of IncludesExcludes
       boolean useGlobalIncludesExcludes = pathIncludes != null || pathExcludes != null;
       IncludesExcludes includesExcludes = IncludesExcludes.any();
       if (pathIncludes == null) {
@@ -439,19 +438,35 @@ final class CLI implements Callable<Integer> {
       FileCache fileCache = FileCache.createDefault(maxFileCacheSize);
 
       for (CodemodIdPair codemod : codemods) {
-        CodemodExecutor codemodExecutor =
-            new DefaultCodemodExecutor(
-                projectPath,
-                includesExcludes,
-                codemod,
-                projectProviders,
-                codeTFProviders,
-                fileCache,
-                javaParserFacade,
-                encodingDetector,
-                maxFileSize,
-                maxFiles,
-                maxWorkers);
+        CodemodExecutor codemodExecutor;
+        if (useGlobalIncludesExcludes) {
+          codemodExecutor =
+              new DefaultCodemodExecutor(
+                  projectPath,
+                  includesExcludes,
+                  codemod,
+                  projectProviders,
+                  codeTFProviders,
+                  fileCache,
+                  javaParserFacade,
+                  encodingDetector,
+                  maxFileSize,
+                  maxFiles,
+                  maxWorkers);
+        } else {
+          codemodExecutor =
+              new DefaultCodemodExecutor(
+                  projectPath,
+                  codemod,
+                  projectProviders,
+                  codeTFProviders,
+                  fileCache,
+                  javaParserFacade,
+                  encodingDetector,
+                  maxFileSize,
+                  maxFiles,
+                  maxWorkers);
+        }
 
         log.info("running codemod: {}", codemod.getId());
         CodeTFResult result = codemodExecutor.execute(filePaths);
