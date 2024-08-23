@@ -134,10 +134,7 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
               if (changeSuccessful.areChangesApplied()) {
                 codemodChanges.add(
                     buildCodemodChange(
-                        context.path(),
-                        region.start().line(),
-                        changeSuccessful.getDependenciesRequired(),
-                        result));
+                        region.start().line(), changeSuccessful.getDependenciesRequired(), result));
               }
             }
           }
@@ -149,17 +146,13 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
   }
 
   private CodemodChange buildCodemodChange(
-      final Path path,
-      final int line,
-      final List<DependencyGAV> dependencies,
-      final Result result) {
+      final int line, final List<DependencyGAV> dependencies, final Result result) {
     if (this instanceof FixOnlyCodeChanger fixOnlyCodeChanger) {
       return CodemodChange.from(
           line,
           dependencies,
           new FixedFinding(
-              SarifFindingKeyUtil.buildFindingId(result, path, line),
-              fixOnlyCodeChanger.detectorRule()));
+              SarifFindingKeyUtil.buildFindingId(result), fixOnlyCodeChanger.detectorRule()));
     }
 
     return CodemodChange.from(line, dependencies);
