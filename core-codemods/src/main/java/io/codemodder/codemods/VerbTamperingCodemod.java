@@ -36,9 +36,6 @@ public final class VerbTamperingCodemod extends RawFileChanger {
   public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
       throws IOException {
     Path file = context.path();
-    if (!"web.xml".equalsIgnoreCase(file.getFileName().toString())) {
-      return CodemodFileScanningResult.none();
-    }
     try {
       List<CodemodChange> changes = processWebXml(context, file);
       return CodemodFileScanningResult.withOnlyChanges(changes);
@@ -106,5 +103,15 @@ public final class VerbTamperingCodemod extends RawFileChanger {
   @Override
   public List<CodeTFReference> getReferences() {
     return reporter.getReferences().stream().map(u -> new CodeTFReference(u, u)).toList();
+  }
+
+  @Override
+  public IncludesExcludesPattern getIncludesExcludesPattern() {
+    return new IncludesExcludesPattern.Default(Set.of("{,**/}[wW][eE][bB].[xX][mM][lL]"), Set.of());
+  }
+
+  @Override
+  public boolean supports(final Path file) {
+    return "web.xml".equalsIgnoreCase(file.getFileName().toString());
   }
 }

@@ -14,14 +14,17 @@ final class PmdRuleSarif implements RuleSarif {
   private final SarifSchema210 sarif;
   private final String ruleId;
   private final Map<String, List<Result>> resultsByFile;
+  private final Path repositoryRoot;
 
   PmdRuleSarif(
       final String ruleId,
       final SarifSchema210 sarif,
-      final Map<String, List<Result>> resultsByFile) {
+      final Map<String, List<Result>> resultsByFile,
+      final Path repositoryRoot) {
     this.ruleId = Objects.requireNonNull(ruleId);
     this.sarif = Objects.requireNonNull(sarif);
     this.resultsByFile = Objects.requireNonNull(resultsByFile);
+    this.repositoryRoot = repositoryRoot;
   }
 
   @Override

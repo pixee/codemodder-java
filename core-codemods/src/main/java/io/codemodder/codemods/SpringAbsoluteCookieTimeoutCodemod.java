@@ -47,12 +47,15 @@ public final class SpringAbsoluteCookieTimeoutCodemod extends RawFileChanger {
   }
 
   @Override
+  public boolean supports(final Path file) {
+    return "application.properties".equalsIgnoreCase(file.getFileName().toString());
+  }
+
+  @Override
   public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
       throws IOException {
     Path path = context.path();
-    if (!"application.properties".equalsIgnoreCase(path.getFileName().toString())) {
-      return CodemodFileScanningResult.none();
-    } else if (!inExpectedDir(context.codeDirectory().asPath().relativize(path))) {
+    if (!inExpectedDir(context.codeDirectory().asPath().relativize(path))) {
       return CodemodFileScanningResult.none();
     }
 

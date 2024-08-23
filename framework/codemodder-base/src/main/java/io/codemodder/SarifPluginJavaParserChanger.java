@@ -92,16 +92,15 @@ public abstract class SarifPluginJavaParserChanger<T extends Node> extends JavaP
     this.regionNodeMatcher = Objects.requireNonNull(regionNodeMatcher);
   }
 
+  @Override
+  public boolean supports(final Path file) {
+    return !sarif.getResultsByLocationPath(file).isEmpty();
+  }
+
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    List<Result> results = sarif.getResultsByLocationPath(context.path());
-
-    // small shortcut to avoid always executing the expensive findAll
-    if (results.isEmpty()) {
-      return CodemodFileScanningResult.none();
-    }
-
     List<? extends Node> allNodes = cu.findAll(nodeType);
+    List<Result> results = sarif.getResultsByLocationPath(context.path());
 
     /*
      * We have an interesting scenario we have to handle whereby we could accidentally feed two results that should be

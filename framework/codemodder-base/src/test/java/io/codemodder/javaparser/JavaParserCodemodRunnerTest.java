@@ -75,6 +75,8 @@ final class JavaParserCodemodRunnerTest {
         new JavaParserCodemodRunner(
             JavaParserFacade.from(JavaParser::new),
             updatesAllMethodNamesChanger,
+            tmpDir,
+            IncludesExcludes.any(),
             EncodingDetector.create());
     this.tmpDir = tmpDir;
   }
@@ -155,6 +157,8 @@ final class JavaParserCodemodRunnerTest {
                 new UpdatesMethodNamesParserChanger(),
                 new UpdatesClassNamesParserChanger(),
                 new EmptyReporter()),
+            tmpDir,
+            IncludesExcludes.any(),
             EncodingDetector.create());
     CodemodFileScanningResult result = runner.run(context);
     List<CodemodChange> changes = result.changes();

@@ -3,6 +3,7 @@ package io.codemodder.providers.sonar;
 import io.codemodder.CodemodReporterStrategy;
 import io.codemodder.FixOnlyCodeChanger;
 import io.codemodder.javaparser.JavaParserChanger;
+import java.nio.file.Path;
 
 /** Provides base functionality for making JavaParser-based remediation of Sonar results. */
 public abstract class SonarRemediatingJavaParserChanger extends JavaParserChanger
@@ -17,12 +18,12 @@ public abstract class SonarRemediatingJavaParserChanger extends JavaParserChange
   }
 
   @Override
-  public String vendorName() {
-    return "Sonar";
+  public boolean supports(final Path file) {
+    return super.supports(file) && this.shouldRun;
   }
 
   @Override
-  public boolean shouldRun() {
-    return shouldRun;
+  public String vendorName() {
+    return "Sonar";
   }
 }

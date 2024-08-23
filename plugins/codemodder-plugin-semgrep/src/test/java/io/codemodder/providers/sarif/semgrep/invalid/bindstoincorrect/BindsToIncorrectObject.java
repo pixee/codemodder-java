@@ -41,4 +41,9 @@ public final class BindsToIncorrectObject implements CodeChanger {
   public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
     return null;
   }
+
+  @Override
+  public boolean supports(final Path file) {
+    return true;
+  }
 }

@@ -68,6 +68,11 @@ final class SemgrepModuleTest {
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
     }
+
+    @Override
+    public boolean supports(final Path file) {
+      return true;
+    }
   }
 
   @Codemod(
@@ -218,7 +223,7 @@ final class SemgrepModuleTest {
   }
 
   private SemgrepModule createModule(
-      final Path dir, final List<Class<? extends CodeChanger>> codemodTypes) throws IOException {
+      final Path dir, final List<Class<? extends CodeChanger>> codemodTypes) {
     return new SemgrepModule(dir, List.of("**"), List.of(), codemodTypes);
   }
 
@@ -300,6 +305,11 @@ final class SemgrepModuleTest {
     @Override
     public String getIndividualChangeDescription(Path filePath, CodemodChange change) {
       return null;
+    }
+
+    @Override
+    public boolean supports(final Path file) {
+      return true;
     }
   }
 

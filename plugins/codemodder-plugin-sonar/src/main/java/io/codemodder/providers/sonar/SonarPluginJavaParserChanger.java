@@ -8,6 +8,7 @@ import io.codemodder.codetf.FixedFinding;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.sonar.model.SonarFinding;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,15 +52,16 @@ public abstract class SonarPluginJavaParserChanger<T extends Node, S extends Son
   }
 
   @Override
+  public boolean supports(final Path file) {
+    List<? extends SonarFinding> findings = ruleFinding.getResultsByPath(file);
+    return super.supports(file) && findings != null && !findings.isEmpty();
+  }
+
+  @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    List<? extends SonarFinding> findings = ruleFinding.getResultsByPath(context.path());
-
-    // small shortcut to avoid always executing the expensive findAll
-    if (findings == null || findings.isEmpty()) {
-      return CodemodFileScanningResult.none();
-    }
     final List<? extends Node> allNodes = nodeCollector.collectNodes(cu, nodeType);
+    List<? extends SonarFinding> findings = ruleFinding.getResultsByPath(context.path());
 
     List<CodemodChange> codemodChanges = new ArrayList<>();
     for (SonarFinding sonarFinding : findings) {
@@ -96,11 +98,6 @@ public abstract class SonarPluginJavaParserChanger<T extends Node, S extends Son
       }
     }
     return CodemodFileScanningResult.withOnlyChanges(codemodChanges);
-  }
-
-  @Override
-  public boolean shouldRun() {
-    return ruleFinding.hasResults();
   }
 
   /**

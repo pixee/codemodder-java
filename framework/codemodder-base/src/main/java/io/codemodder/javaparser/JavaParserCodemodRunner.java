@@ -21,27 +21,40 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
   private final JavaParserChanger javaParserChanger;
   private final JavaParserFacade parser;
   private final EncodingDetector encodingDetector;
+  private final IncludesExcludes rootedFileMatcher;
 
   public JavaParserCodemodRunner(
       final JavaParserFacade parser,
       final JavaParserChanger javaParserChanger,
+      final Path projectDir,
+      final IncludesExcludes globalIncludesExcludes,
       final EncodingDetector encodingDetector) {
     this.parser = Objects.requireNonNull(parser);
     this.javaParserChanger = Objects.requireNonNull(javaParserChanger);
     this.encodingDetector = Objects.requireNonNull(encodingDetector);
+    this.rootedFileMatcher = Objects.requireNonNull(globalIncludesExcludes);
+  }
+
+  public JavaParserCodemodRunner(
+      final JavaParserFacade parser,
+      final JavaParserChanger javaParserChanger,
+      final Path projectDir,
+      final EncodingDetector encodingDetector) {
+    this.parser = Objects.requireNonNull(parser);
+    this.javaParserChanger = Objects.requireNonNull(javaParserChanger);
+    this.encodingDetector = Objects.requireNonNull(encodingDetector);
+    // If no global includes/excludes are specified, each codemod will decide which files to inspect
+    this.rootedFileMatcher =
+        javaParserChanger.getIncludesExcludesPattern().getRootedMatcher(projectDir);
   }
 
   @Override
   public boolean supports(final Path path) {
-    return path.getFileName().toString().toLowerCase().endsWith(".java");
+    return rootedFileMatcher.shouldInspect(path.toFile()) && javaParserChanger.supports(path);
   }
 
   @Override
   public CodemodFileScanningResult run(final CodemodInvocationContext context) throws IOException {
-
-    if (!javaParserChanger.shouldRun()) {
-      return CodemodFileScanningResult.none();
-    }
     Path file = context.path();
     CompilationUnit cu = parser.parseJavaFile(file);
     CodemodFileScanningResult result = javaParserChanger.visit(context, cu);

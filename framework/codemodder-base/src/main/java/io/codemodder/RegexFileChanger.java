@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -19,30 +17,25 @@ import org.apache.commons.lang3.StringUtils;
  */
 public abstract class RegexFileChanger extends RawFileChanger {
 
-  private final Predicate<Path> fileMatcher;
   private final Pattern pattern;
   private final boolean removeEmptyLeftoverLines;
   private final List<DependencyGAV> dependenciesRequired;
 
   protected RegexFileChanger(
-      final Predicate<Path> fileMatcher,
       final Pattern pattern,
       final boolean removeEmptyLeftoverLines,
       final List<DependencyGAV> dependenciesRequired) {
-    this.fileMatcher = Objects.requireNonNull(fileMatcher, "fileMatcher");
     this.pattern = Objects.requireNonNull(pattern, "pattern");
     this.removeEmptyLeftoverLines = removeEmptyLeftoverLines;
     this.dependenciesRequired = dependenciesRequired;
   }
 
   protected RegexFileChanger(
-      final Predicate<Path> fileMatcher,
       final Pattern pattern,
       final boolean removeEmptyLeftoverLines,
       final List<DependencyGAV> dependenciesRequired,
       final CodemodReporterStrategy reporter) {
     super(reporter);
-    this.fileMatcher = Objects.requireNonNull(fileMatcher, "fileMatcher");
     this.pattern = Objects.requireNonNull(pattern, "pattern");
     this.removeEmptyLeftoverLines = removeEmptyLeftoverLines;
     this.dependenciesRequired = dependenciesRequired;
@@ -51,10 +44,6 @@ public abstract class RegexFileChanger extends RawFileChanger {
   @Override
   public CodemodFileScanningResult visitFile(final CodemodInvocationContext context)
       throws IOException {
-    if (!fileMatcher.test(context.path())) {
-      return CodemodFileScanningResult.none();
-    }
-
     final List<CodemodChange> changes = new ArrayList<>();
     final String fileContents = Files.readString(context.path());
     final Matcher matcher = pattern.matcher(fileContents);
