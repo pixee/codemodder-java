@@ -7,6 +7,10 @@ plugins {
 
 description = "Community codemods"
 
+application {
+    mainClass.set("io.codemodder.examples.CommunityCodemods")
+}
+
 dependencies {
     implementation(project(":framework:codemodder-base"))
     implementation(project(":plugins:codemodder-plugin-semgrep"))
