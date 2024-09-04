@@ -1,0 +1,8 @@
+{
+  "summary" : "Removed unthrowable exception",
+  "change" : "Removed unthrowable exception",
+  "reviewGuidanceJustification" : "There should be no functional difference after the change, but the source code will be easier to understand.",
+  "references" : [
+    "https://rules.sonarsource.com/java/RSPEC-1130/"
+  ]
+}
