@@ -1,0 +1,57 @@
+{
+  "total": 4,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 4
+  },
+  "effortTotal": 20,
+  "debtTotal": 20,
+  "issues": [
+    {
+      "key": "AY92LqQsXaXxNZYph9K2",
+      "rule": "java:S1130",
+      "severity": "MINOR",
+      "component": "project_foo:src/main/ThingTest.java",
+      "project": "project_foo",
+      "hash": "eb19688940073fe18e692e9a5fc935f3",
+      "textRange": {
+        "startLine": 24,
+        "endLine": 24,
+        "startOffset": 26,
+        "endOffset": 44
+      },
+      "flows": [],
+      "resolution": "FIXED",
+      "status": "CLOSED",
+      "message": "Remove the declaration of thrown exception 'java.net.URISyntaxException', as it cannot be thrown from method's body.",
+      "effort": "5min",
+      "debt": "5min",
+      "assignee": "zxc@github",
+      "author": "zxc@zxc.com",
+      "tags": [
+        "clumsy",
+        "error-handling",
+        "redundant",
+        "unused"
+      ],
+      "creationDate": "2022-07-27T16:44:52+0200",
+      "updateDate": "2024-08-14T00:29:42+0200",
+      "closeDate": "2024-08-14T00:29:42+0200",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "FIXED"
+    }
+  ]
+
+}
