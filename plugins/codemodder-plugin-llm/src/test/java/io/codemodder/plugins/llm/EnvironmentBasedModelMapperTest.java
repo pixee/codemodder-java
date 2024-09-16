@@ -22,8 +22,6 @@ final class EnvironmentBasedModelMapperTest {
   void before() {
     final var environment =
         Map.of(
-            "CODEMODDER_AZURE_OPENAI_GPT_3_5_TURBO_0125_DEPLOYMENT",
-            "my-gpt-3.5-turbo",
             "CODEMODDER_AZURE_OPENAI_GPT_4_0613_DEPLOYMENT",
             "my-gpt-4",
             "CODEMODDER_AZURE_OPENAI_GPT_4_TURBO_2024_04_09_DEPLOYMENT",
@@ -36,8 +34,8 @@ final class EnvironmentBasedModelMapperTest {
   /** Spot checks one of the standard models to make sure the mapping works as expected */
   @Test
   void it_maps_model_name_to_deployment() {
-    final var name = mapper.getModelName(StandardModel.GPT_3_5_TURBO_0125);
-    assertThat(name).isEqualTo("my-gpt-3.5-turbo");
+    final var name = mapper.getModelName(StandardModel.GPT_4O_2024_05_13);
+    assertThat(name).isEqualTo("my-gpt-4o");
   }
 
   /**

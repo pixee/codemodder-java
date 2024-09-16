@@ -5,18 +5,6 @@ import java.util.List;
 
 /** Well-known GPT models used in Codemod development. */
 public enum StandardModel implements Model {
-  GPT_3_5_TURBO_0125("gpt-3.5-turbo-0125", 16_385) {
-    @Override
-    public int tokens(final List<String> messages) {
-      return Tokens.countTokens(messages, 3, EncodingType.CL100K_BASE);
-    }
-  },
-  GPT_4_0613("gpt-4-0613", 8_192) {
-    @Override
-    public int tokens(final List<String> messages) {
-      return Tokens.countTokens(messages, 3, EncodingType.CL100K_BASE);
-    }
-  },
   GPT_4_TURBO_2024_04_09("gpt-4-turbo-2024-04-09", 128_000) {
     @Override
     public int tokens(final List<String> messages) {
