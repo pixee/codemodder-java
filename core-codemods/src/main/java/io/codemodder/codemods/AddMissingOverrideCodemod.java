@@ -1,7 +1,6 @@
 package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import io.codemodder.*;
@@ -11,7 +10,6 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarPluginJavaParserChanger;
 import io.codemodder.sonar.model.Issue;
-import java.util.Optional;
 import javax.inject.Inject;
 
 /** A codemod for automatically fixing missing @Override annotations. */
@@ -36,15 +34,13 @@ public final class AddMissingOverrideCodemod
       final SimpleName methodName,
       final Issue issue) {
 
-    Optional<Node> parentNodeRef = methodName.getParentNode();
-    if (parentNodeRef.isPresent()) {
-      Node parentNode = parentNodeRef.get();
-      if (parentNode instanceof MethodDeclaration method) {
-        method.addAnnotation(Override.class);
-        return ChangesResult.changesApplied;
-      }
-    }
-    return ChangesResult.noChanges;
+    var maybeMethodName =
+        methodName
+            .getParentNode()
+            .map(p -> p instanceof MethodDeclaration ? (MethodDeclaration) p : null)
+            .filter(mr -> !mr.getAnnotationByName("Override").isPresent());
+    maybeMethodName.ifPresent(mr -> mr.addAnnotation(Override.class));
+    return maybeMethodName.map(mr -> ChangesResult.changesApplied).orElse(ChangesResult.noChanges);
   }
 
   @Override
