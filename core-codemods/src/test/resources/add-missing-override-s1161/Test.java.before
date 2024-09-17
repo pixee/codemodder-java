@@ -143,6 +143,11 @@ public class SqlInjectionLesson10b extends AssignmentEndpoint {
     public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
       return contents;
     }
+
+    @Override
+    public CharSequence getCharContent2(boolean ignoreEncodingErrors) throws IOException {
+      return contents;
+    }
   }
 
   private boolean check_text(String regex, String text) {
