@@ -2,6 +2,15 @@ package io.codemodder.codemods;
 
 import io.codemodder.CodeChanger;
 import io.codemodder.Runner;
+import io.codemodder.codemods.semgrep.SemgrepJavaDeserializationCodemod;
+import io.codemodder.codemods.semgrep.SemgrepMissingSecureFlagCodemod;
+import io.codemodder.codemods.semgrep.SemgrepReflectionInjectionCodemod;
+import io.codemodder.codemods.semgrep.SemgrepSQLInjectionCodemod;
+import io.codemodder.codemods.semgrep.SemgrepSQLInjectionFormattedSqlStringCodemod;
+import io.codemodder.codemods.semgrep.SemgrepSSRFCodemod;
+import io.codemodder.codemods.semgrep.SemgrepServletResponseWriterXSSCodemod;
+import io.codemodder.codemods.semgrep.SemgrepWeakRandomCodemod;
+import io.codemodder.codemods.semgrep.SemgrepXXECodemod;
 import java.util.List;
 
 /**
@@ -53,6 +62,15 @@ public final class DefaultCodemods {
         SanitizeHttpHeaderCodemod.class,
         SanitizeSpringMultipartFilenameCodemod.class,
         SecureRandomCodemod.class,
+        SemgrepJavaDeserializationCodemod.class,
+        SemgrepMissingSecureFlagCodemod.class,
+        SemgrepReflectionInjectionCodemod.class,
+        SemgrepServletResponseWriterXSSCodemod.class,
+        SemgrepSSRFCodemod.class,
+        SemgrepSQLInjectionCodemod.class,
+        SemgrepSQLInjectionFormattedSqlStringCodemod.class,
+        SemgrepWeakRandomCodemod.class,
+        SemgrepXXECodemod.class,
         SemgrepOverlyPermissiveFilePermissionsCodemod.class,
         SimplifyRestControllerAnnotationsCodemod.class,
         SubstituteReplaceAllCodemod.class,
