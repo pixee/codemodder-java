@@ -12,7 +12,9 @@ public enum GenericRemediationMetadata {
   REFLECTION_INJECTION("reflection-injection"),
   DESERIALIZATION("java-deserialization"),
   MISSING_SECURE_FLAG("missing-secure-flag"),
-  SQL_INJECTION("sql-injection");
+  SQL_INJECTION("sql-injection"),
+  SSRF("ssrf"),
+  WEAK_RANDOM("weak-random");
 
   private final CodemodReporterStrategy reporter;
 
