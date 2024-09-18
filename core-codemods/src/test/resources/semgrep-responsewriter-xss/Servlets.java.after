@@ -1,0 +1,18 @@
+package com.acme.servlets;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.owasp.encoder.Encode;
+
+public class Servlets extends HttpServlet
+{
+    protected void danger(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String input1 = req.getParameter("input1");
+        resp.getWriter().write(Encode.forHtml(input1));
+    }
+}

@@ -1,0 +1,105 @@
+/*
+ * This file is part of WebGoat, an Open Web Application Security Project utility. For details, please see http://www.owasp.org/
+ *
+ * Copyright (c) 2002 - 2019 Bruce Mayhew
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+ * 02111-1307, USA.
+ *
+ * Getting Source ==============
+ *
+ * Source for this application is maintained at https://github.com/WebGoat/WebGoat, a repository for free software projects.
+ */
+
+package org.owasp.webgoat.lessons.xxe.introduction;
+
+import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+@RestController
+public class TranslationController extends AssignmentEndpoint {
+
+    @GetMapping("/fetch")
+    public String fetchTranslationContent(@RequestParam("host") String host) {
+        StringBuilder content = new StringBuilder();
+        try {
+            // get the content
+            URL url = new URL(host + "/content/original");
+
+            // Open a connection to the URL
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            // Read the response
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+
+            // Close the connections
+            in.close();
+            connection.disconnect();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error fetching content";
+        }
+
+        // Return the fetched content as a response
+        return content.toString();
+    }
+
+    @GetMapping("/translate")
+    public String hello(@RequestParam("translator") final String translationStrategy) {
+        final TranslatorStrategy translator = loadTranslatorByName(translationStrategy);
+        return translator.translate("Hello, world!");
+    }
+
+    // translate the input
+    interface TranslatorStrategy {
+        String translate(String input);
+    }
+
+    private static TranslatorStrategy loadTranslatorByName(final String translationStrategy) {
+        final Class<?> translatorClazz;
+        try {
+            translatorClazz = Class.forName("com.acme." + translationStrategy);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Invalid translator: " + translationStrategy, e);
+        }
+        if (TranslatorStrategy.class.isAssignableFrom(translatorClazz)) {
+            throw new IllegalArgumentException("Invalid translator: " + translationStrategy);
+        }
+        final Constructor<?> translatorCtor;
+        try {
+            translatorCtor = translatorClazz.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(
+                    "Translator " + translationStrategy + " is missing a no-args constructor", e);
+        }
+        final TranslatorStrategy translator;
+        try {
+            translator = (TranslatorStrategy) translatorCtor.newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Failed to initialize translator " + translationStrategy, e);
+        }
+        return translator;
+    }
+}
