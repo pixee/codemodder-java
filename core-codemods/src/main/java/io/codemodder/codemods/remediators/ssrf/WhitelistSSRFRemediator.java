@@ -14,6 +14,7 @@ import io.codemodder.remediation.FixCandidate;
 import io.codemodder.remediation.FixCandidateSearchResults;
 import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.MethodOrConstructor;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -147,7 +148,7 @@ public final class WhitelistSSRFRemediator implements SSRFRemediator {
     if (number.isBlank()) {
       return defaultMethodName + "_1";
     }
-    int num = (new Random()).nextInt();
+    int num = (new SecureRandom()).nextInt();
     try {
       num = Integer.parseInt(number.substring(1)) + 1;
     } catch (NumberFormatException e) {
