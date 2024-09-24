@@ -131,11 +131,6 @@ public final class WhitelistSSRFRemediator implements SSRFRemediator {
     return Pair.with(changes, unfixedFindings);
   }
 
-  private boolean hardenURL(final CompilationUnit cu, final ObjectCreationExpr newUrlCreation) {
-    var classDecl = newUrlCreation.findAncestor(ClassOrInterfaceDeclaration.class);
-    return false;
-  }
-
   static final String defaultMethodName = "filterURL";
 
   private static String generateFilterMethodName(final ClassOrInterfaceDeclaration classDecl) {
