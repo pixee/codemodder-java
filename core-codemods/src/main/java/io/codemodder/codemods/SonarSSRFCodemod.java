@@ -15,13 +15,10 @@ import java.util.List;
 import java.util.Objects;
 import javax.inject.Inject;
 
-/**
- * Fixes some Semgrep issues reported under the id
- * "java.spring.security.injection.tainted-url-host.tainted-url-host"
- */
+/** Fixes SSRF issues found by sonsr rule javasecurity:S5144. */
 @Codemod(
     id = "sonar:java/ssrf-s5144",
-    reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH,
     importance = Importance.HIGH)
 public final class SonarSSRFCodemod extends SonarRemediatingJavaParserChanger {
