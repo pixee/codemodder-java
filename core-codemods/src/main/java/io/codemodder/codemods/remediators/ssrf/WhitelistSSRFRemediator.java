@@ -16,13 +16,14 @@ import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.MethodOrConstructor;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.javatuples.Pair;
 
 public final class WhitelistSSRFRemediator implements SSRFRemediator {
+
+  static final String DEFAULT_METHOD_NAME = "filterURL";
 
   @Override
   public <T> CodemodFileScanningResult remediateAll(
@@ -38,15 +39,6 @@ public final class WhitelistSSRFRemediator implements SSRFRemediator {
     List<CodemodChange> changes = new ArrayList<>();
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
 
-    // new URL(url) case
-    FixCandidateSearcher<T> urlSearcher =
-        new FixCandidateSearcher.Builder<T>()
-            .withMatcher(mce -> mce.isConstructorForType("URL"))
-            .withMatcher(mce -> !mce.getArguments().isEmpty())
-            .build();
-
-    // ...
-
     // RestTemplate().exchange(url,...)
     FixCandidateSearcher<T> rtSearcher =
         new FixCandidateSearcher.Builder<T>()
@@ -54,6 +46,7 @@ public final class WhitelistSSRFRemediator implements SSRFRemediator {
             .withMatcher(mce -> mce.isMethodCallWithName("exchange"))
             // has RestTemplate as scope
             .withMatcher(MethodOrConstructor::isMethodCallWithScope)
+            // The type check below doesn't work
             // .withMatcher(mce -> mce.asMethodCall().getScope().filter(s ->
             // (("org.springframework.web.client" +
             //        ".RestTemplate").equals(s.calculateResolvedType().describe()))).isPresent())
@@ -62,7 +55,7 @@ public final class WhitelistSSRFRemediator implements SSRFRemediator {
     var pairResult =
         searchAndFix(
             rtSearcher,
-            (cunit, moc) -> hardenRT(cunit, moc.asMethodCall()),
+            (cunit, moc) -> hardenRT(moc.asMethodCall()),
             cu,
             path,
             detectorRule,
@@ -131,33 +124,27 @@ public final class WhitelistSSRFRemediator implements SSRFRemediator {
     return Pair.with(changes, unfixedFindings);
   }
 
-  private boolean hardenURL(final CompilationUnit cu, final ObjectCreationExpr newUrlCreation) {
-    var classDecl = newUrlCreation.findAncestor(ClassOrInterfaceDeclaration.class);
-    return false;
-  }
-
-  static final String defaultMethodName = "filterURL";
-
   private static String generateFilterMethodName(final ClassOrInterfaceDeclaration classDecl) {
     var methodNames =
         classDecl.getMethods().stream()
             .map(CallableDeclaration::getNameAsString)
-            .filter(s -> s.startsWith(defaultMethodName))
+            .filter(s -> s.startsWith(DEFAULT_METHOD_NAME))
             .sorted()
             .collect(Collectors.toCollection(ArrayList::new));
     if (methodNames.isEmpty()) {
-      return defaultMethodName;
+      return DEFAULT_METHOD_NAME;
     }
-    String number = methodNames.get(methodNames.size() - 1).substring(defaultMethodName.length());
+    String number = methodNames.get(methodNames.size() - 1).substring(DEFAULT_METHOD_NAME.length());
     if (number.isBlank()) {
-      return defaultMethodName + "_1";
+      return DEFAULT_METHOD_NAME + "_1";
     }
-    int num = (new Random()).nextInt();
+    int num = 0;
     try {
       num = Integer.parseInt(number.substring(1)) + 1;
     } catch (NumberFormatException e) {
+      return DEFAULT_METHOD_NAME;
     }
-    return defaultMethodName + "_" + num;
+    return DEFAULT_METHOD_NAME + "_" + num;
   }
 
   private static void addFilterMethod(
@@ -176,14 +163,16 @@ public final class WhitelistSSRFRemediator implements SSRFRemediator {
     classDecl.addMember(StaticJavaParser.parseMethodDeclaration(method));
   }
 
-  private boolean hardenRT(final CompilationUnit cu, final MethodCallExpr call) {
+  private boolean hardenRT(final MethodCallExpr call) {
     var maybeFirstArg =
         call.getArguments().stream()
             .findFirst()
             .filter(
                 arg ->
                     !(arg.isMethodCallExpr()
-                        && arg.asMethodCallExpr().getNameAsString().startsWith(defaultMethodName)));
+                        && arg.asMethodCallExpr()
+                            .getNameAsString()
+                            .startsWith(DEFAULT_METHOD_NAME)));
     if (maybeFirstArg.isPresent()) {
       var maybeClassDecl = call.findAncestor(ClassOrInterfaceDeclaration.class);
       if (maybeClassDecl.isPresent()) {
