@@ -170,25 +170,24 @@ public final class WhitelistJavaDeserializationRemediator implements JavaDeseria
       final ClassOrInterfaceDeclaration classDecl, final String newClassName) {
     final String klass =
         """
-    static class %s extends ObjectInputStream {
+static class %s extends ObjectInputStream {
 
-        public %s(InputStream in) throws IOException {
-            super(in);
-        }
-
-        @Override
-        protected Class<?> resolveClass(ObjectStreamClass osc) throws IOException, ClassNotFoundException {
-
-            List<String> whitelist = List.of();
-
-            if (!whitelist.contains(osc.getName())) {
-                throw new SecurityException("Unauthorized deserialization of %s".formatted(osc.getName()));
-            }
-
-            return super.resolveClass(osc);
-        }
+    public %s(InputStream in) throws IOException {
+        super(in);
     }
-    """
+
+    @Override
+    protected Class<?> resolveClass(ObjectStreamClass osc) throws IOException, ClassNotFoundException {
+
+        List<String> whitelist = List.of();
+
+        if (!whitelist.contains(osc.getName())) {
+            throw new SecurityException("Unauthorized deserialization of %s".formatted(osc.getName()));
+        }
+
+        return super.resolveClass(osc);
+    }
+}"""
             .formatted(newClassName, newClassName, "%s");
     classDecl.addMember(StaticJavaParser.parseBodyDeclaration(klass));
   }

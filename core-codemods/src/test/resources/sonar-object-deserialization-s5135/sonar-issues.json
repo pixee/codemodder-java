@@ -1,0 +1,184 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 1
+  },
+  "effortTotal": 30,
+  "debtTotal": 30,
+  "issues": [
+    {
+      "key": "AZHrvooZfRrfcdAcjJKg",
+      "rule": "javasecurity:S5135",
+      "severity": "BLOCKER",
+      "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+      "project": "nahsra_WebGoatDemo",
+      "line": 60,
+      "hash": "95b1fb35a9f6375dd251bb720a356b94",
+      "textRange": {
+        "startLine": 60,
+        "endLine": 60,
+        "startOffset": 17,
+        "endOffset": 33
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 60,
+                "endLine": 60,
+                "startOffset": 17,
+                "endOffset": 33
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be injected into the caller"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 57,
+                "endLine": 58,
+                "startOffset": 9,
+                "endOffset": 93
+              },
+              "msg": "A malicious value can be assigned to variable ‘ois’"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 8,
+                "endOffset": 93
+              },
+              "msg": "This constructor can propagate malicious content to the newly created object"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 30,
+                "endOffset": 92
+              },
+              "msg": "This constructor can propagate malicious content to the newly created object"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 55,
+                "endOffset": 91
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 4,
+                "endOffset": 56
+              },
+              "msg": "A malicious value can be assigned to variable ‘b64token’"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 15,
+                "endOffset": 56
+              },
+              "msg": "This string operation can propagate malicious content to the returned object"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 15,
+                "endOffset": 38
+              },
+              "msg": "This string operation can propagate malicious content to the returned object"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 49,
+                "endLine": 49,
+                "startOffset": 53,
+                "endOffset": 58
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 49,
+                "endLine": 49,
+                "startOffset": 32,
+                "endOffset": 45
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not deserialize user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "assignee": "nahsra@github",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2024-09-13T16:15:18+0200",
+      "updateDate": "2024-09-13T16:16:04+0200",
+      "type": "VULNERABILITY",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN"
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoatDemo",
+      "uuid": "AZHrvY6NJ-7YZ51HyHWm",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "WebGoatDemo",
+      "longName": "WebGoatDemo"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+      "uuid": "AZHrvoY7fRrfcdAcjI9N",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "InsecureDeserializationTask.java",
+      "longName": "src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+      "path": "src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "nahsra",
+      "name": "Arshan Dabirsiaghi"
+    }
+  ],
+  "facets": []
+}
