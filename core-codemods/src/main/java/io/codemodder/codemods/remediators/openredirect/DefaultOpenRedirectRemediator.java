@@ -121,7 +121,8 @@ final class DefaultOpenRedirectRemediator implements OpenRedirectRemediator {
       if (maybeClassDecl.isPresent()) {
         var newMethodName = generateFilterMethodName(maybeClassDecl.get());
         addFilterMethod(maybeClassDecl.get(), newMethodName);
-        var newCall = new MethodCallExpr(newMethodName, maybeFirstArg.get().clone());
+        var newCall =
+            new MethodCallExpr(newMethodName, call.getScope().get(), maybeFirstArg.get().clone());
         call.replace(newCall);
         addImportIfMissing(cu, SecurityException.class);
         return true;

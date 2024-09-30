@@ -1,0 +1,20 @@
+import java.lang.SecurityException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class RedirectionForgery{
+
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	  String location = req.getParameter("url");
+	  whitelistedRedirect(resp, location);
+	}
+	
+	void whitelistedRedirect(final HttpServletResponse resp, final String url) {
+	    var allowedHosts = List.of("");
+	    if (!allowedHosts.contains(url)) {
+	        throw new SecurityException("Supplied URL is not allowed.");
+	    }
+	    resp.sendRedirect(url);
+	}
+
+}
