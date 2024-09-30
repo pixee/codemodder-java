@@ -74,6 +74,7 @@ public final class DefaultCodemods {
         SemgrepOverlyPermissiveFilePermissionsCodemod.class,
         SimplifyRestControllerAnnotationsCodemod.class,
         SubstituteReplaceAllCodemod.class,
+        SonarOpenRedirectCodemod.class,
         SonarRemoveUnthrowableExceptionCodemod.class,
         SonarXXECodemod.class,
         SonarSQLInjectionCodemod.class,
