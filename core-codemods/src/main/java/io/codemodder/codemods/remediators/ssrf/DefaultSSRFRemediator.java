@@ -48,17 +48,16 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
             .withMatcher(mce -> !mce.getArguments().isEmpty())
             .build();
 
-    // RestTemplate().exchange(url,...)
+    // Matches calls like RestTemplate.exchange(...)
+    // Doesn't actually check that the `exchange` call scope is actually of type RestTemplate
+    // This is left for the detectors, for now
     FixCandidateSearcher<T> rtSearcher =
         new FixCandidateSearcher.Builder<T>()
             // is method with name
             .withMatcher(mce -> mce.isMethodCallWithName("exchange"))
-            // has RestTemplate as scope
+            // has a scope
             .withMatcher(MethodOrConstructor::isMethodCallWithScope)
-            // The type check below doesn't work
-            // .withMatcher(mce -> mce.asMethodCall().getScope().filter(s ->
-            // (("org.springframework.web.client" +
-            //        ".RestTemplate").equals(s.calculateResolvedType().describe()))).isPresent())
+            // Could be improved further by adding a RestTemplate type check to the scope
             .build();
 
     List<CodemodChange> changes = new ArrayList<>();

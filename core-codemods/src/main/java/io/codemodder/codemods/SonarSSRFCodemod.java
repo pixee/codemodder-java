@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Objects;
 import javax.inject.Inject;
 
-/** Fixes SSRF issues found by sonsr rule javasecurity:S5144. */
+/** Fixes SSRF issues found by sonar rule javasecurity:S5144. */
 @Codemod(
     id = "sonar:java/ssrf-s5144",
-    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH,
     importance = Importance.HIGH)
 public final class SonarSSRFCodemod extends SonarRemediatingJavaParserChanger {
