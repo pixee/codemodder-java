@@ -1,5 +1,6 @@
 package io.codemodder.codemods;
 
+import io.codemodder.DependencyGAV;
 import io.codemodder.testutils.CodemodTestMixin;
 import io.codemodder.testutils.Metadata;
 import org.junit.jupiter.api.Nested;
@@ -13,6 +14,6 @@ final class SonarSSRFCodemodTest {
       renameTestFile =
           "src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
       expectingFixesAtLines = {104},
-      dependencies = {})
+      dependencies = DependencyGAV.JAVA_SECURITY_TOOLKIT_GAV)
   class RestTemplateTest implements CodemodTestMixin {}
 }

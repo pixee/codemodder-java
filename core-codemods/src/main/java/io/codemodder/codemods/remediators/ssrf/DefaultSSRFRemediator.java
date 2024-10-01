@@ -18,11 +18,14 @@ import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.remediation.FixCandidate;
 import io.codemodder.remediation.FixCandidateSearchResults;
 import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.MethodOrConstructor;
 import io.github.pixee.security.HostValidator;
 import io.github.pixee.security.Urls;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import org.javatuples.Pair;
 
 final class DefaultSSRFRemediator implements SSRFRemediator {
 
@@ -45,8 +48,26 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
             .withMatcher(mce -> !mce.getArguments().isEmpty())
             .build();
 
-    FixCandidateSearchResults<T> results =
-        searcher.search(
+    // RestTemplate().exchange(url,...)
+    FixCandidateSearcher<T> rtSearcher =
+        new FixCandidateSearcher.Builder<T>()
+            // is method with name
+            .withMatcher(mce -> mce.isMethodCallWithName("exchange"))
+            // has RestTemplate as scope
+            .withMatcher(MethodOrConstructor::isMethodCallWithScope)
+            // The type check below doesn't work
+            // .withMatcher(mce -> mce.asMethodCall().getScope().filter(s ->
+            // (("org.springframework.web.client" +
+            //        ".RestTemplate").equals(s.calculateResolvedType().describe()))).isPresent())
+            .build();
+
+    List<CodemodChange> changes = new ArrayList<>();
+    List<UnfixedFinding> unfixedFindings = new ArrayList<>();
+
+    var pairResult =
+        searchAndFix(
+            searcher,
+            (cunit, moc) -> harden(cunit, moc.asObjectCreationExpr()),
             cu,
             path,
             detectorRule,
@@ -55,30 +76,28 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
             getStartLine,
             getEndLine,
             getStartColumn);
+    changes.addAll(pairResult.getValue0());
+    unfixedFindings.addAll(pairResult.getValue1());
 
-    List<CodemodChange> changes = new ArrayList<>();
+    var pairResultRT =
+        searchAndFix(
+            rtSearcher,
+            (cunit, moc) -> hardenRT(cunit, moc.asMethodCall()),
+            cu,
+            path,
+            detectorRule,
+            issuesForFile,
+            getKey,
+            getStartLine,
+            getEndLine,
+            getStartColumn);
+    changes.addAll(pairResultRT.getValue0());
+    unfixedFindings.addAll(pairResultRT.getValue1());
 
-    for (FixCandidate<T> candidate : results.fixCandidates()) {
-      ObjectCreationExpr call = (ObjectCreationExpr) candidate.call().asNode();
-      List<T> issues = candidate.issues();
-      harden(cu, call);
-      List<FixedFinding> fixedFindings =
-          issues.stream()
-              .map(issue -> new FixedFinding(getKey.apply(issue), detectorRule))
-              .toList();
-      CodemodChange change =
-          CodemodChange.from(
-              getStartLine.apply(issues.get(0)),
-              List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT),
-              fixedFindings);
-      changes.add(change);
-    }
-
-    List<UnfixedFinding> unfixedFindings = new ArrayList<>(results.unfixableFindings());
     return CodemodFileScanningResult.from(changes, unfixedFindings);
   }
 
-  private void harden(final CompilationUnit cu, final ObjectCreationExpr newUrlCall) {
+  private boolean harden(final CompilationUnit cu, final ObjectCreationExpr newUrlCall) {
     NodeList<Expression> arguments = newUrlCall.getArguments();
 
     /*
@@ -92,23 +111,106 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
      * ...
      * URL u = Urls.create(foo, io.github.pixee.security.Urls.HTTP_PROTOCOLS, io.github.pixee.security.HostValidator.ALLOW_ALL)
      */
+    MethodCallExpr safeCall = wrapInUrlsCreate(cu, arguments);
+    newUrlCall.replace(safeCall);
+    return true;
+  }
+
+  private MethodCallExpr wrapInUrlsCreate(
+      final CompilationUnit cu, final NodeList<Expression> arguments) {
     addImportIfMissing(cu, Urls.class.getName());
     addImportIfMissing(cu, HostValidator.class.getName());
+
     FieldAccessExpr httpProtocolsExpr = new FieldAccessExpr();
     httpProtocolsExpr.setScope(new NameExpr(Urls.class.getSimpleName()));
     httpProtocolsExpr.setName("HTTP_PROTOCOLS");
 
     FieldAccessExpr denyCommonTargetsExpr = new FieldAccessExpr();
-
     denyCommonTargetsExpr.setScope(new NameExpr(HostValidator.class.getSimpleName()));
     denyCommonTargetsExpr.setName("DENY_COMMON_INFRASTRUCTURE_TARGETS");
 
     NodeList<Expression> newArguments = new NodeList<>();
-    newArguments.addAll(arguments); // first are all the arguments they were passing to "new URL"
+    newArguments.addAll(arguments); // add expression
     newArguments.add(httpProtocolsExpr); // load the protocols they're allowed
     newArguments.add(denyCommonTargetsExpr); // load the host validator
+
     MethodCallExpr safeCall =
         new MethodCallExpr(new NameExpr(Urls.class.getSimpleName()), "create", newArguments);
-    newUrlCall.replace(safeCall);
+
+    return safeCall;
+  }
+
+  private boolean hardenRT(final CompilationUnit cu, final MethodCallExpr call) {
+    var maybeFirstArg = call.getArguments().stream().findFirst();
+    if (maybeFirstArg.isPresent()) {
+      var wrappedArg =
+          new MethodCallExpr(
+              wrapInUrlsCreate(cu, new NodeList<Expression>(maybeFirstArg.get().clone())),
+              "toString");
+      maybeFirstArg.get().replace(wrappedArg);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns a list of changes and unfixed findings for a pair of searcher, that gather relevant
+   * issues, and a fixer predicate, that returns true if the change is successful.
+   */
+  private <T> Pair<List<CodemodChange>, List<UnfixedFinding>> searchAndFix(
+      final FixCandidateSearcher<T> searcher,
+      final BiPredicate<CompilationUnit, MethodOrConstructor> fixer,
+      final CompilationUnit cu,
+      final String path,
+      final DetectorRule detectorRule,
+      final List<T> issuesForFile,
+      final Function<T, String> getKey,
+      final Function<T, Integer> getStartLine,
+      final Function<T, Integer> getEndLine,
+      final Function<T, Integer> getStartColumn) {
+    List<CodemodChange> changes = new ArrayList<>();
+    List<UnfixedFinding> unfixedFindings = new ArrayList<>();
+
+    FixCandidateSearchResults<T> results =
+        searcher.search(
+            cu,
+            path,
+            detectorRule,
+            issuesForFile,
+            getKey,
+            getStartLine,
+            getEndLine,
+            getStartColumn);
+
+    for (FixCandidate<T> candidate : results.fixCandidates()) {
+      MethodOrConstructor call = candidate.call();
+      List<T> issues = candidate.issues();
+      if (fixer.test(cu, call)) {
+        List<FixedFinding> fixedFindings =
+            issues.stream()
+                .map(issue -> new FixedFinding(getKey.apply(issue), detectorRule))
+                .toList();
+        CodemodChange change =
+            CodemodChange.from(
+                getStartLine.apply(issues.get(0)),
+                List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT),
+                fixedFindings);
+        changes.add(change);
+      } else {
+        issues.forEach(
+            issue -> {
+              final String id = getKey.apply(issue);
+              final UnfixedFinding unfixableFinding =
+                  new UnfixedFinding(
+                      id,
+                      detectorRule,
+                      path,
+                      getStartLine.apply(issues.get(0)),
+                      "State changing effects possible or unrecognized code shape");
+              unfixedFindings.add(unfixableFinding);
+            });
+      }
+    }
+    return Pair.with(changes, unfixedFindings);
   }
 }

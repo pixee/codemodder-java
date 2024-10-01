@@ -3,7 +3,6 @@ package io.codemodder.codemods;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.*;
 import io.codemodder.codemods.remediators.ssrf.SSRFRemediator;
-import io.codemodder.codemods.remediators.ssrf.WhitelistSSRFRemediator;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
@@ -31,7 +30,7 @@ public final class SonarSSRFCodemod extends SonarRemediatingJavaParserChanger {
       @ProvidedSonarScan(ruleId = "javasecurity:S5144") final RuleIssue issues) {
     super(GenericRemediationMetadata.SSRF.reporter(), issues);
     this.issues = Objects.requireNonNull(issues);
-    this.remediator = new WhitelistSSRFRemediator();
+    this.remediator = SSRFRemediator.DEFAULT;
   }
 
   @Override
