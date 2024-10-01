@@ -134,10 +134,7 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
     newArguments.add(httpProtocolsExpr); // load the protocols they're allowed
     newArguments.add(denyCommonTargetsExpr); // load the host validator
 
-    MethodCallExpr safeCall =
-        new MethodCallExpr(new NameExpr(Urls.class.getSimpleName()), "create", newArguments);
-
-    return safeCall;
+    return new MethodCallExpr(new NameExpr(Urls.class.getSimpleName()), "create", newArguments);
   }
 
   private boolean hardenRT(final CompilationUnit cu, final MethodCallExpr call) {
@@ -145,8 +142,7 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
     if (maybeFirstArg.isPresent()) {
       var wrappedArg =
           new MethodCallExpr(
-              wrapInUrlsCreate(cu, new NodeList<Expression>(maybeFirstArg.get().clone())),
-              "toString");
+              wrapInUrlsCreate(cu, new NodeList<>(maybeFirstArg.get().clone())), "toString");
       maybeFirstArg.get().replace(wrappedArg);
       return true;
     }
