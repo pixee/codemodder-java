@@ -78,6 +78,7 @@ public final class DefaultCodemods {
         SonarXXECodemod.class,
         SonarSQLInjectionCodemod.class,
         SonarUnsafeReflectionRemediationCodemod.class,
+        SonarSSRFCodemod.class,
         SQLParameterizerCodemod.class,
         SSRFCodemod.class,
         StackTraceExposureCodemod.class,

@@ -1,0 +1,154 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 1
+  },
+  "effortTotal": 30,
+  "debtTotal": 30,
+  "issues": [
+    {
+      "key": "AZHrvorffRrfcdAcjJMa",
+      "rule": "javasecurity:S5144",
+      "severity": "MAJOR",
+      "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+      "project": "nahsra_WebGoatDemo",
+      "line": 104,
+      "hash": "63e6f44c40b5af5bab94346394e62cc9",
+      "textRange": {
+        "startLine": 104,
+        "endLine": 109,
+        "startOffset": 6,
+        "endOffset": 25
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 104,
+                "endLine": 109,
+                "startOffset": 6,
+                "endOffset": 25
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 106,
+                "endLine": 106,
+                "startOffset": 14,
+                "endOffset": 95
+              },
+              "msg": "This string operation can propagate malicious content to the returned object"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 100,
+                "endLine": 100,
+                "startOffset": 37,
+                "endOffset": 49
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 100,
+                "endLine": 100,
+                "startOffset": 15,
+                "endOffset": 36
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 75,
+                "endLine": 75,
+                "startOffset": 6,
+                "endOffset": 44
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 70,
+                "endLine": 70,
+                "startOffset": 4,
+                "endOffset": 44
+              },
+              "msg": "A malicious value can be assigned to variable ‘host’"
+            },
+            {
+              "component": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 70,
+                "endLine": 70,
+                "startOffset": 18,
+                "endOffset": 43
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct the URL from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "assignee": "nahsra@github",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2024-09-13T16:15:18+0200",
+      "updateDate": "2024-09-13T16:16:04+0200",
+      "type": "VULNERABILITY",
+      "organization": "nahsra",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "issueStatus": "OPEN"
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoatDemo:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+      "uuid": "AZHrvoY7fRrfcdAcjI97",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "ResetLinkAssignmentForgotPassword.java",
+      "longName": "src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+      "path": "src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoatDemo",
+      "uuid": "AZHrvY6NJ-7YZ51HyHWm",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "WebGoatDemo",
+      "longName": "WebGoatDemo"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "nahsra",
+      "name": "Arshan Dabirsiaghi"
+    }
+  ],
+  "facets": []
+}

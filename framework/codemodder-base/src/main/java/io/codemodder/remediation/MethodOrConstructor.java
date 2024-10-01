@@ -78,4 +78,12 @@ public record MethodOrConstructor(Node node) {
     }
     throw new IllegalStateException("Not a method call");
   }
+
+  /** Return the wrapped node as a {@link ObjectCreationExpr} or blow up. */
+  public ObjectCreationExpr asObjectCreationExpr() {
+    if (this.isConstructor()) {
+      return (ObjectCreationExpr) this.node;
+    }
+    throw new IllegalStateException("Not a constructor");
+  }
 }
