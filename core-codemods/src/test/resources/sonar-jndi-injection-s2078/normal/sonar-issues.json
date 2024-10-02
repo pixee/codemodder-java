@@ -1,0 +1,552 @@
+{
+  "total": 6,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 6
+  },
+  "effortTotal": 110,
+  "debtTotal": 110,
+  "issues": [
+    {
+      "key": "AZJM52DeO14kODUdUlL7",
+      "rule": "javasecurity:S2078",
+      "severity": "BLOCKER",
+      "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+      "project": "andrecsilva_bad-code-java",
+      "line": 18,
+      "hash": "04ad6717d681874235a5c5f3f6ce5f2e",
+      "textRange": {
+        "startLine": 18,
+        "endLine": 18,
+        "startOffset": 30,
+        "endOffset": 50
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 18,
+                "endLine": 18,
+                "startOffset": 30,
+                "endOffset": 50
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 16,
+                "endLine": 16,
+                "startOffset": 41,
+                "endOffset": 62
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 16,
+                "endLine": 16,
+                "startOffset": 26,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 13,
+                "endLine": 13,
+                "startOffset": 15,
+                "endOffset": 39
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 12,
+                "endLine": 12,
+                "startOffset": 38,
+                "endOffset": 59
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 12,
+                "endLine": 12,
+                "startOffset": 25,
+                "endOffset": 37
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+              "textRange": {
+                "startLine": 21,
+                "endLine": 21,
+                "startOffset": 15,
+                "endOffset": 50
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+              "textRange": {
+                "startLine": 20,
+                "endLine": 20,
+                "startOffset": 77,
+                "endOffset": 85
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+              "textRange": {
+                "startLine": 20,
+                "endLine": 20,
+                "startOffset": 40,
+                "endOffset": 63
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 18,
+                "endLine": 18,
+                "startOffset": 30,
+                "endOffset": 50
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 16,
+                "endLine": 16,
+                "startOffset": 41,
+                "endOffset": 62
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 16,
+                "endLine": 16,
+                "startOffset": 26,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 13,
+                "endLine": 13,
+                "startOffset": 15,
+                "endOffset": 39
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 12,
+                "endLine": 12,
+                "startOffset": 38,
+                "endOffset": 59
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+              "textRange": {
+                "startLine": 12,
+                "endLine": 12,
+                "startOffset": 25,
+                "endOffset": 37
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+              "textRange": {
+                "startLine": 26,
+                "endLine": 26,
+                "startOffset": 15,
+                "endOffset": 50
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+              "textRange": {
+                "startLine": 25,
+                "endLine": 25,
+                "startOffset": 80,
+                "endOffset": 88
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+              "textRange": {
+                "startLine": 25,
+                "endLine": 25,
+                "startOffset": 43,
+                "endOffset": 66
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct this LDAP name or filter from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cert",
+        "cwe"
+      ],
+      "creationDate": "2024-10-02T13:04:36+0200",
+      "updateDate": "2024-10-02T13:04:36+0200",
+      "type": "VULNERABILITY",
+      "organization": "andrecsilva",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN"
+    },
+    {
+      "key": "AZJM52D0O14kODUdUlL8",
+      "rule": "javasecurity:S2078",
+      "severity": "BLOCKER",
+      "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+      "project": "andrecsilva_bad-code-java",
+      "line": 15,
+      "hash": "71889032360e7572c8d7400ea6f029a5",
+      "textRange": {
+        "startLine": 15,
+        "endLine": 15,
+        "startOffset": 21,
+        "endOffset": 41
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+              "textRange": {
+                "startLine": 15,
+                "endLine": 15,
+                "startOffset": 21,
+                "endOffset": 41
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+              "textRange": {
+                "startLine": 13,
+                "endLine": 13,
+                "startOffset": 70,
+                "endOffset": 78
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+              "textRange": {
+                "startLine": 13,
+                "endLine": 13,
+                "startOffset": 33,
+                "endOffset": 56
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct this LDAP name or filter from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cert",
+        "cwe"
+      ],
+      "creationDate": "2024-10-02T13:04:36+0200",
+      "updateDate": "2024-10-02T13:04:36+0200",
+      "type": "VULNERABILITY",
+      "organization": "andrecsilva",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN"
+    },
+    {
+      "key": "AZIzNLU0LHhd1vFwOk7J",
+      "rule": "java:S1220",
+      "severity": "MINOR",
+      "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/RedirectionForgery.java",
+      "project": "andrecsilva_bad-code-java",
+      "flows": [],
+      "status": "OPEN",
+      "message": "Move this file to a named package.",
+      "effort": "10min",
+      "debt": "10min",
+      "tags": [
+        "convention"
+      ],
+      "creationDate": "2024-09-27T13:14:20+0200",
+      "updateDate": "2024-09-27T13:18:51+0200",
+      "type": "CODE_SMELL",
+      "organization": "andrecsilva",
+      "cleanCodeAttribute": "MODULAR",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN"
+    },
+    {
+      "key": "AZIzNLU0LHhd1vFwOk7K",
+      "rule": "javasecurity:S5146",
+      "severity": "BLOCKER",
+      "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/RedirectionForgery.java",
+      "project": "andrecsilva_bad-code-java",
+      "line": 8,
+      "hash": "b7a8781b629c5d632230d13cbd8ba8f5",
+      "textRange": {
+        "startLine": 8,
+        "endLine": 8,
+        "startOffset": 3,
+        "endOffset": 30
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/RedirectionForgery.java",
+              "textRange": {
+                "startLine": 8,
+                "endLine": 8,
+                "startOffset": 3,
+                "endOffset": 30
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/RedirectionForgery.java",
+              "textRange": {
+                "startLine": 7,
+                "endLine": 7,
+                "startOffset": 3,
+                "endOffset": 45
+              },
+              "msg": "A malicious value can be assigned to variable ‘location’"
+            },
+            {
+              "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/RedirectionForgery.java",
+              "textRange": {
+                "startLine": 7,
+                "endLine": 7,
+                "startOffset": 21,
+                "endOffset": 44
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not perform redirects based on user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2024-09-27T13:14:20+0200",
+      "updateDate": "2024-09-27T13:18:51+0200",
+      "type": "VULNERABILITY",
+      "organization": "andrecsilva",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN"
+    },
+    {
+      "key": "AZIzNLVmLHhd1vFwOk7M",
+      "rule": "xml:S1134",
+      "severity": "MAJOR",
+      "component": "andrecsilva_bad-code-java:pom.xml",
+      "project": "andrecsilva_bad-code-java",
+      "line": 12,
+      "hash": "57a1d2bace8541f648f11f4019ae460c",
+      "textRange": {
+        "startLine": 12,
+        "endLine": 12,
+        "startOffset": 2,
+        "endOffset": 51
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Take the required action to fix the issue indicated by this \"FIXME\" comment.",
+      "effort": "0min",
+      "debt": "0min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2024-09-27T13:09:45+0200",
+      "updateDate": "2024-09-27T13:18:51+0200",
+      "type": "CODE_SMELL",
+      "organization": "andrecsilva",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "issueStatus": "OPEN"
+    },
+    {
+      "key": "AZIzNLVfLHhd1vFwOk7L",
+      "rule": "java:S106",
+      "severity": "MAJOR",
+      "component": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/App.java",
+      "project": "andrecsilva_bad-code-java",
+      "line": 11,
+      "hash": "a6bb3cf9230562f25bf42bea1ce34544",
+      "textRange": {
+        "startLine": 11,
+        "endLine": 11,
+        "startOffset": 8,
+        "endOffset": 18
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Replace this use of System.out by a logger.",
+      "effort": "10min",
+      "debt": "10min",
+      "tags": [
+        "bad-practice",
+        "cert"
+      ],
+      "creationDate": "2024-09-27T13:09:45+0200",
+      "updateDate": "2024-09-27T13:18:51+0200",
+      "type": "CODE_SMELL",
+      "organization": "andrecsilva",
+      "cleanCodeAttribute": "MODULAR",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "issueStatus": "OPEN"
+    }
+  ],
+  "components": [
+    {
+      "organization": "andrecsilva",
+      "key": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/App.java",
+      "uuid": "AZIzNLJLLHhd1vFwOk7D",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "App.java",
+      "longName": "src/main/java/com/mycompany/app/App.java",
+      "path": "src/main/java/com/mycompany/app/App.java"
+    },
+    {
+      "organization": "andrecsilva",
+      "key": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/RedirectionForgery.java",
+      "uuid": "AZIzNLJLLHhd1vFwOk7C",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "RedirectionForgery.java",
+      "longName": "src/main/java/com/mycompany/app/RedirectionForgery.java",
+      "path": "src/main/java/com/mycompany/app/RedirectionForgery.java"
+    },
+    {
+      "organization": "andrecsilva",
+      "key": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+      "uuid": "AZJM3WlnzAV4pOA1RILi",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "JNDIVuln.java",
+      "longName": "src/main/java/com/mycompany/app/jndi/JNDIVuln.java",
+      "path": "src/main/java/com/mycompany/app/jndi/JNDIVuln.java"
+    },
+    {
+      "organization": "andrecsilva",
+      "key": "andrecsilva_bad-code-java:src/main/java/com/mycompany/app/jndi/FindResource.java",
+      "uuid": "AZJM3WlnzAV4pOA1RILh",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "FindResource.java",
+      "longName": "src/main/java/com/mycompany/app/jndi/FindResource.java",
+      "path": "src/main/java/com/mycompany/app/jndi/FindResource.java"
+    },
+    {
+      "organization": "andrecsilva",
+      "key": "andrecsilva_bad-code-java:pom.xml",
+      "uuid": "AZIzNLJLLHhd1vFwOk7I",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "pom.xml",
+      "longName": "pom.xml",
+      "path": "pom.xml"
+    },
+    {
+      "organization": "andrecsilva",
+      "key": "andrecsilva_bad-code-java",
+      "uuid": "AZIzNG7PBzBgaIxETvJi",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "bad-code-java",
+      "longName": "bad-code-java"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "andrecsilva",
+      "name": "André C. Silva"
+    }
+  ],
+  "facets": []
+}
