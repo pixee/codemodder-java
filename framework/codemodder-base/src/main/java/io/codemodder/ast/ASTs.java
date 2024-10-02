@@ -831,15 +831,6 @@ public final class ASTs {
   }
 
   /**
-   * Given a {@link SimpleName} {@code name}, checks if there exists a local variable declaration
-   * whose name is {@code name}.
-   */
-  public static Optional<LocalVariableDeclaration> findEarliestLocalVariableDeclarationOf(
-      final SimpleName name) {
-    return NameResolver.findLocalVariableDeclarationOf(name, name.asString());
-  }
-
-  /**
    * Given a {@link SimpleName} {@code name}, checks if there exists a local declaration whose name
    * is {@code name}.
    */

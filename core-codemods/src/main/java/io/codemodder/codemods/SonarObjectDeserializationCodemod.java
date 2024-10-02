@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Objects;
 import javax.inject.Inject;
 
-/** Fixes Object Deserialization issues found by sonsr rule javasecurity:S5135. */
+/** Fixes Object Deserialization issues found by sonar rule javasecurity:S5135. */
 @Codemod(
     id = "sonar:java/object-deserialization-s5135",
-    reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
+    reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     executionPriority = CodemodExecutionPriority.HIGH,
     importance = Importance.HIGH)
 public final class SonarObjectDeserializationCodemod extends SonarRemediatingJavaParserChanger {
