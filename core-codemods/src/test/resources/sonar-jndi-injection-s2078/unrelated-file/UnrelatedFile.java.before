@@ -1,0 +1,8 @@
+package com.acme;
+
+// this class has no findings, but it shouldn't cause an error
+class UnrelatedFile {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}

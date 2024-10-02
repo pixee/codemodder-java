@@ -25,7 +25,7 @@ abstract class DefaultRuleFinding<T extends SonarFinding> implements RuleFinding
 
   @Override
   public List<T> getResultsByPath(final Path path) {
-    return findings.get(path.toString());
+    return findings.getOrDefault(path.toString(), List.of());
   }
 
   @Override
