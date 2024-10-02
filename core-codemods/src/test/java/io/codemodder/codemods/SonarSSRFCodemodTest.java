@@ -15,5 +15,5 @@ final class SonarSSRFCodemodTest {
           "src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
       expectingFixesAtLines = {104},
       dependencies = DependencyGAV.JAVA_SECURITY_TOOLKIT_GAV)
-  class RestTemplateTest implements CodemodTestMixin {}
+  final class RestTemplateTest implements CodemodTestMixin {}
 }
