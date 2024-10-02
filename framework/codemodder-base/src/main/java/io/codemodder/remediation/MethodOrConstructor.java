@@ -81,9 +81,16 @@ public record MethodOrConstructor(Node node) {
 
   /** Return the wrapped node as a {@link ObjectCreationExpr} or blow up. */
   public ObjectCreationExpr asObjectCreationExpr() {
+<<<<<<< HEAD
     if (this.isConstructor()) {
       return (ObjectCreationExpr) this.node;
     }
     throw new IllegalStateException("Not a constructor");
+=======
+    if (this.node instanceof ObjectCreationExpr) {
+      return (ObjectCreationExpr) this.node;
+    }
+    throw new IllegalStateException("Not an ObjectCreationExpr");
+>>>>>>> 337650aa (Initial implementation of SonarObjectDeserialization)
   }
 }
