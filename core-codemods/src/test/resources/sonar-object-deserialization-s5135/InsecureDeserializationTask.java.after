@@ -22,15 +22,12 @@
 
 package org.owasp.webgoat.lessons.deserialization;
 
+import static io.github.pixee.security.ObjectInputFilters.createSafeObjectInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
-import java.lang.ClassNotFoundException;
-import java.lang.SecurityException;
 import java.util.Base64;
-import java.util.List;
 import org.dummy.insecure.framework.VulnerableTaskHolder;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
@@ -59,7 +56,7 @@ public class InsecureDeserializationTask extends AssignmentEndpoint {
     b64token = token.replace('-', '+').replace('_', '/');
 
     try (ObjectInputStream ois =
-        new WhitelistedObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(b64token)))) {
+        createSafeObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(b64token)))) {
       before = System.currentTimeMillis();
       Object o = ois.readObject();
       if (!(o instanceof VulnerableTaskHolder)) {
@@ -85,21 +82,5 @@ public class InsecureDeserializationTask extends AssignmentEndpoint {
       return failed(this).build();
     }
     return success(this).build();
-  }
-  
-  static class WhitelistedObjectInputStream extends ObjectInputStream {
-
-      public WhitelistedObjectInputStream(InputStream in) throws IOException {
-          super(in);
-      }
-
-      @Override
-protected Class<?> resolveClass(ObjectStreamClass osc) throws IOException, ClassNotFoundException {
-    List<String> whitelist = List.of();
-    if (!whitelist.contains(osc.getName())) {
-        throw new SecurityException("Unauthorized deserialization of %s".formatted(osc.getName()));
-    }
-    return super.resolveClass(osc);
-}
   }
 }

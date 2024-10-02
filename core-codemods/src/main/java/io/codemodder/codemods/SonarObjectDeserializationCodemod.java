@@ -8,7 +8,6 @@ import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.javadeserialization.JavaDeserializationRemediator;
-import io.codemodder.remediation.javadeserialization.WhitelistJavaDeserializationRemediator;
 import io.codemodder.sonar.model.Issue;
 import io.codemodder.sonar.model.SonarFinding;
 import java.util.List;
@@ -29,9 +28,9 @@ public final class SonarObjectDeserializationCodemod extends SonarRemediatingJav
   @Inject
   public SonarObjectDeserializationCodemod(
       @ProvidedSonarScan(ruleId = "javasecurity:S5135") final RuleIssue issues) {
-    super(GenericRemediationMetadata.SSRF.reporter(), issues);
+    super(GenericRemediationMetadata.DESERIALIZATION.reporter(), issues);
     this.issues = Objects.requireNonNull(issues);
-    this.remediator = new WhitelistJavaDeserializationRemediator();
+    this.remediator = JavaDeserializationRemediator.DEFAULT;
   }
 
   @Override

@@ -1,5 +1,6 @@
 package io.codemodder.codemods;
 
+import io.codemodder.DependencyGAV;
 import io.codemodder.testutils.CodemodTestMixin;
 import io.codemodder.testutils.Metadata;
 import org.junit.jupiter.api.Nested;
@@ -13,6 +14,6 @@ final class SonarObjectDeserializationCodemodTest {
       renameTestFile =
           "src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
       expectingFixesAtLines = {60},
-      dependencies = {})
-  class ObjectInputStreamCreationTest implements CodemodTestMixin {}
+      dependencies = DependencyGAV.JAVA_SECURITY_TOOLKIT_GAV)
+  final class ObjectInputStreamCreationTest implements CodemodTestMixin {}
 }
