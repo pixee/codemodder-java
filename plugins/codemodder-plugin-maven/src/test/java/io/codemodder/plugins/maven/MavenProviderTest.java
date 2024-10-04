@@ -172,11 +172,11 @@ final class MavenProviderTest {
         Arguments.of(simplePom, 7), // injects all new text in one delta
         Arguments.of(
             simplePomWithExistingSections,
-            16), // already has both sections, record at dependencies section
+            17), // already has both sections, record at dependencies section
         Arguments.of(
             webgoatPomThatJustNeedsUpgrades,
             151), // just updating the version number here in the properties
-        Arguments.of(webgoatPom, 413) // add to the end of the dependencies section
+        Arguments.of(webgoatPom, 419) // add to the end of the dependencies section
         );
   }
 
