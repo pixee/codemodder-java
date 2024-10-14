@@ -4,13 +4,11 @@ import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import io.codemodder.DependencyGAV;
-import java.util.List;
+import io.codemodder.remediation.RemediationStrategy;
+import io.codemodder.remediation.SuccessOrReason;
 import java.util.Set;
 
 /**
@@ -18,7 +16,7 @@ import java.util.Set;
  *
  * <p>Fixes by injecting a validation method into the class and calling it before the lookup() call.
  */
-final class InjectValidationMethodStrategy implements JNDIFixStrategy {
+final class InjectValidationMethodStrategy implements RemediationStrategy {
 
   private final MethodDeclaration fixMethod;
 
@@ -39,20 +37,21 @@ final class InjectValidationMethodStrategy implements JNDIFixStrategy {
   }
 
   @Override
-  public List<DependencyGAV> fix(
-      final CompilationUnit cu,
-      final ClassOrInterfaceDeclaration parentClass,
-      final MethodCallExpr lookupCall,
-      final NameExpr contextNameVariable,
-      final BlockStmt blockStmt,
-      final int index) {
+  public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
+    var contextOrReason = JNDIFixContext.fromNode(node);
+
+    if (contextOrReason.isRight()) {
+      return SuccessOrReason.reason(contextOrReason.getRight());
+    }
+
+    var context = contextOrReason.getLeft();
     MethodCallExpr validationCall = new MethodCallExpr(null, validateResourceMethodName);
-    validationCall.addArgument(contextNameVariable);
-    blockStmt.addStatement(index, validationCall);
+    validationCall.addArgument(context.contextNameVariable());
+    context.blockStmt().addStatement(context.index(), validationCall);
 
     // add the validation method if it's not already present
     boolean alreadyHasResourceValidationCallPresent =
-        parentClass.findAll(MethodDeclaration.class).stream()
+        context.parentClass().findAll(MethodDeclaration.class).stream()
             .anyMatch(
                 md ->
                     md.getNameAsString().equals(validateResourceMethodName)
@@ -60,11 +59,11 @@ final class InjectValidationMethodStrategy implements JNDIFixStrategy {
                         && md.getParameters().get(0).getTypeAsString().equals("String"));
 
     if (!alreadyHasResourceValidationCallPresent) {
-      parentClass.addMember(fixMethod);
+      context.parentClass().addMember(fixMethod);
       addImportIfMissing(cu, Set.class);
     }
 
-    return List.of();
+    return SuccessOrReason.success();
   }
 
   private static final String validateResourceMethodName = "validateResourceName";

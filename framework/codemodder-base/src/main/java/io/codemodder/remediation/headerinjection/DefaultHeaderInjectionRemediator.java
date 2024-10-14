@@ -14,9 +14,9 @@ import io.codemodder.CodemodChange;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
-import io.codemodder.remediation.FixCandidate;
-import io.codemodder.remediation.FixCandidateSearchResults;
-import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.LegacyFixCandidate;
+import io.codemodder.remediation.LegacyFixCandidateSearchResults;
+import io.codemodder.remediation.LegacyFixCandidateSearcher;
 import io.codemodder.remediation.MethodOrConstructor;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,15 +50,15 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
       final Function<T, Integer> getEndLine,
       final Function<T, Integer> getStartColumn) {
 
-    FixCandidateSearcher<T> searcher =
-        new FixCandidateSearcher.Builder<T>()
+    LegacyFixCandidateSearcher<T> searcher =
+        new LegacyFixCandidateSearcher.Builder<T>()
             .withMatcher(mce -> mce.isMethodCallWithNameIn(setHeaderNames))
             .withMatcher(MethodOrConstructor::isMethodCallWithScope)
             .withMatcher(mce -> mce.getArguments().size() == 2)
             .withMatcher(mce -> !(mce.getArguments().get(1) instanceof StringLiteralExpr))
             .build();
 
-    FixCandidateSearchResults<T> results =
+    LegacyFixCandidateSearchResults<T> results =
         searcher.search(
             cu,
             path,
@@ -70,10 +70,10 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
             getStartColumn);
 
     List<CodemodChange> changes = new ArrayList<>();
-    for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
-      List<T> issues = fixCandidate.issues();
+    for (LegacyFixCandidate<T> legacyFixCandidate : results.fixCandidates()) {
+      List<T> issues = legacyFixCandidate.issues();
 
-      MethodCallExpr setHeaderCall = fixCandidate.call().asMethodCall();
+      MethodCallExpr setHeaderCall = legacyFixCandidate.call().asMethodCall();
       Expression headerValueArgument = setHeaderCall.getArgument(1);
       wrap(headerValueArgument).withScopelessMethod(validatorMethodName);
 
@@ -107,7 +107,7 @@ final class DefaultHeaderInjectionRemediator implements HeaderInjectionRemediato
       }
 
       // all the line numbers should be the same, so we just grab the first one
-      int line = getStartLine.apply(fixCandidate.issues().get(0));
+      int line = getStartLine.apply(legacyFixCandidate.issues().get(0));
       List<FixedFinding> fixedFindings =
           issues.stream()
               .map(issue -> new FixedFinding(getKey.apply(issue), detectorRule))

@@ -15,9 +15,9 @@ import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
-import io.codemodder.remediation.FixCandidate;
-import io.codemodder.remediation.FixCandidateSearchResults;
-import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.LegacyFixCandidate;
+import io.codemodder.remediation.LegacyFixCandidateSearchResults;
+import io.codemodder.remediation.LegacyFixCandidateSearcher;
 import io.codemodder.remediation.MethodOrConstructor;
 import io.github.pixee.security.HostValidator;
 import io.github.pixee.security.Urls;
@@ -42,8 +42,8 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
 
     // search for new URL() calls on those lines, assuming the tool points there -- there are plenty
     // of more signatures to chase down
-    FixCandidateSearcher<T> searcher =
-        new FixCandidateSearcher.Builder<T>()
+    LegacyFixCandidateSearcher<T> searcher =
+        new LegacyFixCandidateSearcher.Builder<T>()
             .withMatcher(mce -> mce.isConstructorForType("URL"))
             .withMatcher(mce -> !mce.getArguments().isEmpty())
             .build();
@@ -51,8 +51,8 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
     // Matches calls like RestTemplate.exchange(...)
     // Doesn't actually check that the `exchange` call scope is actually of type RestTemplate
     // This is left for the detectors, for now
-    FixCandidateSearcher<T> rtSearcher =
-        new FixCandidateSearcher.Builder<T>()
+    LegacyFixCandidateSearcher<T> rtSearcher =
+        new LegacyFixCandidateSearcher.Builder<T>()
             // is method with name
             .withMatcher(mce -> mce.isMethodCallWithName("exchange"))
             // has a scope
@@ -153,7 +153,7 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
    * issues, and a fixer predicate, that returns true if the change is successful.
    */
   private <T> Pair<List<CodemodChange>, List<UnfixedFinding>> searchAndFix(
-      final FixCandidateSearcher<T> searcher,
+      final LegacyFixCandidateSearcher<T> searcher,
       final BiPredicate<CompilationUnit, MethodOrConstructor> fixer,
       final CompilationUnit cu,
       final String path,
@@ -166,7 +166,7 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
     List<CodemodChange> changes = new ArrayList<>();
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
 
-    FixCandidateSearchResults<T> results =
+    LegacyFixCandidateSearchResults<T> results =
         searcher.search(
             cu,
             path,
@@ -177,7 +177,7 @@ final class DefaultSSRFRemediator implements SSRFRemediator {
             getEndLine,
             getStartColumn);
 
-    for (FixCandidate<T> candidate : results.fixCandidates()) {
+    for (LegacyFixCandidate<T> candidate : results.fixCandidates()) {
       MethodOrConstructor call = candidate.call();
       List<T> issues = candidate.issues();
       if (fixer.test(cu, call)) {

@@ -42,7 +42,7 @@ final class NakedVariableReturnFixer implements XSSCodeShapeFixer {
     if (matchingStatements.isEmpty()) {
       return new XSSCodeShapeFixResult(false, false, null, line);
     } else if (matchingStatements.size() > 1) {
-      return new XSSCodeShapeFixResult(true, false, RemediationMessages.multipleCallsFound, line);
+      return new XSSCodeShapeFixResult(true, false, RemediationMessages.multipleNodesFound, line);
     }
 
     ReturnStmt nakedReturn = matchingStatements.get(0);

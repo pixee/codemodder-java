@@ -7,11 +7,13 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.jndiinjection.JNDIInjectionRemediator;
 import io.codemodder.sonar.model.Issue;
 import io.codemodder.sonar.model.SonarFinding;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** This codemod knows how to fix JNDI vulnerabilities found by sonar. */
@@ -22,15 +24,15 @@ import javax.inject.Inject;
     importance = Importance.HIGH)
 public final class SonarJNDIInjectionCodemod extends SonarRemediatingJavaParserChanger {
 
-  private final JNDIInjectionRemediator remediator;
   private final RuleIssue issues;
+  private final Remediator<Issue> remediator;
 
   @Inject
   public SonarJNDIInjectionCodemod(
       @ProvidedSonarScan(ruleId = "javasecurity:S2078") final RuleIssue issues) {
     super(GenericRemediationMetadata.JNDI.reporter(), issues);
     this.issues = Objects.requireNonNull(issues);
-    this.remediator = JNDIInjectionRemediator.DEFAULT;
+    this.remediator = new JNDIInjectionRemediator<>();
   }
 
   @Override
@@ -52,7 +54,13 @@ public final class SonarJNDIInjectionCodemod extends SonarRemediatingJavaParserC
         issuesForFile,
         SonarFinding::getKey,
         i -> i.getTextRange() != null ? i.getTextRange().getStartLine() : i.getLine(),
-        i -> i.getTextRange() != null ? i.getTextRange().getEndLine() : null,
-        i -> i.getTextRange() != null ? i.getTextRange().getStartOffset() : null);
+        i ->
+            i.getTextRange() != null
+                ? Optional.of(i.getTextRange().getEndLine())
+                : Optional.empty(),
+        i ->
+            i.getTextRange() != null
+                ? Optional.of(i.getTextRange().getStartOffset() + 1)
+                : Optional.empty());
   }
 }

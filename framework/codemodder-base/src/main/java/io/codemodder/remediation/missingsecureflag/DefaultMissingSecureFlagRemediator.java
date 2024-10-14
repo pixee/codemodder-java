@@ -13,9 +13,9 @@ import io.codemodder.ast.ASTTransforms;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
-import io.codemodder.remediation.FixCandidate;
-import io.codemodder.remediation.FixCandidateSearchResults;
-import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.LegacyFixCandidate;
+import io.codemodder.remediation.LegacyFixCandidateSearchResults;
+import io.codemodder.remediation.LegacyFixCandidateSearcher;
 import io.codemodder.remediation.RemediationMessages;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,13 +37,13 @@ final class DefaultMissingSecureFlagRemediator implements MissingSecureFlagRemed
       final Function<T, Integer> getStartColumn) {
 
     // this remediator assumes we're pointing to a response.addCookie() call
-    FixCandidateSearcher<T> searcher =
-        new FixCandidateSearcher.Builder<T>()
+    LegacyFixCandidateSearcher<T> searcher =
+        new LegacyFixCandidateSearcher.Builder<T>()
             .withMethodName("addCookie")
             .withMatcher(mce -> mce.getArguments().size() == 1)
             .build();
 
-    FixCandidateSearchResults<T> results =
+    LegacyFixCandidateSearchResults<T> results =
         searcher.search(
             cu,
             path,
@@ -57,7 +57,7 @@ final class DefaultMissingSecureFlagRemediator implements MissingSecureFlagRemed
     List<CodemodChange> changes = new ArrayList<>();
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
 
-    for (FixCandidate<T> result : results.fixCandidates()) {
+    for (LegacyFixCandidate<T> result : results.fixCandidates()) {
       MethodCallExpr methodCallExpr = result.call().asMethodCall();
       List<T> issues = result.issues();
 

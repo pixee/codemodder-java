@@ -1,31 +1,65 @@
 package io.codemodder.remediation.jndiinjection;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.NameExpr;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
-import java.util.List;
+import io.codemodder.remediation.*;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Function;
 
-/**
- * Remediates JNDI injection vulnerabilities. It does this by weaving in a check to limit what JNDI
- * resources are available, and users can add more.
- *
- * <p>Inspiration for this came from logback:
- * https://github.com/qos-ch/logback/blob/979d76f3f2847f1c129bcc6295e69187d02e472c/logback-core/src/main/java/ch/qos/logback/core/util/JNDIUtil.java#L54
- */
-public interface JNDIInjectionRemediator {
+public class JNDIInjectionRemediator<T> implements Remediator<T> {
 
-  /** Remediate all JNDI injection vulnerabilities in the given compilation unit. */
-  <T> CodemodFileScanningResult remediateAll(
+  private final SearcherStrategyRemediator<T> searchStrategyRemediator;
+
+  /** Remediator with the default strategy. */
+  public JNDIInjectionRemediator() {
+    this(new ReplaceLimitedLookupStrategy());
+  }
+
+  /**
+   * A remediator with a chosen strategy
+   *
+   * @param strategy
+   */
+  public JNDIInjectionRemediator(final RemediationStrategy strategy) {
+    this.searchStrategyRemediator =
+        new SearcherStrategyRemediator.Builder<T>()
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<T>()
+                    .withMatcher(
+                        n ->
+                            Optional.of(n)
+                                .map(MethodOrConstructor::new)
+                                .filter(mce -> mce.isMethodCallWithName("lookup"))
+                                .filter(mce -> mce.asNode().hasScope())
+                                .filter(mce -> mce.getArguments().size() == 1)
+                                .filter(mce -> mce.getArguments().get(0) instanceof NameExpr)
+                                .isPresent())
+                    .build(),
+                strategy)
+            .build();
+  }
+
+  @Override
+  public CodemodFileScanningResult remediateAll(
       CompilationUnit cu,
       String path,
       DetectorRule detectorRule,
-      List<T> issuesForFile,
-      Function<T, String> getKey,
-      Function<T, Integer> getStartLine,
-      Function<T, Integer> getEndLine,
-      Function<T, Integer> getStartColumn);
-
-  /** The default JNDI injection remediation strategy. */
-  JNDIInjectionRemediator DEFAULT = new DefaultJNDIInjectionRemediator();
+      Collection<T> findingsForPath,
+      Function<T, String> findingIdExtractor,
+      Function<T, Integer> findingStartLineExtractor,
+      Function<T, Optional<Integer>> findingEndLineExtractor,
+      Function<T, Optional<Integer>> findingColumnExtractor) {
+    return searchStrategyRemediator.remediateAll(
+        cu,
+        path,
+        detectorRule,
+        findingsForPath,
+        findingIdExtractor,
+        findingStartLineExtractor,
+        findingEndLineExtractor,
+        findingColumnExtractor);
+  }
 }

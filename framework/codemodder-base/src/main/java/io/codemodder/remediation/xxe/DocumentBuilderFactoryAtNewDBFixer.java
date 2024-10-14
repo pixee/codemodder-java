@@ -1,7 +1,7 @@
 package io.codemodder.remediation.xxe;
 
-import static io.codemodder.remediation.RemediationMessages.multipleCallsFound;
-import static io.codemodder.remediation.RemediationMessages.noCallsAtThatLocation;
+import static io.codemodder.remediation.RemediationMessages.multipleNodesFound;
+import static io.codemodder.remediation.RemediationMessages.noNodesAtThatLocation;
 import static io.codemodder.remediation.xxe.XMLFeatures.addFeatureDisablingStatements;
 
 import com.github.javaparser.ast.CompilationUnit;
@@ -22,9 +22,9 @@ final class DocumentBuilderFactoryAtNewDBFixer implements XXEFixer {
             cu, line, column, "newDocumentBuilder", List.of("DocumentBuilder"));
 
     if (candidateMethods.isEmpty()) {
-      return new XXEFixAttempt(false, false, noCallsAtThatLocation);
+      return new XXEFixAttempt(false, false, noNodesAtThatLocation);
     } else if (candidateMethods.size() > 1) {
-      return new XXEFixAttempt(false, false, multipleCallsFound);
+      return new XXEFixAttempt(false, false, multipleNodesFound);
     }
 
     MethodCallExpr newDocumentBuilderCall = candidateMethods.get(0);
