@@ -140,8 +140,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
     List<CodemodChange> allChanges = new ArrayList<>();
     List<UnfixedFinding> allUnfixed = new ArrayList<>();
 
-    for (var searcher : searcherRemediatorMap.keySet()) {
-      var strategy = searcherRemediatorMap.get(searcher);
+    for (var searcherAndStrategy : searcherRemediatorMap.entrySet()) {
       var pairResult =
           remediateWithStrategy(
               cu,
@@ -152,8 +151,8 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
               findingStartLineExtractor,
               findingEndLineExtractor,
               findingColumnExtractor,
-              searcher,
-              strategy);
+              searcherAndStrategy.getKey(),
+              searcherAndStrategy.getValue());
       allChanges.addAll(pairResult.getValue0());
       allUnfixed.addAll(pairResult.getValue1());
     }

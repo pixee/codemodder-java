@@ -3,6 +3,7 @@ package io.codemodder.remediation;
 import io.codemodder.DependencyGAV;
 import io.codemodder.Either;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -27,14 +28,14 @@ public class SuccessOrReason {
 
   public List<DependencyGAV> getDependencies() {
     if (!isSuccess()) {
-      throw new RuntimeException("Trying to get dependencies from a failure result");
+      throw new NoSuchElementException("Trying to get dependencies from a failure result");
     }
     return either.getLeft();
   }
 
   public String getReason() {
     if (isSuccess()) {
-      throw new RuntimeException("Trying to get a reason from a successful result");
+      throw new NoSuchElementException("Trying to get a reason from a successful result");
     }
     return either.getRight();
   }
