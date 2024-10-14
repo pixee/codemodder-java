@@ -10,9 +10,9 @@ import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
-import io.codemodder.remediation.FixCandidate;
-import io.codemodder.remediation.FixCandidateSearchResults;
-import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.LegacyFixCandidate;
+import io.codemodder.remediation.LegacyFixCandidateSearchResults;
+import io.codemodder.remediation.LegacyFixCandidateSearcher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,14 +31,14 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediator
       final Function<T, Integer> getStartLine,
       final Function<T, Integer> getEndLine,
       final Function<T, Integer> getStartColumn) {
-    FixCandidateSearcher<T> searcher =
-        new FixCandidateSearcher.Builder<T>()
+    LegacyFixCandidateSearcher<T> searcher =
+        new LegacyFixCandidateSearcher.Builder<T>()
             .withMethodName("createXMLStreamReader")
             .withMatcher(mce -> mce.asNode().hasScope())
             .withMatcher(mce -> mce.getArguments().isNonEmpty())
             .build();
 
-    FixCandidateSearchResults<T> results =
+    LegacyFixCandidateSearchResults<T> results =
         searcher.search(
             cu,
             path,
@@ -52,11 +52,11 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediator
     List<CodemodChange> changes = new ArrayList<>();
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
 
-    for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
-      List<T> issues = fixCandidate.issues();
+    for (LegacyFixCandidate<T> legacyFixCandidate : results.fixCandidates()) {
+      List<T> issues = legacyFixCandidate.issues();
 
       // get the xmlstreamreader scope variable
-      MethodCallExpr createXMLStreamReaderCall = fixCandidate.call().asMethodCall();
+      MethodCallExpr createXMLStreamReaderCall = legacyFixCandidate.call().asMethodCall();
       Expression xmlStreamReaderScope = createXMLStreamReaderCall.getScope().get();
 
       // make sure it's a variable

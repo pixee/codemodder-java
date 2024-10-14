@@ -10,16 +10,16 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-final class DefaultFixCandidateSearcherTest {
+final class DefaultLegacyLegacyFixCandidateSearcherTest {
 
-  private DefaultFixCandidateSearcher<Issue> searcher;
+  private DefaultLegacyFixCandidateSearcher<Issue> searcher;
   private DetectorRule rule1;
 
   private record Issue(String key, int line) {}
 
   @BeforeEach
   void setup() {
-    searcher = new DefaultFixCandidateSearcher<>("println", List.of());
+    searcher = new DefaultLegacyFixCandidateSearcher<>("println", List.of());
     rule1 = new DetectorRule("key1", "rule 1", null);
   }
 
@@ -48,26 +48,27 @@ final class DefaultFixCandidateSearcherTest {
 
     CompilationUnit cu = StaticJavaParser.parse(javaCode);
 
-    FixCandidateSearchResults<Issue> fixCandidateSearchResults =
+    LegacyFixCandidateSearchResults<Issue> legacyFixCandidateSearchResults =
         searcher.search(
             cu, "path", rule1, allIssues, Issue::key, Issue::line, i -> null, i -> null);
-    List<FixCandidate<Issue>> fixCandidates = fixCandidateSearchResults.fixCandidates();
-    assertThat(fixCandidates).hasSize(2);
+    List<LegacyFixCandidate<Issue>> legacyFixCandidates =
+        legacyFixCandidateSearchResults.fixCandidates();
+    assertThat(legacyFixCandidates).hasSize(2);
 
     // the first issue should match 2 issues and the first call which prints "Foo"
-    FixCandidate<Issue> fixCandidate1 = fixCandidates.get(0);
-    assertThat(fixCandidate1.call().asMethodCall().getArgument(0).toString())
+    LegacyFixCandidate<Issue> legacyFixCandidate1 = legacyFixCandidates.get(0);
+    assertThat(legacyFixCandidate1.call().asMethodCall().getArgument(0).toString())
         .hasToString("\"Foo\"");
-    assertThat(fixCandidate1.issues()).containsExactly(issue1, issue2);
+    assertThat(legacyFixCandidate1.issues()).containsExactly(issue1, issue2);
 
     // the second issue should match 1 issue and the second call which prints "Bar"
-    FixCandidate<Issue> fixCandidate2 = fixCandidates.get(1);
-    assertThat(fixCandidate2.call().asMethodCall().getArgument(0).toString())
+    LegacyFixCandidate<Issue> legacyFixCandidate2 = legacyFixCandidates.get(1);
+    assertThat(legacyFixCandidate2.call().asMethodCall().getArgument(0).toString())
         .hasToString("\"Bar\"");
-    assertThat(fixCandidate2.issues()).containsExactly(issue3);
+    assertThat(legacyFixCandidate2.issues()).containsExactly(issue3);
 
     // confirm that the unfixed finding is the one that doesn't exist
-    assertThat(fixCandidateSearchResults.unfixableFindings())
+    assertThat(legacyFixCandidateSearchResults.unfixableFindings())
         .containsExactly(
             new UnfixedFinding(
                 "key4", rule1, "path", 505, RemediationMessages.noCallsAtThatLocation));
@@ -96,7 +97,7 @@ final class DefaultFixCandidateSearcherTest {
     // the issue that points to startline=3 alone should not match the actual call location (4) so
     // it should not match
     // the issue that points to startline=4 alone should match the actual call location
-    FixCandidateSearchResults<Issue> results =
+    LegacyFixCandidateSearchResults<Issue> results =
         searcher.search(cu, "path", rule1, issues, Issue::key, Issue::line, i -> null, i -> null);
 
     assertThat(results.fixCandidates().get(0).issues()).hasSize(1);

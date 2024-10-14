@@ -16,9 +16,9 @@ import io.codemodder.ast.LocalDeclaration;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
-import io.codemodder.remediation.FixCandidate;
-import io.codemodder.remediation.FixCandidateSearchResults;
-import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.LegacyFixCandidate;
+import io.codemodder.remediation.LegacyFixCandidateSearchResults;
+import io.codemodder.remediation.LegacyFixCandidateSearcher;
 import io.codemodder.remediation.MethodOrConstructor;
 import io.github.pixee.security.ObjectInputFilters;
 import java.util.ArrayList;
@@ -40,15 +40,15 @@ final class DefaultJavaDeserializationRemediator implements JavaDeserializationR
       final Function<T, Integer> getEndLine,
       final Function<T, Integer> getStartColumn) {
 
-    FixCandidateSearcher<T> searcher =
-        new FixCandidateSearcher.Builder<T>()
+    LegacyFixCandidateSearcher<T> searcher =
+        new LegacyFixCandidateSearcher.Builder<T>()
             .withMethodName("readObject")
             .withMatcher(MethodOrConstructor::isMethodCallWithScope)
             .withMatcher(mce -> mce.getArguments().isEmpty())
             .build();
 
     // search for readObject() calls on those lines, assuming the tool points there
-    FixCandidateSearchResults<T> results =
+    LegacyFixCandidateSearchResults<T> results =
         searcher.search(
             cu,
             path,
@@ -63,7 +63,7 @@ final class DefaultJavaDeserializationRemediator implements JavaDeserializationR
       // try searching for matching ObjectInputStream creation objects, maybe that's where they're
       // pointing
       searcher =
-          new FixCandidateSearcher.Builder<T>()
+          new LegacyFixCandidateSearcher.Builder<T>()
               .withMatcher(mc -> mc.isConstructorForType("ObjectInputStream"))
               .build();
 
@@ -82,9 +82,9 @@ final class DefaultJavaDeserializationRemediator implements JavaDeserializationR
     List<CodemodChange> changes = new ArrayList<>();
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
 
-    for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
-      List<T> issues = fixCandidate.issues();
-      MethodOrConstructor call = fixCandidate.call();
+    for (LegacyFixCandidate<T> legacyFixCandidate : results.fixCandidates()) {
+      List<T> issues = legacyFixCandidate.issues();
+      MethodOrConstructor call = legacyFixCandidate.call();
 
       if (call.isConstructor()) {
         // we're pointing to the readObject(), fix and move on

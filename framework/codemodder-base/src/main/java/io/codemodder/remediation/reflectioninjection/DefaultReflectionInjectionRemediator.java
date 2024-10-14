@@ -10,9 +10,9 @@ import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
-import io.codemodder.remediation.FixCandidate;
-import io.codemodder.remediation.FixCandidateSearchResults;
-import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.LegacyFixCandidate;
+import io.codemodder.remediation.LegacyFixCandidateSearchResults;
+import io.codemodder.remediation.LegacyFixCandidateSearcher;
 import io.codemodder.remediation.MethodOrConstructor;
 import io.github.pixee.security.Reflection;
 import java.util.ArrayList;
@@ -32,12 +32,12 @@ final class DefaultReflectionInjectionRemediator implements ReflectionInjectionR
       final Function<T, Integer> getEndLine,
       final Function<T, Integer> getStartColumn) {
 
-    FixCandidateSearcher<T> searcher =
-        new FixCandidateSearcher.Builder<T>()
+    LegacyFixCandidateSearcher<T> searcher =
+        new LegacyFixCandidateSearcher.Builder<T>()
             .withMatcher(mce -> isClassForNameCall(cu, mce))
             .build();
 
-    FixCandidateSearchResults<T> results =
+    LegacyFixCandidateSearchResults<T> results =
         searcher.search(
             cu,
             path,
@@ -50,11 +50,11 @@ final class DefaultReflectionInjectionRemediator implements ReflectionInjectionR
 
     List<CodemodChange> changes = new ArrayList<>();
 
-    for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
-      List<T> issues = fixCandidate.issues();
+    for (LegacyFixCandidate<T> legacyFixCandidate : results.fixCandidates()) {
+      List<T> issues = legacyFixCandidate.issues();
       int line = getStartLine.apply(issues.get(0));
 
-      MethodCallExpr methodCallExpr = fixCandidate.call().asMethodCall();
+      MethodCallExpr methodCallExpr = legacyFixCandidate.call().asMethodCall();
       replaceMethodCallExpression(cu, methodCallExpr);
 
       issues.stream()

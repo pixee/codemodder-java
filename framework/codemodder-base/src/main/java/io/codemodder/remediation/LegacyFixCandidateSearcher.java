@@ -9,10 +9,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /** Searches for potential fix locations in the source code. */
-public interface FixCandidateSearcher<T> {
+public interface LegacyFixCandidateSearcher<T> {
 
   /** Searches for potential fix locations in the source code. */
-  FixCandidateSearchResults<T> search(
+  LegacyFixCandidateSearchResults<T> search(
       CompilationUnit cu,
       String path,
       DetectorRule rule,
@@ -22,7 +22,7 @@ public interface FixCandidateSearcher<T> {
       Function<T, Integer> getEndLine,
       Function<T, Integer> getColumn);
 
-  /** Builder for {@link FixCandidateSearcher}. */
+  /** Builder for {@link LegacyFixCandidateSearcher}. */
   final class Builder<T> {
     private String methodName;
     private final List<Predicate<MethodOrConstructor>> methodMatchers;
@@ -41,8 +41,8 @@ public interface FixCandidateSearcher<T> {
       return this;
     }
 
-    public FixCandidateSearcher<T> build() {
-      return new DefaultFixCandidateSearcher<>(methodName, List.copyOf(methodMatchers));
+    public LegacyFixCandidateSearcher<T> build() {
+      return new DefaultLegacyFixCandidateSearcher<>(methodName, List.copyOf(methodMatchers));
     }
   }
 }

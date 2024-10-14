@@ -14,9 +14,9 @@ import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
-import io.codemodder.remediation.FixCandidate;
-import io.codemodder.remediation.FixCandidateSearchResults;
-import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.LegacyFixCandidate;
+import io.codemodder.remediation.LegacyFixCandidateSearchResults;
+import io.codemodder.remediation.LegacyFixCandidateSearcher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,8 +46,8 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
       final Function<T, Integer> getEndLine,
       final Function<T, Integer> getStartColumn) {
 
-    FixCandidateSearcher<T> searcher =
-        new FixCandidateSearcher.Builder<T>()
+    LegacyFixCandidateSearcher<T> searcher =
+        new LegacyFixCandidateSearcher.Builder<T>()
             .withMethodName("lookup")
             .withMatcher(mce -> mce.asNode().hasScope())
             .withMatcher(mce -> mce.getArguments().size() == 1)
@@ -55,7 +55,7 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
             .build();
 
     // find all the potential lookup() calls
-    FixCandidateSearchResults<T> results =
+    LegacyFixCandidateSearchResults<T> results =
         searcher.search(
             cu,
             path,
@@ -69,11 +69,11 @@ final class DefaultJNDIInjectionRemediator implements JNDIInjectionRemediator {
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
     List<CodemodChange> changes = new ArrayList<>();
 
-    for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
-      List<T> issues = fixCandidate.issues();
+    for (LegacyFixCandidate<T> legacyFixCandidate : results.fixCandidates()) {
+      List<T> issues = legacyFixCandidate.issues();
       int line = getStartLine.apply(issues.get(0));
 
-      MethodCallExpr lookupCall = fixCandidate.call().asMethodCall();
+      MethodCallExpr lookupCall = legacyFixCandidate.call().asMethodCall();
       // get the parent method of the lookup() call
       Optional<MethodDeclaration> parentMethod = lookupCall.findAncestor(MethodDeclaration.class);
       if (parentMethod.isEmpty()) {

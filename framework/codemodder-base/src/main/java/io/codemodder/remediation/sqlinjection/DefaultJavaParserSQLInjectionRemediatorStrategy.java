@@ -6,9 +6,9 @@ import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
-import io.codemodder.remediation.FixCandidate;
-import io.codemodder.remediation.FixCandidateSearchResults;
-import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.LegacyFixCandidate;
+import io.codemodder.remediation.LegacyFixCandidateSearchResults;
+import io.codemodder.remediation.LegacyFixCandidateSearcher;
 import io.codemodder.remediation.MethodOrConstructor;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,10 +56,10 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
       final Predicate<MethodOrConstructor> matcher,
       final Predicate<MethodOrConstructor> fixer) {
 
-    FixCandidateSearcher<T> searcher =
-        new FixCandidateSearcher.Builder<T>().withMatcher(matcher).build();
+    LegacyFixCandidateSearcher<T> searcher =
+        new LegacyFixCandidateSearcher.Builder<T>().withMatcher(matcher).build();
 
-    FixCandidateSearchResults<T> results =
+    LegacyFixCandidateSearchResults<T> results =
         searcher.search(
             cu,
             path,
@@ -77,8 +77,8 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
     final List<UnfixedFinding> unfixedFindings = new ArrayList<>();
     final List<CodemodChange> changes = new ArrayList<>();
 
-    for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
-      List<T> issues = fixCandidate.issues();
+    for (LegacyFixCandidate<T> legacyFixCandidate : results.fixCandidates()) {
+      List<T> issues = legacyFixCandidate.issues();
       Integer line = findingStartLineExtractor.apply(issues.get(0));
 
       if (line == null) {
@@ -92,7 +92,7 @@ final class DefaultJavaParserSQLInjectionRemediatorStrategy
         continue;
       }
 
-      if (fixer.test(fixCandidate.call())) {
+      if (fixer.test(legacyFixCandidate.call())) {
         issues.forEach(
             issue -> {
               final String id = findingIdExtractor.apply(issue);

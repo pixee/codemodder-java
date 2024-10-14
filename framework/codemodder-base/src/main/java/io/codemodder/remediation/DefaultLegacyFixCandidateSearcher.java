@@ -12,19 +12,19 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import org.jetbrains.annotations.VisibleForTesting;
 
-final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
+final class DefaultLegacyFixCandidateSearcher<T> implements LegacyFixCandidateSearcher<T> {
 
   private final List<Predicate<MethodOrConstructor>> matchers;
   private final String methodName;
 
-  DefaultFixCandidateSearcher(
+  DefaultLegacyFixCandidateSearcher(
       final String methodName, final List<Predicate<MethodOrConstructor>> matchers) {
     this.methodName = methodName;
     this.matchers = matchers;
   }
 
   @Override
-  public FixCandidateSearchResults<T> search(
+  public LegacyFixCandidateSearchResults<T> search(
       final CompilationUnit cu,
       final String path,
       final DetectorRule rule,
@@ -88,20 +88,20 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
       fixCandidateToIssueMapping.computeIfAbsent(call, k -> new ArrayList<>()).add(issue);
     }
 
-    List<FixCandidate<T>> fixCandidates =
+    List<LegacyFixCandidate<T>> legacyFixCandidates =
         fixCandidateToIssueMapping.entrySet().stream()
-            .map(entry -> new FixCandidate<>(entry.getKey(), entry.getValue()))
+            .map(entry -> new LegacyFixCandidate<>(entry.getKey(), entry.getValue()))
             .toList();
 
-    return new FixCandidateSearchResults<T>() {
+    return new LegacyFixCandidateSearchResults<T>() {
       @Override
       public List<UnfixedFinding> unfixableFindings() {
         return unfixedFindings;
       }
 
       @Override
-      public List<FixCandidate<T>> fixCandidates() {
-        return fixCandidates;
+      public List<LegacyFixCandidate<T>> fixCandidates() {
+        return legacyFixCandidates;
       }
     };
   }

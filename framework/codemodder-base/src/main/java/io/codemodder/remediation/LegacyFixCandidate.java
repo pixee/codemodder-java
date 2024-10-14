@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Objects;
 
 /** The potential fix location. */
-public record FixCandidate<T>(MethodOrConstructor call, List<T> issues) {
+public record LegacyFixCandidate<T>(MethodOrConstructor call, List<T> issues) {
 
-  public FixCandidate {
+  public LegacyFixCandidate {
     Objects.requireNonNull(call);
     Objects.requireNonNull(issues);
     if (issues.isEmpty()) {
