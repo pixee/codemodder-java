@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import io.codemodder.remediation.RemediationMessages;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +62,10 @@ final class DocumentBuilderFactoryAtParseFixerTest {
             19,
             "DocumentBuilder came from outside the method scope"),
         Arguments.of(
-            unfixableBecauseDocumentBuilderTypeIsntLocal, 6, null, "No calls at that location"));
+            unfixableBecauseDocumentBuilderTypeIsntLocal,
+            6,
+            null,
+            RemediationMessages.noNodesAtThatLocation));
   }
 
   @BeforeEach
