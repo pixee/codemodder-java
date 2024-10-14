@@ -86,7 +86,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
       return Pair.with(List.of(), List.of());
     }
 
-    final List<UnfixedFinding> unfixedFindings = new ArrayList<>();
+    final List<UnfixedFinding> unfixedFindings = new ArrayList<>(results.unfixableFindings());
     final List<CodemodChange> changes = new ArrayList<>();
 
     for (FixCandidate<T> fixCandidate : results.fixCandidates()) {
@@ -119,12 +119,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
             issue -> {
               final String id = findingIdExtractor.apply(issue);
               final UnfixedFinding unfixableFinding =
-                  new UnfixedFinding(
-                      id,
-                      detectorRule,
-                      path,
-                      line,
-                      "State changing effects possible or unrecognized code shape");
+                  new UnfixedFinding(id, detectorRule, path, line, maybeDeps.getReason());
               unfixedFindings.add(unfixableFinding);
             });
       }

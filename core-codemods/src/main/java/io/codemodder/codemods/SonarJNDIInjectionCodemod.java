@@ -59,7 +59,7 @@ public final class SonarJNDIInjectionCodemod extends SonarRemediatingJavaParserC
                 : Optional.empty(),
         i ->
             i.getTextRange() != null
-                ? Optional.of(i.getTextRange().getStartOffset())
+                ? Optional.of(i.getTextRange().getStartOffset() + 1)
                 : Optional.empty());
   }
 }

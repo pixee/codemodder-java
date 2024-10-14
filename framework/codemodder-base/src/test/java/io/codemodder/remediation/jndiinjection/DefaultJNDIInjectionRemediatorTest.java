@@ -12,7 +12,9 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.remediation.RemediationMessages;
+import io.codemodder.remediation.RemediationStrategy;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,12 +24,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 final class DefaultJNDIInjectionRemediatorTest {
 
-  private DefaultJNDIInjectionRemediator remediator;
+  private JNDIInjectionRemediator<JNDIInjectionIssue> remediator;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    this.remediator = new DefaultJNDIInjectionRemediator();
+    this.remediator = new JNDIInjectionRemediator<>();
     this.rule = new DetectorRule("java/JNDIInjection", "JNDI Injection", null);
   }
 
@@ -47,8 +49,8 @@ final class DefaultJNDIInjectionRemediatorTest {
             List.of(issue),
             JNDIInjectionIssue::key,
             JNDIInjectionIssue::line,
-            i -> null,
-            JNDIInjectionIssue::column);
+            i -> Optional.empty(),
+            i -> Optional.empty());
 
     assertThat(result.changes()).isEmpty();
     ;
@@ -142,7 +144,7 @@ final class DefaultJNDIInjectionRemediatorTest {
   @ParameterizedTest
   @MethodSource("fixableSamples")
   void it_fixes_jndi_injection(
-      final JNDIFixStrategy fixStrategy,
+      final RemediationStrategy fixStrategy,
       final String expectedFixedCode,
       final boolean expectDependency) {
     String vulnerableCode =
@@ -164,7 +166,7 @@ final class DefaultJNDIInjectionRemediatorTest {
     LexicalPreservingPrinter.setup(cu);
 
     JNDIInjectionIssue issue = new JNDIInjectionIssue("key", line, null);
-    remediator = new DefaultJNDIInjectionRemediator(fixStrategy);
+    remediator = new JNDIInjectionRemediator<>(fixStrategy);
     CodemodFileScanningResult result =
         remediator.remediateAll(
             cu,
@@ -173,8 +175,8 @@ final class DefaultJNDIInjectionRemediatorTest {
             List.of(issue),
             JNDIInjectionIssue::key,
             JNDIInjectionIssue::line,
-            i -> null,
-            JNDIInjectionIssue::column);
+            i -> Optional.empty(),
+            i -> Optional.empty());
 
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);
@@ -199,7 +201,7 @@ final class DefaultJNDIInjectionRemediatorTest {
 
   @Test
   void it_fixes_without_duplicating_control_method() {
-    remediator = new DefaultJNDIInjectionRemediator(new InjectValidationMethodStrategy());
+    remediator = new JNDIInjectionRemediator<>(new InjectValidationMethodStrategy());
     String vulnerableCode =
         """
                 import java.util.Set;
@@ -238,8 +240,8 @@ final class DefaultJNDIInjectionRemediatorTest {
             List.of(issue),
             JNDIInjectionIssue::key,
             JNDIInjectionIssue::line,
-            i -> null,
-            JNDIInjectionIssue::column);
+            i -> Optional.empty(),
+            i -> Optional.empty());
 
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);
