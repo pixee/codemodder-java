@@ -71,7 +71,7 @@ final class DefaultLegacyLegacyFixCandidateSearcherTest {
     assertThat(legacyFixCandidateSearchResults.unfixableFindings())
         .containsExactly(
             new UnfixedFinding(
-                "key4", rule1, "path", 505, RemediationMessages.noCallsAtThatLocation));
+                "key4", rule1, "path", 505, RemediationMessages.noNodesAtThatLocation));
   }
 
   @Test

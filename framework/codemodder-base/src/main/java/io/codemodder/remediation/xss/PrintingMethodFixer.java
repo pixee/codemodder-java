@@ -66,7 +66,7 @@ final class PrintingMethodFixer implements XSSCodeShapeFixer {
     if (writingMethodCalls.isEmpty()) {
       return new XSSCodeShapeFixResult(false, false, null, line);
     } else if (writingMethodCalls.size() > 1) {
-      return new XSSCodeShapeFixResult(true, false, RemediationMessages.multipleCallsFound, line);
+      return new XSSCodeShapeFixResult(true, false, RemediationMessages.multipleNodesFound, line);
     }
 
     MethodCallExpr call = writingMethodCalls.get(0);

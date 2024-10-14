@@ -77,7 +77,7 @@ final class DefaultHeaderInjectionRemediatorTest {
                       }
                       """,
             6,
-            RemediationMessages.noCallsAtThatLocation),
+            RemediationMessages.noNodesAtThatLocation),
         Arguments.of(
             """
                         package com.acme;
@@ -91,7 +91,7 @@ final class DefaultHeaderInjectionRemediatorTest {
                         }
                         """,
             6,
-            RemediationMessages.noCallsAtThatLocation),
+            RemediationMessages.noNodesAtThatLocation),
         Arguments.of(
             """
                           package com.acme;
@@ -105,7 +105,7 @@ final class DefaultHeaderInjectionRemediatorTest {
                           }
                           """,
             6,
-            RemediationMessages.noCallsAtThatLocation));
+            RemediationMessages.noNodesAtThatLocation));
   }
 
   private static Stream<Arguments> fixableSamples() {

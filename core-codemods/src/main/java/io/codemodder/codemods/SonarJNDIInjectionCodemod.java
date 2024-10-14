@@ -7,6 +7,7 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.jndiinjection.JNDIInjectionRemediator;
 import io.codemodder.sonar.model.Issue;
 import io.codemodder.sonar.model.SonarFinding;
@@ -24,7 +25,7 @@ import javax.inject.Inject;
 public final class SonarJNDIInjectionCodemod extends SonarRemediatingJavaParserChanger {
 
   private final RuleIssue issues;
-  private final JNDIInjectionRemediator<Issue> remediator;
+  private final Remediator<Issue> remediator;
 
   @Inject
   public SonarJNDIInjectionCodemod(

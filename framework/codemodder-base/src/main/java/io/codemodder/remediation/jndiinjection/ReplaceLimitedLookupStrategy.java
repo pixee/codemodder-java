@@ -25,7 +25,7 @@ public final class ReplaceLimitedLookupStrategy implements RemediationStrategy {
     var contextOrReason = JNDIFixContext.fromNode(node);
 
     if (contextOrReason.isRight()) {
-      return SuccessOrReason.fromFailure(contextOrReason.getRight());
+      return SuccessOrReason.reason(contextOrReason.getRight());
     }
 
     var context = contextOrReason.getLeft();
@@ -42,6 +42,6 @@ public final class ReplaceLimitedLookupStrategy implements RemediationStrategy {
     // the new scope is the static call
     wrap(jndiContext).withStaticMethod(className, methodName, false);
 
-    return SuccessOrReason.fromSuccess(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
+    return SuccessOrReason.success(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
   }
 }

@@ -50,7 +50,7 @@ final class DefaultWeakRandomRemediator implements WeakRandomRemediator {
                 detectorRule,
                 path,
                 getLine.apply(issue),
-                RemediationMessages.multipleCallsFound));
+                RemediationMessages.multipleNodesFound));
         continue;
       } else if (unsafeRandoms.isEmpty()) {
         unfixedFindings.add(
@@ -59,7 +59,7 @@ final class DefaultWeakRandomRemediator implements WeakRandomRemediator {
                 detectorRule,
                 path,
                 getLine.apply(issue),
-                RemediationMessages.noCallsAtThatLocation));
+                RemediationMessages.noNodesAtThatLocation));
         continue;
       }
 

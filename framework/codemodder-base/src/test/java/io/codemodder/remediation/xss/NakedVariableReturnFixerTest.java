@@ -44,7 +44,7 @@ final class NakedVariableReturnFixerTest {
             }
             """,
             5,
-            RemediationMessages.multipleCallsFound),
+            RemediationMessages.multipleNodesFound),
         Arguments.of(
             """
                 class Samples {

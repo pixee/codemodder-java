@@ -6,12 +6,12 @@ package io.codemodder.remediation;
  */
 public interface RemediationMessages {
 
-  /** No calls at that location */
-  String noCallsAtThatLocation = "No calls at that location";
+  /** No nodes at that location */
+  String noNodesAtThatLocation = "No nodes at that location";
 
-  /** Multiple calls found at the given location and that may cause confusion */
-  String multipleCallsFound =
-      "Multiple calls found at the given location and that may cause confusion";
+  /** Multiple nodes found at the given location and that may cause confusion */
+  String multipleNodesFound =
+      "Multiple nodes found at the given location and that may cause confusion";
 
   String ambiguousCodeShape = "Ambiguous code shape";
 }

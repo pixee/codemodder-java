@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 /** The potential fix location. */
+@Deprecated
 public record LegacyFixCandidate<T>(MethodOrConstructor call, List<T> issues) {
 
   public LegacyFixCandidate {

@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /** Searches for potential fix locations in the source code. */
+@Deprecated
 public interface LegacyFixCandidateSearcher<T> {
 
   /** Searches for potential fix locations in the source code. */

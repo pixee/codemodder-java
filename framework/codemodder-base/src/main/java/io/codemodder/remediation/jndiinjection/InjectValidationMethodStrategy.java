@@ -41,7 +41,7 @@ final class InjectValidationMethodStrategy implements RemediationStrategy {
     var contextOrReason = JNDIFixContext.fromNode(node);
 
     if (contextOrReason.isRight()) {
-      return SuccessOrReason.fromFailure(contextOrReason.getRight());
+      return SuccessOrReason.reason(contextOrReason.getRight());
     }
 
     var context = contextOrReason.getLeft();
@@ -63,7 +63,7 @@ final class InjectValidationMethodStrategy implements RemediationStrategy {
       addImportIfMissing(cu, Set.class);
     }
 
-    return SuccessOrReason.fromSuccess();
+    return SuccessOrReason.success();
   }
 
   private static final String validateResourceMethodName = "validateResourceName";

@@ -235,7 +235,7 @@ final class DefaultReflectionInjectionRemediatorTest {
                         }
                         """,
           3,
-          RemediationMessages.noCallsAtThatLocation);
+          RemediationMessages.noNodesAtThatLocation);
     }
 
     @Test
@@ -252,7 +252,7 @@ final class DefaultReflectionInjectionRemediatorTest {
                         }
                         """,
           3,
-          RemediationMessages.multipleCallsFound);
+          RemediationMessages.multipleNodesFound);
     }
 
     private void verifyUnfixable(

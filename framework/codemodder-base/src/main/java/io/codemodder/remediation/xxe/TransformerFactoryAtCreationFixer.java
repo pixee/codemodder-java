@@ -3,7 +3,7 @@ package io.codemodder.remediation.xxe;
 import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 import static io.codemodder.javaparser.ASTExpectations.expect;
 import static io.codemodder.remediation.RemediationMessages.*;
-import static io.codemodder.remediation.RemediationMessages.multipleCallsFound;
+import static io.codemodder.remediation.RemediationMessages.multipleNodesFound;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -28,9 +28,9 @@ final class TransformerFactoryAtCreationFixer implements XXEFixer {
         ASTs.findMethodCallsWhichAreAssignedToType(
             cu, line, column, "newInstance", List.of("TransformerFactory"));
     if (candidateMethods.isEmpty()) {
-      return new XXEFixAttempt(false, false, noCallsAtThatLocation);
+      return new XXEFixAttempt(false, false, noNodesAtThatLocation);
     } else if (candidateMethods.size() > 1) {
-      return new XXEFixAttempt(false, false, multipleCallsFound);
+      return new XXEFixAttempt(false, false, multipleNodesFound);
     }
     MethodCallExpr newFactoryInstanceCall = candidateMethods.get(0);
     Optional<VariableDeclarator> newFactoryVariableRef =

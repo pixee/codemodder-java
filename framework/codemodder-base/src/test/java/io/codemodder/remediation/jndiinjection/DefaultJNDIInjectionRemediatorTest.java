@@ -65,7 +65,7 @@ final class DefaultJNDIInjectionRemediatorTest {
 
   private static Stream<Arguments> unfixableSamples() {
     return Stream.of(
-        Arguments.of("class Foo {}", 5, RemediationMessages.noCallsAtThatLocation),
+        Arguments.of("class Foo {}", 5, RemediationMessages.noNodesAtThatLocation),
         Arguments.of(
             """
                     class Foo {
@@ -77,7 +77,7 @@ final class DefaultJNDIInjectionRemediatorTest {
                     }
                     """,
             5,
-            RemediationMessages.multipleCallsFound),
+            RemediationMessages.multipleNodesFound),
         Arguments.of(
             """
                 class Foo {

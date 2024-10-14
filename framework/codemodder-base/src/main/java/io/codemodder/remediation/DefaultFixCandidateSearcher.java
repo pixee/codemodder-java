@@ -73,12 +73,12 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
       if (nodesForIssue.isEmpty()) {
         unfixedFindings.add(
             new UnfixedFinding(
-                findingId, rule, path, issueStartLine, RemediationMessages.noCallsAtThatLocation));
+                findingId, rule, path, issueStartLine, RemediationMessages.noNodesAtThatLocation));
         continue;
       } else if (nodesForIssue.size() > 1) {
         unfixedFindings.add(
             new UnfixedFinding(
-                findingId, rule, path, issueStartLine, RemediationMessages.multipleCallsFound));
+                findingId, rule, path, issueStartLine, RemediationMessages.multipleNodesFound));
         continue;
       }
       Node node = nodesForIssue.get(0);

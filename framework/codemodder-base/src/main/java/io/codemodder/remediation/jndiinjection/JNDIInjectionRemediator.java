@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 public class JNDIInjectionRemediator<T> implements Remediator<T> {
 
-  private SearcherStrategyRemediator<T> searchStrategyRemediator;
+  private final SearcherStrategyRemediator<T> searchStrategyRemediator;
 
   /** Remediator with the default strategy. */
   public JNDIInjectionRemediator() {

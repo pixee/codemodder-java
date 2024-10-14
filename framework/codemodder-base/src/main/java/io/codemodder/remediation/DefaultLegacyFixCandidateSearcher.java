@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import org.jetbrains.annotations.VisibleForTesting;
 
+@Deprecated
 final class DefaultLegacyFixCandidateSearcher<T> implements LegacyFixCandidateSearcher<T> {
 
   private final List<Predicate<MethodOrConstructor>> matchers;
@@ -76,12 +77,12 @@ final class DefaultLegacyFixCandidateSearcher<T> implements LegacyFixCandidateSe
       if (callsForIssue.isEmpty()) {
         unfixedFindings.add(
             new UnfixedFinding(
-                findingId, rule, path, issueStartLine, RemediationMessages.noCallsAtThatLocation));
+                findingId, rule, path, issueStartLine, RemediationMessages.noNodesAtThatLocation));
         continue;
       } else if (callsForIssue.size() > 1) {
         unfixedFindings.add(
             new UnfixedFinding(
-                findingId, rule, path, issueStartLine, RemediationMessages.multipleCallsFound));
+                findingId, rule, path, issueStartLine, RemediationMessages.multipleNodesFound));
         continue;
       }
       MethodOrConstructor call = callsForIssue.get(0);

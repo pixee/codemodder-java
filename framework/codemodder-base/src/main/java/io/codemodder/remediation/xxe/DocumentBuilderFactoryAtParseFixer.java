@@ -1,7 +1,7 @@
 package io.codemodder.remediation.xxe;
 
-import static io.codemodder.remediation.RemediationMessages.multipleCallsFound;
-import static io.codemodder.remediation.RemediationMessages.noCallsAtThatLocation;
+import static io.codemodder.remediation.RemediationMessages.multipleNodesFound;
+import static io.codemodder.remediation.RemediationMessages.noNodesAtThatLocation;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.ast.CompilationUnit;
@@ -40,9 +40,9 @@ final class DocumentBuilderFactoryAtParseFixer implements XXEFixer {
     }
 
     if (candidateMethods.isEmpty()) {
-      return new XXEFixAttempt(false, false, noCallsAtThatLocation);
+      return new XXEFixAttempt(false, false, noNodesAtThatLocation);
     } else if (candidateMethods.size() > 1) {
-      return new XXEFixAttempt(false, false, multipleCallsFound);
+      return new XXEFixAttempt(false, false, multipleNodesFound);
     }
 
     // find the variable that we're calling parse() on
