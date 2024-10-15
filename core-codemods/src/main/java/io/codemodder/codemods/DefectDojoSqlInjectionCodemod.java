@@ -7,6 +7,7 @@ import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.defectdojo.DefectDojoScan;
 import io.codemodder.providers.defectdojo.Finding;
 import io.codemodder.providers.defectdojo.RuleFindings;
+import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.sqlinjection.SQLInjectionRemediator;
 import java.util.List;
 import java.util.Objects;
@@ -26,7 +27,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
     implements FixOnlyCodeChanger {
 
   private final RuleFindings findings;
-  private final SQLInjectionRemediator<Finding> remediatorStrategy;
+  private final Remediator<Finding> remediatorStrategy;
 
   @Inject
   public DefectDojoSqlInjectionCodemod(

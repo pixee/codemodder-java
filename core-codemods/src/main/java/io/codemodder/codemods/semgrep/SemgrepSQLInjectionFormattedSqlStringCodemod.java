@@ -13,6 +13,7 @@ import io.codemodder.SarifFindingKeyUtil;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.sqlinjection.SQLInjectionRemediator;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -28,7 +29,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH)
 public final class SemgrepSQLInjectionFormattedSqlStringCodemod extends SemgrepJavaParserChanger {
 
-  private final SQLInjectionRemediator<Result> remediator;
+  private final Remediator<Result> remediator;
 
   @Inject
   public SemgrepSQLInjectionFormattedSqlStringCodemod(
