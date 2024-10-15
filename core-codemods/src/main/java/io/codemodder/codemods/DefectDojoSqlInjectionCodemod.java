@@ -7,9 +7,11 @@ import io.codemodder.javaparser.JavaParserChanger;
 import io.codemodder.providers.defectdojo.DefectDojoScan;
 import io.codemodder.providers.defectdojo.Finding;
 import io.codemodder.providers.defectdojo.RuleFindings;
-import io.codemodder.remediation.sqlinjection.JavaParserSQLInjectionRemediatorStrategy;
+import io.codemodder.remediation.Remediator;
+import io.codemodder.remediation.sqlinjection.SQLInjectionRemediator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /**
@@ -25,7 +27,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
     implements FixOnlyCodeChanger {
 
   private final RuleFindings findings;
-  private final JavaParserSQLInjectionRemediatorStrategy remediatorStrategy;
+  private final Remediator<Finding> remediatorStrategy;
 
   @Inject
   public DefectDojoSqlInjectionCodemod(
@@ -33,7 +35,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
           RuleFindings findings) {
     super(CodemodReporterStrategy.fromClasspath(SQLParameterizerCodemod.class));
     this.findings = Objects.requireNonNull(findings);
-    this.remediatorStrategy = JavaParserSQLInjectionRemediatorStrategy.DEFAULT;
+    this.remediatorStrategy = new SQLInjectionRemediator<>();
   }
 
   @Override
@@ -60,6 +62,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
         findingsForThisPath,
         finding -> String.valueOf(finding.getId()),
         Finding::getLine,
-        f -> null);
+        f -> Optional.empty(),
+        f -> Optional.empty());
   }
 }

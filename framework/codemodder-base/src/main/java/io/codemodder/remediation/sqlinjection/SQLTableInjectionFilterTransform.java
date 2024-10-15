@@ -1,6 +1,7 @@
 package io.codemodder.remediation.sqlinjection;
 
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
@@ -62,6 +63,10 @@ public final class SQLTableInjectionFilterTransform {
   }
 
   public static boolean fix(final MethodCallExpr call) {
+    return call.findCompilationUnit().map(cu -> fix(cu, call)).orElse(false);
+  }
+
+  public static boolean fix(final CompilationUnit cu, final MethodCallExpr call) {
     final var linearized = new LinearizedStringExpression(call.getArgument(0));
     var injections = findTableInjections(linearized);
     injections =
@@ -72,7 +77,7 @@ public final class SQLTableInjectionFilterTransform {
                         && e.asMethodCallExpr().getNameAsString().equals("validateTableName")))
             .toList();
     if (!injections.isEmpty()) {
-      fix(injections, linearized.getResolvedExpressionsMap());
+      fix(cu, injections, linearized.getResolvedExpressionsMap());
       return true;
     }
     return false;
@@ -113,7 +118,8 @@ public final class SQLTableInjectionFilterTransform {
     return tableInjections;
   }
 
-  private static void addFilterMethodIfMissing(final ClassOrInterfaceDeclaration classDecl) {
+  private static void addFilterMethodIfMissing(
+      final CompilationUnit cu, final ClassOrInterfaceDeclaration classDecl) {
     final String method =
         """
 		  String validateTableName(final String tablename){
@@ -135,17 +141,18 @@ public final class SQLTableInjectionFilterTransform {
       classDecl.addMember(StaticJavaParser.parseMethodDeclaration(method));
     }
     // Add Pattern import
-    ASTTransforms.addImportIfMissing(
-        classDecl.findCompilationUnit().get(), "java.util.regex.Pattern");
+    ASTTransforms.addImportIfMissing(cu, "java.util.regex.Pattern");
   }
 
   private static void fix(
-      final List<Expression> injections, final Map<Expression, Expression> resolutionMap) {
+      final CompilationUnit cu,
+      final List<Expression> injections,
+      final Map<Expression, Expression> resolutionMap) {
     injections.stream()
         .map(e -> unresolve(e, resolutionMap))
         .forEach(SQLTableInjectionFilterTransform::wrapExpressionWithCall);
     var classDecl = injections.get(0).findAncestor(ClassOrInterfaceDeclaration.class);
-    classDecl.ifPresent(SQLTableInjectionFilterTransform::addFilterMethodIfMissing);
+    classDecl.ifPresent(cd -> addFilterMethodIfMissing(cu, cd));
   }
 
   private static Expression unresolve(

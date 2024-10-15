@@ -1,5 +1,6 @@
 package io.codemodder.codemods.semgrep;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodExecutionPriority;
@@ -12,7 +13,9 @@ import io.codemodder.SarifFindingKeyUtil;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
-import io.codemodder.remediation.sqlinjection.JavaParserSQLInjectionRemediatorStrategy;
+import io.codemodder.remediation.Remediator;
+import io.codemodder.remediation.sqlinjection.SQLInjectionRemediator;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /**
@@ -26,14 +29,14 @@ import javax.inject.Inject;
     importance = Importance.HIGH)
 public final class SemgrepSQLInjectionCodemod extends SemgrepJavaParserChanger {
 
-  private final JavaParserSQLInjectionRemediatorStrategy remediator;
+  private final Remediator<Result> remediator;
 
   @Inject
   public SemgrepSQLInjectionCodemod(
       @ProvidedSemgrepScan(ruleId = "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli")
           final RuleSarif sarif) {
     super(GenericRemediationMetadata.SQL_INJECTION.reporter(), sarif);
-    this.remediator = JavaParserSQLInjectionRemediatorStrategy.DEFAULT;
+    this.remediator = new SQLInjectionRemediator<>();
   }
 
   @Override
@@ -54,6 +57,11 @@ public final class SemgrepSQLInjectionCodemod extends SemgrepJavaParserChanger {
         ruleSarif.getResultsByLocationPath(context.path()),
         SarifFindingKeyUtil::buildFindingId,
         r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
-        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine());
+        r ->
+            Optional.ofNullable(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
+        r ->
+            Optional.ofNullable(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn()));
   }
 }
