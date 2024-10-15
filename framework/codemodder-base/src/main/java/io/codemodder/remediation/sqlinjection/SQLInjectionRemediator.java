@@ -8,8 +8,8 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Default implementation of the JavaParserSQLInjectionRemediatorStrategy interface. This class
- * provides the logic to visit a CompilationUnit and process findings for potential SQL injections.
+ * A Remediator for SQL injection issues. This class provides the logic to visit a CompilationUnit
+ * and process findings for potential SQL injections.
  */
 public final class SQLInjectionRemediator<T> implements Remediator<T> {
 
