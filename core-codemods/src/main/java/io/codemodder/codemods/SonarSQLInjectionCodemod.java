@@ -7,11 +7,14 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleHotspot;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.remediation.GenericRemediationMetadata;
-import io.codemodder.remediation.sqlinjection.JavaParserSQLInjectionRemediatorStrategy;
+import io.codemodder.remediation.Remediator;
+import io.codemodder.remediation.sqlinjection.SQLInjectionRemediator;
 import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.SonarFinding;
+import io.codemodder.sonar.model.TextRange;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.inject.Inject;
 
 @Codemod(
@@ -21,7 +24,7 @@ import javax.inject.Inject;
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class SonarSQLInjectionCodemod extends SonarRemediatingJavaParserChanger {
 
-  private final JavaParserSQLInjectionRemediatorStrategy remediationStrategy;
+  private final Remediator<Hotspot> remediationStrategy;
   private final RuleHotspot hotspots;
 
   @Inject
@@ -29,7 +32,7 @@ public final class SonarSQLInjectionCodemod extends SonarRemediatingJavaParserCh
       @ProvidedSonarScan(ruleId = "java:S2077") final RuleHotspot hotspots) {
     super(GenericRemediationMetadata.SQL_INJECTION.reporter(), hotspots);
     this.hotspots = Objects.requireNonNull(hotspots);
-    this.remediationStrategy = JavaParserSQLInjectionRemediatorStrategy.DEFAULT;
+    this.remediationStrategy = new SQLInjectionRemediator<>();
   }
 
   @Override
@@ -51,6 +54,7 @@ public final class SonarSQLInjectionCodemod extends SonarRemediatingJavaParserCh
         hotspotsForFile,
         SonarFinding::getKey,
         i -> i.getTextRange() != null ? i.getTextRange().getStartLine() : i.getLine(),
-        i -> i.getTextRange() != null ? i.getTextRange().getEndLine() : null);
+        i -> Optional.ofNullable(i.getTextRange()).map(TextRange::getEndLine),
+        i -> Optional.ofNullable(i.getTextRange()).map(tr -> tr.getStartOffset() + 1));
   }
 }

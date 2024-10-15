@@ -56,7 +56,7 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
     return CodemodFileScanningResult.withOnlyChanges(changes);
   }
 
-  private static final String queryParameterNamePrefix = ":parameter";
+  private static final String queryParameterNamePrefix = "parameter";
 
   private boolean isQueryCreation(final MethodCallExpr methodCallExpr) {
     final Predicate<MethodCallExpr> isQueryCall =
@@ -86,7 +86,8 @@ public final class HQLParameterizationCodemod extends JavaParserChanger {
       final var builder = new StringBuilder(startString);
       final int lastQuoteIndex = startString.lastIndexOf('\'') + 1;
       final var prepend = startString.substring(lastQuoteIndex);
-      builder.replace(lastQuoteIndex - 1, startString.length(), queryParameterNamePrefix + count);
+      builder.replace(
+          lastQuoteIndex - 1, startString.length(), ":" + queryParameterNamePrefix + count);
       start.asStringLiteralExpr().setValue(builder.toString());
 
       // fix end

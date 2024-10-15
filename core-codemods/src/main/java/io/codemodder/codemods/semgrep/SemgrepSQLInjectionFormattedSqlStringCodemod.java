@@ -1,5 +1,6 @@
 package io.codemodder.codemods.semgrep;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodExecutionPriority;
@@ -12,7 +13,8 @@ import io.codemodder.SarifFindingKeyUtil;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
-import io.codemodder.remediation.sqlinjection.JavaParserSQLInjectionRemediatorStrategy;
+import io.codemodder.remediation.sqlinjection.SQLInjectionRemediator;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /**
@@ -26,7 +28,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH)
 public final class SemgrepSQLInjectionFormattedSqlStringCodemod extends SemgrepJavaParserChanger {
 
-  private final JavaParserSQLInjectionRemediatorStrategy remediator;
+  private final SQLInjectionRemediator<Result> remediator;
 
   @Inject
   public SemgrepSQLInjectionFormattedSqlStringCodemod(
@@ -34,7 +36,7 @@ public final class SemgrepSQLInjectionFormattedSqlStringCodemod extends SemgrepJ
               ruleId = "java.lang.security.audit.formatted-sql-string.formatted-sql-string")
           final RuleSarif sarif) {
     super(GenericRemediationMetadata.SQL_INJECTION.reporter(), sarif);
-    this.remediator = JavaParserSQLInjectionRemediatorStrategy.DEFAULT;
+    this.remediator = new SQLInjectionRemediator<>();
   }
 
   @Override
@@ -55,6 +57,11 @@ public final class SemgrepSQLInjectionFormattedSqlStringCodemod extends SemgrepJ
         ruleSarif.getResultsByLocationPath(context.path()),
         SarifFindingKeyUtil::buildFindingId,
         r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
-        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine());
+        r ->
+            Optional.ofNullable(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
+        r ->
+            Optional.ofNullable(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn()));
   }
 }

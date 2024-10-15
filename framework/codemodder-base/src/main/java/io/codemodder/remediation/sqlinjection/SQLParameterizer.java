@@ -37,6 +37,11 @@ public final class SQLParameterizer {
     this.compilationUnit = null;
   }
 
+  public SQLParameterizer(final MethodCallExpr methodCallExpr, final CompilationUnit cu) {
+    this.executeCall = Objects.requireNonNull(methodCallExpr);
+    this.compilationUnit = cu;
+  }
+
   /**
    * Checks if the {@link MethodCallExpr} is of one of the execute calls of {@link
    * java.sql.Statement} whose argument is not a {@link String} literal.

@@ -1,49 +1,59 @@
 package io.codemodder.remediation.sqlinjection;
 
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import io.codemodder.remediation.MethodOrConstructor;
+import io.codemodder.remediation.RemediationStrategy;
+import io.codemodder.remediation.SuccessOrReason;
+import java.util.Optional;
 
 /** Composes several transformations related to SQL injections. */
-public final class SQLInjectionFixComposer {
+public final class SQLInjectionFixComposer implements RemediationStrategy {
 
-  private SQLInjectionFixComposer() {}
+  SQLInjectionFixComposer() {}
 
   /**
-   * Given a {@link MethodCallExpr} related to executing JDBC API SQL queries (i.e.
-   * prepareStatement(), executeQuery(), etc.), parameterize data injections or add a validation
-   * step for structural injections.
+   * Given a node, check if it is a {@link MethodCallExpr} related to executing JDBC API SQL queries
+   * (i.e. prepareStatement(), executeQuery(), etc.), parameterize data injections or add a
+   * validation step for structural injections.
    */
-  public static boolean checkAndFix(final MethodOrConstructor m) {
+  public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
 
-    if (!m.isMethodCall()) {
-      return false;
+    var maybeMethodCall =
+        Optional.of(node).map(n -> n instanceof MethodCallExpr ? (MethodCallExpr) n : null);
+    if (maybeMethodCall.isEmpty()) {
+      return SuccessOrReason.reason("Not a method call");
     }
 
-    MethodCallExpr methodCallExpr = m.asMethodCall();
+    MethodCallExpr methodCallExpr = maybeMethodCall.get();
 
     // First, check if any data injection fixes apply
-    var maybeFixed = new SQLParameterizer(methodCallExpr).checkAndFix();
+    var maybeFixed = new SQLParameterizer(methodCallExpr, cu).checkAndFix();
     if (maybeFixed.isPresent()) {
       // If yes, execute cleanup steps and check if any table injection remains.
       SQLParameterizerWithCleanup.cleanup(maybeFixed.get());
       SQLTableInjectionFilterTransform.findAndFix(maybeFixed.get());
-      return true;
+      return SuccessOrReason.success();
       // If not, try the table injection only
     } else {
-      return SQLTableInjectionFilterTransform.findAndFix(methodCallExpr);
+      return SQLTableInjectionFilterTransform.findAndFix(methodCallExpr)
+          ? SuccessOrReason.success()
+          : SuccessOrReason.reason("Could not fix injection");
     }
   }
 
   /**
-   * Check if the {@link MethodCallExpr} is a JDBC API query method that is a target of a SQL
-   * injection transformation.
+   * Check if the node is a JDBC API query method that is a target of a SQL injection
+   * transformation.
    */
-  public static boolean match(final MethodOrConstructor methodOrConstructor) {
-    if (!methodOrConstructor.isMethodCall()) {
-      return false;
-    }
-    MethodCallExpr methodCallExpr = methodOrConstructor.asMethodCall();
-    return SQLParameterizer.isSupportedJdbcMethodCall(methodCallExpr)
-        || SQLTableInjectionFilterTransform.matchCall(methodCallExpr);
+  public static boolean match(final Node node) {
+    var maybeMethodCall =
+        Optional.of(node)
+            .map(n -> n instanceof MethodCallExpr ? (MethodCallExpr) n : null)
+            .filter(
+                n ->
+                    SQLParameterizer.isSupportedJdbcMethodCall(n)
+                        || SQLTableInjectionFilterTransform.matchCall(n));
+    return maybeMethodCall.isPresent();
   }
 }
