@@ -172,12 +172,12 @@ class POMScanner {
       String relativePath, Set<String> prevPaths, POMDocument pomFile) {
 
     if (!isRelative(relativePath)) {
-      LOGGER.warn("not relative: " + relativePath);
+      LOGGER.debug("not relative: {}", relativePath);
       return false;
     }
 
     if (prevPaths.contains(relativePath)) {
-      LOGGER.warn("loop: " + pomFile.getPath() + ", relativePath: " + relativePath);
+      LOGGER.debug("loop: {}, relativePath: {}", pomFile.getPath(), relativePath);
       return false;
     } else {
       prevPaths.add(relativePath);

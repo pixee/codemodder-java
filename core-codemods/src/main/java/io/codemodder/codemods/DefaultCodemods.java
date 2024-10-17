@@ -40,6 +40,7 @@ public final class DefaultCodemods {
         CodeQLSSRFCodemod.class,
         CodeQLStackTraceExposureCodemod.class,
         CodeQLUnverifiedJwtCodemod.class,
+        CodeQLXXECodemod.class,
         DeclareVariableOnSeparateLineCodemod.class,
         DefectDojoSqlInjectionCodemod.class,
         DefineConstantForLiteralCodemod.class,
