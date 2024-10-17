@@ -12,6 +12,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,12 +22,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 final class DefaultJavaDeserializationRemediatorTest {
 
-  private DefaultJavaDeserializationRemediator remediator;
+  private JavaDeserializationRemediator<Object> remediator;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    remediator = new DefaultJavaDeserializationRemediator();
+    remediator = new JavaDeserializationRemediator<>();
     rule = new DetectorRule("untrusted-deserialization", "Untrusted Deserialization", null);
   }
 
@@ -64,7 +65,14 @@ final class DefaultJavaDeserializationRemediatorTest {
 
     CodemodFileScanningResult result =
         remediator.remediateAll(
-            cu, "path", rule, List.of(new Object()), o -> "id", o -> line, o -> null, o -> null);
+            cu,
+            "path",
+            rule,
+            List.of(new Object()),
+            o -> "id",
+            o -> line,
+            o -> Optional.empty(),
+            o -> Optional.empty());
     assertThat(result.unfixedFindings()).hasSize(1);
     assertThat(result.changes()).isEmpty();
     UnfixedFinding unfixedFinding = result.unfixedFindings().get(0);
@@ -103,7 +111,14 @@ final class DefaultJavaDeserializationRemediatorTest {
 
     CodemodFileScanningResult result =
         remediator.remediateAll(
-            cu, "path", rule, List.of(new Object()), o -> "id", o -> line, o -> null, o -> null);
+            cu,
+            "path",
+            rule,
+            List.of(new Object()),
+            o -> "id",
+            o -> line,
+            o -> Optional.empty(),
+            o -> Optional.empty());
     assertThat(result.unfixedFindings()).isEmpty();
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);
