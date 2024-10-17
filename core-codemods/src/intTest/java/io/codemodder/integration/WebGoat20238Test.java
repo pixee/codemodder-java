@@ -46,7 +46,7 @@ final class WebGoat20238Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .toList();
 
-    assertThat(fileChanges.size(), is(49));
+    assertThat(fileChanges.size(), is(50));
 
     verifyStandardCodemodResults(fileChanges);
 
@@ -70,6 +70,7 @@ final class WebGoat20238Test extends GitRepositoryTest {
 
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/insecure-randomness", 0);
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/ssrf", 1);
+    verifyCodemodsHitWithChangesetCount(report, "codeql:java/xxe", 1);
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/sql-injection", 6);
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/insecure-cookie", 2);
   }

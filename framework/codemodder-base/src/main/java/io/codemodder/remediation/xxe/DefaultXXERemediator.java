@@ -33,7 +33,7 @@ final class DefaultXXERemediator implements XXERemediator {
       final List<T> issuesForFile,
       final Function<T, String> getKey,
       final Function<T, Integer> getStartLine,
-      final Function<T, Integer> getColumn) {
+      final Function<T, Integer> getStartColumn) {
 
     List<UnfixedFinding> unfixedFindings = new ArrayList<>();
     List<CodemodChange> changes = new ArrayList<>();
@@ -42,7 +42,7 @@ final class DefaultXXERemediator implements XXERemediator {
 
       String findingId = getKey.apply(issue);
       int line = getStartLine.apply(issue);
-      Integer column = getColumn.apply(issue);
+      Integer column = getStartColumn.apply(issue);
       for (XXEFixer fixer : fixers) {
         XXEFixAttempt fixAttempt = fixer.tryFix(line, column, cu);
         if (!fixAttempt.isResponsibleFixer()) {
