@@ -1,5 +1,6 @@
 package io.codemodder;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -38,48 +39,48 @@ public class Either<L, R> {
 
   /** Returns an {@link Either} containing {@code value} as a left value. */
   public static <A, B> Either<A, B> left(A value) {
-    return new Either<>(value, null);
+    return new Either<>(Objects.requireNonNull(value), null);
   }
 
   /** Returns an {@link Either} containing {@code value} as a right value. */
   public static <A, B> Either<A, B> right(B value) {
-    return new Either<>(null, value);
+    return new Either<>(null, Objects.requireNonNull(value));
   }
 
   /** Applies {@code func} to the left value if present. */
   public <A> Either<A, R> map(Function<L, A> func) {
-    if (this.isLeft()) return new Either<>(func.apply(this.leftValue), null);
-    else return new Either<>(null, this.rightValue);
+    if (this.isLeft()) return Either.left(func.apply(this.leftValue));
+    else return Either.right(this.rightValue);
   }
 
   /**
    * Applies {@code func} to the right value if present and returns an {@code Either} containing the
-   * result. Otherwise returns an {@code Either} containing the left value.
+   * result. Otherwise, returns an {@code Either} containing the left value.
    */
   public <A> Either<A, R> flatMap(Function<L, Either<A, R>> func) {
     if (this.isLeft()) {
       var other = func.apply(this.leftValue);
-      if (other.isLeft()) return new Either<>(other.leftValue, null);
-      else return new Either<>(null, other.rightValue);
-    } else return new Either<>(null, this.rightValue);
+      if (other.isLeft()) return Either.left(other.leftValue);
+      else return Either.right(other.rightValue);
+    } else return Either.right(this.rightValue);
   }
 
   /** Applies {@code func} to the left value if present. */
   public <A> Either<L, A> mapRight(Function<R, A> func) {
-    if (this.isRight()) return new Either<>(null, func.apply(this.rightValue));
-    else return new Either<>(this.leftValue, null);
+    if (this.isRight()) return Either.right(func.apply(this.rightValue));
+    else return Either.left(this.leftValue);
   }
 
   /**
    * Applies {@code func} to the right value if present and returns an {@code Either} containing the
-   * result. Otherwise returns an {@code Either} containing the left value.
+   * result. Otherwise, returns an {@code Either} containing the left value.
    */
   public <A> Either<L, A> flatMapRight(Function<R, Either<L, A>> func) {
     if (this.isRight()) {
       var other = func.apply(this.rightValue);
-      if (other.isRight()) return new Either<>(null, other.rightValue);
-      else return new Either<>(other.leftValue, null);
-    } else return new Either<>(this.leftValue, null);
+      if (other.isRight()) return Either.right(other.rightValue);
+      else return Either.left(other.leftValue);
+    } else return Either.left(this.leftValue);
   }
 
   /**
