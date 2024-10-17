@@ -16,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.mozilla.universalchardet.UniversalDetector;
 
@@ -25,29 +24,6 @@ final class WebGoat822Test extends GitRepositoryTest {
   WebGoat822Test() {
     super("https://github.com/WebGoat/WebGoat", "main", "e75cfbeb110e3d3a2ca3c8fee2754992d89c419d");
   }
-
-  private static final String testPathIncludes =
-      "**.java,"
-          + "**/*.java,"
-          + "pom.xml,"
-          + "**/pom.xml,"
-          + "**.jsp,"
-          + "**/*.jsp,"
-          + "web.xml,"
-          + "**/web.xml,"
-          + ".github/workflows/*.yml,"
-          + ".github/workflows/*.yaml";
-
-  private static final String testPathExcludes =
-      "**/test/**,"
-          + "**/testFixtures/**,"
-          + "**/*Test.java,"
-          + "**/intTest/**,"
-          + "**/tests/**,"
-          + "**/target/**,"
-          + "**/build/**,"
-          + "**/.mvn/**,"
-          + ".mvn/**";
 
   @Test
   void it_injects_dependency_even_when_no_poms_included() throws Exception {
@@ -125,12 +101,19 @@ final class WebGoat822Test extends GitRepositoryTest {
         report.getResults().stream()
             .map(CodeTFResult::getChangeset)
             .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+            .toList();
 
     assertThat(fileChanges.size(), is(58));
 
     // we only inject into a couple files
     verifyStandardCodemodResults(fileChanges);
+
+    // and that we inject the correct pom
+    assertThat(
+        fileChanges.stream()
+            .map(CodeTFChangesetEntry::getPath)
+            .anyMatch(path -> path.endsWith("insecure-deserialization/pom.xml")),
+        is(true));
 
     // this file is only changed by including the codeql results, which we didn't do in this test
     assertThat(
@@ -165,9 +148,9 @@ final class WebGoat822Test extends GitRepositoryTest {
         report.getResults().stream()
             .map(CodeTFResult::getChangeset)
             .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+            .toList();
 
-    assertThat(fileChanges.size(), is(62));
+    assertThat(fileChanges.size(), is(64));
 
     verifyStandardCodemodResults(fileChanges);
 
@@ -187,37 +170,10 @@ final class WebGoat822Test extends GitRepositoryTest {
 
     assertThat(ajaxJwtChange.getChanges().size(), equalTo(1));
     assertThat(ajaxJwtChange.getChanges().get(0).getLineNumber(), equalTo(53));
-  }
 
-  private static void verifyStandardCodemodResults(final List<CodeTFChangesetEntry> fileChanges) {
-    // we only inject into a couple files
-    assertThat(
-        fileChanges.stream()
-            .map(CodeTFChangesetEntry::getPath)
-            .anyMatch(path -> path.endsWith("SerializationHelper.java")),
-        is(true));
-
-    assertThat(
-        fileChanges.stream()
-            .map(CodeTFChangesetEntry::getPath)
-            .anyMatch(path -> path.endsWith("InsecureDeserializationTask.java")),
-        is(true));
-
-    // and inject the correct pom
-
-    assertThat(
-        fileChanges.stream()
-            .map(CodeTFChangesetEntry::getPath)
-            .anyMatch(path -> path.equals("webgoat-lessons/insecure-deserialization/pom.xml")),
-        is(true));
-  }
-
-  private static void verifyNoFailedFiles(final CodeTFReport report) {
-    List<String> failedFiles =
-        report.getResults().stream()
-            .map(CodeTFResult::getFailedFiles)
-            .flatMap(Collection::stream)
-            .toList();
-    assertThat(failedFiles.size(), is(0));
+    verifyCodemodsHitWithChangesetCount(report, "codeql:java/insecure-randomness", 0);
+    verifyCodemodsHitWithChangesetCount(report, "codeql:java/ssrf", 3);
+    verifyCodemodsHitWithChangesetCount(report, "codeql:java/sql-injection", 5);
+    verifyCodemodsHitWithChangesetCount(report, "codeql:java/insecure-cookie", 1);
   }
 }

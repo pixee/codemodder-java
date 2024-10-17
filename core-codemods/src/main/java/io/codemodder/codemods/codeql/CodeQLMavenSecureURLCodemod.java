@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.codemods.codeql;
 
 import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.Result;
@@ -31,13 +31,13 @@ import org.xml.sax.SAXException;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
+public final class CodeQLMavenSecureURLCodemod extends SarifPluginRawFileChanger
     implements FixOnlyCodeChanger {
 
   private final XPathStreamProcessor processor;
 
   @Inject
-  MavenSecureURLCodemod(
+  CodeQLMavenSecureURLCodemod(
       @ProvidedCodeQLScan(ruleId = "java/maven/non-https-url") final RuleSarif sarif,
       final XPathStreamProcessor processor) {
     super(sarif);
@@ -76,7 +76,7 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
             "//*[local-name()='repository']/*[local-name()='url'] |"
                 + " //*[local-name()='pluginRepository']/*[local-name()='url'] |"
                 + " //*[local-name()='snapshotRepository']/*[local-name()='url']",
-            MavenSecureURLCodemod::handle);
+            CodeQLMavenSecureURLCodemod::handle);
 
     if (change.isEmpty()) {
       return CodemodFileScanningResult.none();
@@ -147,5 +147,5 @@ public final class MavenSecureURLCodemod extends SarifPluginRawFileChanger
     }
   }
 
-  private static final Logger LOG = LoggerFactory.getLogger(MavenSecureURLCodemod.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CodeQLMavenSecureURLCodemod.class);
 }

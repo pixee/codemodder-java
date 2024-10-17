@@ -2,6 +2,7 @@ package io.codemodder.codemods;
 
 import io.codemodder.CodeChanger;
 import io.codemodder.Runner;
+import io.codemodder.codemods.codeql.*;
 import io.codemodder.codemods.semgrep.SemgrepJavaDeserializationCodemod;
 import io.codemodder.codemods.semgrep.SemgrepMissingSecureFlagCodemod;
 import io.codemodder.codemods.semgrep.SemgrepReflectionInjectionCodemod;
@@ -25,6 +26,21 @@ public final class DefaultCodemods {
         AddClarifyingBracesCodemod.class,
         AddMissingOverrideCodemod.class,
         AvoidImplicitPublicConstructorCodemod.class,
+        CodeQLDeserializationOfUserControlledDataCodemod.class,
+        CodeQLHttpResponseSplittingCodemod.class,
+        CodeQLInputResourceLeakCodemod.class,
+        CodeQLInsecureCookieCodemod.class,
+        CodeQLInsecureRandomnessCodemod.class,
+        CodeQLJDBCResourceLeakCodemod.class,
+        CodeQLJEXLInjectionCodemod.class,
+        CodeQLJNDIInjectionCodemod.class,
+        CodeQLMavenSecureURLCodemod.class,
+        CodeQLOutputResourceLeakCodemod.class,
+        CodeQLSQLInjectionCodemod.class,
+        CodeQLSSRFCodemod.class,
+        CodeQLStackTraceExposureCodemod.class,
+        CodeQLUnverifiedJwtCodemod.class,
+        CodeQLXXECodemod.class,
         DeclareVariableOnSeparateLineCodemod.class,
         DefectDojoSqlInjectionCodemod.class,
         DefineConstantForLiteralCodemod.class,
@@ -39,14 +55,8 @@ public final class DefaultCodemods {
         HardenXStreamCodemod.class,
         HardenZipEntryPathsCodemod.class,
         HQLParameterizationCodemod.class,
-        InputResourceLeakCodemod.class,
-        InsecureCookieCodemod.class,
-        JDBCResourceLeakCodemod.class,
-        JEXLInjectionCodemod.class,
         JSPScriptletXSSCodemod.class,
         LimitReadlineCodemod.class,
-        MavenSecureURLCodemod.class,
-        OutputResourceLeakCodemod.class,
         OverridesMatchParentSynchronizationCodemod.class,
         PreventFileWriterLeakWithFilesCodemod.class,
         RandomizeSeedCodemod.class,
@@ -83,10 +93,8 @@ public final class DefaultCodemods {
         SonarXXECodemod.class,
         SQLParameterizerCodemod.class,
         SSRFCodemod.class,
-        StackTraceExposureCodemod.class,
         SwitchLiteralFirstComparisonsCodemod.class,
         SwitchToStandardCharsetsCodemod.class,
-        UnverifiedJwtCodemod.class,
         UpgradeSSLContextTLSCodemod.class,
         UpgradeSSLEngineTLSCodemod.class,
         UpgradeSSLParametersTLSCodemod.class,

@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.codemods.codeql;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.StaticJavaParser;
@@ -38,10 +38,10 @@ import org.apache.commons.jexl3.JexlExpression;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class JEXLInjectionCodemod extends CodeQLSarifJavaParserChanger<Expression> {
+public final class CodeQLJEXLInjectionCodemod extends CodeQLSarifJavaParserChanger<Expression> {
 
   @Inject
-  public JEXLInjectionCodemod(
+  public CodeQLJEXLInjectionCodemod(
       @ProvidedCodeQLScan(ruleId = "java/jexl-expression-injection") final RuleSarif sarif) {
     super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
@@ -63,7 +63,7 @@ public final class JEXLInjectionCodemod extends CodeQLSarifJavaParserChanger<Exp
    * fix it. Combines {@code isFixable} and {@code tryToFix}.
    */
   static Optional<Integer> checkAndFix(final Expression expr) {
-    return isFixable(expr).flatMap(JEXLInjectionCodemod::tryToFix);
+    return isFixable(expr).flatMap(CodeQLJEXLInjectionCodemod::tryToFix);
   }
 
   /**
@@ -71,7 +71,8 @@ public final class JEXLInjectionCodemod extends CodeQLSarifJavaParserChanger<Exp
    * the expression of {@code expr} that can be sandboxed.
    */
   static Optional<MethodCallExpr> isFixable(final Expression expr) {
-    return findJEXLCreateExpression(expr).flatMap(JEXLInjectionCodemod::findJEXLBuilderCreate);
+    return findJEXLCreateExpression(expr)
+        .flatMap(CodeQLJEXLInjectionCodemod::findJEXLBuilderCreate);
   }
 
   /** Tries to sandbox the {@link JexlBuilder#create()} and returns its line if it does. */

@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.codemods.codeql;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
@@ -21,10 +21,10 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class UnverifiedJwtCodemod extends CodeQLSarifJavaParserChanger<Expression> {
+public final class CodeQLUnverifiedJwtCodemod extends CodeQLSarifJavaParserChanger<Expression> {
 
   @Inject
-  public UnverifiedJwtCodemod(
+  public CodeQLUnverifiedJwtCodemod(
       @ProvidedCodeQLScan(ruleId = "java/missing-jwt-signature-check") final RuleSarif sarif) {
     super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }

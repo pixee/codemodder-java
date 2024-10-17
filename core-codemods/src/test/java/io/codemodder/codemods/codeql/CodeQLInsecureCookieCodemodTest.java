@@ -1,10 +1,10 @@
-package io.codemodder.codemods;
+package io.codemodder.codemods.codeql;
 
 import io.codemodder.testutils.CodemodTestMixin;
 import io.codemodder.testutils.Metadata;
 
 @Metadata(
-    codemodType = InsecureCookieCodemod.class,
+    codemodType = CodeQLInsecureCookieCodemod.class,
     testResourceDir = "insecure-cookie",
     dependencies = {})
-public class InsecureCookieCodemodTest implements CodemodTestMixin {}
+final class CodeQLInsecureCookieCodemodTest implements CodemodTestMixin {}

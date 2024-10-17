@@ -1,10 +1,19 @@
 package io.codemodder.integration;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import io.codemodder.codetf.CodeTFChangesetEntry;
+import io.codemodder.codetf.CodeTFReport;
+import io.codemodder.codetf.CodeTFResult;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.eclipse.jgit.api.Git;
@@ -81,4 +90,61 @@ abstract class GitRepositoryTest {
     this.outputFile = Files.createTempFile("report", ".log").toFile();
     outputFile.deleteOnExit();
   }
+
+  protected void verifyNoFailedFiles(final CodeTFReport report) {
+    List<String> failedFiles =
+        report.getResults().stream()
+            .map(CodeTFResult::getFailedFiles)
+            .flatMap(Collection::stream)
+            .toList();
+    assertThat(failedFiles.size(), is(0));
+  }
+
+  protected void verifyStandardCodemodResults(final List<CodeTFChangesetEntry> fileChanges) {
+    // we only inject into a couple files
+    assertThat(
+        fileChanges.stream()
+            .map(CodeTFChangesetEntry::getPath)
+            .anyMatch(path -> path.endsWith("SerializationHelper.java")),
+        is(true));
+
+    assertThat(
+        fileChanges.stream()
+            .map(CodeTFChangesetEntry::getPath)
+            .anyMatch(path -> path.endsWith("InsecureDeserializationTask.java")),
+        is(true));
+  }
+
+  protected void verifyCodemodsHitWithChangesetCount(
+      final CodeTFReport report, final String codemodId, final int changes) {
+    List<CodeTFResult> results =
+        report.getResults().stream()
+            .filter(result -> codemodId.equals(result.getCodemod()))
+            .toList();
+    assertThat(results.size(), equalTo(1)); // should only have 1 entry per codemod
+    assertThat(results.get(0).getChangeset().size(), equalTo(changes));
+  }
+
+  protected static final String testPathIncludes =
+      "**.java,"
+          + "**/*.java,"
+          + "pom.xml,"
+          + "**/pom.xml,"
+          + "**.jsp,"
+          + "**/*.jsp,"
+          + "web.xml,"
+          + "**/web.xml,"
+          + ".github/workflows/*.yml,"
+          + ".github/workflows/*.yaml";
+
+  protected static final String testPathExcludes =
+      "**/test/**,"
+          + "**/testFixtures/**,"
+          + "**/*Test.java,"
+          + "**/intTest/**,"
+          + "**/tests/**,"
+          + "**/target/**,"
+          + "**/build/**,"
+          + "**/.mvn/**,"
+          + ".mvn/**";
 }

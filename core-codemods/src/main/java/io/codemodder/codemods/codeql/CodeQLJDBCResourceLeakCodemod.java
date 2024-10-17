@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.codemods.codeql;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
@@ -8,6 +8,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.codeql.CodeQLSarifJavaParserChanger;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
+import io.codemodder.remediation.resourceleak.ResourceLeakFixer;
 import javax.inject.Inject;
 
 /**
@@ -19,10 +20,11 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class JDBCResourceLeakCodemod extends CodeQLSarifJavaParserChanger<MethodCallExpr> {
+public final class CodeQLJDBCResourceLeakCodemod
+    extends CodeQLSarifJavaParserChanger<MethodCallExpr> {
 
   @Inject
-  public JDBCResourceLeakCodemod(
+  public CodeQLJDBCResourceLeakCodemod(
       @ProvidedCodeQLScan(ruleId = "java/database-resource-leak") final RuleSarif sarif) {
     super(sarif, MethodCallExpr.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
