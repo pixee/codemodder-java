@@ -7,4 +7,4 @@ import io.codemodder.testutils.Metadata;
     codemodType = CodeQLInsecureCookieCodemod.class,
     testResourceDir = "insecure-cookie",
     dependencies = {})
-public class CodeQLInsecureCookieCodemodTest implements CodemodTestMixin {}
+final class CodeQLInsecureCookieCodemodTest implements CodemodTestMixin {}
