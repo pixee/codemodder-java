@@ -13,6 +13,7 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.*;
 import io.codemodder.javaparser.ChangesResult;
 import io.codemodder.providers.sarif.semgrep.SemgrepScan;
+import io.codemodder.remediation.resourceleak.ResourceLeakFixer;
 import java.io.File;
 import java.io.Writer;
 import javax.inject.Inject;

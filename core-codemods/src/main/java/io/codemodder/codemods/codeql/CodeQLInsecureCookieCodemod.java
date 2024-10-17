@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.codemods.codeql;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
@@ -23,10 +23,11 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.LOW,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class InsecureCookieCodemod extends CodeQLSarifJavaParserChanger<MethodCallExpr> {
+public final class CodeQLInsecureCookieCodemod
+    extends CodeQLSarifJavaParserChanger<MethodCallExpr> {
 
   @Inject
-  public InsecureCookieCodemod(
+  public CodeQLInsecureCookieCodemod(
       @ProvidedCodeQLScan(ruleId = "java/insecure-cookie") final RuleSarif sarif) {
     super(sarif, MethodCallExpr.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }

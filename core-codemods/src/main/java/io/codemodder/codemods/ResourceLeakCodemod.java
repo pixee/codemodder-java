@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Expression;
 import io.codemodder.*;
 import io.codemodder.javaparser.JavaParserChanger;
+import io.codemodder.remediation.resourceleak.ResourceLeakFixer;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

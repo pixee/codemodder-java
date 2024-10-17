@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.remediation.resourceleak;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.Node;
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * rules "java/database-resource-leak", java/input-resource-leak, and java/output-resource-leak
  * whenever possible.
  */
-final class ResourceLeakFixer {
+public final class ResourceLeakFixer {
 
   private ResourceLeakFixer() {}
 

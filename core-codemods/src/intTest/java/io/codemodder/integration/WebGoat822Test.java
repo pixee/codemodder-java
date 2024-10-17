@@ -167,7 +167,7 @@ final class WebGoat822Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    assertThat(fileChanges.size(), is(62));
+    assertThat(fileChanges.size(), is(63));
 
     verifyStandardCodemodResults(fileChanges);
 
@@ -187,6 +187,21 @@ final class WebGoat822Test extends GitRepositoryTest {
 
     assertThat(ajaxJwtChange.getChanges().size(), equalTo(1));
     assertThat(ajaxJwtChange.getChanges().get(0).getLineNumber(), equalTo(53));
+
+    verifyCodemodsHitWithChangeCount(report, "codeql:java/insecure-randomness", 0);
+    verifyCodemodsHitWithChangeCount(report, "codeql:java/ssrf", 3);
+    verifyCodemodsHitWithChangeCount(report, "codeql:java/sql-injection", 5);
+    verifyCodemodsHitWithChangeCount(report, "codeql:java/insecure-cookie", 1);
+  }
+
+  private void verifyCodemodsHitWithChangeCount(
+      final CodeTFReport report, final String codemodId, final int changes) {
+    List<CodeTFResult> results =
+        report.getResults().stream()
+            .filter(result -> codemodId.equals(result.getCodemod()))
+            .toList();
+    assertThat(results.size(), equalTo(1)); // should only have 1 entry per codemod
+    assertThat(results.get(0).getChangeset().size(), equalTo(changes));
   }
 
   private static void verifyStandardCodemodResults(final List<CodeTFChangesetEntry> fileChanges) {

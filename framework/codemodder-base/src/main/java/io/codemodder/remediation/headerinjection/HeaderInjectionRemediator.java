@@ -18,7 +18,7 @@ public interface HeaderInjectionRemediator {
       Function<T, String> getKey,
       Function<T, Integer> getStartLine,
       Function<T, Integer> getEndLine,
-      Function<T, Integer> getColumn);
+      Function<T, Integer> getStartColumn);
 
   /** The default header injection remediation strategy. */
   HeaderInjectionRemediator DEFAULT = new DefaultHeaderInjectionRemediator();

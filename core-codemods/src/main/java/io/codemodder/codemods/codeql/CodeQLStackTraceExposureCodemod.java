@@ -1,4 +1,4 @@
-package io.codemodder.codemods;
+package io.codemodder.codemods.codeql;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
@@ -22,10 +22,11 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class StackTraceExposureCodemod extends CodeQLSarifJavaParserChanger<Expression> {
+public final class CodeQLStackTraceExposureCodemod
+    extends CodeQLSarifJavaParserChanger<Expression> {
 
   @Inject
-  public StackTraceExposureCodemod(
+  public CodeQLStackTraceExposureCodemod(
       @ProvidedCodeQLScan(ruleId = "java/error-message-exposure") final RuleSarif sarif) {
     super(sarif, Expression.class, SourceCodeRegionExtractor.FROM_SARIF_FIRST_LOCATION);
   }
