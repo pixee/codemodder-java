@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
 
-public class JavaDeserializationFixStrategy implements RemediationStrategy {
+public final class JavaDeserializationFixStrategy implements RemediationStrategy {
 
   /**
    * Tries to find the construction of the scope of a call.

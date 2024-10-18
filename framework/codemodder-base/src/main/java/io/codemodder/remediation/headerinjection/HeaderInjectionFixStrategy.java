@@ -14,7 +14,7 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.remediation.*;
 import java.util.Optional;
 
-public class HeaderInjectionFixStrategy implements RemediationStrategy {
+public final class HeaderInjectionFixStrategy implements RemediationStrategy {
 
   private static final String validatorMethodName = "stripNewlines";
 
