@@ -6,9 +6,10 @@ import java.util.Objects;
 
 /** A base class for LLM codemods that process SARIF and use the OpenAI service. */
 public abstract class SarifPluginLLMCodemod extends SarifPluginRawFileChanger {
+
   protected final OpenAIService openAI;
 
-  public SarifPluginLLMCodemod(RuleSarif sarif, final OpenAIService openAI) {
+  protected SarifPluginLLMCodemod(RuleSarif sarif, final OpenAIService openAI) {
     super(sarif);
     this.openAI = Objects.requireNonNull(openAI);
   }

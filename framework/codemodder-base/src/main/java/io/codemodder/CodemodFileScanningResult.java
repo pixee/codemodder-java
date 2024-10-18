@@ -30,7 +30,7 @@ public interface CodemodFileScanningResult {
   static CodemodFileScanningResult from(
       final List<CodemodChange> changes,
       final List<UnfixedFinding> unfixedFindings,
-      CodeTFAiMetadata codeTFAiMetadata) {
+      final CodeTFAiMetadata codeTFAiMetadata) {
     return new AICodemodFileScanningResult(changes, unfixedFindings, codeTFAiMetadata);
   }
 

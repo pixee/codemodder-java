@@ -14,6 +14,7 @@ import java.util.function.Function;
  */
 public interface Remediator<T> {
 
+  /** Performs the work of performing all remediation, and returning reporting metadata. */
   CodemodFileScanningResult remediateAll(
       final CompilationUnit cu,
       final String path,
@@ -22,5 +23,5 @@ public interface Remediator<T> {
       final Function<T, String> findingIdExtractor,
       final Function<T, Integer> findingStartLineExtractor,
       final Function<T, Optional<Integer>> findingEndLineExtractor,
-      final Function<T, Optional<Integer>> findingColumnExtractor);
+      final Function<T, Optional<Integer>> findingStartColumnExtractor);
 }

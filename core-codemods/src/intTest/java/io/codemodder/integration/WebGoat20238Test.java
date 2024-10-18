@@ -68,10 +68,10 @@ final class WebGoat20238Test extends GitRepositoryTest {
     assertThat(jwtChange.getChanges().get(0).getLineNumber(), equalTo(113));
     assertThat(jwtChange.getChanges().get(1).getLineNumber(), equalTo(140));
 
-    verifyCodemodsHitWithChangesetCount(report, "codeql:java/insecure-randomness", 0);
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/ssrf", 1);
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/xxe", 1);
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/sql-injection", 6);
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/insecure-cookie", 2);
+    verifyCodemodsHitWithChangesetCount(report, "codeql:java/unsafe-deserialization", 2);
   }
 }

@@ -14,7 +14,9 @@ public enum GenericRemediationMetadata {
   MISSING_SECURE_FLAG("missing-secure-flag"),
   SQL_INJECTION("sql-injection"),
   SSRF("ssrf"),
-  WEAK_RANDOM("weak-random");
+  WEAK_RANDOM("weak-random"),
+  PREDICTABLE_SEED("predictable-seed"),
+  ZIP_SLIP("zip-slip");
 
   private final CodemodReporterStrategy reporter;
 

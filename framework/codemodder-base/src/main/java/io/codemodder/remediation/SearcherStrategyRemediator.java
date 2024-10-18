@@ -135,7 +135,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
       final Function<T, String> findingIdExtractor,
       final Function<T, Integer> findingStartLineExtractor,
       final Function<T, Optional<Integer>> findingEndLineExtractor,
-      final Function<T, Optional<Integer>> findingColumnExtractor) {
+      final Function<T, Optional<Integer>> findingStartColumnExtractor) {
 
     List<CodemodChange> allChanges = new ArrayList<>();
     List<UnfixedFinding> allUnfixed = new ArrayList<>();
@@ -150,7 +150,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
               findingIdExtractor,
               findingStartLineExtractor,
               findingEndLineExtractor,
-              findingColumnExtractor,
+              findingStartColumnExtractor,
               searcherAndStrategy.getKey(),
               searcherAndStrategy.getValue());
       allChanges.addAll(pairResult.getValue0());

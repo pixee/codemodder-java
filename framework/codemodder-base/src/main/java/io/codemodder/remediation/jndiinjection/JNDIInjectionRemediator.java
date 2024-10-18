@@ -9,7 +9,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class JNDIInjectionRemediator<T> implements Remediator<T> {
+/** Remediates JNDI injection vulnerabilities. */
+public final class JNDIInjectionRemediator<T> implements Remediator<T> {
 
   private final SearcherStrategyRemediator<T> searchStrategyRemediator;
 
@@ -51,7 +52,7 @@ public class JNDIInjectionRemediator<T> implements Remediator<T> {
       Function<T, String> findingIdExtractor,
       Function<T, Integer> findingStartLineExtractor,
       Function<T, Optional<Integer>> findingEndLineExtractor,
-      Function<T, Optional<Integer>> findingColumnExtractor) {
+      Function<T, Optional<Integer>> findingStartColumnExtractor) {
     return searchStrategyRemediator.remediateAll(
         cu,
         path,
@@ -60,6 +61,6 @@ public class JNDIInjectionRemediator<T> implements Remediator<T> {
         findingIdExtractor,
         findingStartLineExtractor,
         findingEndLineExtractor,
-        findingColumnExtractor);
+        findingStartColumnExtractor);
   }
 }

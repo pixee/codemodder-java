@@ -2,10 +2,10 @@ package io.codemodder.codemods.codeql;
 
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.*;
-import io.codemodder.codemods.remediators.ssrf.SSRFRemediator;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.ssrf.SSRFRemediator;
 import javax.inject.Inject;
 
 /** A codemod for automatically fixing SQL injection from CodeQL. */

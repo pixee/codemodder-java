@@ -79,7 +79,7 @@ public final class LLMDiffs {
         // Save the starting line number for the new hunk.
         start = Integer.parseInt(m.group(1));
       } else {
-        hunk.add(line.length() > 0 ? line : " ");
+        hunk.add(!line.isEmpty() ? line : " ");
       }
     }
 
