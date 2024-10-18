@@ -10,17 +10,18 @@ import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 final class DefaultMissingSecureFlagRemediatorTest {
 
-  private DefaultMissingSecureFlagRemediator remediator;
+  private MissingSecureFlagRemediator<Object> remediator;
 
   @BeforeEach
   void setup() {
-    remediator = new DefaultMissingSecureFlagRemediator();
+    remediator = new MissingSecureFlagRemediator<>();
   }
 
   @ParameterizedTest
@@ -68,8 +69,8 @@ final class DefaultMissingSecureFlagRemediatorTest {
             List.of(new Object()),
             r -> "id-1",
             r -> 5,
-            r -> null,
-            r -> null);
+            r -> Optional.empty(),
+            r -> Optional.empty());
 
     assertThat(result.changes()).isEmpty();
     result
@@ -108,8 +109,8 @@ final class DefaultMissingSecureFlagRemediatorTest {
             List.of(new Object()),
             r -> "id-1",
             r -> line,
-            r -> null,
-            r -> null);
+            r -> Optional.empty(),
+            r -> Optional.empty());
 
     assertThat(result.unfixedFindings()).isEmpty();
     List<CodemodChange> changes = result.changes();
