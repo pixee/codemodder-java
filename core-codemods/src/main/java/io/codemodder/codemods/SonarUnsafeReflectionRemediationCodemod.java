@@ -7,9 +7,12 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.reflectioninjection.ReflectionInjectionRemediator;
 import io.codemodder.sonar.model.Issue;
+import io.codemodder.sonar.model.TextRange;
 import java.util.Objects;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** Sonar remediation codemod for S2658: Classes should not be loaded dynamically. */
@@ -21,14 +24,14 @@ import javax.inject.Inject;
 public final class SonarUnsafeReflectionRemediationCodemod
     extends SonarRemediatingJavaParserChanger {
 
-  private final ReflectionInjectionRemediator remediator;
+  private final Remediator<Issue> remediator;
   private final RuleIssue issues;
 
   @Inject
   public SonarUnsafeReflectionRemediationCodemod(
       @ProvidedSonarScan(ruleId = "java:S2658") final RuleIssue issues) {
     super(GenericRemediationMetadata.REFLECTION_INJECTION.reporter(), issues);
-    this.remediator = ReflectionInjectionRemediator.DEFAULT;
+    this.remediator = new ReflectionInjectionRemediator<>();
     this.issues = Objects.requireNonNull(issues);
   }
 
@@ -50,7 +53,7 @@ public final class SonarUnsafeReflectionRemediationCodemod
         issues.getResultsByPath(context.path()),
         Issue::getKey,
         i -> i.getTextRange() != null ? i.getTextRange().getStartLine() : i.getLine(),
-        i -> i.getTextRange() != null ? i.getTextRange().getEndLine() : null,
-        i -> i.getTextRange().getStartOffset());
+        i -> Optional.ofNullable(i.getTextRange()).map(TextRange::getEndLine),
+        i -> Optional.empty());
   }
 }
