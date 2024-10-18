@@ -81,7 +81,7 @@ final class AppScanRuleSarif implements RuleSarif {
                     result ->
                         artifactLocationIndices.get(path) != null
                             && artifactLocationIndices
-                                .get(path)
+                                .getOrDefault(path, Set.of())
                                 .contains(
                                     result
                                         .getLocations()

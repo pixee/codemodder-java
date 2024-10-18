@@ -1,5 +1,6 @@
 package io.codemodder.codemods.semgrep;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodExecutionPriority;
@@ -13,6 +14,8 @@ import io.codemodder.codemods.remediators.ssrf.SSRFRemediator;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.Remediator;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /**
@@ -26,7 +29,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH)
 public final class SemgrepSSRFCodemod extends SemgrepJavaParserChanger {
 
-  private final SSRFRemediator remediator;
+  private final Remediator<Result> remediator;
 
   @Inject
   public SemgrepSSRFCodemod(
@@ -34,7 +37,7 @@ public final class SemgrepSSRFCodemod extends SemgrepJavaParserChanger {
               ruleId = "java.spring.security.injection.tainted-url-host.tainted-url-host")
           final RuleSarif sarif) {
     super(GenericRemediationMetadata.SSRF.reporter(), sarif);
-    this.remediator = SSRFRemediator.DEFAULT;
+    this.remediator = new SSRFRemediator<>();
   }
 
   @Override
@@ -55,7 +58,11 @@ public final class SemgrepSSRFCodemod extends SemgrepJavaParserChanger {
         ruleSarif.getResultsByLocationPath(context.path()),
         SarifFindingKeyUtil::buildFindingId,
         r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
-        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine(),
-        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn());
+        r ->
+            Optional.ofNullable(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
+        r ->
+            Optional.ofNullable(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn()));
   }
 }
