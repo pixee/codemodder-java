@@ -11,22 +11,21 @@ import io.codemodder.DependencyGAV;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.RemediationMessages;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for {@link DefaultReflectionInjectionRemediator} that use a fake detection input type.
- */
+/** Unit tests for {@link ReflectionInjectionRemediator} that use a fake detection input type. */
 final class DefaultReflectionInjectionRemediatorTest {
 
-  private DefaultReflectionInjectionRemediator remediator;
+  private ReflectionInjectionRemediator<ReflectionInjectionFinding> remediator;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    this.remediator = new DefaultReflectionInjectionRemediator();
+    this.remediator = new ReflectionInjectionRemediator<>();
     this.rule = new DetectorRule("reflection-injection", "Reflection Injection", null);
   }
 
@@ -201,8 +200,8 @@ final class DefaultReflectionInjectionRemediatorTest {
               List.of(finding),
               ReflectionInjectionFinding::key,
               ReflectionInjectionFinding::line,
-              f -> null,
-              ReflectionInjectionFinding::column);
+              f -> Optional.empty(),
+              f -> Optional.ofNullable(f.column));
       assertThat(result.unfixedFindings()).isEmpty();
       assertThat(result.changes()).hasSize(1);
 
@@ -270,8 +269,8 @@ final class DefaultReflectionInjectionRemediatorTest {
               List.of(finding),
               ReflectionInjectionFinding::key,
               ReflectionInjectionFinding::line,
-              f -> null,
-              ReflectionInjectionFinding::column);
+              f -> Optional.empty(),
+              f -> Optional.ofNullable(f.column));
       assertThat(result.changes()).isEmpty();
       assertThat(result.unfixedFindings()).hasSize(1);
       assertThat(result.unfixedFindings().get(0).getLine()).isEqualTo(line);
