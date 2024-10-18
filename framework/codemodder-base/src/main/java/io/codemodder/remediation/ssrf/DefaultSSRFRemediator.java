@@ -1,4 +1,4 @@
-package io.codemodder.codemods.remediators.ssrf;
+package io.codemodder.remediation.ssrf;
 
 import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 

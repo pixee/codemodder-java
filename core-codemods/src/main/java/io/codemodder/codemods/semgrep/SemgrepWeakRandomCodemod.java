@@ -9,9 +9,9 @@ import io.codemodder.Importance;
 import io.codemodder.ReviewGuidance;
 import io.codemodder.RuleSarif;
 import io.codemodder.SarifFindingKeyUtil;
-import io.codemodder.codemods.remediators.weakrandom.WeakRandomRemediator;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
+import io.codemodder.remediation.weakrandom.WeakRandomRemediator;
 import javax.inject.Inject;
 
 /**

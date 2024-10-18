@@ -1,4 +1,4 @@
-package io.codemodder.codemods.remediators.ssrf;
+package io.codemodder.remediation.weakrandom;
 
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.CodemodFileScanningResult;
@@ -6,13 +6,13 @@ import io.codemodder.codetf.DetectorRule;
 import java.util.List;
 import java.util.function.Function;
 
-/** Fixes SSRF vulnerabilities. */
-public interface SSRFRemediator {
+/** Fixes weak randomness. */
+public interface WeakRandomRemediator {
 
   /** A default implementation for callers. */
-  SSRFRemediator DEFAULT = new DefaultSSRFRemediator();
+  WeakRandomRemediator DEFAULT = new DefaultWeakRandomRemediator();
 
-  /** Remediate all SSRF vulnerabilities in the given compilation unit. */
+  /** Remediate all weak random vulnerabilities in the given compilation unit. */
   <T> CodemodFileScanningResult remediateAll(
       CompilationUnit cu,
       String path,
@@ -20,6 +20,5 @@ public interface SSRFRemediator {
       List<T> issuesForFile,
       Function<T, String> getKey,
       Function<T, Integer> getStartLine,
-      Function<T, Integer> getEndLine,
-      Function<T, Integer> getColumn);
+      Function<T, Integer> getStartColumn);
 }

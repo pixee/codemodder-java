@@ -36,7 +36,7 @@ public final class SQLInjectionRemediator<T> implements Remediator<T> {
       Function<T, String> findingIdExtractor,
       Function<T, Integer> findingStartLineExtractor,
       Function<T, Optional<Integer>> findingEndLineExtractor,
-      Function<T, Optional<Integer>> findingColumnExtractor) {
+      Function<T, Optional<Integer>> findingStartColumnExtractor) {
     return searchStrategyRemediator.remediateAll(
         cu,
         path,
@@ -45,6 +45,6 @@ public final class SQLInjectionRemediator<T> implements Remediator<T> {
         findingIdExtractor,
         findingStartLineExtractor,
         findingEndLineExtractor,
-        findingColumnExtractor);
+        findingStartColumnExtractor);
   }
 }

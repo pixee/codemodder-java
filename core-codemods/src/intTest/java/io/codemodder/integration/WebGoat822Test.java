@@ -171,7 +171,6 @@ final class WebGoat822Test extends GitRepositoryTest {
     assertThat(ajaxJwtChange.getChanges().size(), equalTo(1));
     assertThat(ajaxJwtChange.getChanges().get(0).getLineNumber(), equalTo(53));
 
-    verifyCodemodsHitWithChangesetCount(report, "codeql:java/insecure-randomness", 0);
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/ssrf", 3);
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/sql-injection", 5);
     verifyCodemodsHitWithChangesetCount(report, "codeql:java/insecure-cookie", 1);

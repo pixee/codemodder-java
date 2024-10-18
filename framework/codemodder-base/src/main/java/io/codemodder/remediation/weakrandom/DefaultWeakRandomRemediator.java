@@ -1,4 +1,4 @@
-package io.codemodder.codemods.remediators.weakrandom;
+package io.codemodder.remediation.weakrandom;
 
 import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 
