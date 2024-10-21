@@ -24,7 +24,7 @@ public final class SQLInjectionFixComposer implements RemediationStrategy {
    * @param binaryExpr
    * @return An Optional containing the execute call if successful
    */
-  private Optional<MethodCallExpr> flowsIntoExecuteCall(final BinaryExpr binaryExpr) {
+  private Optional<MethodCallExpr> flowsIntoExecuteCall(final Expression binaryExpr) {
     // Is argument of a method call
     var maybeDirectArgumentOfCall =
         ASTs.isArgumentOfMethodCall(binaryExpr).filter(SQLInjectionFixComposer::match);
@@ -58,10 +58,10 @@ public final class SQLInjectionFixComposer implements RemediationStrategy {
   public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
 
     // Is a binary expr or method call expr?
-    Optional<Either<MethodCallExpr, BinaryExpr>> morb;
+    Optional<Either<MethodCallExpr, Expression>> morb;
     if (node instanceof MethodCallExpr m) {
       morb = Optional.of(Either.left(m));
-    } else if (node instanceof BinaryExpr b) {
+    } else if (node instanceof Expression b) {
       morb = Optional.of(Either.right(b));
     } else {
       morb = Optional.empty();

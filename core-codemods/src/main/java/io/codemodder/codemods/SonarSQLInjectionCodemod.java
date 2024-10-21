@@ -1,14 +1,18 @@
 package io.codemodder.codemods;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.Expression;
 import io.codemodder.*;
+import io.codemodder.ast.ASTs;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleHotspot;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
+import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.Remediator;
-import io.codemodder.remediation.sqlinjection.SQLInjectionRemediator;
+import io.codemodder.remediation.SearcherStrategyRemediator;
+import io.codemodder.remediation.sqlinjection.SQLInjectionFixComposer;
 import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.SonarFinding;
 import io.codemodder.sonar.model.TextRange;
@@ -32,7 +36,28 @@ public final class SonarSQLInjectionCodemod extends SonarRemediatingJavaParserCh
       @ProvidedSonarScan(ruleId = "java:S2077") final RuleHotspot hotspots) {
     super(GenericRemediationMetadata.SQL_INJECTION.reporter(), hotspots);
     this.hotspots = Objects.requireNonNull(hotspots);
-    this.remediationStrategy = new SQLInjectionRemediator<>();
+    this.remediationStrategy =
+        new SearcherStrategyRemediator.Builder<Hotspot>()
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<Hotspot>()
+                    .withMatcher(
+                        n ->
+                            Optional.empty()
+                                // is the call itself
+                                .or(() -> Optional.of(n).filter(SQLInjectionFixComposer::match))
+                                // is the argument of the call
+                                .or(
+                                    () ->
+                                        Optional.of(n)
+                                            .map(
+                                                m ->
+                                                    m instanceof Expression ? (Expression) m : null)
+                                            .flatMap(ASTs::isArgumentOfMethodCall)
+                                            .filter(SQLInjectionFixComposer::match))
+                                .isPresent())
+                    .build(),
+                new SQLInjectionFixComposer())
+            .build();
   }
 
   @Override

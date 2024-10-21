@@ -21,7 +21,11 @@ public final class SQLInjectionRemediator<T> implements Remediator<T> {
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<T>()
                     .withMatcher(
-                        n -> Optional.of(n).filter(SQLInjectionFixComposer::match).isPresent())
+                        n ->
+                            Optional.empty()
+                                // is the call itself
+                                .or(() -> Optional.of(n).filter(SQLInjectionFixComposer::match))
+                                .isPresent())
                     .build(),
                 new SQLInjectionFixComposer())
             .build();
