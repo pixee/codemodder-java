@@ -50,7 +50,7 @@ public final class JavaDeserializationFixStrategy implements RemediationStrategy
 
       Expression expression = initializer.get();
       if (expression instanceof ObjectCreationExpr objCreation) {
-        return Either.left(expression.asObjectCreationExpr());
+        return Either.left(objCreation);
       }
     } else {
       return Either.right("Unexpected declaration type");
