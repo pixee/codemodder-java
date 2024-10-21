@@ -9,19 +9,14 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import io.codemodder.CodemodChange;
 import io.codemodder.DependencyGAV;
 import io.codemodder.Either;
 import io.codemodder.ast.ASTs;
 import io.codemodder.ast.LocalDeclaration;
-import io.codemodder.codetf.DetectorRule;
-import io.codemodder.codetf.FixedFinding;
 import io.codemodder.remediation.*;
 import io.github.pixee.security.ObjectInputFilters;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import org.jetbrains.annotations.NotNull;
 
 /** Default strategy to hardens deserialization vulnerabilities. */
 public final class JavaDeserializationFixStrategy implements RemediationStrategy {
@@ -97,20 +92,6 @@ public final class JavaDeserializationFixStrategy implements RemediationStrategy
 
     fixObjectInputStreamCreation(maybeConstructor.getLeft());
     return SuccessOrReason.success(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
-  }
-
-  /**
-   * Build a {@link io.codemodder.CodemodChange} for this code change that fixes the given issues.
-   */
-  private static <T> @NotNull CodemodChange buildFixChange(
-      final DetectorRule detectorRule,
-      final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final List<T> issues) {
-    return CodemodChange.from(
-        getLine.apply(issues.get(0)),
-        List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT),
-        issues.stream().map(i -> new FixedFinding(getKey.apply(i), detectorRule)).toList());
   }
 
   private void fixObjectInputStreamCreation(final ObjectCreationExpr objCreation) {
