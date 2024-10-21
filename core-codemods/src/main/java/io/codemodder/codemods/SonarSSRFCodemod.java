@@ -7,11 +7,14 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.ssrf.SSRFRemediator;
 import io.codemodder.sonar.model.Issue;
 import io.codemodder.sonar.model.SonarFinding;
+import io.codemodder.sonar.model.TextRange;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** Fixes SSRF issues found by sonar rule javasecurity:S5144. */
@@ -22,7 +25,7 @@ import javax.inject.Inject;
     importance = Importance.HIGH)
 public final class SonarSSRFCodemod extends SonarRemediatingJavaParserChanger {
 
-  private final SSRFRemediator remediator;
+  private final Remediator<Issue> remediator;
   private final RuleIssue issues;
 
   @Inject
@@ -30,7 +33,7 @@ public final class SonarSSRFCodemod extends SonarRemediatingJavaParserChanger {
       @ProvidedSonarScan(ruleId = "javasecurity:S5144") final RuleIssue issues) {
     super(GenericRemediationMetadata.SSRF.reporter(), issues);
     this.issues = Objects.requireNonNull(issues);
-    this.remediator = SSRFRemediator.DEFAULT;
+    this.remediator = new SSRFRemediator<>();
   }
 
   @Override
@@ -52,7 +55,7 @@ public final class SonarSSRFCodemod extends SonarRemediatingJavaParserChanger {
         issuesForFile,
         SonarFinding::getKey,
         i -> i.getTextRange() != null ? i.getTextRange().getStartLine() : i.getLine(),
-        i -> i.getTextRange() != null ? i.getTextRange().getEndLine() : null,
-        i -> i.getTextRange() != null ? i.getTextRange().getStartOffset() : null);
+        i -> Optional.ofNullable(i.getTextRange()).map(TextRange::getEndLine),
+        i -> Optional.ofNullable(i.getTextRange()).map(tr -> tr.getStartOffset() + 1));
   }
 }
