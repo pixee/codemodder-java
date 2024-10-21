@@ -43,8 +43,6 @@ public final class SonarSQLInjectionCodemod extends SonarRemediatingJavaParserCh
                     .withMatcher(
                         n ->
                             Optional.empty()
-                                // is the call itself
-                                .or(() -> Optional.of(n).filter(SQLInjectionFixComposer::match))
                                 // is the argument of the call
                                 .or(
                                     () ->

@@ -10,7 +10,12 @@ import io.codemodder.remediation.*;
 import java.util.*;
 import java.util.function.Function;
 
-final class HeaderInjectionRemediator<T> implements Remediator<T> {
+/**
+ * Fixes header injection pointed by issues.
+ *
+ * @param <T>
+ */
+public final class HeaderInjectionRemediator<T> implements Remediator<T> {
 
   private final SearcherStrategyRemediator<T> searchStrategyRemediator;
 

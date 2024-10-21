@@ -1,11 +1,14 @@
 package io.codemodder.codemods.codeql;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.headerinjection.HeaderInjectionRemediator;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** A codemod for automatically fixing HTTP response splitting from CodeQL. */
@@ -16,13 +19,13 @@ import javax.inject.Inject;
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class CodeQLHttpResponseSplittingCodemod extends CodeQLRemediationCodemod {
 
-  private final HeaderInjectionRemediator remediator;
+  private final Remediator<Result> remediator;
 
   @Inject
   public CodeQLHttpResponseSplittingCodemod(
       @ProvidedCodeQLScan(ruleId = "java/http-response-splitting") final RuleSarif sarif) {
     super(GenericRemediationMetadata.HEADER_INJECTION.reporter(), sarif);
-    this.remediator = HeaderInjectionRemediator.DEFAULT;
+    this.remediator = new HeaderInjectionRemediator<>();
   }
 
   @Override
@@ -43,7 +46,9 @@ public final class CodeQLHttpResponseSplittingCodemod extends CodeQLRemediationC
         ruleSarif.getResultsByLocationPath(context.path()),
         SarifFindingKeyUtil::buildFindingId,
         r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
-        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine(),
-        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn());
+        r -> Optional.of(r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
+        r ->
+            Optional.of(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn()));
   }
 }

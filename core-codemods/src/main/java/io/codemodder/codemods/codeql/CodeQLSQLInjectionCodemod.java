@@ -2,12 +2,16 @@ package io.codemodder.codemods.codeql;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.Expression;
 import io.codemodder.*;
+import io.codemodder.ast.ASTs;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
+import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.Remediator;
-import io.codemodder.remediation.sqlinjection.SQLInjectionRemediator;
+import io.codemodder.remediation.SearcherStrategyRemediator;
+import io.codemodder.remediation.sqlinjection.SQLInjectionFixComposer;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -25,7 +29,26 @@ public final class CodeQLSQLInjectionCodemod extends CodeQLRemediationCodemod {
   public CodeQLSQLInjectionCodemod(
       @ProvidedCodeQLScan(ruleId = "java/sql-injection") final RuleSarif sarif) {
     super(GenericRemediationMetadata.SQL_INJECTION.reporter(), sarif);
-    this.remediator = new SQLInjectionRemediator<>();
+    this.remediator =
+        new SearcherStrategyRemediator.Builder<Result>()
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<Result>()
+                    .withMatcher(
+                        n ->
+                            Optional.empty()
+                                // is the argument of the call
+                                .or(
+                                    () ->
+                                        Optional.of(n)
+                                            .map(
+                                                m ->
+                                                    m instanceof Expression ? (Expression) m : null)
+                                            .flatMap(ASTs::isArgumentOfMethodCall)
+                                            .filter(SQLInjectionFixComposer::match))
+                                .isPresent())
+                    .build(),
+                new SQLInjectionFixComposer())
+            .build();
   }
 
   @Override

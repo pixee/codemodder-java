@@ -12,9 +12,11 @@ import io.codemodder.RuleSarif;
 import io.codemodder.SarifFindingKeyUtil;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
+import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.Remediator;
-import io.codemodder.remediation.sqlinjection.SQLInjectionRemediator;
+import io.codemodder.remediation.SearcherStrategyRemediator;
+import io.codemodder.remediation.sqlinjection.SQLInjectionFixComposer;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -36,7 +38,19 @@ public final class SemgrepSQLInjectionCodemod extends SemgrepJavaParserChanger {
       @ProvidedSemgrepScan(ruleId = "java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli")
           final RuleSarif sarif) {
     super(GenericRemediationMetadata.SQL_INJECTION.reporter(), sarif);
-    this.remediator = new SQLInjectionRemediator<>();
+    this.remediator =
+        new SearcherStrategyRemediator.Builder<Result>()
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<Result>()
+                    .withMatcher(
+                        n ->
+                            Optional.empty()
+                                // is the call itself
+                                .or(() -> Optional.of(n).filter(SQLInjectionFixComposer::match))
+                                .isPresent())
+                    .build(),
+                new SQLInjectionFixComposer())
+            .build();
   }
 
   @Override
