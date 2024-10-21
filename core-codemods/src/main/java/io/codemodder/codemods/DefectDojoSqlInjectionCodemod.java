@@ -27,7 +27,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
     implements FixOnlyCodeChanger {
 
   private final RuleFindings findings;
-  private final Remediator<Finding> remediatorStrategy;
+  private final Remediator<Finding> remediationStrategy;
 
   @Inject
   public DefectDojoSqlInjectionCodemod(
@@ -35,7 +35,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
           RuleFindings findings) {
     super(CodemodReporterStrategy.fromClasspath(SQLParameterizerCodemod.class));
     this.findings = Objects.requireNonNull(findings);
-    this.remediatorStrategy = new SQLInjectionRemediator<>();
+    this.remediationStrategy = new SQLInjectionRemediator<>();
   }
 
   @Override
@@ -55,7 +55,7 @@ public final class DefectDojoSqlInjectionCodemod extends JavaParserChanger
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
     List<Finding> findingsForThisPath = findings.getForPath(context.path());
-    return remediatorStrategy.remediateAll(
+    return remediationStrategy.remediateAll(
         cu,
         context.path().toString(),
         detectorRule(),

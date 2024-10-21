@@ -59,15 +59,18 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
                         .map(issueEndLine -> matches(issueStartLine, nodeStartLine, issueEndLine))
                         .orElse(matches(issueStartLine, nodeStartLine));
                   })
-              // if column info is present, check if the column is contained in the node's range
+              // if column info is present, check if the node starts after the issue start
+              // coordinates
               .filter(
                   n ->
                       maybeColumn
                           .map(
                               column ->
                                   n.getRange()
-                                      .orElseThrow()
-                                      .contains(new Position(issueStartLine, column)))
+                                          .orElseThrow()
+                                          .begin
+                                          .compareTo(new Position(issueStartLine, column))
+                                      >= 0)
                           .orElse(true))
               .toList();
       if (nodesForIssue.isEmpty()) {
@@ -107,8 +110,7 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
   static boolean matches(
       final int issueStartLine, final int startNodeLine, final int issueEndLine) {
     // if the issue spans multiple lines, the node must be within that range
-    return matches(issueStartLine, startNodeLine)
-        && isInBetween(startNodeLine, issueStartLine, issueEndLine);
+    return isInBetween(startNodeLine, issueStartLine, issueEndLine);
   }
 
   static boolean matches(final int issueStartLine, final int startNodeLine) {
