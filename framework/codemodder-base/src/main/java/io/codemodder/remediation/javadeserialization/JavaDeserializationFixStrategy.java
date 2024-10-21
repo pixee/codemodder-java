@@ -98,19 +98,6 @@ public final class JavaDeserializationFixStrategy implements RemediationStrategy
     return SuccessOrReason.success(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
   }
 
-  /**
-   * Build a {@link io.codemodder.CodemodChange} for this code change that fixes the given issues.
-   */
-  private static <T> @NotNull CodemodChange buildFixChange(
-      final DetectorRule detectorRule,
-      final Function<T, String> getKey,
-      final Function<T, Integer> getLine,
-      final List<T> issues) {
-    return CodemodChange.from(
-        getLine.apply(issues.get(0)),
-        List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT),
-        issues.stream().map(i -> new FixedFinding(getKey.apply(i), detectorRule)).toList());
-  }
 
   private void fixObjectInputStreamCreation(final ObjectCreationExpr objCreation) {
     replace(objCreation)
