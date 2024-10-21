@@ -12,6 +12,7 @@ import io.codemodder.codetf.FixedFinding;
 import io.codemodder.codetf.UnfixedFinding;
 import io.codemodder.remediation.RemediationMessages;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,12 +22,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 final class DefaultHeaderInjectionRemediatorTest {
 
-  private DefaultHeaderInjectionRemediator remediator;
+  private HeaderInjectionRemediator<HeaderInjectionFinding> remediator;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    this.remediator = new DefaultHeaderInjectionRemediator();
+    this.remediator = new HeaderInjectionRemediator<>();
     this.rule = new DetectorRule("header-injection", "Header Injection", null);
   }
 
@@ -52,8 +53,8 @@ final class DefaultHeaderInjectionRemediatorTest {
             List.of(finding),
             f -> f.id,
             f -> line,
-            f -> null,
-            f -> null);
+            f -> Optional.empty(),
+            f -> Optional.empty());
     assertThat(result.changes()).isEmpty();
     assertThat(result.unfixedFindings()).hasSize(1);
     UnfixedFinding unfixedFinding = result.unfixedFindings().get(0);
@@ -186,8 +187,8 @@ final class DefaultHeaderInjectionRemediatorTest {
             List.of(finding),
             f -> f.id,
             f -> f.line,
-            f -> null,
-            f -> null);
+            f -> Optional.empty(),
+            f -> Optional.empty());
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);
     assertThat(change.lineNumber()).isEqualTo(line);
