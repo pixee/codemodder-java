@@ -14,6 +14,7 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.remediation.*;
 import java.util.Optional;
 
+/** Default strategy to harden header injection vulnerabilities. */
 public final class HeaderInjectionFixStrategy implements RemediationStrategy {
 
   private static final String validatorMethodName = "stripNewlines";

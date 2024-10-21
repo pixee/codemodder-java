@@ -13,6 +13,7 @@ import io.github.pixee.security.Reflection;
 import java.util.List;
 import java.util.Optional;
 
+/** Default strategy to fix reflection injection vulnerabilities. */
 public final class ReflectionInjectionFixStrategy implements RemediationStrategy {
 
   @Override

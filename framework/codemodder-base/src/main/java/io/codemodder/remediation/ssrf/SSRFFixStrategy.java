@@ -13,7 +13,7 @@ import io.github.pixee.security.HostValidator;
 import io.github.pixee.security.Urls;
 import java.util.List;
 
-/** Fixes SSRF issues. */
+/** Default strategy to fix SSRF issues. */
 public final class SSRFFixStrategy implements RemediationStrategy {
 
   @Override

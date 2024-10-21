@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
 
+/** Default strategy to hardens deserialization vulnerabilities. */
 public final class JavaDeserializationFixStrategy implements RemediationStrategy {
 
   /**

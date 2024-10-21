@@ -13,6 +13,7 @@ import io.codemodder.remediation.RemediationStrategy;
 import io.codemodder.remediation.SuccessOrReason;
 import java.util.Optional;
 
+/** Default strategy to add missing secure flags in cookies. */
 public final class MissingSecureFlagFixStrategy implements RemediationStrategy {
 
   @Override
