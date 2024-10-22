@@ -3,32 +3,51 @@ package io.codemodder.remediation.xss;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
-import java.nio.file.Path;
-import java.util.List;
+import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.Remediator;
+import io.codemodder.remediation.SearcherStrategyRemediator;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Function;
 
-/** Remediates header injection vulnerabilities. */
-public interface XSSRemediator {
+public class XSSRemediator<T> implements Remediator<T> {
 
-  /** Remediate all header injection vulnerabilities in the given compilation unit. */
-  <T> CodemodFileScanningResult remediateJava(
+  private final SearcherStrategyRemediator<T> searchStrategyRemediator;
+
+  public XSSRemediator() {
+    this.searchStrategyRemediator =
+        new SearcherStrategyRemediator.Builder<T>()
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<T>()
+                    .withMatcher(NakedVariableReturnFixStrategy::match)
+                    .build(),
+                new NakedVariableReturnFixStrategy())
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<T>()
+                    .withMatcher(PrintingMethodFixStrategy::match)
+                    .build(),
+                new PrintingMethodFixStrategy())
+            .build();
+  }
+
+  @Override
+  public CodemodFileScanningResult remediateAll(
       CompilationUnit cu,
       String path,
       DetectorRule detectorRule,
-      List<T> issuesForFile,
-      Function<T, String> getKey,
-      Function<T, Integer> getLine,
-      Function<T, Integer> getColumn);
-
-  <T> CodemodFileScanningResult remediateJSP(
-      Path filePath,
-      String relativePath,
-      DetectorRule detectorRule,
-      List<T> issuesForFile,
-      Function<T, String> getKey,
-      Function<T, Integer> getLine,
-      Function<T, Integer> getColumn);
-
-  /** The default header injection remediation strategy. */
-  XSSRemediator DEFAULT = new DefaultXSSRemediator();
+      Collection<T> findingsForPath,
+      Function<T, String> findingIdExtractor,
+      Function<T, Integer> findingStartLineExtractor,
+      Function<T, Optional<Integer>> findingEndLineExtractor,
+      Function<T, Optional<Integer>> findingColumnExtractor) {
+    return searchStrategyRemediator.remediateAll(
+        cu,
+        path,
+        detectorRule,
+        findingsForPath,
+        findingIdExtractor,
+        findingStartLineExtractor,
+        findingEndLineExtractor,
+        findingColumnExtractor);
+  }
 }
