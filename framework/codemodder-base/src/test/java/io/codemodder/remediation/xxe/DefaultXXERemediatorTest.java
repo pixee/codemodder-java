@@ -15,12 +15,12 @@ import org.junit.jupiter.api.Test;
 
 final class DefaultXXERemediatorTest {
 
-  private AlternateXXERemediator<XXEFinding> remediator;
+  private XXERemediator<XXEFinding> remediator;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    this.remediator = new AlternateXXERemediator<>();
+    this.remediator = new XXERemediator<>();
     this.rule = new DetectorRule("xxe", "XXE", null);
   }
 

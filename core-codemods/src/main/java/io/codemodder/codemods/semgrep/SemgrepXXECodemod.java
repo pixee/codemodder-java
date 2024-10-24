@@ -15,7 +15,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.Remediator;
-import io.codemodder.remediation.xxe.AlternateXXERemediator;
+import io.codemodder.remediation.xxe.XXERemediator;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -47,7 +47,7 @@ public final class SemgrepXXECodemod extends CompositeJavaParserChanger {
                     "java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-disallow-doctype-decl-missing")
             final RuleSarif sarif) {
       super(GenericRemediationMetadata.WEAK_RANDOM.reporter(), sarif);
-      this.remediator = new AlternateXXERemediator<>();
+      this.remediator = new XXERemediator<>();
     }
 
     @Override
@@ -84,7 +84,7 @@ public final class SemgrepXXECodemod extends CompositeJavaParserChanger {
                     "java.lang.security.audit.xxe.saxparserfactory-disallow-doctype-decl-missing.saxparserfactory-disallow-doctype-decl-missing")
             final RuleSarif sarif) {
       super(GenericRemediationMetadata.WEAK_RANDOM.reporter(), sarif);
-      this.remediator = new AlternateXXERemediator<>();
+      this.remediator = new XXERemediator<>();
     }
 
     @Override
