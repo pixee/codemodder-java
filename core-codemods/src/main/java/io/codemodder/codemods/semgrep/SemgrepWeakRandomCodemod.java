@@ -1,5 +1,6 @@
 package io.codemodder.codemods.semgrep;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodExecutionPriority;
@@ -11,7 +12,9 @@ import io.codemodder.RuleSarif;
 import io.codemodder.SarifFindingKeyUtil;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
+import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.weakrandom.WeakRandomRemediator;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /**
@@ -25,14 +28,14 @@ import javax.inject.Inject;
     importance = Importance.MEDIUM)
 public final class SemgrepWeakRandomCodemod extends SemgrepJavaParserChanger {
 
-  private final WeakRandomRemediator remediator;
+  private final Remediator<Result> remediator;
 
   @Inject
   public SemgrepWeakRandomCodemod(
       @ProvidedSemgrepScan(ruleId = "java.lang.security.audit.crypto.weak-random.weak-random")
           final RuleSarif sarif) {
     super(io.codemodder.remediation.GenericRemediationMetadata.WEAK_RANDOM.reporter(), sarif);
-    this.remediator = WeakRandomRemediator.DEFAULT;
+    this.remediator = new WeakRandomRemediator<>();
   }
 
   @Override
@@ -53,6 +56,9 @@ public final class SemgrepWeakRandomCodemod extends SemgrepJavaParserChanger {
         ruleSarif.getResultsByLocationPath(context.path()),
         SarifFindingKeyUtil::buildFindingId,
         r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
-        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn());
+        r -> Optional.of(r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
+        r ->
+            Optional.of(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn()));
   }
 }

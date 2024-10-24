@@ -5,10 +5,7 @@ import static io.codemodder.javaparser.JavaParserTransformer.replace;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.*;
 import io.codemodder.DependencyGAV;
 import io.codemodder.Either;
 import io.codemodder.ast.ASTs;
@@ -60,18 +57,22 @@ public final class JavaDeserializationFixStrategy implements RemediationStrategy
 
   @Override
   public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
-
+    // We know that the target must exist and be an OCE from the match
+    final Node consideredNode =
+        node instanceof VariableDeclarationExpr vd
+            ? vd.getVariable(0).getInitializer().get().asObjectCreationExpr()
+            : node;
     Optional<Either<MethodCallExpr, ObjectCreationExpr>> maybeCallOrConstructor =
         Optional.<Either<MethodCallExpr, ObjectCreationExpr>>empty()
             .or(
                 () ->
-                    node instanceof MethodCallExpr
-                        ? Optional.of(Either.left((MethodCallExpr) node))
+                    consideredNode instanceof MethodCallExpr
+                        ? Optional.of(Either.left((MethodCallExpr) consideredNode))
                         : Optional.empty())
             .or(
                 () ->
-                    node instanceof ObjectCreationExpr
-                        ? Optional.of(Either.right((ObjectCreationExpr) node))
+                    consideredNode instanceof ObjectCreationExpr
+                        ? Optional.of(Either.right((ObjectCreationExpr) consideredNode))
                         : Optional.empty());
     if (maybeCallOrConstructor.isEmpty()) {
       return SuccessOrReason.reason("Not a call or constructor");
@@ -85,7 +86,7 @@ public final class JavaDeserializationFixStrategy implements RemediationStrategy
             // declaration of the ObjectInputStream
             .ifLeftOrElseGet(this::findConstructor, Either::left);
 
-    // afailed to find the construction
+    // failed to find the construction
     if (maybeConstructor.isRight()) {
       return SuccessOrReason.reason(maybeConstructor.getRight());
     }
@@ -99,5 +100,62 @@ public final class JavaDeserializationFixStrategy implements RemediationStrategy
         .withStaticMethod(ObjectInputFilters.class.getName(), "createSafeObjectInputStream")
         .withStaticImport()
         .withSameArguments();
+  }
+
+  /**
+   * Match code shape for AssignExpr case
+   *
+   * @param node
+   * @return
+   */
+  public static boolean match(final VariableDeclarationExpr node) {
+    return Optional.of(node)
+        .flatMap(vde -> vde.getVariables().getFirst())
+        .flatMap(VariableDeclarator::getInitializer)
+        .map(e -> e.isObjectCreationExpr() ? e.asObjectCreationExpr() : null)
+        .filter(JavaDeserializationFixStrategy::match)
+        .isPresent();
+  }
+
+  /**
+   * Match code shape for ObjectCreationExpr case
+   *
+   * @param node
+   * @return
+   */
+  public static boolean match(final ObjectCreationExpr node) {
+    return Optional.of(node)
+        .map(n -> n instanceof ObjectCreationExpr ? (ObjectCreationExpr) n : null)
+        .filter(oce -> "ObjectInputStream".equals(oce.getTypeAsString()))
+        .isPresent();
+  }
+
+  /**
+   * Match code shape for MethodCallExpr case
+   *
+   * @param node
+   * @return
+   */
+  public static boolean match(final MethodCallExpr node) {
+    return Optional.of(node)
+        .map(n -> n instanceof MethodCallExpr ? (MethodCallExpr) n : null)
+        .filter(mce -> mce.getNameAsString().equals("readObject"))
+        .filter(mce -> mce.getArguments().isEmpty())
+        .isPresent();
+  }
+
+  /**
+   * Default matching
+   *
+   * @param node
+   * @return
+   */
+  public static boolean match(final Node node) {
+    if (node instanceof MethodCallExpr mce) {
+      return match(mce);
+    } else if (node instanceof ObjectCreationExpr oce) {
+      return match(oce);
+    }
+    return false;
   }
 }

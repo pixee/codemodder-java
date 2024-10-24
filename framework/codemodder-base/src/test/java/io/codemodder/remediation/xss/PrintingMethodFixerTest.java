@@ -6,7 +6,10 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.SearcherStrategyRemediator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,12 +18,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 final class PrintingMethodFixerTest {
 
-  private PrintingMethodFixer fixer;
+  private PrintingMethodFixStrategy fixer;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    this.fixer = new PrintingMethodFixer();
+    this.fixer = new PrintingMethodFixStrategy();
     this.rule = new DetectorRule("xss", "XSS", null);
   }
 
@@ -83,17 +86,25 @@ final class PrintingMethodFixerTest {
     LexicalPreservingPrinter.setup(cu);
 
     XSSFinding finding = new XSSFinding("should_be_fixed", 3, null);
-    XSSCodeShapeFixResult result =
-        fixer.fixCodeShape(
+    var remediator =
+        new SearcherStrategyRemediator.Builder<XSSFinding>()
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<XSSFinding>()
+                    .withMatcher(PrintingMethodFixStrategy::match)
+                    .build(),
+                fixer)
+            .build();
+    var result =
+        remediator.remediateAll(
             cu,
             "path",
             rule,
             List.of(finding),
             XSSFinding::key,
             XSSFinding::line,
-            XSSFinding::column);
-    assertThat(result.isResponsibleFixer()).isTrue();
-    assertThat(result.isFixed()).isTrue();
+            x -> Optional.empty(),
+            x -> Optional.ofNullable(x.column()));
+    assertThat(result.changes().isEmpty()).isFalse();
     String actualCode = LexicalPreservingPrinter.print(cu);
     assertThat(actualCode).isEqualToIgnoringWhitespace(afterCode);
   }

@@ -2,6 +2,8 @@ package io.codemodder.codemods.semgrep;
 
 import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodExecutionPriority;
 import io.codemodder.CodemodFileScanningResult;
@@ -12,9 +14,11 @@ import io.codemodder.RuleSarif;
 import io.codemodder.SarifFindingKeyUtil;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
+import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.Remediator;
-import io.codemodder.remediation.javadeserialization.JavaDeserializationRemediator;
+import io.codemodder.remediation.SearcherStrategyRemediator;
+import io.codemodder.remediation.javadeserialization.JavaDeserializationFixStrategy;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -37,7 +41,32 @@ public final class SemgrepJavaDeserializationCodemod extends SemgrepJavaParserCh
               ruleId = "java.lang.security.audit.object-deserialization.object-deserialization")
           final RuleSarif sarif) {
     super(GenericRemediationMetadata.DESERIALIZATION.reporter(), sarif);
-    this.remediator = new JavaDeserializationRemediator<>();
+    this.remediator =
+        new SearcherStrategyRemediator.Builder<Result>()
+            .withSearcherStrategyPair(
+                // matches declarations
+                new FixCandidateSearcher.Builder<Result>()
+                    .withMatcher(
+                        n ->
+                            Optional.empty()
+                                .or(
+                                    () ->
+                                        Optional.of(n)
+                                            .map(
+                                                m ->
+                                                    m instanceof VariableDeclarationExpr vde
+                                                        ? vde
+                                                        : null)
+                                            .filter(JavaDeserializationFixStrategy::match))
+                                .or(
+                                    () ->
+                                        Optional.of(n)
+                                            .map(m -> m instanceof MethodCallExpr mce ? mce : null)
+                                            .filter(JavaDeserializationFixStrategy::match))
+                                .isPresent())
+                    .build(),
+                new JavaDeserializationFixStrategy())
+            .build();
   }
 
   @Override

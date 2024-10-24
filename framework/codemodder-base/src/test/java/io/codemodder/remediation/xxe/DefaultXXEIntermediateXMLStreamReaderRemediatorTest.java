@@ -10,17 +10,18 @@ import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.FixedFinding;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 final class DefaultXXEIntermediateXMLStreamReaderRemediatorTest {
 
-  private DefaultXXEIntermediateXMLStreamReaderRemediator remediator;
+  private XXEIntermediateXMLStreamReaderRemediator<Object> remediator;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    remediator = new DefaultXXEIntermediateXMLStreamReaderRemediator();
+    remediator = new XXEIntermediateXMLStreamReaderRemediator<>();
     rule = new DetectorRule("xxe", "XXE Fixed At XMLStreamReader", null);
   }
 
@@ -48,7 +49,14 @@ final class DefaultXXEIntermediateXMLStreamReaderRemediatorTest {
 
     CodemodFileScanningResult result =
         remediator.remediateAll(
-            cu, "foo", rule, List.of(new Object()), f -> "my-id-1", f -> 9, f -> null, f -> null);
+            cu,
+            "foo",
+            rule,
+            List.of(new Object()),
+            f -> "my-id-1",
+            f -> 9,
+            f -> Optional.empty(),
+            f -> Optional.empty());
 
     // confirm code is what's expected
     String actualCode = LexicalPreservingPrinter.print(cu);

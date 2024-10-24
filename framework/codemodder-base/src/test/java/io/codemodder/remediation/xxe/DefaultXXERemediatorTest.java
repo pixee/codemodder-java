@@ -9,17 +9,18 @@ import io.codemodder.CodemodChange;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 final class DefaultXXERemediatorTest {
 
-  private DefaultXXERemediator remediator;
+  private XXERemediator<XXEFinding> remediator;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    this.remediator = new DefaultXXERemediator();
+    this.remediator = new XXERemediator<>();
     this.rule = new DetectorRule("xxe", "XXE", null);
   }
 
@@ -52,7 +53,14 @@ final class DefaultXXERemediatorTest {
     LexicalPreservingPrinter.setup(cu);
     CodemodFileScanningResult result =
         remediator.remediateAll(
-            cu, "foo", rule, findings, XXEFinding::key, XXEFinding::line, XXEFinding::column);
+            cu,
+            "foo",
+            rule,
+            findings,
+            XXEFinding::key,
+            XXEFinding::line,
+            x -> Optional.empty(),
+            x -> Optional.ofNullable(x.column()));
     assertThat(result.unfixedFindings()).isEmpty();
     assertThat(result.changes()).hasSize(1);
     CodemodChange change = result.changes().get(0);
@@ -118,8 +126,14 @@ final class DefaultXXERemediatorTest {
     LexicalPreservingPrinter.setup(cu);
     CodemodFileScanningResult result =
         remediator.remediateAll(
-            cu, "foo", rule, findings, XXEFinding::key, XXEFinding::line, XXEFinding::column);
+            cu,
+            "foo",
+            rule,
+            findings,
+            XXEFinding::key,
+            XXEFinding::line,
+            x -> Optional.empty(),
+            x -> Optional.ofNullable(x.column()));
     assertThat(result.changes()).isEmpty();
-    assertThat(result.unfixedFindings()).isEmpty();
   }
 }

@@ -1,11 +1,14 @@
 package io.codemodder.codemods.codeql;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.*;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.xxe.XXEIntermediateXMLStreamReaderRemediator;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** A codemod for automatically fixing SQL injection from CodeQL. */
@@ -16,12 +19,12 @@ import javax.inject.Inject;
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class CodeQLXXECodemod extends CodeQLRemediationCodemod {
 
-  private final XXEIntermediateXMLStreamReaderRemediator remediator;
+  private final Remediator<Result> remediator;
 
   @Inject
   public CodeQLXXECodemod(@ProvidedCodeQLScan(ruleId = "java/xxe") final RuleSarif sarif) {
     super(GenericRemediationMetadata.XXE.reporter(), sarif);
-    this.remediator = XXEIntermediateXMLStreamReaderRemediator.DEFAULT;
+    this.remediator = new XXEIntermediateXMLStreamReaderRemediator<>();
   }
 
   @Override
@@ -42,7 +45,11 @@ public final class CodeQLXXECodemod extends CodeQLRemediationCodemod {
         ruleSarif.getResultsByLocationPath(context.path()),
         SarifFindingKeyUtil::buildFindingId,
         r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
-        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine(),
-        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn());
+        r ->
+            Optional.ofNullable(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
+        r ->
+            Optional.ofNullable(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn()));
   }
 }

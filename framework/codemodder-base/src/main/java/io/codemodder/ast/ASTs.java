@@ -884,6 +884,33 @@ public final class ASTs {
   }
 
   /**
+   * Checks if a node is a MethodCallExpr that is the initialization of a declaration with one of
+   * the types in assignedToTypes.
+   *
+   * @param node
+   * @param methodName
+   * @param assignedToTypes
+   * @return
+   */
+  public static Optional<MethodCallExpr> isInitializedToType(
+      final Node node, final String methodName, final List<String> assignedToTypes) {
+    return Optional.of(node)
+        .map(n -> n instanceof MethodCallExpr ? (MethodCallExpr) n : null)
+        .filter(m -> methodName.equals(m.getNameAsString()))
+        .filter(
+            m -> {
+              Optional<VariableDeclarator> newFactoryVariableRef =
+                  expect(m).toBeMethodCallExpression().initializingVariable().result();
+              if (newFactoryVariableRef.isEmpty()) {
+                return false;
+              }
+              String type = newFactoryVariableRef.get().getTypeAsString();
+              return assignedToTypes.contains(type)
+                  || assignedToTypes.stream().anyMatch(type::endsWith);
+            });
+  }
+
+  /**
    * This finds all methods that match the given location, with the given name, and is assigned to a
    * variable of one of the given types.
    */
