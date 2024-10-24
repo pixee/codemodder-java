@@ -4,7 +4,7 @@ import com.github.javaparser.Position;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.Node;
 
-final class DefaultNodePositionMatcher implements NodePositionMatcher {
+class DefaultNodePositionMatcher implements NodePositionMatcher {
 
   @Override
   public boolean match(final Node node, final int line) {
@@ -34,7 +34,7 @@ final class DefaultNodePositionMatcher implements NodePositionMatcher {
     return number >= upper && number <= lower;
   }
 
-  private Range getRange(final Node node) {
+  Range getRange(final Node node) {
     return node.getRange().orElseThrow();
   }
 }
