@@ -1,5 +1,6 @@
 package io.codemodder.codemods.semgrep;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodExecutionPriority;
@@ -13,7 +14,9 @@ import io.codemodder.SarifFindingKeyUtil;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
-import io.codemodder.remediation.xxe.XXERemediator;
+import io.codemodder.remediation.Remediator;
+import io.codemodder.remediation.xxe.AlternateXXERemediator;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /** Fixes some Semgrep XXE issues. */
@@ -35,7 +38,7 @@ public final class SemgrepXXECodemod extends CompositeJavaParserChanger {
   }
 
   public static class SemgrepXXEDocumentBuilderFactoryCodemod extends SemgrepJavaParserChanger {
-    private final XXERemediator remediator;
+    private final Remediator<Result> remediator;
 
     @Inject
     public SemgrepXXEDocumentBuilderFactoryCodemod(
@@ -44,7 +47,7 @@ public final class SemgrepXXECodemod extends CompositeJavaParserChanger {
                     "java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-disallow-doctype-decl-missing")
             final RuleSarif sarif) {
       super(GenericRemediationMetadata.WEAK_RANDOM.reporter(), sarif);
-      this.remediator = XXERemediator.DEFAULT;
+      this.remediator = new AlternateXXERemediator<>();
     }
 
     @Override
@@ -65,15 +68,14 @@ public final class SemgrepXXECodemod extends CompositeJavaParserChanger {
           ruleSarif.getResultsByLocationPath(context.path()),
           SarifFindingKeyUtil::buildFindingId,
           r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
-          // we don't pass the column because it's deceiving as the column points to beginning of
-          // statement, not call
-          r -> null);
+          r -> Optional.of(r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
+          r -> Optional.empty());
     }
   }
 
   public static class SemgrepXXESaxParserFactoryCodemod extends SemgrepJavaParserChanger {
 
-    private final XXERemediator remediator;
+    private final Remediator<Result> remediator;
 
     @Inject
     public SemgrepXXESaxParserFactoryCodemod(
@@ -82,7 +84,7 @@ public final class SemgrepXXECodemod extends CompositeJavaParserChanger {
                     "java.lang.security.audit.xxe.saxparserfactory-disallow-doctype-decl-missing.saxparserfactory-disallow-doctype-decl-missing")
             final RuleSarif sarif) {
       super(GenericRemediationMetadata.WEAK_RANDOM.reporter(), sarif);
-      this.remediator = XXERemediator.DEFAULT;
+      this.remediator = new AlternateXXERemediator<>();
     }
 
     @Override
@@ -103,9 +105,8 @@ public final class SemgrepXXECodemod extends CompositeJavaParserChanger {
           ruleSarif.getResultsByLocationPath(context.path()),
           SarifFindingKeyUtil::buildFindingId,
           r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
-          // we don't pass the column because it's deceiving as the column points to beginning of
-          // statement, not call
-          r -> null);
+          r -> Optional.of(r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
+          r -> Optional.empty());
     }
   }
 }

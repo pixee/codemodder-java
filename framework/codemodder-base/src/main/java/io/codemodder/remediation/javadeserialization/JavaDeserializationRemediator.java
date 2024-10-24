@@ -1,9 +1,6 @@
 package io.codemodder.remediation.javadeserialization;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.*;
@@ -25,34 +22,7 @@ public final class JavaDeserializationRemediator<T> implements Remediator<T> {
         new SearcherStrategyRemediator.Builder<T>()
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(
-                        node ->
-                            Optional.empty()
-                                .or(
-                                    () ->
-                                        Optional.of(node)
-                                            .map(
-                                                n ->
-                                                    n instanceof MethodCallExpr
-                                                        ? (MethodCallExpr) n
-                                                        : null)
-                                            .filter(Node::hasScope)
-                                            .filter(
-                                                mce -> mce.getNameAsString().equals("readObject"))
-                                            .filter(mce -> mce.getArguments().isEmpty()))
-                                .or(
-                                    () ->
-                                        Optional.of(node)
-                                            .map(
-                                                n ->
-                                                    n instanceof ObjectCreationExpr
-                                                        ? (ObjectCreationExpr) n
-                                                        : null)
-                                            .filter(
-                                                oce ->
-                                                    "ObjectInputStream"
-                                                        .equals(oce.getTypeAsString())))
-                                .isPresent())
+                    .withMatcher(JavaDeserializationFixStrategy::match)
                     .build(),
                 new JavaDeserializationFixStrategy())
             .build();

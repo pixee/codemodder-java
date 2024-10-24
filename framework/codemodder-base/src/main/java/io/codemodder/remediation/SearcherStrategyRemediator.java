@@ -63,7 +63,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
       final CompilationUnit cu,
       final String path,
       final DetectorRule detectorRule,
-      final Collection<T> findingsForPath,
+      final List<T> findingsForPath,
       final Function<T, String> findingIdExtractor,
       final Function<T, Integer> findingStartLineExtractor,
       final Function<T, Optional<Integer>> findingEndLineExtractor,
@@ -71,20 +71,19 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
       final FixCandidateSearcher<T> searcher,
       final RemediationStrategy strategy) {
 
+    if (findingsForPath.isEmpty()) {
+      return Pair.with(List.of(), List.of());
+    }
     FixCandidateSearchResults<T> results =
         searcher.search(
             cu,
             path,
             detectorRule,
-            new ArrayList<>(findingsForPath),
+            findingsForPath,
             findingIdExtractor,
             findingStartLineExtractor,
             findingEndLineExtractor,
             findingColumnExtractor);
-
-    if (findingsForPath.isEmpty()) {
-      return Pair.with(List.of(), List.of());
-    }
 
     final List<UnfixedFinding> unfixedFindings = new ArrayList<>(results.unfixableFindings());
     final List<CodemodChange> changes = new ArrayList<>();
@@ -112,7 +111,6 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
                 .map(findingIdExtractor)
                 .map(findingId -> new FixedFinding(findingId, detectorRule))
                 .toList();
-
         changes.add(CodemodChange.from(line, maybeDeps.getDependencies(), fixedFindings));
       } else {
         issues.forEach(
@@ -123,6 +121,8 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
               unfixedFindings.add(unfixableFinding);
             });
       }
+      // Remove finding from consideration
+      findingsForPath.removeAll(issues);
     }
     return Pair.with(changes, unfixedFindings);
   }
@@ -136,7 +136,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
       final Function<T, Integer> findingStartLineExtractor,
       final Function<T, Optional<Integer>> findingEndLineExtractor,
       final Function<T, Optional<Integer>> findingStartColumnExtractor) {
-
+    List<T> findings = new ArrayList<>(findingsForPath);
     List<CodemodChange> allChanges = new ArrayList<>();
     List<UnfixedFinding> allUnfixed = new ArrayList<>();
 
@@ -146,7 +146,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
               cu,
               path,
               detectorRule,
-              findingsForPath,
+              findings,
               findingIdExtractor,
               findingStartLineExtractor,
               findingEndLineExtractor,
@@ -156,6 +156,18 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
       allChanges.addAll(pairResult.getValue0());
       allUnfixed.addAll(pairResult.getValue1());
     }
+    // Any remaining, unmatched, findings are treated as unfixed
+    allUnfixed.addAll(
+        findings.stream()
+            .map(
+                f ->
+                    new UnfixedFinding(
+                        findingIdExtractor.apply(f),
+                        detectorRule,
+                        path,
+                        findingStartLineExtractor.apply(f),
+                        RemediationMessages.noNodesAtThatLocation))
+            .toList());
     return CodemodFileScanningResult.from(allChanges, allUnfixed);
   }
 }

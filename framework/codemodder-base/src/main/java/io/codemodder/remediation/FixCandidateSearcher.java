@@ -36,9 +36,11 @@ public interface FixCandidateSearcher<T> {
   /** Builder for {@link FixCandidateSearcher}. */
   final class Builder<T> {
     private final List<Predicate<Node>> matchers;
+    private NodePositionMatcher nodePositionMatcher;
 
     public Builder() {
       this.matchers = new ArrayList<>();
+      this.nodePositionMatcher = new DefaultNodePositionMatcher();
     }
 
     public Builder<T> withMatcher(final Predicate<Node> matcher) {
@@ -46,8 +48,13 @@ public interface FixCandidateSearcher<T> {
       return this;
     }
 
+    public Builder<T> withNodePositionMatcher(final NodePositionMatcher nodePositionMatcher) {
+      this.nodePositionMatcher = nodePositionMatcher;
+      return this;
+    }
+
     public FixCandidateSearcher<T> build() {
-      return new DefaultFixCandidateSearcher<>(List.copyOf(matchers));
+      return new DefaultFixCandidateSearcher<>(List.copyOf(matchers), nodePositionMatcher);
     }
   }
 }
