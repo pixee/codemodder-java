@@ -3,10 +3,7 @@ package io.codemodder.remediation.xxe;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
-import io.codemodder.remediation.FixCandidateSearcher;
-import io.codemodder.remediation.Remediator;
-import io.codemodder.remediation.SearcherStrategyRemediator;
-import io.codemodder.remediation.WithoutScopePositionMatcher;
+import io.codemodder.remediation.*;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
@@ -16,42 +13,46 @@ public class XXERemediator<T> implements Remediator<T> {
   private final SearcherStrategyRemediator<T> searchStrategyRemediator;
 
   public XXERemediator() {
+    this(NodePositionMatcher.DEFAULT);
+  }
+
+  public XXERemediator(final NodePositionMatcher matcher) {
     this.searchStrategyRemediator =
         new SearcherStrategyRemediator.Builder<T>()
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<T>()
                     .withMatcher(DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy::match)
-                    .withNodePositionMatcher(new WithoutScopePositionMatcher())
+                    .withNodePositionMatcher(matcher)
                     .build(),
                 new DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy())
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<T>()
                     .withMatcher(DocumentBuilderFactoryAtNewDBFixStrategy::match)
-                    .withNodePositionMatcher(new WithoutScopePositionMatcher())
+                    .withNodePositionMatcher(matcher)
                     .build(),
                 new DocumentBuilderFactoryAtNewDBFixStrategy())
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<T>()
                     .withMatcher(SAXParserAtNewSPFixStrategy::match)
-                    .withNodePositionMatcher(new WithoutScopePositionMatcher())
+                    .withNodePositionMatcher(matcher)
                     .build(),
                 new SAXParserAtNewSPFixStrategy())
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<T>()
                     .withMatcher(DocumentBuilderFactoryAtParseFixStrategy::match)
-                    .withNodePositionMatcher(new WithoutScopePositionMatcher())
+                    .withNodePositionMatcher(matcher)
                     .build(),
                 new DocumentBuilderFactoryAtParseFixStrategy())
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<T>()
                     .withMatcher(TransformerFactoryAtCreationFixStrategy::match)
-                    .withNodePositionMatcher(new WithoutScopePositionMatcher())
+                    .withNodePositionMatcher(matcher)
                     .build(),
                 new TransformerFactoryAtCreationFixStrategy())
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<T>()
                     .withMatcher(XMLReaderAtParseFixStrategy::match)
-                    .withNodePositionMatcher(new WithoutScopePositionMatcher())
+                    .withNodePositionMatcher(matcher)
                     .build(),
                 new XMLReaderAtParseFixStrategy())
             .build();

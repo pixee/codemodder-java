@@ -8,6 +8,7 @@ import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.Remediator;
+import io.codemodder.remediation.WithoutScopePositionMatcher;
 import io.codemodder.remediation.xxe.XXERemediator;
 import io.codemodder.sonar.model.Issue;
 import io.codemodder.sonar.model.SonarFinding;
@@ -30,7 +31,7 @@ public final class SonarXXECodemod extends SonarRemediatingJavaParserChanger {
   public SonarXXECodemod(@ProvidedSonarScan(ruleId = "java:S2755") final RuleIssue issues) {
     super(GenericRemediationMetadata.XXE.reporter(), issues);
     this.issues = Objects.requireNonNull(issues);
-    this.remediationStrategy = new XXERemediator<>();
+    this.remediationStrategy = new XXERemediator<>(new WithoutScopePositionMatcher());
   }
 
   @Override
