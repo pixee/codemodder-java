@@ -2,6 +2,7 @@ package io.codemodder.remediation;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.UnfixedFinding;
 import java.util.*;
@@ -60,7 +61,7 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
       Optional<Integer> maybeColumn = getColumn.apply(issue);
       List<Node> nodesForIssue =
           nodes.stream()
-              .filter(n -> n.hasRange())
+              .filter(NodeWithRange::hasRange)
               // if column info is present, check if the node starts after the issue start
               // coordinates
               .filter(

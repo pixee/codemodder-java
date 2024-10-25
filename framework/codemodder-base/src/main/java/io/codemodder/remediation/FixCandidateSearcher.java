@@ -16,7 +16,7 @@ public interface FixCandidateSearcher<T> {
    * @param cu
    * @param path
    * @param rule
-   * @param issuesForFile
+   * @param issuesForFile A mutable list of issues. Issues discovered as unfixed are removed.
    * @param getKey A function that extracts the key for T.
    * @param getStartLine A function that extracts start line information from T. Always required.
    * @param getEndLine A function that extracts end line information from T. May not be available
