@@ -11,17 +11,19 @@ import java.util.function.Predicate;
 public interface FixCandidateSearcher<T> {
 
   /**
-   * Searches the AST for nodes associated with the given issues.
+   * Searches the AST for nodes associated with the given issues. Issues are sorted into
+   * FixCandidates, UnfixedFindings and unmatched.
    *
    * @param cu
    * @param path
    * @param rule
-   * @param issuesForFile A mutable list of issues. Issues discovered as unfixed are removed.
+   * @param issuesForFile A list of issues.
    * @param getKey A function that extracts the key for T.
    * @param getStartLine A function that extracts start line information from T. Always required.
    * @param getEndLine A function that extracts end line information from T. May not be available
    * @param getColumn A function that extracts column information from T. May not be available
-   * @return
+   * @return A FixSearchResults object that sorts the issues into FixCandidates, unfixed and
+   *     unmatched.
    */
   FixCandidateSearchResults<T> search(
       CompilationUnit cu,

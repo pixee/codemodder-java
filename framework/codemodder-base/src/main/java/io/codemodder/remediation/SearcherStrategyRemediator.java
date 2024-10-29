@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import org.javatuples.Pair;
+import org.javatuples.Triplet;
 
 /**
  * Remediates issues with pairs of searchers and strategies. Searchers will associate an issue with
@@ -59,7 +59,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
   }
 
   /** Remediate with a chosen searcher-strategy pair. */
-  private Pair<List<CodemodChange>, List<UnfixedFinding>> remediateWithStrategy(
+  private Triplet<List<CodemodChange>, List<UnfixedFinding>, List<T>> remediateWithStrategy(
       final CompilationUnit cu,
       final String path,
       final DetectorRule detectorRule,
@@ -72,7 +72,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
       final RemediationStrategy strategy) {
 
     if (findingsForPath.isEmpty()) {
-      return Pair.with(List.of(), List.of());
+      return Triplet.with(List.of(), List.of(), findingsForPath);
     }
     FixCandidateSearchResults<T> results =
         searcher.search(
@@ -121,10 +121,8 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
               unfixedFindings.add(unfixableFinding);
             });
       }
-      // Remove finding from consideration
-      findingsForPath.removeAll(issues);
     }
-    return Pair.with(changes, unfixedFindings);
+    return Triplet.with(changes, unfixedFindings, results.unmatchedIssues());
   }
 
   public CodemodFileScanningResult remediateAll(
@@ -141,7 +139,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
     List<UnfixedFinding> allUnfixed = new ArrayList<>();
 
     for (var searcherAndStrategy : searcherRemediatorMap.entrySet()) {
-      var pairResult =
+      var tripletResults =
           remediateWithStrategy(
               cu,
               path,
@@ -153,8 +151,9 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
               findingStartColumnExtractor,
               searcherAndStrategy.getKey(),
               searcherAndStrategy.getValue());
-      allChanges.addAll(pairResult.getValue0());
-      allUnfixed.addAll(pairResult.getValue1());
+      allChanges.addAll(tripletResults.getValue0());
+      allUnfixed.addAll(tripletResults.getValue1());
+      findings = tripletResults.getValue2();
     }
     // Any remaining, unmatched, findings are treated as unfixed
     allUnfixed.addAll(

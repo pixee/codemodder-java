@@ -52,7 +52,7 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
             .toList();
 
     Map<Node, List<T>> fixCandidateToIssueMapping = new IdentityHashMap<>();
-    List<T> issuesToRemove = new ArrayList<>();
+    Set<T> matchedIssues = new HashSet<>();
 
     for (T issue : issuesForFile) {
       String findingId = getKey.apply(issue);
@@ -76,8 +76,8 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
       if (nodesForIssue.isEmpty()) {
         continue;
       }
+      matchedIssues.add(issue);
       if (nodesForIssue.size() > 1) {
-        issuesToRemove.add(issue);
         unfixedFindings.add(
             new UnfixedFinding(
                 findingId, rule, path, issueStartLine, RemediationMessages.multipleNodesFound));
@@ -93,11 +93,15 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
             .toList();
 
     // remove any issue that had a match
-    issuesForFile.removeAll(issuesToRemove);
     return new FixCandidateSearchResults<T>() {
       @Override
       public List<UnfixedFinding> unfixableFindings() {
         return unfixedFindings;
+      }
+
+      @Override
+      public List<T> unmatchedIssues() {
+        return issuesForFile.stream().filter(i -> !matchedIssues.contains(i)).toList();
       }
 
       @Override
