@@ -2,6 +2,7 @@ package io.codemodder.remediation;
 
 import com.github.javaparser.ast.Node;
 
+/** Provides methods for matching nodes to given coordinates. */
 public interface NodePositionMatcher {
 
   static final NodePositionMatcher DEFAULT = new DefaultNodePositionMatcher();

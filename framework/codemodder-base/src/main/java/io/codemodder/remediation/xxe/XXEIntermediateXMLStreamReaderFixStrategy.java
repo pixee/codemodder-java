@@ -10,7 +10,11 @@ import io.codemodder.remediation.RemediationStrategy;
 import io.codemodder.remediation.SuccessOrReason;
 import java.util.Optional;
 
-public class XXEIntermediateXMLStreamReaderFixStrategy implements RemediationStrategy {
+/**
+ * Fix strategy for XXE vulnerabilities anchored to the XMLStreamReader calls. Finds the parser's
+ * declaration and add statements disabling external entities and features.
+ */
+final class XXEIntermediateXMLStreamReaderFixStrategy implements RemediationStrategy {
 
   @Override
   public SuccessOrReason fix(final CompilationUnit cu, final Node node) {

@@ -9,7 +9,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithTraversableScope;
 public final class WithoutScopePositionMatcher extends DefaultNodePositionMatcher {
 
   @Override
-  Range getRange(final Node node) {
+  protected Range getRange(final Node node) {
     var originalRange = node.getRange().orElseThrow();
     if (node.hasScope()) {
       var scope = ((NodeWithTraversableScope) node).traverseScope().get();

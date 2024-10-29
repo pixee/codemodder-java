@@ -34,7 +34,7 @@ class DefaultNodePositionMatcher implements NodePositionMatcher {
     return number >= upper && number <= lower;
   }
 
-  Range getRange(final Node node) {
+  protected Range getRange(final Node node) {
     return node.getRange().orElseThrow();
   }
 }

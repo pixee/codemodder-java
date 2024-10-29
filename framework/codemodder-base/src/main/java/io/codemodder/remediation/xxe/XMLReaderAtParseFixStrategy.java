@@ -13,6 +13,10 @@ import io.codemodder.remediation.SuccessOrReason;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Fix strategy for XXE vulnerabilities anchored to the XMLReader parse() calls. Finds the parser's
+ * declaration and add statements disabling external entities and features.
+ */
 final class XMLReaderAtParseFixStrategy implements RemediationStrategy {
 
   @Override

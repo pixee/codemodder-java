@@ -13,7 +13,11 @@ import io.codemodder.remediation.SuccessOrReason;
 import java.util.List;
 import java.util.Optional;
 
-public class DocumentBuilderFactoryAtNewDBFixStrategy implements RemediationStrategy {
+/**
+ * Fix strategy for XXE vulnerabilities anchored to the parser's newDocumentBuilder() calls. Finds
+ * the parser's declaration and add statements disabling external entities and features.
+ */
+final class DocumentBuilderFactoryAtNewDBFixStrategy implements RemediationStrategy {
 
   @Override
   public SuccessOrReason fix(final CompilationUnit cu, final Node node) {

@@ -14,8 +14,11 @@ import io.codemodder.remediation.SuccessOrReason;
 import java.util.List;
 import java.util.Optional;
 
-public class DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy
-    implements RemediationStrategy {
+/**
+ * Fix strategy for XXE vulnerabilities anchored to the parser's newInstance() calls. Finds the
+ * parser's declaration and add statements disabling external entities and features.
+ */
+final class DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy implements RemediationStrategy {
 
   @Override
   public SuccessOrReason fix(CompilationUnit cu, Node node) {

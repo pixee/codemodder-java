@@ -13,7 +13,11 @@ import io.codemodder.remediation.SuccessOrReason;
 import java.util.List;
 import java.util.Optional;
 
-class SAXParserAtNewSPFixStrategy implements RemediationStrategy {
+/**
+ * Fix strategy for XXE vulnerabilities anchored to the SAXParser newSaxParser() calls. Finds the
+ * parser's declaration and add statements disabling external entities and features.
+ */
+final class SAXParserAtNewSPFixStrategy implements RemediationStrategy {
 
   /**
    * Matches SaxParser y = (x.)newSaxParser(), where the node is the newSaxParser call.
