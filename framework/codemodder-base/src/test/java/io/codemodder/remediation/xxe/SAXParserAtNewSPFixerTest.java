@@ -6,10 +6,8 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.codetf.DetectorRule;
-import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.SearcherStrategyRemediator;
-import io.codemodder.remediation.WithoutScopePositionMatcher;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,12 +21,7 @@ final class SAXParserAtNewSPFixerTest {
   void setup() {
     fixer =
         new SearcherStrategyRemediator.Builder<>()
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<Object>()
-                    .withMatcher(SAXParserAtNewSPFixStrategy::match)
-                    .withNodePositionMatcher(new WithoutScopePositionMatcher())
-                    .build(),
-                new SAXParserAtNewSPFixStrategy())
+            .withMatchAndFixStrategy(new SAXParserAtNewSPFixStrategy())
             .build();
   }
 

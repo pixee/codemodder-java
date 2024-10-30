@@ -19,42 +19,12 @@ public class XXERemediator<T> implements Remediator<T> {
   public XXERemediator(final NodePositionMatcher matcher) {
     this.searchStrategyRemediator =
         new SearcherStrategyRemediator.Builder<T>()
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy::match)
-                    .withNodePositionMatcher(matcher)
-                    .build(),
-                new DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy())
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(DocumentBuilderFactoryAtNewDBFixStrategy::match)
-                    .withNodePositionMatcher(matcher)
-                    .build(),
-                new DocumentBuilderFactoryAtNewDBFixStrategy())
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(SAXParserAtNewSPFixStrategy::match)
-                    .withNodePositionMatcher(matcher)
-                    .build(),
-                new SAXParserAtNewSPFixStrategy())
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(DocumentBuilderFactoryAtParseFixStrategy::match)
-                    .withNodePositionMatcher(matcher)
-                    .build(),
-                new DocumentBuilderFactoryAtParseFixStrategy())
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(TransformerFactoryAtCreationFixStrategy::match)
-                    .withNodePositionMatcher(matcher)
-                    .build(),
-                new TransformerFactoryAtCreationFixStrategy())
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(XMLReaderAtParseFixStrategy::match)
-                    .withNodePositionMatcher(matcher)
-                    .build(),
-                new XMLReaderAtParseFixStrategy())
+            .withMatchAndFixStrategy(new DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy())
+            .withMatchAndFixStrategy(new DocumentBuilderFactoryAtNewDBFixStrategy())
+            .withMatchAndFixStrategy(new SAXParserAtNewSPFixStrategy())
+            .withMatchAndFixStrategy(new DocumentBuilderFactoryAtParseFixStrategy())
+            .withMatchAndFixStrategy(new TransformerFactoryAtCreationFixStrategy())
+            .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
             .build();
   }
 

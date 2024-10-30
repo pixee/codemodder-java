@@ -6,9 +6,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.codetf.DetectorRule;
-import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.SearcherStrategyRemediator;
-import io.codemodder.remediation.WithoutScopePositionMatcher;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -47,12 +45,7 @@ final class XMLReaderAtParseFixerTest {
 
     var searcherRemediator =
         new SearcherStrategyRemediator.Builder<>()
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<Object>()
-                    .withMatcher(XMLReaderAtParseFixStrategy::match)
-                    .withNodePositionMatcher(new WithoutScopePositionMatcher())
-                    .build(),
-                new XMLReaderAtParseFixStrategy())
+            .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
             .build();
     var result =
         searcherRemediator.remediateAll(

@@ -8,7 +8,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithType;
 import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.ast.ASTs;
-import io.codemodder.remediation.RemediationStrategy;
+import io.codemodder.remediation.MatchAndFixStrategy;
 import io.codemodder.remediation.SuccessOrReason;
 import java.util.Optional;
 import java.util.Set;
@@ -17,7 +17,7 @@ import java.util.Set;
  * Fix strategy for XXE vulnerabilities anchored to the XMLReader parse() calls. Finds the parser's
  * declaration and add statements disabling external entities and features.
  */
-final class XMLReaderAtParseFixStrategy implements RemediationStrategy {
+final class XMLReaderAtParseFixStrategy extends MatchAndFixStrategy {
 
   @Override
   public SuccessOrReason fix(CompilationUnit cu, Node node) {
@@ -50,7 +50,7 @@ final class XMLReaderAtParseFixStrategy implements RemediationStrategy {
    * @param node
    * @return
    */
-  public static boolean match(final Node node) {
+  public boolean match(final Node node) {
     return Optional.of(node)
         .map(n -> n instanceof MethodCallExpr ? (MethodCallExpr) n : null)
         .filter(m -> "parse".equals(m.getNameAsString()))

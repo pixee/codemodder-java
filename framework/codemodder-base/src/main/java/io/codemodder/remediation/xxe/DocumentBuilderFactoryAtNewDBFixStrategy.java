@@ -8,7 +8,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.ast.ASTs;
-import io.codemodder.remediation.RemediationStrategy;
+import io.codemodder.remediation.MatchAndFixStrategy;
 import io.codemodder.remediation.SuccessOrReason;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +17,7 @@ import java.util.Optional;
  * Fix strategy for XXE vulnerabilities anchored to the parser's newDocumentBuilder() calls. Finds
  * the parser's declaration and add statements disabling external entities and features.
  */
-final class DocumentBuilderFactoryAtNewDBFixStrategy implements RemediationStrategy {
+final class DocumentBuilderFactoryAtNewDBFixStrategy extends MatchAndFixStrategy {
 
   @Override
   public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
@@ -55,7 +55,7 @@ final class DocumentBuilderFactoryAtNewDBFixStrategy implements RemediationStrat
    * @param node
    * @return
    */
-  public static boolean match(final Node node) {
+  public boolean match(final Node node) {
     return ASTs.isInitializedToType(node, "newDocumentBuilder", List.of("DocumentBuilder"))
         .isPresent();
   }

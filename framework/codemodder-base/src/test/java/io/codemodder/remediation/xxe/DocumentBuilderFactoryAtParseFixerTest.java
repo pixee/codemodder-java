@@ -75,12 +75,7 @@ final class DocumentBuilderFactoryAtParseFixerTest {
   void setup() {
     fixer =
         new SearcherStrategyRemediator.Builder<>()
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<Object>()
-                    .withMatcher(DocumentBuilderFactoryAtParseFixStrategy::match)
-                    .withNodePositionMatcher(new WithoutScopePositionMatcher())
-                    .build(),
-                new DocumentBuilderFactoryAtParseFixStrategy())
+            .withMatchAndFixStrategy(new DocumentBuilderFactoryAtParseFixStrategy())
             .build();
   }
 

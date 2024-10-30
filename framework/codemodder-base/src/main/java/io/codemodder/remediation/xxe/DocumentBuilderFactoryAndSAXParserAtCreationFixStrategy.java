@@ -9,7 +9,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.ast.ASTs;
-import io.codemodder.remediation.RemediationStrategy;
+import io.codemodder.remediation.MatchAndFixStrategy;
 import io.codemodder.remediation.SuccessOrReason;
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +18,7 @@ import java.util.Optional;
  * Fix strategy for XXE vulnerabilities anchored to the parser's newInstance() calls. Finds the
  * parser's declaration and add statements disabling external entities and features.
  */
-final class DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy implements RemediationStrategy {
+final class DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy extends MatchAndFixStrategy {
 
   @Override
   public SuccessOrReason fix(CompilationUnit cu, Node node) {
@@ -50,7 +50,7 @@ final class DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy implements R
    * @param node
    * @return
    */
-  public static boolean match(final Node node) {
+  public boolean match(final Node node) {
     return ASTs.isInitializedToType(
             node, "newInstance", List.of("DocumentBuilderFactory", "SAXParserFactory"))
         .isPresent();

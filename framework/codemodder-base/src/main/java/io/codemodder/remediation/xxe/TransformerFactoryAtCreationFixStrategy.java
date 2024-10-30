@@ -15,7 +15,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.ast.ASTs;
-import io.codemodder.remediation.RemediationStrategy;
+import io.codemodder.remediation.MatchAndFixStrategy;
 import io.codemodder.remediation.SuccessOrReason;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +24,7 @@ import java.util.Optional;
  * Fix strategy for XXE vulnerabilities anchored to the TransformerParser newInstance() calls. Finds
  * the parser's declaration and add statements disabling external entities and features.
  */
-final class TransformerFactoryAtCreationFixStrategy implements RemediationStrategy {
+final class TransformerFactoryAtCreationFixStrategy extends MatchAndFixStrategy {
 
   @Override
   public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
@@ -75,7 +75,7 @@ final class TransformerFactoryAtCreationFixStrategy implements RemediationStrate
    * @param node
    * @return
    */
-  public static boolean match(final Node node) {
+  public boolean match(final Node node) {
     return ASTs.isInitializedToType(node, "newInstance", List.of("TransformerFactory")).isPresent();
   }
 }
