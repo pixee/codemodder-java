@@ -42,6 +42,18 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
       return this;
     }
 
+    public Builder<T> withMatchAndFixStrategyAndNodeMatcher(
+        final MatchAndFixStrategy maf, final NodePositionMatcher nodeMatcher) {
+      Objects.requireNonNull(maf);
+      this.searcherRemediatorMap.put(
+          new FixCandidateSearcher.Builder<T>()
+              .withMatcher(maf::match)
+              .withNodePositionMatcher(nodeMatcher)
+              .build(),
+          maf);
+      return this;
+    }
+
     public Builder<T> withFunctions(
         final Predicate<Node> searcherMatcher,
         final BiFunction<CompilationUnit, Node, SuccessOrReason> fixer) {

@@ -19,12 +19,16 @@ public class XXERemediator<T> implements Remediator<T> {
   public XXERemediator(final NodePositionMatcher matcher) {
     this.searchStrategyRemediator =
         new SearcherStrategyRemediator.Builder<T>()
-            .withMatchAndFixStrategy(new DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy())
-            .withMatchAndFixStrategy(new DocumentBuilderFactoryAtNewDBFixStrategy())
-            .withMatchAndFixStrategy(new SAXParserAtNewSPFixStrategy())
-            .withMatchAndFixStrategy(new DocumentBuilderFactoryAtParseFixStrategy())
-            .withMatchAndFixStrategy(new TransformerFactoryAtCreationFixStrategy())
-            .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
+            .withMatchAndFixStrategyAndNodeMatcher(
+                new DocumentBuilderFactoryAndSAXParserAtCreationFixStrategy(), matcher)
+            .withMatchAndFixStrategyAndNodeMatcher(
+                new DocumentBuilderFactoryAtNewDBFixStrategy(), matcher)
+            .withMatchAndFixStrategyAndNodeMatcher(new SAXParserAtNewSPFixStrategy(), matcher)
+            .withMatchAndFixStrategyAndNodeMatcher(
+                new DocumentBuilderFactoryAtParseFixStrategy(), matcher)
+            .withMatchAndFixStrategyAndNodeMatcher(
+                new TransformerFactoryAtCreationFixStrategy(), matcher)
+            .withMatchAndFixStrategyAndNodeMatcher(new XMLReaderAtParseFixStrategy(), matcher)
             .build();
   }
 
