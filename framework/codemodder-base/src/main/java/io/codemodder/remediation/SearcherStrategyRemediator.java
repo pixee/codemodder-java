@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import org.javatuples.Pair;
+import org.javatuples.Triplet;
 
 /**
  * Remediates issues with pairs of searchers and strategies. Searchers will associate an issue with
@@ -32,6 +32,25 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
         final FixCandidateSearcher<T> searcher, final RemediationStrategy strategy) {
       this.searcherRemediatorMap.put(
           Objects.requireNonNull(searcher), Objects.requireNonNull(strategy));
+      return this;
+    }
+
+    public Builder<T> withMatchAndFixStrategy(final MatchAndFixStrategy maf) {
+      Objects.requireNonNull(maf);
+      this.searcherRemediatorMap.put(
+          new FixCandidateSearcher.Builder<T>().withMatcher(maf::match).build(), maf);
+      return this;
+    }
+
+    public Builder<T> withMatchAndFixStrategyAndNodeMatcher(
+        final MatchAndFixStrategy maf, final NodePositionMatcher nodeMatcher) {
+      Objects.requireNonNull(maf);
+      this.searcherRemediatorMap.put(
+          new FixCandidateSearcher.Builder<T>()
+              .withMatcher(maf::match)
+              .withNodePositionMatcher(nodeMatcher)
+              .build(),
+          maf);
       return this;
     }
 
@@ -59,11 +78,11 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
   }
 
   /** Remediate with a chosen searcher-strategy pair. */
-  private Pair<List<CodemodChange>, List<UnfixedFinding>> remediateWithStrategy(
+  private Triplet<List<CodemodChange>, List<UnfixedFinding>, List<T>> remediateWithStrategy(
       final CompilationUnit cu,
       final String path,
       final DetectorRule detectorRule,
-      final Collection<T> findingsForPath,
+      final List<T> findingsForPath,
       final Function<T, String> findingIdExtractor,
       final Function<T, Integer> findingStartLineExtractor,
       final Function<T, Optional<Integer>> findingEndLineExtractor,
@@ -71,20 +90,19 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
       final FixCandidateSearcher<T> searcher,
       final RemediationStrategy strategy) {
 
+    if (findingsForPath.isEmpty()) {
+      return Triplet.with(List.of(), List.of(), findingsForPath);
+    }
     FixCandidateSearchResults<T> results =
         searcher.search(
             cu,
             path,
             detectorRule,
-            new ArrayList<>(findingsForPath),
+            findingsForPath,
             findingIdExtractor,
             findingStartLineExtractor,
             findingEndLineExtractor,
             findingColumnExtractor);
-
-    if (findingsForPath.isEmpty()) {
-      return Pair.with(List.of(), List.of());
-    }
 
     final List<UnfixedFinding> unfixedFindings = new ArrayList<>(results.unfixableFindings());
     final List<CodemodChange> changes = new ArrayList<>();
@@ -112,7 +130,6 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
                 .map(findingIdExtractor)
                 .map(findingId -> new FixedFinding(findingId, detectorRule))
                 .toList();
-
         changes.add(CodemodChange.from(line, maybeDeps.getDependencies(), fixedFindings));
       } else {
         issues.forEach(
@@ -124,7 +141,7 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
             });
       }
     }
-    return Pair.with(changes, unfixedFindings);
+    return Triplet.with(changes, unfixedFindings, results.unmatchedIssues());
   }
 
   public CodemodFileScanningResult remediateAll(
@@ -136,26 +153,39 @@ public class SearcherStrategyRemediator<T> implements Remediator<T> {
       final Function<T, Integer> findingStartLineExtractor,
       final Function<T, Optional<Integer>> findingEndLineExtractor,
       final Function<T, Optional<Integer>> findingStartColumnExtractor) {
-
+    List<T> findings = new ArrayList<>(findingsForPath);
     List<CodemodChange> allChanges = new ArrayList<>();
     List<UnfixedFinding> allUnfixed = new ArrayList<>();
 
     for (var searcherAndStrategy : searcherRemediatorMap.entrySet()) {
-      var pairResult =
+      var tripletResults =
           remediateWithStrategy(
               cu,
               path,
               detectorRule,
-              findingsForPath,
+              findings,
               findingIdExtractor,
               findingStartLineExtractor,
               findingEndLineExtractor,
               findingStartColumnExtractor,
               searcherAndStrategy.getKey(),
               searcherAndStrategy.getValue());
-      allChanges.addAll(pairResult.getValue0());
-      allUnfixed.addAll(pairResult.getValue1());
+      allChanges.addAll(tripletResults.getValue0());
+      allUnfixed.addAll(tripletResults.getValue1());
+      findings = tripletResults.getValue2();
     }
+    // Any remaining, unmatched, findings are treated as unfixed
+    allUnfixed.addAll(
+        findings.stream()
+            .map(
+                f ->
+                    new UnfixedFinding(
+                        findingIdExtractor.apply(f),
+                        detectorRule,
+                        path,
+                        findingStartLineExtractor.apply(f),
+                        RemediationMessages.noNodesAtThatLocation))
+            .toList());
     return CodemodFileScanningResult.from(allChanges, allUnfixed);
   }
 }

@@ -5,6 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import io.codemodder.codetf.DetectorRule;
+import io.codemodder.remediation.SearcherStrategyRemediator;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 final class XMLReaderAtParseFixerTest {
@@ -39,11 +43,22 @@ final class XMLReaderAtParseFixerTest {
     CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
     LexicalPreservingPrinter.setup(cu);
 
-    XXEFixAttempt fixAttempt = new XMLReaderAtParseFixer().tryFix(14, 19, cu);
+    var searcherRemediator =
+        new SearcherStrategyRemediator.Builder<>()
+            .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
+            .build();
+    var result =
+        searcherRemediator.remediateAll(
+            cu,
+            "path",
+            new DetectorRule("", "", ""),
+            List.of(new Object()),
+            o -> "id",
+            o -> 14,
+            o -> Optional.empty(),
+            o -> Optional.of(19));
 
-    assertThat(fixAttempt.isFixed()).isTrue();
-    assertThat(fixAttempt.isResponsibleFixer()).isTrue();
-    assertThat(fixAttempt.reasonNotFixed()).isNullOrEmpty();
+    assertThat(result.changes().isEmpty()).isFalse();
     String fixedCode =
         """
                             public class MyCode {

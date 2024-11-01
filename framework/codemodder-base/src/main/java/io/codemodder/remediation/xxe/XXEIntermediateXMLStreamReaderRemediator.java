@@ -1,29 +1,55 @@
 package io.codemodder.remediation.xxe;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
-import java.util.List;
+import io.codemodder.remediation.FixCandidateSearcher;
+import io.codemodder.remediation.Remediator;
+import io.codemodder.remediation.SearcherStrategyRemediator;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Function;
 
-/**
- * Strategy for remediating XXE vulnerabilities at an intermediate step in {@link
- * javax.xml.stream.XMLInputFactory#createXMLStreamReader}.
- */
-public interface XXEIntermediateXMLStreamReaderRemediator {
+public class XXEIntermediateXMLStreamReaderRemediator<T> implements Remediator<T> {
 
-  /** A default implementation for callers. */
-  XXEIntermediateXMLStreamReaderRemediator DEFAULT =
-      new DefaultXXEIntermediateXMLStreamReaderRemediator();
+  private final SearcherStrategyRemediator<T> searchStrategyRemediator;
 
-  /** Remediate all XXE vulnerabilities in the given compilation unit. */
-  <T> CodemodFileScanningResult remediateAll(
+  public XXEIntermediateXMLStreamReaderRemediator() {
+    this.searchStrategyRemediator =
+        new SearcherStrategyRemediator.Builder<T>()
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<T>()
+                    .withMatcher(
+                        node ->
+                            Optional.of(node)
+                                .map(n -> n instanceof MethodCallExpr mce ? mce : null)
+                                .filter(mce -> mce.hasScope())
+                                .filter(mce -> mce.getArguments().isNonEmpty())
+                                .isPresent())
+                    .build(),
+                new XXEIntermediateXMLStreamReaderFixStrategy())
+            .build();
+  }
+
+  @Override
+  public CodemodFileScanningResult remediateAll(
       CompilationUnit cu,
       String path,
       DetectorRule detectorRule,
-      List<T> issuesForFile,
-      Function<T, String> getKey,
-      Function<T, Integer> getEndLine,
-      Function<T, Integer> getStartColumn,
-      Function<T, Integer> getEndColumn);
+      Collection<T> findingsForPath,
+      Function<T, String> findingIdExtractor,
+      Function<T, Integer> findingStartLineExtractor,
+      Function<T, Optional<Integer>> findingEndLineExtractor,
+      Function<T, Optional<Integer>> findingColumnExtractor) {
+    return searchStrategyRemediator.remediateAll(
+        cu,
+        path,
+        detectorRule,
+        findingsForPath,
+        findingIdExtractor,
+        findingStartLineExtractor,
+        findingEndLineExtractor,
+        findingColumnExtractor);
+  }
 }

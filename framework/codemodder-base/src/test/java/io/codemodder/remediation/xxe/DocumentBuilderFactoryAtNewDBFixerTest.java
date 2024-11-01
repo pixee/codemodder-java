@@ -5,16 +5,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import io.codemodder.codetf.DetectorRule;
+import io.codemodder.remediation.Remediator;
+import io.codemodder.remediation.SearcherStrategyRemediator;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 final class DocumentBuilderFactoryAtNewDBFixerTest {
 
-  private DocumentBuilderFactoryAtNewDBFixer fixer;
+  private Remediator<Object> fixer;
 
   @BeforeEach
   void setup() {
-    this.fixer = new DocumentBuilderFactoryAtNewDBFixer();
+    fixer =
+        new SearcherStrategyRemediator.Builder<>()
+            .withMatchAndFixStrategy(new DocumentBuilderFactoryAtNewDBFixStrategy())
+            .build();
   }
 
   @Test
@@ -43,9 +51,17 @@ final class DocumentBuilderFactoryAtNewDBFixerTest {
 
     CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
     LexicalPreservingPrinter.setup(cu);
-    XXEFixAttempt attempt = fixer.tryFix(10, null, cu);
-    assertThat(attempt.isFixed()).isTrue();
-    assertThat(attempt.isResponsibleFixer()).isTrue();
+    var result =
+        fixer.remediateAll(
+            cu,
+            "path",
+            new DetectorRule("", "", ""),
+            List.of(new Object()),
+            o -> "id",
+            o -> 10,
+            o -> Optional.empty(),
+            o -> Optional.empty());
+    assertThat(result.changes().isEmpty()).isFalse();
 
     String fixedCode =
         """

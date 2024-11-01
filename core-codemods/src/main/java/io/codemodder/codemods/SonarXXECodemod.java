@@ -7,11 +7,14 @@ import io.codemodder.providers.sonar.ProvidedSonarScan;
 import io.codemodder.providers.sonar.RuleIssue;
 import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.Remediator;
+import io.codemodder.remediation.WithoutScopePositionMatcher;
 import io.codemodder.remediation.xxe.XXERemediator;
 import io.codemodder.sonar.model.Issue;
 import io.codemodder.sonar.model.SonarFinding;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.inject.Inject;
 
 @Codemod(
@@ -21,14 +24,14 @@ import javax.inject.Inject;
     executionPriority = CodemodExecutionPriority.HIGH)
 public final class SonarXXECodemod extends SonarRemediatingJavaParserChanger {
 
-  private final XXERemediator remediationStrategy;
+  private final Remediator<Issue> remediationStrategy;
   private final RuleIssue issues;
 
   @Inject
   public SonarXXECodemod(@ProvidedSonarScan(ruleId = "java:S2755") final RuleIssue issues) {
     super(GenericRemediationMetadata.XXE.reporter(), issues);
     this.issues = Objects.requireNonNull(issues);
-    this.remediationStrategy = XXERemediator.DEFAULT;
+    this.remediationStrategy = new XXERemediator<>(new WithoutScopePositionMatcher());
   }
 
   @Override
@@ -49,7 +52,14 @@ public final class SonarXXECodemod extends SonarRemediatingJavaParserChanger {
         detectorRule(),
         issuesForFile,
         SonarFinding::getKey,
-        f -> f.getTextRange() != null ? f.getTextRange().getStartLine() : f.getLine(),
-        f -> f.getTextRange().getStartOffset());
+        i -> i.getTextRange() != null ? i.getTextRange().getStartLine() : i.getLine(),
+        i ->
+            i.getTextRange() != null
+                ? Optional.of(i.getTextRange().getEndLine())
+                : Optional.empty(),
+        i ->
+            i.getTextRange() != null
+                ? Optional.of(i.getTextRange().getStartOffset() + 1)
+                : Optional.empty());
   }
 }

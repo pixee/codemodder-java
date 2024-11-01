@@ -10,13 +10,12 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.ast.ASTs;
+import io.codemodder.remediation.SuccessOrReason;
 import java.util.List;
 import java.util.Optional;
 
-/** Holds shared APIs for working with shared XML feature setting. */
-final class XMLFeatures {
-
-  private XMLFeatures() {}
+/** Holds shared APIs for building nodes shared between XML fixers */
+public class XMLFixBuilder {
 
   /** Creates a call that disables parameter entities. */
   static MethodCallExpr createParameterEntityDisabledCall(final NameExpr nameExpr) {
@@ -42,7 +41,7 @@ final class XMLFeatures {
    * Creates a call for {@link javax.xml.stream.XMLInputFactory#setProperty(java.lang.String,
    * java.lang.Object)} for disabling.
    */
-  static XXEFixAttempt addXMLInputFactoryDisablingStatement(
+  static SuccessOrReason addXMLInputFactoryDisablingStatement(
       final NameExpr variable, final Statement statementToInjectAround, final boolean before) {
     MethodCallExpr call =
         new MethodCallExpr(
@@ -54,7 +53,7 @@ final class XMLFeatures {
 
     Optional<BlockStmt> block = ASTs.findBlockStatementFrom(statementToInjectAround);
     if (block.isEmpty()) {
-      return new XXEFixAttempt(true, false, "No block statement found for newFactory() call");
+      return SuccessOrReason.reason("No block statement found for newFactory() call");
     }
 
     BlockStmt blockStmt = block.get();
@@ -66,14 +65,14 @@ final class XMLFeatures {
 
     Statement fixStatement = new ExpressionStmt(call);
     existingStatements.add(index, fixStatement);
-    return new XXEFixAttempt(true, true, null);
+    return SuccessOrReason.success();
   }
 
-  static XXEFixAttempt addFeatureDisablingStatements(
+  static SuccessOrReason addFeatureDisablingStatements(
       final NameExpr variable, final Statement statementToInjectAround, final boolean before) {
     Optional<BlockStmt> block = ASTs.findBlockStatementFrom(statementToInjectAround);
     if (block.isEmpty()) {
-      return new XXEFixAttempt(true, false, "No block statement found for newFactory() call");
+      return SuccessOrReason.reason("No block statement found for newFactory() call");
     }
 
     BlockStmt blockStmt = block.get();
@@ -106,6 +105,6 @@ final class XMLFeatures {
         .map(Optional::get)
         .forEach(Node::remove);
 
-    return new XXEFixAttempt(true, true, null);
+    return SuccessOrReason.success();
   }
 }

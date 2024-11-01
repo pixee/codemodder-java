@@ -11,17 +11,19 @@ import java.util.function.Predicate;
 public interface FixCandidateSearcher<T> {
 
   /**
-   * Searches the AST for nodes associated with the given issues.
+   * Searches the AST for nodes associated with the given issues. Issues are sorted into
+   * FixCandidates, UnfixedFindings and unmatched.
    *
    * @param cu
    * @param path
    * @param rule
-   * @param issuesForFile
+   * @param issuesForFile A list of issues.
    * @param getKey A function that extracts the key for T.
    * @param getStartLine A function that extracts start line information from T. Always required.
    * @param getEndLine A function that extracts end line information from T. May not be available
    * @param getColumn A function that extracts column information from T. May not be available
-   * @return
+   * @return A FixSearchResults object that sorts the issues into FixCandidates, unfixed and
+   *     unmatched.
    */
   FixCandidateSearchResults<T> search(
       CompilationUnit cu,
@@ -36,9 +38,11 @@ public interface FixCandidateSearcher<T> {
   /** Builder for {@link FixCandidateSearcher}. */
   final class Builder<T> {
     private final List<Predicate<Node>> matchers;
+    private NodePositionMatcher nodePositionMatcher;
 
     public Builder() {
       this.matchers = new ArrayList<>();
+      this.nodePositionMatcher = new DefaultNodePositionMatcher();
     }
 
     public Builder<T> withMatcher(final Predicate<Node> matcher) {
@@ -46,8 +50,13 @@ public interface FixCandidateSearcher<T> {
       return this;
     }
 
+    public Builder<T> withNodePositionMatcher(final NodePositionMatcher nodePositionMatcher) {
+      this.nodePositionMatcher = nodePositionMatcher;
+      return this;
+    }
+
     public FixCandidateSearcher<T> build() {
-      return new DefaultFixCandidateSearcher<>(List.copyOf(matchers));
+      return new DefaultFixCandidateSearcher<>(List.copyOf(matchers), nodePositionMatcher);
     }
   }
 }

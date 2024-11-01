@@ -1,5 +1,6 @@
 package io.codemodder.codemods.semgrep;
 
+import com.contrastsecurity.sarif.Result;
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.Codemod;
 import io.codemodder.CodemodExecutionPriority;
@@ -12,7 +13,9 @@ import io.codemodder.SarifFindingKeyUtil;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.semgrep.ProvidedSemgrepScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
+import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.xss.XSSRemediator;
+import java.util.Optional;
 import javax.inject.Inject;
 
 /**
@@ -26,7 +29,7 @@ import javax.inject.Inject;
     importance = Importance.MEDIUM)
 public final class SemgrepServletResponseWriterXSSCodemod extends SemgrepJavaParserChanger {
 
-  private final XSSRemediator remediator;
+  private final Remediator<Result> remediator;
 
   @Inject
   public SemgrepServletResponseWriterXSSCodemod(
@@ -34,7 +37,7 @@ public final class SemgrepServletResponseWriterXSSCodemod extends SemgrepJavaPar
               ruleId = "java.lang.security.servletresponse-writer-xss.servletresponse-writer-xss")
           final RuleSarif sarif) {
     super(GenericRemediationMetadata.XSS.reporter(), sarif);
-    this.remediator = XSSRemediator.DEFAULT;
+    this.remediator = new XSSRemediator<>();
   }
 
   @Override
@@ -48,13 +51,16 @@ public final class SemgrepServletResponseWriterXSSCodemod extends SemgrepJavaPar
   @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-    return remediator.remediateJava(
+    return remediator.remediateAll(
         cu,
         context.path().toString(),
         detectorRule(),
         ruleSarif.getResultsByLocationPath(context.path()),
         SarifFindingKeyUtil::buildFindingId,
         r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
-        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn());
+        r -> Optional.of(r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
+        r ->
+            Optional.of(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn()));
   }
 }

@@ -6,8 +6,11 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.RemediationMessages;
+import io.codemodder.remediation.SearcherStrategyRemediator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +35,7 @@ final class NakedVariableReturnFixerTest {
             }
             """,
             5,
-            null),
+            RemediationMessages.noNodesAtThatLocation),
         Arguments.of(
             """
             class Samples {
@@ -56,7 +59,7 @@ final class NakedVariableReturnFixerTest {
                 }
                 """,
             5,
-            null));
+            RemediationMessages.noNodesAtThatLocation));
   }
 
   @BeforeEach
@@ -71,25 +74,30 @@ final class NakedVariableReturnFixerTest {
     CompilationUnit cu = StaticJavaParser.parse(code);
     LexicalPreservingPrinter.setup(cu);
 
-    NakedVariableReturnFixer fixer = new NakedVariableReturnFixer();
+    var fixer = new NakedVariableReturnFixStrategy();
 
     List<XSSFinding> findings = List.of(new XSSFinding("id", line, null));
 
-    XSSCodeShapeFixResult result =
-        fixer.fixCodeShape(
+    var remediator =
+        new SearcherStrategyRemediator.Builder<XSSFinding>()
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<XSSFinding>()
+                    .withMatcher(NakedVariableReturnFixStrategy::match)
+                    .build(),
+                fixer)
+            .build();
+    var result =
+        remediator.remediateAll(
             cu,
             "path",
             detectorRule,
             findings,
             XSSFinding::key,
             XSSFinding::line,
-            XSSFinding::column);
-    assertThat(result.isFixed()).isFalse();
-    if (result.isResponsibleFixer()) {
-      assertThat(result.reasonNotFixed()).isEqualTo(reasonForFailure);
-    } else {
-      assertThat(reasonForFailure).isNull();
-    }
+            x -> Optional.empty(),
+            x -> Optional.ofNullable(x.column()));
+    assertThat(result.unfixedFindings().isEmpty()).isFalse();
+    assertThat(result.unfixedFindings().get(0).getReason()).isEqualTo(reasonForFailure);
   }
 
   @Test
@@ -107,23 +115,31 @@ final class NakedVariableReturnFixerTest {
     CompilationUnit cu = StaticJavaParser.parse(code);
     LexicalPreservingPrinter.setup(cu);
 
-    NakedVariableReturnFixer fixer = new NakedVariableReturnFixer();
+    var fixer = new NakedVariableReturnFixStrategy();
 
     // when we try to find both, we should error - fix groups should only have one location
     List<XSSFinding> findings = List.of(new XSSFinding("should_be_fixed_simple_name", 5, null));
 
-    XSSCodeShapeFixResult result =
-        fixer.fixCodeShape(
+    var remediator =
+        new SearcherStrategyRemediator.Builder<XSSFinding>()
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<XSSFinding>()
+                    .withMatcher(NakedVariableReturnFixStrategy::match)
+                    .build(),
+                fixer)
+            .build();
+    var result =
+        remediator.remediateAll(
             cu,
             "path",
             detectorRule,
             findings,
             XSSFinding::key,
             XSSFinding::line,
-            XSSFinding::column);
-    assertThat(result.isFixed()).isTrue();
-    assertThat(result.isResponsibleFixer()).isTrue();
-    assertThat(result.line()).isEqualTo(5);
+            x -> Optional.empty(),
+            x -> Optional.ofNullable(x.column()));
+    assertThat(result.changes().isEmpty()).isFalse();
+    assertThat(result.changes().get(0).lineNumber()).isEqualTo(5);
 
     String afterCode = LexicalPreservingPrinter.print(cu);
     assertThat(afterCode)

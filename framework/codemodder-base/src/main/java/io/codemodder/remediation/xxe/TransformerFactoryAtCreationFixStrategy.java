@@ -2,10 +2,9 @@ package io.codemodder.remediation.xxe;
 
 import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 import static io.codemodder.javaparser.ASTExpectations.expect;
-import static io.codemodder.remediation.RemediationMessages.*;
-import static io.codemodder.remediation.RemediationMessages.multipleNodesFound;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
@@ -16,23 +15,26 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import io.codemodder.ast.ASTs;
+import io.codemodder.remediation.MatchAndFixStrategy;
+import io.codemodder.remediation.SuccessOrReason;
 import java.util.List;
 import java.util.Optional;
 
-/** Fix XXEs reported at the TransformerFactory.newInstance() call locations. */
-final class TransformerFactoryAtCreationFixer implements XXEFixer {
+/**
+ * Fix strategy for XXE vulnerabilities anchored to the TransformerParser newInstance() calls. Finds
+ * the parser's declaration and add statements disabling external entities and features.
+ */
+final class TransformerFactoryAtCreationFixStrategy extends MatchAndFixStrategy {
 
   @Override
-  public XXEFixAttempt tryFix(final int line, final Integer column, CompilationUnit cu) {
-    List<MethodCallExpr> candidateMethods =
-        ASTs.findMethodCallsWhichAreAssignedToType(
-            cu, line, column, "newInstance", List.of("TransformerFactory"));
-    if (candidateMethods.isEmpty()) {
-      return new XXEFixAttempt(false, false, noNodesAtThatLocation);
-    } else if (candidateMethods.size() > 1) {
-      return new XXEFixAttempt(false, false, multipleNodesFound);
+  public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
+    var maybeCall =
+        Optional.of(node).map(n -> n instanceof MethodCallExpr ? (MethodCallExpr) n : null);
+    if (maybeCall.isEmpty()) {
+      return SuccessOrReason.reason("Not a method call.");
     }
-    MethodCallExpr newFactoryInstanceCall = candidateMethods.get(0);
+
+    MethodCallExpr newFactoryInstanceCall = maybeCall.get();
     Optional<VariableDeclarator> newFactoryVariableRef =
         expect(newFactoryInstanceCall).toBeMethodCallExpression().initializingVariable().result();
     VariableDeclarator newFactoryVariable = newFactoryVariableRef.get();
@@ -40,13 +42,13 @@ final class TransformerFactoryAtCreationFixer implements XXEFixer {
         newFactoryVariable.findAncestor(Statement.class);
 
     if (variableDeclarationStmtRef.isEmpty()) {
-      return new XXEFixAttempt(true, false, "Not assigned as part of statement");
+      return SuccessOrReason.reason("Not assigned as part of statement");
     }
 
     Statement statement = variableDeclarationStmtRef.get();
     Optional<BlockStmt> block = ASTs.findBlockStatementFrom(statement);
     if (block.isEmpty()) {
-      return new XXEFixAttempt(true, false, "No block statement found for newFactory() call");
+      return SuccessOrReason.reason("No block statement found for newFactory() call");
     }
 
     BlockStmt blockStmt = block.get();
@@ -64,6 +66,16 @@ final class TransformerFactoryAtCreationFixer implements XXEFixer {
     NodeList<Statement> existingStatements = blockStmt.getStatements();
     int index = existingStatements.indexOf(statement);
     existingStatements.add(index + 1, fixStatement);
-    return new XXEFixAttempt(true, true, null);
+    return SuccessOrReason.success();
+  }
+
+  /**
+   * Matches against TransformerFactory.newInstance() calls
+   *
+   * @param node
+   * @return
+   */
+  public boolean match(final Node node) {
+    return ASTs.isInitializedToType(node, "newInstance", List.of("TransformerFactory")).isPresent();
   }
 }

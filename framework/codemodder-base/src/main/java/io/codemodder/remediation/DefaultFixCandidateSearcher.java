@@ -1,8 +1,8 @@
 package io.codemodder.remediation;
 
-import com.github.javaparser.Position;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.codetf.UnfixedFinding;
 import java.util.*;
@@ -19,8 +19,17 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
 
   private final List<Predicate<Node>> matchers;
 
+  private final NodePositionMatcher nodePositionMatcher;
+
   DefaultFixCandidateSearcher(final List<Predicate<Node>> matchers) {
     this.matchers = matchers;
+    this.nodePositionMatcher = new DefaultNodePositionMatcher();
+  }
+
+  DefaultFixCandidateSearcher(
+      final List<Predicate<Node>> matchers, final NodePositionMatcher nodePositionMatcher) {
+    this.matchers = matchers;
+    this.nodePositionMatcher = nodePositionMatcher;
   }
 
   @Override
@@ -42,23 +51,17 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
             .filter(n -> matchers.stream().allMatch(m -> m.test(n)))
             .toList();
 
-    Map<Node, List<T>> fixCandidateToIssueMapping = new HashMap<>();
+    Map<Node, List<T>> fixCandidateToIssueMapping = new IdentityHashMap<>();
+    Set<T> matchedIssues = new HashSet<>();
 
     for (T issue : issuesForFile) {
       String findingId = getKey.apply(issue);
       int issueStartLine = getStartLine.apply(issue);
-      Optional<Integer> maybeEndLine = getEndLine.apply(issue);
+      int issueEndLine = getEndLine.apply(issue).orElse(issueStartLine);
       Optional<Integer> maybeColumn = getColumn.apply(issue);
       List<Node> nodesForIssue =
           nodes.stream()
-              .filter(
-                  n -> {
-                    int nodeStartLine = n.getRange().orElseThrow().begin.line;
-                    // if issue end line info is present, match the node line with the issue range
-                    return maybeEndLine
-                        .map(issueEndLine -> matches(issueStartLine, nodeStartLine, issueEndLine))
-                        .orElse(matches(issueStartLine, nodeStartLine));
-                  })
+              .filter(NodeWithRange::hasRange)
               // if column info is present, check if the node starts after the issue start
               // coordinates
               .filter(
@@ -66,19 +69,15 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
                       maybeColumn
                           .map(
                               column ->
-                                  n.getRange()
-                                          .orElseThrow()
-                                          .begin
-                                          .compareTo(new Position(issueStartLine, column))
-                                      >= 0)
-                          .orElse(true))
+                                  nodePositionMatcher.match(
+                                      n, issueStartLine, issueEndLine, column))
+                          .orElse(nodePositionMatcher.match(n, issueStartLine, issueEndLine)))
               .toList();
       if (nodesForIssue.isEmpty()) {
-        unfixedFindings.add(
-            new UnfixedFinding(
-                findingId, rule, path, issueStartLine, RemediationMessages.noNodesAtThatLocation));
         continue;
-      } else if (nodesForIssue.size() > 1) {
+      }
+      matchedIssues.add(issue);
+      if (nodesForIssue.size() > 1) {
         unfixedFindings.add(
             new UnfixedFinding(
                 findingId, rule, path, issueStartLine, RemediationMessages.multipleNodesFound));
@@ -93,10 +92,16 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
             .map(entry -> new FixCandidate<>(entry.getKey(), entry.getValue()))
             .toList();
 
+    // remove any issue that had a match
     return new FixCandidateSearchResults<T>() {
       @Override
       public List<UnfixedFinding> unfixableFindings() {
         return unfixedFindings;
+      }
+
+      @Override
+      public List<T> unmatchedIssues() {
+        return issuesForFile.stream().filter(i -> !matchedIssues.contains(i)).toList();
       }
 
       @Override

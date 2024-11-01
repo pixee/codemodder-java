@@ -5,7 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import io.codemodder.remediation.RemediationMessages;
+import io.codemodder.codetf.DetectorRule;
+import io.codemodder.remediation.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 final class DocumentBuilderFactoryAtParseFixerTest {
 
-  private DocumentBuilderFactoryAtParseFixer fixer;
+  private Remediator<Object> fixer;
 
   private static final String unfixableBecauseDocumentBuilderCameFromOutside =
       """
@@ -70,7 +73,10 @@ final class DocumentBuilderFactoryAtParseFixerTest {
 
   @BeforeEach
   void setup() {
-    this.fixer = new DocumentBuilderFactoryAtParseFixer();
+    fixer =
+        new SearcherStrategyRemediator.Builder<>()
+            .withMatchAndFixStrategy(new DocumentBuilderFactoryAtParseFixStrategy())
+            .build();
   }
 
   @ParameterizedTest
@@ -78,9 +84,18 @@ final class DocumentBuilderFactoryAtParseFixerTest {
   void it_doesnt_fix(final String code, final int line, final Integer column, final String reason) {
     CompilationUnit cu = StaticJavaParser.parse(code);
     LexicalPreservingPrinter.setup(cu);
-    XXEFixAttempt attempt = fixer.tryFix(line, column, cu);
-    assertThat(attempt.isFixed()).isFalse();
-    assertThat(attempt.reasonNotFixed()).isEqualTo(reason);
+    var result =
+        fixer.remediateAll(
+            cu,
+            "path",
+            new DetectorRule("", "", ""),
+            List.of(new Object()),
+            o -> "id",
+            o -> line,
+            o -> Optional.empty(),
+            o -> Optional.ofNullable(column));
+    assertThat(result.unfixedFindings().isEmpty()).isFalse();
+    assertThat(result.unfixedFindings().get(0).getReason()).isEqualTo(reason);
   }
 
   @Test
@@ -109,9 +124,17 @@ final class DocumentBuilderFactoryAtParseFixerTest {
 
     CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
     LexicalPreservingPrinter.setup(cu);
-    XXEFixAttempt attempt = fixer.tryFix(11, 16, cu);
-    assertThat(attempt.isFixed()).isTrue();
-    assertThat(attempt.isResponsibleFixer()).isTrue();
+    var result =
+        fixer.remediateAll(
+            cu,
+            "path",
+            new DetectorRule("", "", ""),
+            List.of(new Object()),
+            o -> "id",
+            o -> 11,
+            o -> Optional.empty(),
+            o -> Optional.ofNullable(16));
+    assertThat(result.changes().isEmpty()).isFalse();
 
     String fixedCode =
         """
