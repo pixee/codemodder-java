@@ -245,6 +245,25 @@ public final class SQLParameterizer {
     return Optional.of(stmtObject);
   }
 
+  private Optional<Either<AssignExpr, LocalVariableDeclaration>>
+      validateStatementCreationExprForHijack(
+          final Either<MethodCallExpr, Either<AssignExpr, LocalVariableDeclaration>> stmtObject) {
+    if (stmtObject.isRight()) {
+      var maybelvd =
+          stmtObject
+              .getRight()
+              .ifLeftOrElseGet(
+                  ae ->
+                      ASTs.findEarliestLocalVariableDeclarationOf(
+                          ae, ae.getTarget().asNameExpr().getNameAsString()),
+                  lvd -> Optional.of(lvd));
+      if (maybelvd.filter(lvd -> lvd instanceof ExpressionStmtVariableDeclaration).isPresent()) {
+        return Optional.of(stmtObject.getRight());
+      }
+    }
+    return Optional.empty();
+  }
+
   /** Checks if a local declaration can change types to a subtype. */
   private boolean canChangeTypes(final LocalVariableDeclaration localDeclaration) {
     final var allNameExpr =
@@ -642,27 +661,68 @@ public final class SQLParameterizer {
     return assignedInScope || definedInScope;
   }
 
-  private MethodCallExpr fixHijackedStatement(
+  private Expression getConnectionExpression(
+      final Either<AssignExpr, LocalVariableDeclaration> stmtCreation) {
+    return stmtCreation
+        .ifLeftOrElseGet(
+            ae -> ae.getValue().asMethodCallExpr(),
+            lvd -> lvd.getDeclaration().getInitializer().get().asMethodCallExpr())
+        .getScope()
+        .get();
+  }
+
+  private MethodCallExpr fixByHijackedStatement(
       final Either<AssignExpr, LocalVariableDeclaration> stmtCreation,
       final QueryParameterizer queryParameterizer,
       final MethodCallExpr executeCall) {
     var executeStmt = ASTs.findParentStatementFrom(executeCall).get();
-    // TODO this shouldn't work on anything but expression statements declaration, filter them out
-    // create new PreparedStatement object and set parameters
-
     // get the statement object variable name
     final String stmtName =
         stmtCreation.ifLeftOrElseGet(
             a -> a.getTarget().asNameExpr().getNameAsString(), LocalVariableDeclaration::getName);
+    // generate a name for the new PreparedStatement object
+    String pStmtName = generateNameWithSuffix(executeCall);
+
+    final String connName = getConnectionExpression(stmtCreation).asNameExpr().getNameAsString();
+
+    var topStatement = executeStmt;
 
     // Replace the parameters with the `?` string and adds the `setParameter` calls
     // Also, get the top `setParameter` statement
-    var topStatement = gatherAndSetParameters(stmtName, executeStmt, queryParameterizer);
+    topStatement = gatherAndSetParameters(pStmtName, topStatement, queryParameterizer);
 
-    // .close the original statement and assign it to the stmt variable
+    // Add PreparedStmt stmt =  conn.prepareStatement() assignment
+    MethodCallExpr prepareStatementCall =
+        new MethodCallExpr(new NameExpr(connName), "prepareStatement", executeCall.getArguments());
+    ExpressionStmt pStmtCreation =
+        new ExpressionStmt(
+            new VariableDeclarationExpr(
+                new VariableDeclarator(
+                    StaticJavaParser.parseType("PreparedStatement"),
+                    pStmtName,
+                    prepareStatementCall)));
+    ASTTransforms.addStatementBeforeStatement(topStatement, pStmtCreation);
+    topStatement = pStmtCreation;
+
+    // add stmt.close()
+    Statement closeOriginal =
+        new ExpressionStmt(new MethodCallExpr(new NameExpr(stmtName), new SimpleName("close")));
+    ASTTransforms.addStatementBeforeStatement(topStatement, closeOriginal);
+
+    // TODO will this work for every type of execute statement? or just executeQuery?
     // change execute statement
-    // TODO will this work for any type of execute statement?
-    return null;
+    executeCall.setName("execute");
+    executeCall.setScope(new NameExpr(pStmtName));
+    executeCall.setArguments(new NodeList<>());
+
+    // add stmt = pstmt after executeCall
+    Statement hijackAssignment =
+        new ExpressionStmt(
+            new AssignExpr(
+                new NameExpr(stmtName), new NameExpr(pStmtName), AssignExpr.Operator.ASSIGN));
+    ASTTransforms.addStatementAfterStatement(executeStmt, hijackAssignment);
+
+    return prepareStatementCall;
   }
 
   /**
@@ -678,8 +738,7 @@ public final class SQLParameterizer {
     // validate the call itself first
     if (isParameterizationCandidate(executeCall) && validateExecuteCall(executeCall).isPresent()) {
       // Now find the stmt creation expression, if any and validate it
-      final var stmtObject =
-          findStatementCreationExpr(executeCall).flatMap(this::validateStatementCreationExpr);
+      final var stmtObject = findStatementCreationExpr(executeCall);
 
       if (stmtObject.isPresent()) {
         // Now look for injections
@@ -713,16 +772,21 @@ public final class SQLParameterizer {
                             .map(Expression::asNameExpr)
                             .anyMatch(name -> assignedOrDefinedInScope(name, assignOrLVD)));
 
-        if (queryp.getInjections().isEmpty() || resolvedInScope) {
+        // No injections detected
+        if (queryp.getInjections().isEmpty()) {
           return Optional.empty();
         }
 
-        if (nameInScope) {
+        // This means we can replace the Statement declaration or assignment
+        if (!nameInScope
+            && !resolvedInScope
+            && stmtObject.flatMap(this::validateStatementCreationExpr).isPresent()) {
           return Optional.of(fix(stmtObject.get(), queryp, executeCall));
         }
-        if (stmtObject.get().isRight()) {
-          return Optional.of(
-              fixHijackedStatement(stmtObject.get().getRight(), queryp, executeCall));
+        // Otherwise we use the hijack strategy
+        var maybeStmtObject = stmtObject.flatMap(this::validateStatementCreationExprForHijack);
+        if (maybeStmtObject.isPresent()) {
+          return Optional.of(fixByHijackedStatement(maybeStmtObject.get(), queryp, executeCall));
         }
       }
     }

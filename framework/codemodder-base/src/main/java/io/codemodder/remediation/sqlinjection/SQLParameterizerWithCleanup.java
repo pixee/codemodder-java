@@ -20,7 +20,7 @@ public final class SQLParameterizerWithCleanup {
     // Remove concatenation with empty strings e.g "first" +  "" -> "first";
     maybeMethodDecl.ifPresent(ASTTransforms::removeEmptyStringConcatenation);
     // Remove potential unused variables left after transform
-    maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
+    // maybeMethodDecl.ifPresent(md -> ASTTransforms.removeUnusedLocalVariables(md));
 
     // Merge concatenated literals, e.g. "first" + " and second" -> "first and second"
     pstmtCall.getArguments().getFirst().ifPresent(ASTTransforms::mergeConcatenatedLiterals);
