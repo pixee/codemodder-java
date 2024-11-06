@@ -58,6 +58,7 @@ public final class JavaParserCodemodRunner implements CodemodRunner {
     Path file = context.path();
     CompilationUnit cu = parser.parseJavaFile(file);
     CodemodFileScanningResult result = javaParserChanger.visit(context, cu);
+    System.out.println(cu);
     List<CodemodChange> changes = result.changes();
     if (!changes.isEmpty()) {
       String encodingName = encodingDetector.detect(file).orElse("UTF-8");
