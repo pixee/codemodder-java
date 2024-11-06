@@ -10,7 +10,7 @@ public final class SQLParameterizerWithCleanup {
 
   public static boolean checkAndFix(final MethodCallExpr methodCallExpr) {
     var maybeFixed = new SQLParameterizer(methodCallExpr).checkAndFix();
-    // maybeFixed.ifPresent(call -> cleanup(call));
+    maybeFixed.ifPresent(call -> cleanup(call));
     return maybeFixed.isPresent();
   }
 
