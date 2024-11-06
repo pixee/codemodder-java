@@ -692,8 +692,12 @@ public final class SQLParameterizer {
     topStatement = gatherAndSetParameters(pStmtName, topStatement, queryParameterizer);
 
     // Add PreparedStmt stmt =  conn.prepareStatement() assignment
+    // Need to clone the nodes in the arguments to make sure the parent node is properly set
     MethodCallExpr prepareStatementCall =
-        new MethodCallExpr(new NameExpr(connName), "prepareStatement", executeCall.getArguments());
+        new MethodCallExpr(
+            new NameExpr(connName),
+            "prepareStatement",
+            new NodeList<>(executeCall.getArguments().stream().map(n -> n.clone()).toList()));
     ExpressionStmt pStmtCreation =
         new ExpressionStmt(
             new VariableDeclarationExpr(

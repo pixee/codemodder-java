@@ -182,14 +182,14 @@ public final class ASTs {
   }
 
   /**
-   * Test for this pattern: {@link PatternExpr} ({@code node}) -&gt; {@link SimpleName}
+   * Test for this pattern: {@link TypePatternExpr} ({@code node}) -&gt; {@link SimpleName}
    *
    * @return A tuple with the above pattern in order sans the {@link SimpleName}.
    */
-  public static Optional<PatternExpr> isPatternExprDeclarationOf(
+  public static Optional<TypePatternExpr> isPatternExprDeclarationOf(
       final Node node, final String name) {
-    if (node instanceof PatternExpr) {
-      var pexpr = (PatternExpr) node;
+    if (node instanceof TypePatternExpr) {
+      var pexpr = (TypePatternExpr) node;
       if (pexpr.getNameAsString().equals(name)) return Optional.of(pexpr);
     }
     return Optional.empty();
