@@ -101,12 +101,13 @@ public final class SQLParameterizer {
             return false;
           }
         };
+    var stmtCreationMethods = List.of("createStatement", "prepareStatement");
     return Optional.of(expr)
         .map(e -> e instanceof MethodCallExpr ? expr.asMethodCallExpr() : null)
         .filter(
             mce ->
                 mce.getScope().filter(isConnection).isPresent()
-                    && mce.getNameAsString().equals("createStatement"));
+                    && (stmtCreationMethods.contains(mce.getNameAsString())));
   }
 
   private Optional<MethodCallExpr> validateExecuteCall(final MethodCallExpr executeCall) {
@@ -187,16 +188,17 @@ public final class SQLParameterizer {
             .map(expr -> expr instanceof NameExpr ? expr.asNameExpr() : null)
             .flatMap(ne -> ASTs.findEarliestLocalVariableDeclarationOf(ne, ne.getNameAsString()));
 
-    // Has a single assignment
-    // We erroniously assume that it always shadows the init expression
     // Needs some flow analysis to correctly address this case
     final Optional<AssignExpr> maybeSingleAssigned =
         maybeLVD
             .map(lvd -> ASTs.findAllAssignments(lvd).limit(2).toList())
-            .filter(allAssignments -> allAssignments.size() == 1)
-            .map(allAssignments -> allAssignments.get(0))
+            .filter(allAssignments -> !allAssignments.isEmpty())
+            .map(allAssignments -> allAssignments.get(allAssignments.size() - 1))
             .filter(assign -> assign.getTarget().isNameExpr())
-            .filter(assign -> isConnectionCreateStatement(assign.getValue()).isPresent());
+            .filter(
+                assign ->
+                    isConnectionCreateStatement(ASTs.resolveLocalExpression(assign.getValue()))
+                        .isPresent());
 
     if (maybeSingleAssigned.isPresent()) {
       return maybeSingleAssigned.map(a -> Either.right(Either.left(a)));
@@ -665,7 +667,7 @@ public final class SQLParameterizer {
       final Either<AssignExpr, LocalVariableDeclaration> stmtCreation) {
     return stmtCreation
         .ifLeftOrElseGet(
-            ae -> ae.getValue().asMethodCallExpr(),
+            ae -> ASTs.resolveLocalExpression(ae.getValue()).asMethodCallExpr(),
             lvd -> lvd.getDeclaration().getInitializer().get().asMethodCallExpr())
         .getScope()
         .get();
@@ -707,6 +709,7 @@ public final class SQLParameterizer {
                     prepareStatementCall)));
     ASTTransforms.addStatementBeforeStatement(topStatement, pStmtCreation);
     topStatement = pStmtCreation;
+    ASTTransforms.addImportIfMissing(compilationUnit, "java.sql.PreparedStatement");
 
     // Test if stmt.execute*() is the first usage of the stmt object
     // If so, remove initializer
