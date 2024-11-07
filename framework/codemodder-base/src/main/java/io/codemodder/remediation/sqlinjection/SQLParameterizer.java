@@ -708,10 +708,17 @@ public final class SQLParameterizer {
     ASTTransforms.addStatementBeforeStatement(topStatement, pStmtCreation);
     topStatement = pStmtCreation;
 
-    // add stmt.close()
-    Statement closeOriginal =
-        new ExpressionStmt(new MethodCallExpr(new NameExpr(stmtName), new SimpleName("close")));
-    ASTTransforms.addStatementBeforeStatement(topStatement, closeOriginal);
+    // Test if stmt.execute*() is the first usage of the stmt object
+    // If so, remove initializer
+    // otherwise add stmt.close()
+    if (isExecuteFirstUsageAfterDeclaration(stmtCreation, executeCall)) {
+      var lvd = stmtCreation.getRight();
+      lvd.getVariableDeclarator().getInitializer().ifPresent(i -> i.remove());
+    } else {
+      Statement closeOriginal =
+          new ExpressionStmt(new MethodCallExpr(new NameExpr(stmtName), new SimpleName("close")));
+      ASTTransforms.addStatementBeforeStatement(topStatement, closeOriginal);
+    }
 
     // TODO will this work for every type of execute statement? or just executeQuery?
     // change execute statement
@@ -727,6 +734,23 @@ public final class SQLParameterizer {
     ASTTransforms.addStatementAfterStatement(executeStmt, hijackAssignment);
 
     return prepareStatementCall;
+  }
+
+  private boolean isExecuteFirstUsageAfterDeclaration(
+      final Either<AssignExpr, LocalVariableDeclaration> stmtCreation,
+      final MethodCallExpr executeCall) {
+    if (stmtCreation.isRight()) {
+      var lvd = stmtCreation.getRight();
+      // This is heuristics
+      return ASTs.findAllReferences(lvd).stream()
+          .findFirst()
+          .flatMap(e -> ASTs.isScopeInMethodCall(e))
+          .filter(mce -> mce == executeCall)
+          .isPresent();
+    }
+    // We could also apply this predicate to assignments and remove it, but that may require more
+    // checks
+    return false;
   }
 
   /**
