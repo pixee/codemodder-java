@@ -27,7 +27,6 @@ public final class Test {
       JexlExpression expression = jexl.createExpression(input);
       JexlContext context = new MapContext();
       expression.evaluate(context);
-
     }
   }
 
@@ -42,7 +41,6 @@ public final class Test {
           sandbox.block(cls);
       }
       new JexlBuilder().sandbox(sandbox).create().createExpression(input).evaluate(context);
-
     }
   }
 

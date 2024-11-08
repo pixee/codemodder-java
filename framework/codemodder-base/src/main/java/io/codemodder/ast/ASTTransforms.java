@@ -26,7 +26,6 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 public final class ASTTransforms {
   /** Add an import in alphabetical order. */
@@ -87,26 +86,21 @@ public final class ASTTransforms {
    */
   public static <N extends Node> void addStatementAt(
       final NodeWithStatements<N> node, final Statement stmt, final int index) {
+
+    var oldStatements = node.getStatements();
     var newStatements = new ArrayList<Statement>();
     int i = 0;
-    for (var s : node.getStatements()) {
+    for (var s : oldStatements) {
       if (i == index) {
         newStatements.add(stmt);
       }
       newStatements.add(s);
       i++;
     }
-
-    // rebuilds the whole statements list as to preserve proper children order.
-
-    // workaround for maintaining indent, removes all but the first
-    IntStream.range(0, node.getStatements().size() - 1)
-        .forEach(j -> node.getStatements().removeLast());
-    // replace the first with the new statement if needed
-    if (index == 0) {
-      node.getStatements().get(0).replace(stmt);
+    for (i = index; i < oldStatements.size(); i++) {
+      node.setStatement(i, newStatements.get(i));
     }
-    newStatements.stream().skip(1).forEach(node.getStatements()::add);
+    node.addStatement(newStatements.get(newStatements.size() - 1));
   }
 
   /**
@@ -291,7 +285,13 @@ public final class ASTTransforms {
   public static void removeEmptyStringConcatenation(Node subtree) {
     subtree
         .findAll(BinaryExpr.class, Node.TreeTraversal.POSTORDER)
-        .forEach(binexp -> binexp.replace(removeEmptyStringConcatenation(binexp)));
+        .forEach(
+            binexp -> {
+              var newNode = removeEmptyStringConcatenation(binexp);
+              if (newNode != binexp) {
+                binexp.replace(newNode.clone());
+              }
+            });
   }
 
   /** Removes unused variables. */

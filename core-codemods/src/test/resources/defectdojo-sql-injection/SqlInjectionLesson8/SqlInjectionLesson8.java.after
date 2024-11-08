@@ -70,9 +70,10 @@ public class SqlInjectionLesson8 extends AssignmentEndpoint {
       try {
         PreparedStatement statement =
             connection.prepareStatement(
-query,                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            query,     ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
         log(connection, query);
         statement.setString(1, name);
+
         statement.setString(2, auth_tan);
         ResultSet results = statement.execute();
         if (results.getStatement() != null) {
@@ -98,7 +99,6 @@ query,                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDAT
         } else {
           return failed(this).build();
         }
-
       } catch (SQLException e) {
         return failed(this)
             .output("<br><span class='feedback-negative'>" + e.getMessage() + "</span>")
@@ -156,7 +156,7 @@ query,                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDAT
       statement.setString(1, sdf.format(cal.getTime()));
       statement.setString(2, action);
       statement.execute();
-        } catch (SQLException e) {
+    } catch (SQLException e) {
       System.err.println(e.getMessage());
     }
   }

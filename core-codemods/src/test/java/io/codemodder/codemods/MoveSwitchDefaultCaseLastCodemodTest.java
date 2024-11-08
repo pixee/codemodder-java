@@ -57,9 +57,9 @@ final class MoveSwitchDefaultCaseLastCodemodTest implements CodemodTestMixin {
                           break;
                         default:
                           break;
-                case 0:
-                    break;
-                     }
+                        case 0:
+                            break;
+                        }
                   }
                 }
                 """;

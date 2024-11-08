@@ -29,18 +29,5 @@ public final class Test {
 	while (rs3.next()) {
 		System.out.println("User: " + rs3.getString("username"));
 	}
-
-	
-	
-	
-	
-
-	
-	
-	
-
-	
-	
-
   }
 }
