@@ -11,8 +11,8 @@ final class Test {
            case "bar":
              System.out.println("bar");
              break;
-default:
-             System.out.println("default");       }
+           default:
+             System.out.println("default");}
        System.out.println("bar");
    }
 

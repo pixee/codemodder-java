@@ -1,0 +1,27 @@
+package com.acme.testcode;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public final class Test {
+
+  private Connection conn;
+
+  public void queryAfterDeclaration() throws SQLException {
+	Statement stmt = conn.createStatement();
+	String username = request.getParameter("username");
+	String query2 = "SELECT * FROM users WHERE username = '" + username + "'";
+	ResultSet rs2 = stmt.executeQuery(query2);
+	while (rs2.next()) {
+		System.out.println("User: " + rs2.getString("username"));
+	}
+	String email = request.getParameter("email");
+	String query3 = "SELECT * FROM users WHERE email = '" + email + "'";
+	ResultSet rs3 = stmt.executeQuery(query3);
+	while (rs3.next()) {
+		System.out.println("User: " + rs3.getString("username"));
+	}
+  }
+}

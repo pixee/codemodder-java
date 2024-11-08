@@ -186,11 +186,11 @@ public final class ASTs {
    *
    * @return A tuple with the above pattern in order sans the {@link SimpleName}.
    */
-  public static Optional<PatternExpr> isPatternExprDeclarationOf(
+  public static Optional<TypePatternExpr> isPatternExprDeclarationOf(
       final Node node, final String name) {
-    if (node instanceof PatternExpr) {
-      var pexpr = (PatternExpr) node;
-      if (pexpr.getNameAsString().equals(name)) return Optional.of(pexpr);
+    if (node instanceof TypePatternExpr) {
+      var pexpr = (TypePatternExpr) node;
+      if (pexpr.getName().asString().equals(name)) return Optional.of(pexpr);
     }
     return Optional.empty();
   }
