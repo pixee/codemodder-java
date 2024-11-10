@@ -3,6 +3,7 @@ package io.codemodder;
 import static io.codemodder.CodemodLoader.isValidCodemodId;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.javaparser.JavaParser;
@@ -214,6 +215,81 @@ final class CodemodLoaderTest {
     public boolean supports(Path file) {
       return true;
     }
+  }
+
+  /** Confirm the codemods respect the order of the regulator. */
+  @Test
+  void it_handles_codemod_orders(final @TempDir Path tmpDir) throws IOException {
+
+    // create an ordered list of codemods
+    List<Class<? extends CodeChanger>> codemodTypes =
+        List.of(
+            // test:java/changes-file
+            ChangesFile.class,
+
+            // test:java/changes-file-again
+            ChangesFileAgain.class,
+
+            // test:java/changes-file-yet-again
+            ChangesFileYetAgain.class);
+
+    CodemodLoader loader = createLoader(codemodTypes, tmpDir);
+    List<CodemodIdPair> codemods = loader.getCodemods();
+    assertThat(codemods.get(0).getId(), equalTo("test:java/changes-file"));
+    assertThat(codemods.get(1).getId(), equalTo("test:java/changes-file-again"));
+    assertThat(codemods.get(2).getId(), equalTo("test:java/changes-file-yet-again"));
+
+    // now we specify a --codemod-includes order to be in backwards order
+    CodemodRegulator regulator =
+        CodemodRegulator.of(
+            DefaultRuleSetting.DISABLED,
+            List.of(
+                "test:java/changes-file-yet-again",
+                "test:java/changes-file-again",
+                "test:java/changes-file"));
+    loader =
+        new CodemodLoader(
+            codemodTypes,
+            regulator,
+            tmpDir,
+            List.of("**"),
+            List.of(),
+            Files.list(tmpDir).toList(),
+            Map.of(),
+            List.of(),
+            List.of(),
+            null,
+            null,
+            null);
+
+    codemods = loader.getCodemods();
+    assertThat(codemods.get(0).getId(), equalTo("test:java/changes-file-yet-again"));
+    assertThat(codemods.get(1).getId(), equalTo("test:java/changes-file-again"));
+    assertThat(codemods.get(2).getId(), equalTo("test:java/changes-file"));
+
+    // now do it again, with only the B and C codemods
+    regulator =
+        CodemodRegulator.of(
+            DefaultRuleSetting.ENABLED,
+            List.of("test:java/changes-file-again", "test:java/changes-file"));
+    loader =
+        new CodemodLoader(
+            codemodTypes,
+            regulator,
+            tmpDir,
+            List.of("**"),
+            List.of(),
+            Files.list(tmpDir).toList(),
+            Map.of(),
+            List.of(),
+            List.of(),
+            null,
+            null,
+            null);
+
+    codemods = loader.getCodemods();
+    assertThat(codemods, hasSize(1));
+    assertThat(codemods.get(0).getId(), equalTo("test:java/changes-file-yet-again"));
   }
 
   /**
