@@ -43,13 +43,26 @@ public final class CodemodLoader {
     // sort the codemods according to their priority
     List<Class<? extends CodeChanger>> orderedCodemodTypes = new ArrayList<>(unorderedCodemodTypes);
 
-    // sort according to the codemod execution priority of each codemod type
-    orderedCodemodTypes.sort(
-        (c1, c2) -> {
-          CodemodExecutionPriority p1 = c1.getAnnotation(Codemod.class).executionPriority();
-          CodemodExecutionPriority p2 = c2.getAnnotation(Codemod.class).executionPriority();
-          return CodemodExecutionPriority.priorityOrderComparator.compare(p1, p2);
-        });
+    // if there's an order from --codemod-includes, honor that
+    Optional<List<String>> desiredOrder = codemodRegulator.desiredCodemodIdOrder();
+    if (desiredOrder.isPresent()) {
+      orderedCodemodTypes.sort(
+          (c1, c2) -> {
+            String id1 = c1.getAnnotation(Codemod.class).id();
+            String id2 = c2.getAnnotation(Codemod.class).id();
+            int index1 = desiredOrder.get().indexOf(id1);
+            int index2 = desiredOrder.get().indexOf(id2);
+            return Integer.compare(index1, index2);
+          });
+    } else {
+      // sort according to the codemod execution priority of each codemod type
+      orderedCodemodTypes.sort(
+          (c1, c2) -> {
+            CodemodExecutionPriority p1 = c1.getAnnotation(Codemod.class).executionPriority();
+            CodemodExecutionPriority p2 = c2.getAnnotation(Codemod.class).executionPriority();
+            return CodemodExecutionPriority.priorityOrderComparator.compare(p1, p2);
+          });
+    }
 
     // get all the injectable parameters
     Set<String> packagesScanned = new HashSet<>();
@@ -127,7 +140,6 @@ public final class CodemodLoader {
         codemods.add(new CodemodIdPair(codemodId, codeChanger));
       }
     }
-
     this.codemods = Collections.unmodifiableList(codemods);
   }
 
