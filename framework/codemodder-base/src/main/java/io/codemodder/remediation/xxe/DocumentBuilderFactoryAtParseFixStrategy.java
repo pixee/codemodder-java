@@ -101,6 +101,20 @@ final class DocumentBuilderFactoryAtParseFixStrategy extends MatchAndFixStrategy
         .map(n -> n instanceof MethodCallExpr ? (MethodCallExpr) n : null)
         .filter(m -> "parse".equals(m.getNameAsString()))
         .filter(m -> m.getScope().filter(Expression::isNameExpr).isPresent())
+        .filter(
+            m -> {
+              Optional<Node> sourceRef =
+                  ASTs.findNonCallableSimpleNameSource(m.getScope().get().asNameExpr().getName());
+              if (sourceRef.isEmpty()) {
+                return false;
+              }
+              Node source = sourceRef.get();
+              if (source instanceof NodeWithType<?, ?>) {
+                return Set.of("DocumentBuilder", "javax.xml.parsers.DocumentBuilder")
+                    .contains(((NodeWithType<?, ?>) source).getTypeAsString());
+              }
+              return false;
+            })
         .isPresent();
   }
 }
