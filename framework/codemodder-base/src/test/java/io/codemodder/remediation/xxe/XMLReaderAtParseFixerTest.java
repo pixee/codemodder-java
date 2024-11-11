@@ -9,12 +9,38 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.SearcherStrategyRemediator;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.Test;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 final class XMLReaderAtParseFixerTest {
 
-  @Test
-  void it_fixes_xmlreaders_at_parse_call() {
+  private static Stream<Arguments> provideRemediators() {
+    return Stream.of(
+        Arguments.of(
+            new SearcherStrategyRemediator.Builder<>()
+                .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
+                .build()),
+
+        // now try with the previously conflicting parser strategy inline as well
+        Arguments.of(
+            new SearcherStrategyRemediator.Builder<>()
+                .withMatchAndFixStrategy(new DocumentBuilderFactoryAtParseFixStrategy())
+                .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
+                .build()),
+
+        // reverse the order to confirm no ordering issues
+        Arguments.of(
+            new SearcherStrategyRemediator.Builder<>()
+                .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
+                .withMatchAndFixStrategy(new DocumentBuilderFactoryAtParseFixStrategy())
+                .build()));
+  }
+
+  @MethodSource("provideRemediators")
+  @ParameterizedTest
+  void it_fixes_xmlreaders_at_parse_call(final SearcherStrategyRemediator remediator) {
     String vulnerableCode =
         """
                     public class MyCode {
@@ -43,12 +69,8 @@ final class XMLReaderAtParseFixerTest {
     CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
     LexicalPreservingPrinter.setup(cu);
 
-    var searcherRemediator =
-        new SearcherStrategyRemediator.Builder<>()
-            .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
-            .build();
     var result =
-        searcherRemediator.remediateAll(
+        remediator.remediateAll(
             cu,
             "path",
             new DetectorRule("", "", ""),
