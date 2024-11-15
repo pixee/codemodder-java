@@ -1,0 +1,6 @@
+{
+  "summary" : "Escaped regex metacharacters to prevent abuse",
+  "change" : "Escaped regex metacharacters to prevent abuse",
+  "reviewGuidanceIJustification" : "We believe this change is effective, and it will not break applications unless intentionally allowing users to specify regex patterns.",
+  "references" : ["https://cwe.mitre.org/data/definitions/400.html", "https://wiki.sei.cmu.edu/confluence/display/java/IDS08-J.+Sanitize+untrusted+data+included+in+a+regular+expression"]
+}

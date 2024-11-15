@@ -16,7 +16,8 @@ public enum GenericRemediationMetadata {
   SSRF("ssrf"),
   WEAK_RANDOM("weak-random"),
   PREDICTABLE_SEED("predictable-seed"),
-  ZIP_SLIP("zip-slip");
+  ZIP_SLIP("zip-slip"),
+  REGEX_INJECTION("regex-injection");
 
   private final CodemodReporterStrategy reporter;
 
