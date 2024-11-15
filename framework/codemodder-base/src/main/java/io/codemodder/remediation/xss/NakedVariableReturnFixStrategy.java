@@ -10,9 +10,13 @@ import io.codemodder.remediation.RemediationStrategy;
 import io.codemodder.remediation.SuccessOrReason;
 import java.util.List;
 import java.util.Optional;
-import org.jetbrains.annotations.VisibleForTesting;
 
+/**
+ * Fix strategy for XSS vulnerabilities where a variable is returned directly and that is what's
+ * vulnerable.
+ */
 final class NakedVariableReturnFixStrategy implements RemediationStrategy {
+
   @Override
   public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
     var maybeReturn = Optional.of(node).map(n -> n instanceof ReturnStmt ? (ReturnStmt) n : null);
@@ -25,8 +29,7 @@ final class NakedVariableReturnFixStrategy implements RemediationStrategy {
     return SuccessOrReason.success(List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER));
   }
 
-  @VisibleForTesting
-  public static boolean match(final Node node) {
+  static boolean match(final Node node) {
     return Optional.of(node)
         .map(n -> n instanceof ReturnStmt ? (ReturnStmt) n : null)
         .filter(rs -> rs.getExpression().isPresent())

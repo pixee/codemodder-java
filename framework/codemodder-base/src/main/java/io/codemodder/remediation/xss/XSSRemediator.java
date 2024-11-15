@@ -10,7 +10,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class XSSRemediator<T> implements Remediator<T> {
+/** Remediator for XSS vulnerabilities. */
+public final class XSSRemediator<T> implements Remediator<T> {
 
   private final SearcherStrategyRemediator<T> searchStrategyRemediator;
 
