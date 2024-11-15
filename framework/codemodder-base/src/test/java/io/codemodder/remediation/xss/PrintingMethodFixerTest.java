@@ -76,7 +76,55 @@ final class PrintingMethodFixerTest {
                             getWriter().write(Encode.forHtml(s));
                           }
                         }
-                        """));
+                        """),
+        Arguments.of(
+            """
+                                class Samples {
+                                  void should_be_fixed(String s) {
+                                    getWriter().write("<div>" + s);
+                                  }
+                                }
+                                """,
+            """
+                                import org.owasp.encoder.Encode;
+                                class Samples {
+                                  void should_be_fixed(String s) {
+                                    getWriter().write("<div>" + Encode.forHtml(s));
+                                  }
+                                }
+                                """),
+        Arguments.of(
+            """
+                                class Samples {
+                                  void should_be_fixed(String s) {
+                                    getWriter().write("<div>" + s + "</div>");
+                                  }
+                                }
+                                """,
+            """
+                                import org.owasp.encoder.Encode;
+                                class Samples {
+                                  void should_be_fixed(String s) {
+                                    getWriter().write("<div>" + Encode.forHtml(s) + "</div>");
+                                  }
+                                }
+                                """),
+        Arguments.of(
+            """
+                                class Samples {
+                                  void should_be_fixed(String s) {
+                                    getWriter().write(s + "</div>");
+                                  }
+                                }
+                                """,
+            """
+                                import org.owasp.encoder.Encode;
+                                class Samples {
+                                  void should_be_fixed(String s) {
+                                    getWriter().write(Encode.forHtml(s) + "</div>");
+                                  }
+                                }
+                                """));
   }
 
   @ParameterizedTest
@@ -104,7 +152,7 @@ final class PrintingMethodFixerTest {
             XSSFinding::line,
             x -> Optional.empty(),
             x -> Optional.ofNullable(x.column()));
-    assertThat(result.changes().isEmpty()).isFalse();
+    assertThat(result.changes()).isNotEmpty();
     String actualCode = LexicalPreservingPrinter.print(cu);
     assertThat(actualCode).isEqualToIgnoringWhitespace(afterCode);
   }
