@@ -2,7 +2,7 @@ package io.codemodder.providers.sarif.codeql;
 
 import io.codemodder.CodeChanger;
 import io.codemodder.Codemod;
-import io.codemodder.LazyCodemodLoadingAbstractModule;
+import io.codemodder.CodemodCheckingAbstractModule;
 import io.codemodder.RuleSarif;
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /** Responsible for distributing the SARIFS to CodeQL based codemods based on rules. */
-public final class CodeQLModule extends LazyCodemodLoadingAbstractModule {
+public final class CodeQLModule extends CodemodCheckingAbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final List<RuleSarif> allCodeqlRuleSarifs;

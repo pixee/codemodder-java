@@ -2,7 +2,7 @@ package io.codemodder.providers.sonar;
 
 import io.codemodder.CodeChanger;
 import io.codemodder.Codemod;
-import io.codemodder.LazyCodemodLoadingAbstractModule;
+import io.codemodder.CodemodCheckingAbstractModule;
 import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.Issue;
 import io.codemodder.sonar.model.SonarFinding;
@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.util.*;
 import javax.inject.Inject;
 
-final class SonarModule<T extends SonarFinding> extends LazyCodemodLoadingAbstractModule {
+final class SonarModule<T extends SonarFinding> extends CodemodCheckingAbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path repository;

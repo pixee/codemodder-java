@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Responsible for binding Semgrep-related things. */
-public final class SemgrepModule extends LazyCodemodLoadingAbstractModule {
+public final class SemgrepModule extends CodemodCheckingAbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;

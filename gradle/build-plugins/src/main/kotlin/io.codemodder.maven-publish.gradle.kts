@@ -26,7 +26,7 @@ signing {
         val signingPassword: String? by project
         useInMemoryPgpKeys(signingKey, signingPassword)
     }
-    sign(extensions.getByType<PublishingExtension>().publications.getByName(publicationName))
+//    sign(extensions.getByType<PublishingExtension>().publications.getByName(publicationName))
 }
 
 publishing {

@@ -3,14 +3,13 @@ package io.codemodder;
 import com.google.inject.AbstractModule;
 import java.util.List;
 
-/** A module that only loads if it is responsible for a codemod that's being loaded. */
-public abstract class LazyCodemodLoadingAbstractModule extends AbstractModule {
+/** A module that only configures if it is responsible for a codemod that's being loaded. */
+public abstract class CodemodCheckingAbstractModule extends AbstractModule {
 
   private final boolean shouldActivate;
 
   /** Returns true if this module is responsible for any of the given codemods, so it doesn't . */
-  protected LazyCodemodLoadingAbstractModule(
-      final List<Class<? extends CodeChanger>> codemodTypes) {
+  protected CodemodCheckingAbstractModule(final List<Class<? extends CodeChanger>> codemodTypes) {
     this.shouldActivate = codemodTypes.stream().anyMatch(this::isResponsibleFor);
   }
 

@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Responsible for binding PMD-related things. */
-public final class PmdModule extends LazyCodemodLoadingAbstractModule {
+public final class PmdModule extends CodemodCheckingAbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;
