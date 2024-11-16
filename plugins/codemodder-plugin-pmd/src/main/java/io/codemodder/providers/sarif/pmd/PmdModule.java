@@ -2,10 +2,7 @@ package io.codemodder.providers.sarif.pmd;
 
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
-import com.google.inject.AbstractModule;
-import io.codemodder.CodeChanger;
-import io.codemodder.LazyLoadingRuleSarif;
-import io.codemodder.RuleSarif;
+import io.codemodder.*;
 import io.github.classgraph.*;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
@@ -16,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Responsible for binding PMD-related things. */
-public final class PmdModule extends AbstractModule {
+public final class PmdModule extends LazyCodemodLoadingAbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;
@@ -27,6 +24,7 @@ public final class PmdModule extends AbstractModule {
       final Path codeDirectory,
       final List<Path> includedFiles,
       final List<Class<? extends CodeChanger>> codemodTypes) {
+    super(codemodTypes);
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
     this.includedFiles = Objects.requireNonNull(includedFiles);
@@ -34,7 +32,14 @@ public final class PmdModule extends AbstractModule {
   }
 
   @Override
-  protected void configure() {
+  protected boolean isResponsibleFor(final Class<? extends CodeChanger> codemod) {
+    Codemod annotation = codemod.getAnnotation(Codemod.class);
+    String id = annotation.id();
+    return id.startsWith("semgrep:") || id.startsWith("pixee:");
+  }
+
+  @Override
+  protected void doConfigure() {
     Set<String> packagesScanned = new HashSet<>();
 
     List<PmdScanTarget> scanTargets = new ArrayList<>();

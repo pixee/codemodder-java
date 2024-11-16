@@ -1,7 +1,8 @@
 package io.codemodder.providers.sarif.codeql;
 
-import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
+import io.codemodder.Codemod;
+import io.codemodder.LazyCodemodLoadingAbstractModule;
 import io.codemodder.RuleSarif;
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -12,19 +13,25 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /** Responsible for distributing the SARIFS to CodeQL based codemods based on rules. */
-public final class CodeQLModule extends AbstractModule {
+public final class CodeQLModule extends LazyCodemodLoadingAbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final List<RuleSarif> allCodeqlRuleSarifs;
 
   CodeQLModule(
       final List<Class<? extends CodeChanger>> codemodTypes, final List<RuleSarif> sarifs) {
+    super(codemodTypes);
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.allCodeqlRuleSarifs = sarifs;
   }
 
   @Override
-  protected void configure() {
+  protected boolean isResponsibleFor(final Class<? extends CodeChanger> codemod) {
+    return codemod.getAnnotation(Codemod.class).id().startsWith("codeql:");
+  }
+
+  @Override
+  protected void doConfigure() {
     // What if there are multiple sarif files with a given rule?
     // We can safely ignore this case for now.
     final Map<String, RuleSarif> map =

@@ -2,10 +2,7 @@ package io.codemodder.providers.sarif.semgrep;
 
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
-import com.google.inject.AbstractModule;
-import io.codemodder.CodeChanger;
-import io.codemodder.LazyLoadingRuleSarif;
-import io.codemodder.RuleSarif;
+import io.codemodder.*;
 import io.github.classgraph.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -20,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Responsible for binding Semgrep-related things. */
-public final class SemgrepModule extends AbstractModule {
+public final class SemgrepModule extends LazyCodemodLoadingAbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;
@@ -44,13 +41,14 @@ public final class SemgrepModule extends AbstractModule {
         new DefaultSemgrepRuleFactory());
   }
 
-  public SemgrepModule(
+  SemgrepModule(
       final Path codeDirectory,
       final List<String> includePatterns,
       final List<String> excludePatterns,
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs,
       final SemgrepRuleFactory semgrepRuleFactory) {
+    super(codemodTypes);
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
     this.includePatterns = Objects.requireNonNull(includePatterns);
@@ -61,7 +59,14 @@ public final class SemgrepModule extends AbstractModule {
   }
 
   @Override
-  protected void configure() {
+  protected boolean isResponsibleFor(final Class<? extends CodeChanger> codemod) {
+    Codemod annotation = codemod.getAnnotation(Codemod.class);
+    String id = annotation.id();
+    return id.startsWith("semgrep:") || id.startsWith("pixee:");
+  }
+
+  @Override
+  protected void doConfigure() {
 
     // find all the @ProvidedSemgrepScan annotations and bind them as is
     Set<String> packagesScanned = new HashSet<>();
