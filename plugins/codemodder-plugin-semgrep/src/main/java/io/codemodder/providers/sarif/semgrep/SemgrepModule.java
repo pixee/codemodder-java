@@ -62,7 +62,7 @@ public final class SemgrepModule extends CodemodCheckingAbstractModule {
   protected boolean isResponsibleFor(final Class<? extends CodeChanger> codemod) {
     Codemod annotation = codemod.getAnnotation(Codemod.class);
     String id = annotation.id();
-    return id.startsWith("semgrep:") || id.startsWith("pixee:");
+    return id.startsWith("semgrep:") || id.startsWith("pixee:") || id.startsWith("codemodder:");
   }
 
   @Override
