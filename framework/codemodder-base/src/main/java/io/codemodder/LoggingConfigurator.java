@@ -24,9 +24,7 @@ public final class LoggingConfigurator extends ContextAwareBase implements Confi
     ca.setContext(lc);
     ca.setName(APPENDER_NAME);
     PatternLayoutEncoder patternLayoutEncoder = new PatternLayoutEncoder();
-    // add the timestamp
-    //    patternLayoutEncoder.setPattern("%m%n");
-    patternLayoutEncoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
+    patternLayoutEncoder.setPattern("%m%n");
     patternLayoutEncoder.setContext(lc);
     patternLayoutEncoder.setCharset(StandardCharsets.UTF_8);
     patternLayoutEncoder.start();
