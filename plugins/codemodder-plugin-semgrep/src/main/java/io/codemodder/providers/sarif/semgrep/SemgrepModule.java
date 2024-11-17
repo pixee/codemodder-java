@@ -2,6 +2,7 @@ package io.codemodder.providers.sarif.semgrep;
 
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
+import com.google.inject.AbstractModule;
 import io.codemodder.*;
 import io.github.classgraph.*;
 import java.io.IOException;
@@ -17,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Responsible for binding Semgrep-related things. */
-public final class SemgrepModule extends CodemodCheckingAbstractModule {
+public final class SemgrepModule extends AbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;
@@ -48,7 +49,6 @@ public final class SemgrepModule extends CodemodCheckingAbstractModule {
       final List<Class<? extends CodeChanger>> codemodTypes,
       final List<RuleSarif> sarifs,
       final SemgrepRuleFactory semgrepRuleFactory) {
-    super(codemodTypes);
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
     this.includePatterns = Objects.requireNonNull(includePatterns);
@@ -59,14 +59,7 @@ public final class SemgrepModule extends CodemodCheckingAbstractModule {
   }
 
   @Override
-  protected boolean isResponsibleFor(final Class<? extends CodeChanger> codemod) {
-    Codemod annotation = codemod.getAnnotation(Codemod.class);
-    String id = annotation.id();
-    return id.startsWith("semgrep:") || id.startsWith("pixee:") || id.startsWith("codemodder:");
-  }
-
-  @Override
-  protected void doConfigure() {
+  protected void configure() {
 
     // find all the @ProvidedSemgrepScan annotations and bind them as is
     Set<String> packagesScanned = new HashSet<>();
@@ -146,6 +139,14 @@ public final class SemgrepModule extends CodemodCheckingAbstractModule {
         LOG.trace("Finished scanning codemod package: {}", packageName);
         packagesScanned.add(packageName);
       }
+    }
+
+    if (rules.isEmpty()) {
+      // no active codemods have rules to bind for, so we can return
+      LOG.info("No active codemods have Semgrep rules to bind for JIT scanning");
+      return;
+    } else {
+      LOG.info("Found {} Semgrep rules to bind for JIT scanning", rules.size());
     }
 
     /*

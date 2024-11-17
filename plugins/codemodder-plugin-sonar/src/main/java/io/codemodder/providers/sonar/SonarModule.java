@@ -1,8 +1,7 @@
 package io.codemodder.providers.sonar;
 
+import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
-import io.codemodder.Codemod;
-import io.codemodder.CodemodCheckingAbstractModule;
 import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.Issue;
 import io.codemodder.sonar.model.SonarFinding;
@@ -15,7 +14,7 @@ import java.nio.file.Path;
 import java.util.*;
 import javax.inject.Inject;
 
-final class SonarModule<T extends SonarFinding> extends CodemodCheckingAbstractModule {
+final class SonarModule<T extends SonarFinding> extends AbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path repository;
@@ -28,7 +27,6 @@ final class SonarModule<T extends SonarFinding> extends CodemodCheckingAbstractM
       final Path repository,
       final List<T> findings,
       final Class<? extends RuleFinding<T>> ruleFindingClass) {
-    super(codemodTypes);
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.repository = Objects.requireNonNull(repository);
     this.sonarFindings = findings;
@@ -36,12 +34,7 @@ final class SonarModule<T extends SonarFinding> extends CodemodCheckingAbstractM
   }
 
   @Override
-  protected boolean isResponsibleFor(final Class<? extends CodeChanger> codemod) {
-    return codemod.getAnnotation(Codemod.class).id().startsWith("sonar:");
-  }
-
-  @Override
-  protected void doConfigure() {
+  protected void configure() {
 
     Map<String, List<T>> findingsByRuleMap = groupFindingsByRule(sonarFindings);
 

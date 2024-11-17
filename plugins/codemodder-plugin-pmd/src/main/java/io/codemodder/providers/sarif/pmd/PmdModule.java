@@ -2,6 +2,7 @@ package io.codemodder.providers.sarif.pmd;
 
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
+import com.google.inject.AbstractModule;
 import io.codemodder.*;
 import io.github.classgraph.*;
 import java.lang.reflect.Executable;
@@ -13,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Responsible for binding PMD-related things. */
-public final class PmdModule extends CodemodCheckingAbstractModule {
+public final class PmdModule extends AbstractModule {
 
   private final List<Class<? extends CodeChanger>> codemodTypes;
   private final Path codeDirectory;
@@ -24,7 +25,6 @@ public final class PmdModule extends CodemodCheckingAbstractModule {
       final Path codeDirectory,
       final List<Path> includedFiles,
       final List<Class<? extends CodeChanger>> codemodTypes) {
-    super(codemodTypes);
     this.codemodTypes = Objects.requireNonNull(codemodTypes);
     this.codeDirectory = Objects.requireNonNull(codeDirectory);
     this.includedFiles = Objects.requireNonNull(includedFiles);
@@ -32,14 +32,7 @@ public final class PmdModule extends CodemodCheckingAbstractModule {
   }
 
   @Override
-  protected boolean isResponsibleFor(final Class<? extends CodeChanger> codemod) {
-    Codemod annotation = codemod.getAnnotation(Codemod.class);
-    String id = annotation.id();
-    return id.startsWith("semgrep:") || id.startsWith("pixee:") || id.startsWith("pmd:");
-  }
-
-  @Override
-  protected void doConfigure() {
+  protected void configure() {
     Set<String> packagesScanned = new HashSet<>();
 
     List<PmdScanTarget> scanTargets = new ArrayList<>();
@@ -86,6 +79,11 @@ public final class PmdModule extends CodemodCheckingAbstractModule {
         LOG.trace("Finished scanning codemod package: {}", packageName);
         packagesScanned.add(packageName);
       }
+    }
+
+    if (scanTargets.isEmpty()) {
+      LOG.trace("No @PmdScan annotations found, skipping");
+      return;
     }
 
     SarifSchema210 allRulesBatchedRun =
