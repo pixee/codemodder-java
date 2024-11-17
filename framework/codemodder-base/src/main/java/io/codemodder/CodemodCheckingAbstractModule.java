@@ -21,9 +21,9 @@ public abstract class CodemodCheckingAbstractModule extends AbstractModule {
   @Override
   protected final void configure() {
     if (shouldActivate) {
-      log.info("Configuring module {}", this.getClass().getSimpleName());
+      log.debug("Configuring module {}", this.getClass().getSimpleName());
       doConfigure();
-      log.info("Done configuration {}", this.getClass().getSimpleName());
+      log.debug("Done configuration {}", this.getClass().getSimpleName());
     }
   }
 
