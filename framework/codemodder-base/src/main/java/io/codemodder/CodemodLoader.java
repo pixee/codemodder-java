@@ -13,6 +13,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** This type is responsible for loading codemods and the surrounding subsystem. */
 public final class CodemodLoader {
@@ -32,6 +34,8 @@ public final class CodemodLoader {
       final List<Path> sonarHotspotsJsonFiles,
       final Path defectDojoFindingsJsonFile,
       final Path contrastVulnerabilitiesXmlFilePath) {
+
+    log.debug("Loading providers");
 
     // get all the providers ready for dependency injection & codemod instantiation
     final List<CodemodProvider> providers =
@@ -106,6 +110,7 @@ public final class CodemodLoader {
           wantsSarif.stream()
               .flatMap(toolName -> ruleSarifByTool.getOrDefault(toolName, List.of()).stream())
               .toList();
+      log.debug("Loading modules from provider: {}", provider.getClass().getSimpleName());
       final Set<AbstractModule> modules =
           provider.getModules(
               repositoryDir,
@@ -125,7 +130,9 @@ public final class CodemodLoader {
     final List<CodemodIdPair> codemods = new ArrayList<>();
 
     // validate and instantiate the codemods
+    log.debug("Instantiating codemods");
     final Injector injector = Guice.createInjector(allModules);
+    log.debug("Codemods instantiated");
     final Set<String> codemodIds = new HashSet<>();
     for (final Class<? extends CodeChanger> type : orderedCodemodTypes) {
       final Codemod codemodAnnotation = type.getAnnotation(Codemod.class);
@@ -163,6 +170,8 @@ public final class CodemodLoader {
   static boolean isValidCodemodId(final String codemodId) {
     return codemodIdPattern.matcher(codemodId).matches();
   }
+
+  private static final Logger log = LoggerFactory.getLogger(CodemodLoader.class);
 
   private static final Pattern codemodIdPattern =
       Pattern.compile("^([A-Za-z0-9]+):(([A-Za-z0-9]+)/)+([A-Za-z0-9\\-\\.]+)$");

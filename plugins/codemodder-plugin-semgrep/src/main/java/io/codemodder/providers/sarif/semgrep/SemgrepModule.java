@@ -3,9 +3,7 @@ package io.codemodder.providers.sarif.semgrep;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.google.inject.AbstractModule;
-import io.codemodder.CodeChanger;
-import io.codemodder.LazyLoadingRuleSarif;
-import io.codemodder.RuleSarif;
+import io.codemodder.*;
 import io.github.classgraph.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -44,7 +42,7 @@ public final class SemgrepModule extends AbstractModule {
         new DefaultSemgrepRuleFactory());
   }
 
-  public SemgrepModule(
+  SemgrepModule(
       final Path codeDirectory,
       final List<String> includePatterns,
       final List<String> excludePatterns,
@@ -141,6 +139,14 @@ public final class SemgrepModule extends AbstractModule {
         LOG.trace("Finished scanning codemod package: {}", packageName);
         packagesScanned.add(packageName);
       }
+    }
+
+    if (rules.isEmpty()) {
+      // no active codemods have rules to bind for, so we can return
+      LOG.info("No active codemods have Semgrep rules to bind for JIT scanning");
+      return;
+    } else {
+      LOG.info("Found {} Semgrep rules to bind for JIT scanning", rules.size());
     }
 
     /*

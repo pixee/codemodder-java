@@ -366,9 +366,14 @@ final class CLI implements Callable<Integer> {
       log.debug("excluding paths: {}", pathExcludes);
 
       // get all files that match
+      log.debug("Listing source directories");
       List<SourceDirectory> sourceDirectories =
           sourceDirectoryLister.listJavaSourceDirectories(List.of(projectDirectory));
+
+      log.debug("Listing files");
       List<Path> filePaths = fileFinder.findFiles(projectPath, includesExcludes);
+
+      log.debug("Creating codemod regulator");
 
       // get codemod includes/excludes
       final CodemodRegulator regulator;
@@ -386,10 +391,13 @@ final class CLI implements Callable<Integer> {
       }
 
       // create the loader
+      log.debug("Loading input files");
       CodeDirectory codeDirectory = new DefaultCodeDirectory(projectPath);
       List<Path> sarifFiles = convertToPaths(sarifs);
       List<Path> sonarIssuesJsonFiles = convertToPaths(sonarIssuesJsonFilePaths);
       List<Path> sonarHotspotJsonFiles = convertToPaths(sonarHotspotsJsonFilePaths);
+
+      log.debug("Parsing SARIFs");
       Map<String, List<RuleSarif>> pathSarifMap =
           SarifParser.create().parseIntoMap(sarifFiles, codeDirectory);
       List<ParameterArgument> codemodParameters =

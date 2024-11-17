@@ -3,9 +3,7 @@ package io.codemodder.providers.sarif.pmd;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.google.inject.AbstractModule;
-import io.codemodder.CodeChanger;
-import io.codemodder.LazyLoadingRuleSarif;
-import io.codemodder.RuleSarif;
+import io.codemodder.*;
 import io.github.classgraph.*;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
@@ -81,6 +79,11 @@ public final class PmdModule extends AbstractModule {
         LOG.trace("Finished scanning codemod package: {}", packageName);
         packagesScanned.add(packageName);
       }
+    }
+
+    if (scanTargets.isEmpty()) {
+      LOG.trace("No @PmdScan annotations found, skipping");
+      return;
     }
 
     SarifSchema210 allRulesBatchedRun =
