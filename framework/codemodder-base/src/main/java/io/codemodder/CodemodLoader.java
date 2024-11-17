@@ -35,7 +35,7 @@ public final class CodemodLoader {
       final Path defectDojoFindingsJsonFile,
       final Path contrastVulnerabilitiesXmlFilePath) {
 
-    log.info("Loading providers");
+    log.debug("Loading providers");
 
     // get all the providers ready for dependency injection & codemod instantiation
     final List<CodemodProvider> providers =
@@ -110,7 +110,7 @@ public final class CodemodLoader {
           wantsSarif.stream()
               .flatMap(toolName -> ruleSarifByTool.getOrDefault(toolName, List.of()).stream())
               .toList();
-      log.info("Loading modules from provider: {}", provider.getClass().getSimpleName());
+      log.debug("Loading modules from provider: {}", provider.getClass().getSimpleName());
       final Set<AbstractModule> modules =
           provider.getModules(
               repositoryDir,
@@ -130,9 +130,9 @@ public final class CodemodLoader {
     final List<CodemodIdPair> codemods = new ArrayList<>();
 
     // validate and instantiate the codemods
-    log.info("Instantiating codemods");
+    log.debug("Instantiating codemods");
     final Injector injector = Guice.createInjector(allModules);
-    log.info("Codemods instantiated");
+    log.debug("Codemods instantiated");
     final Set<String> codemodIds = new HashSet<>();
     for (final Class<? extends CodeChanger> type : orderedCodemodTypes) {
       final Codemod codemodAnnotation = type.getAnnotation(Codemod.class);

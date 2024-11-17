@@ -27,7 +27,7 @@ final class AppScanSarifLocationData {
 
     Map<Path, Set<Integer>> artifactLocationIndicesMap = new HashMap<>();
 
-    log.info("Calculating locations in project dir");
+    log.debug("Calculating locations in project dir");
     for (int i = 0; i < locations.size(); i++) {
       final Integer index = i;
       String path = locations.get(i);
@@ -43,7 +43,7 @@ final class AppScanSarifLocationData {
       existingRealPath.ifPresent(
           p -> artifactLocationIndicesMap.computeIfAbsent(p, k -> new HashSet<>()).add(index));
     }
-    log.info("Done calculating locations");
+    log.debug("Done calculating locations");
     this.artifactLocationIndices = Map.copyOf(artifactLocationIndicesMap);
   }
 
