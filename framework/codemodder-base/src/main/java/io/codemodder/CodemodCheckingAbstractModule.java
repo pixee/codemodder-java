@@ -2,6 +2,8 @@ package io.codemodder;
 
 import com.google.inject.AbstractModule;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** A module that only configures if it is responsible for a codemod that's being loaded. */
 public abstract class CodemodCheckingAbstractModule extends AbstractModule {
@@ -19,10 +21,14 @@ public abstract class CodemodCheckingAbstractModule extends AbstractModule {
   @Override
   protected final void configure() {
     if (shouldActivate) {
+      log.info("Configuring module {}", this.getClass().getSimpleName());
       doConfigure();
+      log.info("Done configuration {}", this.getClass().getSimpleName());
     }
   }
 
   /** Do the configuration that you would normally do in the configure method. */
   protected abstract void doConfigure();
+
+  private static final Logger log = LoggerFactory.getLogger(CodemodCheckingAbstractModule.class);
 }

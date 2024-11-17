@@ -21,7 +21,7 @@ import org.junit.jupiter.api.io.TempDir;
 final class AppScanModuleTest {
 
   @Codemod(
-      id = "appscan-test:java/finds-stuff",
+      id = "appscan:java/finds-stuff",
       importance = Importance.LOW,
       reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW)
   static class AppScanSarifTestCodemod implements CodeChanger {
