@@ -1,0 +1,6 @@
+{
+  "summary" : "Removed printing/sending of error data",
+  "change" : "Removed printing/sending of error data",
+  "reviewGuidanceIJustification" : "While this change is most likely harmless, it may be the case that the other endpoint is expecting the message and needs adjustment.",
+  "references" : ["https://cwe.mitre.org/data/definitions/209.html", "https://owasp.org/www-community/Improper_Error_Handling", "https://www.securecoding.cert.org/confluence/display/java/ERR01-J.+Do+not+allow+exceptions+to+expose+sensitive+information"]
+}

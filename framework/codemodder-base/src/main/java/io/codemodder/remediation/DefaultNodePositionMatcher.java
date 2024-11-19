@@ -19,7 +19,7 @@ class DefaultNodePositionMatcher implements NodePositionMatcher {
   @Override
   public boolean match(final Node node, int startLine, int endLine, int startColumn) {
     return match(node, startLine, endLine)
-        && getRange(node).begin.compareTo(new Position(startLine, startColumn)) <= 0;
+        && getRange(node).begin.compareTo(new Position(startLine, startColumn)) >= 0;
   }
 
   @Override
