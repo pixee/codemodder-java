@@ -1,19 +1,12 @@
 package io.codemodder.remediation.errorexposure;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
-import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.SearcherStrategyRemediator;
-import io.codemodder.remediation.headerinjection.HeaderInjectionFixStrategy;
-
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -28,7 +21,7 @@ public final class ErrorMessageExposureRemediator<T> implements Remediator<T> {
   public ErrorMessageExposureRemediator() {
     this.searchStrategyRemediator =
         new SearcherStrategyRemediator.Builder<T>()
-                .withMatchAndFixStrategy(new ErrorMessageExposureFixStrategy())
+            .withMatchAndFixStrategy(new ErrorMessageExposureFixStrategy())
             .build();
   }
 

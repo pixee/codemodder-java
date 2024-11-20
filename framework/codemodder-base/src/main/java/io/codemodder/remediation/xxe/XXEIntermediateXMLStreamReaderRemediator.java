@@ -1,8 +1,10 @@
 package io.codemodder.remediation.xxe;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.expr.Expression;
 import io.codemodder.CodemodFileScanningResult;
+import io.codemodder.ast.ASTs;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.Remediator;
@@ -23,9 +25,9 @@ public class XXEIntermediateXMLStreamReaderRemediator<T> implements Remediator<T
                     .withMatcher(
                         node ->
                             Optional.of(node)
-                                .map(n -> n instanceof MethodCallExpr mce ? mce : null)
-                                .filter(mce -> mce.hasScope())
-                                .filter(mce -> mce.getArguments().isNonEmpty())
+                                .map(n -> n instanceof Expression e ? e : null)
+                                .flatMap(ASTs::isArgumentOfMethodCall)
+                                .filter(Node::hasScope)
                                 .isPresent())
                     .build(),
                 new XXEIntermediateXMLStreamReaderFixStrategy())

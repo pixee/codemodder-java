@@ -8,6 +8,7 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import io.codemodder.CodemodChange;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.remediation.WithoutScopePositionMatcher;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +21,7 @@ final class DefaultXXERemediatorTest {
 
   @BeforeEach
   void setup() {
-    this.remediator = new XXERemediator<>();
+    this.remediator = new XXERemediator<>(new WithoutScopePositionMatcher());
     this.rule = new DetectorRule("xxe", "XXE", null);
   }
 
@@ -48,7 +49,7 @@ final class DefaultXXERemediatorTest {
             }
             """;
 
-    List<XXEFinding> findings = List.of(new XXEFinding("foo", 11, 16));
+    List<XXEFinding> findings = List.of(new XXEFinding("foo", 11, 15));
     CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
     LexicalPreservingPrinter.setup(cu);
     CodemodFileScanningResult result =

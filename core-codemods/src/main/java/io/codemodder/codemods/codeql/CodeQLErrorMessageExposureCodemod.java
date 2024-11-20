@@ -8,10 +8,8 @@ import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.errorexposure.ErrorMessageExposureRemediator;
-import io.codemodder.remediation.xxe.XXEIntermediateXMLStreamReaderRemediator;
-
-import javax.inject.Inject;
 import java.util.Optional;
+import javax.inject.Inject;
 
 /** A codemod for automatically fixing SQL injection from CodeQL. */
 @Codemod(
@@ -24,7 +22,8 @@ public final class CodeQLErrorMessageExposureCodemod extends CodeQLRemediationCo
   private final Remediator<Result> remediator;
 
   @Inject
-  public CodeQLErrorMessageExposureCodemod(@ProvidedCodeQLScan(ruleId = "java/error-message-exposure") final RuleSarif sarif) {
+  public CodeQLErrorMessageExposureCodemod(
+      @ProvidedCodeQLScan(ruleId = "java/error-message-exposure") final RuleSarif sarif) {
     super(GenericRemediationMetadata.ERROR_MESSAGE_EXPOSURE.reporter(), sarif);
     this.remediator = new ErrorMessageExposureRemediator<>();
   }
@@ -40,18 +39,18 @@ public final class CodeQLErrorMessageExposureCodemod extends CodeQLRemediationCo
   @Override
   public CodemodFileScanningResult visit(
       final CodemodInvocationContext context, final CompilationUnit cu) {
-      return remediator.remediateAll(
-              cu,
-              context.path().toString(),
-              detectorRule(),
-              ruleSarif.getResultsByLocationPath(context.path()),
-              SarifFindingKeyUtil::buildFindingId,
-              r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
-              r ->
-                      Optional.ofNullable(
-                              r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
-              r ->
-                      Optional.ofNullable(
-                              r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn()));
+    return remediator.remediateAll(
+        cu,
+        context.path().toString(),
+        detectorRule(),
+        ruleSarif.getResultsByLocationPath(context.path()),
+        SarifFindingKeyUtil::buildFindingId,
+        r -> r.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine(),
+        r ->
+            Optional.ofNullable(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
+        r ->
+            Optional.ofNullable(
+                r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn()));
   }
 }
