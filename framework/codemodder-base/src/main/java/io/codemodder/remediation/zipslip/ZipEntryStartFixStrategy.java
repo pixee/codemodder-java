@@ -24,14 +24,22 @@ final class ZipEntryStartFixStrategy implements RemediationStrategy {
       return SuccessOrReason.reason("No encompassing class found");
     }
 
-    addSanitizeName(classDeclRef.get());
+    Optional<MethodDeclaration> methodAncestor = call.findAncestor(MethodDeclaration.class);
+    if (methodAncestor.isEmpty()) {
+      return SuccessOrReason.reason("No encompassing method found");
+    }
+
+    boolean addStatic = methodAncestor.get().isStatic() || classDeclRef.get().isInterface();
+
+    addSanitizeName(classDeclRef.get(), addStatic);
     wrap(call).withScopelessMethod("sanitizeZipFilename");
 
     return SuccessOrReason.success();
   }
 
-  private static void addSanitizeName(final ClassOrInterfaceDeclaration classDecl) {
-    final String method =
+  private static void addSanitizeName(
+      final ClassOrInterfaceDeclaration classDecl, final boolean addStatic) {
+    String method =
         """
                 String sanitizeZipFilename(String entryName) {
                     if (entryName == null || entryName.trim().isEmpty()) {
@@ -43,6 +51,11 @@ final class ZipEntryStartFixStrategy implements RemediationStrategy {
                     return entryName;
                 }
                 """;
+
+    if (addStatic) {
+      method = "static " + method;
+    }
+
     boolean sanitizeMethodPresent =
         classDecl.findAll(MethodDeclaration.class).stream()
             .anyMatch(
