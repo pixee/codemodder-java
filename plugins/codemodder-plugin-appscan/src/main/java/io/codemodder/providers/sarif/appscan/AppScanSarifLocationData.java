@@ -43,7 +43,7 @@ final class AppScanSarifLocationData {
       existingRealPath.ifPresent(
           p -> artifactLocationIndicesMap.computeIfAbsent(p, k -> new HashSet<>()).add(index));
     }
-    log.debug("Done calculating locations");
+    log.trace("Done calculating locations");
     this.artifactLocationIndices = Map.copyOf(artifactLocationIndicesMap);
   }
 

@@ -46,7 +46,7 @@ final class WebGoat20238Test extends GitRepositoryTest {
             .flatMap(Collection::stream)
             .toList();
 
-    assertThat(fileChanges.size(), is(50));
+    assertThat(fileChanges.size(), is(51));
 
     verifyStandardCodemodResults(fileChanges);
 

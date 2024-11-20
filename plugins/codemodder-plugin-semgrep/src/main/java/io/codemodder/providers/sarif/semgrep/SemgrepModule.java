@@ -143,10 +143,10 @@ public final class SemgrepModule extends AbstractModule {
 
     if (rules.isEmpty()) {
       // no active codemods have rules to bind for, so we can return
-      LOG.info("No active codemods have Semgrep rules to bind for JIT scanning");
+      LOG.trace("No active codemods have Semgrep rules to bind for JIT scanning");
       return;
     } else {
-      LOG.info("Found {} Semgrep rules to bind for JIT scanning", rules.size());
+      LOG.trace("Found {} Semgrep rules to bind for JIT scanning", rules.size());
     }
 
     /*

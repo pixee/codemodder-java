@@ -43,6 +43,7 @@ public final class DefaultCodemods {
         CodeQLUnverifiedJwtCodemod.class,
         CodeQLXSSCodemod.class,
         CodeQLXXECodemod.class,
+        CodeQLZipSlipHandler.class,
         DeclareVariableOnSeparateLineCodemod.class,
         DefectDojoSqlInjectionCodemod.class,
         DefineConstantForLiteralCodemod.class,
