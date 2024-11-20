@@ -1,4 +1,4 @@
-package io.codemodder.remediation.xss;
+package io.codemodder.remediation.zipslip;
 
 import com.github.javaparser.ast.CompilationUnit;
 import io.codemodder.CodemodFileScanningResult;
@@ -10,29 +10,19 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 
-/** Remediator for XSS vulnerabilities. */
-public final class XSSRemediator<T> implements Remediator<T> {
+/** Remediator for ZipSlip vulnerabilities. */
+public final class ZipSlipRemediator<T> implements Remediator<T> {
 
   private final SearcherStrategyRemediator<T> searchStrategyRemediator;
 
-  public XSSRemediator() {
+  public ZipSlipRemediator() {
     this.searchStrategyRemediator =
         new SearcherStrategyRemediator.Builder<T>()
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(NakedVariableReturnFixStrategy::match)
+                    .withMatcher(ZipEntryStartFixStrategy::match)
                     .build(),
-                new NakedVariableReturnFixStrategy())
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(PrintingMethodFixStrategy::match)
-                    .build(),
-                new PrintingMethodFixStrategy())
-            .withSearcherStrategyPair(
-                new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(ResponseEntityFixStrategy::match)
-                    .build(),
-                new ResponseEntityFixStrategy())
+                new ZipEntryStartFixStrategy())
             .build();
   }
 

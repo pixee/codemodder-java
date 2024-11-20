@@ -18,11 +18,11 @@ final class DefaultSarifParser implements SarifParser {
 
   private Optional<SarifSchema210> readSarifFile(final Path sarifFile) {
     try {
-      log.debug("Reading input file: {}", sarifFile);
+      log.trace("Reading input file: {}", sarifFile);
       InputStream stream = Files.newInputStream(sarifFile);
-      log.debug("Parsing to SARIF input files");
+      log.trace("Parsing to SARIF input files");
       SarifSchema210 sarif = new ObjectMapper().readValue(stream, SarifSchema210.class);
-      log.debug("Parsed SARIF input files");
+      log.trace("Parsed SARIF input files");
       return Optional.of(sarif);
     } catch (final IOException e) {
       log.error("Problem deserializing SARIF file: {}", sarifFile, e);
@@ -38,7 +38,7 @@ final class DefaultSarifParser implements SarifParser {
       final CodeDirectory codeDirectory,
       final List<RuleSarifFactory> factories) {
     for (final var factory : factories) {
-      log.debug("Building SARIF: {}", factory.getClass().getSimpleName());
+      log.trace("Building SARIF: {}", factory.getClass().getSimpleName());
       final var maybeRuleSarif =
           factory.build(toolName, rule.ruleId, rule.messageText, sarif, codeDirectory);
       if (maybeRuleSarif.isPresent()) {
@@ -78,12 +78,12 @@ final class DefaultSarifParser implements SarifParser {
       final Run run, final SarifSchema210 sarif, final CodeDirectory codeDirectory) {
     // driver name
     final var toolName = run.getTool().getDriver().getName();
-    log.debug("Loading SARIF rule factories");
+    log.trace("Loading SARIF rule factories");
     final List<RuleSarifFactory> factories =
         ServiceLoader.load(RuleSarifFactory.class).stream()
             .map(ServiceLoader.Provider::get)
             .toList();
-    log.debug("Done loading SARIF rule factories");
+    log.trace("Done loading SARIF rule factories");
     final var runResults = run.getResults();
     final var allResults =
         runResults != null
@@ -114,7 +114,7 @@ final class DefaultSarifParser implements SarifParser {
             sarif -> sarif.getRuns().stream().flatMap(run -> fromSarif(run, sarif, codeDirectory)))
         .forEach(
             p -> {
-              log.debug("Merging SARIF results");
+              log.trace("Merging SARIF results");
               map.merge(
                   p.getKey(),
                   new ArrayList<>(Collections.singletonList(p.getValue())),
