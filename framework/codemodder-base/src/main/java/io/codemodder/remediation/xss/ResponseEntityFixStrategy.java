@@ -2,7 +2,9 @@ package io.codemodder.remediation.xss;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.remediation.RemediationStrategy;
 import io.codemodder.remediation.SuccessOrReason;
 import java.util.Optional;
@@ -32,6 +34,17 @@ final class ResponseEntityFixStrategy implements RemediationStrategy {
                 "ResponseEntity".equals(c.getTypeAsString())
                     || c.getTypeAsString().startsWith("ResponseEntity<"))
         .filter(c -> !c.getArguments().isEmpty())
+        .filter(
+            c -> {
+              Expression firstArg = c.getArguments().getFirst().get();
+              try {
+                ResolvedType resolvedType = firstArg.calculateResolvedType();
+                return "java.lang.String".equals(resolvedType.describe());
+              } catch (Exception e) {
+                // this is expected often, and indicates its a non-String type anyway
+                return false;
+              }
+            })
         .isPresent();
   }
 }
