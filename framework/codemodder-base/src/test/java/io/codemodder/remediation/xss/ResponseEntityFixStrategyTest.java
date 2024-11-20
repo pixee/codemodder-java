@@ -2,13 +2,15 @@ package io.codemodder.remediation.xss;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
+import io.codemodder.javaparser.JavaParserFactory;
 import io.codemodder.remediation.FixCandidateSearcher;
 import io.codemodder.remediation.SearcherStrategyRemediator;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -21,10 +23,12 @@ final class ResponseEntityFixStrategyTest {
 
   private ResponseEntityFixStrategy fixer;
   private DetectorRule rule;
+  private JavaParser parser;
 
   @BeforeEach
-  void setup() {
+  void setup() throws IOException {
     this.fixer = new ResponseEntityFixStrategy();
+    this.parser = JavaParserFactory.newFactory().create(List.of());
     this.rule = new DetectorRule("xss", "XSS", null);
   }
 
@@ -67,7 +71,7 @@ final class ResponseEntityFixStrategyTest {
   @ParameterizedTest
   @MethodSource("fixableSamples")
   void it_fixes_obvious_response_write_methods(final String beforeCode, final String afterCode) {
-    CompilationUnit cu = StaticJavaParser.parse(beforeCode);
+    CompilationUnit cu = parser.parse(beforeCode).getResult().orElseThrow();
     LexicalPreservingPrinter.setup(cu);
 
     var result = scanAndFix(cu, 3);
@@ -100,7 +104,7 @@ final class ResponseEntityFixStrategyTest {
   @ParameterizedTest
   @MethodSource("unfixableSamples")
   void it_does_not_fix_unfixable_samples(final String beforeCode, final int line) {
-    CompilationUnit cu = StaticJavaParser.parse(beforeCode);
+    CompilationUnit cu = parser.parse(beforeCode).getResult().orElseThrow();
     LexicalPreservingPrinter.setup(cu);
     var result = scanAndFix(cu, line);
     assertThat(result.changes()).isEmpty();
@@ -110,13 +114,24 @@ final class ResponseEntityFixStrategyTest {
     return Stream.of(
         // this is not a ResponseEntity, shouldn't touch it
         Arguments.of(
+            // this is not a ResponseEntity, shouldn't touch it
             """
                         class Samples {
-                          String should_be_fixed(String s) {
+                          String should_not_be_fixed(String s) {
                             return new NotResponseEntity(s, HttpStatus.OK);
                           }
                         }
                         """,
+            3),
+        Arguments.of(
+            // this is not a String, shouldn't touch it
+            """
+                            class Samples {
+                              String should_not_be_fixed(BodyType s) {
+                                return new ResponseEntity(s, HttpStatus.OK);
+                              }
+                            }
+                            """,
             3));
   }
 }
