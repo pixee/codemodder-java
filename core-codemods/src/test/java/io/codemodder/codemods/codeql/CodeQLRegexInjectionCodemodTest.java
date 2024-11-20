@@ -14,7 +14,7 @@ final class CodeQLRegexInjectionCodemodTest {
       expectingFixesAtLines = 438,
       doRetransformTest = false,
       dependencies = {})
-  class BannedWordlistTest implements CodemodTestMixin {}
+  final class BannedWordlistTest implements CodemodTestMixin {}
 
   @Nested
   @Metadata(
@@ -24,5 +24,5 @@ final class CodeQLRegexInjectionCodemodTest {
       expectingFixesAtLines = {71, 66, 49},
       doRetransformTest = false,
       dependencies = {})
-  class RegexUtilTest implements CodemodTestMixin {}
+  final class RegexUtilTest implements CodemodTestMixin {}
 }
