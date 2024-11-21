@@ -4,12 +4,10 @@ import com.google.inject.AbstractModule;
 import io.codemodder.CodeChanger;
 import io.codemodder.RuleSarif;
 import java.lang.reflect.Constructor;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Responsible for distributing the SARIFS to CodeQL based codemods based on rules. */
 public final class CodeQLModule extends AbstractModule {
@@ -27,9 +25,16 @@ public final class CodeQLModule extends AbstractModule {
   protected void configure() {
     // What if there are multiple sarif files with a given rule?
     // We can safely ignore this case for now.
-    final Map<String, RuleSarif> map =
-        allCodeqlRuleSarifs.stream()
-            .collect(Collectors.toUnmodifiableMap(RuleSarif::getRule, rs -> rs));
+    final Map<String, RuleSarif> map = new HashMap<>();
+    allCodeqlRuleSarifs.forEach(
+        rs -> {
+          if (!map.containsKey(rs.getRule())) {
+            map.put(rs.getRule(), rs);
+          } else {
+            log.warn(
+                "Multiple SARIFs found for rule: {}, ignoring results after first", rs.getRule());
+          }
+        });
 
     for (final Class<? extends CodeChanger> codemodType : codemodTypes) {
       final Constructor<?>[] constructors = codemodType.getDeclaredConstructors();
@@ -49,4 +54,6 @@ public final class CodeQLModule extends AbstractModule {
                   .toInstance(map.getOrDefault(providedCodeQLScan.ruleId(), RuleSarif.EMPTY)));
     }
   }
+
+  private static final Logger log = LoggerFactory.getLogger(CodeQLModule.class);
 }

@@ -1,16 +1,12 @@
 package io.codemodder.providers.sarif.codeql;
 
-import com.contrastsecurity.sarif.Region;
-import com.contrastsecurity.sarif.Result;
-import com.contrastsecurity.sarif.Run;
-import com.contrastsecurity.sarif.SarifSchema210;
+import com.contrastsecurity.sarif.*;
 import io.codemodder.CodeDirectory;
 import io.codemodder.RuleSarif;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +35,8 @@ public final class CodeQLRuleSarif implements RuleSarif {
               .skip(toolIndex)
               .findFirst()
               .flatMap(tool -> tool.getRules().stream().skip(ruleIndex).findFirst())
-              .map(rd -> rd.getId());
-      if (maybeRule.isPresent()) {
-        return maybeRule.get();
-      } else {
-        return null;
-      }
+              .map(ReportingDescriptor::getId);
+      return maybeRule.orElse(null);
     }
     return result.getRuleId();
   }
@@ -53,7 +45,7 @@ public final class CodeQLRuleSarif implements RuleSarif {
   public List<Region> getRegionsFromResultsByRule(final Path path) {
     return getResultsByLocationPath(path).stream()
         .map(result -> result.getLocations().get(0).getPhysicalLocation().getRegion())
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   @Override
