@@ -6,13 +6,14 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.Statement;
+import io.codemodder.ast.ASTs;
 import io.codemodder.remediation.RemediationStrategy;
 import io.codemodder.remediation.SuccessOrReason;
 import java.util.Optional;
 
 /**
- * Fix strategy for XXE vulnerabilities anchored to the XMLStreamReader calls. Finds the parser's
- * declaration and add statements disabling external entities and features.
+ * Fix strategy for XXE vulnerabilities anchored to arguments of a XMLStreamReader calls. Finds the
+ * parser's declaration and add statements disabling external entities and features.
  */
 final class XXEIntermediateXMLStreamReaderFixStrategy implements RemediationStrategy {
 
@@ -20,7 +21,9 @@ final class XXEIntermediateXMLStreamReaderFixStrategy implements RemediationStra
   public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
 
     var maybeCall =
-        Optional.of(node).map(m -> m instanceof MethodCallExpr ? (MethodCallExpr) node : null);
+        Optional.of(node)
+            .map(m -> m instanceof Expression e ? e : null)
+            .flatMap(ASTs::isArgumentOfMethodCall);
     if (maybeCall.isEmpty()) {
       return SuccessOrReason.reason("Not a method call");
     }

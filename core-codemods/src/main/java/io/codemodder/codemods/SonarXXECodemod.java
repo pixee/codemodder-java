@@ -59,7 +59,7 @@ public final class SonarXXECodemod extends SonarRemediatingJavaParserChanger {
                 : Optional.empty(),
         i ->
             i.getTextRange() != null
-                ? Optional.of(i.getTextRange().getStartOffset() + 1)
+                ? Optional.of(i.getTextRange().getStartOffset())
                 : Optional.empty());
   }
 }

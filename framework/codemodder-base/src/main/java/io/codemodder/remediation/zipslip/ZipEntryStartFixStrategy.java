@@ -70,8 +70,17 @@ final class ZipEntryStartFixStrategy implements RemediationStrategy {
 
   /** Return true if it appears to be a ZipEntry#getName() call. */
   static boolean match(final Node node) {
-    return node instanceof MethodCallExpr call
-        && call.getScope().isPresent()
-        && "getName".equals(call.getNameAsString());
+    return Optional.of(node)
+        .map(n -> n instanceof MethodCallExpr mce ? mce : null)
+        .filter(mce -> mce.hasScope())
+        .filter(mce -> "getName".equals(mce.getNameAsString()))
+        // Not already sanitized
+        .filter(
+            mce ->
+                mce.getParentNode()
+                    .map(p -> p instanceof MethodCallExpr m ? m : null)
+                    .filter(m -> "sanitizeZipFilename".equals(m.getNameAsString()))
+                    .isEmpty())
+        .isPresent();
   }
 }

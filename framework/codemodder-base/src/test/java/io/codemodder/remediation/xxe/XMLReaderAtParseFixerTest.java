@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.SearcherStrategyRemediator;
+import io.codemodder.remediation.WithoutScopePositionMatcher;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -20,21 +21,28 @@ final class XMLReaderAtParseFixerTest {
     return Stream.of(
         Arguments.of(
             new SearcherStrategyRemediator.Builder<>()
-                .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
+                .withMatchAndFixStrategyAndNodeMatcher(
+                    new XMLReaderAtParseFixStrategy(), new WithoutScopePositionMatcher())
                 .build()),
 
         // now try with the previously conflicting parser strategy inline as well
         Arguments.of(
             new SearcherStrategyRemediator.Builder<>()
-                .withMatchAndFixStrategy(new DocumentBuilderFactoryAtParseFixStrategy())
-                .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
+                .withMatchAndFixStrategyAndNodeMatcher(
+                    new DocumentBuilderFactoryAtParseFixStrategy(),
+                    new WithoutScopePositionMatcher())
+                .withMatchAndFixStrategyAndNodeMatcher(
+                    new XMLReaderAtParseFixStrategy(), new WithoutScopePositionMatcher())
                 .build()),
 
         // reverse the order to confirm no ordering issues
         Arguments.of(
             new SearcherStrategyRemediator.Builder<>()
-                .withMatchAndFixStrategy(new XMLReaderAtParseFixStrategy())
-                .withMatchAndFixStrategy(new DocumentBuilderFactoryAtParseFixStrategy())
+                .withMatchAndFixStrategyAndNodeMatcher(
+                    new XMLReaderAtParseFixStrategy(), new WithoutScopePositionMatcher())
+                .withMatchAndFixStrategyAndNodeMatcher(
+                    new DocumentBuilderFactoryAtParseFixStrategy(),
+                    new WithoutScopePositionMatcher())
                 .build()));
   }
 

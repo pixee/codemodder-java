@@ -13,8 +13,7 @@ public final class Test {
     try {
       throw new Exception();
     } catch (Exception ex) {
-      ex.printStackTrace();
-    }
+}
   }
 
   protected void flowToSendError(HttpServletRequest request, HttpServletResponse response)
@@ -23,7 +22,6 @@ public final class Test {
       throw new Exception();
     } catch (Exception ex) {
       String msg = ex.getMessage();
-      response.sendError(0);
     }
   }
 
@@ -34,7 +32,6 @@ public final class Test {
     } catch (Exception ex) {
       StringWriter sw = new StringWriter();
       ex.printStackTrace(new PrintWriter(sw));
-      response.sendError(0);
     }
   }
 }

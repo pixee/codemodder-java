@@ -75,7 +75,8 @@ final class DocumentBuilderFactoryAtParseFixerTest {
   void setup() {
     fixer =
         new SearcherStrategyRemediator.Builder<>()
-            .withMatchAndFixStrategy(new DocumentBuilderFactoryAtParseFixStrategy())
+            .withMatchAndFixStrategyAndNodeMatcher(
+                new DocumentBuilderFactoryAtParseFixStrategy(), new WithoutScopePositionMatcher())
             .build();
   }
 
@@ -133,7 +134,7 @@ final class DocumentBuilderFactoryAtParseFixerTest {
             o -> "id",
             o -> 11,
             o -> Optional.empty(),
-            o -> Optional.ofNullable(16));
+            o -> Optional.ofNullable(15));
     assertThat(result.changes().isEmpty()).isFalse();
 
     String fixedCode =

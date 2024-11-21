@@ -8,6 +8,7 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.SearcherStrategyRemediator;
+import io.codemodder.remediation.WithoutScopePositionMatcher;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,8 @@ final class TransformerFactoryAtCreationFixerTest {
   void setup() {
     fixer =
         new SearcherStrategyRemediator.Builder<>()
-            .withMatchAndFixStrategy(new TransformerFactoryAtCreationFixStrategy())
+            .withMatchAndFixStrategyAndNodeMatcher(
+                new TransformerFactoryAtCreationFixStrategy(), new WithoutScopePositionMatcher())
             .build();
   }
 

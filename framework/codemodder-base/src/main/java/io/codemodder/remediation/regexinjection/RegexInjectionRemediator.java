@@ -7,6 +7,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.CodemodFileScanningResult;
+import io.codemodder.ast.ASTs;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.*;
 import java.util.Collection;
@@ -27,7 +28,8 @@ public final class RegexInjectionRemediator<T> implements Remediator<T> {
                     .withMatcher(
                         node ->
                             Optional.of(node)
-                                .map(n -> n instanceof MethodCallExpr ? (MethodCallExpr) n : null)
+                                .map(n -> n instanceof Expression e ? e : null)
+                                .flatMap(ASTs::isArgumentOfMethodCall)
                                 .filter(RegexInjectionRemediator::isCompileCall)
                                 .isPresent())
                     .build(),
@@ -37,7 +39,12 @@ public final class RegexInjectionRemediator<T> implements Remediator<T> {
                     .withMatcher(
                         node ->
                             Optional.of(node)
-                                .map(n -> n instanceof MethodCallExpr ? (MethodCallExpr) n : null)
+                                .map(n -> n instanceof Expression e ? e : null)
+                                // Must be the first argument
+                                .flatMap(
+                                    e ->
+                                        ASTs.isArgumentOfMethodCall(e)
+                                            .filter(mce -> mce.getArgument(0) == e))
                                 .filter(RegexInjectionRemediator::isReplaceFirstCall)
                                 .isPresent())
                     .build(),
@@ -49,19 +56,19 @@ public final class RegexInjectionRemediator<T> implements Remediator<T> {
   private static class FixPatternCompileStrategy implements RemediationStrategy {
     @Override
     public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
-      final MethodCallExpr compileCall = (MethodCallExpr) node;
+      final MethodCallExpr compileCall = ASTs.isArgumentOfMethodCall((Expression) node).get();
       Expression argument = compileCall.getArgument(0);
       wrap(argument).withStaticMethod(Pattern.class.getName(), "quote", false);
       return SuccessOrReason.success();
     }
   }
 
-  /** Check if its a {@link Pattern#compile(String)} call. */
+  /** Check if it's a {@link Pattern#compile(String)} call. */
   private static boolean isCompileCall(final MethodCallExpr methodCallExpr) {
-    return methodCallExpr.getNameAsString().equals("compile")
-            && methodCallExpr.getArguments().size() == 1
-        || methodCallExpr.getArguments().size() == 2
-            && !methodCallExpr.getArguments().get(0).isStringLiteralExpr();
+    return "compile".equals(methodCallExpr.getNameAsString())
+        && (methodCallExpr.getArguments().size() == 1
+            || (methodCallExpr.getArguments().size() == 2
+                && !methodCallExpr.getArguments().get(0).isStringLiteralExpr()));
   }
 
   /** Check if its a {@link String#replaceFirst(String, String)} call. */
@@ -75,7 +82,7 @@ public final class RegexInjectionRemediator<T> implements Remediator<T> {
   private static class FixStringReplaceFirstStrategy implements RemediationStrategy {
     @Override
     public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
-      final MethodCallExpr replaceFirstCall = (MethodCallExpr) node;
+      final MethodCallExpr replaceFirstCall = ASTs.isArgumentOfMethodCall((Expression) node).get();
       Expression argument = replaceFirstCall.getArgument(0);
       wrap(argument).withStaticMethod(Pattern.class.getName(), "quote", false);
       return SuccessOrReason.success();
