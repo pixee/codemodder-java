@@ -27,7 +27,7 @@ import org.xml.sax.SAXException;
 
 /** Fixes issues reported under the id "java/maven/non-https-url". */
 @Codemod(
-    id = "codeql:java/maven/non-https-url",
+    id = "codeql:java/maven-non-https-url",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.MEDIUM,
     executionPriority = CodemodExecutionPriority.HIGH)
