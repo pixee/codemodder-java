@@ -366,14 +366,14 @@ final class CLI implements Callable<Integer> {
       log.debug("excluding paths: {}", pathExcludes);
 
       // get all files that match
-      log.debug("Listing source directories");
+      log.trace("Listing source directories");
       List<SourceDirectory> sourceDirectories =
           sourceDirectoryLister.listJavaSourceDirectories(List.of(projectDirectory));
 
-      log.debug("Listing files");
+      log.trace("Listing files");
       List<Path> filePaths = fileFinder.findFiles(projectPath, includesExcludes);
 
-      log.debug("Creating codemod regulator");
+      log.trace("Creating codemod regulator");
 
       // get codemod includes/excludes
       final CodemodRegulator regulator;

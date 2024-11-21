@@ -46,7 +46,7 @@ final class DefaultSarifParser implements SarifParser {
       }
     }
 
-    log.info("Found SARIF from unsupported tool: {}", toolName);
+    log.info("Found SARIF rule entries from unsupported tool: {}", toolName);
     return Optional.empty();
   }
 
