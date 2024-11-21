@@ -10,8 +10,6 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import io.codemodder.remediation.RemediationStrategy;
 import io.codemodder.remediation.SuccessOrReason;
-
-import java.lang.invoke.MethodHandleInfo;
 import java.util.Optional;
 
 /** Fixes ZipSlip vulnerabilities where a ZipEntry starts the data flow. */
@@ -72,16 +70,17 @@ final class ZipEntryStartFixStrategy implements RemediationStrategy {
 
   /** Return true if it appears to be a ZipEntry#getName() call. */
   static boolean match(final Node node) {
-    return
-            Optional.of(node)
-                    .map(n -> n instanceof MethodCallExpr mce ? mce : null)
-                    .filter(mce -> mce.hasScope())
-                    .filter(mce -> "getName".equals(mce.getNameAsString()))
-                    // Not already sanitized
-                    .filter(mce ->  mce.getParentNode()
-                            .map(p -> p instanceof MethodCallExpr m ? m : null)
-                            .filter(m -> "sanitizeZipFilename".equals(m.getNameAsString()))
-                            .isEmpty())
-                    .isPresent();
+    return Optional.of(node)
+        .map(n -> n instanceof MethodCallExpr mce ? mce : null)
+        .filter(mce -> mce.hasScope())
+        .filter(mce -> "getName".equals(mce.getNameAsString()))
+        // Not already sanitized
+        .filter(
+            mce ->
+                mce.getParentNode()
+                    .map(p -> p instanceof MethodCallExpr m ? m : null)
+                    .filter(m -> "sanitizeZipFilename".equals(m.getNameAsString()))
+                    .isEmpty())
+        .isPresent();
   }
 }
