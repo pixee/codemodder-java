@@ -11,7 +11,7 @@ import io.codemodder.remediation.errorexposure.ErrorMessageExposureRemediator;
 import java.util.Optional;
 import javax.inject.Inject;
 
-/** A codemod for automatically fixing SQL injection from CodeQL. */
+/** A codemod that removes sensitive information exposure from error messages * */
 @Codemod(
     id = "codeql:java/error-message-exposure",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
