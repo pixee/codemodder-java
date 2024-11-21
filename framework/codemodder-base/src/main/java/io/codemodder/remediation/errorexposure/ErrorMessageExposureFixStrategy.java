@@ -14,8 +14,8 @@ import java.util.Optional;
 /** Removes exposure from error messages. */
 public final class ErrorMessageExposureFixStrategy extends MatchAndFixStrategy {
 
-  private static List<String> printErrorMethods = List.of("printStackTrace");
-  private static List<String> printMethods = List.of("println", "print", "sendError");
+  private static final List<String> printErrorMethods = List.of("printStackTrace");
+  private static final List<String> printMethods = List.of("println", "print", "sendError");
 
   /**
    * Test if the node is an expression that is the argument of a method call
@@ -45,8 +45,6 @@ public final class ErrorMessageExposureFixStrategy extends MatchAndFixStrategy {
 
   @Override
   public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
-    // we know from the match that this is true
-    Expression expr = (Expression) node;
     // find encompassing statement
     Optional<Statement> maybeStmt =
         Optional.<MethodCallExpr>empty()
@@ -54,18 +52,18 @@ public final class ErrorMessageExposureFixStrategy extends MatchAndFixStrategy {
             .or(
                 () ->
                     Optional.of(node)
-                        .map(n -> n instanceof Expression ? (Expression) n : null)
+                        .map(n -> n instanceof Expression e ? e : null)
                         .flatMap(ASTs::isArgumentOfMethodCall)
                         .filter(mce -> printMethods.contains(mce.getNameAsString())))
             // is itself a method call that send errors: e.g. err.printStackTrace()
             .or(
                 () ->
                     Optional.of(node)
-                        .map(n -> n instanceof Expression ? (Expression) n : null)
-                        .flatMap(e -> e.toMethodCallExpr())
+                        .map(n -> n instanceof Expression e ? e : null)
+                        .flatMap(Expression::toMethodCallExpr)
                         .filter(mce -> printErrorMethods.contains(mce.getNameAsString())))
             // check if the method call is in a statement by itself
-            .flatMap(mce -> mce.getParentNode())
+            .flatMap(Node::getParentNode)
             .map(p -> p instanceof ExpressionStmt ? (ExpressionStmt) p : null);
     // Remove it
     if (maybeStmt.isPresent()) {

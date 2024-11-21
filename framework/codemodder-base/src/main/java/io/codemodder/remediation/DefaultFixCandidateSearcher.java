@@ -73,9 +73,6 @@ final class DefaultFixCandidateSearcher<T> implements FixCandidateSearcher<T> {
                                       n, issueStartLine, issueEndLine, column))
                           .orElse(nodePositionMatcher.match(n, issueStartLine, issueEndLine)))
               .toList();
-      System.out.println(issueStartLine);
-      System.out.println(maybeColumn);
-      System.out.println(nodesForIssue);
       if (nodesForIssue.isEmpty()) {
         continue;
       }
