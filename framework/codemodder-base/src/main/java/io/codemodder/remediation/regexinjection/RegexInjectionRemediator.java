@@ -63,12 +63,12 @@ public final class RegexInjectionRemediator<T> implements Remediator<T> {
     }
   }
 
-  /** Check if its a {@link Pattern#compile(String)} call. */
+  /** Check if it's a {@link Pattern#compile(String)} call. */
   private static boolean isCompileCall(final MethodCallExpr methodCallExpr) {
-    return methodCallExpr.getNameAsString().equals("compile")
-            && methodCallExpr.getArguments().size() == 1
-        || methodCallExpr.getArguments().size() == 2
-            && !methodCallExpr.getArguments().get(0).isStringLiteralExpr();
+    return "compile".equals(methodCallExpr.getNameAsString())
+        && (methodCallExpr.getArguments().size() == 1
+            || (methodCallExpr.getArguments().size() == 2
+                && !methodCallExpr.getArguments().get(0).isStringLiteralExpr()));
   }
 
   /** Check if its a {@link String#replaceFirst(String, String)} call. */
