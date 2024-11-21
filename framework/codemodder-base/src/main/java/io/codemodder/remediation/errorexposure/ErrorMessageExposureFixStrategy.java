@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 /** Removes exposure from error messages. */
-public final class ErrorMessageExposureFixStrategy extends MatchAndFixStrategy {
+final class ErrorMessageExposureFixStrategy extends MatchAndFixStrategy {
 
   private static final List<String> printErrorMethods = List.of("printStackTrace");
   private static final List<String> printMethods = List.of("println", "print", "sendError");
