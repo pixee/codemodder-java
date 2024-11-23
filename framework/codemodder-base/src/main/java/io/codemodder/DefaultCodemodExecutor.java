@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -184,7 +185,14 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
               Collection<DependencyGAV> deps =
                   projectProviders.stream()
                       .flatMap(
-                          provider -> provider.getAllDependencies(projectDir, filePath).stream())
+                          provider -> {
+                            try {
+                              return provider.getAllDependencies(projectDir, filePath).stream();
+                            } catch (Exception e) {
+                              log.error("Problem getting dependencies for file {}", filePath, e);
+                              return Stream.empty();
+                            }
+                          })
                       .toList();
 
               CodemodInvocationContext context =

@@ -146,7 +146,7 @@ final class DefaultCodemodExecutorTest {
     }
 
     @Override
-    public Collection<DependencyGAV> getAllDependencies(Path projectDir, Path file) {
+    public Collection<DependencyGAV> getAllDependencies(final Path projectDir, final Path file) {
       return List.of();
     }
   }
@@ -158,7 +158,41 @@ final class DefaultCodemodExecutorTest {
 
     // should have just 1 entry because we only scanned javaFile1
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
-    assertThat(changeset.size()).isEqualTo(1);
+    assertThat(changeset).hasSize(1);
+    assertThat(changeset.get(0)).satisfies(DefaultCodemodExecutorTest::isJavaFile1ChangedCorrectly);
+  }
+
+  @Test
+  void it_works_despite_fail_prefetching_all_deps() {
+    FakeDepsProvider depsProvider =
+        new FakeDepsProvider() {
+          @Override
+          public Collection<DependencyGAV> getAllDependencies(
+              final Path projectDir, final Path file) {
+            throw new RuntimeException("failed to prefetch deps");
+          }
+        };
+
+    executor =
+        new DefaultCodemodExecutor(
+            repoDir,
+            includesEverything,
+            beforeAfterCodemod,
+            List.of(depsProvider),
+            List.of(),
+            fileCache,
+            javaParserFacade,
+            encodingDetector,
+            -1,
+            -1,
+            -1);
+
+    CodeTFResult result = executor.execute(List.of(javaFile1));
+    assertThat(result).satisfies(DefaultCodemodExecutorTest::hasBeforeAfterCodemodMetadata);
+
+    // should have just 1 entry because we only scanned javaFile1
+    List<CodeTFChangesetEntry> changeset = result.getChangeset();
+    assertThat(changeset).hasSize(1);
     assertThat(changeset.get(0)).satisfies(DefaultCodemodExecutorTest::isJavaFile1ChangedCorrectly);
   }
 
@@ -241,7 +275,7 @@ final class DefaultCodemodExecutorTest {
 
     // confirm the change was updated by the provider
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
-    assertThat(changeset.size()).isEqualTo(1);
+    assertThat(changeset).hasSize(1);
     CodeTFChangesetEntry entry = changeset.get(0);
     assertThat(entry.getChanges().get(0).getDescription()).isEqualTo("hi " + javaFile1.toString());
     assertThat(entry.getChanges().get(0).getProperties()).hasSize(1);
@@ -256,7 +290,7 @@ final class DefaultCodemodExecutorTest {
 
     // should have 2 entries for both javaFile1 and javaFile3
     List<CodeTFChangesetEntry> changeset = result.getChangeset();
-    assertThat(changeset.size()).isEqualTo(2);
+    assertThat(changeset).hasSize(2);
     assertThat(changeset.get(0)).satisfies(DefaultCodemodExecutorTest::isJavaFile1ChangedCorrectly);
     assertThat(changeset.get(1)).satisfies(DefaultCodemodExecutorTest::isJavaFile3ChangedCorrectly);
   }

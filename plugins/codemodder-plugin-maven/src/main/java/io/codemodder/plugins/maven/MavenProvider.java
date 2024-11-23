@@ -143,8 +143,9 @@ public final class MavenProvider implements ProjectProvider {
 
       return pomOperator.getAllFoundDependencies();
     } catch (Exception e) {
-      throw new DependencyUpdateException("Failure when retrieving dependencies", e);
+      LOG.warn("Not all Maven dependencies could be found", e);
     }
+    return Collections.emptyList();
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(MavenProvider.class);
