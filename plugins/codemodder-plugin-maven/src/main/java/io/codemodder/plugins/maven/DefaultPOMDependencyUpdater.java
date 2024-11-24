@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** POMDependencyUpdater is responsible for updating Maven POM files with new dependencies. */
-class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
+final class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
   private final PomFileFinder pomFileFinder;
 
   private Optional<Path> maybePomFile;
@@ -63,17 +63,19 @@ class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
    * @param file The specific POM file to update.
    * @param dependencies The list of new dependencies to be added.
    * @return A DependencyUpdateResult containing information about the update process.
-   * @throws IOException If an I/O error occurs.
-   * @throws XMLStreamException If an error occurs during XML stream processing.
-   * @throws DocumentException If an error occurs while parsing the document.
-   * @throws URISyntaxException If there is an issue with the URI syntax.
    */
   @NotNull
   public DependencyUpdateResult execute(
-      final Path projectDir, final Path file, final List<DependencyGAV> dependencies)
-      throws IOException, XMLStreamException, DocumentException, URISyntaxException {
-    if (isEmptyPomFile(projectDir, file)) {
-      LOG.trace("Pom file was empty for {}", file);
+      final Path projectDir, final Path file, final List<DependencyGAV> dependencies) {
+
+    // if we can't find a pom, we want to skip this file
+    try {
+      if (isEmptyPomFile(projectDir, file)) {
+        LOG.trace("Pom file was empty for {}", file);
+        return DependencyUpdateResult.EMPTY_UPDATE;
+      }
+    } catch (IOException e) {
+      LOG.warn("Not all Maven dependencies could be found", e);
       return DependencyUpdateResult.EMPTY_UPDATE;
     }
 
@@ -84,7 +86,17 @@ class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
     skippedDependencies = new ArrayList<>();
     injectedDependencies = new ArrayList<>();
     erroredFiles = new LinkedHashSet<>();
-    foundDependenciesMapped = new AtomicReference<>(pomOperator.getAllFoundDependencies());
+
+    // get all the existing dependencies, if we're not able to find them, we can't update
+    Collection<DependencyGAV> allFoundDependencies;
+    try {
+      allFoundDependencies = pomOperator.getAllFoundDependencies();
+    } catch (IOException | DocumentException | XMLStreamException | URISyntaxException e) {
+      LOG.warn("Problem calculating all dependencies", e);
+      return DependencyUpdateResult.EMPTY_UPDATE;
+    }
+
+    foundDependenciesMapped = new AtomicReference<>(allFoundDependencies);
     LOG.trace("Beginning dependency set size: {}", foundDependenciesMapped.get().size());
 
     dependencies.forEach(
@@ -97,7 +109,6 @@ class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
             }
 
             final ProjectModel modifiedProjectModel = pomOperator.addDependency(newDependencyGAV);
-
             if (modifiedProjectModel == null) {
               LOG.trace("POM file didn't need modification or it failed?");
               return;
@@ -107,16 +118,14 @@ class DefaultPOMDependencyUpdater implements POMDependencyUpdater {
 
             modifyPomFiles(projectDir, modifiedProjectModel, newDependencyGAV);
 
+            // recalculate the dependencies after our addition
             final Collection<DependencyGAV> newDependencySet =
                 pomOperator.getAllFoundDependencies();
-
             LOG.trace("New dependency set size: {}", newDependencySet.size());
-
             foundDependenciesMapped.set(newDependencySet);
-          } catch (DocumentException | IOException | URISyntaxException | XMLStreamException e) {
-            LOG.error("Unexpected problem getting on pom operator", e);
-            throw new MavenProvider.DependencyUpdateException(
-                "Failure while executing pom operator: ", e);
+
+          } catch (Exception e) {
+            LOG.error("Problem  getting on pom operator", e);
           }
         });
 

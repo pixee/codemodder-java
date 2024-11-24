@@ -153,7 +153,7 @@ final class MavenProviderTest {
 
     // we've updated all the poms, so we merge this with the pre-existing one change
     List<CodeTFChangesetEntry> changes = result.packageChanges();
-    assertThat(changes.size()).isEqualTo(2);
+    assertThat(changes).hasSize(2);
 
     // we injected all the dependencies, total success!
     assertThat(result.injectedPackages()).containsOnly(marsDependency1, marsDependency2);
@@ -204,15 +204,15 @@ final class MavenProviderTest {
 
     // we only injected the toolkit -- verify that
     List<DependencyGAV> injectedPackages = result.injectedPackages();
-    assertThat(injectedPackages.size()).isEqualTo(1);
+    assertThat(injectedPackages).hasSize(1);
     DependencyGAV injectedPackage = injectedPackages.get(0);
     assertThat(injectedPackage).isEqualTo(DependencyGAV.JAVA_SECURITY_TOOLKIT);
 
     List<CodeTFChangesetEntry> changesets = result.packageChanges();
-    assertThat(changesets.size()).isEqualTo(1);
+    assertThat(changesets).hasSize(1);
     CodeTFChangesetEntry change = changesets.get(0);
     List<CodeTFChange> changes = change.getChanges();
-    assertThat(changes.size()).isEqualTo(1);
+    assertThat(changes).hasSize(1);
     CodeTFChange lineChange = changes.get(0);
     assertThat(lineChange.getDescription()).contains("License: ");
     assertThat(lineChange.getLineNumber()).isEqualTo(libraryFactsLineTarget);
@@ -402,7 +402,7 @@ final class MavenProviderTest {
         provider.updateDependencies(
             projectDir, module1Pom, List.of(marsDependency1, marsDependency2, venusDependency));
 
-    assertThat(result.packageChanges().size()).isEqualTo(3);
+    assertThat(result.packageChanges()).hasSize(3);
 
     CodeTFChangesetEntry changesetEntry = result.packageChanges().iterator().next();
     assertThat(changesetEntry.getPath()).isEqualTo("module1/pom.xml");
@@ -423,8 +423,7 @@ final class MavenProviderTest {
             Pair.of(jspFile, Optional.of(rootPom)),
             Pair.of(irrelevantFile, Optional.of(rootPom)))) {
       Optional<Path> pom = pomFinder.findForFile(this.projectDir, pair.getLeft());
-      assertThat(pom.isPresent()).isTrue();
-      assertThat(pom.get()).isEqualTo(pair.getRight().get());
+      assertThat(pom).contains(pair.getRight().get());
     }
   }
 

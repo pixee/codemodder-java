@@ -58,16 +58,20 @@ public final class MavenProvider implements ProjectProvider {
   private final PomFileFinder pomFileFinder;
 
   MavenProvider(
+      final PomFileFinder pomFileFinder, final POMDependencyUpdater pomDependencyUpdater) {
+    this.pomFileFinder = Objects.requireNonNull(pomFileFinder);
+    this.pomDependencyUpdater = Objects.requireNonNull(pomDependencyUpdater);
+  }
+
+  MavenProvider(
       final PomModifier pomModifier,
       final PomFileFinder pomFileFinder,
       final DependencyDescriptor dependencyDescriptor,
       final ArtifactInjectionPositionFinder positionFinder) {
-    Objects.requireNonNull(pomModifier);
-    Objects.requireNonNull(pomFileFinder);
-    this.pomFileFinder = pomFileFinder;
-    this.pomDependencyUpdater =
+    this(
+        pomFileFinder,
         new DefaultPOMDependencyUpdater(
-            new CodeTFGenerator(positionFinder, dependencyDescriptor), pomFileFinder, pomModifier);
+            new CodeTFGenerator(positionFinder, dependencyDescriptor), pomFileFinder, pomModifier));
   }
 
   MavenProvider(
@@ -113,20 +117,17 @@ public final class MavenProvider implements ProjectProvider {
     }
   }
 
+  /**
+   * This method must not throw exception -- it should capture failures in its model and bubble up
+   * normal results.
+   */
   @Override
   public DependencyUpdateResult updateDependencies(
       final Path projectDir, final Path file, final List<DependencyGAV> dependencies) {
-    try {
-      String dependenciesStr =
-          dependencies.stream().map(DependencyGAV::toString).collect(Collectors.joining(","));
-      LOG.trace("Updating dependencies for {} in {}: {}", file, projectDir, dependenciesStr);
-      final DependencyUpdateResult dependencyUpdateResult =
-          pomDependencyUpdater.execute(projectDir, file, dependencies);
-      LOG.trace("Dependency update result: {}", dependencyUpdateResult);
-      return dependencyUpdateResult;
-    } catch (Exception e) {
-      throw new DependencyUpdateException("Failure when updating dependencies", e);
-    }
+    String dependenciesStr =
+        dependencies.stream().map(DependencyGAV::toString).collect(Collectors.joining(","));
+    LOG.trace("Updating dependencies for {} in {}: {}", file, projectDir, dependenciesStr);
+    return pomDependencyUpdater.execute(projectDir, file, dependencies);
   }
 
   @Override
