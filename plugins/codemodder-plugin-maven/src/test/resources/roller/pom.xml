@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.apache.roller</groupId>
+    <artifactId>roller-project</artifactId>
+    <version>6.1.4</version>
+    <packaging>pom</packaging>
+
+    <name>Roller</name>
+    <description>
+        Roller is an open source blog server built with open source Java
+        libraries including Struts2, Velocity, ROME and Guice.
+    </description>
+    <url>http://roller.apache.org</url>
+    <inceptionYear>2002</inceptionYear>
+
+    <scm>
+        <url>https://github.com/apache/roller</url>
+        <connection>scm:git:git://github.com/apache/roller.git</connection>
+        <developerConnection>scm:git:git@github.com:apache/roller.git</developerConnection>
+    </scm>
+
+    <properties>
+        <derby.version>10.11.1.1</derby.version>
+        <java-mail.version>1.4.7</java-mail.version>
+        <jaxb.version>2.3.1</jaxb.version>
+        <jetty.plugin.version>10.0.23</jetty.plugin.version> <!-- Jetty 11 requires Jakarta package names -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <roller.version>6.1.4</roller.version>
+        <slf4j.version>1.7.36</slf4j.version>
+    </properties>
+
+    <modules>
+        <module>app</module>
+        <module>db-utils</module>
+        <!-- <module>it-selenium</module> -->
+    </modules>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <release>11</release>
+                        <fork>true</fork>
+                        <compilerArgs>
+                            <arg>-Xlint:all</arg>
+                            <!--
+                            <arg>-Xlint:unchecked,rawtypes,cast,overrides,overloads,dep-ann,removal,synchronization,try,finally,varargs,processing</arg>
+                            <arg>-Xmaxwarns</arg>
+                            <arg>1000</arg>
+                            -->
+                        </compilerArgs>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-idea-plugin</artifactId>
+                    <version>2.2.1</version>
+                    <configuration>
+                        <downloadSources>true</downloadSources>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-maven-plugin</artifactId>
+                    <version>${jetty.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.17.1</version>
+                    <configuration>
+                        <rulesUri>file:version-rules.xml</rulesUri>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>5.11.0</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
