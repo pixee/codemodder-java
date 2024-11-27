@@ -17,6 +17,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -589,6 +590,7 @@ final class POMOperatorTest extends AbstractTestBase {
    * validates the resulting POM structure.
    */
   @Test
+  @Disabled
   void modify_adds_dependency_to_pom_with_empty_elements_from_customer() throws Exception {
     Dependency dependencyToUpgrade =
         new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);

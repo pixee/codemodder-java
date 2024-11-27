@@ -508,21 +508,21 @@ class FormatCommand extends AbstractCommand {
 
     int lastIndex = 0;
 
-    singleElementsWithAttributes.sort(
-        Comparator.comparingInt(matchDataJ -> matchDataJ.getRange().getFirst()));
+    // singleElementsWithAttributes.sort(
+    //    Comparator.comparingInt(matchDataJ -> matchDataJ.getRange().getFirst()));
 
-    for (MatchData match : singleElementsWithAttributes) {
-      MatchResult representationMatch =
-          match.getModifiedContent().find(xmlRepresentation, lastIndex);
+    // for (MatchData match : singleElementsWithAttributes) {
+    //  MatchResult representationMatch =
+    //      match.getModifiedContent().find(xmlRepresentation, lastIndex);
 
-      if (null == representationMatch) {
-        LOGGER.warn("Failure on quoting: {}", match);
-      } else {
-        xmlRepresentation =
-            replaceRange(xmlRepresentation, representationMatch.getRange(), match.getContent());
-        lastIndex = representationMatch.getRange().getFirst() + match.getContent().length();
-      }
-    }
+    //  if (null == representationMatch) {
+    //    LOGGER.warn("Failure on quoting: {}", match);
+    //  } else {
+    //    xmlRepresentation =
+    //        replaceRange(xmlRepresentation, representationMatch.getRange(), match.getContent());
+    //    lastIndex = representationMatch.getRange().getFirst() + match.getContent().length();
+    //  }
+    // }
 
     /**
      * We might need to replace the beginning of the POM with the same content from the very
