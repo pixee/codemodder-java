@@ -506,7 +506,6 @@ class FormatCommand extends AbstractCommand {
       xmlRepresentation = replaceRange(xmlRepresentation, match.getRange(), nextMatch.getContent());
     }
 
-
     // singleElementsWithAttributes.sort(
     //    Comparator.comparingInt(matchDataJ -> matchDataJ.getRange().getFirst()));
 
