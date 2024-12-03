@@ -18,12 +18,15 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmlunit.diff.ComparisonType;
 import org.xmlunit.diff.Diff;
 import org.xmlunit.diff.Difference;
 
+@Execution(ExecutionMode.SAME_THREAD)
 final class POMOperatorTest extends AbstractTestBase {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(POMOperatorTest.class);
