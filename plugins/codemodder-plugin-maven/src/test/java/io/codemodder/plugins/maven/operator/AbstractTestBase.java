@@ -59,7 +59,7 @@ class AbstractTestBase {
       String testName, ProjectModel context, final OperationType operationType) throws Exception {
 
     String resultFile = "pom-" + testName + "-result.xml";
-    URL resource = AbstractTestBase.class.getClass().getResource(resultFile);
+    URL resource = AbstractTestBase.class.getResource(resultFile);
 
     if (resource != null) {
       Document outcome = new SAXReader().read(resource);

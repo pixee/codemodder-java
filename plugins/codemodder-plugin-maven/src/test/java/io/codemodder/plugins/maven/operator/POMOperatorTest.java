@@ -581,6 +581,18 @@ final class POMOperatorTest extends AbstractTestBase {
             "\n\t\t<dependency>\n\t\t\t<groupId>org.dom4j</groupId>\n\t\t\t<artifactId>dom4j</artifactId>\n\t\t</dependency>\n");
   }
 
+    @Test
+    void modify_adds_dependency_to_pom_with_empty_elements_with_multiple_attributes() throws Exception {
+        Dependency dependencyToUpgrade =
+                new Dependency("io.github.pixee", "java-security-toolkit", "1.0.2", null, null, null);
+
+        performAndAssertModifyPomOperation(
+                "trimmed-roller",
+                ProjectModelFactory.load(POMOperatorTest.class.getResource("pom-trimmed-roller.xml"))
+                        .withDependency(dependencyToUpgrade)
+                        .withUseProperties(true));
+    }
+
   /**
    * Tests a scenario with an empty element from a customer's POM file and validates the resultant
    * POM.
