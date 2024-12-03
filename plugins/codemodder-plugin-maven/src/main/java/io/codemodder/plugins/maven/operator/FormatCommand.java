@@ -416,7 +416,7 @@ class FormatCommand extends AbstractCommand {
    * <p>this is important so we can mix and match offsets and apply formatting accordingly
    *
    * @param xmlDocumentString Rendered POM Document Contents (string-formatted)
-   * @return map of (index, matchData object) reve/rse ordered
+   * @return map of (index, matchData object) reverse ordered
    */
   private LinkedHashMap<Integer, MatchData> findSingleElementMatchesFrom(String xmlDocumentString) {
     Sequence<MatchResult> allFoundMatchesSequence =
