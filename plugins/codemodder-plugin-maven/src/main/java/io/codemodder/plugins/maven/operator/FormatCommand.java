@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -137,22 +138,22 @@ class FormatCommand extends AbstractCommand {
    * A Slight variation on writeAsUnicode from stax which writes as a regex string so we could
    * rewrite its output
    */
-  private String writeAsRegex(StartElement element) {
+  private String writeAsRegex(final StartElement element, final List<Attribute> orderedAttributes) {
     StringWriter writer = new StringWriter();
 
     writer.write("<");
     writer.write(Pattern.quote(element.getName().getLocalPart()));
 
-    Iterator<?> attrIter = element.getAttributes();
-    while (attrIter.hasNext()) {
-      Attribute attr = (Attribute) attrIter.next();
-
+    for (var attr : orderedAttributes) {
       writer.write("\\s+");
 
       writer.write(Pattern.quote(attr.getName().getLocalPart()));
-      writer.write("=[\\\"\']");
+      writer.write("\\s*");
+      writer.write("=");
+      writer.write("\\s*");
+      writer.write("[\\\"']");
       writer.write(Pattern.quote(attr.getValue()));
-      writer.write("[\\\"\']");
+      writer.write("[\\\"']");
     }
     writer.write("\\s*\\/>");
 
@@ -335,7 +336,25 @@ class FormatCommand extends AbstractCommand {
               new IntRange(
                   realElementStart, realElementStart + 1 + trimmedOriginalContent.length());
 
-          String contentRe = writeAsRegex(getLastStartElement(prevEvents));
+          var element = getLastStartElement(prevEvents);
+
+          // order the attributes by the original ordering
+          // attributes names are unique, we can just order them by the index of the name
+
+          // Remove attribute contents, just in case some they contain the name of an attribute
+          // TODO should we trim the element name beforehand?
+          String contentRemoved = untrimmedOriginalContent.replaceAll("[\\\"'].*[\\\"']", "");
+
+          var it = element.getAttributes();
+          var orderedAttributes =
+              Stream.iterate(it, Iterator::hasNext, UnaryOperator.identity())
+                  .map(Iterator::next)
+                  .map(a -> new Pair<>(a, contentRemoved.indexOf(a.getName().getLocalPart())))
+                  .sorted(Comparator.comparing(p -> p.getSecond()))
+                  .map(p -> p.getFirst())
+                  .collect(Collectors.toList());
+
+          String contentRe = writeAsRegex(element, orderedAttributes);
 
           Regex modifiedContentRE = new Regex(contentRe);
 
@@ -397,7 +416,7 @@ class FormatCommand extends AbstractCommand {
    * <p>this is important so we can mix and match offsets and apply formatting accordingly
    *
    * @param xmlDocumentString Rendered POM Document Contents (string-formatted)
-   * @return map of (index, matchData object) reverse ordered
+   * @return map of (index, matchData object) reve/rse ordered
    */
   private LinkedHashMap<Integer, MatchData> findSingleElementMatchesFrom(String xmlDocumentString) {
     Sequence<MatchResult> allFoundMatchesSequence =
@@ -493,6 +512,8 @@ class FormatCommand extends AbstractCommand {
 
     // Let's find out the original empty elements from the original pom and store into a stack
     List<MatchData> elementsToReplace = getElementsToReplace(originalElementMap, pom);
+
+    // DOM parsers don't guarantee attribute ordering, extract the original ordering for the regex
 
     // Lets to the replacements backwards on the existing, current pom
     Map<Integer, MatchData> emptyElements = getEmptyElements(targetElementMap, xmlRepresentation);
