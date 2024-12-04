@@ -16,18 +16,7 @@ class CommandChain {
   private static final Logger LOGGER = LoggerFactory.getLogger(CommandChain.class);
 
   /** Internal ArrayList of the Commands */
-  private List<Command> commandList;
-
-  private static List<Command> COMMON_COMMANDS =
-      List.of(
-          // Validation commands
-          CheckDependencyPresent.getInstance(),
-          CheckParentPackaging.getInstance(),
-          // Format commands
-          new FormatCommand(),
-          new DiscardFormatCommand(),
-          // Multipom command
-          new CompositeDependencyManagement());
+  private final List<Command> commandList;
 
   private CommandChain(List<Command> commands) {
     this.commandList = commands;
@@ -93,7 +82,17 @@ class CommandChain {
    * @return A pre-configured Chain for modifying a POM.
    */
   public static CommandChain modifyDependency() {
-    final List<Command> modifyCommands = new ArrayList<>(COMMON_COMMANDS);
+    final List<Command> modifyCommands =
+        new ArrayList<>(
+            List.of(
+                // Validation commands
+                CheckDependencyPresent.getInstance(),
+                CheckParentPackaging.getInstance(),
+                // Format commands
+                new FormatCommand(),
+                new DiscardFormatCommand(),
+                // Multipom command
+                new CompositeDependencyManagement()));
     modifyCommands.addAll(
         List.of(
             SimpleUpgrade.getInstance(),
@@ -109,7 +108,17 @@ class CommandChain {
    * @return A pre-configured Chain.
    */
   public static CommandChain insertDependency() {
-    final List<Command> insertCommands = new ArrayList<>(COMMON_COMMANDS);
+    final List<Command> insertCommands =
+        new ArrayList<>(
+            List.of(
+                // Validation commands
+                CheckDependencyPresent.getInstance(),
+                CheckParentPackaging.getInstance(),
+                // Format commands
+                new FormatCommand(),
+                new DiscardFormatCommand(),
+                // Multipom command
+                new CompositeDependencyManagement()));
     insertCommands.add(new SimpleInsert(true));
     return new CommandChain(insertCommands);
   }
@@ -120,7 +129,17 @@ class CommandChain {
    * @return A pre-configured Chain.
    */
   public static CommandChain updateDependency() {
-    final List<Command> insertCommands = new ArrayList<>(COMMON_COMMANDS);
+    final List<Command> insertCommands =
+        new ArrayList<>(
+            List.of(
+                // Validation commands
+                CheckDependencyPresent.getInstance(),
+                CheckParentPackaging.getInstance(),
+                // Format commands
+                new FormatCommand(),
+                new DiscardFormatCommand(),
+                // Multipom command
+                new CompositeDependencyManagement()));
     insertCommands.addAll(
         List.of(SimpleUpgrade.getInstance(), SimpleDependencyManagement.getInstance()));
 
@@ -169,7 +188,8 @@ class CommandChain {
     return filterByQueryType(
         AVAILABLE_DEPENDENCY_QUERY_COMMANDS,
         queryType,
-        Arrays.asList(CheckLocalRepositoryDirCommand.CheckParentDirCommand.getInstance()),
+        Collections.singletonList(
+            CheckLocalRepositoryDirCommand.CheckParentDirCommand.getInstance()),
         it -> it == queryType);
   }
 
@@ -196,7 +216,7 @@ class CommandChain {
    * and report issues creating
    */
   static final List<Pair<QueryType, String>> AVAILABLE_DEPENDENCY_QUERY_COMMANDS =
-      new ArrayList<>(Arrays.asList(new Pair<>(QueryType.SAFE, "QueryByParsing")));
+      new ArrayList<>(List.of(new Pair<>(QueryType.SAFE, "QueryByParsing")));
 
   /** List of Commands for Version Query */
   private static final List<Pair<QueryType, String>> AVAILABLE_QUERY_VERSION_COMMANDS =

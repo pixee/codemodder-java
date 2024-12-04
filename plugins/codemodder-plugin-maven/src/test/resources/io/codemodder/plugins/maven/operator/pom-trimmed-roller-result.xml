@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <dependencies>
+        <dependency>
+            <groupId>org.instancio</groupId>
+            <artifactId>instancio-junit</artifactId>
+            <version>5.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.pixee</groupId>
+            <artifactId>java-security-toolkit</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+
+        <finalName>roller</finalName>
+
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>ant-contrib</groupId>
+                        <artifactId>ant-contrib</artifactId>
+                        <version>${maven-antrun.version}</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>ant</groupId>
+                                <artifactId>ant</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <!-- last velocity version which had the Ant TexenTask -->
+                    <dependency>
+                        <groupId>org.apache.velocity</groupId>
+                        <artifactId>velocity</artifactId>
+                        <version>1.7</version>
+                    </dependency>
+                </dependencies>
+
+                <executions>
+                    <execution>
+                        <id>gen-db-scripts</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- Workaround for git distribution that doesn't keep empty directories.
+                                     For detail check [ROL-2086] -->
+                                <taskdef resource="net/sf/antcontrib/antlib.xml" />
+                                <property file="${basedir}/src/main/resources/sql/dbscripts.properties" />
+                                <for list="${databases}" param="database" delimiter=" ">
+                                    <sequential>
+                                        <mkdir dir="${basedir}/target/classes/dbscripts/@{database}" />
+                                    </sequential>
+                                </for>
+
+                                <taskdef name="texen"
+                                         classname="org.apache.velocity.texen.ant.TexenTask"
+                                         classpathref="maven.plugin.classpath"/>
+                                <texen
+                                    controlTemplate  ="control.vm"
+                                    contextProperties="${basedir}/src/main/resources/sql/dbscripts.properties"
+                                    templatePath     ="${basedir}/src/main/resources/sql"
+                                    outputDirectory  ="${basedir}/target/classes/dbscripts"
+                                    outputFile       ="README.txt"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+
+    </build>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.github.pixee</groupId>
+                <artifactId>java-security-toolkit</artifactId>
+                <version>${versions.java-security-toolkit}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <properties>
+        <versions.java-security-toolkit>1.0.2</versions.java-security-toolkit>
+    </properties>
+</project>
