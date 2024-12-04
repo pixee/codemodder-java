@@ -427,6 +427,42 @@ final class MavenProviderTest {
     }
   }
 
+  @Test
+  void it_doesnt_butcher_roller_pom(@TempDir Path rollerTmpAppDir) throws IOException {
+
+    // copy the test files to temp so we can mess around with them
+    Path rollerSrcDir = Path.of("src/test/resources/roller");
+    Files.createDirectories(rollerTmpAppDir.resolve("app"));
+    Files.copy(rollerSrcDir.resolve("app/pom.xml"), rollerTmpAppDir.resolve("app/pom.xml"));
+    Files.copy(rollerSrcDir.resolve("pom.xml"), rollerTmpAppDir.resolve("pom.xml"));
+    Path rollerJavaFile = rollerTmpAppDir.resolve("app/Foo.java");
+
+    // confirm we can find deps in the roller project
+    MavenProvider provider = new MavenProvider();
+    Collection<DependencyGAV> dependencies =
+        provider.getAllDependencies(rollerTmpAppDir, rollerJavaFile);
+    assertThat(dependencies).isNotEmpty();
+
+    // confirm it found an existing known dependency in the /app/pom.xml
+    DependencyGAV mockito = DependencyGAV.createDefault("org.mockito", "mockito-core", "5.12.0");
+    assertThat(dependencies).contains(mockito);
+
+    // add a new dependency and confirm it gets added correctly
+    DependencyGAV newDep = DependencyGAV.createDefault("com.acme", "acme", "1.0.0");
+    DependencyUpdateResult dependencyUpdateResult =
+        provider.updateDependencies(rollerTmpAppDir, rollerJavaFile, List.of(newDep));
+    List<CodeTFChangesetEntry> changes = dependencyUpdateResult.packageChanges();
+    assertThat(changes).isNotEmpty();
+    assertThat(changes.get(0).getPath()).isEqualTo("app/pom.xml");
+    List<DependencyGAV> injectedPackages = dependencyUpdateResult.injectedPackages();
+    assertThat(injectedPackages).contains(newDep);
+
+    // confirm the new dep is in the pom
+    Collection<DependencyGAV> newDependencies =
+        provider.getAllDependencies(rollerTmpAppDir, rollerJavaFile);
+    assertThat(newDependencies).contains(newDep).contains(mockito);
+  }
+
   private static final String simplePomWithExistingSections =
       """
                   <?xml version="1.0" encoding="UTF-8"?>
