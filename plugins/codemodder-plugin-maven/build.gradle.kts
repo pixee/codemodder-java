@@ -31,4 +31,5 @@ dependencies {
     implementation(libs.diff.match.patch)
     implementation(libs.slf4j.simple)
     implementation(libs.slf4j.api)
+    implementation(libs.woodstox)
 }

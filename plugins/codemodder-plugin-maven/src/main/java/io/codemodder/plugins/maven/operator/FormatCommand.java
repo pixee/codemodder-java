@@ -2,6 +2,8 @@ package io.codemodder.plugins.maven.operator;
 
 import static io.github.pixee.security.XMLInputFactorySecurity.hardenFactory;
 
+import com.ctc.wstx.evt.CompactStartElement;
+import com.ctc.wstx.stax.WstxInputFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +40,7 @@ class FormatCommand extends AbstractCommand {
   private static final Logger LOGGER = LoggerFactory.getLogger(FormatCommand.class);
 
   /** StAX InputFactory */
-  private XMLInputFactory inputFactory = hardenFactory(XMLInputFactory.newInstance());
+  private XMLInputFactory inputFactory = WstxInputFactory.newInstance();
 
   /** StAX OutputFactory */
   private XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
@@ -270,6 +272,10 @@ class FormatCommand extends AbstractCommand {
     int elementStart = 0;
     List<XMLEvent> prevEvents = new ArrayList<>();
 
+    System.out.println("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+    System.out.println(inputFactory.getClass());
+    System.out.println(eventReader.getClass());
+    System.out.println("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
     while (eventReader.hasNext()) {
       XMLEvent event = eventReader.nextEvent();
 
@@ -324,8 +330,15 @@ class FormatCommand extends AbstractCommand {
           String originalPomCharsetString =
               new String(pomFile.getOriginalPom(), pomFile.getCharset());
 
-          String untrimmedOriginalContent =
-              originalPomCharsetString.substring(elementStart, offset);
+          String untrimmedOriginalContent = "";
+          // is self closing element, tag is contained within the offset of the next element
+          if (prevEvents.get(prevEvents.size() - 1) instanceof CompactStartElement) {
+            untrimmedOriginalContent =
+                originalPomCharsetString.substring(
+                    offset, eventReader.peek().getLocation().getCharacterOffset());
+          } else {
+            untrimmedOriginalContent = originalPomCharsetString.substring(elementStart, offset);
+          }
 
           String trimmedOriginalContent = untrimmedOriginalContent.trim();
 
