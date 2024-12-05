@@ -4,6 +4,7 @@ import static io.github.pixee.security.XMLInputFactorySecurity.hardenFactory;
 
 import com.ctc.wstx.evt.CompactStartElement;
 import com.ctc.wstx.stax.WstxInputFactory;
+import com.ctc.wstx.stax.WstxOutputFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +44,7 @@ class FormatCommand extends AbstractCommand {
   private XMLInputFactory inputFactory = WstxInputFactory.newInstance();
 
   /** StAX OutputFactory */
-  private XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+  private XMLOutputFactory outputFactory = WstxOutputFactory.newInstance();
 
   private List<MatchData> singleElementsWithAttributes = new ArrayList<>();
 
@@ -272,10 +273,6 @@ class FormatCommand extends AbstractCommand {
     int elementStart = 0;
     List<XMLEvent> prevEvents = new ArrayList<>();
 
-    System.out.println("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
-    System.out.println(inputFactory.getClass());
-    System.out.println(eventReader.getClass());
-    System.out.println("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
     while (eventReader.hasNext()) {
       XMLEvent event = eventReader.nextEvent();
 
@@ -331,7 +328,7 @@ class FormatCommand extends AbstractCommand {
               new String(pomFile.getOriginalPom(), pomFile.getCharset());
 
           String untrimmedOriginalContent = "";
-          // is self closing element, tag is contained within the offset of the next element
+          // is self-closing element, tag is contained within the offset of the next element
           if (prevEvents.get(prevEvents.size() - 1) instanceof CompactStartElement) {
             untrimmedOriginalContent =
                 originalPomCharsetString.substring(
