@@ -2,7 +2,6 @@ package io.codemodder.plugins.maven.operator;
 
 import static io.github.pixee.security.XMLInputFactorySecurity.hardenFactory;
 
-import com.ctc.wstx.evt.CompactStartElement;
 import com.ctc.wstx.stax.WstxInputFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
 import java.io.ByteArrayInputStream;
@@ -327,14 +326,26 @@ class FormatCommand extends AbstractCommand {
           String originalPomCharsetString =
               new String(pomFile.getOriginalPom(), pomFile.getCharset());
 
+          var prev = prevEvents.get(prevEvents.size() - 1);
           String untrimmedOriginalContent = "";
           // is self-closing element, tag is contained within the offset of the next element
-          if (prevEvents.get(prevEvents.size() - 1) instanceof CompactStartElement) {
+          if (prev instanceof StartElement
+              && prev.getLocation().getCharacterOffset()
+                  == endElementEvent.getLocation().getCharacterOffset()) {
             untrimmedOriginalContent =
                 originalPomCharsetString.substring(
                     offset, eventReader.peek().getLocation().getCharacterOffset());
           } else {
-            untrimmedOriginalContent = originalPomCharsetString.substring(elementStart, offset);
+            // is empty tag, the last character events is not in between the tags
+            if (prev.isStartElement()) {
+              untrimmedOriginalContent =
+                  originalPomCharsetString.substring(
+                      prev.getLocation().getCharacterOffset(),
+                      eventReader.peek().getLocation().getCharacterOffset());
+
+            } else {
+              untrimmedOriginalContent = originalPomCharsetString.substring(elementStart, offset);
+            }
           }
 
           String trimmedOriginalContent = untrimmedOriginalContent.trim();
