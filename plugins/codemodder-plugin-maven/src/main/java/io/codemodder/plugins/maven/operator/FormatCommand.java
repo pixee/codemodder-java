@@ -38,7 +38,7 @@ class FormatCommand extends AbstractCommand {
   private static final Logger LOGGER = LoggerFactory.getLogger(FormatCommand.class);
 
   /** StAX InputFactory */
-  private XMLInputFactory inputFactory = hardenFactory(XMLInputFactory.newInstance());
+  private XMLInputFactory inputFactory = XMLInputFactory.newInstance().newInstance();
 
   /** StAX OutputFactory */
   private XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
@@ -324,8 +324,27 @@ class FormatCommand extends AbstractCommand {
           String originalPomCharsetString =
               new String(pomFile.getOriginalPom(), pomFile.getCharset());
 
-          String untrimmedOriginalContent =
-              originalPomCharsetString.substring(elementStart, offset);
+          var prev = prevEvents.get(prevEvents.size() - 1);
+          String untrimmedOriginalContent = "";
+          // is self-closing element, tag is contained within the offset of the next element
+          if (prev instanceof StartElement
+              && prev.getLocation().getCharacterOffset()
+                  == endElementEvent.getLocation().getCharacterOffset()) {
+            untrimmedOriginalContent =
+                originalPomCharsetString.substring(
+                    offset, eventReader.peek().getLocation().getCharacterOffset());
+          } else {
+            // is empty tag, the last character events is not in between the tags
+            if (prev.isStartElement()) {
+              untrimmedOriginalContent =
+                  originalPomCharsetString.substring(
+                      prev.getLocation().getCharacterOffset(),
+                      eventReader.peek().getLocation().getCharacterOffset());
+
+            } else {
+              untrimmedOriginalContent = originalPomCharsetString.substring(elementStart, offset);
+            }
+          }
 
           String trimmedOriginalContent = untrimmedOriginalContent.trim();
 

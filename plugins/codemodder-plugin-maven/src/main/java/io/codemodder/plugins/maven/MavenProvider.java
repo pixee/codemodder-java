@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>a. We skip parent finding if there's not a relativePath declaration (this is by design), so
  * sometimes pom finding will fail on purpose b. there are several flags on ProjectModelFactory
- * which aren't applied. They relate to verisons, upgrading and particularly: Actives Profiles c. If
+ * which aren't applied. They relate to versions, upgrading and particularly: Actives Profiles c. If
  * you need anything declared in a ~/.m2/settings.xml, we don't support that (e.g., passwords or
  * proxies) d. Haven't tested, but I'm almost sure that it wouldn't work on any repo other than
  * central e. We allow on this module to do online resolution. HOWEVER by default its offline f. You
