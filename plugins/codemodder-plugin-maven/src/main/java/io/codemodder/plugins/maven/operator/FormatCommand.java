@@ -2,8 +2,6 @@ package io.codemodder.plugins.maven.operator;
 
 import static io.github.pixee.security.XMLInputFactorySecurity.hardenFactory;
 
-import com.ctc.wstx.stax.WstxInputFactory;
-import com.ctc.wstx.stax.WstxOutputFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,10 +38,10 @@ class FormatCommand extends AbstractCommand {
   private static final Logger LOGGER = LoggerFactory.getLogger(FormatCommand.class);
 
   /** StAX InputFactory */
-  private XMLInputFactory inputFactory = WstxInputFactory.newInstance();
+  private XMLInputFactory inputFactory = XMLInputFactory.newInstance().newInstance();
 
   /** StAX OutputFactory */
-  private XMLOutputFactory outputFactory = WstxOutputFactory.newInstance();
+  private XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 
   private List<MatchData> singleElementsWithAttributes = new ArrayList<>();
 
