@@ -73,9 +73,14 @@ final class DefaultXPathStreamProcessor implements XPathStreamProcessor {
     XMLEventWriter xmlWriter = outputFactory.createXMLEventWriter(sw);
     while (xmlReader.hasNext()) {
       final XMLEvent currentEvent = xmlReader.nextEvent();
-      Location location = currentEvent.getLocation();
-      if (doesPositionMatch(httpMethodPositions, location)) {
-        handler.handle(xmlReader, xmlWriter, currentEvent);
+      // get the position of the last character of the event, that is, the start of the next one
+      if (xmlReader.hasNext()) {
+        Location location = xmlReader.peek().getLocation();
+        if (doesPositionMatch(httpMethodPositions, location)) {
+          handler.handle(xmlReader, xmlWriter, currentEvent);
+        } else {
+          xmlWriter.add(currentEvent);
+        }
       } else {
         xmlWriter.add(currentEvent);
       }
