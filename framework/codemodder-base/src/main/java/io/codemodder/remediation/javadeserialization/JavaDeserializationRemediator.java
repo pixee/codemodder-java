@@ -1,6 +1,8 @@
 package io.codemodder.remediation.javadeserialization;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.*;
@@ -21,8 +23,26 @@ public final class JavaDeserializationRemediator<T> implements Remediator<T> {
     this.searchStrategyRemediator =
         new SearcherStrategyRemediator.Builder<T>()
             .withSearcherStrategyPair(
+                // matches declarations
                 new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(JavaDeserializationFixStrategy::match)
+                    .withMatcher(
+                        n ->
+                            Optional.empty()
+                                .or(
+                                    () ->
+                                        Optional.of(n)
+                                            .map(
+                                                m ->
+                                                    m instanceof VariableDeclarationExpr vde
+                                                        ? vde
+                                                        : null)
+                                            .filter(JavaDeserializationFixStrategy::match))
+                                .or(
+                                    () ->
+                                        Optional.of(n)
+                                            .map(m -> m instanceof MethodCallExpr mce ? mce : null)
+                                            .filter(JavaDeserializationFixStrategy::match))
+                                .isPresent())
                     .build(),
                 new JavaDeserializationFixStrategy())
             .build();

@@ -30,9 +30,14 @@ public final class XSSRemediator<T> implements Remediator<T> {
                 new PrintingMethodFixStrategy())
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<T>()
-                    .withMatcher(ResponseEntityFixStrategy::match)
+                    .withMatcher(ResponseEntityConstructorFixStrategy::match)
                     .build(),
-                new ResponseEntityFixStrategy())
+                new ResponseEntityConstructorFixStrategy())
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<T>()
+                    .withMatcher(ResponseEntityWriteFixStrategy::match)
+                    .build(),
+                new ResponseEntityWriteFixStrategy())
             .build();
   }
 

@@ -19,15 +19,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-final class ResponseEntityFixStrategyTest {
+final class ResponseEntityWriteFixStrategyTest {
 
-  private ResponseEntityFixStrategy fixer;
+  private ResponseEntityWriteFixStrategy fixer;
   private DetectorRule rule;
   private JavaParser parser;
 
   @BeforeEach
   void setup() throws IOException {
-    this.fixer = new ResponseEntityFixStrategy();
+    this.fixer = new ResponseEntityWriteFixStrategy();
     this.parser = JavaParserFactory.newFactory().create(List.of());
     this.rule = new DetectorRule("xss", "XSS", null);
   }
@@ -36,36 +36,36 @@ final class ResponseEntityFixStrategyTest {
     return Stream.of(
         Arguments.of(
             """
-            class Samples {
-              String should_be_fixed(String s) {
-                return new ResponseEntity(s, HttpStatus.OK);
-              }
-            }
-            """,
+                    class Samples {
+                      String should_be_fixed(String s) {
+                        return ResponseEntity.ok("Value: " + s);
+                      }
+                    }
+                    """,
             """
-                import org.owasp.encoder.Encode;
-                class Samples {
-                  String should_be_fixed(String s) {
-                    return new ResponseEntity(Encode.forHtml(s), HttpStatus.OK);
-                  }
-                }
-                """),
+                        import org.owasp.encoder.Encode;
+                        class Samples {
+                          String should_be_fixed(String s) {
+                            return ResponseEntity.ok("Value: " + Encode.forHtml(s));
+                          }
+                        }
+                        """),
         Arguments.of(
             """
-           class Samples {
-             ResponseEntity<String> should_be_fixed(String s) {
-               return new ResponseEntity<>(s + "hi", HttpStatus.OK);
-             }
-           }
-           """,
+                    class Samples {
+                      String should_be_fixed(Object s) {
+                        return ResponseEntity.ok("Value: " + s.toString());
+                      }
+                    }
+                    """,
             """
-           import org.owasp.encoder.Encode;
-           class Samples {
-             ResponseEntity<String> should_be_fixed(String s) {
-               return new ResponseEntity<>(Encode.forHtml(s) + "hi", HttpStatus.OK);
-             }
-           }
-           """));
+                        import org.owasp.encoder.Encode;
+                        class Samples {
+                          String should_be_fixed(Object s) {
+                            return ResponseEntity.ok("Value: " + Encode.forHtml(s.toString()));
+                          }
+                        }
+                        """));
   }
 
   @ParameterizedTest
@@ -86,7 +86,7 @@ final class ResponseEntityFixStrategyTest {
         new SearcherStrategyRemediator.Builder<XSSFinding>()
             .withSearcherStrategyPair(
                 new FixCandidateSearcher.Builder<XSSFinding>()
-                    .withMatcher(ResponseEntityFixStrategy::match)
+                    .withMatcher(ResponseEntityWriteFixStrategy::match)
                     .build(),
                 fixer)
             .build();
@@ -117,21 +117,11 @@ final class ResponseEntityFixStrategyTest {
             // this is not a ResponseEntity, shouldn't touch it
             """
                         class Samples {
-                          String should_not_be_fixed(String s) {
-                            return new NotResponseEntity(s, HttpStatus.OK);
+                          String should_be_fixed(String s) {
+                            return ResponseEntity.something_besides_ok("Value: " + s);
                           }
                         }
                         """,
-            3),
-        Arguments.of(
-            // this is not a String, shouldn't touch it
-            """
-                            class Samples {
-                              String should_not_be_fixed(BodyType s) {
-                                return new ResponseEntity(s, HttpStatus.OK);
-                              }
-                            }
-                            """,
             3));
   }
 }
