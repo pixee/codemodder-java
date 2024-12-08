@@ -1,0 +1,6 @@
+{
+  "summary" : "Introduced protections against Log Injection / Forging attacks",
+  "change" : "Added a call to replace any newlines the value",
+  "reviewGuidanceJustification" : "This strips newlines from the value before it is logged, preventing log injection attacks",
+  "references" : ["https://owasp.org/www-community/attacks/Log_Injection", "https://knowledge-base.secureflag.com/vulnerabilities/inadequate_input_validation/log_injection_vulnerability.html", "https://cwe.mitre.org/data/definitions/117.html"]
+}

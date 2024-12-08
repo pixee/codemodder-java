@@ -34,6 +34,7 @@ public final class DefaultCodemods {
         CodeQLJDBCResourceLeakCodemod.class,
         CodeQLJEXLInjectionCodemod.class,
         CodeQLJNDIInjectionCodemod.class,
+        CodeQLLogInjectionCodemod.class,
         CodeQLMavenSecureURLCodemod.class,
         CodeQLOutputResourceLeakCodemod.class,
         CodeQLPredictableSeedCodemod.class,

@@ -53,7 +53,6 @@ final class DefaultJNDIInjectionRemediatorTest {
             i -> Optional.empty());
 
     assertThat(result.changes()).isEmpty();
-    ;
 
     List<UnfixedFinding> unfixedFindings = result.unfixedFindings();
     assertThat(unfixedFindings).hasSize(1);
