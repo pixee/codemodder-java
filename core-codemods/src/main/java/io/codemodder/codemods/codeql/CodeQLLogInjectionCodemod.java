@@ -49,8 +49,6 @@ public final class CodeQLLogInjectionCodemod extends CodeQLRemediationCodemod {
         r ->
             Optional.ofNullable(
                 r.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine()),
-        r ->
-            Optional.ofNullable(
-                r.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn()));
+        r -> Optional.empty());
   }
 }
