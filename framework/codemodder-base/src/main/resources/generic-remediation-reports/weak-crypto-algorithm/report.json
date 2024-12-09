@@ -1,0 +1,5 @@
+{
+  "summary" : "Moved to stronger cryptographic algorithm",
+  "change" : "Updated to use a stronger cryptographic algorithm.",
+  "references" : ["https://cwe.mitre.org/data/definitions/327.html", "https://cwe.mitre.org/data/definitions/328.html"]
+}
