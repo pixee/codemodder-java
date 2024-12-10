@@ -1,6 +1,6 @@
 {
-  "summary" : "Added a timeout to regular expression matching",
-  "change" : "Added a timeout to regular expression matching",
-  "reviewGuidanceIJustification" : "The expected timeout is highly dependent on the application and should be adjusted to conform to it.",
-  "references" : ["https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS", "https://cwe.mitre.org/data/definitions/400.html", "https://github.com/google/re2j"]
+  "summary" : "Removed printing/sending of error data",
+  "change" : "Removed printing/sending of error data",
+  "reviewGuidanceIJustification" : "While this change is most likely harmless, it may be the case that the other endpoint is expecting the message and needs adjustment.",
+  "references" : ["https://cwe.mitre.org/data/definitions/209.html", "https://owasp.org/www-community/Improper_Error_Handling", "https://www.securecoding.cert.org/confluence/display/java/ERR01-J.+Do+not+allow+exceptions+to+expose+sensitive+information"]
 }
