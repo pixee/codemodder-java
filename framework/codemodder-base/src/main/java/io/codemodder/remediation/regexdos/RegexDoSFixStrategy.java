@@ -30,7 +30,7 @@ final class RegexDoSFixStrategy extends MatchAndFixStrategy {
       List.of("matches", "find", "replaceAll", "replaceFirst");
 
   /**
-   * Test if the node is a Pattern.matcher*() call
+   * Test if the node is an argument of a Pattern.matcher*() call
    *
    * @param node
    * @return
