@@ -19,6 +19,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.TypeParameter;
+import com.github.javaparser.resolution.types.ResolvedType;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -880,6 +881,20 @@ public final class ASTs {
     @Override
     public boolean hasNext() {
       return current.getParentNode().isPresent();
+    }
+  }
+
+  /**
+   * Resolves type of a given expression e.
+   *
+   * @param e
+   * @return
+   */
+  public static Optional<ResolvedType> calculateResolvedType(final Expression e) {
+    try {
+      return Optional.of(e.calculateResolvedType());
+    } catch (final RuntimeException exception) {
+      return Optional.empty();
     }
   }
 

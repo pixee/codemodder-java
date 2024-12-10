@@ -39,6 +39,7 @@ public final class DefaultCodemods {
         CodeQLOutputResourceLeakCodemod.class,
         CodeQLPotentiallyUnsafeCryptoAlgorithmCodemod.class,
         CodeQLPredictableSeedCodemod.class,
+        CodeQLRegexDoSCodemod.class,
         CodeQLRegexInjectionCodemod.class,
         CodeQLSQLInjectionCodemod.class,
         CodeQLSSRFCodemod.class,
