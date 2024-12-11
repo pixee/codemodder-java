@@ -10,7 +10,6 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
 import io.codemodder.DependencyGAV;
 import io.codemodder.ast.ASTs;
@@ -42,26 +41,26 @@ final class LogStatementFixer implements RemediationStrategy {
   private SuccessOrReason fixArguments(final NodeList<Expression> arguments) {
 
     // first and only is NameExpr (not an exception) (args == 1), (args can be 2 if exception)
-    if ((arguments.size() == 1 && arguments.get(0).isNameExpr())
+    if ((arguments.size() == 1 && isNameOrMethodExpr(arguments.get(0)))
         || (arguments.size() == 2
-            && arguments.get(0).isNameExpr()
+            && isNameOrMethodExpr(arguments.get(0))
             && isException(arguments.get(1)))) {
-      NameExpr argument = arguments.get(0).asNameExpr();
+      Expression argument = arguments.get(0);
       wrapWithNewlineSanitizer(argument);
-      return SuccessOrReason.success(List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER));
+      return SuccessOrReason.success(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
     }
 
     // first is string literal and second is NameExpr (args can be 3 if not exception)
     if ((arguments.size() == 2
             && arguments.get(0).isStringLiteralExpr()
-            && arguments.get(1).isNameExpr())
+            && isNameOrMethodExpr(arguments.get(1)))
         || (arguments.size() == 3
             && arguments.get(0).isStringLiteralExpr()
-            && arguments.get(1).isNameExpr()
+            && isNameOrMethodExpr(arguments.get(1))
             && isException(arguments.get(2)))) {
-      NameExpr argument = arguments.get(1).asNameExpr();
+      Expression argument = arguments.get(1);
       wrapWithNewlineSanitizer(argument);
-      return SuccessOrReason.success(List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER));
+      return SuccessOrReason.success(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
     }
 
     // first is BinaryExpr with NameExpr in it (args == 2) (args can be 3 if last is exception)
@@ -73,11 +72,25 @@ final class LogStatementFixer implements RemediationStrategy {
       Optional<Expression> expressionToWrap = findExpressionToWrap(binaryExpr);
       if (expressionToWrap.isPresent()) {
         wrapWithNewlineSanitizer(expressionToWrap.get());
-        return SuccessOrReason.success(List.of(DependencyGAV.OWASP_XSS_JAVA_ENCODER));
+        return SuccessOrReason.success(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
+      }
+    }
+
+    // first and only argument is a binary expression with a call to be able to wrap in it
+    if (arguments.size() == 1 && arguments.get(0).isBinaryExpr()) {
+      BinaryExpr binaryExpr = arguments.get(0).asBinaryExpr();
+      Optional<Expression> expressionToWrap = findExpressionToWrap(binaryExpr);
+      if (expressionToWrap.isPresent()) {
+        wrapWithNewlineSanitizer(expressionToWrap.get());
+        return SuccessOrReason.success(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
       }
     }
 
     return SuccessOrReason.reason("Unfixable log call shape");
+  }
+
+  private static boolean isNameOrMethodExpr(final Expression expression) {
+    return expression.isNameExpr() || expression.isMethodCallExpr();
   }
 
   private boolean isException(final Expression expression) {
