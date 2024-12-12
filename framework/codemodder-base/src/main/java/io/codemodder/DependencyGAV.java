@@ -160,7 +160,7 @@ public interface DependencyGAV {
         group, artifact, version, justification, license, repositoryUrl, noTransitiveDependencies);
   }
 
-  String JAVA_SECURITY_TOOLKIT_VERSION = "1.2.0";
+  String JAVA_SECURITY_TOOLKIT_VERSION = "1.2.1";
   String JAVA_SECURITY_TOOLKIT_GAV =
       "io.github.pixee:java-security-toolkit:" + JAVA_SECURITY_TOOLKIT_VERSION;
 
