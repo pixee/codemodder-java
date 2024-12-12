@@ -171,6 +171,6 @@ final class LogStatementFixer implements RemediationStrategy {
   }
 
   private static void wrapWithNewlineSanitizer(final Expression expression) {
-    wrap(expression).withStaticMethod(Newlines.class.getName(), "stripNewLines", true);
+    wrap(expression).withStaticMethod(Newlines.class.getName(), "stripAll", true);
   }
 }
