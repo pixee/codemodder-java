@@ -34,6 +34,23 @@ final class LogInjectionRemediatorTest {
     return Stream.of(
         Arguments.of(
             """
+                            class Foo {
+                              void foo(String msg) {
+                                 log.info("hi" + msg);
+                              }
+                            }
+                            """,
+            """
+                            import static io.github.pixee.security.Newlines.stripAll;
+                            class Foo {
+                              void foo(String msg) {
+                                log.info("hi" + stripAll(msg));
+                              }
+                            }
+                            """,
+            3),
+        Arguments.of(
+            """
                     class Foo {
                       void foo(String msg) {
                          log.info(msg);
@@ -41,10 +58,10 @@ final class LogInjectionRemediatorTest {
                     }
                     """,
             """
-                    import static io.github.pixee.security.Newlines.stripNewLines;
+                    import static io.github.pixee.security.Newlines.stripAll;
                     class Foo {
                       void foo(String msg) {
-                        log.info(stripNewLines(msg));
+                        log.info(stripAll(msg));
                       }
                     }
                     """,
@@ -58,11 +75,11 @@ final class LogInjectionRemediatorTest {
                             }
                             """,
             """
-                        import static io.github.pixee.security.Newlines.stripNewLines;
+                        import static io.github.pixee.security.Newlines.stripAll;
 
                         class Foo {
                           void foo(String msg, MyException ex) {
-                            log.info(stripNewLines(msg), ex);
+                            log.info(stripAll(msg), ex);
                           }
                         }
                         """,
@@ -77,12 +94,12 @@ final class LogInjectionRemediatorTest {
                             }
                             """,
             """
-                        import static io.github.pixee.security.Newlines.stripNewLines;
+                        import static io.github.pixee.security.Newlines.stripAll;
 
                         class Foo {
                           void foo(String msg) {
                             MyException ex = null;
-                            log.info(stripNewLines(msg), ex);
+                            log.info(stripAll(msg), ex);
                           }
                         }
                         """,
@@ -100,14 +117,14 @@ final class LogInjectionRemediatorTest {
                             }
                             """,
             """
-                        import static io.github.pixee.security.Newlines.stripNewLines;
+                        import static io.github.pixee.security.Newlines.stripAll;
 
                         class Foo {
                               void foo(String msg) {
                                 try {
                                   doThing();
                                 } catch(MyException e) {
-                                  log.info(stripNewLines(msg), e);
+                                  log.info(stripAll(msg), e);
                                 }
                               }
                             }
@@ -122,11 +139,11 @@ final class LogInjectionRemediatorTest {
                             }
                             """,
             """
-                        import static io.github.pixee.security.Newlines.stripNewLines;
+                        import static io.github.pixee.security.Newlines.stripAll;
 
                         class Foo {
                           void foo(String user, MyException ex) {
-                            log.info("hi " + stripNewLines(user), ex);
+                            log.info("hi " + stripAll(user), ex);
                           }
                         }
                         """,
@@ -140,11 +157,11 @@ final class LogInjectionRemediatorTest {
                             }
                             """,
             """
-                        import static io.github.pixee.security.Newlines.stripNewLines;
+                        import static io.github.pixee.security.Newlines.stripAll;
 
                         class Foo {
                           void foo(String user, MyException ex) {
-                            log.info("hi " + stripNewLines(user) + " its me!", ex);
+                            log.info("hi " + stripAll(user) + " its me!", ex);
                           }
                         }
                         """,
@@ -158,11 +175,11 @@ final class LogInjectionRemediatorTest {
                             }
                             """,
             """
-                        import static io.github.pixee.security.Newlines.stripNewLines;
+                        import static io.github.pixee.security.Newlines.stripAll;
 
                         class Foo {
                           void foo(String user, MyException ex) {
-                            log.info("hi {}", stripNewLines(user), ex);
+                            log.info("hi {}", stripAll(user), ex);
                           }
                         }
                         """,
