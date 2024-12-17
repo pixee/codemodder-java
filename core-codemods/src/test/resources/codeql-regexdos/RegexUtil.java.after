@@ -18,11 +18,10 @@
 
 package org.apache.roller.util;
 
+import io.github.pixee.security.ExecuteWithTimeout;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Hex;
@@ -62,7 +61,7 @@ public final class RegexUtil {
      */
     public static String obfuscateEmail(String str) {
         Matcher emailMatch = EMAIL_PATTERN.matcher(str);
-        while (executeWithTimeout(() -> emailMatch.find(), 5000)) {
+        while (ExecuteWithTimeout.executeWithTimeout(() -> emailMatch.find(), 5000)) {
             String at = emailMatch.group(1);
             //System.out.println("at=" + at);
             str = str.replaceFirst(at, "-AT-");
@@ -115,13 +114,4 @@ public final class RegexUtil {
         return result.toString();
     }
     
-    public <E> E executeWithTimeout(final Callable<E> action, final int timeout) {
-        Future<E> maybeResult = Executors.newSingleThreadExecutor().submit(action);
-        try {
-            return maybeResult.get(timeout, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to execute within time limit.");
-        }
-    }
-
 }
