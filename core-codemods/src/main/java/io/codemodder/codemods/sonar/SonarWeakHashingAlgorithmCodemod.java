@@ -17,7 +17,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 @Codemod(
-    id = "sonar:java/weak-hash-2245",
+    id = "sonar:java/weak-hash-4790",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
     importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)

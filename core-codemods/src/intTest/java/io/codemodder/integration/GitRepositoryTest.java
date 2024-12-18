@@ -97,7 +97,12 @@ abstract class GitRepositoryTest {
             .map(CodeTFResult::getFailedFiles)
             .flatMap(Collection::stream)
             .toList();
-    assertThat(failedFiles.size(), is(0));
+    if (!failedFiles.isEmpty()) {
+      System.out.println("Failed files during scan:");
+      failedFiles.forEach(System.err::println);
+    }
+    int size = failedFiles.size();
+    assertThat(size, is(0));
   }
 
   protected void verifyStandardCodemodResults(final List<CodeTFChangesetEntry> fileChanges) {
