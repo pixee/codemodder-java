@@ -27,7 +27,7 @@ Follow these instructions if you intend to modify and build this project from so
    [here](https://semgrep.dev/docs/getting-started/#installing-and-running-semgrep-locally)
    for instructions. It can usually be done via `pip`:
    ```shell
-   pip install semgrep
+   pip install semgrep==1.84.1
    ```
 
 If your python library paths contain your home directory as a root folder (i.e.

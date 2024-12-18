@@ -12,6 +12,7 @@ import io.codemodder.codemods.semgrep.SemgrepSSRFCodemod;
 import io.codemodder.codemods.semgrep.SemgrepServletResponseWriterXSSCodemod;
 import io.codemodder.codemods.semgrep.SemgrepWeakRandomCodemod;
 import io.codemodder.codemods.semgrep.SemgrepXXECodemod;
+import io.codemodder.codemods.sonar.*;
 import java.util.List;
 
 /**
@@ -89,12 +90,15 @@ public final class DefaultCodemods {
         SemgrepOverlyPermissiveFilePermissionsCodemod.class,
         SimplifyRestControllerAnnotationsCodemod.class,
         SubstituteReplaceAllCodemod.class,
+        SonarCookieMissingSecureFlagCodemod.class,
         SonarJNDIInjectionCodemod.class,
         SonarObjectDeserializationCodemod.class,
         SonarRemoveUnthrowableExceptionCodemod.class,
         SonarSQLInjectionCodemod.class,
         SonarSSRFCodemod.class,
         SonarUnsafeReflectionRemediationCodemod.class,
+        SonarWeakHashingAlgorithmCodemod.class,
+        SonarWeakRandomCodemod.class,
         SonarXXECodemod.class,
         SQLParameterizerCodemod.class,
         SSRFCodemod.class,

@@ -64,7 +64,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Semgrep
-        run: python3 -m pip install semgrep
+        run: python3 -m pip install semgrep==1.84.1
 
       - name: Run Check task
         uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a # v2.9.0

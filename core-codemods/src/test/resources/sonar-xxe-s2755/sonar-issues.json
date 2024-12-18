@@ -30,7 +30,7 @@
       "effort": "15min",
       "debt": "15min",
       "assignee": "nahsra@github",
-      "author": "arshan.dabirsiaghi@gmail.com",
+      "author": "foo@foo.com",
       "tags": [
         "cwe",
         "symbolic-execution"
@@ -68,7 +68,7 @@
       "effort": "15min",
       "debt": "15min",
       "assignee": "nahsra@github",
-      "author": "arshan.dabirsiaghi@gmail.com",
+      "author": "foo@gmail.com",
       "tags": [
         "cwe",
         "symbolic-execution"
@@ -106,7 +106,7 @@
       "effort": "15min",
       "debt": "15min",
       "assignee": "nahsra@github",
-      "author": "arshan.dabirsiaghi@gmail.com",
+      "author": "foo@gmail.com",
       "tags": [
         "cwe",
         "symbolic-execution"
@@ -144,7 +144,7 @@
       "effort": "15min",
       "debt": "15min",
       "assignee": "nahsra@github",
-      "author": "arshan.dabirsiaghi@gmail.com",
+      "author": "foo@gmail.com",
       "tags": [
         "cwe",
         "symbolic-execution"
