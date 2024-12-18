@@ -12,6 +12,7 @@ import io.codemodder.codemods.semgrep.SemgrepSSRFCodemod;
 import io.codemodder.codemods.semgrep.SemgrepServletResponseWriterXSSCodemod;
 import io.codemodder.codemods.semgrep.SemgrepWeakRandomCodemod;
 import io.codemodder.codemods.semgrep.SemgrepXXECodemod;
+import io.codemodder.codemods.sonar.*;
 import java.util.List;
 
 /**
