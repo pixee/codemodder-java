@@ -9,14 +9,12 @@ import io.codemodder.providers.sonar.SonarRemediatingJavaParserChanger;
 import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.Remediator;
 import io.codemodder.remediation.weakcrypto.WeakCryptoAlgorithmRemediator;
-import io.codemodder.remediation.weakrandom.WeakRandomRemediator;
 import io.codemodder.sonar.model.Hotspot;
 import io.codemodder.sonar.model.SonarFinding;
-
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import javax.inject.Inject;
 
 @Codemod(
     id = "sonar:java/weak-hash-2245",

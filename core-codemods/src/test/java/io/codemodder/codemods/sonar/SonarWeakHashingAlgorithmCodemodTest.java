@@ -10,7 +10,8 @@ final class SonarWeakHashingAlgorithmCodemodTest {
   @Metadata(
       codemodType = SonarWeakHashingAlgorithmCodemod.class,
       testResourceDir = "sonar-weak-hash-4790",
-      renameTestFile = "src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java",
+      renameTestFile =
+          "src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java",
       expectingFixesAtLines = {55},
       doRetransformTest = false,
       dependencies = {})
