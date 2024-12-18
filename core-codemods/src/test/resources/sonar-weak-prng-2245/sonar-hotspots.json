@@ -1,0 +1,48 @@
+{
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 1
+  },
+  "hotspots": [
+    {
+      "key": "AZPB23jjwGhA7VQ2UjF_",
+      "component": "nahsra_WebGoatSonarDemo:src/main/java/org/owasp/webgoat/lessons/csrf/CSRFGetFlag.java",
+      "project": "nahsra_WebGoatSonarDemo",
+      "securityCategory": "weak-cryptography",
+      "vulnerabilityProbability": "MEDIUM",
+      "status": "TO_REVIEW",
+      "line": 59,
+      "message": "Make sure that using this pseudorandom number generator is safe here.",
+      "assignee": "AYu2RswFLuhbfWU895e4",
+      "author": "foo@foo.com",
+      "creationDate": "2024-12-13T22:06:37+0100",
+      "updateDate": "2024-12-13T22:09:25+0100",
+      "textRange": {
+        "startLine": 59,
+        "endLine": 59,
+        "startOffset": 28,
+        "endOffset": 34
+      },
+      "flows": [],
+      "ruleKey": "java:S2245"
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoatSonarDemo:src/main/java/org/owasp/webgoat/lessons/csrf/CSRFGetFlag.java",
+      "qualifier": "FIL",
+      "name": "CSRFGetFlag.java",
+      "longName": "src/main/java/org/owasp/webgoat/lessons/csrf/CSRFGetFlag.java",
+      "path": "src/main/java/org/owasp/webgoat/lessons/csrf/CSRFGetFlag.java"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoatSonarDemo",
+      "qualifier": "TRK",
+      "name": "WebGoatSonarDemo",
+      "longName": "WebGoatSonarDemo"
+    }
+  ]
+}

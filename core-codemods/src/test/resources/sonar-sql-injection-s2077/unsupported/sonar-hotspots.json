@@ -14,7 +14,7 @@
       "status": "TO_REVIEW",
       "line": 52,
       "message": "Make sure using a dynamically formatted SQL query is safe here.",
-      "author": "arshan.dabirsiaghi@gmail.com",
+      "author": "foo@gmail.com",
       "creationDate": "2023-12-06T18:40:23+0100",
       "updateDate": "2024-04-25T23:46:59+0200",
       "textRange": {

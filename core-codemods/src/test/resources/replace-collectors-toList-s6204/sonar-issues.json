@@ -29,8 +29,8 @@
       "message": "Replace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'",
       "effort": "5min",
       "debt": "5min",
-      "assignee": "nahsra@github",
-      "author": "arshan.dabirsiaghi@gmail.com",
+      "assignee": "foo@github",
+      "author": "foo@gmail.com",
       "tags": [
         "java16"
       ],
