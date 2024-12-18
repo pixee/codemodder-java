@@ -1,0 +1,48 @@
+{
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 1
+  },
+  "hotspots": [
+    {
+      "key": "AZPB23cAwGhA7VQ2Ui-j",
+      "component": "nahsra_WebGoatSonarDemo:src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java",
+      "project": "nahsra_WebGoatSonarDemo",
+      "securityCategory": "others",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 55,
+      "message": "Make sure this weak hash algorithm is not used in a sensitive context here.",
+      "assignee": "AYu2RswFLuhbfWU895e4",
+      "author": "foo@gmail.com",
+      "creationDate": "2024-12-13T22:06:37+0100",
+      "updateDate": "2024-12-13T22:09:25+0100",
+      "textRange": {
+        "startLine": 55,
+        "endLine": 55,
+        "startOffset": 39,
+        "endOffset": 50
+      },
+      "flows": [],
+      "ruleKey": "java:S4790"
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoatSonarDemo:src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java",
+      "qualifier": "FIL",
+      "name": "HashingAssignment.java",
+      "longName": "src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java",
+      "path": "src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoatSonarDemo",
+      "qualifier": "TRK",
+      "name": "WebGoatSonarDemo",
+      "longName": "WebGoatSonarDemo"
+    }
+  ]
+}
