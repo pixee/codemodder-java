@@ -1,0 +1,48 @@
+{
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 1
+  },
+  "hotspots": [
+    {
+      "key": "AZPB23bawGhA7VQ2Ui-U",
+      "component": "nahsra_WebGoatSonarDemo:src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java",
+      "project": "nahsra_WebGoatSonarDemo",
+      "securityCategory": "insecure-conf",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 76,
+      "message": "Make sure creating this cookie without the \"secure\" flag is safe here.",
+      "assignee": "AYu2RswFLuhbfWU895e4",
+      "author": "foo@gmail.com",
+      "creationDate": "2024-12-13T22:06:37+0100",
+      "updateDate": "2024-12-13T22:09:25+0100",
+      "textRange": {
+        "startLine": 76,
+        "endLine": 76,
+        "startOffset": 24,
+        "endOffset": 30
+      },
+      "flows": [],
+      "ruleKey": "java:S2092"
+    }
+  ],
+  "components": [
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoatSonarDemo:src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java",
+      "qualifier": "FIL",
+      "name": "SpoofCookieAssignment.java",
+      "longName": "src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java",
+      "path": "src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java"
+    },
+    {
+      "organization": "nahsra",
+      "key": "nahsra_WebGoatSonarDemo",
+      "qualifier": "TRK",
+      "name": "WebGoatSonarDemo",
+      "longName": "WebGoatSonarDemo"
+    }
+  ]
+}

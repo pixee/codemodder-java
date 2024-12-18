@@ -2,6 +2,7 @@ package io.codemodder.remediation.missingsecureflag;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import io.codemodder.CodemodFileScanningResult;
 import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.*;
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 
+/** Remediator for missing secure flag in cookies. */
 public final class MissingSecureFlagRemediator<T> implements Remediator<T> {
 
   private final SearcherStrategyRemediator<T> searchStrategyRemediator;
@@ -26,7 +28,22 @@ public final class MissingSecureFlagRemediator<T> implements Remediator<T> {
                                 .filter(mce -> mce.getArguments().size() == 1)
                                 .isPresent())
                     .build(),
-                new MissingSecureFlagFixStrategy())
+                new FixAtJakartaAddCookieCallStrategy())
+            .withSearcherStrategyPair(
+                new FixCandidateSearcher.Builder<T>()
+                    .withMatcher(
+                        node ->
+                            Optional.of(node)
+                                .map(
+                                    n ->
+                                        n instanceof ObjectCreationExpr
+                                            ? (ObjectCreationExpr) n
+                                            : null)
+                                .filter(oce -> "Cookie".equals(oce.getTypeAsString()))
+                                .filter(oce -> oce.getArguments().size() == 2)
+                                .isPresent())
+                    .build(),
+                new FixAtJakartaCookieCreationStrategy())
             .build();
   }
 

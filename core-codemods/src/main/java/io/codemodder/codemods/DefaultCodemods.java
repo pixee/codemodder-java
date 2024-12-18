@@ -90,6 +90,7 @@ public final class DefaultCodemods {
         SemgrepOverlyPermissiveFilePermissionsCodemod.class,
         SimplifyRestControllerAnnotationsCodemod.class,
         SubstituteReplaceAllCodemod.class,
+        SonarCookieMissingSecureFlagCodemod.class,
         SonarJNDIInjectionCodemod.class,
         SonarObjectDeserializationCodemod.class,
         SonarRemoveUnthrowableExceptionCodemod.class,
