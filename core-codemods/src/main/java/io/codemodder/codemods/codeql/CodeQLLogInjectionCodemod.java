@@ -16,7 +16,7 @@ import javax.inject.Inject;
     id = "codeql:java/log-injection",
     reviewGuidance = ReviewGuidance.MERGE_WITHOUT_REVIEW,
     importance = Importance.HIGH,
-    executionPriority = CodemodExecutionPriority.HIGH)
+    executionPriority = CodemodExecutionPriority.LOW)
 public final class CodeQLLogInjectionCodemod extends CodeQLRemediationCodemod {
 
   private final Remediator<Result> remediator;
