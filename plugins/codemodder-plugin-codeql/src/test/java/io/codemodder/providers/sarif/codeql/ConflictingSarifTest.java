@@ -37,7 +37,6 @@ final class ConflictingSarifTest {
         pathSarifMap,
         List.of(),
         List.of(),
-        List.of(),
         null,
         null);
   }
