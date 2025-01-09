@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Fix strategy for XXE vulnerabilities anchored to the TransformerParser newInstance() calls. Finds
+ * Fix strategy for XXE vulnerabilities anchored to the TransformerParser.newInstance() calls. Finds
  * the parser's declaration and add statements disabling external entities and features.
  */
 final class TransformerFactoryAtCreationFixStrategy extends MatchAndFixStrategy {
@@ -70,7 +70,7 @@ final class TransformerFactoryAtCreationFixStrategy extends MatchAndFixStrategy 
   }
 
   /**
-   * Matches against TransformerFactory.newInstance() calls
+   * Matches against XMLInputFactory.newInstance() calls.
    *
    * @param node
    * @return

@@ -11,64 +11,43 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.remediation.WithoutScopePositionMatcher;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 final class DefaultXXERemediatorTest {
 
   private XXERemediator<XXEFinding> remediator;
   private DetectorRule rule;
 
-  @BeforeEach
-  void setup() {
-    this.remediator = new XXERemediator<>(new WithoutScopePositionMatcher());
-    this.rule = new DetectorRule("xxe", "XXE", null);
-  }
-
-  @Test
-  void it_fixes_dbf_at_parse_call() {
-    String vulnerableCode =
-        """
-            public class MyCode {
-              public void foo() {
-                    XMLReader parser = null;
-                    DocumentBuilderFactory dbf = null;
-                    StringReader sr = null;
-                    boolean success;
-                    try
-                    {
-                        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                        DocumentBuilder db = dbf.newDocumentBuilder();
-                        db.parse(new InputSource(sr));
-                        success = true;
-                    } catch (FileNotFoundException e){
-                        success = false;
-                        logError(e);
-                    }
-              }
-            }
-            """;
-
-    List<XXEFinding> findings = List.of(new XXEFinding("foo", 11, 15));
-    CompilationUnit cu = StaticJavaParser.parse(vulnerableCode);
-    LexicalPreservingPrinter.setup(cu);
-    CodemodFileScanningResult result =
-        remediator.remediateAll(
-            cu,
-            "foo",
-            rule,
-            findings,
-            XXEFinding::key,
-            XXEFinding::line,
-            x -> Optional.empty(),
-            x -> Optional.ofNullable(x.column()));
-    assertThat(result.unfixedFindings()).isEmpty();
-    assertThat(result.changes()).hasSize(1);
-    CodemodChange change = result.changes().get(0);
-    assertThat(change.lineNumber()).isEqualTo(11);
-
-    String fixedCode =
-        """
+  private static Stream<Arguments> fixableSamples() {
+    return Stream.of(
+        Arguments.of(
+            """
+                          public class MyCode {
+                            public void foo() {
+                                  XMLReader parser = null;
+                                  DocumentBuilderFactory dbf = null;
+                                  StringReader sr = null;
+                                  boolean success;
+                                  try
+                                  {
+                                      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                                      DocumentBuilder db = dbf.newDocumentBuilder();
+                                      db.parse(new InputSource(sr));
+                                      success = true;
+                                  } catch (FileNotFoundException e){
+                                      success = false;
+                                      logError(e);
+                                  }
+                            }
+                          }
+                          """,
+            11,
+            """
                         public class MyCode {
                           public void foo() {
                                 XMLReader parser = null;
@@ -89,10 +68,114 @@ final class DefaultXXERemediatorTest {
                                 }
                           }
                         }
-                        """;
+                        """),
+        Arguments.of(
+            """
+               import jakarta.xml.bind.JAXBContext;
+               import jakarta.xml.bind.JAXBException;
+               import java.io.StringReader;
+               import java.time.LocalDateTime;
+               import java.time.format.DateTimeFormatter;
+               import java.util.ArrayList;
+               import java.util.Comparator;
+               import java.util.HashMap;
+               import java.util.Map;
+               import javax.xml.XMLConstants;
+               import javax.xml.stream.XMLInputFactory;
+               import javax.xml.stream.XMLStreamException;
+               import org.owasp.webgoat.container.users.WebGoatUser;
+               import org.springframework.context.annotation.Scope;
+               import org.springframework.stereotype.Component;
+
+               public class CommentCreator {
+
+                  public Comment comment() {
+                    var jc = JAXBContext.newInstance(Comment.class);
+                    var xif = XMLInputFactory.newInstance();
+
+                    // TODO fix me disabled for now.
+                    if (securityEnabled) {
+                      xif.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, ""); // Compliant
+                      xif.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, ""); // compliant
+                    }
+
+                    var xsr = xif.createXMLStreamReader(new StringReader(xml));
+
+                    var unmarshaller = jc.createUnmarshaller();
+                    return (Comment) unmarshaller.unmarshal(xsr);
+                  }
+               }
+               """,
+            21,
+            """
+                       import jakarta.xml.bind.JAXBContext;
+                       import jakarta.xml.bind.JAXBException;
+                       import java.io.StringReader;
+                       import java.time.LocalDateTime;
+                       import java.time.format.DateTimeFormatter;
+                       import java.util.ArrayList;
+                       import java.util.Comparator;
+                       import java.util.HashMap;
+                       import java.util.Map;
+                       import javax.xml.XMLConstants;
+                       import javax.xml.stream.XMLInputFactory;
+                       import javax.xml.stream.XMLStreamException;
+                       import org.owasp.webgoat.container.users.WebGoatUser;
+                       import org.springframework.context.annotation.Scope;
+                       import org.springframework.stereotype.Component;
+
+                       public class CommentCreator {
+
+                          public Comment comment() {
+                            var jc = JAXBContext.newInstance(Comment.class);
+                            var xif = XMLInputFactory.newInstance();
+                            xif.setProperty("javax.xml.stream.isSupportingExternalEntities", false);
+
+                            // TODO fix me disabled for now.
+                            if (securityEnabled) {
+                              xif.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, ""); // Compliant
+                              xif.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, ""); // compliant
+                            }
+
+                            var xsr = xif.createXMLStreamReader(new StringReader(xml));
+
+                            var unmarshaller = jc.createUnmarshaller();
+                            return (Comment) unmarshaller.unmarshal(xsr);
+                          }
+                       }
+                       """));
+  }
+
+  @BeforeEach
+  void setup() {
+    this.remediator = new XXERemediator<>(new WithoutScopePositionMatcher());
+    this.rule = new DetectorRule("xxe", "XXE", null);
+  }
+
+  @ParameterizedTest
+  @MethodSource("fixableSamples")
+  void it_fixes_dbf_at_parse_call(String beforeCode, int line, String afterCode) {
+
+    List<XXEFinding> findings = List.of(new XXEFinding("foo", line, null));
+    CompilationUnit cu = StaticJavaParser.parse(beforeCode);
+    LexicalPreservingPrinter.setup(cu);
+    CodemodFileScanningResult result =
+        remediator.remediateAll(
+            cu,
+            "foo",
+            rule,
+            findings,
+            XXEFinding::key,
+            XXEFinding::line,
+            x -> Optional.empty(),
+            x -> Optional.ofNullable(x.column()));
+    assertThat(result.unfixedFindings()).isEmpty();
+    assertThat(result.changes()).hasSize(1);
+    CodemodChange change = result.changes().get(0);
+    assertThat(change.lineNumber()).isEqualTo(line);
 
     String actualCode = LexicalPreservingPrinter.print(cu);
-    assertThat(actualCode).isEqualToIgnoringCase(fixedCode);
+    assertThat(actualCode).isEqualToIgnoringCase(afterCode);
   }
 
   @Test

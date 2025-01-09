@@ -29,6 +29,8 @@ public class XXERemediator<T> implements Remediator<T> {
             .withMatchAndFixStrategyAndNodeMatcher(
                 new TransformerFactoryAtCreationFixStrategy(), matcher)
             .withMatchAndFixStrategyAndNodeMatcher(new XMLReaderAtParseFixStrategy(), matcher)
+            .withMatchAndFixStrategyAndNodeMatcher(
+                new XMLInputFactoryAtNewInstanceFixStrategy(), matcher)
             .build();
   }
 
