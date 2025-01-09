@@ -7,7 +7,7 @@ import io.codemodder.codetf.DetectorRule;
 import io.codemodder.providers.sarif.codeql.ProvidedCodeQLScan;
 import io.codemodder.remediation.GenericRemediationMetadata;
 import io.codemodder.remediation.Remediator;
-import io.codemodder.remediation.xxe.XXEIntermediateXMLStreamReaderRemediator;
+import io.codemodder.remediation.xxe.XMLStreamReaderIntermediateRemediator;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -24,7 +24,7 @@ public final class CodeQLXXECodemod extends CodeQLRemediationCodemod {
   @Inject
   public CodeQLXXECodemod(@ProvidedCodeQLScan(ruleId = "java/xxe") final RuleSarif sarif) {
     super(GenericRemediationMetadata.XXE.reporter(), sarif);
-    this.remediator = new XXEIntermediateXMLStreamReaderRemediator<>();
+    this.remediator = new XMLStreamReaderIntermediateRemediator<>();
   }
 
   @Override

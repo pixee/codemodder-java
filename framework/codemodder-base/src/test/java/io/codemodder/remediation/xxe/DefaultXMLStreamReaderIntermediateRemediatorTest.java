@@ -14,14 +14,14 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-final class DefaultXXEIntermediateXMLStreamReaderRemediatorTest {
+final class DefaultXMLStreamReaderIntermediateRemediatorTest {
 
-  private XXEIntermediateXMLStreamReaderRemediator<Object> remediator;
+  private XMLStreamReaderIntermediateRemediator<Object> remediator;
   private DetectorRule rule;
 
   @BeforeEach
   void setup() {
-    remediator = new XXEIntermediateXMLStreamReaderRemediator<>();
+    remediator = new XMLStreamReaderIntermediateRemediator<>();
     rule = new DetectorRule("xxe", "XXE Fixed At XMLStreamReader", null);
   }
 
