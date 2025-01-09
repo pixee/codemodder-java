@@ -8,5 +8,5 @@ import io.codemodder.testutils.Metadata;
     testResourceDir = "add-missing-override-s1161",
     renameTestFile = "src/main/java/SqlInjectionLesson10b.java",
     dependencies = {},
-    sonarIssuesJsonFiles = {"sonar-issues_1.json", "sonar-issues_2.json"})
+    sonarJsonFiles = {"sonar-issues_1.json", "sonar-issues_2.json"})
 final class AddMissingOverrideCodemodTest implements CodemodTestMixin {}

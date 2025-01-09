@@ -50,10 +50,7 @@ public @interface Metadata {
   int[] expectingFailedFixesAtLines() default {};
 
   /** Sonar issues file names for testing multiple json files */
-  String[] sonarIssuesJsonFiles() default {};
-
-  /** Sonar hotspots file names for testing multiple json files */
-  String[] sonarHotspotsJsonFiles() default {};
+  String[] sonarJsonFiles() default {};
 
   /**
    * Used to filter test execution to only the tests with a display name that matches the given
