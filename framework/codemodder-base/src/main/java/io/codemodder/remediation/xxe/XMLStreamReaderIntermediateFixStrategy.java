@@ -15,7 +15,7 @@ import java.util.Optional;
  * Fix strategy for XXE vulnerabilities anchored to arguments of a XMLStreamReader calls. Finds the
  * parser's declaration and add statements disabling external entities and features.
  */
-final class XXEIntermediateXMLStreamReaderFixStrategy implements RemediationStrategy {
+final class XMLStreamReaderIntermediateFixStrategy implements RemediationStrategy {
 
   @Override
   public SuccessOrReason fix(final CompilationUnit cu, final Node node) {
@@ -27,7 +27,7 @@ final class XXEIntermediateXMLStreamReaderFixStrategy implements RemediationStra
     if (maybeCall.isEmpty()) {
       return SuccessOrReason.reason("Not a method call");
     }
-    // get the xmlstreamreader scope variable
+    // get the XMLStreamReader scope variable
     MethodCallExpr createXMLStreamReaderCall = maybeCall.get();
     Expression xmlStreamReaderScope = createXMLStreamReaderCall.getScope().get();
 
