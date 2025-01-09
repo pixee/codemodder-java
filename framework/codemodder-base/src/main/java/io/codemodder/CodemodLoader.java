@@ -30,8 +30,7 @@ public final class CodemodLoader {
       final List<Path> includedFiles,
       final Map<String, List<RuleSarif>> ruleSarifByTool,
       final List<ParameterArgument> codemodParameters,
-      final List<Path> sonarIssuesJsonFiles,
-      final List<Path> sonarHotspotsJsonFiles,
+      final List<Path> sonarJsonFiles,
       final Path defectDojoFindingsJsonFile,
       final Path contrastVulnerabilitiesXmlFilePath) {
 
@@ -119,8 +118,7 @@ public final class CodemodLoader {
               pathExcludes,
               orderedCodemodTypes,
               allWantedSarifs,
-              sonarIssuesJsonFiles,
-              sonarHotspotsJsonFiles,
+              sonarJsonFiles,
               defectDojoFindingsJsonFile,
               contrastVulnerabilitiesXmlFilePath);
       allModules.addAll(modules);

@@ -116,24 +116,17 @@ final class CLI implements Callable<Integer> {
   private String projectName;
 
   @CommandLine.Option(
-      names = {"--sonar-issues-json"},
+      names = {"--sonar-json"},
       description =
-          "comma-separated set of path(s) to file(s) containing the result of a call to the Sonar Web API Issues endpoint",
+          "comma-separated set of path(s) to file(s) containing the result of a call to the Sonar Web API Issues or Hotspots endpoint (or both such files merged together)",
       split = ",")
-  private List<String> sonarIssuesJsonFilePaths;
+  private List<String> sonarJsons;
 
   @CommandLine.Option(
       names = {"--defectdojo-findings-json"},
       description =
           "a path to a file containing the result of a call to the DefectDojo v2 Findings API endpoint")
   private Path defectDojoFindingsJsonFilePath;
-
-  @CommandLine.Option(
-      names = {"--sonar-hotspots-json"},
-      description =
-          "comma-separated set of path(s) to file(s) containing the result of a call to the Sonar Web API Hotspots endpoint",
-      split = ",")
-  private List<String> sonarHotspotsJsonFilePaths;
 
   @CommandLine.Option(
       names = {"--contrast-vulnerabilities-xml"},
@@ -394,8 +387,7 @@ final class CLI implements Callable<Integer> {
       log.debug("Loading input files");
       CodeDirectory codeDirectory = new DefaultCodeDirectory(projectPath);
       List<Path> sarifFiles = convertToPaths(sarifs);
-      List<Path> sonarIssuesJsonFiles = convertToPaths(sonarIssuesJsonFilePaths);
-      List<Path> sonarHotspotJsonFiles = convertToPaths(sonarHotspotsJsonFilePaths);
+      List<Path> sonarJsonFiles = convertToPaths(sonarJsons);
 
       log.debug("Parsing SARIFs");
       Map<String, List<RuleSarif>> pathSarifMap =
@@ -412,8 +404,7 @@ final class CLI implements Callable<Integer> {
               filePaths,
               pathSarifMap,
               codemodParameters,
-              sonarIssuesJsonFiles,
-              sonarHotspotJsonFiles,
+              sonarJsonFiles,
               defectDojoFindingsJsonFilePath,
               contrastVulnerabilitiesXmlFilePath);
       List<CodemodIdPair> codemods = loader.getCodemods();
