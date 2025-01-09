@@ -3,6 +3,7 @@
   "change": "Replaced unsafe usages of `Class.forName` with hardened alternative `Reflection.loadAndVerify`",
   "reviewGuidanceJustification": "Reflection.loadAndVerify disallows the loading of classes that are well-known to be dangerous paths to remote code execution. Pathological cases aside, the use of Reflection.loadAndVerify will not disrupt the typical operations of an application.",
   "references": [
+    "https://cwe.mitre.org/data/definitions/470",
     "https://rules.sonarsource.com/java/RSPEC-2658/"
   ]
 }
