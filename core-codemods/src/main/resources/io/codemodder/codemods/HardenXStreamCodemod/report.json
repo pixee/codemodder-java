@@ -6,6 +6,7 @@
     "https://x-stream.github.io/security.html",
     "http://diniscruz.blogspot.com/2013/12/xstream-remote-code-execution-exploit.html",
     "https://www.contrastsecurity.com/security-influencers/serialization-must-die-act-2-xstream",
-    "https://x-stream.github.io/CVE-2013-7285.html"
+    "https://x-stream.github.io/CVE-2013-7285.html",
+    "https://cwe.mitre.org/data/definitions/502.html"
   ]
 }
