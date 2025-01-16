@@ -26,13 +26,13 @@ import javax.inject.Inject;
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
-public final class SonarSQLInjectionCodemod extends SonarRemediatingJavaParserChanger {
+public final class SonarSQLInjectionHotspotCodemod extends SonarRemediatingJavaParserChanger {
 
   private final Remediator<Hotspot> remediationStrategy;
   private final RuleHotspot hotspots;
 
   @Inject
-  public SonarSQLInjectionCodemod(
+  public SonarSQLInjectionHotspotCodemod(
       @ProvidedSonarScan(ruleId = "java:S2077") final RuleHotspot hotspots) {
     super(GenericRemediationMetadata.SQL_INJECTION.reporter(), hotspots);
     this.hotspots = Objects.requireNonNull(hotspots);

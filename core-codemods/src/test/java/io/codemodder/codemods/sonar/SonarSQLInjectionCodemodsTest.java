@@ -4,11 +4,11 @@ import io.codemodder.testutils.CodemodTestMixin;
 import io.codemodder.testutils.Metadata;
 import org.junit.jupiter.api.Nested;
 
-final class SonarSQLInjectionCodemodTest {
+final class SonarSQLInjectionCodemodsTest {
 
   @Nested
   @Metadata(
-      codemodType = SonarSQLInjectionCodemod.class,
+      codemodType = SonarSQLInjectionHotspotCodemod.class,
       testResourceDir = "sonar-sql-injection-s2077/unsupported",
       renameTestFile = "src/main/java/org/owasp/webgoat/container/users/UserService.java",
       expectingFailedFixesAtLines = {52}, // we don't support this method
@@ -17,17 +17,27 @@ final class SonarSQLInjectionCodemodTest {
 
   @Nested
   @Metadata(
-      codemodType = SonarSQLInjectionCodemod.class,
+      codemodType = SonarSQLInjectionIssueCodemod.class,
+      testResourceDir = "sonar-sql-injection-s3649",
+      renameTestFile =
+          "src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+      expectingFixesAtLines = {69},
+      dependencies = {})
+  class FromIssueRatherThanHotspotTest implements CodemodTestMixin {}
+
+  @Nested
+  @Metadata(
+      codemodType = SonarSQLInjectionHotspotCodemod.class,
       testResourceDir = "sonar-sql-injection-s2077/supported",
       renameTestFile =
           "src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
       expectingFixesAtLines = {69},
       dependencies = {})
-  class SupportedTest implements CodemodTestMixin {}
+  class SupportedHotspotTest implements CodemodTestMixin {}
 
   @Nested
   @Metadata(
-      codemodType = SonarSQLInjectionCodemod.class,
+      codemodType = SonarSQLInjectionHotspotCodemod.class,
       testResourceDir = "sonar-sql-injection-s2077/supportedTableInjection",
       renameTestFile = "core-codemods/src/main/java/io/codemodder/codemods/SQLTest.java",
       expectingFixesAtLines = {19, 25, 33, 40},
@@ -36,7 +46,7 @@ final class SonarSQLInjectionCodemodTest {
 
   @Nested
   @Metadata(
-      codemodType = SonarSQLInjectionCodemod.class,
+      codemodType = SonarSQLInjectionHotspotCodemod.class,
       testResourceDir = "sonar-sql-injection-s2077/supportedMixedInjections",
       renameTestFile = "core-codemods/src/main/java/io/codemodder/codemods/SQLTestMixed.java",
       expectingFixesAtLines = {21},

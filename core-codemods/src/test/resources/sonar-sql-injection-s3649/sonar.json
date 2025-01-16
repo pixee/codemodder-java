@@ -1,0 +1,4297 @@
+{
+  "issues": [
+    {
+      "key": "AZMmKNSFS2LXR59nrMX5",
+      "rule": "javasecurity:S3649",
+      "severity": "BLOCKER",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 66,
+      "hash": "86250b910fd363b2b908c293afd7198c",
+      "textRange": {
+        "startLine": 66,
+        "endLine": 66,
+        "startOffset": 28,
+        "endOffset": 52
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+              "textRange": {
+                "startLine": 66,
+                "endLine": 66,
+                "startOffset": 28,
+                "endOffset": 52
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be injected into the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+              "textRange": {
+                "startLine": 59,
+                "endLine": 65,
+                "startOffset": 6,
+                "endOffset": 25
+              },
+              "msg": "A malicious value can be assigned to variable \u2018statement\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+              "textRange": {
+                "startLine": 60,
+                "endLine": 65,
+                "startOffset": 10,
+                "endOffset": 24
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+              "textRange": {
+                "startLine": 61,
+                "endLine": 65,
+                "startOffset": 14,
+                "endOffset": 23
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+              "textRange": {
+                "startLine": 64,
+                "endLine": 64,
+                "startOffset": 20,
+                "endOffset": 34
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+              "textRange": {
+                "startLine": 51,
+                "endLine": 51,
+                "startOffset": 64,
+                "endOffset": 78
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+              "textRange": {
+                "startLine": 51,
+                "endLine": 51,
+                "startOffset": 43,
+                "endOffset": 56
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct SQL queries directly from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe",
+        "sql"
+      ],
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNPdS2LXR59nrMVm",
+      "rule": "javasecurity:S5135",
+      "severity": "BLOCKER",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 60,
+      "hash": "95b1fb35a9f6375dd251bb720a356b94",
+      "textRange": {
+        "startLine": 60,
+        "endLine": 60,
+        "startOffset": 17,
+        "endOffset": 33
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 60,
+                "endLine": 60,
+                "startOffset": 17,
+                "endOffset": 33
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be injected into the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 57,
+                "endLine": 58,
+                "startOffset": 9,
+                "endOffset": 93
+              },
+              "msg": "A malicious value can be assigned to variable \u2018ois\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 8,
+                "endOffset": 93
+              },
+              "msg": "This constructor can propagate malicious content to the newly created object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 30,
+                "endOffset": 92
+              },
+              "msg": "This constructor can propagate malicious content to the newly created object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 55,
+                "endOffset": 91
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 4,
+                "endOffset": 56
+              },
+              "msg": "A malicious value can be assigned to variable \u2018b64token\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 15,
+                "endOffset": 56
+              },
+              "msg": "This string operation can propagate malicious content to the returned object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 15,
+                "endOffset": 38
+              },
+              "msg": "This string operation can propagate malicious content to the returned object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 49,
+                "endLine": 49,
+                "startOffset": 53,
+                "endOffset": 58
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/deserialization/InsecureDeserializationTask.java",
+              "textRange": {
+                "startLine": 49,
+                "endLine": 49,
+                "startOffset": 32,
+                "endOffset": 45
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not deserialize user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNRiS2LXR59nrMXg",
+      "rule": "javasecurity:S5144",
+      "severity": "MAJOR",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 104,
+      "hash": "63e6f44c40b5af5bab94346394e62cc9",
+      "textRange": {
+        "startLine": 104,
+        "endLine": 109,
+        "startOffset": 6,
+        "endOffset": 25
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 104,
+                "endLine": 109,
+                "startOffset": 6,
+                "endOffset": 25
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 106,
+                "endLine": 106,
+                "startOffset": 14,
+                "endOffset": 95
+              },
+              "msg": "This string operation can propagate malicious content to the returned object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 100,
+                "endLine": 100,
+                "startOffset": 37,
+                "endOffset": 49
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 100,
+                "endLine": 100,
+                "startOffset": 15,
+                "endOffset": 36
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 75,
+                "endLine": 75,
+                "startOffset": 6,
+                "endOffset": 44
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 70,
+                "endLine": 70,
+                "startOffset": 4,
+                "endOffset": 44
+              },
+              "msg": "A malicious value can be assigned to variable \u2018host\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/passwordreset/ResetLinkAssignmentForgotPassword.java",
+              "textRange": {
+                "startLine": 70,
+                "endLine": 70,
+                "startOffset": 18,
+                "endOffset": 43
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct the URL from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNTCS2LXR59nrMZp",
+      "rule": "javasecurity:S2083",
+      "severity": "BLOCKER",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 97,
+      "hash": "7383ccf98bebdbedfb6974cc2c120a17",
+      "textRange": {
+        "startLine": 97,
+        "endLine": 97,
+        "startOffset": 18,
+        "endOffset": 59
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 97,
+                "endLine": 97,
+                "startOffset": 18,
+                "endOffset": 59
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 92,
+                "startOffset": 6,
+                "endOffset": 98
+              },
+              "msg": "A malicious value can be assigned to variable \u2018catPicture\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 10,
+                "endOffset": 97
+              },
+              "msg": "This constructor can propagate malicious content to the newly created object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 41,
+                "endOffset": 96
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 41,
+                "endOffset": 87
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 84,
+                "endOffset": 86
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 90,
+                "endLine": 90,
+                "startOffset": 6,
+                "endOffset": 42
+              },
+              "msg": "A malicious value can be assigned to variable \u2018id\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 90,
+                "endLine": 90,
+                "startOffset": 15,
+                "endOffset": 41
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct the path from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNTCS2LXR59nrMZo",
+      "rule": "javasecurity:S2083",
+      "severity": "BLOCKER",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 103,
+      "hash": "6913628bcd69522b54342d60b7debed9",
+      "textRange": {
+        "startLine": 103,
+        "endLine": 103,
+        "startOffset": 45,
+        "endOffset": 86
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 103,
+                "endLine": 103,
+                "startOffset": 45,
+                "endOffset": 86
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 92,
+                "startOffset": 6,
+                "endOffset": 98
+              },
+              "msg": "A malicious value can be assigned to variable \u2018catPicture\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 10,
+                "endOffset": 97
+              },
+              "msg": "This constructor can propagate malicious content to the newly created object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 41,
+                "endOffset": 96
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 41,
+                "endOffset": 87
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 84,
+                "endOffset": 86
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 90,
+                "endLine": 90,
+                "startOffset": 6,
+                "endOffset": 42
+              },
+              "msg": "A malicious value can be assigned to variable \u2018id\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 90,
+                "endLine": 90,
+                "startOffset": 15,
+                "endOffset": 41
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct the path from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNTCS2LXR59nrMZn",
+      "rule": "javasecurity:S2083",
+      "severity": "BLOCKER",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 108,
+      "hash": "d15f2155e5c23511ddab543d43a6e5b6",
+      "textRange": {
+        "startLine": 108,
+        "endLine": 108,
+        "startOffset": 54,
+        "endOffset": 92
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 108,
+                "endLine": 108,
+                "startOffset": 54,
+                "endOffset": 92
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be injected into the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 108,
+                "endLine": 108,
+                "startOffset": 54,
+                "endOffset": 80
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 92,
+                "startOffset": 6,
+                "endOffset": 98
+              },
+              "msg": "A malicious value can be assigned to variable \u2018catPicture\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 10,
+                "endOffset": 97
+              },
+              "msg": "This constructor can propagate malicious content to the newly created object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 41,
+                "endOffset": 96
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 41,
+                "endOffset": 87
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 92,
+                "endLine": 92,
+                "startOffset": 84,
+                "endOffset": 86
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 90,
+                "endLine": 90,
+                "startOffset": 6,
+                "endOffset": 42
+              },
+              "msg": "A malicious value can be assigned to variable \u2018id\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileUploadRetrieval.java",
+              "textRange": {
+                "startLine": 90,
+                "endLine": 90,
+                "startOffset": 15,
+                "endOffset": 41
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct the path from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNN8S2LXR59nrMUi",
+      "rule": "javasecurity:S3649",
+      "severity": "BLOCKER",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 69,
+      "hash": "f255a38aef2351cd046efb83b3747cd4",
+      "textRange": {
+        "startLine": 69,
+        "endLine": 69,
+        "startOffset": 30,
+        "endOffset": 68
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+              "textRange": {
+                "startLine": 69,
+                "endLine": 69,
+                "startOffset": 30,
+                "endOffset": 68
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+              "textRange": {
+                "startLine": 66,
+                "endLine": 67,
+                "startOffset": 8,
+                "endOffset": 91
+              },
+              "msg": "A malicious value can be assigned to variable \u2018checkUserQuery\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+              "textRange": {
+                "startLine": 67,
+                "endLine": 67,
+                "startOffset": 12,
+                "endOffset": 90
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+              "textRange": {
+                "startLine": 67,
+                "endLine": 67,
+                "startOffset": 72,
+                "endOffset": 84
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+              "textRange": {
+                "startLine": 57,
+                "endLine": 57,
+                "startOffset": 27,
+                "endOffset": 39
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+              "textRange": {
+                "startLine": 57,
+                "endLine": 57,
+                "startOffset": 6,
+                "endOffset": 19
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct SQL queries directly from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe",
+        "sql"
+      ],
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNONS2LXR59nrMU0",
+      "rule": "javasecurity:S3649",
+      "severity": "BLOCKER",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 67,
+      "hash": "f5dd9337e0be29a7ad344596bf010bd6",
+      "textRange": {
+        "startLine": 67,
+        "endLine": 67,
+        "startOffset": 28,
+        "endOffset": 57
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 67,
+                "endLine": 67,
+                "startOffset": 28,
+                "endOffset": 57
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 62,
+                "endLine": 63,
+                "startOffset": 6,
+                "endOffset": 99
+              },
+              "msg": "A malicious value can be assigned to variable \u2018query\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 63,
+                "endLine": 63,
+                "startOffset": 10,
+                "endOffset": 99
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 63,
+                "endLine": 63,
+                "startOffset": 82,
+                "endOffset": 93
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 59,
+                "endLine": 59,
+                "startOffset": 41,
+                "endOffset": 59
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 59,
+                "endLine": 59,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 11,
+                "endOffset": 70
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 27,
+                "endOffset": 69
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 27,
+                "endOffset": 34
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 27,
+                "endOffset": 34
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 6,
+                "endOffset": 19
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 67,
+                "endLine": 67,
+                "startOffset": 28,
+                "endOffset": 57
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 62,
+                "endLine": 63,
+                "startOffset": 6,
+                "endOffset": 99
+              },
+              "msg": "A malicious value can be assigned to variable \u2018query\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 63,
+                "endLine": 63,
+                "startOffset": 10,
+                "endOffset": 99
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 59,
+                "endLine": 59,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 11,
+                "endOffset": 70
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 27,
+                "endOffset": 69
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 43,
+                "endOffset": 51
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 57,
+                "endOffset": 65
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 36,
+                "endOffset": 49
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 67,
+                "endLine": 67,
+                "startOffset": 28,
+                "endOffset": 57
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 62,
+                "endLine": 63,
+                "startOffset": 6,
+                "endOffset": 99
+              },
+              "msg": "A malicious value can be assigned to variable \u2018query\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 63,
+                "endLine": 63,
+                "startOffset": 10,
+                "endOffset": 99
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 59,
+                "endLine": 59,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 11,
+                "endOffset": 70
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 27,
+                "endOffset": 69
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 60,
+                "endOffset": 69
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 88,
+                "endOffset": 97
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 67,
+                "endOffset": 80
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct SQL queries directly from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe",
+        "sql"
+      ],
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNWTS2LXR59nrMbY",
+      "rule": "javasecurity:S5145",
+      "severity": "MINOR",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 83,
+      "hash": "e84b4a13be3ecacb766792bb3f318ad0",
+      "textRange": {
+        "startLine": 83,
+        "endLine": 83,
+        "startOffset": 11,
+        "endOffset": 75
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 90,
+                "startOffset": 17,
+                "endOffset": 22
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 89,
+                "startOffset": 17,
+                "endOffset": 49
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 89,
+                "endLine": 89,
+                "startOffset": 22,
+                "endOffset": 48
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 89,
+                "endLine": 89,
+                "startOffset": 43,
+                "endOffset": 48
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 62,
+                "endLine": 63,
+                "startOffset": 6,
+                "endOffset": 99
+              },
+              "msg": "A malicious value can be assigned to variable \u2018query\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 63,
+                "endLine": 63,
+                "startOffset": 10,
+                "endOffset": 99
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 63,
+                "endLine": 63,
+                "startOffset": 82,
+                "endOffset": 93
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 59,
+                "endLine": 59,
+                "startOffset": 41,
+                "endOffset": 59
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 59,
+                "endLine": 59,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 11,
+                "endOffset": 70
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 27,
+                "endOffset": 69
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 27,
+                "endOffset": 34
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 27,
+                "endOffset": 34
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 6,
+                "endOffset": 19
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 112,
+                "endLine": 115,
+                "startOffset": 17,
+                "endOffset": 22
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 112,
+                "endLine": 114,
+                "startOffset": 17,
+                "endOffset": 81
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 114,
+                "endLine": 114,
+                "startOffset": 22,
+                "endOffset": 80
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 114,
+                "endLine": 114,
+                "startOffset": 43,
+                "endOffset": 80
+              },
+              "msg": "This string operation can propagate malicious content to the returned object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 62,
+                "endLine": 62,
+                "startOffset": 4,
+                "endOffset": 100
+              },
+              "msg": "A malicious value can be assigned to variable \u2018queryString\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 62,
+                "endLine": 62,
+                "startOffset": 25,
+                "endOffset": 99
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 62,
+                "endLine": 62,
+                "startOffset": 88,
+                "endOffset": 99
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 61,
+                "endLine": 61,
+                "startOffset": 61,
+                "endOffset": 79
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 61,
+                "endLine": 61,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 11,
+                "endOffset": 47
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 27,
+                "endOffset": 33
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 6,
+                "endOffset": 19
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 15,
+                "endOffset": 98
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 15,
+                "endOffset": 90
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 72,
+                "endOffset": 89
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 8,
+                "endOffset": 65
+              },
+              "msg": "This invocation can propagate malicious content to the instance of the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 71,
+                "endLine": 71,
+                "startOffset": 8,
+                "endOffset": 77
+              },
+              "msg": "This invocation can propagate malicious content to the instance of the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 71,
+                "endLine": 71,
+                "startOffset": 22,
+                "endOffset": 76
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 71,
+                "endLine": 71,
+                "startOffset": 59,
+                "endOffset": 64
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 62,
+                "endLine": 62,
+                "startOffset": 41,
+                "endOffset": 53
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 62,
+                "endLine": 62,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 59,
+                "endLine": 59,
+                "startOffset": 11,
+                "endOffset": 33
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 53,
+                "endOffset": 58
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson2.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 32,
+                "endOffset": 45
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 17,
+                "endOffset": 64
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 17,
+                "endOffset": 56
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 55
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 71,
+                "endLine": 71,
+                "startOffset": 10,
+                "endOffset": 67
+              },
+              "msg": "This invocation can propagate malicious content to the instance of the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 70,
+                "endLine": 70,
+                "startOffset": 10,
+                "endOffset": 79
+              },
+              "msg": "This invocation can propagate malicious content to the instance of the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 70,
+                "endLine": 70,
+                "startOffset": 24,
+                "endOffset": 78
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 70,
+                "endLine": 70,
+                "startOffset": 61,
+                "endOffset": 66
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 57,
+                "endLine": 57,
+                "startOffset": 41,
+                "endOffset": 53
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 57,
+                "endLine": 57,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 54,
+                "endLine": 54,
+                "startOffset": 11,
+                "endOffset": 33
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 53,
+                "endLine": 53,
+                "startOffset": 53,
+                "endOffset": 58
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+              "textRange": {
+                "startLine": 53,
+                "endLine": 53,
+                "startOffset": 32,
+                "endOffset": 45
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 69,
+                "endLine": 69,
+                "startOffset": 17,
+                "endOffset": 64
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 69,
+                "endLine": 69,
+                "startOffset": 17,
+                "endOffset": 56
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 69,
+                "endLine": 69,
+                "startOffset": 38,
+                "endOffset": 55
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 68,
+                "endLine": 68,
+                "startOffset": 10,
+                "endOffset": 79
+              },
+              "msg": "This invocation can propagate malicious content to the instance of the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 68,
+                "endLine": 68,
+                "startOffset": 24,
+                "endOffset": 78
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 68,
+                "endLine": 68,
+                "startOffset": 61,
+                "endOffset": 66
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 41,
+                "endOffset": 53
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 11,
+                "endOffset": 33
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 54,
+                "endLine": 54,
+                "startOffset": 53,
+                "endOffset": 58
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson4.java",
+              "textRange": {
+                "startLine": 54,
+                "endLine": 54,
+                "startOffset": 32,
+                "endOffset": 45
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfiile.java",
+              "textRange": {
+                "startLine": 96,
+                "endLine": 99,
+                "startOffset": 13,
+                "endOffset": 18
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfiile.java",
+              "textRange": {
+                "startLine": 96,
+                "endLine": 98,
+                "startOffset": 13,
+                "endOffset": 63
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfiile.java",
+              "textRange": {
+                "startLine": 98,
+                "endLine": 98,
+                "startOffset": 18,
+                "endOffset": 62
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfiile.java",
+              "textRange": {
+                "startLine": 98,
+                "endLine": 98,
+                "startOffset": 18,
+                "endOffset": 51
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfiile.java",
+              "textRange": {
+                "startLine": 67,
+                "endLine": 67,
+                "startOffset": 6,
+                "endOffset": 66
+              },
+              "msg": "This invocation can propagate malicious content to the instance of the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/UserProfile.java",
+              "textRange": {
+                "startLine": 115,
+                "endLine": 115,
+                "startOffset": 4,
+                "endOffset": 22
+              },
+              "msg": "A malicious value can be assigned to field \u2018color\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/UserProfile.java",
+              "textRange": {
+                "startLine": 114,
+                "endLine": 114,
+                "startOffset": 23,
+                "endOffset": 35
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfiile.java",
+              "textRange": {
+                "startLine": 67,
+                "endLine": 67,
+                "startOffset": 34,
+                "endOffset": 65
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfiile.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 70,
+                "endOffset": 90
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfiile.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 45,
+                "endOffset": 57
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 112,
+                "endLine": 115,
+                "startOffset": 17,
+                "endOffset": 22
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 112,
+                "endLine": 114,
+                "startOffset": 17,
+                "endOffset": 81
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 114,
+                "endLine": 114,
+                "startOffset": 22,
+                "endOffset": 80
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 114,
+                "endLine": 114,
+                "startOffset": 43,
+                "endOffset": 80
+              },
+              "msg": "This string operation can propagate malicious content to the returned object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 61,
+                "endLine": 61,
+                "startOffset": 41,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 61,
+                "endLine": 61,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 58,
+                "endLine": 58,
+                "startOffset": 11,
+                "endOffset": 47
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 56,
+                "endOffset": 67
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5b.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 35,
+                "endOffset": 48
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+              "textRange": {
+                "startLine": 100,
+                "endLine": 100,
+                "startOffset": 13,
+                "endOffset": 94
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+              "textRange": {
+                "startLine": 100,
+                "endLine": 100,
+                "startOffset": 13,
+                "endOffset": 86
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+              "textRange": {
+                "startLine": 100,
+                "endLine": 100,
+                "startOffset": 70,
+                "endOffset": 85
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+              "textRange": {
+                "startLine": 78,
+                "endLine": 78,
+                "startOffset": 4,
+                "endOffset": 63
+              },
+              "msg": "This invocation can propagate malicious content to the instance of the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+              "textRange": {
+                "startLine": 77,
+                "endLine": 77,
+                "startOffset": 4,
+                "endOffset": 74
+              },
+              "msg": "This invocation can propagate malicious content to the instance of the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+              "textRange": {
+                "startLine": 76,
+                "endLine": 76,
+                "startOffset": 4,
+                "endOffset": 70
+              },
+              "msg": "This invocation can propagate malicious content to the instance of the caller"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+              "textRange": {
+                "startLine": 76,
+                "endLine": 76,
+                "startOffset": 16,
+                "endOffset": 69
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+              "textRange": {
+                "startLine": 76,
+                "endLine": 76,
+                "startOffset": 52,
+                "endOffset": 58
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+              "textRange": {
+                "startLine": 60,
+                "endLine": 60,
+                "startOffset": 27,
+                "endOffset": 33
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+              "textRange": {
+                "startLine": 60,
+                "endLine": 60,
+                "startOffset": 6,
+                "endOffset": 19
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5.java",
+              "textRange": {
+                "startLine": 84,
+                "endLine": 84,
+                "startOffset": 15,
+                "endOffset": 70
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5.java",
+              "textRange": {
+                "startLine": 84,
+                "endLine": 84,
+                "startOffset": 15,
+                "endOffset": 62
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5.java",
+              "textRange": {
+                "startLine": 84,
+                "endLine": 84,
+                "startOffset": 35,
+                "endOffset": 61
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5.java",
+              "textRange": {
+                "startLine": 84,
+                "endLine": 84,
+                "startOffset": 56,
+                "endOffset": 61
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5.java",
+              "textRange": {
+                "startLine": 75,
+                "endLine": 75,
+                "startOffset": 41,
+                "endOffset": 53
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5.java",
+              "textRange": {
+                "startLine": 75,
+                "endLine": 75,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 11,
+                "endOffset": 33
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5.java",
+              "textRange": {
+                "startLine": 70,
+                "endLine": 70,
+                "startOffset": 39,
+                "endOffset": 44
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5.java",
+              "textRange": {
+                "startLine": 68,
+                "endLine": 68,
+                "startOffset": 2,
+                "endOffset": 39
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 90,
+                "startOffset": 17,
+                "endOffset": 22
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 89,
+                "startOffset": 17,
+                "endOffset": 49
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 89,
+                "endLine": 89,
+                "startOffset": 22,
+                "endOffset": 48
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 59,
+                "endLine": 59,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 11,
+                "endOffset": 70
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 27,
+                "endOffset": 69
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 43,
+                "endOffset": 51
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 57,
+                "endOffset": 65
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 36,
+                "endOffset": 49
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 90,
+                "startOffset": 17,
+                "endOffset": 22
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 89,
+                "startOffset": 17,
+                "endOffset": 49
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 89,
+                "endLine": 89,
+                "startOffset": 22,
+                "endOffset": 48
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 59,
+                "endLine": 59,
+                "startOffset": 25,
+                "endOffset": 40
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 11,
+                "endOffset": 70
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 27,
+                "endOffset": 69
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 56,
+                "endLine": 56,
+                "startOffset": 60,
+                "endOffset": 69
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 88,
+                "endOffset": 97
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+              "textRange": {
+                "startLine": 55,
+                "endLine": 55,
+                "startOffset": 67,
+                "endOffset": 80
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        },
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 83,
+                "endLine": 83,
+                "startOffset": 11,
+                "endOffset": 75
+              },
+              "msg": "sink (in dependency): tainted value is used to perform a security-sensitive operation"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 40,
+                "endOffset": 60
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/i18n/PluginMessages.java",
+              "textRange": {
+                "startLine": 82,
+                "endLine": 82,
+                "startOffset": 16,
+                "endOffset": 26
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 10,
+                "endOffset": 57
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 91,
+                "endLine": 91,
+                "startOffset": 38,
+                "endOffset": 44
+              },
+              "msg": "A malicious value was previously assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 87,
+                "endLine": 87,
+                "startOffset": 24,
+                "endOffset": 29
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/logging/LogSpoofingTask.java",
+              "textRange": {
+                "startLine": 40,
+                "endLine": 40,
+                "startOffset": 13,
+                "endOffset": 50
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/logging/LogSpoofingTask.java",
+              "textRange": {
+                "startLine": 40,
+                "endLine": 40,
+                "startOffset": 13,
+                "endOffset": 42
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 6,
+                "endOffset": 26
+              },
+              "msg": "A malicious value can be assigned to field \u2018output\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/assignments/AttackResult.java",
+              "textRange": {
+                "startLine": 72,
+                "endLine": 72,
+                "startOffset": 38,
+                "endOffset": 51
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/logging/LogSpoofingTask.java",
+              "textRange": {
+                "startLine": 38,
+                "endLine": 38,
+                "startOffset": 53,
+                "endOffset": 61
+              },
+              "msg": "This instruction can propagate malicious content"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/logging/LogSpoofingTask.java",
+              "textRange": {
+                "startLine": 38,
+                "endLine": 38,
+                "startOffset": 32,
+                "endOffset": 45
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not log user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNTYS2LXR59nrMZ9",
+      "rule": "javasecurity:S6096",
+      "severity": "BLOCKER",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileZipSlip.java",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 75,
+      "hash": "5ebbc39e6c36bd3622ba14cd4ea2c5c0",
+      "textRange": {
+        "startLine": 75,
+        "endLine": 75,
+        "startOffset": 8,
+        "endOffset": 71
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileZipSlip.java",
+              "textRange": {
+                "startLine": 75,
+                "endLine": 75,
+                "startOffset": 8,
+                "endOffset": 71
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileZipSlip.java",
+              "textRange": {
+                "startLine": 75,
+                "endLine": 75,
+                "startOffset": 23,
+                "endOffset": 33
+              },
+              "msg": "This invocation can propagate malicious content to its return value"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileZipSlip.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 8,
+                "endOffset": 65
+              },
+              "msg": "A malicious value can be assigned to variable \u2018f\u2019"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileZipSlip.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 17,
+                "endOffset": 64
+              },
+              "msg": "This constructor can propagate malicious content to the newly created object"
+            },
+            {
+              "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileZipSlip.java",
+              "textRange": {
+                "startLine": 73,
+                "endLine": 73,
+                "startOffset": 52,
+                "endOffset": 63
+              },
+              "msg": "Source: a user can craft an archive file with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct the path from file name entry of an archive.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNlfS2LXR59nrM35",
+      "rule": "javascript:S6594",
+      "severity": "MINOR",
+      "component": "PixeeSandbox_WebGoat:src/main/resources/lessons/spoofcookie/js/handler.js",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 2,
+      "hash": "f583860feb40163710d47219b9f127e9",
+      "textRange": {
+        "startLine": 2,
+        "endLine": 2,
+        "startOffset": 30,
+        "endOffset": 35
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Use the \"RegExp.exec()\" method instead.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "regex",
+        "type-dependent"
+      ],
+      "creationDate": "2021-09-23T15:51:17+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "EFFICIENT",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    },
+    {
+      "key": "AZMmKNfyS2LXR59nrMsM",
+      "rule": "javascript:S6594",
+      "severity": "MINOR",
+      "component": "PixeeSandbox_WebGoat:src/main/resources/webgoat/static/plugins/bootstrap-wysihtml5/js/wysihtml5-0.3.0.js",
+      "project": "PixeeSandbox_WebGoat",
+      "line": 3707,
+      "hash": "2b3cf031dd838960a5537a13d93d6763",
+      "textRange": {
+        "startLine": 3707,
+        "endLine": 3707,
+        "startOffset": 36,
+        "endOffset": 41
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Use the \"RegExp.exec()\" method instead.",
+      "effort": "5min",
+      "debt": "5min",
+      "tags": [
+        "regex",
+        "type-dependent"
+      ],
+      "creationDate": "2014-08-13T12:14:11+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee-sandbox",
+      "cleanCodeAttribute": "EFFICIENT",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "WebGoat"
+    }
+  ],
+  "hotspots": [
+    {
+      "key": "AZMmKNiPS2LXR59nrM1J",
+      "component": "PixeeSandbox_WebGoat:src/main/resources/lessons/jwt/js/jwt-refresh.js",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "auth",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 10,
+      "message": "Review this potentially hardcoded credential.",
+      "creationDate": "2018-05-23T14:28:19+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 10,
+        "endLine": 10,
+        "startOffset": 52,
+        "endOffset": 70
+      },
+      "flows": [],
+      "ruleKey": "javascript:S2068"
+    },
+    {
+      "key": "AZMmKNS3S2LXR59nrMZe",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/SolutionConstants.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "auth",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 34,
+      "message": "'PASSWORD' detected in this expression, review this potentially hard-coded password.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 34,
+        "endLine": 34,
+        "startOffset": 9,
+        "endOffset": 17
+      },
+      "flows": [],
+      "ruleKey": "java:S2068"
+    },
+    {
+      "key": "AZMmKNS3S2LXR59nrMZg",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/SolutionConstants.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "auth",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 35,
+      "message": "'PASSWORD' detected in this expression, review this potentially hard-coded password.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 35,
+        "endLine": 35,
+        "startOffset": 9,
+        "endOffset": 21
+      },
+      "flows": [],
+      "ruleKey": "java:S2068"
+    },
+    {
+      "key": "AZMmKNS3S2LXR59nrMZh",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/SolutionConstants.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "auth",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 36,
+      "message": "'PASSWORD' detected in this expression, review this potentially hard-coded password.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 36,
+        "endLine": 36,
+        "startOffset": 9,
+        "endOffset": 28
+      },
+      "flows": [],
+      "ruleKey": "java:S2068"
+    },
+    {
+      "key": "AZMmKNT0S2LXR59nrMaI",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/IDORLogin.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "auth",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 45,
+      "message": "'password' detected in this expression, review this potentially hard-coded password.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 45,
+        "endLine": 45,
+        "startOffset": 28,
+        "endOffset": 31
+      },
+      "flows": [],
+      "ruleKey": "java:S2068"
+    },
+    {
+      "key": "AZMmKNT0S2LXR59nrMaJ",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/idor/IDORLogin.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "auth",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 51,
+      "message": "'password' detected in this expression, review this potentially hard-coded password.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 51,
+        "endLine": 51,
+        "startOffset": 29,
+        "endOffset": 32
+      },
+      "flows": [],
+      "ruleKey": "java:S2068"
+    },
+    {
+      "key": "AZMmKNTdS2LXR59nrMZ_",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/insecurelogin/InsecureLoginTask.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "auth",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 36,
+      "message": "'password' detected in this expression, review this potentially hard-coded password.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 36,
+        "endLine": 36,
+        "startOffset": 62,
+        "endOffset": 70
+      },
+      "flows": [],
+      "ruleKey": "java:S2068"
+    },
+    {
+      "key": "AZMmKNXxS2LXR59nrMbz",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/WebSecurityConfig.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "csrf",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 80,
+      "message": "Make sure disabling Spring Security's CSRF protection is safe here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 80,
+        "endLine": 80,
+        "startOffset": 26,
+        "endOffset": 33
+      },
+      "flows": [],
+      "ruleKey": "java:S4502"
+    },
+    {
+      "key": "AZMmKNYhS2LXR59nrMcH",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/webwolf/WebSecurityConfig.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "csrf",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 59,
+      "message": "Make sure disabling Spring Security's CSRF protection is safe here.",
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 59,
+        "endLine": 59,
+        "startOffset": 26,
+        "endOffset": 33
+      },
+      "flows": [],
+      "ruleKey": "java:S4502"
+    },
+    {
+      "key": "AZMmKNV9S2LXR59nrMbT",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/lessons/LessonConnectionInvocationHandler.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "sql-injection",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 29,
+      "message": "Make sure using a dynamically formatted SQL query is safe here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 29,
+        "endLine": 29,
+        "startOffset": 26,
+        "endOffset": 69
+      },
+      "flows": [],
+      "ruleKey": "java:S2077"
+    },
+    {
+      "key": "AZMmKNXgS2LXR59nrMbv",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/users/UserService.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "sql-injection",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 52,
+      "message": "Make sure using a dynamically formatted SQL query is safe here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 52,
+        "endLine": 52,
+        "startOffset": 25,
+        "endOffset": 96
+      },
+      "flows": [],
+      "ruleKey": "java:S2077"
+    },
+    {
+      "key": "AZMmKNSFS2LXR59nrMX4",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "sql-injection",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 61,
+      "message": "Make sure using a dynamically formatted SQL query is safe here.",
+      "creationDate": "2023-01-04T08:07:23+0100",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 61,
+        "endLine": 65,
+        "startOffset": 14,
+        "endOffset": 23
+      },
+      "flows": [],
+      "ruleKey": "java:S2077"
+    },
+    {
+      "key": "AZMmKNdgS2LXR59nrMkO",
+      "component": "PixeeSandbox_WebGoat:src/main/resources/webgoat/static/js/jquery_form/jquery.form.js",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "rce",
+      "vulnerabilityProbability": "MEDIUM",
+      "status": "TO_REVIEW",
+      "line": 125,
+      "message": "Make sure that 'javascript:' code is safe as it is a form of eval().",
+      "creationDate": "2014-09-14T15:56:06+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 125,
+        "endLine": 125,
+        "startOffset": 64,
+        "endOffset": 82
+      },
+      "flows": [],
+      "ruleKey": "javascript:S1523"
+    },
+    {
+      "key": "AZMmKNcQS2LXR59nrMgB",
+      "component": "PixeeSandbox_WebGoat:src/main/resources/webgoat/static/js/libs/jquery.form.js",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "rce",
+      "vulnerabilityProbability": "MEDIUM",
+      "status": "TO_REVIEW",
+      "line": 125,
+      "message": "Make sure that 'javascript:' code is safe as it is a form of eval().",
+      "creationDate": "2015-04-22T00:40:14+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 125,
+        "endLine": 125,
+        "startOffset": 64,
+        "endOffset": 82
+      },
+      "flows": [],
+      "ruleKey": "javascript:S1523"
+    },
+    {
+      "key": "AZMmKNfyS2LXR59nrMts",
+      "component": "PixeeSandbox_WebGoat:src/main/resources/webgoat/static/plugins/bootstrap-wysihtml5/js/wysihtml5-0.3.0.js",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "rce",
+      "vulnerabilityProbability": "MEDIUM",
+      "status": "TO_REVIEW",
+      "line": 5418,
+      "message": "Make sure that 'javascript:' code is safe as it is a form of eval().",
+      "creationDate": "2014-08-13T12:14:11+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 5418,
+        "endLine": 5418,
+        "startOffset": 21,
+        "endOffset": 49
+      },
+      "flows": [],
+      "ruleKey": "javascript:S1523"
+    },
+    {
+      "key": "AZMmKNn6S2LXR59nrM59",
+      "component": "PixeeSandbox_WebGoat:src/main/resources/lessons/chromedevtools/html/ChromeDevTools.html",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "weak-cryptography",
+      "vulnerabilityProbability": "MEDIUM",
+      "status": "TO_REVIEW",
+      "line": 53,
+      "message": "Make sure that using this pseudorandom number generator is safe here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 53,
+        "endLine": 53,
+        "startOffset": 66,
+        "endOffset": 79
+      },
+      "flows": [],
+      "ruleKey": "javascript:S2245"
+    },
+    {
+      "key": "AZMmKNojS2LXR59nrM6f",
+      "component": "PixeeSandbox_WebGoat:src/main/resources/lessons/httpbasics/html/HttpBasics.html",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "weak-cryptography",
+      "vulnerabilityProbability": "MEDIUM",
+      "status": "TO_REVIEW",
+      "line": 59,
+      "message": "Make sure that using this pseudorandom number generator is safe here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 59,
+        "endLine": 59,
+        "startOffset": 27,
+        "endOffset": 40
+      },
+      "flows": [],
+      "ruleKey": "javascript:S2245"
+    },
+    {
+      "key": "AZMmKNStS2LXR59nrMZS",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/challenges/challenge7/PasswordResetLink.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "weak-cryptography",
+      "vulnerabilityProbability": "MEDIUM",
+      "status": "TO_REVIEW",
+      "line": 14,
+      "message": "Make sure that using this pseudorandom number generator is safe here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 14,
+        "endLine": 14,
+        "startOffset": 24,
+        "endOffset": 30
+      },
+      "flows": [],
+      "ruleKey": "java:S2245"
+    },
+    {
+      "key": "AZMmKNfyS2LXR59nrMsf",
+      "component": "PixeeSandbox_WebGoat:src/main/resources/webgoat/static/plugins/bootstrap-wysihtml5/js/wysihtml5-0.3.0.js",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "encrypt-data",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 3983,
+      "message": "Using http protocol is insecure. Use https instead.",
+      "creationDate": "2014-08-13T12:14:11+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 3983,
+        "endLine": 3983,
+        "startOffset": 18,
+        "endOffset": 27
+      },
+      "flows": [],
+      "ruleKey": "javascript:S5332"
+    },
+    {
+      "key": "AZMmKNfyS2LXR59nrMws",
+      "component": "PixeeSandbox_WebGoat:src/main/resources/webgoat/static/plugins/bootstrap-wysihtml5/js/wysihtml5-0.3.0.js",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "encrypt-data",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 8160,
+      "message": "Using http protocol is insecure. Use https instead.",
+      "creationDate": "2014-08-13T12:14:11+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 8160,
+        "endLine": 8160,
+        "startOffset": 28,
+        "endOffset": 37
+      },
+      "flows": [],
+      "ruleKey": "javascript:S5332"
+    },
+    {
+      "key": "AZMmKNN3S2LXR59nrMUX",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6b.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "insecure-conf",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 71,
+      "message": "Make sure this debug feature is deactivated before delivering the code in production.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 71,
+        "endLine": 71,
+        "startOffset": 13,
+        "endOffset": 28
+      },
+      "flows": [],
+      "ruleKey": "java:S4507"
+    },
+    {
+      "key": "AZMmKNN3S2LXR59nrMUY",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6b.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "insecure-conf",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 75,
+      "message": "Make sure this debug feature is deactivated before delivering the code in production.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 75,
+        "endLine": 75,
+        "startOffset": 8,
+        "endOffset": 23
+      },
+      "flows": [],
+      "ruleKey": "java:S4507"
+    },
+    {
+      "key": "AZMmKNNHS2LXR59nrMT4",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/sqlinjection/mitigation/SqlInjectionLesson10b.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "insecure-conf",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 130,
+      "message": "Make sure this debug feature is deactivated before delivering the code in production.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 130,
+        "endLine": 130,
+        "startOffset": 16,
+        "endOffset": 31
+      },
+      "flows": [],
+      "ruleKey": "java:S4507"
+    },
+    {
+      "key": "AZMmKNQIS2LXR59nrMWK",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "insecure-conf",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 134,
+      "message": "Make sure creating this cookie without the \"secure\" flag is safe here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 134,
+        "endLine": 134,
+        "startOffset": 26,
+        "endOffset": 32
+      },
+      "flows": [],
+      "ruleKey": "java:S2092"
+    },
+    {
+      "key": "AZMmKNQIS2LXR59nrMWL",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "insecure-conf",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 139,
+      "message": "Make sure creating this cookie without the \"secure\" flag is safe here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 139,
+        "endLine": 139,
+        "startOffset": 26,
+        "endOffset": 32
+      },
+      "flows": [],
+      "ruleKey": "java:S2092"
+    },
+    {
+      "key": "AZMmKNL0S2LXR59nrMTB",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "insecure-conf",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 76,
+      "message": "Make sure creating this cookie without the \"secure\" flag is safe here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 76,
+        "endLine": 76,
+        "startOffset": 24,
+        "endOffset": 30
+      },
+      "flows": [],
+      "ruleKey": "java:S2092"
+    },
+    {
+      "key": "AZMmKNU_S2LXR59nrMa6",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/hijacksession/HijackSessionAssignment.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "others",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 86,
+      "message": "Make sure creating this cookie without the \"HttpOnly\" flag is safe.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 86,
+        "endLine": 86,
+        "startOffset": 24,
+        "endOffset": 30
+      },
+      "flows": [],
+      "ruleKey": "java:S3330"
+    },
+    {
+      "key": "AZMmKNQIS2LXR59nrMWI",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "others",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 134,
+      "message": "Make sure creating this cookie without the \"HttpOnly\" flag is safe.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 134,
+        "endLine": 134,
+        "startOffset": 26,
+        "endOffset": 32
+      },
+      "flows": [],
+      "ruleKey": "java:S3330"
+    },
+    {
+      "key": "AZMmKNQIS2LXR59nrMWJ",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "others",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 139,
+      "message": "Make sure creating this cookie without the \"HttpOnly\" flag is safe.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 139,
+        "endLine": 139,
+        "startOffset": 26,
+        "endOffset": 32
+      },
+      "flows": [],
+      "ruleKey": "java:S3330"
+    },
+    {
+      "key": "AZMmKNXxS2LXR59nrMb1",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/container/WebSecurityConfig.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "others",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 106,
+      "message": "Make sure this weak hash algorithm is not used in a sensitive context here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 106,
+        "endLine": 106,
+        "startOffset": 53,
+        "endOffset": 64
+      },
+      "flows": [],
+      "ruleKey": "java:S4790"
+    },
+    {
+      "key": "AZMmKNMZS2LXR59nrMTQ",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "others",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 55,
+      "message": "Make sure this weak hash algorithm is not used in a sensitive context here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 55,
+        "endLine": 55,
+        "startOffset": 39,
+        "endOffset": 50
+      },
+      "flows": [],
+      "ruleKey": "java:S4790"
+    },
+    {
+      "key": "AZMmKNYhS2LXR59nrMcK",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/webwolf/WebSecurityConfig.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "others",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 83,
+      "message": "Make sure this weak hash algorithm is not used in a sensitive context here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 83,
+        "endLine": 83,
+        "startOffset": 53,
+        "endOffset": 64
+      },
+      "flows": [],
+      "ruleKey": "java:S4790"
+    },
+    {
+      "key": "AZMmKNTYS2LXR59nrMZ4",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileZipSlip.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "others",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 70,
+      "message": "Make sure that expanding this archive file is safe here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 70,
+        "endLine": 70,
+        "startOffset": 52,
+        "endOffset": 59
+      },
+      "flows": [],
+      "ruleKey": "java:S5042"
+    },
+    {
+      "key": "AZMmKNTYS2LXR59nrMZ3",
+      "component": "PixeeSandbox_WebGoat:src/main/java/org/owasp/webgoat/lessons/pathtraversal/ProfileZipSlip.java",
+      "project": "PixeeSandbox_WebGoat",
+      "securityCategory": "others",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 61,
+      "message": "Make sure publicly writable directories are used safely here.",
+      "creationDate": "2022-04-09T14:56:12+0200",
+      "updateDate": "2024-11-13T16:32:54+0100",
+      "textRange": {
+        "startLine": 61,
+        "endLine": 61,
+        "startOffset": 26,
+        "endOffset": 82
+      },
+      "flows": [],
+      "ruleKey": "java:S5443"
+    }
+  ]
+}
