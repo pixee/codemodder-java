@@ -22,7 +22,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 @Codemod(
-    id = "sonar:java/sonar-sql-injection-s2077",
+    id = "sonar:java/sql-injection-s2077",
     reviewGuidance = ReviewGuidance.MERGE_AFTER_REVIEW,
     importance = Importance.HIGH,
     executionPriority = CodemodExecutionPriority.HIGH)
