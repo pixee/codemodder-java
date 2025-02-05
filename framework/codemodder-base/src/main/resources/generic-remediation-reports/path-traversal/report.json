@@ -1,0 +1,8 @@
+{
+  "summary" : "Remediate path traversal",
+  "change": "Added a validator/sanitizer",
+  "reviewGuidanceIJustification" : "These changes should be reviewed to ensure that the validator/sanitizer is correctly implemented and won't disrupt the application's functionality.",
+  "references" : [
+    "https://cwe.mitre.org/data/definitions/35.html"
+  ]
+}

@@ -20,6 +20,7 @@ public enum GenericRemediationMetadata {
   REGEX_INJECTION("regex-injection"),
   ERROR_MESSAGE_EXPOSURE("error-message-exposure"),
   LOG_INJECTION("log-injection"),
+  PATH_TRAVERSAL("path-traversal"),
   WEAK_CRYPTO_ALGORITHM("weak-crypto-algorithm");
 
   private final CodemodReporterStrategy reporter;
