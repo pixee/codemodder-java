@@ -722,7 +722,6 @@ public final class SQLParameterizer {
       ASTTransforms.addStatementBeforeStatement(topStatement, closeOriginal);
     }
 
-    // TODO will this work for every type of execute statement? or just executeQuery?
     // change execute statement
     executeCall.setScope(new NameExpr(pStmtName));
     executeCall.setArguments(new NodeList<>());
