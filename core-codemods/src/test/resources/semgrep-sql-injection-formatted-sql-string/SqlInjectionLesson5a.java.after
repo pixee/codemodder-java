@@ -67,7 +67,7 @@ public class SqlInjectionLesson5a extends AssignmentEndpoint {
           query,     ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
         statement.setString(1, accountName);
 
-        ResultSet results = statement.execute();
+        ResultSet results = statement.executeQuery();
         if ((results != null) && (results.first())) {
           ResultSetMetaData resultsMetaData = results.getMetaData();
           StringBuilder output = new StringBuilder();

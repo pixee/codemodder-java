@@ -524,7 +524,6 @@ public final class SQLParameterizer {
     var topStatement = gatherAndSetParameters(stmtName, executeStmt, queryParameterizer);
 
     // (3)
-    executeCall.setName("execute");
     executeCall.setScope(new NameExpr(stmtName));
     executeCall.setArguments(new NodeList<>());
 
@@ -723,9 +722,7 @@ public final class SQLParameterizer {
       ASTTransforms.addStatementBeforeStatement(topStatement, closeOriginal);
     }
 
-    // TODO will this work for every type of execute statement? or just executeQuery?
     // change execute statement
-    executeCall.setName("execute");
     executeCall.setScope(new NameExpr(pStmtName));
     executeCall.setArguments(new NodeList<>());
 
