@@ -15,7 +15,7 @@ public final class Test {
 	String query2 = "SELECT * FROM users WHERE username = ?";
 	PreparedStatement statement = conn.prepareStatement(query2);
 	statement.setString(1, request.getParameter("username"));
-	ResultSet rs2 = statement.execute();
+	ResultSet rs2 = statement.executeQuery();
 	stmt = statement;
 	while (rs2.next()) {
 		System.out.println("User: " + rs2.getString("username"));
@@ -24,7 +24,7 @@ public final class Test {
 	stmt.close();
 	PreparedStatement stmt1 = conn.prepareStatement(query3);
 	stmt1.setString(1, request.getParameter("email"));
-	ResultSet rs3 = stmt1.execute();
+	ResultSet rs3 = stmt1.executeQuery();
 	stmt = stmt1;
 	while (rs3.next()) {
 		System.out.println("User: " + rs3.getString("username"));

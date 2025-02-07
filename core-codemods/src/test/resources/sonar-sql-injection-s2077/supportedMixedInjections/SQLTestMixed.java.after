@@ -18,7 +18,7 @@ public final class SQLTestMixed {
         String sql = "SELECT * FROM " + validateTableName(input + "") + " where name=?" ;
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, scanner.nextLine());
-        return stmt.execute();
+        return stmt.executeQuery();
     }
     
     String validateTableName(final String tablename) {

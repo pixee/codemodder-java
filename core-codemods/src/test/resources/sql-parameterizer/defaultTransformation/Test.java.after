@@ -14,14 +14,14 @@ public final class Test {
     String sql = "SELECT * FROM USERS WHERE USER = ?";
     PreparedStatement stmt = conn.prepareStatement(sql);
     stmt.setString(1, input);
-    return stmt.execute();
+    return stmt.executeQuery();
   }
 
   public ResultSet directStatement(String input) throws SQLException {
     String sql = "SELECT * FROM USERS WHERE USER = ?";
     PreparedStatement stmt = conn.prepareStatement(sql);
     stmt.setString(1, input);
-    var rs = stmt.execute();
+    var rs = stmt.executeQuery();
     return rs;
   }
 
@@ -30,7 +30,7 @@ public final class Test {
     String sql = "SELECT * FROM USERS WHERE USER = ?";
     PreparedStatement statement = conn.prepareStatement(sql);
     statement.setString(1, input);
-    ResultSet rs = statement.execute();
+    ResultSet rs = statement.executeQuery();
     stmt++;
     return rs;
   }
@@ -41,7 +41,7 @@ public final class Test {
     String sql = "SELECT * FROM USERS WHERE USER = ?";
     PreparedStatement stmt1 = conn.prepareStatement(sql);
     stmt1.setString(1, input);
-    ResultSet rs = stmt1.execute();
+    ResultSet rs = stmt1.executeQuery();
     stmt = stmt + statement;
     return rs;
   }
@@ -50,7 +50,7 @@ public final class Test {
     String sql = "SELECT * FROM USERS WHERE USER = ?";
     try(PreparedStatement stmt = conn.prepareStatement(sql) ){
         stmt.setString(1, input);
-        try (ResultSet rs = stmt.execute()) {
+        try (ResultSet rs = stmt.executeQuery()) {
       return rs;
     }
     }
@@ -61,14 +61,14 @@ public final class Test {
     PreparedStatement stmt = conn.prepareStatement(sql);
     stmt.setString(1, "user_" + input + "_name");
     stmt.setString(2, input2);
-    return stmt.execute();
+    return stmt.executeQuery();
   }
 
   public ResultSet referencesAfterExecute(String input) throws SQLException {
     String sql = "SELECT * FROM USERS WHERE USER = ?";
     PreparedStatement stmt = conn.prepareStatement(sql);
     stmt.setString(1, input);
-    var rs = stmt.execute();
+    var rs = stmt.executeQuery();
     System.out.println(sql);
     return rs;
   }
@@ -78,7 +78,7 @@ public final class Test {
     sql = "SELECT * FROM USERS WHERE USER = ?";
     PreparedStatement stmt = conn.prepareStatement(sql);
     stmt.setString(1, input);
-    var rs = stmt.execute();
+    var rs = stmt.executeQuery();
     return rs;
   }
 
@@ -88,7 +88,7 @@ public final class Test {
     try {
       stmt = conn.prepareStatement(sql);
       stmt.setString(1, input);
-      ResultSet rs = stmt.execute();
+      ResultSet rs = stmt.executeQuery();
       return rs;
     } catch (Exception e) {
     }

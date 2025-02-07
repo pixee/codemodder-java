@@ -75,7 +75,7 @@ public class SqlInjectionLesson8 extends AssignmentEndpoint {
         statement.setString(1, name);
 
         statement.setString(2, auth_tan);
-        ResultSet results = statement.execute();
+        ResultSet results = statement.executeQuery();
         if (results.getStatement() != null) {
           if (results.first()) {
             output.append(generateTable(results));
@@ -155,7 +155,7 @@ public class SqlInjectionLesson8 extends AssignmentEndpoint {
       PreparedStatement statement = connection.prepareStatement(logQuery, TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
       statement.setString(1, sdf.format(cal.getTime()));
       statement.setString(2, action);
-      statement.execute();
+      statement.executeUpdate();
     } catch (SQLException e) {
       System.err.println(e.getMessage());
     }
