@@ -5,7 +5,6 @@ import static io.codemodder.ast.ASTTransforms.addImportIfMissing;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import io.codemodder.DependencyGAV;
 import io.codemodder.remediation.RemediationStrategy;
 import io.codemodder.remediation.SuccessOrReason;
 import java.security.SecureRandom;
@@ -25,6 +24,6 @@ final class WeakRandomFixStrategy implements RemediationStrategy {
     ObjectCreationExpr unsafeRandom = maybeOCE.get();
     unsafeRandom.setType("SecureRandom");
     addImportIfMissing(cu, SecureRandom.class.getName());
-    return SuccessOrReason.success(List.of(DependencyGAV.JAVA_SECURITY_TOOLKIT));
+    return SuccessOrReason.success(List.of());
   }
 }
