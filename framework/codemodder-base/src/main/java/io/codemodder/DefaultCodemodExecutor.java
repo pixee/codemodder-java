@@ -337,9 +337,17 @@ final class DefaultCodemodExecutor implements CodemodExecutor {
 
     // create a changeset for this file change + its downstream dependency changes
     List<CodeTFChangesetEntry> changeset = new ArrayList<>();
+    Strategy codeChangeStrategy = codeTFAiMetadata != null ? Strategy.AI : Strategy.DETERMINISTIC;
     changeset.add(
         new CodeTFChangesetEntry(
-            getRelativePath(projectDir, filePath), diff, changes, codeTFAiMetadata));
+            getRelativePath(projectDir, filePath),
+            diff,
+            changes,
+            codeTFAiMetadata,
+            codeChangeStrategy,
+            false,
+            List.of(),
+            null));
     changeset.addAll(dependencyChangesetEntries);
 
     // update the cache
