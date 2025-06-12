@@ -30,7 +30,7 @@ dependencies {
     api(libs.javadiff)
     api(libs.jtokkit)
     api("com.azure:azure-ai-openai:1.0.0-beta.16")
-    api("io.github.classgraph:classgraph:4.8.160")
+    api("io.github.classgraph:classgraph:4.8.179")
 
     implementation(libs.tuples)
     implementation(libs.logback.classic)
