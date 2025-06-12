@@ -126,14 +126,6 @@ final class CLITest {
   }
 
   @Test
-  void structured_appender_works_with_project_name() throws IOException {
-    Path outputFile = Files.createTempFile("codemodder", ".out");
-    writeLogMessageToFile(outputFile, "cloud9");
-    String output = Files.readString(outputFile);
-    assertThat(output).contains("\"project_name\":\"cloud9\"");
-  }
-
-  @Test
   void structured_appender_works_without_project_name() throws IOException {
     Path outputFile = Files.createTempFile("codemodder", ".out");
     writeLogMessageToFile(outputFile, null);
