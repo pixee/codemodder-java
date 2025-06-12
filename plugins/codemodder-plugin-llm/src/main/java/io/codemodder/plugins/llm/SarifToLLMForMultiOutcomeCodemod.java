@@ -201,7 +201,8 @@ public abstract class SarifToLLMForMultiOutcomeCodemod extends SarifPluginLLMCod
       int tokenCount =
           model.tokens(
               List.of(
-                  getSystemMessage().getContent(), estimatedUserMessage.getContent().toString()));
+                  getSystemMessage().getStringContent(),
+                  estimatedUserMessage.getContent().toString()));
       // estimated token count doesn't include the function (~100 tokens) or the reply
       // (~200 tokens) so add those estimates before checking against window size
       tokenCount += 300;
