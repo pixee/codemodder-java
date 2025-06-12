@@ -29,7 +29,7 @@ dependencies {
     api(libs.javaparser.symbolsolver.model)
     api(libs.javadiff)
     api(libs.jtokkit)
-    api("com.azure:azure-ai-openai:1.0.0-beta.10")
+    api("com.azure:azure-ai-openai:1.0.0-beta.16")
     api("io.github.classgraph:classgraph:4.8.160")
 
     implementation(libs.tuples)
