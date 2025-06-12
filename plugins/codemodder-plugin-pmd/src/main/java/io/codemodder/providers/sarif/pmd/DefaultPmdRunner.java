@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import net.sourceforge.pmd.PMDConfiguration;
 import net.sourceforge.pmd.PmdAnalysis;
-import net.sourceforge.pmd.RulePriority;
 import net.sourceforge.pmd.lang.LanguageRegistry;
+import net.sourceforge.pmd.lang.rule.RulePriority;
 import net.sourceforge.pmd.renderers.SarifRenderer;
-import net.sourceforge.pmd.util.log.MessageReporter;
+import net.sourceforge.pmd.util.log.PmdReporter;
 
 final class DefaultPmdRunner implements PmdRunner {
 
@@ -31,7 +31,7 @@ final class DefaultPmdRunner implements PmdRunner {
     config.setDefaultLanguageVersion(LanguageRegistry.PMD.getLanguageVersionById("java", null));
     config.setMinimumPriority(RulePriority.LOW);
     config.setReportFormat(SarifRenderer.NAME);
-    config.setReporter(MessageReporter.quiet());
+    config.setReporter(PmdReporter.quiet());
 
     // create the XML that configures the rules to run based on what codemods need
     String rulesXmlFormat =

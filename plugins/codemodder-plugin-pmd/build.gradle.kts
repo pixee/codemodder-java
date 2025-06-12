@@ -8,7 +8,7 @@ description = "Plugin to enable the use of PMD in codemods"
 dependencies {
     compileOnly(libs.jetbrains.annotations)
     implementation(project(":framework:codemodder-base"))
-    implementation("net.sourceforge.pmd:pmd-java:7.0.0-rc3")
+    implementation("net.sourceforge.pmd:pmd-java:7.14.0")
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
     testImplementation(testlibs.assertj)
