@@ -40,7 +40,7 @@ java-security-toolkit = { module = "io.github.pixee:java-security-toolkit", vers
 java-security-toolkit-xstream = { module = "io.github.pixee:java-security-toolkit-xstream", version.ref = "java-security-toolkit-xstream" }
 javax-inject = { module="javax.inject:javax.inject", version.ref = "javax-inject"}
 jetbrains-annotations = "org.jetbrains:annotations:23.0.0"
-jfiglet = "com.github.lalyos:jfiglet:0.0.8"
+jfiglet = "com.github.lalyos:jfiglet:0.0.9"
 jtokkit = { module = "com.knuddels:jtokkit", version.ref="jtokkit" }
 juniversalchardet = "com.github.albfernandez:juniversalchardet:2.4.0"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
