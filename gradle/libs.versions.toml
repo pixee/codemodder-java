@@ -15,7 +15,7 @@ picocli = "4.7.0"
 slf4j = "2.0.6"
 guice = "5.1.0"
 dom4j = "2.1.4"
-woodstox = "7.1.0"
+woodstox = "7.1.1"
 
 [libraries]
 autovalue-annotations = { module = "com.google.auto.value:auto-value-annotations", version.ref = "auto-value" }
