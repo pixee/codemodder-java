@@ -151,7 +151,8 @@ public abstract class SarifToLLMForBinaryVerificationAndFixingCodemod
     // If the estimated token count, which doesn't include the function (~100 tokens) or the reply
     // (~200 tokens), is close to the max, then assume the code is safe (for now).
     int tokenCount =
-        model.tokens(List.of(systemMessage.getContent(), userMessage.getContent().toString()));
+        model.tokens(
+            List.of(systemMessage.getStringContent(), userMessage.getContent().toString()));
     if (tokenCount > model.contextWindow() - 300) {
       return new BinaryThreatAnalysis(
           "Ignoring file: estimated prompt token count (" + tokenCount + ") is too high.",
