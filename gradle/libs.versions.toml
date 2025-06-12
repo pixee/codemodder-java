@@ -1,6 +1,6 @@
 [versions]
 auto-value = "1.9"
-jackson = "2.13.1"
+jackson = "2.19.0"
 javaparser-core = "3.26.2"
 javaparser-symbolsolver = "3.15.15"
 java-security-toolkit = "1.2.1"
