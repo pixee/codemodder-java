@@ -42,7 +42,7 @@ javax-inject = { module="javax.inject:javax.inject", version.ref = "javax-inject
 jetbrains-annotations = "org.jetbrains:annotations:23.0.0"
 jfiglet = "com.github.lalyos:jfiglet:0.0.8"
 jtokkit = { module = "com.knuddels:jtokkit", version.ref="jtokkit" }
-juniversalchardet = "com.github.albfernandez:juniversalchardet:2.4.0"
+juniversalchardet = "com.github.albfernandez:juniversalchardet:2.5.0"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:7.4"
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
