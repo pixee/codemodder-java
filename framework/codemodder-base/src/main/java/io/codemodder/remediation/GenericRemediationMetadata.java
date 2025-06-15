@@ -18,6 +18,7 @@ public enum GenericRemediationMetadata {
   PREDICTABLE_SEED("predictable-seed"),
   ZIP_SLIP("zip-slip"),
   REGEX_INJECTION("regex-injection"),
+  REGEX_DOS("regex-dos"),
   ERROR_MESSAGE_EXPOSURE("error-message-exposure"),
   LOG_INJECTION("log-injection"),
   PATH_TRAVERSAL("path-traversal"),
