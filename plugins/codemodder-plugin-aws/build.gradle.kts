@@ -11,8 +11,8 @@ dependencies {
         exclude(group = "com.google.inject", module = "guice")
     }
     implementation("com.google.inject:guice:5.1.0")
-    api("software.amazon.awssdk:translate:2.20.101")
-    api("software.amazon.awssdk:sso:2.20.101")
+    api("software.amazon.awssdk:translate:2.54.13")
+    api("software.amazon.awssdk:sso:2.54.13")
 
     testImplementation(testlibs.bundles.junit.jupiter)
     testImplementation(testlibs.bundles.hamcrest)
